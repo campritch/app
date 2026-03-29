@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotsNow — Media Plans</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --dark:         #0e1323;
+      --grey-1:       #9098a9;
+      --grey-2:       #c2c8d4;
+      --text-primary: #1c2033;
+      --text-sub:     #6b7385;
+      --border:       #e4e7ec;
+      --bg-page:      #f4f5f7;
+      --bg-pill:      #f0f1f4;
+      --white:        #ffffff;
+      --coral:        #ff6b6b;
+      --coral-soft:   #fff0f0;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      font-size: 14px; line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font-family: inherit; cursor: pointer; }
+    a { text-decoration: none; }
+
+    /* ── Top Bar ──────────────────────────────── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 100;
+      height: 56px; background: var(--white);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 28px; gap: 16px;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 800; font-size: 15px; color: var(--dark);
+      letter-spacing: -0.3px; flex-shrink: 0;
+    }
+    .logo-mark {
+      width: 22px; height: 22px; border-radius: 6px;
+      background: var(--coral);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .top-search {
+      flex: 1; max-width: 340px; margin: 0 auto;
+      position: relative; display: flex; align-items: center;
+    }
+    .top-search__icon { position: absolute; left: 12px; color: var(--grey-1); display: flex; }
+    .top-search__input {
+      width: 100%; height: 36px; padding: 0 16px 0 36px;
+      background: var(--bg-pill); border: 1.5px solid transparent;
+      border-radius: 10px; font-size: 13px; font-family: inherit;
+      color: var(--text-primary); outline: none;
+    }
+    .top-search__input::placeholder { color: var(--grey-2); }
+    .top-search__input:focus { border-color: var(--dark); background: white; }
+    .top-search__avatar {
+      position: absolute; right: 10px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--coral); display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; color: white; flex-shrink: 0;
+    }
+    .tb-right { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+    .tb-icon {
+      width: 34px; height: 34px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; color: var(--dark); position: relative;
+    }
+    .tb-icon:hover { background: var(--bg-pill); }
+    .tb-badge {
+      position: absolute; top: 5px; right: 5px;
+      width: 7px; height: 7px; border-radius: 50%; background: var(--coral);
+      border: 1.5px solid white;
+    }
+    .tb-login {
+      height: 32px; padding: 0 14px; background: none;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 12px; font-weight: 600; color: var(--text-primary);
+    }
+
+    /* ── Page Shell ───────────────────────────── */
+    .page {
+      max-width: 960px; margin: 0 auto;
+      padding: 28px 24px 80px;
+      display: flex; flex-direction: column; gap: 0;
+    }
+
+    /* ── Breadcrumb ───────────────────────────── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--grey-1); margin-bottom: 20px;
+    }
+    .breadcrumb a { color: var(--grey-1); }
+    .breadcrumb a:hover { color: var(--text-primary); }
+    .breadcrumb__sep { color: var(--grey-2); }
+    .breadcrumb__current { color: var(--text-primary); font-weight: 500; }
+
+    /* ── Page Header ──────────────────────────── */
+    .page-header {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .page-header__left { display: flex; flex-direction: column; gap: 4px; }
+    .page-title { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; color: var(--dark); }
+    .page-sub { margin: 0; font-size: 13px; color: var(--text-sub); }
+
+    .page-header__controls { display: flex; align-items: center; gap: 8px; }
+    .filter-select {
+      height: 34px; padding: 0 10px 0 12px;
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 8px; font-size: 12px; font-weight: 600;
+      color: var(--text-primary); font-family: inherit; outline: none;
+      appearance: none; cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239098a9' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center;
+      padding-right: 28px;
+    }
+    .filter-select:hover { border-color: var(--grey-1); }
+
+    .search-bar {
+      height: 34px; width: 180px; position: relative; display: flex; align-items: center;
+    }
+    .search-bar__icon { position: absolute; left: 10px; color: var(--grey-1); display: flex; }
+    .search-bar__input {
+      width: 100%; height: 34px; padding: 0 12px 0 32px;
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 8px; font-size: 12px; font-family: inherit;
+      color: var(--text-primary); outline: none;
+    }
+    .search-bar__input::placeholder { color: var(--grey-2); }
+    .search-bar__input:focus { border-color: var(--dark); }
+
+    /* ── Section heading ──────────────────────── */
+    .section-label {
+      font-size: 12px; font-weight: 700; color: var(--grey-1);
+      letter-spacing: 0.4px; margin: 0 0 10px; padding-top: 24px;
+    }
+    .section-label:first-of-type { padding-top: 0; }
+
+    /* ── Plan Row ─────────────────────────────── */
+    .plan-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 0; }
+    .plan-row {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 14px; padding: 14px 18px;
+      display: flex; align-items: center; gap: 16px;
+      transition: border-color 0.12s, box-shadow 0.12s;
+    }
+    .plan-row:hover { border-color: var(--grey-2); box-shadow: 0 2px 12px rgba(14,19,35,0.05); }
+
+    .plan-logo {
+      width: 44px; height: 44px; border-radius: 10px;
+      border: 1px solid var(--border); object-fit: cover; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; background: var(--bg-pill); overflow: hidden;
+    }
+
+    .plan-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .plan-name {
+      font-size: 14px; font-weight: 700; color: var(--dark);
+      display: flex; align-items: center; gap: 7px;
+    }
+    .plan-edit {
+      width: 18px; height: 18px; border-radius: 5px; background: none; border: none;
+      color: var(--grey-2); display: flex; align-items: center; justify-content: center;
+      padding: 0; flex-shrink: 0;
+    }
+    .plan-edit:hover { background: var(--bg-pill); color: var(--grey-1); }
+    .plan-meta {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 12px; color: var(--text-sub);
+    }
+    .plan-meta__item { display: flex; align-items: center; gap: 4px; }
+    .plan-meta__dot { width: 3px; height: 3px; border-radius: 50%; background: var(--grey-2); flex-shrink: 0; }
+
+    .plan-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .btn-view {
+      height: 32px; padding: 0 14px; background: none;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 12px; font-weight: 600; color: var(--text-primary);
+    }
+    .btn-view:hover { background: var(--bg-pill); }
+    .btn-start {
+      height: 32px; padding: 0 14px;
+      background: var(--dark); border: none; border-radius: 8px;
+      font-size: 12px; font-weight: 700; color: white;
+    }
+    .btn-start:hover { opacity: 0.85; }
+
+    /* ── Demo divider ─────────────────────────── */
+    .demo-tag {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--grey-1);
+      display: flex; align-items: center; gap: 10px; padding: 32px 0 16px;
+    }
+    .demo-tag::before, .demo-tag::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ══════════════════════════════════════════
+       EMPTY STATE
+    ══════════════════════════════════════════ */
+    .empty-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 20px; overflow: hidden;
+    }
+
+    .es-media {
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center; padding: 64px 40px 72px;
+    }
+
+    /* Illustration */
+    .es-media__art { margin-bottom: 32px; }
+
+    .es-media__title {
+      font-size: 20px; font-weight: 800; letter-spacing: -0.4px;
+      color: var(--dark); margin: 0 0 10px;
+    }
+    .es-media__sub {
+      font-size: 13px; color: var(--text-sub); line-height: 1.7;
+      max-width: 340px; margin: 0 auto 28px;
+    }
+
+    .btn-primary {
+      height: 44px; padding: 0 24px; background: var(--coral);
+      border: none; border-radius: 10px;
+      font-size: 13px; font-weight: 700; color: white;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+
+    /* Value props */
+    .es-props {
+      display: flex; gap: 8px; margin-top: 24px; flex-wrap: wrap; justify-content: center;
+    }
+    .es-prop {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 12px; background: var(--bg-pill);
+      border-radius: 20px; font-size: 11px; font-weight: 500; color: var(--text-sub);
+    }
+    .es-prop__dot {
+      width: 5px; height: 5px; border-radius: 50%; background: var(--grey-2); flex-shrink: 0;
+    }
+
+    /* Ghost plan rows — decorative hint */
+    .ghost-plans {
+      padding: 0 28px 32px;
+      display: flex; flex-direction: column; gap: 8px;
+      pointer-events: none; opacity: 0.38;
+    }
+    .ghost-plan {
+      height: 72px; border-radius: 14px;
+      border: 1.5px dashed var(--border); background: var(--bg-pill);
+      display: flex; align-items: center; padding: 0 18px; gap: 14px;
+    }
+    .ghost-logo { width: 44px; height: 44px; border-radius: 10px; background: var(--border); flex-shrink: 0; }
+    .ghost-lines { display: flex; flex-direction: column; gap: 7px; flex: 1; }
+    .ghost-line { height: 6px; border-radius: 3px; background: var(--border); }
+    .ghost-line--l { width: 38%; }
+    .ghost-line--s { width: 22%; }
+    .ghost-btns { display: flex; gap: 8px; }
+    .ghost-btn { width: 56px; height: 30px; border-radius: 8px; background: var(--border); }
+    .ghost-btn--dark { background: var(--grey-2); }
+
+    @media (max-width: 640px) {
+      .page-header { flex-direction: column; align-items: flex-start; }
+      .ghost-plans { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<header class="top-bar">
+  <a href="campaign.html" class="logo">
+    <div class="logo-mark">
+      <svg width="10" height="10" viewBox="0 0 20 20" fill="white"><circle cx="10" cy="10" r="5"/></svg>
+    </div>
+    SpotsNow
+  </a>
+
+  <div class="top-search">
+    <span class="top-search__icon">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </span>
+    <input class="top-search__input" placeholder="Search your brands or podcasters here…" />
+    <span class="top-search__avatar">W</span>
+  </div>
+
+  <div class="tb-right">
+    <button class="tb-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    </button>
+    <button class="tb-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      <span class="tb-badge"></span>
+    </button>
+    <button class="tb-login">Login</button>
+    <button class="tb-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- ═══════════════════════════════════════
+       STATE 1: POPULATED
+  ═══════════════════════════════════════ -->
+  <p class="demo-tag">Populated state</p>
+
+  <nav class="breadcrumb">
+    <a href="#">Home</a>
+    <span class="breadcrumb__sep">›</span>
+    <span class="breadcrumb__current">Media plans</span>
+  </nav>
+
+  <div class="page-header">
+    <div class="page-header__left">
+      <h1 class="page-title">Media Plans</h1>
+      <p class="page-sub">Browse and search your media plans, then add them to cart.</p>
+    </div>
+    <div class="page-header__controls">
+      <select class="filter-select">
+        <option>Creator: Wally</option>
+        <option>Creator: All</option>
+      </select>
+      <div class="search-bar">
+        <span class="search-bar__icon">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <input class="search-bar__input" placeholder="Search…" />
+      </div>
+    </div>
+  </div>
+
+  <!-- December Plans -->
+  <p class="section-label">December Plans</p>
+  <div class="plan-list">
+
+    <div class="plan-row">
+      <div class="plan-logo">
+        <!-- Coca-Cola red circle logo -->
+        <svg width="32" height="32" viewBox="0 0 44 44" fill="none">
+          <rect width="44" height="44" rx="10" fill="#e8001d"/>
+          <text x="22" y="30" text-anchor="middle" font-size="22" font-family="serif" fill="white" font-style="italic">C</text>
+        </svg>
+      </div>
+      <div class="plan-info">
+        <div class="plan-name">
+          Coca Cola
+          <button class="plan-edit" title="Rename">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+        </div>
+        <div class="plan-meta">
+          <span class="plan-meta__item">Budget: $34,000</span>
+          <span class="plan-meta__dot"></span>
+          <span class="plan-meta__item">Est. ROAS: 3x</span>
+          <span class="plan-meta__dot"></span>
+          <span class="plan-meta__item">02/03/26</span>
+        </div>
+      </div>
+      <div class="plan-actions">
+        <button class="btn-view">View</button>
+        <button class="btn-start">Start</button>
+      </div>
+    </div>
+
+    <div class="plan-row">
+      <div class="plan-logo">
+        <svg width="32" height="32" viewBox="0 0 44 44" fill="none">
+          <rect width="44" height="44" rx="10" fill="#0047BB"/>
+          <text x="22" y="30" text-anchor="middle" font-size="14" font-family="sans-serif" fill="white" font-weight="800">PEPSI</text>
+        </svg>
+      </div>
+      <div class="plan-info">
+        <div class="plan-name">
+          Pepsi Test
+          <button class="plan-edit" title="Rename">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+        </div>
+        <div class="plan-meta">
+          <span class="plan-meta__item">Budget: $34,000</span>
+          <span class="plan-meta__dot"></span>
+          <span class="plan-meta__item">Est. ROAS: 3x</span>
+          <span class="plan-meta__dot"></span>
+          <span class="plan-meta__item">02/01/26</span>
+        </div>
+      </div>
+      <div class="plan-actions">
+        <button class="btn-view">View</button>
+        <button class="btn-start">Start</button>
+      </div>
+    </div>
+
+    <div class="plan-row">
+      <div class="plan-logo" style="background:#dcfce7;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg>
+      </div>
+      <div class="plan-info">
+        <div class="plan-name">
+          December 3rd_2026
+          <button class="plan-edit" title="Rename">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+        </div>
+        <div class="plan-meta">
+          <span class="plan-meta__item">Budget: $34,000</span>
+          <span class="plan-meta__dot"></span>
+          <span class="plan-meta__item">Est. ROAS: 3x</span>
+          <span class="plan-meta__dot"></span>
+          <span class="plan-meta__item">02/03/26</span>
+        </div>
+      </div>
+      <div class="plan-actions">
+        <button class="btn-view">View</button>
+        <button class="btn-start">Start</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- November Plans -->
+  <p class="section-label">November Plans</p>
+  <div class="plan-list">
+
+    <div class="plan-row">
+      <div class="plan-logo">
+        <svg width="32" height="32" viewBox="0 0 44 44" fill="none">
+          <rect width="44" height="44" rx="10" fill="#e8001d"/>
+          <text x="22" y="30" text-anchor="middle" font-size="22" font-family="serif" fill="white" font-style="italic">C</text>
+        </svg>
+      </div>
+      <div class="plan-info">
+        <div class="plan-name">
+          Coca Cola
+          <button class="plan-edit" title="Rename">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+        </div>
+        <div class="plan-meta">
+          <span class="plan-meta__item">Budget: $34,000</span>
+          <span class="plan-meta__dot"></span>
+          <span class="plan-meta__item">Est. ROAS: 3x</span>
+          <span class="plan-meta__dot"></span>
+          <span class="plan-meta__item">02/03/26</span>
+        </div>
+      </div>
+      <div class="plan-actions">
+        <button class="btn-view">View</button>
+        <button class="btn-start">Start</button>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ═══════════════════════════════════════
+       STATE 2: EMPTY
+  ═══════════════════════════════════════ -->
+  <p class="demo-tag">Empty state</p>
+
+  <nav class="breadcrumb">
+    <a href="#">Home</a>
+    <span class="breadcrumb__sep">›</span>
+    <span class="breadcrumb__current">Media plans</span>
+  </nav>
+
+  <div class="page-header" style="margin-bottom:16px;">
+    <div class="page-header__left">
+      <h1 class="page-title">Media Plans</h1>
+      <p class="page-sub">Browse and search your media plans, then add them to cart.</p>
+    </div>
+    <div class="page-header__controls">
+      <select class="filter-select">
+        <option>Creator: Wally</option>
+      </select>
+      <div class="search-bar">
+        <span class="search-bar__icon">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <input class="search-bar__input" placeholder="Search…" />
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-card">
+    <div class="es-media">
+
+      <!-- Illustration: document with media icons -->
+      <div class="es-media__art">
+        <svg width="200" height="156" viewBox="0 0 200 156" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="card-shadow">
+              <feDropShadow dx="0" dy="4" stdDeviation="12" flood-color="#0e1323" flood-opacity="0.09"/>
+            </filter>
+          </defs>
+
+          <!-- Back left card (rotated) -->
+          <rect x="18" y="28" width="72" height="92" rx="12"
+            fill="#f4f5f7" stroke="#e4e7ec" stroke-width="1.5"
+            transform="rotate(-9 18 28)"/>
+
+          <!-- Back right card (rotated) -->
+          <rect x="110" y="28" width="72" height="92" rx="12"
+            fill="#f4f5f7" stroke="#e4e7ec" stroke-width="1.5"
+            transform="rotate(9 110 28)"/>
+
+          <!-- Centre card -->
+          <rect x="54" y="14" width="92" height="116" rx="14"
+            fill="white" stroke="#e4e7ec" stroke-width="1.5"
+            filter="url(#card-shadow)"/>
+
+          <!-- Brand logo placeholder -->
+          <rect x="68" y="26" width="40" height="40" rx="10" fill="#f0f1f4"/>
+          <!-- Mic inside -->
+          <path d="M88 34a5 5 0 0 1 5 5v7a5 5 0 0 1-10 0v-7a5 5 0 0 1 5-5z"
+            stroke="#c2c8d4" stroke-width="1.5" fill="none"/>
+          <path d="M81 46a7 7 0 0 0 14 0"
+            stroke="#c2c8d4" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <line x1="88" y1="53" x2="88" y2="57"
+            stroke="#c2c8d4" stroke-width="1.5" stroke-linecap="round"/>
+
+          <!-- Title lines -->
+          <rect x="68" y="74" width="50" height="7" rx="3.5" fill="#f0f1f4"/>
+          <rect x="68" y="87" width="34" height="6" rx="3" fill="#f0f1f4"/>
+
+          <!-- Metric row -->
+          <rect x="54" y="108" width="46" height="22" rx="0" fill="#f8f8f9"/>
+          <rect x="100" y="108" width="46" height="22" rx="0" fill="#f8f8f9"/>
+          <line x1="54" y1="108" x2="146" y2="108" stroke="#e4e7ec" stroke-width="1"/>
+          <line x1="100" y1="108" x2="100" y2="130" stroke="#e4e7ec" stroke-width="1"/>
+
+          <!-- Coral "+" badge -->
+          <circle cx="146" cy="68" r="13" fill="#fff0f0"/>
+          <circle cx="146" cy="68" r="13" stroke="#ffd5d5" stroke-width="1"/>
+          <path d="M146 62v12M140 68h12" stroke="#ff6b6b" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <h2 class="es-media__title">Create your first media plan</h2>
+      <p class="es-media__sub">
+        Find the right podcasts and YouTube channels for your brand, bundle them into a plan, and launch in minutes.
+      </p>
+
+      <button class="btn-primary" onclick="window.location='campaign.html'">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Find my shows
+      </button>
+
+      <div class="es-props">
+        <span class="es-prop"><span class="es-prop__dot"></span>85,000+ shows analyzed</span>
+        <span class="es-prop"><span class="es-prop__dot"></span>AI-matched to your audience</span>
+        <span class="es-prop"><span class="es-prop__dot"></span>Share plans with your team</span>
+      </div>
+    </div>
+
+    <!-- Ghost rows hinting at what will appear -->
+    <div class="ghost-plans">
+      <div class="ghost-plan">
+        <div class="ghost-logo"></div>
+        <div class="ghost-lines">
+          <div class="ghost-line ghost-line--l"></div>
+          <div class="ghost-line ghost-line--s"></div>
+        </div>
+        <div class="ghost-btns">
+          <div class="ghost-btn"></div>
+          <div class="ghost-btn ghost-btn--dark"></div>
+        </div>
+      </div>
+      <div class="ghost-plan">
+        <div class="ghost-logo"></div>
+        <div class="ghost-lines">
+          <div class="ghost-line" style="width:30%"></div>
+          <div class="ghost-line ghost-line--s"></div>
+        </div>
+        <div class="ghost-btns">
+          <div class="ghost-btn"></div>
+          <div class="ghost-btn ghost-btn--dark"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

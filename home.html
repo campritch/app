@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotsNow — AI-Powered Podcast Advertising</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --dark: #0e1323;
+      --grey-1: #707481;
+      --text-primary: #252733;
+      --text-secondary: #5a5f6e;
+      --border: #dee0e4;
+      --border-light: #e8e8e8;
+      --white: #ffffff;
+      --coral: #ff6b6b;
+      --btn-dark: #111111;
+      --green-bg: #d6f0e0;
+      --green-text: #0d6832;
+      --pill-bg: #f3f4f6;
+      --ai-dark: #0a0e1a;
+      --ai-mid: #111827;
+      --ai-accent: #6366f1;
+      --ai-glow: rgba(99,102,241,0.25);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.4;
+      color: var(--dark); background: #f5f5f3;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font-family: inherit; cursor: pointer; }
+    img { display: block; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ─── TOP BAR ─── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 200;
+      height: 56px; display: flex; align-items: center; gap: 16px;
+      padding: 0 28px; background: var(--white);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .top-bar__logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 800; font-size: 15px; color: var(--dark);
+      text-decoration: none; flex-shrink: 0; letter-spacing: -0.3px;
+    }
+    .logo-mark {
+      width: 22px; height: 22px; border-radius: 6px;
+      background: var(--coral); display: flex; align-items: center; justify-content: center;
+    }
+    .logo-mark svg { display: block; }
+    .top-bar__nav {
+      display: flex; align-items: center; gap: 4px; flex: 1;
+    }
+    .top-bar__nav-link {
+      padding: 6px 12px; border-radius: 8px; border: none; background: none;
+      font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer;
+    }
+    .top-bar__nav-link:hover { background: var(--pill-bg); color: var(--dark); }
+    .top-bar__nav-link--ai {
+      display: flex; align-items: center; gap: 6px;
+      color: var(--ai-accent); font-weight: 700;
+    }
+    .pulse-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--ai-accent);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+    .top-bar__actions  { display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-left: auto; }
+    .login-btn {
+      padding: 6px 14px; background: none;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; font-weight: 600; color: var(--text-primary);
+    }
+    .login-btn:hover { background: var(--pill-bg); }
+    .signup-btn {
+      padding: 7px 16px; background: var(--btn-dark);
+      border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 700; color: white;
+    }
+    .signup-btn:hover { opacity: 0.85; }
+
+    /* ─── PAGE WRAPPER ─── */
+    .page { display: flex; flex-direction: column; }
+    .page-card {
+      background: var(--white);
+      max-width: 1136px; margin: 24px auto 0; width: calc(100% - 48px);
+      border-radius: 20px;
+      border: 1px solid var(--border-light);
+      overflow: hidden;
+    }
+    .section-divider {
+      border: none; border-top: 1px solid var(--border-light); margin: 0;
+    }
+
+    /* ─── STAT BOXES ─── */
+    .stat-box {
+      border-radius: 12px; padding: 14px 18px;
+      display: flex; flex-direction: column; gap: 5px;
+    }
+    .stat-box--light { background: #f8f8f8; border: 1px solid var(--border-light); }
+    .stat-box--dark  { background: var(--btn-dark); }
+    .stat-box__label { font-size: 10px; font-weight: 600; letter-spacing: 0.2px; }
+    .stat-box--light .stat-box__label { color: var(--grey-1); }
+    .stat-box--dark  .stat-box__label { color: rgba(255,255,255,0.55); }
+    .stat-box__value { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
+    .stat-box--light .stat-box__value { color: var(--dark); }
+    .stat-box--dark  .stat-box__value { color: white; }
+    .stat-box--wide .stat-box__value { font-size: 26px; }
+
+    /* ─── SHOW CARDS (AI planner results) ─── */
+    .campaign-card {
+      background: var(--white); border: 1px solid var(--border-light);
+      border-radius: 14px; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .campaign-card--dark { background: var(--dark); border-color: var(--dark); }
+    .card-why {
+      flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 16px;
+    }
+    .card-why__label {
+      margin: 0; font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.4);
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .card-why__text {
+      margin: 0; font-size: 12px; line-height: 1.55; color: rgba(255,255,255,0.82); flex: 1;
+    }
+    .card-why__btn {
+      height: 32px; background: var(--coral); border: none;
+      border-radius: 8px; font-size: 11px; font-weight: 700; color: white; margin-top: auto;
+    }
+    .card-why__btn:hover { opacity: 0.9; }
+    .card-top {
+      display: flex; gap: 10px; padding: 12px 12px 10px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .card-thumb { width: 44px; height: 44px; border-radius: 9px; object-fit: cover; flex-shrink: 0; }
+    .card-top-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .card-title {
+      margin: 0; font-size: 13px; font-weight: 700; color: var(--dark);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-top-row { display: flex; align-items: center; gap: 6px; }
+    .cat-pill {
+      display: inline-flex; align-items: center; height: 17px; padding: 0 6px;
+      border-radius: 4px; background: var(--green-bg);
+      color: var(--green-text); font-size: 9px; font-weight: 700;
+    }
+    .match-score { display: flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--green-text); }
+    .card-metrics {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1px; background: var(--border-light);
+      border-bottom: 1px solid var(--border-light); flex: 1;
+    }
+    .card-metric {
+      background: var(--white); padding: 7px 10px;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .metric-label {
+      font-size: 8px; font-weight: 700; color: var(--grey-1);
+      letter-spacing: 0.4px; text-transform: uppercase;
+    }
+    .metric-value { font-size: 12px; font-weight: 700; color: var(--dark); }
+    .card-footer { display: flex; align-items: center; gap: 6px; padding: 8px 12px; }
+    .review-btn {
+      flex: 1; height: 30px; background: var(--white);
+      border: 1px solid var(--border); border-radius: 7px;
+      font-size: 11px; font-weight: 600; color: var(--dark);
+    }
+    .review-btn:hover { background: var(--pill-bg); }
+
+    /* ─── HERO ─── */
+    .hero-section { display: flex; gap: 0; }
+    .hero-left { flex: 1; padding: 44px 40px 44px 36px; min-width: 0; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 24px; padding: 0 10px; border-radius: 20px;
+      background: #ede9fe; color: var(--ai-accent);
+      font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+      margin-bottom: 18px;
+    }
+    .hero-title {
+      margin: 0 0 14px; font-size: 34px; font-weight: 800;
+      letter-spacing: -1.2px; line-height: 1.07; color: var(--dark); max-width: 500px;
+    }
+    .hero-title em { font-style: normal; color: var(--coral); }
+    .hero-desc {
+      margin: 0 0 26px; font-size: 14px; color: var(--text-secondary);
+      line-height: 1.65; max-width: 440px;
+    }
+    .hero-features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .hero-feature { display: flex; align-items: flex-start; gap: 10px; }
+    .hero-feature__icon {
+      width: 28px; height: 28px; border-radius: 7px; background: var(--green-bg);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+    }
+    .hero-feature__icon--ai {
+      background: #ede9fe;
+    }
+    .hero-feature__text { font-size: 13px; color: var(--text-primary); font-weight: 500; line-height: 1.5; }
+    .hero-feature__text span { color: var(--text-secondary); font-weight: 400; }
+    .hero-logos { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
+    .hero-logos-label { font-size: 10px; color: var(--grey-1); font-weight: 600; letter-spacing: 0.3px; }
+    .hero-logo-pill {
+      height: 22px; padding: 0 10px; border-radius: 20px;
+      background: var(--pill-bg); border: 1px solid var(--border-light);
+      font-size: 10px; font-weight: 700; color: var(--text-secondary);
+      display: flex; align-items: center;
+    }
+
+    /* Hero right: campaign builder widget */
+    .hero-right {
+      width: 360px; flex-shrink: 0;
+      border-left: 1px solid var(--border-light);
+      background: #fafafa;
+      padding: 32px 28px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .widget-header { display: flex; flex-direction: column; gap: 4px; }
+    .widget-header__label { font-size: 10px; font-weight: 700; color: var(--grey-1); text-transform: uppercase; letter-spacing: 0.6px; }
+    .widget-header__title { font-size: 14px; font-weight: 700; color: var(--dark); line-height: 1.3; }
+    .widget-field { display: flex; flex-direction: column; gap: 5px; }
+    .widget-field label { font-size: 11px; font-weight: 600; color: var(--grey-1); }
+    .widget-input {
+      height: 40px; padding: 0 12px; border: 1.5px solid var(--border);
+      border-radius: 9px; font-size: 13px; font-family: inherit;
+      color: var(--text-primary); background: var(--white); outline: none;
+      transition: border-color 0.15s;
+    }
+    .widget-input:focus { border-color: var(--dark); }
+    .widget-input::placeholder { color: #b0b4be; }
+    .widget-select {
+      height: 40px; padding: 0 12px; border: 1.5px solid var(--border);
+      border-radius: 9px; font-size: 13px; font-family: inherit;
+      color: var(--text-primary); background: var(--white); outline: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23707481' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
+      cursor: pointer; transition: border-color 0.15s;
+    }
+    .widget-select:focus { border-color: var(--dark); }
+    .widget-row { display: flex; gap: 8px; }
+    .widget-row .widget-field { flex: 1; }
+    .widget-cta {
+      width: 100%; height: 44px; background: var(--coral); border: none; border-radius: 10px;
+      font-size: 13px; font-weight: 800; color: white;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      transition: opacity 0.15s;
+    }
+    .widget-cta:hover { opacity: 0.9; }
+    .widget-note { font-size: 11px; color: var(--grey-1); text-align: center; margin: 0; }
+    .widget-preview {
+      border-top: 1px solid var(--border-light); padding-top: 16px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .widget-preview__label { font-size: 10px; font-weight: 700; color: var(--grey-1); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .preview-stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    /* ─── STATS ROW SECTION ─── */
+    .stats-row-section { padding: 28px 36px 36px; }
+    .stats-row-header { margin-bottom: 20px; }
+    .stats-row-header h2 { margin: 0; font-size: 18px; font-weight: 700; color: var(--dark); letter-spacing: -0.4px; }
+    .stats-row-header p { margin: 6px 0 0; font-size: 12px; color: var(--grey-1); }
+    .stats-row-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+
+    /* ─── TRUST SECTION ─── */
+    .trust-section { padding: 28px 36px 36px; }
+    .trust-header { margin-bottom: 20px; }
+    .trust-header h2 { margin: 0; font-size: 18px; font-weight: 700; color: var(--dark); letter-spacing: -0.4px; }
+    .trust-header p { margin: 4px 0 0; font-size: 12px; color: var(--grey-1); }
+    .trust-row { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .trust-avatars { display: flex; align-items: center; }
+    .trust-avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      border: 2px solid white; margin-left: -10px;
+      background: var(--pill-bg); overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--grey-1);
+    }
+    .trust-avatar:first-child { margin-left: 0; }
+    .trust-stats { display: flex; gap: 32px; }
+    .trust-stat { display: flex; flex-direction: column; gap: 2px; }
+    .trust-stat__num { font-size: 22px; font-weight: 800; color: var(--dark); letter-spacing: -0.6px; }
+    .trust-stat__label { font-size: 11px; color: var(--grey-1); }
+
+    /* ─── AI FEATURE CARD ─── */
+    .ai-section { padding: 0 36px 36px; }
+    .ai-card {
+      border: 1px solid var(--border-light); border-radius: 14px;
+      display: flex; align-items: stretch; overflow: hidden;
+    }
+    .ai-card__left { flex: 1; padding: 24px 28px; }
+    .ai-card__tag {
+      display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px;
+      border-radius: 4px; background: var(--dark); color: white;
+      font-size: 9px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .ai-card__tag--indigo {
+      background: var(--ai-accent);
+    }
+    .ai-card__title { margin: 0 0 8px; font-size: 16px; font-weight: 700; color: var(--dark); letter-spacing: -0.3px; }
+    .ai-card__desc { margin: 0; font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+    .ai-card__right {
+      width: 220px; flex-shrink: 0; border-left: 1px solid var(--border-light);
+      background: #f8f8f8; padding: 24px 20px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .ai-card__right-label { font-size: 10px; font-weight: 700; color: var(--grey-1); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ─── CORE SHOWS SECTION ─── */
+    .core-section { padding: 28px 36px 36px; }
+    .core-section__header {
+      display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px;
+    }
+    .core-section__title { margin: 0; font-size: 16px; font-weight: 700; color: var(--dark); }
+    .core-section__meta  { font-size: 11px; color: var(--grey-1); }
+    .core-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+    /* ─── AI PLANNER (dark section replacing Flash Sales) ─── */
+    .how-section {
+      background: linear-gradient(135deg, var(--ai-dark) 0%, #131929 50%, #0d1b35 100%);
+      margin: 24px auto 0;
+      max-width: 1136px; width: calc(100% - 48px);
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+    .how-section::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0;
+    }
+    .how-section > * { position: relative; z-index: 1; }
+    .how-header {
+      padding: 40px 40px 0;
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;
+    }
+    .how-header__left { display: flex; flex-direction: column; gap: 8px; }
+    .how-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase;
+      color: var(--ai-accent);
+    }
+    .how-title {
+      margin: 0; font-size: 24px; font-weight: 800; color: white; letter-spacing: -0.6px; line-height: 1.2;
+    }
+    .how-desc {
+      margin: 0; font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.6; max-width: 480px;
+    }
+    .how-steps {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 0; padding: 32px 40px 40px;
+    }
+    .how-step {
+      padding: 24px 28px 24px 0;
+      border-right: 1px solid rgba(255,255,255,0.07);
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .how-step:last-child { border-right: none; padding-right: 0; padding-left: 28px; }
+    .how-step:nth-child(2) { padding-left: 28px; }
+    .how-step__num {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.35);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; color: var(--ai-accent);
+    }
+    .how-step__title {
+      margin: 0; font-size: 15px; font-weight: 700; color: white; letter-spacing: -0.3px;
+    }
+    .how-step__desc {
+      margin: 0; font-size: 12px; color: rgba(255,255,255,0.45); line-height: 1.6;
+    }
+    .how-step__tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      height: 22px; padding: 0 9px; border-radius: 20px;
+      background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3);
+      font-size: 10px; font-weight: 700; color: var(--ai-accent);
+      align-self: flex-start;
+    }
+    .how-step__metric {
+      margin-top: auto;
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .how-step__metric-val {
+      font-size: 22px; font-weight: 800; color: white; letter-spacing: -0.6px;
+    }
+    .how-step__metric-label {
+      font-size: 10px; color: rgba(255,255,255,0.35); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;
+    }
+
+    /* ─── TWO MODES SECTION ─── */
+    .modes-section { padding: 28px 36px 36px; }
+    .modes-header { margin-bottom: 20px; }
+    .modes-header h2 { margin: 0; font-size: 18px; font-weight: 700; color: var(--dark); letter-spacing: -0.4px; }
+    .modes-header p { margin: 6px 0 0; font-size: 12px; color: var(--grey-1); }
+    .modes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .mode-card {
+      border: 1px solid var(--border-light); border-radius: 14px;
+      overflow: hidden; display: flex; flex-direction: column;
+    }
+    .mode-card--dark { background: var(--dark); border-color: var(--dark); }
+    .mode-card__header {
+      padding: 20px 20px 16px; border-bottom: 1px solid var(--border-light);
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .mode-card--dark .mode-card__header { border-bottom-color: rgba(255,255,255,0.08); }
+    .mode-icon {
+      width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mode-icon--green { background: var(--green-bg); }
+    .mode-icon--dark { background: rgba(255,255,255,0.1); }
+    .mode-card__label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+      margin-bottom: 3px;
+    }
+    .mode-card--dark .mode-card__label { color: rgba(255,255,255,0.4); }
+    .mode-card:not(.mode-card--dark) .mode-card__label { color: var(--grey-1); }
+    .mode-card__name {
+      font-size: 15px; font-weight: 700; letter-spacing: -0.3px; margin: 0;
+    }
+    .mode-card--dark .mode-card__name { color: white; }
+    .mode-card:not(.mode-card--dark) .mode-card__name { color: var(--dark); }
+    .mode-card__body { padding: 16px 20px 20px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+    .mode-card__desc { font-size: 12px; line-height: 1.6; margin: 0; }
+    .mode-card--dark .mode-card__desc { color: rgba(255,255,255,0.55); }
+    .mode-card:not(.mode-card--dark) .mode-card__desc { color: var(--text-secondary); }
+    .mode-bullets { display: flex; flex-direction: column; gap: 7px; }
+    .mode-bullet { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; font-weight: 500; }
+    .mode-card--dark .mode-bullet { color: rgba(255,255,255,0.65); }
+    .mode-card:not(.mode-card--dark) .mode-bullet { color: var(--text-primary); }
+    .mode-bullet__dot {
+      width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; margin-top: 5px;
+    }
+    .mode-card--dark .mode-bullet__dot { background: var(--coral); }
+    .mode-card:not(.mode-card--dark) .mode-bullet__dot { background: var(--green-text); }
+
+    /* ─── TESTIMONIALS ─── */
+    .testimonials-section { padding: 28px 36px 36px; }
+    .testimonials-header { margin-bottom: 20px; }
+    .testimonials-header h2 { margin: 0; font-size: 18px; font-weight: 700; color: var(--dark); letter-spacing: -0.4px; }
+    .testimonials-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .testimonial-card {
+      border: 1px solid var(--border-light); border-radius: 14px;
+      padding: 20px; display: flex; flex-direction: column; gap: 12px;
+    }
+    .testimonial-card--dark { background: var(--dark); border-color: var(--dark); }
+    .t-quote { font-size: 13px; color: var(--text-primary); line-height: 1.65; flex: 1; margin: 0; }
+    .testimonial-card--dark .t-quote { color: rgba(255,255,255,0.75); }
+    .t-author { display: flex; align-items: center; gap: 10px; }
+    .t-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--pill-bg); border: 1px solid var(--border-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: var(--grey-1); flex-shrink: 0;
+    }
+    .testimonial-card--dark .t-avatar { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.6); }
+    .t-name { font-size: 12px; font-weight: 700; color: var(--dark); }
+    .testimonial-card--dark .t-name { color: white; }
+    .t-role { font-size: 11px; color: var(--grey-1); }
+    .testimonial-card--dark .t-role { color: rgba(255,255,255,0.4); }
+
+    /* ─── CASE STUDY ─── */
+    .case-section { padding: 0 36px 36px; }
+    .case-card {
+      border: 1px solid var(--border-light); border-radius: 14px; overflow: hidden;
+      display: flex;
+    }
+    .case-left { flex: 1; padding: 28px; }
+    .case-logo-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .case-logo-thumb {
+      width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 800; color: var(--dark); background: var(--pill-bg);
+    }
+    .case-logo-name { font-size: 13px; font-weight: 700; color: var(--dark); }
+    .case-quote {
+      font-size: 14px; font-weight: 600; color: var(--dark); line-height: 1.55; margin: 0 0 16px;
+      font-style: italic;
+    }
+    .case-attribution { display: flex; align-items: center; gap: 8px; }
+    .case-avatar {
+      width: 32px; height: 32px; border-radius: 50%; background: var(--pill-bg);
+      border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: var(--grey-1);
+    }
+    .case-attr-name { font-size: 12px; font-weight: 700; color: var(--dark); }
+    .case-attr-role { font-size: 11px; color: var(--grey-1); }
+    .case-right {
+      width: 260px; flex-shrink: 0; border-left: 1px solid var(--border-light);
+      background: #f8f8f8; padding: 28px 24px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .case-right-label { font-size: 10px; font-weight: 700; color: var(--grey-1); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .case-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    /* ─── BOTTOM CTA ─── */
+    .bottom-cta-section { padding: 28px 36px 44px; }
+    .bottom-cta-card {
+      border: 1px solid var(--border-light); border-radius: 14px;
+      background: var(--dark); overflow: hidden;
+      display: flex; align-items: stretch;
+    }
+    .bottom-cta-left { flex: 1; padding: 40px; }
+    .bottom-cta-eyebrow {
+      font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.4);
+      text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px;
+    }
+    .bottom-cta-title {
+      margin: 0 0 12px; font-size: 24px; font-weight: 800; color: white;
+      letter-spacing: -0.6px; line-height: 1.2;
+    }
+    .bottom-cta-desc { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6; max-width: 380px; }
+    .bottom-cta-checks { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
+    .bottom-cta-check { display: flex; align-items: center; gap: 8px; font-size: 12px; color: rgba(255,255,255,0.55); }
+    .bottom-cta-check svg { color: var(--coral); flex-shrink: 0; }
+    .bottom-cta-right {
+      width: 360px; flex-shrink: 0; border-left: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04); padding: 32px 28px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .bottom-cta-right .widget-header__label { color: rgba(255,255,255,0.4); }
+    .bottom-cta-right .widget-header__title { color: white; }
+    .bottom-cta-right .widget-field label { color: rgba(255,255,255,0.4); }
+    .bottom-cta-right .widget-input,
+    .bottom-cta-right .widget-select {
+      background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.12);
+      color: white;
+    }
+    .bottom-cta-right .widget-input::placeholder { color: rgba(255,255,255,0.25); }
+    .bottom-cta-right .widget-input:focus,
+    .bottom-cta-right .widget-select:focus { border-color: rgba(255,255,255,0.4); }
+    .bottom-cta-right .widget-note { color: rgba(255,255,255,0.3); }
+
+    /* ─── FOOTER ─── */
+    .site-footer {
+      max-width: 1136px; margin: 0 auto; width: calc(100% - 48px);
+      padding: 24px 0 40px;
+      display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+    }
+    .footer-logo { display: flex; align-items: center; gap: 7px; font-weight: 800; font-size: 13px; color: var(--grey-1); letter-spacing: -0.2px; }
+    .footer-links { display: flex; gap: 20px; list-style: none; padding: 0; margin: 0; }
+    .footer-links a { font-size: 12px; color: var(--grey-1); }
+    .footer-links a:hover { color: var(--dark); }
+    .footer-copy { font-size: 11px; color: #aaa; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 1000px) {
+      .core-grid { grid-template-columns: repeat(3,1fr); }
+      .stats-row-grid { grid-template-columns: repeat(2,1fr); }
+      .hero-right { width: 300px; }
+      .how-steps { grid-template-columns: 1fr; }
+      .how-step { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.07); padding: 20px 0; }
+      .how-step:last-child { border-bottom: none; }
+      .how-step:nth-child(2) { padding-left: 0; }
+      .how-step:last-child { padding-left: 0; }
+    }
+    @media (max-width: 768px) {
+      .page-card, .how-section { width: calc(100% - 24px); }
+      .hero-section { flex-direction: column; }
+      .hero-right { width: 100%; border-left: none; border-top: 1px solid var(--border-light); }
+      .core-grid { grid-template-columns: repeat(2,1fr); }
+      .modes-grid { grid-template-columns: 1fr; }
+      .trust-row { flex-direction: column; align-items: flex-start; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .case-card { flex-direction: column; }
+      .case-right { width: 100%; border-left: none; border-top: 1px solid var(--border-light); }
+      .bottom-cta-card { flex-direction: column; }
+      .bottom-cta-right { width: 100%; border-left: none; border-top: 1px solid rgba(255,255,255,0.08); }
+      .how-header { flex-direction: column; }
+      .how-steps { padding: 20px 24px 32px; }
+      .how-header { padding: 28px 24px 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<header class="top-bar">
+  <a href="#" class="top-bar__logo">
+    <div class="logo-mark">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="5"/></svg>
+    </div>
+    SpotsNow
+  </a>
+  <nav class="top-bar__nav">
+    <button class="top-bar__nav-link">Discover</button>
+    <button class="top-bar__nav-link">How it works</button>
+    <button class="top-bar__nav-link">Creators</button>
+    <button class="top-bar__nav-link">Pricing</button>
+    <button class="top-bar__nav-link top-bar__nav-link--ai">
+      <span class="pulse-dot"></span>
+      AI Planner
+    </button>
+  </nav>
+  <div class="top-bar__actions">
+    <button class="login-btn">Log in</button>
+    <button class="signup-btn">Start for free</button>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- ─── HERO ─── -->
+  <div class="page-card">
+    <section class="hero-section">
+      <div class="hero-left">
+        <div class="hero-eyebrow">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          AI-Native Podcast Advertising
+        </div>
+        <h1 class="hero-title">
+          Your competitors haven't found<br><em>your audience</em> yet.
+        </h1>
+        <p class="hero-desc">
+          SpotsNow's AI builds your entire podcast media plan in 60 seconds — then you launch. No agency. No spreadsheets. No guesswork. Just your brand, reaching the right audience through the voices they already trust.
+        </p>
+        <div class="hero-features">
+          <div class="hero-feature">
+            <div class="hero-feature__icon hero-feature__icon--ai">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ai-accent)" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div class="hero-feature__text">
+              AI finds your highest-converting shows in 60 seconds <span>— not the days of research it used to take</span>
+            </div>
+          </div>
+          <div class="hero-feature">
+            <div class="hero-feature__icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--green-text)" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div class="hero-feature__text">
+              Full-funnel tracking from click to sale <span>— see ROAS, listen to air checks, optimize mid-flight</span>
+            </div>
+          </div>
+          <div class="hero-feature">
+            <div class="hero-feature__icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--green-text)" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="hero-feature__text">
+              Host-read influence <em>and</em> programmatic targeting <span>— both channels, one platform</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-logos">
+          <span class="hero-logos-label">Brands running on SpotsNow</span>
+          <span class="hero-logo-pill">Pockyt</span>
+          <span class="hero-logo-pill">Super.com</span>
+          <span class="hero-logo-pill">TOYOTA</span>
+          <span class="hero-logo-pill">LIQUID I.V.</span>
+          <span class="hero-logo-pill">NerdWallet</span>
+        </div>
+      </div>
+
+      <!-- Campaign builder widget (right side) -->
+      <div class="hero-right">
+        <div class="widget-header">
+          <div class="widget-header__label">AI Media Planner</div>
+          <div class="widget-header__title">Find your top converting shows in 60 seconds</div>
+        </div>
+        <div class="widget-field">
+          <label>Website Domain</label>
+          <input type="text" class="widget-input" placeholder="yourcompany.com" />
+        </div>
+        <div class="widget-row">
+          <div class="widget-field">
+            <label>Budget</label>
+            <select class="widget-select">
+              <option>$10,000 – $25,000</option>
+              <option>$5,000 – $10,000</option>
+              <option>$25,000 – $50,000</option>
+              <option>$50,000+</option>
+            </select>
+          </div>
+          <div class="widget-field">
+            <label>Audience</label>
+            <select class="widget-select">
+              <option>25–44</option>
+              <option>18–34</option>
+              <option>35–54</option>
+            </select>
+          </div>
+        </div>
+        <button class="widget-cta">
+          Generate My Plan
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <p class="widget-note">Free to generate · No credit card required</p>
+        <div class="widget-preview">
+          <div class="widget-preview__label">Example output for your budget</div>
+          <div class="preview-stat-row">
+            <div class="stat-box stat-box--light">
+              <span class="stat-box__label">Est. ROAS</span>
+              <span class="stat-box__value">4.2x</span>
+            </div>
+            <div class="stat-box stat-box--dark">
+              <span class="stat-box__label">Potential Revenue</span>
+              <span class="stat-box__value">$39,050</span>
+            </div>
+          </div>
+          <div class="preview-stat-row">
+            <div class="stat-box stat-box--light">
+              <span class="stat-box__label">Impressions</span>
+              <span class="stat-box__value">203K</span>
+            </div>
+            <div class="stat-box stat-box--light">
+              <span class="stat-box__label">Shows Matched</span>
+              <span class="stat-box__value">8,343</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider" />
+
+    <!-- ROAS stats -->
+    <div class="stats-row-section">
+      <div class="stats-row-header">
+        <h2>The highest-converting channel brands keep skipping.</h2>
+        <p>Podcast and YouTube creator ads outperform every other digital format — and most brands haven't touched them yet.</p>
+      </div>
+      <div class="stats-row-grid">
+        <div class="stat-box stat-box--dark stat-box--wide">
+          <span class="stat-box__label">Podcast Ads Short-term ROAS</span>
+          <span class="stat-box__value">4.2X</span>
+        </div>
+        <div class="stat-box stat-box--light stat-box--wide">
+          <span class="stat-box__label">Social Ads Short-term ROAS</span>
+          <span class="stat-box__value">3.6X</span>
+        </div>
+        <div class="stat-box stat-box--light stat-box--wide">
+          <span class="stat-box__label">Online Display Short-term ROAS</span>
+          <span class="stat-box__value">3.2X</span>
+        </div>
+        <div class="stat-box stat-box--light stat-box--wide">
+          <span class="stat-box__label">TV Short-term ROAS</span>
+          <span class="stat-box__value">2.2X</span>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- Trust / scale -->
+    <div class="trust-section">
+      <div class="trust-header">
+        <h2>Leverage trust from the most influential voices in your space.</h2>
+        <p>Unlock the highest-converting growth channel for your category — before your competitors do.</p>
+      </div>
+      <div class="trust-row">
+        <div class="trust-avatars">
+          <div class="trust-avatar">JR</div>
+          <div class="trust-avatar">AB</div>
+          <div class="trust-avatar">TF</div>
+          <div class="trust-avatar">SC</div>
+          <div class="trust-avatar">MH</div>
+          <div class="trust-avatar" style="font-size:9px;">+k</div>
+        </div>
+        <div class="trust-stats">
+          <div class="trust-stat">
+            <div class="trust-stat__num">$8.2B</div>
+            <div class="trust-stat__label">spent on placements</div>
+          </div>
+          <div class="trust-stat">
+            <div class="trust-stat__num">82,000</div>
+            <div class="trust-stat__label">creators to request ads from</div>
+          </div>
+          <div class="trust-stat">
+            <div class="trust-stat__num">20,000+</div>
+            <div class="trust-stat__label">brands have advertised</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- AI research mode feature -->
+    <div class="ai-section">
+      <div class="ai-card">
+        <div class="ai-card__left">
+          <div class="ai-card__tag ai-card__tag--indigo">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="white"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Deep AI Research Mode
+          </div>
+          <h3 class="ai-card__title">The media planner that never sleeps — and never guesses.</h3>
+          <p class="ai-card__desc">
+            Our AI scans 85,000+ shows, analyzes audience demographics, brand safety, interest overlap, and historical conversion data across your category. It surfaces only the shows most likely to drive ROAS for your specific product — in seconds. What used to require an agency and two weeks now takes a lunch break.
+          </p>
+        </div>
+        <div class="ai-card__right">
+          <div class="ai-card__right-label">Your projected results</div>
+          <div class="stat-box stat-box--dark">
+            <span class="stat-box__label">Projected Revenue</span>
+            <span class="stat-box__value">$23,435</span>
+          </div>
+          <div class="stat-box stat-box--light">
+            <span class="stat-box__label">Shows Analyzed</span>
+            <span class="stat-box__value">203,000</span>
+          </div>
+          <div class="stat-box stat-box--light">
+            <span class="stat-box__label">Avg. Compatibility Score</span>
+            <span class="stat-box__value">94%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-card -->
+
+  <!-- ─── AI-MATCHED SHOWS ─── -->
+  <div class="page-card">
+    <div class="core-section">
+      <div class="core-section__header">
+        <h2 class="core-section__title">Your AI-matched shows — ready to book</h2>
+        <span class="core-section__meta">85,435 shows analyzed · updated hourly</span>
+      </div>
+      <div class="core-grid">
+        <!-- Card 1 -->
+        <article class="campaign-card">
+          <div class="card-top">
+            <img src="https://placehold.co/44x44/c0392b/fff?text=DS" alt="" class="card-thumb" width="44" height="44"/>
+            <div class="card-top-info">
+              <h4 class="card-title">Daily Stoic</h4>
+              <div class="card-top-row">
+                <span class="cat-pill">Health</span>
+                <span class="match-score">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="#0d6832"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  95%
+                </span>
+              </div>
+              <span style="font-size:10px;color:var(--grey-1);">$4,200 / spot</span>
+            </div>
+          </div>
+          <div class="card-metrics">
+            <div class="card-metric"><span class="metric-label">Episode Reach</span><span class="metric-value">323,453</span></div>
+            <div class="card-metric"><span class="metric-label">Demo Match</span><span class="metric-value">85%</span></div>
+            <div class="card-metric"><span class="metric-label">ROAS Est.</span><span class="metric-value">3.2X</span></div>
+            <div class="card-metric"><span class="metric-label">Interest Match</span><span class="metric-value">90%</span></div>
+          </div>
+          <div class="card-footer">
+            <button class="review-btn">View spot</button>
+          </div>
+        </article>
+        <!-- Card 2 -->
+        <article class="campaign-card">
+          <div class="card-top">
+            <img src="https://placehold.co/44x44/2980b9/fff?text=HL" alt="" class="card-thumb" width="44" height="44"/>
+            <div class="card-top-info">
+              <h4 class="card-title">Huberman Lab</h4>
+              <div class="card-top-row">
+                <span class="cat-pill">Health</span>
+                <span class="match-score">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="#0d6832"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  92%
+                </span>
+              </div>
+              <span style="font-size:10px;color:var(--grey-1);">$6,800 / spot</span>
+            </div>
+          </div>
+          <div class="card-metrics">
+            <div class="card-metric"><span class="metric-label">Episode Reach</span><span class="metric-value">512,000</span></div>
+            <div class="card-metric"><span class="metric-label">Demo Match</span><span class="metric-value">88%</span></div>
+            <div class="card-metric"><span class="metric-label">ROAS Est.</span><span class="metric-value">3.5X</span></div>
+            <div class="card-metric"><span class="metric-label">Interest Match</span><span class="metric-value">91%</span></div>
+          </div>
+          <div class="card-footer">
+            <button class="review-btn">View spot</button>
+          </div>
+        </article>
+        <!-- Card 3 -->
+        <article class="campaign-card">
+          <div class="card-top">
+            <img src="https://placehold.co/44x44/8e44ad/fff?text=TF" alt="" class="card-thumb" width="44" height="44"/>
+            <div class="card-top-info">
+              <h4 class="card-title">Tim Ferriss Show</h4>
+              <div class="card-top-row">
+                <span class="cat-pill">Business</span>
+                <span class="match-score">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="#0d6832"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  91%
+                </span>
+              </div>
+              <span style="font-size:10px;color:var(--grey-1);">$3,900 / spot</span>
+            </div>
+          </div>
+          <div class="card-metrics">
+            <div class="card-metric"><span class="metric-label">Episode Reach</span><span class="metric-value">290,000</span></div>
+            <div class="card-metric"><span class="metric-label">Demo Match</span><span class="metric-value">82%</span></div>
+            <div class="card-metric"><span class="metric-label">ROAS Est.</span><span class="metric-value">3.1X</span></div>
+            <div class="card-metric"><span class="metric-label">Interest Match</span><span class="metric-value">87%</span></div>
+          </div>
+          <div class="card-footer">
+            <button class="review-btn">View spot</button>
+          </div>
+        </article>
+        <!-- Why it matched — dark card -->
+        <article class="campaign-card campaign-card--dark">
+          <div class="card-why">
+            <p class="card-why__label">Why these match</p>
+            <p class="card-why__text">Our AI matched these shows based on competitor spend patterns, audience demographic overlap, and historical ROAS data across your product category. Every score is explainable.</p>
+            <button class="card-why__btn">See your matches free</button>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── HOW IT WORKS (dark section) ─── -->
+  <section class="how-section">
+    <div class="how-header">
+      <div class="how-header__left">
+        <span class="how-eyebrow">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          How SpotsNow works
+        </span>
+        <h2 class="how-title">From zero to live campaign<br>in three steps.</h2>
+        <p class="how-desc">Everything that used to require an agency, a spreadsheet, and two weeks of back-and-forth — automated, in minutes.</p>
+      </div>
+    </div>
+    <div class="how-steps">
+      <!-- Step 1 -->
+      <div class="how-step">
+        <div class="how-step__num">1</div>
+        <h3 class="how-step__title">Tell us about your brand</h3>
+        <p class="how-step__desc">Enter your website domain and budget. Our AI reads your product, audience, and category — then scans 85,000+ shows to find your best matches.</p>
+        <span class="how-step__tag">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          AI-powered · 60 seconds
+        </span>
+        <div class="how-step__metric" style="margin-top:20px;">
+          <span class="how-step__metric-val">85K+</span>
+          <span class="how-step__metric-label">Shows scanned per plan</span>
+        </div>
+      </div>
+      <!-- Step 2 -->
+      <div class="how-step">
+        <div class="how-step__num">2</div>
+        <h3 class="how-step__title">Review your media plan</h3>
+        <p class="how-step__desc">See compatibility scores, projected ROAS, audience overlap, and pricing for every recommended show. Pick the spots you want — no negotiation needed.</p>
+        <span class="how-step__tag">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Transparent pricing
+        </span>
+        <div class="how-step__metric" style="margin-top:20px;">
+          <span class="how-step__metric-val">94%</span>
+          <span class="how-step__metric-label">Avg. compatibility score</span>
+        </div>
+      </div>
+      <!-- Step 3 -->
+      <div class="how-step">
+        <div class="how-step__num">3</div>
+        <h3 class="how-step__title">Launch, track, and optimize</h3>
+        <p class="how-step__desc">Submit talking points, authorize payment, and go live. Track impressions, conversions, and ROAS in real time. Listen to air checks. Adjust mid-campaign — all in one place.</p>
+        <span class="how-step__tag">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Full-funnel visibility
+        </span>
+        <div class="how-step__metric" style="margin-top:20px;">
+          <span class="how-step__metric-val">48h</span>
+          <span class="how-step__metric-label">Avg. time from plan to live</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── TWO AD MODES ─── -->
+  <div class="page-card">
+    <div class="modes-section">
+      <div class="modes-header">
+        <h2>Two powerful ways to reach your audience.</h2>
+        <p>Use host-read influence, programmatic scale, or both — in the same campaign.</p>
+      </div>
+      <div class="modes-grid">
+        <!-- Host-read -->
+        <div class="mode-card">
+          <div class="mode-card__header">
+            <div class="mode-icon mode-icon--green">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--green-text)" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </div>
+            <div>
+              <div class="mode-card__label">Mode 1</div>
+              <h3 class="mode-card__name">Host-Read Ads</h3>
+            </div>
+          </div>
+          <div class="mode-card__body">
+            <p class="mode-card__desc">Tap into the trust audiences already have with creators they love. Host-read ads convert because listeners treat them as personal recommendations — not interruptions.</p>
+            <div class="mode-bullets">
+              <div class="mode-bullet">
+                <span class="mode-bullet__dot"></span>
+                AI matches your brand to the highest-compatibility creators
+              </div>
+              <div class="mode-bullet">
+                <span class="mode-bullet__dot"></span>
+                Submit talking points and let the host do what they do best
+              </div>
+              <div class="mode-bullet">
+                <span class="mode-bullet__dot"></span>
+                Listen to air checks and verify delivery before paying out
+              </div>
+              <div class="mode-bullet">
+                <span class="mode-bullet__dot"></span>
+                Best for: DTC brands, SaaS, and niche audiences
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Programmatic -->
+        <div class="mode-card mode-card--dark">
+          <div class="mode-card__header">
+            <div class="mode-icon mode-icon--dark">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <div>
+              <div class="mode-card__label">Mode 2</div>
+              <h3 class="mode-card__name">Programmatic Targeting</h3>
+            </div>
+          </div>
+          <div class="mode-card__body">
+            <p class="mode-card__desc">Reach your audience by zip code, interest, age, or behavior — served dynamically across thousands of shows. Scale your reach without scaling your ops.</p>
+            <div class="mode-bullets">
+              <div class="mode-bullet">
+                <span class="mode-bullet__dot"></span>
+                Geo-targeted to city, state, or DMA — great for local brands
+              </div>
+              <div class="mode-bullet">
+                <span class="mode-bullet__dot"></span>
+                Audience segments by interest, demo, and purchase behavior
+              </div>
+              <div class="mode-bullet">
+                <span class="mode-bullet__dot"></span>
+                Dynamic insertion across 20,000+ shows automatically
+              </div>
+              <div class="mode-bullet">
+                <span class="mode-bullet__dot"></span>
+                Best for: regional brands, franchises, and high-frequency campaigns
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- Testimonials -->
+    <div class="testimonials-section">
+      <div class="testimonials-header">
+        <h2>Brands that switched from "too hard" to live in under an hour.</h2>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testimonial-card testimonial-card--dark">
+          <p class="t-quote">"We kept telling ourselves podcast ads were too complicated for our team to manage. SpotsNow proved us wrong in about 45 minutes. The AI plan was better than what our agency quoted us."</p>
+          <div class="t-author">
+            <div class="t-avatar">AK</div>
+            <div>
+              <div class="t-name">Alex K.</div>
+              <div class="t-role">Head of Growth · DTC Brand, $8M ARR</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <p class="t-quote">"We now recommend SpotsNow to 30% of our agency clients. The AI matching is genuinely impressive — it surfaces shows I wouldn't have found manually, and the ROAS has backed it up."</p>
+          <div class="t-author">
+            <div class="t-avatar">MR</div>
+            <div>
+              <div class="t-name">Mia R.</div>
+              <div class="t-role">Media Director · Performance Agency</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- Case Study -->
+    <div class="case-section" style="padding-top: 36px;">
+      <div class="case-card">
+        <div class="case-left">
+          <div class="case-logo-row">
+            <div class="case-logo-thumb">DW</div>
+            <div class="case-logo-name">DIY Wrap Club</div>
+          </div>
+          <blockquote class="case-quote">
+            "SpotsNow eliminated everything that made podcast ads feel hard. We found our shows, submitted our talking points, and went live — no agency, no back-and-forth. The tracking dashboard showed us exactly what was working."
+          </blockquote>
+          <div class="case-attribution">
+            <div class="case-avatar">JH</div>
+            <div>
+              <div class="case-attr-name">Ji Hoon Hau</div>
+              <div class="case-attr-role">Founder, DIY Wrap Club</div>
+            </div>
+          </div>
+        </div>
+        <div class="case-right">
+          <div class="case-right-label">Campaign results</div>
+          <div class="case-stats-grid">
+            <div class="stat-box stat-box--dark">
+              <span class="stat-box__label">ROAS</span>
+              <span class="stat-box__value">3.5x</span>
+            </div>
+            <div class="stat-box stat-box--light">
+              <span class="stat-box__label">Revenue</span>
+              <span class="stat-box__value">$39K</span>
+            </div>
+            <div class="stat-box stat-box--light">
+              <span class="stat-box__label">Shows</span>
+              <span class="stat-box__value">8</span>
+            </div>
+            <div class="stat-box stat-box--light">
+              <span class="stat-box__label">vs Display Ads</span>
+              <span class="stat-box__value">–52% CPA</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- Bottom CTA -->
+    <div class="bottom-cta-section">
+      <div class="bottom-cta-card">
+        <div class="bottom-cta-left">
+          <div class="bottom-cta-eyebrow">Start today — it's free</div>
+          <h2 class="bottom-cta-title">Tap into your podcast audience before your competitors do.</h2>
+          <p class="bottom-cta-desc">Your ideal customers are already listening to shows that match your brand. Get your AI-generated media plan free — see exactly which shows you should be on and what ROAS to expect.</p>
+          <div class="bottom-cta-checks">
+            <div class="bottom-cta-check">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Free AI media plan — see your matches before committing
+            </div>
+            <div class="bottom-cta-check">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              No agency, no contracts, no middlemen
+            </div>
+            <div class="bottom-cta-check">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              85,000+ shows across podcast and YouTube
+            </div>
+          </div>
+        </div>
+        <div class="bottom-cta-right">
+          <div class="widget-header">
+            <div class="widget-header__label">AI Media Planner</div>
+            <div class="widget-header__title">Find your top shows in 60 seconds</div>
+          </div>
+          <div class="widget-field">
+            <label>Website Domain</label>
+            <input type="text" class="widget-input" placeholder="yourcompany.com" />
+          </div>
+          <div class="widget-row">
+            <div class="widget-field">
+              <label>Budget</label>
+              <select class="widget-select">
+                <option>$10,000 – $25,000</option>
+                <option>$5,000 – $10,000</option>
+                <option>$25,000 – $50,000</option>
+                <option>$50,000+</option>
+              </select>
+            </div>
+            <div class="widget-field">
+              <label>Audience</label>
+              <select class="widget-select">
+                <option>25–44</option>
+                <option>18–34</option>
+                <option>35–54</option>
+              </select>
+            </div>
+          </div>
+          <button class="widget-cta">
+            Generate My Plan
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+          <p class="widget-note">Free to generate · No credit card required</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<div style="height: 40px;"></div>
+
+<!-- Footer -->
+<footer>
+  <div class="site-footer">
+    <div class="footer-logo">
+      <div class="logo-mark">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="5"/></svg>
+      </div>
+      SpotsNow
+    </div>
+    <ul class="footer-links">
+      <li><a href="#">Advertisers</a></li>
+      <li><a href="#">Creators</a></li>
+      <li><a href="#">Agencies</a></li>
+      <li><a href="#">About</a></li>
+      <li><a href="#">Blog</a></li>
+      <li><a href="#">Terms of Service</a></li>
+      <li><a href="#">Privacy Policy</a></li>
+    </ul>
+    <span class="footer-copy">© 2025 SpotsNow. All rights reserved.</span>
+  </div>
+</footer>
+
+</body>
+</html>

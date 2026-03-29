@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotsNow — Campaign Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --dark:        #0e1323;
+      --grey-1:      #9098a9;
+      --grey-2:      #c2c8d4;
+      --text-primary:#1c2033;
+      --text-sub:    #6b7385;
+      --border:      #e4e7ec;
+      --bg-page:     #f4f5f7;
+      --bg-pill:     #f0f1f4;
+      --white:       #ffffff;
+      --coral:       #ff6b6b;
+      --coral-soft:  #fff0f0;
+      --green-bg:    #d6f0e0;
+      --green-text:  #0d6832;
+      --flash-bg:    #0d0b1e;
+      --flash-orange:#ff6b00;
+      --flash-amber: #ffb300;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      font-size: 14px; line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* ── Top Bar ──────────────────────────────── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 100;
+      height: 56px; background: var(--white);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 28px; gap: 16px;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 800; font-size: 15px; color: var(--dark);
+      text-decoration: none; letter-spacing: -0.3px; flex-shrink: 0;
+    }
+    .logo-mark {
+      width: 22px; height: 22px; border-radius: 6px;
+      background: var(--coral);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .url-pill {
+      flex: 1; max-width: 280px; margin: 0 auto;
+      background: var(--bg-pill); border-radius: 10px;
+      padding: 5px 14px; display: flex; flex-direction: column;
+      align-items: center; gap: 1px;
+    }
+    .url-pill__name { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+    .url-pill__sub  { font-size: 10px; color: var(--grey-1); }
+    .tb-right { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+    .tb-icon {
+      width: 34px; height: 34px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; color: var(--dark);
+    }
+    .tb-icon:hover { background: var(--bg-pill); }
+    .tb-login {
+      height: 32px; padding: 0 14px; background: none;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 12px; font-weight: 600; color: var(--text-primary);
+    }
+
+    /* ── Page Shell ───────────────────────────── */
+    .page {
+      max-width: 1136px; margin: 0 auto;
+      padding: 24px 24px 160px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    /* ── Campaign Header Card ─────────────────── */
+    .header-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 20px; padding: 32px;
+      display: flex; align-items: flex-start; gap: 32px;
+    }
+    .header-card__left {
+      display: flex; align-items: flex-start; gap: 20px; flex: 1; min-width: 0;
+    }
+
+    /* Logo placeholder — pulsing skeleton */
+    .logo-slot {
+      width: 88px; height: 88px; flex-shrink: 0;
+      border-radius: 14px; background: var(--bg-pill);
+      border: 2px dashed var(--border);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--grey-2);
+    }
+    .header-card__info {
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column; gap: 10px; padding-top: 2px;
+    }
+    .header-card__title {
+      font-size: 24px; font-weight: 800; letter-spacing: -0.5px;
+      color: var(--dark); margin: 0;
+    }
+    .header-card__desc {
+      font-size: 13px; color: var(--text-sub); line-height: 1.6;
+      max-width: 400px; margin: 0;
+    }
+    .header-card__meta {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .btn-outline {
+      height: 34px; padding: 0 14px;
+      background: none; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 12px; font-weight: 600; color: var(--text-primary);
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .not-started {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; color: var(--grey-1);
+    }
+
+    /* Stat boxes */
+    .stats-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      width: 270px; flex-shrink: 0;
+    }
+    .stat {
+      border-radius: 12px; padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 5px;
+    }
+    .stat--light { background: var(--bg-pill); border: 1px solid var(--border); }
+    .stat--dark  { background: var(--dark); }
+    .stat__label { font-size: 10px; font-weight: 600; }
+    .stat--light .stat__label { color: var(--grey-1); }
+    .stat--dark  .stat__label { color: rgba(255,255,255,0.4); }
+    .stat__value { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+    .stat--light .stat__value { color: var(--grey-2); }
+    .stat--dark  .stat__value { color: rgba(255,255,255,0.15); }
+
+    /* ── Divider ──────────────────────────────── */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+    /* ══════════════════════════════════════════
+       EMPTY STATE: CORE SHOWS
+    ══════════════════════════════════════════ */
+    .core-card {
+      background: var(--white); border: 1px solid var(--border); border-radius: 20px;
+      overflow: hidden;
+    }
+    .core-card__header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 28px 0;
+    }
+    .core-card__title { margin: 0; font-size: 15px; font-weight: 700; color: var(--dark); }
+    .core-card__meta  { font-size: 11px; color: var(--grey-1); }
+
+    .es-core {
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center; padding: 44px 32px 56px;
+    }
+
+    /* SVG illustration */
+    .es-core__art { margin-bottom: 28px; }
+
+    .es-core__title {
+      font-size: 18px; font-weight: 800; letter-spacing: -0.3px;
+      color: var(--dark); margin: 0 0 10px;
+    }
+    .es-core__sub {
+      font-size: 13px; color: var(--text-sub); line-height: 1.65;
+      max-width: 360px; margin: 0 auto 28px;
+    }
+    .es-core__ctas { display: flex; align-items: center; gap: 10px; }
+    .btn-primary {
+      height: 42px; padding: 0 22px; background: var(--coral);
+      border: none; border-radius: 10px;
+      font-size: 13px; font-weight: 700; color: white;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-secondary {
+      height: 42px; padding: 0 20px; background: none;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 13px; font-weight: 600; color: var(--text-primary);
+    }
+    .btn-secondary:hover { background: var(--bg-pill); }
+
+    /* Three value props below CTAs */
+    .es-props {
+      display: flex; gap: 8px; margin-top: 22px; flex-wrap: wrap; justify-content: center;
+    }
+    .es-prop {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 12px; background: var(--bg-pill);
+      border-radius: 20px; font-size: 11px; font-weight: 500; color: var(--text-sub);
+    }
+    .es-prop__dot {
+      width: 5px; height: 5px; border-radius: 50%; background: var(--grey-2); flex-shrink: 0;
+    }
+
+    /* Ghost card row (decorative, below main state) */
+    .ghost-row {
+      display: flex; gap: 10px; padding: 0 28px 28px;
+      pointer-events: none; opacity: 0.45;
+    }
+    .ghost-card {
+      flex: 1; height: 130px; border-radius: 12px;
+      border: 1.5px dashed var(--border); background: var(--bg-pill);
+      display: flex; flex-direction: column; gap: 0; overflow: hidden;
+    }
+    .ghost-card__top {
+      height: 52px; padding: 10px 12px;
+      display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px dashed var(--border);
+    }
+    .ghost-thumb { width: 32px; height: 32px; border-radius: 7px; background: var(--border); flex-shrink: 0; }
+    .ghost-lines { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+    .ghost-line  { height: 5px; border-radius: 3px; background: var(--border); }
+    .ghost-line--s { width: 55%; }
+    .ghost-card__grid {
+      flex: 1; display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1px; background: var(--border);
+    }
+    .ghost-metric { background: var(--bg-pill); }
+
+    /* ══════════════════════════════════════════
+       EMPTY STATE: FLASH SALES
+    ══════════════════════════════════════════ */
+    .flash-card {
+      background: linear-gradient(140deg, #0d0b1e 0%, #171030 55%, #0c1a38 100%);
+      border-radius: 20px; border: 1px solid rgba(255,255,255,0.06);
+      overflow: hidden; position: relative;
+    }
+    .flash-card::before {
+      content: '';
+      position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse at 20% -10%, rgba(255,107,0,0.18) 0%, transparent 55%);
+    }
+
+    .flash-top {
+      position: relative; z-index: 1;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 24px 28px 0; gap: 16px; flex-wrap: wrap;
+    }
+    .flash-label { display: flex; align-items: center; gap: 12px; }
+    .flash-icon-box {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--flash-orange);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      box-shadow: 0 0 20px rgba(255,107,0,0.35);
+    }
+    .flash-label__title { font-size: 17px; font-weight: 800; color: white; letter-spacing: -0.3px; }
+    .flash-label__sub   { font-size: 11px; color: rgba(255,255,255,0.38); margin-top: 1px; }
+
+    .countdown-pill {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 12px; padding: 10px 16px;
+    }
+    .cd-label { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.6px; }
+    .cd-nums  { display: flex; align-items: center; gap: 2px; }
+    .cd-n { font-size: 22px; font-weight: 800; color: var(--flash-amber); letter-spacing: -1px; font-variant-numeric: tabular-nums; min-width: 30px; text-align: center; }
+    .cd-sep { font-size: 20px; font-weight: 800; color: var(--flash-amber); opacity: 0.35; padding: 0 1px; margin-bottom: 2px; }
+
+    /* Empty body */
+    .es-flash {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center; padding: 40px 32px 52px;
+    }
+
+    /* Four dashed ghost deal cards */
+    .flash-ghost-row {
+      display: flex; gap: 12px; margin-bottom: 36px; width: 100%;
+    }
+    .flash-ghost {
+      flex: 1; border-radius: 14px;
+      border: 1.5px dashed rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.02);
+      overflow: hidden; display: flex; flex-direction: column;
+      min-height: 120px;
+    }
+    .flash-ghost__bar {
+      height: 26px;
+      background: linear-gradient(90deg, rgba(255,107,0,0.12), rgba(255,107,0,0.06));
+      border-bottom: 1px dashed rgba(255,107,0,0.1);
+    }
+    .flash-ghost__body {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+    }
+    .flash-ghost__dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 1.5px dashed rgba(255,255,255,0.07);
+    }
+
+    .es-flash__icon-wrap {
+      width: 56px; height: 56px; border-radius: 16px;
+      background: rgba(255,107,0,0.12);
+      border: 1.5px solid rgba(255,107,0,0.22);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 18px;
+    }
+    .es-flash__title {
+      font-size: 17px; font-weight: 800; color: white;
+      letter-spacing: -0.3px; margin: 0 0 8px;
+    }
+    .es-flash__sub {
+      font-size: 13px; color: rgba(255,255,255,0.38);
+      line-height: 1.65; max-width: 320px; margin: 0 auto 24px;
+    }
+
+    .btn-notify {
+      height: 40px; padding: 0 20px;
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid rgba(255,255,255,0.13);
+      border-radius: 10px; font-size: 13px; font-weight: 700; color: white;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-notify:hover { background: rgba(255,255,255,0.13); }
+
+    .es-flash__next-drop {
+      margin-top: 14px; font-size: 11px; color: rgba(255,255,255,0.2);
+    }
+    .es-flash__next-drop span { color: var(--flash-amber); font-weight: 600; }
+
+    /* ══════════════════════════════════════════
+       EMPTY STATE: DISCOVER (idle)
+    ══════════════════════════════════════════ */
+    .discover-card {
+      background: var(--white); border: 1px solid var(--border); border-radius: 20px; overflow: hidden;
+    }
+    .discover-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 24px 28px 14px; gap: 16px; flex-wrap: wrap;
+    }
+    .discover-head__label { display: flex; flex-direction: column; gap: 2px; }
+    .discover-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--grey-1); }
+    .discover-title  { font-size: 16px; font-weight: 700; color: var(--dark); margin: 0; }
+
+    .search-wrap {
+      flex: 1; max-width: 400px; position: relative; display: flex; align-items: center;
+    }
+    .search-icon-pos { position: absolute; left: 13px; color: var(--grey-1); display: flex; }
+    .search-input {
+      width: 100%; height: 40px; padding: 0 16px 0 38px;
+      background: var(--bg-pill); border: 1.5px solid transparent;
+      border-radius: 10px; font-size: 13px; font-family: inherit;
+      color: var(--text-primary); outline: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .search-input:focus { border-color: var(--dark); background: white; }
+    .search-input::placeholder { color: #bbb; }
+
+    .chip-row {
+      display: flex; flex-wrap: wrap; gap: 6px; padding: 0 28px 16px;
+    }
+    .chip {
+      height: 28px; padding: 0 12px;
+      background: var(--bg-pill); border: 1px solid var(--border);
+      border-radius: 20px; font-size: 11px; font-weight: 600;
+      color: var(--text-sub); transition: all 0.12s;
+    }
+    .chip:hover, .chip.active { background: var(--dark); color: white; border-color: var(--dark); }
+
+    /* Idle empty state */
+    .es-discover {
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center; padding: 28px 32px 44px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Floating show bubbles art */
+    .bubble-art {
+      position: relative; width: 300px; height: 76px; margin-bottom: 22px;
+    }
+    .bubble {
+      position: absolute; display: flex; align-items: center; gap: 8px;
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 10px; padding: 7px 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .bubble--l { left: 0; top: 8px; transform: rotate(-3deg); opacity: 0.45; }
+    .bubble--c { left: 50%; top: 10px; transform: translateX(-50%); z-index: 2; opacity: 1; }
+    .bubble--r { right: 0; top: 4px; transform: rotate(3deg); opacity: 0.45; }
+    .b-thumb { width: 26px; height: 26px; border-radius: 6px; flex-shrink: 0; }
+    .b-info  { display: flex; flex-direction: column; gap: 3px; }
+    .b-line  { height: 5px; border-radius: 3px; background: var(--bg-pill); }
+    .b-line--l { width: 56px; }
+    .b-line--s { width: 36px; }
+
+    .es-discover__title { font-size: 15px; font-weight: 700; color: var(--dark); margin: 0 0 6px; }
+    .es-discover__sub   { font-size: 12px; color: var(--text-sub); line-height: 1.65; max-width: 280px; margin: 0 auto 20px; }
+
+    .quick-tags { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+    .quick-tag {
+      height: 30px; padding: 0 12px;
+      background: var(--bg-pill); border: 1px solid var(--border);
+      border-radius: 20px; font-size: 11px; font-weight: 600;
+      color: var(--text-sub); display: flex; align-items: center; gap: 5px;
+    }
+    .quick-tag:hover { background: var(--dark); color: white; border-color: var(--dark); }
+
+    /* ══════════════════════════════════════════
+       EMPTY STATE: DISCOVER — no results
+    ══════════════════════════════════════════ */
+    .es-no-results {
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center; padding: 36px 32px 44px;
+      border-top: 1px solid var(--border);
+    }
+    .no-results-art {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: var(--bg-pill); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px; color: var(--grey-2);
+    }
+    .es-no-results__q   { font-size: 15px; font-weight: 700; color: var(--dark); margin: 0 0 7px; }
+    .es-no-results__sub { font-size: 12px; color: var(--text-sub); line-height: 1.65; max-width: 280px; margin: 0 auto 20px; }
+    .no-results-actions { display: flex; gap: 8px; }
+    .btn-request {
+      height: 36px; padding: 0 16px; background: none;
+      border: 1.5px solid var(--border); border-radius: 9px;
+      font-size: 12px; font-weight: 600; color: var(--dark);
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-request:hover { background: var(--bg-pill); }
+    .btn-clear {
+      height: 36px; padding: 0 16px; background: var(--dark);
+      border: none; border-radius: 9px;
+      font-size: 12px; font-weight: 700; color: white;
+    }
+    .btn-clear:hover { opacity: 0.85; }
+
+    /* ══════════════════════════════════════════
+       BOTTOM BAR — disabled state
+    ══════════════════════════════════════════ */
+    .bottom-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+      background: var(--white); border-top: 1px solid var(--border);
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.07);
+    }
+    .bottom-bar__inner {
+      max-width: 1136px; margin: 0 auto; padding: 14px 28px;
+      display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    }
+    .bottom-bar__left { display: flex; flex-direction: column; gap: 2px; }
+    .bottom-bar__title { margin: 0; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .bottom-bar__sub   { margin: 0; font-size: 11px; color: var(--grey-1); }
+    .bottom-bar__right { display: flex; align-items: center; gap: 14px; }
+    .bottom-bar__count { font-size: 12px; color: var(--grey-1); }
+    .launch-btn {
+      height: 42px; padding: 0 24px; border-radius: 10px;
+      font-size: 13px; font-weight: 700; border: none;
+      background: var(--bg-pill); color: var(--grey-1); cursor: not-allowed;
+    }
+
+    /* ── Section label (demo only) ────────────── */
+    .demo-tag {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--grey-1);
+      display: flex; align-items: center; gap: 10px; padding: 4px 0;
+    }
+    .demo-tag::before, .demo-tag::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    @media (max-width: 768px) {
+      .header-card  { flex-direction: column; }
+      .stats-grid   { width: 100%; }
+      .ghost-row    { display: none; }
+      .flash-ghost-row { display: none; }
+      .bubble-art   { display: none; }
+      .search-wrap  { max-width: 100%; }
+      .discover-head { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<header class="top-bar">
+  <a href="campaign.html" class="logo">
+    <div class="logo-mark">
+      <svg width="10" height="10" viewBox="0 0 20 20" fill="white"><circle cx="10" cy="10" r="5"/></svg>
+    </div>
+    SpotsNow
+  </a>
+  <div class="url-pill">
+    <span class="url-pill__name">www.mcdonalds.com</span>
+    <span class="url-pill__sub">$10K · 45-34 · Male · 100K+</span>
+  </div>
+  <div class="tb-right">
+    <button class="tb-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+    </button>
+    <button class="tb-login">Login</button>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- ═══════════════════════════════════════
+       1. CAMPAIGN HEADER — empty / no data
+  ═══════════════════════════════════════ -->
+  <p class="demo-tag">Campaign header — no brand connected</p>
+
+  <div class="header-card">
+    <div class="header-card__left">
+      <div class="logo-slot">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="4"/>
+          <path d="M9 9h.01M15 9h.01M9 15h.01M15 15h.01"/>
+        </svg>
+      </div>
+      <div class="header-card__info">
+        <h1 class="header-card__title">Build your campaign</h1>
+        <p class="header-card__desc">Add shows to see your projected impressions, ROAS, and spend update in real time.</p>
+        <div class="header-card__meta">
+          <button class="btn-outline">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Share
+          </button>
+          <span class="not-started">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>
+            Not started yet
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat stat--light">
+        <span class="stat__label" style="color:var(--grey-1)">Impressions</span>
+        <span class="stat__value">—</span>
+      </div>
+      <div class="stat stat--dark">
+        <span class="stat__label">Your Potential Sales</span>
+        <span class="stat__value">—</span>
+      </div>
+      <div class="stat stat--light">
+        <span class="stat__label" style="color:var(--grey-1)">Est. ROAS</span>
+        <span class="stat__value">—</span>
+      </div>
+      <div class="stat stat--light">
+        <span class="stat__label" style="color:var(--grey-1)">Estimated Spend</span>
+        <span class="stat__value">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       2. CORE SHOWS — empty state
+  ═══════════════════════════════════════ -->
+  <p class="demo-tag">Core shows — empty</p>
+
+  <div class="core-card">
+    <div class="core-card__header">
+      <h2 class="core-card__title">0 shows in your campaign</h2>
+      <span class="core-card__meta">85,435 shows analyzed</span>
+    </div>
+
+    <div class="es-core">
+      <!-- Illustration: three overlapping podcast cards -->
+      <div class="es-core__art">
+        <svg width="220" height="148" viewBox="0 0 220 148" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Back-left card -->
+          <rect x="8" y="22" width="88" height="110" rx="12" fill="#f4f5f7" stroke="#e4e7ec" stroke-width="1.5" transform="rotate(-8 8 22)"/>
+          <!-- Back-right card -->
+          <rect x="124" y="22" width="88" height="110" rx="12" fill="#f4f5f7" stroke="#e4e7ec" stroke-width="1.5" transform="rotate(8 124 22)"/>
+          <!-- Centre card (white, shadow) -->
+          <filter id="cs"><feDropShadow dx="0" dy="4" stdDeviation="10" flood-color="#0e1323" flood-opacity="0.10"/></filter>
+          <rect x="62" y="10" width="96" height="120" rx="14" fill="white" stroke="#e4e7ec" stroke-width="1.5" filter="url(#cs)"/>
+          <!-- Thumb placeholder -->
+          <rect x="76" y="24" width="36" height="36" rx="8" fill="#f0f1f4"/>
+          <!-- Mic icon inside thumb -->
+          <path d="M94 32a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0v-6a4 4 0 0 1 4-4z" stroke="#c2c8d4" stroke-width="1.5" fill="none"/>
+          <path d="M88 42a6 6 0 0 0 12 0" stroke="#c2c8d4" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <line x1="94" y1="48" x2="94" y2="52" stroke="#c2c8d4" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- Lines -->
+          <rect x="76" y="68" width="44" height="6" rx="3" fill="#f0f1f4"/>
+          <rect x="76" y="80" width="30" height="5" rx="2.5" fill="#f0f1f4"/>
+          <!-- 2x2 metric grid -->
+          <rect x="62" y="98" width="47" height="30" rx="0" fill="#f8f8f9"/>
+          <rect x="111" y="98" width="47" height="30" rx="0" fill="#f8f8f9"/>
+          <line x1="62" y1="98" x2="158" y2="98" stroke="#e4e7ec" stroke-width="1"/>
+          <line x1="109" y1="98" x2="109" y2="128" stroke="#e4e7ec" stroke-width="1"/>
+          <!-- + icon in centre -->
+          <circle cx="110" cy="74" r="10" fill="#fff0f0"/>
+          <path d="M110 69v10M105 74h10" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <h3 class="es-core__title">Your campaign is empty</h3>
+      <p class="es-core__sub">
+        We've analysed 85,435 shows for your brand. Start with our AI picks, grab a flash deal, or search for a show you already have in mind.
+      </p>
+
+      <div class="es-core__ctas">
+        <button class="btn-primary" onclick="window.location='campaign.html'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          See AI recommendations
+        </button>
+        <button class="btn-secondary">Browse catalog</button>
+      </div>
+
+      <div class="es-props">
+        <span class="es-prop"><span class="es-prop__dot"></span>Matched to your audience</span>
+        <span class="es-prop"><span class="es-prop__dot"></span>No commitment until checkout</span>
+        <span class="es-prop"><span class="es-prop__dot"></span>Remove shows anytime</span>
+      </div>
+    </div>
+
+    <!-- Ghost card row: hints at what will appear -->
+    <div class="ghost-row">
+      <div class="ghost-card">
+        <div class="ghost-card__top">
+          <div class="ghost-thumb"></div>
+          <div class="ghost-lines">
+            <div class="ghost-line"></div>
+            <div class="ghost-line ghost-line--s"></div>
+          </div>
+        </div>
+        <div class="ghost-card__grid">
+          <div class="ghost-metric"></div>
+          <div class="ghost-metric"></div>
+          <div class="ghost-metric" style="border-top:1px dashed var(--border)"></div>
+          <div class="ghost-metric" style="border-top:1px dashed var(--border)"></div>
+        </div>
+      </div>
+      <div class="ghost-card">
+        <div class="ghost-card__top">
+          <div class="ghost-thumb"></div>
+          <div class="ghost-lines">
+            <div class="ghost-line"></div>
+            <div class="ghost-line ghost-line--s"></div>
+          </div>
+        </div>
+        <div class="ghost-card__grid">
+          <div class="ghost-metric"></div><div class="ghost-metric"></div>
+          <div class="ghost-metric" style="border-top:1px dashed var(--border)"></div>
+          <div class="ghost-metric" style="border-top:1px dashed var(--border)"></div>
+        </div>
+      </div>
+      <div class="ghost-card">
+        <div class="ghost-card__top">
+          <div class="ghost-thumb"></div>
+          <div class="ghost-lines">
+            <div class="ghost-line"></div>
+            <div class="ghost-line ghost-line--s"></div>
+          </div>
+        </div>
+        <div class="ghost-card__grid">
+          <div class="ghost-metric"></div><div class="ghost-metric"></div>
+          <div class="ghost-metric" style="border-top:1px dashed var(--border)"></div>
+          <div class="ghost-metric" style="border-top:1px dashed var(--border)"></div>
+        </div>
+      </div>
+      <div class="ghost-card">
+        <div class="ghost-card__top">
+          <div class="ghost-thumb"></div>
+          <div class="ghost-lines">
+            <div class="ghost-line"></div>
+            <div class="ghost-line ghost-line--s"></div>
+          </div>
+        </div>
+        <div class="ghost-card__grid">
+          <div class="ghost-metric"></div><div class="ghost-metric"></div>
+          <div class="ghost-metric" style="border-top:1px dashed var(--border)"></div>
+          <div class="ghost-metric" style="border-top:1px dashed var(--border)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       3. FLASH SALES — no deals available
+  ═══════════════════════════════════════ -->
+  <p class="demo-tag">Flash sales — no deals right now</p>
+
+  <div class="flash-card">
+    <div class="flash-top">
+      <div class="flash-label">
+        <div class="flash-icon-box">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="white"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <div>
+          <div class="flash-label__title">Flash Sales</div>
+          <div class="flash-label__sub">Discounted spots — limited time only</div>
+        </div>
+      </div>
+      <div class="countdown-pill">
+        <span class="cd-label">Next drop in</span>
+        <div class="cd-nums">
+          <span class="cd-n" id="cd-h">11</span>
+          <span class="cd-sep">:</span>
+          <span class="cd-n" id="cd-m">24</span>
+          <span class="cd-sep">:</span>
+          <span class="cd-n" id="cd-s">08</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="es-flash">
+      <!-- Dashed ghost deal cards -->
+      <div class="flash-ghost-row">
+        <div class="flash-ghost"><div class="flash-ghost__bar"></div><div class="flash-ghost__body"><div class="flash-ghost__dot"></div></div></div>
+        <div class="flash-ghost"><div class="flash-ghost__bar"></div><div class="flash-ghost__body"><div class="flash-ghost__dot"></div></div></div>
+        <div class="flash-ghost"><div class="flash-ghost__bar"></div><div class="flash-ghost__body"><div class="flash-ghost__dot"></div></div></div>
+        <div class="flash-ghost"><div class="flash-ghost__bar"></div><div class="flash-ghost__body"><div class="flash-ghost__dot"></div></div></div>
+      </div>
+
+      <div class="es-flash__icon-wrap">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff6b00" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <h3 class="es-flash__title">All deals have been claimed</h3>
+      <p class="es-flash__sub">Flash spots sell fast. New discounted inventory drops regularly — we'll notify you the moment deals matching your campaign go live.</p>
+      <button class="btn-notify">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Notify me on next drop
+      </button>
+      <p class="es-flash__next-drop">Next drop: <span>today at 11:24 PM</span></p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       4a. DISCOVER — idle (no query)
+  ═══════════════════════════════════════ -->
+  <p class="demo-tag">Discover — idle, no search</p>
+
+  <div class="discover-card">
+    <div class="discover-head">
+      <div class="discover-head__label">
+        <span class="discover-eyebrow">Search catalog</span>
+        <h2 class="discover-title">Know a show you want to add?</h2>
+      </div>
+      <div class="search-wrap">
+        <span class="search-icon-pos">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <input class="search-input" placeholder="Search 85,000+ shows by name or category…" id="s1"/>
+      </div>
+    </div>
+    <div class="chip-row">
+      <button class="chip">Comedy</button><button class="chip">True Crime</button>
+      <button class="chip">Business</button><button class="chip">Sports</button>
+      <button class="chip">Technology</button><button class="chip">Health</button>
+      <button class="chip">News</button><button class="chip">Society</button>
+    </div>
+    <div class="es-discover">
+      <!-- Floating show bubble art -->
+      <div class="bubble-art">
+        <div class="bubble bubble--l">
+          <div class="b-thumb" style="background:#fee2e2;"></div>
+          <div class="b-info"><div class="b-line b-line--l"></div><div class="b-line b-line--s"></div></div>
+        </div>
+        <div class="bubble bubble--c">
+          <div class="b-thumb" style="background:#dbeafe;"></div>
+          <div class="b-info"><div class="b-line b-line--l"></div><div class="b-line b-line--s"></div></div>
+        </div>
+        <div class="bubble bubble--r">
+          <div class="b-thumb" style="background:#dcfce7;"></div>
+          <div class="b-info"><div class="b-line b-line--l"></div><div class="b-line b-line--s"></div></div>
+        </div>
+      </div>
+
+      <h3 class="es-discover__title">Search our full catalog</h3>
+      <p class="es-discover__sub">Type a show name, host, or topic — or pick a category to start browsing.</p>
+
+      <div class="quick-tags">
+        <button class="quick-tag">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          Trending now
+        </button>
+        <button class="quick-tag">🏆 Top 50 shows</button>
+        <button class="quick-tag">💡 Under-the-radar</button>
+        <button class="quick-tag">🎯 Matches your audience</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       4b. DISCOVER — no results found
+  ═══════════════════════════════════════ -->
+  <p class="demo-tag">Discover — no results</p>
+
+  <div class="discover-card">
+    <div class="discover-head">
+      <div class="discover-head__label">
+        <span class="discover-eyebrow">Search catalog</span>
+        <h2 class="discover-title">Know a show you want to add?</h2>
+      </div>
+      <div class="search-wrap">
+        <span class="search-icon-pos">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <input class="search-input" value="The Midnight Miracle" style="background:white;border-color:var(--dark);" readonly/>
+      </div>
+    </div>
+    <div class="chip-row">
+      <button class="chip">Comedy</button><button class="chip">True Crime</button>
+      <button class="chip">Business</button><button class="chip">Sports</button>
+      <button class="chip">Technology</button><button class="chip">Health</button>
+      <button class="chip">News</button><button class="chip">Society</button>
+    </div>
+    <div class="es-no-results">
+      <div class="no-results-art">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      </div>
+      <h3 class="es-no-results__q">No results for "The Midnight Miracle"</h3>
+      <p class="es-no-results__sub">This show isn't in our catalog yet. Request it and we'll usually have it live within 24 hours.</p>
+      <div class="no-results-actions">
+        <button class="btn-request">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Request this show
+        </button>
+        <button class="btn-clear">Clear search</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Bottom bar — disabled (no shows) -->
+<div class="bottom-bar">
+  <div class="bottom-bar__inner">
+    <div class="bottom-bar__left">
+      <h3 class="bottom-bar__title">Start your campaign</h3>
+      <p class="bottom-bar__sub">Add shows to your campaign to continue</p>
+    </div>
+    <div class="bottom-bar__right">
+      <span class="bottom-bar__count">0 shows added</span>
+      <button class="launch-btn" disabled>Launch Campaign</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Countdown — next flash drop
+  let secs = 11*3600 + 24*60 + 8
+  setInterval(() => {
+    if (--secs < 0) return
+    const h = Math.floor(secs/3600)
+    const m = Math.floor((secs%3600)/60)
+    const s = secs%60
+    document.getElementById('cd-h').textContent = String(h).padStart(2,'0')
+    document.getElementById('cd-m').textContent = String(m).padStart(2,'0')
+    document.getElementById('cd-s').textContent = String(s).padStart(2,'0')
+  }, 1000)
+
+  // Chip hover toggle demo
+  document.querySelectorAll('.chip').forEach(c =>
+    c.addEventListener('click', () => c.classList.toggle('active')))
+</script>
+</body>
+</html>

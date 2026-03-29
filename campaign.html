@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotsNow — Build Your Campaign</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --dark: #0e1323;
+      --grey-1: #707481;
+      --text-primary: #252733;
+      --text-secondary: #5a5f6e;
+      --border: #dee0e4;
+      --border-light: #e8e8e8;
+      --white: #ffffff;
+      --coral: #ff6b6b;
+      --btn-dark: #111111;
+      --green-bg: #d6f0e0;
+      --green-text: #0d6832;
+      --pill-bg: #f3f4f6;
+      /* Flash sale palette */
+      --flash-dark: #0f0c29;
+      --flash-mid:  #1a1040;
+      --flash-orange: #ff6b00;
+      --flash-amber: #ffb300;
+      --flash-glow: rgba(255,107,0,0.3);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.4;
+      color: var(--dark); background: #f5f5f3;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font-family: inherit; cursor: pointer; }
+    img { display: block; }
+
+    /* ─────────────────────────────────────────────────────
+       TOP BAR
+    ───────────────────────────────────────────────────── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 200;
+      height: 56px; display: flex; align-items: center; gap: 16px;
+      padding: 0 28px; background: var(--white);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .top-bar__logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 800; font-size: 15px; color: var(--dark);
+      text-decoration: none; flex-shrink: 0; letter-spacing: -0.3px;
+    }
+    .logo-mark {
+      width: 22px; height: 22px; border-radius: 6px;
+      background: var(--coral); display: flex; align-items: center; justify-content: center;
+    }
+    .logo-mark svg { display: block; }
+    .top-bar__url-pill {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px;
+      background: var(--pill-bg); border-radius: 10px; padding: 6px 18px;
+      max-width: 300px; margin: 0 auto;
+    }
+    .top-bar__url-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .top-bar__url-sub  { font-size: 11px; color: var(--grey-1); }
+    .top-bar__actions  { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+    .icon-btn {
+      position: relative; width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; border-radius: 8px; color: var(--dark);
+    }
+    .icon-btn:hover { background: var(--pill-bg); }
+    .topbadge {
+      position: absolute; top: 4px; right: 4px;
+      min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px;
+      background: var(--dark); color: white;
+      font-size: 9px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .topbadge--coral { background: var(--coral); }
+    .login-btn {
+      padding: 6px 14px; background: none;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; font-weight: 600; color: var(--text-primary);
+    }
+    .login-btn:hover { background: var(--pill-bg); }
+
+    /* ─────────────────────────────────────────────────────
+       PAGE WRAPPER
+    ───────────────────────────────────────────────────── */
+    .page { display: flex; flex-direction: column; }
+
+    /* White card wrapping core sections */
+    .page-card {
+      background: var(--white);
+      max-width: 1136px; margin: 24px auto 0; width: calc(100% - 48px);
+      border-radius: 20px;
+      border: 1px solid var(--border-light);
+      overflow: hidden;
+    }
+    .page-card__inner { padding: 36px 36px 0; }
+
+    /* ─────────────────────────────────────────────────────
+       CAMPAIGN HEADER
+    ───────────────────────────────────────────────────── */
+    .campaign-header {
+      display: flex; align-items: flex-start; gap: 36px; margin-bottom: 36px;
+    }
+    .campaign-header__left {
+      display: flex; align-items: flex-start; gap: 20px; flex: 1; min-width: 0;
+    }
+    .brand-logo {
+      width: 96px; height: 96px; border-radius: 14px;
+      object-fit: cover; flex-shrink: 0;
+    }
+    .campaign-header__info {
+      flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; padding-top: 2px;
+    }
+    .campaign-header__title {
+      margin: 0; font-size: 26px; font-weight: 800;
+      letter-spacing: -0.6px; color: var(--dark); line-height: 1.1;
+    }
+    .campaign-header__desc {
+      margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 440px;
+    }
+    .show-more-btn {
+      background: none; border: none; padding: 0; margin-left: 4px;
+      font-size: 13px; font-weight: 600; color: var(--dark); text-decoration: underline;
+    }
+    .campaign-header__actions { display: flex; align-items: center; gap: 12px; margin-top: 2px; }
+    .share-btn {
+      display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px;
+      background: var(--white); border: 1px solid var(--border); border-radius: 8px;
+      font-size: 12px; font-weight: 600; color: var(--text-primary);
+    }
+    .share-btn:hover { background: var(--pill-bg); }
+    .saved-label {
+      display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--grey-1);
+    }
+
+    /* Stats */
+    .campaign-stats {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      flex-shrink: 0; width: 290px;
+    }
+    .stat-box {
+      border-radius: 12px; padding: 14px 18px;
+      display: flex; flex-direction: column; gap: 5px;
+    }
+    .stat-box--light { background: #f8f8f8; border: 1px solid var(--border-light); }
+    .stat-box--dark  { background: var(--btn-dark); }
+    .stat-box__label { font-size: 10px; font-weight: 600; letter-spacing: 0.2px; }
+    .stat-box--light .stat-box__label { color: var(--grey-1); }
+    .stat-box--dark  .stat-box__label { color: rgba(255,255,255,0.55); }
+    .stat-box__value { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
+    .stat-box--light .stat-box__value { color: var(--dark); }
+    .stat-box--dark  .stat-box__value { color: white; }
+
+    /* ─────────────────────────────────────────────────────
+       SECTION DIVIDER
+    ───────────────────────────────────────────────────── */
+    .section-divider {
+      border: none; border-top: 1px solid var(--border-light); margin: 0;
+    }
+
+    /* ─────────────────────────────────────────────────────
+       CORE SHOWS
+    ───────────────────────────────────────────────────── */
+    .core-section { padding: 28px 36px 36px; }
+    .core-section__header {
+      display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px;
+    }
+    .core-section__title { margin: 0; font-size: 16px; font-weight: 700; color: var(--dark); }
+    .core-section__meta  { font-size: 11px; color: var(--grey-1); }
+    .core-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    }
+    .campaign-card {
+      background: var(--white); border: 1px solid var(--border-light);
+      border-radius: 14px; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .campaign-card--dark { background: var(--dark); border-color: var(--dark); }
+
+    .card-why {
+      flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 16px;
+    }
+    .card-why__label {
+      margin: 0; font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.4);
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .card-why__text {
+      margin: 0; font-size: 12px; line-height: 1.55; color: rgba(255,255,255,0.82); flex: 1;
+    }
+    .card-why__btn {
+      height: 32px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px; font-size: 11px; font-weight: 600; color: white; margin-top: auto;
+    }
+    .card-why__btn:hover { background: rgba(255,255,255,0.2); }
+
+    .card-top {
+      display: flex; gap: 10px; padding: 12px 12px 10px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .card-thumb { width: 44px; height: 44px; border-radius: 9px; object-fit: cover; flex-shrink: 0; }
+    .card-top-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .card-title {
+      margin: 0; font-size: 13px; font-weight: 700; color: var(--dark);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-top-row { display: flex; align-items: center; gap: 6px; }
+    .cat-pill {
+      display: inline-flex; align-items: center; height: 17px; padding: 0 6px;
+      border-radius: 4px; background: var(--green-bg);
+      color: var(--green-text); font-size: 9px; font-weight: 700;
+    }
+    .match-score { display: flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--green-text); }
+    .price-toggle {
+      display: flex; align-items: center; gap: 4px; background: none; border: none; padding: 0;
+      font-size: 10px; font-weight: 600; color: var(--grey-1); text-decoration: underline;
+      align-self: flex-start;
+    }
+
+    .card-metrics {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1px; background: var(--border-light);
+      border-bottom: 1px solid var(--border-light); flex: 1;
+    }
+    .card-metric {
+      background: var(--white); padding: 7px 10px;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .metric-label {
+      font-size: 8px; font-weight: 700; color: var(--grey-1);
+      letter-spacing: 0.4px; text-transform: uppercase;
+    }
+    .metric-value { font-size: 12px; font-weight: 700; color: var(--dark); }
+
+    .card-footer { display: flex; align-items: center; gap: 6px; padding: 8px 12px; }
+    .review-btn {
+      flex: 1; height: 30px; background: var(--white);
+      border: 1px solid var(--border); border-radius: 7px;
+      font-size: 11px; font-weight: 600; color: var(--dark);
+    }
+    .review-btn:hover { background: var(--pill-bg); }
+    .remove-btn {
+      flex-shrink: 0; width: 30px; height: 30px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: 1px solid var(--border); border-radius: 7px; color: var(--grey-1);
+    }
+    .remove-btn:hover { color: #c0392b; border-color: #c0392b; }
+    .remove-btn svg { pointer-events: none; }
+
+    /* ─────────────────────────────────────────────────────
+       FLASH SALES — completely rethought
+    ───────────────────────────────────────────────────── */
+    .flash-section {
+      /* Full bleed dark band */
+      background: linear-gradient(135deg, var(--flash-dark) 0%, #1c1036 50%, #0f1f3d 100%);
+      margin: 24px auto 0;
+      max-width: 1136px; width: calc(100% - 48px);
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Subtle noise texture overlay */
+    .flash-section::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0;
+    }
+
+    .flash-section > * { position: relative; z-index: 1; }
+
+    /* Top banner */
+    .flash-banner {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 32px 0;
+      gap: 16px; flex-wrap: wrap;
+    }
+    .flash-banner__left { display: flex; align-items: center; gap: 14px; }
+    .flash-label {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .flash-label__icon {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: var(--flash-orange);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 16px var(--flash-glow);
+    }
+    .flash-label__text { display: flex; flex-direction: column; gap: 1px; }
+    .flash-label__title {
+      font-size: 18px; font-weight: 800; color: white; letter-spacing: -0.4px; line-height: 1;
+    }
+    .flash-label__sub { font-size: 12px; color: rgba(255,255,255,0.5); }
+
+    /* Live countdown */
+    .flash-countdown {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; padding: 10px 16px;
+    }
+    .flash-countdown__label {
+      font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.5);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .flash-countdown__timer {
+      display: flex; align-items: center; gap: 4px;
+    }
+    .countdown-block {
+      display: flex; flex-direction: column; align-items: center; gap: 1px;
+    }
+    .countdown-num {
+      font-size: 22px; font-weight: 800; color: var(--flash-amber);
+      letter-spacing: -1px; line-height: 1;
+      font-variant-numeric: tabular-nums;
+      min-width: 32px; text-align: center;
+    }
+    .countdown-unit { font-size: 9px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; }
+    .countdown-sep { font-size: 20px; font-weight: 800; color: var(--flash-amber); line-height: 1; opacity: 0.5; margin-bottom: 8px; }
+
+    /* Subtitle strip */
+    .flash-subtitle-row {
+      padding: 10px 32px 20px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .flash-subtitle { font-size: 13px; color: rgba(255,255,255,0.45); }
+    .flash-spots-left {
+      display: flex; align-items: center; gap: 5px;
+      background: rgba(255,107,0,0.15); border: 1px solid rgba(255,107,0,0.3);
+      border-radius: 20px; padding: 3px 10px;
+      font-size: 11px; font-weight: 700; color: var(--flash-orange);
+    }
+    .pulse-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--flash-orange);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    /* Flash cards grid */
+    .flash-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 12px; padding: 0 32px 32px;
+    }
+    .flash-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px; overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: border-color 0.2s, transform 0.15s;
+      cursor: default;
+    }
+    .flash-card:hover {
+      border-color: rgba(255,107,0,0.5);
+      transform: translateY(-2px);
+    }
+
+    /* Savings ribbon across top */
+    .flash-card__ribbon {
+      background: linear-gradient(90deg, var(--flash-orange), #ff9500);
+      padding: 6px 14px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .flash-card__save {
+      font-size: 12px; font-weight: 800; color: white; letter-spacing: -0.2px;
+    }
+    .flash-card__timer-badge {
+      display: flex; align-items: center; gap: 4px;
+      background: rgba(0,0,0,0.2); border-radius: 20px; padding: 2px 8px;
+      font-size: 10px; font-weight: 700; color: white;
+    }
+
+    .flash-card__body { padding: 12px 14px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+
+    .flash-card__show { display: flex; align-items: center; gap: 10px; }
+    .flash-card__thumb {
+      width: 42px; height: 42px; border-radius: 9px; object-fit: cover; flex-shrink: 0;
+    }
+    .flash-card__show-info { flex: 1; min-width: 0; }
+    .flash-card__title {
+      font-size: 13px; font-weight: 700; color: white;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0 0 3px;
+    }
+    .flash-card__cats { display: flex; gap: 4px; flex-wrap: wrap; }
+    .flash-cat-pill {
+      display: inline-flex; align-items: center; height: 16px; padding: 0 6px;
+      border-radius: 4px; background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.7); font-size: 9px; font-weight: 600;
+    }
+
+    /* Impressions + price row */
+    .flash-card__stats { display: flex; justify-content: space-between; align-items: flex-end; }
+    .flash-card__impressions { display: flex; flex-direction: column; gap: 2px; }
+    .flash-card__imp-label {
+      font-size: 8px; font-weight: 700; color: rgba(255,255,255,0.35);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .flash-card__imp-value { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.85); }
+    .flash-card__pricing { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+    .flash-card__price-old { font-size: 10px; color: rgba(255,255,255,0.3); text-decoration: line-through; }
+    .flash-card__price-new { font-size: 16px; font-weight: 800; color: white; letter-spacing: -0.3px; }
+
+    /* CTA */
+    .flash-card__footer { padding: 0 14px 14px; display: flex; gap: 8px; }
+    .flash-add-btn {
+      flex: 1; height: 36px; background: var(--coral);
+      border: none; border-radius: 9px;
+      font-size: 12px; font-weight: 700; color: white;
+    }
+    .flash-add-btn:hover { opacity: 0.9; }
+    .flash-add-btn.is-added {
+      background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5);
+      border: 1px solid rgba(255,255,255,0.1); cursor: default; pointer-events: none;
+    }
+    .flash-review-btn {
+      height: 36px; padding: 0 12px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 9px;
+      font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.6);
+    }
+    .flash-review-btn:hover { background: rgba(255,255,255,0.12); }
+
+    /* ─────────────────────────────────────────────────────
+       DISCOVER / SEARCH
+    ───────────────────────────────────────────────────── */
+    .discover-section {
+      max-width: 1136px; margin: 16px auto 0; width: calc(100% - 48px);
+      background: var(--white); border: 1px solid var(--border-light);
+      border-radius: 20px; overflow: hidden; margin-bottom: 0;
+    }
+    .discover-inner { padding: 36px; }
+
+    .discover-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .discover-header__left { display: flex; flex-direction: column; gap: 3px; }
+    .discover-eyebrow {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.8px;
+      text-transform: uppercase; color: var(--grey-1);
+    }
+    .discover-title { margin: 0; font-size: 16px; font-weight: 700; color: var(--dark); }
+
+    .discover-search-wrap {
+      position: relative; display: flex; align-items: center;
+      flex: 1; max-width: 440px; margin-left: 24px;
+    }
+    .discover-search-icon {
+      position: absolute; left: 14px; color: var(--grey-1); pointer-events: none;
+      display: flex; align-items: center;
+    }
+    .discover-input {
+      width: 100%; height: 42px; padding: 0 40px 0 40px;
+      background: var(--pill-bg); border: 1.5px solid transparent;
+      border-radius: 10px; font-size: 13px; font-family: inherit;
+      color: var(--text-primary); outline: none; transition: border-color 0.15s, background 0.15s;
+    }
+    .discover-input:focus { border-color: var(--dark); background: white; }
+    .discover-input::placeholder { color: #b0b4be; }
+    .discover-clear {
+      position: absolute; right: 12px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--border); border: none;
+      display: none; align-items: center; justify-content: center;
+      color: var(--grey-1); font-size: 10px;
+    }
+    .discover-clear.is-visible { display: flex; }
+
+    .discover-chips {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px;
+    }
+    .discover-chip {
+      height: 28px; padding: 0 12px;
+      background: var(--pill-bg); border: 1px solid var(--border-light);
+      border-radius: 20px; font-size: 11px; font-weight: 600;
+      color: var(--text-secondary); transition: all 0.12s;
+    }
+    .discover-chip:hover, .discover-chip.is-active {
+      background: var(--dark); color: white; border-color: var(--dark);
+    }
+
+    .discover-results { display: flex; flex-direction: column; gap: 6px; }
+    .discover-idle { font-size: 12px; color: var(--grey-1); padding: 8px 0; }
+
+    .discover-result {
+      display: flex; align-items: center; gap: 14px; padding: 10px 14px;
+      background: var(--white); border: 1px solid var(--border-light);
+      border-radius: 10px; transition: border-color 0.12s;
+    }
+    .discover-result:hover { border-color: var(--border); }
+    .discover-result.is-added { opacity: 0.45; pointer-events: none; }
+    .discover-result__thumb { width: 38px; height: 38px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+    .discover-result__info { flex: 1; min-width: 0; }
+    .discover-result__title {
+      font-size: 13px; font-weight: 700; color: var(--dark);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px;
+    }
+    .discover-result__meta { display: flex; align-items: center; gap: 6px; }
+    .discover-result__cat {
+      display: inline-flex; align-items: center; height: 16px; padding: 0 6px;
+      border-radius: 4px; background: var(--pill-bg);
+      color: var(--text-secondary); font-size: 9px; font-weight: 600;
+    }
+    .discover-result__listeners { font-size: 11px; color: var(--grey-1); }
+    .discover-result__actions { flex-shrink: 0; }
+    .discover-add-btn {
+      height: 30px; padding: 0 14px; background: var(--btn-dark);
+      border: none; border-radius: 7px; font-size: 11px; font-weight: 700; color: white;
+    }
+    .discover-add-btn:hover { opacity: 0.85; }
+    .discover-added-label {
+      height: 30px; padding: 0 12px; display: inline-flex; align-items: center; gap: 4px;
+      border-radius: 7px; background: var(--green-bg);
+      font-size: 11px; font-weight: 700; color: var(--green-text);
+    }
+    .discover-no-results { padding: 20px 0; font-size: 13px; color: var(--grey-1); }
+    .request-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 600; color: var(--dark);
+      background: none; border: 1px solid var(--border); border-radius: 8px;
+      padding: 7px 14px; margin-top: 10px;
+    }
+    .request-link:hover { background: var(--pill-bg); }
+
+    /* ─────────────────────────────────────────────────────
+       BOTTOM BAR
+    ───────────────────────────────────────────────────── */
+    .bottom-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+      background: white; border-top: 1px solid var(--border-light);
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.1);
+      display: none;
+    }
+    .bottom-bar.is-visible { display: block; }
+    .bottom-bar__inner {
+      max-width: 1136px; margin: 0 auto; padding: 14px 36px;
+      display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    }
+    .bottom-bar__left { display: flex; flex-direction: column; gap: 1px; }
+    .bottom-bar__title { margin: 0; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .bottom-bar__sub   { margin: 0; font-size: 12px; color: var(--grey-1); }
+    .bottom-bar__right { display: flex; align-items: center; gap: 16px; }
+    .bottom-bar__count { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+    .launch-btn {
+      height: 42px; padding: 0 28px; background: var(--coral);
+      border: none; border-radius: 10px; font-size: 14px; font-weight: 700; color: white;
+    }
+    .launch-btn:hover { opacity: 0.9; }
+
+    /* ─────────────────────────────────────────────────────
+       PAGE BOTTOM SPACER
+    ───────────────────────────────────────────────────── */
+    .page-spacer { height: 120px; }
+
+    /* ─────────────────────────────────────────────────────
+       RESPONSIVE
+    ───────────────────────────────────────────────────── */
+    @media (max-width: 1000px) {
+      .core-grid { grid-template-columns: repeat(3,1fr); }
+      .flash-grid { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 768px) {
+      .page-card, .flash-section, .discover-section { width: calc(100% - 24px); }
+      .campaign-header { flex-direction: column; }
+      .campaign-stats { width: 100%; }
+      .core-grid { grid-template-columns: repeat(2,1fr); }
+      .flash-grid { grid-template-columns: 1fr; }
+      .discover-search-wrap { max-width: 100%; margin-left: 0; margin-top: 12px; }
+      .discover-header { flex-direction: column; align-items: flex-start; }
+      .bottom-bar__inner { flex-direction: column; align-items: stretch; }
+      .bottom-bar__right { justify-content: space-between; }
+    }
+    @media (max-width: 500px) {
+      .core-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Top Bar ──────────────────────────────────────────────── -->
+<header class="top-bar">
+  <a href="#" class="top-bar__logo">
+    <div class="logo-mark">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="5"/></svg>
+    </div>
+    SpotsNow
+  </a>
+  <div class="top-bar__url-pill">
+    <span class="top-bar__url-name">www.mcdonalds.com</span>
+    <span class="top-bar__url-sub">$10K, 45-34 +2, Male, 100K+</span>
+  </div>
+  <nav class="top-bar__actions">
+    <button class="icon-btn" aria-label="Filters">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+      <span class="topbadge">5</span>
+    </button>
+    <button class="icon-btn" aria-label="Cart">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      <span class="topbadge topbadge--coral" id="cart-badge">8</span>
+    </button>
+    <button class="login-btn">Login</button>
+    <button class="icon-btn" aria-label="Menu">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </nav>
+</header>
+
+<div class="page">
+
+  <!-- ── White card: header + core shows ────────────────────── -->
+  <div class="page-card">
+    <div class="page-card__inner">
+
+      <!-- Campaign Header -->
+      <section class="campaign-header">
+        <div class="campaign-header__left">
+          <img src="https://placehold.co/96x96/da291c/ffffff?text=M" alt="McDonald's" class="brand-logo" width="96" height="96"/>
+          <div class="campaign-header__info">
+            <h1 class="campaign-header__title">Build your campaign</h1>
+            <p class="campaign-header__desc" id="desc-text">
+              The best strategy we see for you is a mix of True Crime and Comedy as similar competitors like Wendys are spending big in these shows. We've identified the best converting ones which…<button class="show-more-btn" id="show-more-btn">Show more</button>
+            </p>
+            <div class="campaign-header__actions">
+              <button class="share-btn">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Share
+              </button>
+              <span class="saved-label">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Campaign · Saved
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="campaign-stats">
+          <div class="stat-box stat-box--light">
+            <span class="stat-box__label">Impressions</span>
+            <span class="stat-box__value">203,000</span>
+          </div>
+          <div class="stat-box stat-box--dark">
+            <span class="stat-box__label">Your Potential Sales</span>
+            <span class="stat-box__value">$23,435</span>
+          </div>
+          <div class="stat-box stat-box--light">
+            <span class="stat-box__label">Est. ROAS</span>
+            <span class="stat-box__value">2.9x</span>
+          </div>
+          <div class="stat-box stat-box--light">
+            <span class="stat-box__label">Estimated Spend</span>
+            <span class="stat-box__value">$14,023</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- Core Shows -->
+    <div class="core-section">
+      <div class="core-section__header">
+        <h2 class="core-section__title"><span id="core-count">8</span> shows included in your campaign</h2>
+        <span class="core-section__meta">85,435 shows analyzed</span>
+      </div>
+      <div class="core-grid" id="core-grid"></div>
+    </div>
+  </div>
+
+  <!-- ── Flash Sales ─────────────────────────────────────────── -->
+  <section class="flash-section">
+
+    <div class="flash-banner">
+      <div class="flash-banner__left">
+        <div class="flash-label">
+          <div class="flash-label__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="flash-label__text">
+            <span class="flash-label__title">Flash Sales</span>
+            <span class="flash-label__sub">Discounted inventory — not available after the timer runs out</span>
+          </div>
+        </div>
+      </div>
+      <div class="flash-countdown" aria-label="Time remaining">
+        <span class="flash-countdown__label">Ends in</span>
+        <div class="flash-countdown__timer">
+          <div class="countdown-block">
+            <span class="countdown-num" id="cd-h">04</span>
+            <span class="countdown-unit">hrs</span>
+          </div>
+          <span class="countdown-sep">:</span>
+          <div class="countdown-block">
+            <span class="countdown-num" id="cd-m">38</span>
+            <span class="countdown-unit">min</span>
+          </div>
+          <span class="countdown-sep">:</span>
+          <div class="countdown-block">
+            <span class="countdown-num" id="cd-s">17</span>
+            <span class="countdown-unit">sec</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flash-subtitle-row">
+      <span class="flash-subtitle">Prices revert to standard rates when the timer expires.</span>
+      <span class="flash-spots-left">
+        <span class="pulse-dot"></span>
+        4 spots remaining
+      </span>
+    </div>
+
+    <div class="flash-grid" id="flash-grid"></div>
+  </section>
+
+  <!-- ── Discover ────────────────────────────────────────────── -->
+  <section class="discover-section">
+    <div class="discover-inner">
+      <div class="discover-header">
+        <div class="discover-header__left">
+          <span class="discover-eyebrow">Search catalog</span>
+          <h2 class="discover-title">Know a show you want to add?</h2>
+        </div>
+        <div class="discover-search-wrap">
+          <span class="discover-search-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
+          <input type="search" class="discover-input" id="discover-input" placeholder="Search 85,000+ shows by name or category…" autocomplete="off"/>
+          <button class="discover-clear" id="discover-clear" aria-label="Clear">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="discover-chips" id="discover-chips">
+        <button class="discover-chip" data-chip="Comedy">Comedy</button>
+        <button class="discover-chip" data-chip="True Crime">True Crime</button>
+        <button class="discover-chip" data-chip="Business">Business</button>
+        <button class="discover-chip" data-chip="Sports">Sports</button>
+        <button class="discover-chip" data-chip="Technology">Technology</button>
+        <button class="discover-chip" data-chip="Health">Health</button>
+        <button class="discover-chip" data-chip="News">News</button>
+        <button class="discover-chip" data-chip="Society">Society</button>
+      </div>
+      <div class="discover-results" id="discover-results">
+        <p class="discover-idle">Start typing or pick a category to browse shows.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="page-spacer"></div>
+
+<!-- ── Bottom Bar ──────────────────────────────────────────── -->
+<div class="bottom-bar" id="bottom-bar">
+  <div class="bottom-bar__inner">
+    <div class="bottom-bar__left">
+      <h3 class="bottom-bar__title">Start your campaign</h3>
+      <p class="bottom-bar__sub">Add shows to your campaign and checkout</p>
+    </div>
+    <div class="bottom-bar__right">
+      <span class="bottom-bar__count" id="bottom-count">8 shows added to cart</span>
+      <button class="launch-btn">Launch Campaign</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ── Data ──────────────────────────────────────────────────── */
+  const CORE_SHOWS = [
+    { id:'1', title:'Daily Stoic',        img:'https://placehold.co/44x44/c0392b/fff?text=DS', category:'Health',     matchScore:95, episodeSize:323453, demoMatch:85, roasEst:3.2, interestMatch:90, price:'$4,200', whyItMatches:'Our high-quality health supplements contain the finest ingredients and are available in powders, liquids and capsules.' },
+    { id:'2', title:'Huberman Lab',       img:'https://placehold.co/44x44/2980b9/fff?text=HL', category:'Health',     matchScore:92, episodeSize:512000, demoMatch:88, roasEst:3.5, interestMatch:91, price:'$6,800' },
+    { id:'3', title:'Tim Ferriss Show',   img:'https://placehold.co/44x44/8e44ad/fff?text=TF', category:'Business',   matchScore:91, episodeSize:290000, demoMatch:82, roasEst:3.1, interestMatch:87, price:'$3,900' },
+    { id:'4', title:'Crime Junkie',       img:'https://placehold.co/44x44/1a252f/fff?text=CJ', category:'True Crime', matchScore:89, episodeSize:450000, demoMatch:79, roasEst:2.8, interestMatch:85, price:'$5,100' },
+    { id:'5', title:'SmartLess',          img:'https://placehold.co/44x44/16a085/fff?text=SL', category:'Comedy',     matchScore:88, episodeSize:380000, demoMatch:81, roasEst:2.9, interestMatch:83, price:'$4,600' },
+    { id:'6', title:'My Favorite Murder', img:'https://placehold.co/44x44/c0392b/fff?text=MF', category:'Comedy',     matchScore:86, episodeSize:310000, demoMatch:77, roasEst:2.7, interestMatch:80, price:'$3,700' },
+    { id:'7', title:"Conan O'Brien",      img:'https://placehold.co/44x44/e67e22/fff?text=CO', category:'Comedy',     matchScore:84, episodeSize:420000, demoMatch:76, roasEst:2.6, interestMatch:78, price:'$5,000' },
+    { id:'8', title:'Armchair Expert',    img:'https://placehold.co/44x44/27ae60/fff?text=AE', category:'Society',    matchScore:83, episodeSize:275000, demoMatch:74, roasEst:2.5, interestMatch:77, price:'$3,300' },
+  ]
+
+  // Countdown starts at 4h 38m 17s
+  let cdTotalSecs = 4*3600 + 38*60 + 17
+
+  const FLASH_SHOWS = [
+    { id:'f1', title:'New Heights',    img:'https://placehold.co/42x42/2ecc71/fff?text=NH', categories:['Sport','Comedy'],    impressions:323453, originalPrice:'$5,200', discountedPrice:'$3,640', savePct:30, spotsLeft:2, endsLabel:'4h 38m' },
+    { id:'f2', title:'Call Her Daddy', img:'https://placehold.co/42x42/e91e63/fff?text=CD', categories:['Health','Business'], impressions:489000, originalPrice:'$6,000', discountedPrice:'$3,900', savePct:35, spotsLeft:1, endsLabel:'4h 38m' },
+    { id:'f3', title:'Realfoodology',  img:'https://placehold.co/42x42/ff9800/fff?text=RF', categories:['Health','Comedy'],   impressions:210000, originalPrice:'$4,100', discountedPrice:'$2,870', savePct:30, spotsLeft:3, endsLabel:'4h 38m' },
+    { id:'f4', title:'On Purpose',     img:'https://placehold.co/42x42/9c27b0/fff?text=OP', categories:['Health','Society'],  impressions:298000, originalPrice:'$4,800', discountedPrice:'$3,360', savePct:30, spotsLeft:4, endsLabel:'4h 38m' },
+  ]
+
+  const CATALOG = [
+    { id:'c1',  title:'The Joe Rogan Experience', img:'https://placehold.co/38x38/1a1a1a/fff?text=JR', category:'Comedy',     listeners:'11.4M' },
+    { id:'c2',  title:'Stuff You Should Know',    img:'https://placehold.co/38x38/3498db/fff?text=SY', category:'Society',    listeners:'4.2M'  },
+    { id:'c3',  title:'Radiolab',                 img:'https://placehold.co/38x38/e74c3c/fff?text=RL', category:'Society',    listeners:'2.1M'  },
+    { id:'c4',  title:'How I Built This',         img:'https://placehold.co/38x38/f39c12/fff?text=HI', category:'Business',   listeners:'2.8M'  },
+    { id:'c5',  title:'Freakonomics Radio',       img:'https://placehold.co/38x38/27ae60/fff?text=FR', category:'Business',   listeners:'1.9M'  },
+    { id:'c6',  title:'Serial',                   img:'https://placehold.co/38x38/2c3e50/fff?text=SE', category:'True Crime', listeners:'5.3M'  },
+    { id:'c7',  title:'Dateline NBC',             img:'https://placehold.co/38x38/c0392b/fff?text=DN', category:'True Crime', listeners:'3.1M'  },
+    { id:'c8',  title:'Monday Morning Quarterback',img:'https://placehold.co/38x38/2980b9/fff?text=MM',category:'Sports',     listeners:'1.7M'  },
+    { id:'c9',  title:'The Ringer NFL Show',      img:'https://placehold.co/38x38/e67e22/fff?text=RN', category:'Sports',     listeners:'1.3M'  },
+    { id:'c10', title:'Darknet Diaries',          img:'https://placehold.co/38x38/1abc9c/fff?text=DD', category:'Technology', listeners:'980K'  },
+    { id:'c11', title:'Lex Fridman Podcast',      img:'https://placehold.co/38x38/7f8c8d/fff?text=LF', category:'Technology', listeners:'3.4M'  },
+    { id:'c12', title:'Planet Money',             img:'https://placehold.co/38x38/f1c40f/fff?text=PM', category:'Business',   listeners:'2.0M'  },
+    { id:'c13', title:'This American Life',       img:'https://placehold.co/38x38/9b59b6/fff?text=TA', category:'Society',    listeners:'4.5M'  },
+    { id:'c14', title:'Maintenance Phase',        img:'https://placehold.co/38x38/e91e63/fff?text=MP', category:'Health',     listeners:'750K'  },
+    { id:'c15', title:"Your Mom's House",         img:'https://placehold.co/38x38/ff5722/fff?text=YM', category:'Comedy',     listeners:'1.6M'  },
+    { id:'c16', title:'Pod Save America',         img:'https://placehold.co/38x38/1565c0/fff?text=PS', category:'News',       listeners:'2.2M'  },
+    { id:'c17', title:'The Daily',                img:'https://placehold.co/38x38/212121/fff?text=TD', category:'News',       listeners:'6.1M'  },
+    { id:'c18', title:'Up First',                 img:'https://placehold.co/38x38/00838f/fff?text=UF', category:'News',       listeners:'2.9M'  },
+    { id:'c19', title:'Acquired',                 img:'https://placehold.co/38x38/283593/fff?text=AQ', category:'Business',   listeners:'820K'  },
+    { id:'c20', title:'The Happiness Lab',        img:'https://placehold.co/38x38/558b2f/fff?text=HL', category:'Health',     listeners:'1.1M'  },
+  ]
+
+  /* ── State ─────────────────────────────────────────────────── */
+  let coreShows    = [...CORE_SHOWS]
+  let flashAdded   = new Set()
+  let catalogAdded = new Set()
+  let pricesShown  = {}
+  let discoverQ    = ''
+  let activeChip   = null
+
+  /* ── Helpers ───────────────────────────────────────────────── */
+  const fmt = n => n ? Number(n).toLocaleString() : '—'
+
+  const svgBolt = () => `<svg width="10" height="10" viewBox="0 0 24 24" fill="#0d6832"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`
+  const svgTrash = () => `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`
+  const svgEye = open => open
+    ? `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+    : `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`
+  const svgCheck = () => `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
+
+  /* ── Core card render ───────────────────────────────────────── */
+  function renderCard(show, index) {
+    const isWhy = index === 3 && show.whyItMatches
+    const showPrice = !!pricesShown[show.id]
+    if (isWhy) {
+      return `<article class="campaign-card campaign-card--dark" data-id="${show.id}">
+        <div class="card-why">
+          <p class="card-why__label">Why it matches:</p>
+          <p class="card-why__text">${show.whyItMatches}</p>
+          <button class="card-why__btn">Review match</button>
+        </div></article>`
+    }
+    return `<article class="campaign-card" data-id="${show.id}">
+      <div class="card-top">
+        <img src="${show.img}" alt="" class="card-thumb" width="44" height="44"/>
+        <div class="card-top-info">
+          <h4 class="card-title">${show.title}</h4>
+          <div class="card-top-row">
+            <span class="cat-pill">${show.category}</span>
+            ${show._catalog ? `<span class="match-score" style="color:var(--grey-1);font-size:10px">Pending</span>` : `<span class="match-score">${svgBolt()} ${show.matchScore}%</span>`}
+          </div>
+          ${show._catalog
+            ? `<span style="font-size:10px;color:var(--grey-1)">Price on request</span>`
+            : `<button class="price-toggle" data-id="${show.id}">${showPrice ? show.price : 'Show price'} ${svgEye(showPrice)}</button>`}
+        </div>
+      </div>
+      <div class="card-metrics">
+        <div class="card-metric"><span class="metric-label">Episode Size</span><span class="metric-value">${fmt(show.episodeSize)}</span></div>
+        <div class="card-metric"><span class="metric-label">Demo Match</span><span class="metric-value">${show.demoMatch}${show.demoMatch !== '—' ? '%' : ''}</span></div>
+        <div class="card-metric"><span class="metric-label">ROAS Est.</span><span class="metric-value">${show.roasEst}${show.roasEst !== '—' ? 'X' : ''}</span></div>
+        <div class="card-metric"><span class="metric-label">Interest Match</span><span class="metric-value">${show.interestMatch}${show.interestMatch !== '—' ? '%' : ''}</span></div>
+      </div>
+      <div class="card-footer">
+        <button class="review-btn">Review match</button>
+        <button class="remove-btn" data-remove="${show.id}">${svgTrash()}</button>
+      </div></article>`
+  }
+
+  /* ── Flash card render ──────────────────────────────────────── */
+  function renderFlashCard(show) {
+    const added = flashAdded.has(show.id)
+    const allCore = new Set(coreShows.map(s => s.id))
+    const inCore  = allCore.has(show.id)
+    const isDone  = added || inCore
+    return `<div class="flash-card" data-flash-id="${show.id}">
+      <div class="flash-card__ribbon">
+        <span class="flash-card__save">Save ${show.savePct}% — $${(parseInt(show.originalPrice.replace(/\D/g,'')) - parseInt(show.discountedPrice.replace(/\D/g,''))).toLocaleString()} off</span>
+        <span class="flash-card__timer-badge">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          ${show.endsLabel}
+        </span>
+      </div>
+      <div class="flash-card__body">
+        <div class="flash-card__show">
+          <img src="${show.img}" alt="" class="flash-card__thumb" width="42" height="42"/>
+          <div class="flash-card__show-info">
+            <p class="flash-card__title">${show.title}</p>
+            <div class="flash-card__cats">${show.categories.map(c => `<span class="flash-cat-pill">${c}</span>`).join('')}</div>
+          </div>
+        </div>
+        <div class="flash-card__stats">
+          <div class="flash-card__impressions">
+            <span class="flash-card__imp-label">Est Impressions</span>
+            <span class="flash-card__imp-value">${fmt(show.impressions)}</span>
+          </div>
+          <div class="flash-card__pricing">
+            <span class="flash-card__price-old">${show.originalPrice}</span>
+            <span class="flash-card__price-new">${show.discountedPrice}</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;">
+          <span style="width:6px;height:6px;border-radius:50%;background:#ff6b00;display:inline-block;"></span>
+          <span style="font-size:10px;color:rgba(255,255,255,0.45);">${show.spotsLeft} spot${show.spotsLeft !== 1 ? 's' : ''} left at this price</span>
+        </div>
+      </div>
+      <div class="flash-card__footer">
+        <button class="flash-add-btn ${isDone ? 'is-added' : ''}" data-flash-add="${show.id}">
+          ${isDone ? `${svgCheck()} Added` : '+ Add to Campaign'}
+        </button>
+        <button class="flash-review-btn">Info</button>
+      </div></div>`
+  }
+
+  /* ── Discover result render ──────────────────────────────────── */
+  function renderDiscoverResult(show) {
+    const allIds = new Set([...coreShows.map(s => s.id), ...catalogAdded])
+    const isAdded = allIds.has(show.id)
+    return `<div class="discover-result ${isAdded ? 'is-added' : ''}">
+      <img src="${show.img}" alt="" class="discover-result__thumb" width="38" height="38"/>
+      <div class="discover-result__info">
+        <div class="discover-result__title">${show.title}</div>
+        <div class="discover-result__meta">
+          <span class="discover-result__cat">${show.category}</span>
+          <span class="discover-result__listeners">${show.listeners} listeners</span>
+        </div>
+      </div>
+      <div class="discover-result__actions">
+        ${isAdded
+          ? `<span class="discover-added-label">${svgCheck()} Added</span>`
+          : `<button class="discover-add-btn" data-catalog-add="${show.id}">+ Add</button>`}
+      </div></div>`
+  }
+
+  /* ── Render functions ────────────────────────────────────────── */
+  function renderCoreGrid() {
+    document.getElementById('core-grid').innerHTML = coreShows.map((s,i) => renderCard(s,i)).join('')
+    const count = coreShows.length
+    document.getElementById('core-count').textContent = count
+    document.getElementById('cart-badge').textContent = count
+    document.getElementById('bottom-count').textContent = `${count} shows added to cart`
+    document.getElementById('bottom-bar').classList.toggle('is-visible', count > 0)
+  }
+
+  function renderFlashGrid() {
+    document.getElementById('flash-grid').innerHTML = FLASH_SHOWS.map(renderFlashCard).join('')
+  }
+
+  function renderDiscoverResults() {
+    const chipsEl = document.getElementById('discover-chips')
+    const q = discoverQ.trim().toLowerCase()
+    chipsEl.style.display = (q === '' && !activeChip) ? 'flex' : 'none'
+    const el = document.getElementById('discover-results')
+    if (q === '' && !activeChip) {
+      el.innerHTML = '<p class="discover-idle">Start typing or pick a category to browse shows.</p>'
+      return
+    }
+    const matches = CATALOG.filter(s => {
+      const inChip  = !activeChip || s.category === activeChip
+      const inQuery = q === '' || s.title.toLowerCase().includes(q) || s.category.toLowerCase().includes(q)
+      return inChip && inQuery
+    })
+    el.innerHTML = matches.length === 0
+      ? `<div class="discover-no-results"><p>No shows found for "<strong>${discoverQ}</strong>"</p><button class="request-link">+ Request this show</button></div>`
+      : matches.map(renderDiscoverResult).join('')
+  }
+
+  function render() {
+    renderCoreGrid()
+    renderFlashGrid()
+    renderDiscoverResults()
+  }
+
+  /* ── Countdown ───────────────────────────────────────────────── */
+  function tickCountdown() {
+    if (cdTotalSecs <= 0) return
+    cdTotalSecs--
+    const h = Math.floor(cdTotalSecs / 3600)
+    const m = Math.floor((cdTotalSecs % 3600) / 60)
+    const s = cdTotalSecs % 60
+    document.getElementById('cd-h').textContent = String(h).padStart(2,'0')
+    document.getElementById('cd-m').textContent = String(m).padStart(2,'0')
+    document.getElementById('cd-s').textContent = String(s).padStart(2,'0')
+  }
+  setInterval(tickCountdown, 1000)
+
+  /* ── Events ──────────────────────────────────────────────────── */
+  document.getElementById('core-grid').addEventListener('click', e => {
+    const rm = e.target.closest('[data-remove]')
+    if (rm) { coreShows = coreShows.filter(s => s.id !== rm.dataset.remove); render(); return }
+    const pt = e.target.closest('.price-toggle[data-id]')
+    if (pt) { pricesShown[pt.dataset.id] = !pricesShown[pt.dataset.id]; renderCoreGrid() }
+  })
+
+  document.getElementById('flash-grid').addEventListener('click', e => {
+    const btn = e.target.closest('[data-flash-add]')
+    if (!btn || btn.classList.contains('is-added')) return
+    const id = btn.dataset.flashAdd
+    const show = FLASH_SHOWS.find(s => s.id === id)
+    if (!show) return
+    flashAdded.add(id)
+    coreShows.push({
+      id: show.id, title: show.title, img: show.img,
+      category: show.categories[0], matchScore: 80,
+      episodeSize: show.impressions, demoMatch: 75, roasEst: 2.4, interestMatch: 78,
+      price: show.discountedPrice,
+    })
+    render()
+  })
+
+  document.getElementById('discover-input').addEventListener('input', e => {
+    discoverQ = e.target.value
+    activeChip = null
+    document.querySelectorAll('.discover-chip').forEach(c => c.classList.remove('is-active'))
+    document.getElementById('discover-clear').classList.toggle('is-visible', discoverQ.length > 0)
+    renderDiscoverResults()
+  })
+
+  document.getElementById('discover-clear').addEventListener('click', () => {
+    discoverQ = ''
+    document.getElementById('discover-input').value = ''
+    document.getElementById('discover-clear').classList.remove('is-visible')
+    renderDiscoverResults()
+  })
+
+  document.getElementById('discover-chips').addEventListener('click', e => {
+    const chip = e.target.closest('[data-chip]')
+    if (!chip) return
+    const val = chip.dataset.chip
+    activeChip = activeChip === val ? null : val
+    document.querySelectorAll('.discover-chip').forEach(c =>
+      c.classList.toggle('is-active', c.dataset.chip === activeChip))
+    renderDiscoverResults()
+  })
+
+  document.getElementById('discover-results').addEventListener('click', e => {
+    const btn = e.target.closest('[data-catalog-add]')
+    if (!btn) return
+    const id = btn.dataset.catalogAdd
+    const show = CATALOG.find(s => s.id === id)
+    if (!show) return
+    catalogAdded.add(id)
+    coreShows.push({
+      id: show.id, title: show.title, img: show.img,
+      category: show.category, matchScore: '—',
+      episodeSize: 0, demoMatch: '—', roasEst: '—', interestMatch: '—',
+      price: 'Request price', _catalog: true,
+    })
+    render()
+  })
+
+  // Show more/less
+  const fullDesc = `The best strategy we see for you is a mix of True Crime and Comedy as similar competitors like Wendys are spending big in these shows. We've identified the best converting ones which deliver the highest ROAS for your category and have negotiated flash rates on select inventory.`
+  let descExpanded = false
+  function attachShowMore() {
+    const btn = document.getElementById('show-more-btn')
+    if (!btn) return
+    btn.addEventListener('click', () => {
+      descExpanded = !descExpanded
+      const short = fullDesc.slice(0,140) + '…'
+      document.getElementById('desc-text').innerHTML =
+        (descExpanded ? fullDesc : short) +
+        ` <button class="show-more-btn" id="show-more-btn">${descExpanded ? 'Show less' : 'Show more'}</button>`
+      attachShowMore()
+    })
+  }
+  attachShowMore()
+
+  /* ── Init ────────────────────────────────────────────────────── */
+  render()
+</script>
+</body>
+</html>

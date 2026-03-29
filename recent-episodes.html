@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recent Episodes — SpotsNow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --dark: #0e1323;
+      --grey-1: #707481;
+      --text-primary: #252733;
+      --text-secondary: #5a5f6e;
+      --border: #dee0e4;
+      --border-light: #e8e8e8;
+      --white: #ffffff;
+      --coral: #ff6b6b;
+      --btn-dark: #111111;
+      --green-bg: #d6f0e0;
+      --green-text: #0d6832;
+      --pill-bg: #f3f4f6;
+      --amber-bg: #fff3cd;
+      --amber-text: #92600a;
+      --red-bg: #fde8e8;
+      --red-text: #b91c1c;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.4;
+      color: var(--dark); background: #f5f5f3;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* ── TOP BAR ── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 200;
+      height: 56px; display: flex; align-items: center; gap: 16px;
+      padding: 0 28px; background: var(--white);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .top-bar__logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 800; font-size: 15px; color: var(--dark);
+      text-decoration: none; flex-shrink: 0; letter-spacing: -0.3px;
+    }
+    .logo-mark {
+      width: 22px; height: 22px; border-radius: 6px;
+      background: var(--coral); display: flex; align-items: center; justify-content: center;
+    }
+    .top-bar__url-pill {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px;
+      background: var(--pill-bg); border-radius: 10px; padding: 6px 18px;
+      max-width: 300px; margin: 0 auto;
+    }
+    .top-bar__url-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .top-bar__url-sub  { font-size: 11px; color: var(--grey-1); }
+    .top-bar__actions  { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+    .icon-btn {
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; border-radius: 8px; color: var(--dark);
+    }
+    .icon-btn:hover { background: var(--pill-bg); }
+
+    /* ── PAGE LAYOUT ── */
+    .page { max-width: 1136px; margin: 0 auto; padding: 24px 24px 80px; }
+
+    /* ── SECTION CARD ── */
+    .section-card {
+      background: var(--white);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 24px 28px 0;
+      margin-bottom: 4px;
+    }
+    .section-title {
+      margin: 0; font-size: 16px; font-weight: 700; color: var(--dark);
+    }
+    .section-meta {
+      font-size: 12px; color: var(--grey-1); font-weight: 500;
+    }
+
+    /* ── COLUMN HEADERS ── */
+    .episodes-col-headers {
+      display: grid;
+      grid-template-columns: minmax(0,300px) 1fr 64px 88px;
+      gap: 0 16px;
+      padding: 10px 28px;
+      border-bottom: 1px solid var(--border-light);
+      align-items: center;
+    }
+    .col-label {
+      font-size: 9px; font-weight: 700; color: var(--grey-1);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .col-label--right { text-align: right; }
+
+    /* ── EPISODE ROW ── */
+    .episode-list { display: flex; flex-direction: column; }
+
+    .episode-row {
+      display: grid;
+      grid-template-columns: minmax(0,300px) 1fr 64px 88px;
+      gap: 0 16px;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--border-light);
+      align-items: center;
+      transition: background 0.1s;
+    }
+    .episode-row:last-child { border-bottom: none; }
+    .episode-row:hover { background: #fafafa; }
+
+    /* Episode info */
+    .ep-info {
+      display: flex; align-items: center; gap: 12px; min-width: 0;
+    }
+    .ep-thumb {
+      width: 40px; height: 40px; border-radius: 8px;
+      flex-shrink: 0; overflow: hidden; position: relative;
+      background: #1c3a38;
+    }
+    .ep-thumb svg { display: block; }
+    .ep-thumb__play {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.45); opacity: 0; transition: opacity 0.15s;
+      cursor: pointer; border: none; padding: 0;
+    }
+    .ep-info:hover .ep-thumb__play { opacity: 1; }
+    .ep-text { flex: 1; min-width: 0; }
+    .ep-title {
+      font-size: 13px; font-weight: 600; color: var(--dark);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+    .ep-meta-row {
+      display: flex; align-items: center; gap: 6px;
+    }
+    .ep-date { font-size: 11px; color: var(--grey-1); }
+    .ep-num  {
+      font-size: 10px; color: var(--grey-1);
+      background: var(--pill-bg); border-radius: 4px; padding: 1px 5px; font-weight: 600;
+    }
+
+    /* Ad timeline */
+    .ad-timeline {
+      position: relative; height: 32px;
+      display: flex; align-items: center;
+    }
+    .ad-timeline__track {
+      position: relative; width: 100%; height: 8px;
+      background: var(--border-light); border-radius: 3px; overflow: visible;
+    }
+    /* Ad segment rectangle */
+    .ad-seg {
+      position: absolute; top: 0; bottom: 0;
+      border-radius: 2px;
+      z-index: 2; cursor: default;
+      transition: filter 0.1s;
+    }
+    .ad-seg:hover { filter: brightness(1.15); z-index: 3; }
+    /* Tooltip */
+    .ad-seg[data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+      background: var(--dark); color: white; font-size: 10px; font-weight: 600;
+      padding: 4px 9px; border-radius: 6px; white-space: nowrap;
+      pointer-events: none; font-family: 'Inter', sans-serif;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+
+    /* Duration */
+    .ep-duration {
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      text-align: right; font-variant-numeric: tabular-nums;
+    }
+
+    /* Ad load badge */
+    .ad-load {
+      display: flex; flex-direction: column; align-items: flex-end; gap: 2px;
+    }
+    .ad-load__pct {
+      font-size: 14px; font-weight: 800; letter-spacing: -0.3px;
+    }
+    .ad-load__label { font-size: 9px; font-weight: 600; color: var(--grey-1); text-transform: uppercase; letter-spacing: 0.4px; }
+    .ad-load__badge {
+      display: inline-flex; align-items: center; height: 15px; padding: 0 5px;
+      border-radius: 3px; font-size: 8px; font-weight: 700;
+    }
+    .ad-load__badge--green { background: var(--green-bg); color: var(--green-text); }
+    .ad-load__badge--amber { background: var(--amber-bg); color: var(--amber-text); }
+    .ad-load__badge--red   { background: var(--red-bg);   color: var(--red-text); }
+
+    /* Platform icons */
+    .platforms {
+      display: flex; align-items: center; gap: 4px; justify-content: flex-end; flex-wrap: wrap;
+    }
+    .platform-icon {
+      width: 20px; height: 20px; border-radius: 5px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 8px; font-weight: 800; color: white; letter-spacing: -0.3px;
+    }
+
+    /* ── SEE MORE BUTTON ── */
+    .see-more-wrap {
+      padding: 0;
+    }
+    .see-more-btn {
+      width: 100%; height: 48px;
+      background: var(--white); border: none;
+      border-top: 1px solid var(--border-light);
+      font-size: 13px; font-weight: 600; color: var(--text-secondary);
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: background 0.1s, color 0.1s;
+    }
+    .see-more-btn:hover { background: var(--pill-bg); color: var(--dark); }
+    .see-more-btn svg { color: var(--grey-1); }
+  </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<header class="top-bar">
+  <a href="#" class="top-bar__logo">
+    <div class="logo-mark">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="5"/></svg>
+    </div>
+    SpotsNow
+  </a>
+  <div class="top-bar__url-pill">
+    <span class="top-bar__url-name">New Heights</span>
+    <span class="top-bar__url-sub">Wondery · Health &amp; Wellness, Business</span>
+  </div>
+  <nav class="top-bar__actions">
+    <button class="icon-btn" aria-label="Inbox">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/><polyline points="4,4 12,13 20,4"/></svg>
+    </button>
+    <button class="icon-btn" aria-label="Cart">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.66a2 2 0 001.99-1.81l1.19-7.19H6"/></svg>
+    </button>
+    <button class="icon-btn" aria-label="Menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </nav>
+</header>
+
+<!-- Page -->
+<main class="page">
+  <div class="section-card">
+
+    <div class="section-header">
+      <h2 class="section-title">Recent Episodes</h2>
+      <span class="section-meta">Showing latest 5 of 247 episodes</span>
+    </div>
+
+    <!-- Column headers -->
+    <div class="episodes-col-headers">
+      <span class="col-label">Episode</span>
+      <span class="col-label">Ad Timeline</span>
+      <span class="col-label col-label--right">Duration</span>
+      <span class="col-label col-label--right">Ad Load</span>
+    </div>
+
+    <!-- Episode list -->
+    <div class="episode-list" id="episodeList">
+      <!-- Rows rendered by JS -->
+    </div>
+
+    <div class="see-more-wrap">
+      <button class="see-more-btn">
+        See all episodes
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  // ── Brand colours — each advertiser gets a unique, consistent colour ──
+  const brandColor = {
+    "AG1":           "#ff6b6b",   // coral (SpotsNow brand colour — your sponsored placements)
+    "BetterHelp":    "#4f9cf9",   // blue
+    "DraftKings":    "#00b09b",   // teal
+    "Bud Light":     "#e8b84b",   // gold
+    "Rocket Money":  "#a855f7",   // purple
+    "Factor":        "#f97316",   // orange
+    "USAA":          "#1d4ed8",   // dark blue
+  };
+
+  // ── Episodes — ads have start+end (% of episode) and a brand name ──────
+  const episodes = [
+    {
+      num: 247,
+      title: "Travis Kelce on His Return to Training Camp, Taylor's Eras Tour Finale & the New Heights Future",
+      date: "Nov 7th",
+      duration: "1:14:22",
+      adLoad: 8,
+      ads: [
+        { start: 0,   end: 3,   brand: "AG1",          label: "Pre-roll" },
+        { start: 26,  end: 29,  brand: "AG1",          label: "Mid-roll #1" },
+        { start: 57,  end: 60,  brand: "BetterHelp",   label: "Mid-roll #2" },
+        { start: 87,  end: 90,  brand: "Rocket Money", label: "Post-roll" },
+      ],
+      platforms: ["AP","SP","YT","GO","TK"],
+    },
+    {
+      num: 246,
+      title: "Jason on Playing Against Himself at Joint Practice, Patrick Mahomes & Picking Travis's Walk-Up Song",
+      date: "Oct 31st",
+      duration: "58:44",
+      adLoad: 11,
+      ads: [
+        { start: 0,   end: 3,   brand: "AG1",          label: "Pre-roll" },
+        { start: 21,  end: 24,  brand: "AG1",          label: "Mid-roll #1" },
+        { start: 50,  end: 53,  brand: "Factor",       label: "Mid-roll #2" },
+        { start: 73,  end: 76,  brand: "Bud Light",    label: "Mid-roll #3" },
+        { start: 94,  end: 97,  brand: "Rocket Money", label: "Post-roll" },
+      ],
+      platforms: ["AP","SP","YT","GO","TK"],
+    },
+    {
+      num: 245,
+      title: "Everyone Knows the Answer to This — Chiefs vs. Raiders Week 7 Preview",
+      date: "Oct 25th",
+      duration: "43:03",
+      adLoad: 10,
+      ads: [
+        { start: 0,   end: 3,   brand: "AG1",          label: "Pre-roll" },
+        { start: 33,  end: 36,  brand: "AG1",          label: "Mid-roll" },
+        { start: 81,  end: 84,  brand: "DraftKings",   label: "Mid-roll #2" },
+      ],
+      platforms: ["AP","SP","YT","DI"],
+    },
+    {
+      num: 244,
+      title: "Travis & Jason React to the Kelce Brothers Documentary Trailer Drop",
+      date: "Oct 19th",
+      duration: "51:18",
+      adLoad: 14,
+      ads: [
+        { start: 0,   end: 3,   brand: "AG1",          label: "Pre-roll" },
+        { start: 17,  end: 20,  brand: "AG1",          label: "Mid-roll #1" },
+        { start: 41,  end: 44,  brand: "BetterHelp",   label: "Mid-roll #2" },
+        { start: 65,  end: 68,  brand: "USAA",         label: "Mid-roll #3" },
+        { start: 79,  end: 82,  brand: "DraftKings",   label: "Mid-roll #4" },
+        { start: 93,  end: 97,  brand: "Factor",       label: "Post-roll" },
+      ],
+      platforms: ["AP","SP","YT","GO","TK","DI"],
+    },
+    {
+      num: 243,
+      title: "It's Week 6: Jason On Eagles vs Browns, What's Wrong With the Chiefs & Jason Kelce Appreciation Day",
+      date: "Oct 12th",
+      duration: "1:02:55",
+      adLoad: 9,
+      ads: [
+        { start: 0,   end: 3,   brand: "AG1",          label: "Pre-roll" },
+        { start: 28,  end: 31,  brand: "AG1",          label: "Mid-roll #1" },
+        { start: 62,  end: 65,  brand: "Bud Light",    label: "Mid-roll #2" },
+        { start: 90,  end: 93,  brand: "Rocket Money", label: "Post-roll" },
+      ],
+      platforms: ["AP","SP","YT"],
+    },
+  ];
+
+  const platformMeta = {
+    AP: { label: "AP", bg: "#9932cc" },
+    SP: { label: "SP", bg: "#1db954" },
+    YT: { label: "YT", bg: "#e0291c" },
+    GO: { label: "GO", bg: "#4285f4" },
+    TK: { label: "TK", bg: "#010101" },
+    DI: { label: "DI", bg: "#5865f2" },
+  };
+
+  function adLoadClass(pct) {
+    if (pct <= 10) return "green";
+    if (pct <= 14) return "amber";
+    return "red";
+  }
+  function adLoadLabel(pct) {
+    if (pct <= 10) return "LOW";
+    if (pct <= 14) return "AVG";
+    return "HIGH";
+  }
+
+  function showThumbSVG() {
+    return `<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" fill="#1c3a38"/>
+      <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="Inter,sans-serif" font-size="10" font-weight="800" letter-spacing="-0.3">NH</text>
+    </svg>`;
+  }
+
+  function renderRow(ep) {
+    const cls = adLoadClass(ep.adLoad);
+    const lbl = adLoadLabel(ep.adLoad);
+
+    // Ad segments — rectangles positioned by start% with width = (end-start)%
+    const segments = ep.ads.map(a => {
+      const color  = brandColor[a.brand] || "#aaa";
+      const left   = a.start;
+      const width  = a.end - a.start;
+      const tip    = `${a.brand} · ${a.label}`;
+      return `<span class="ad-seg" style="left:${left}%;width:${width}%;background:${color}" data-tip="${tip}"></span>`;
+    }).join('');
+
+    const platformIcons = ep.platforms.map(p => {
+      const m = platformMeta[p] || { label: p, bg: "#aaa" };
+      return `<span class="platform-icon" style="background:${m.bg}" title="${p}">${m.label}</span>`;
+    }).join('');
+
+    return `
+      <div class="episode-row">
+        <div class="ep-info">
+          <div class="ep-thumb">
+            ${showThumbSVG()}
+            <button class="ep-thumb__play" aria-label="Play episode">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>
+          </div>
+          <div class="ep-text">
+            <div class="ep-title">${ep.title}</div>
+            <div class="ep-meta-row">
+              <span class="ep-date">${ep.date}</span>
+              <span class="ep-num">Ep ${ep.num}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ad-timeline">
+          <div class="ad-timeline__track">
+            ${segments}
+          </div>
+        </div>
+
+        <div class="ep-duration">${ep.duration}</div>
+
+        <div class="ad-load">
+          <span class="ad-load__label">Ad Load</span>
+          <span class="ad-load__pct">${ep.adLoad}%</span>
+          <span class="ad-load__badge ad-load__badge--${cls}">${lbl}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  document.getElementById('episodeList').innerHTML = episodes.map(renderRow).join('');
+</script>
+</body>
+</html>

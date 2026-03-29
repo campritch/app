@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotsNow — Podcast & YouTube Creator Ads</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --dark: #0e1323;
+      --grey-1: #707481;
+      --text-primary: #252733;
+      --text-secondary: #5a5f6e;
+      --border: #dee0e4;
+      --border-light: #e8e8e8;
+      --white: #ffffff;
+      --coral: #ff6b6b;
+      --btn-dark: #111111;
+      --green-bg: #d6f0e0;
+      --green-text: #0d6832;
+      --pill-bg: #f3f4f6;
+      --flash-dark: #0f0c29;
+      --flash-mid:  #1a1040;
+      --flash-orange: #ff6b00;
+      --flash-amber: #ffb300;
+      --flash-glow: rgba(255,107,0,0.3);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.4;
+      color: var(--dark); background: #f5f5f3;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font-family: inherit; cursor: pointer; }
+    img { display: block; }
+    a { text-decoration: none; color: inherit; }
+
+    /* TOP BAR */
+    .top-bar {
+      position: sticky; top: 0; z-index: 200;
+      height: 56px; display: flex; align-items: center; gap: 16px;
+      padding: 0 28px; background: var(--white);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .top-bar__logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 800; font-size: 15px; color: var(--dark);
+      text-decoration: none; flex-shrink: 0; letter-spacing: -0.3px;
+    }
+    .logo-mark {
+      width: 22px; height: 22px; border-radius: 6px;
+      background: var(--coral); display: flex; align-items: center; justify-content: center;
+    }
+    .logo-mark svg { display: block; }
+    .top-bar__nav {
+      display: flex; align-items: center; gap: 4px; flex: 1;
+    }
+    .top-bar__nav-link {
+      padding: 6px 12px; border-radius: 8px; border: none; background: none;
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+    }
+    .top-bar__nav-link:hover { background: var(--pill-bg); color: var(--dark); }
+    .top-bar__nav-link--flash {
+      display: flex; align-items: center; gap: 6px;
+      color: var(--flash-orange); font-weight: 700;
+    }
+    .pulse-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--flash-orange);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+    .top-bar__actions  { display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-left: auto; }
+    .icon-btn {
+      position: relative; width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; border-radius: 8px; color: var(--dark);
+    }
+    .icon-btn:hover { background: var(--pill-bg); }
+    .login-btn {
+      padding: 6px 14px; background: none;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; font-weight: 600; color: var(--text-primary);
+    }
+    .login-btn:hover { background: var(--pill-bg); }
+    .signup-btn {
+      padding: 7px 16px; background: var(--btn-dark);
+      border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 700; color: white;
+    }
+    .signup-btn:hover { opacity: 0.85; }
+
+    /* PAGE WRAPPER */
+    .page { display: flex; flex-direction: column; }
+
+    /* WHITE PAGE CARD */
+    .page-card {
+      background: var(--white);
+      max-width: 1136px; margin: 24px auto 0; width: calc(100% - 48px);
+      border-radius: 20px;
+      border: 1px solid var(--border-light);
+      overflow: hidden;
+    }
+    .page-card__inner { padding: 36px 36px 0; }
+
+    /* SECTION DIVIDER */
+    .section-divider {
+      border: none; border-top: 1px solid var(--border-light); margin: 0;
+    }
+
+    /* STAT BOXES */
+    .campaign-stats {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      flex-shrink: 0; width: 290px;
+    }
+    .stat-box {
+      border-radius: 12px; padding: 14px 18px;
+      display: flex; flex-direction: column; gap: 5px;
+    }
+    .stat-box--light { background: #f8f8f8; border: 1px solid var(--border-light); }
+    .stat-box--dark  { background: var(--btn-dark); }
+    .stat-box__label { font-size: 10px; font-weight: 600; letter-spacing: 0.2px; }
+    .stat-box--light .stat-box__label { color: var(--grey-1); }
+    .stat-box--dark  .stat-box__label { color: rgba(255,255,255,0.55); }
+    .stat-box__value { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
+    .stat-box--light .stat-box__value { color: var(--dark); }
+    .stat-box--dark  .stat-box__value { color: white; }
+
+    /* CAMPAIGN CARDS */
+    .core-section { padding: 28px 36px 36px; }
+    .core-section__header {
+      display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px;
+    }
+    .core-section__title { margin: 0; font-size: 16px; font-weight: 700; color: var(--dark); }
+    .core-section__meta  { font-size: 11px; color: var(--grey-1); }
+    .core-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    }
+    .campaign-card {
+      background: var(--white); border: 1px solid var(--border-light);
+      border-radius: 14px; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .campaign-card--dark { background: var(--dark); border-color: var(--dark); }
+    .card-why {
+      flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 16px;
+    }
+    .card-why__label {
+      margin: 0; font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.4);
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .card-why__text {
+      margin: 0; font-size: 12px; line-height: 1.55; color: rgba(255,255,255,0.82); flex: 1;
+    }
+    .card-why__btn {
+      height: 32px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px; font-size: 11px; font-weight: 600; color: white; margin-top: auto;
+    }
+    .card-top {
+      display: flex; gap: 10px; padding: 12px 12px 10px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .card-thumb { width: 44px; height: 44px; border-radius: 9px; object-fit: cover; flex-shrink: 0; }
+    .card-top-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .card-title {
+      margin: 0; font-size: 13px; font-weight: 700; color: var(--dark);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-top-row { display: flex; align-items: center; gap: 6px; }
+    .cat-pill {
+      display: inline-flex; align-items: center; height: 17px; padding: 0 6px;
+      border-radius: 4px; background: var(--green-bg);
+      color: var(--green-text); font-size: 9px; font-weight: 700;
+    }
+    .match-score { display: flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--green-text); }
+    .card-metrics {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1px; background: var(--border-light);
+      border-bottom: 1px solid var(--border-light); flex: 1;
+    }
+    .card-metric {
+      background: var(--white); padding: 7px 10px;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .metric-label {
+      font-size: 8px; font-weight: 700; color: var(--grey-1);
+      letter-spacing: 0.4px; text-transform: uppercase;
+    }
+    .metric-value { font-size: 12px; font-weight: 700; color: var(--dark); }
+    .card-footer { display: flex; align-items: center; gap: 6px; padding: 8px 12px; }
+    .review-btn {
+      flex: 1; height: 30px; background: var(--white);
+      border: 1px solid var(--border); border-radius: 7px;
+      font-size: 11px; font-weight: 600; color: var(--dark);
+    }
+    .review-btn:hover { background: var(--pill-bg); }
+
+    /* FLASH SALES SECTION */
+    .flash-section {
+      background: linear-gradient(135deg, var(--flash-dark) 0%, #1c1036 50%, #0f1f3d 100%);
+      margin: 24px auto 0;
+      max-width: 1136px; width: calc(100% - 48px);
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+    .flash-section::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0;
+    }
+    .flash-section > * { position: relative; z-index: 1; }
+    .flash-banner {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 32px 0; gap: 16px; flex-wrap: wrap;
+    }
+    .flash-banner__left { display: flex; align-items: center; gap: 14px; }
+    .flash-label { display: flex; align-items: center; gap: 8px; }
+    .flash-label__icon {
+      width: 34px; height: 34px; border-radius: 9px; background: var(--flash-orange);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      box-shadow: 0 0 16px var(--flash-glow);
+    }
+    .flash-label__text { display: flex; flex-direction: column; gap: 1px; }
+    .flash-label__title { font-size: 18px; font-weight: 800; color: white; letter-spacing: -0.4px; line-height: 1; }
+    .flash-label__sub { font-size: 12px; color: rgba(255,255,255,0.5); }
+    .flash-countdown {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; padding: 10px 16px;
+    }
+    .flash-countdown__label { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; }
+    .flash-countdown__timer { display: flex; align-items: center; gap: 4px; }
+    .countdown-block { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+    .countdown-num { font-size: 22px; font-weight: 800; color: var(--flash-amber); letter-spacing: -1px; line-height: 1; font-variant-numeric: tabular-nums; min-width: 32px; text-align: center; }
+    .countdown-unit { font-size: 9px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; }
+    .countdown-sep { font-size: 20px; font-weight: 800; color: var(--flash-amber); line-height: 1; opacity: 0.5; margin-bottom: 8px; }
+    .flash-subtitle-row { padding: 10px 32px 20px; display: flex; align-items: center; gap: 12px; }
+    .flash-subtitle { font-size: 13px; color: rgba(255,255,255,0.45); }
+    .flash-spots-left {
+      display: flex; align-items: center; gap: 5px;
+      background: rgba(255,107,0,0.15); border: 1px solid rgba(255,107,0,0.3);
+      border-radius: 20px; padding: 3px 10px;
+      font-size: 11px; font-weight: 700; color: var(--flash-orange);
+    }
+    .flash-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 12px; padding: 0 32px 32px;
+    }
+    .flash-card {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .flash-card:hover { border-color: rgba(255,107,0,0.5); transform: translateY(-2px); }
+    .flash-card__ribbon {
+      background: linear-gradient(90deg, var(--flash-orange), #ff9500);
+      padding: 6px 14px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .flash-card__save { font-size: 12px; font-weight: 800; color: white; letter-spacing: -0.2px; }
+    .flash-card__timer-badge {
+      display: flex; align-items: center; gap: 4px;
+      background: rgba(0,0,0,0.2); border-radius: 20px; padding: 2px 8px;
+      font-size: 10px; font-weight: 700; color: white;
+    }
+    .flash-card__body { padding: 12px 14px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+    .flash-card__show { display: flex; align-items: center; gap: 10px; }
+    .flash-card__thumb { width: 42px; height: 42px; border-radius: 9px; object-fit: cover; flex-shrink: 0; }
+    .flash-card__show-info { flex: 1; min-width: 0; }
+    .flash-card__title { font-size: 13px; font-weight: 700; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0 0 3px; }
+    .flash-card__cats { display: flex; gap: 4px; flex-wrap: wrap; }
+    .flash-cat-pill {
+      display: inline-flex; align-items: center; height: 16px; padding: 0 6px;
+      border-radius: 4px; background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.7); font-size: 9px; font-weight: 600;
+    }
+    .flash-card__stats { display: flex; justify-content: space-between; align-items: flex-end; }
+    .flash-card__impressions { display: flex; flex-direction: column; gap: 2px; }
+    .flash-card__imp-label { font-size: 8px; font-weight: 700; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.5px; }
+    .flash-card__imp-value { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.85); }
+    .flash-card__pricing { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+    .flash-card__price-old { font-size: 10px; color: rgba(255,255,255,0.3); text-decoration: line-through; }
+    .flash-card__price-new { font-size: 16px; font-weight: 800; color: white; letter-spacing: -0.3px; }
+    .flash-card__footer { padding: 0 14px 14px; display: flex; gap: 8px; }
+    .flash-add-btn {
+      flex: 1; height: 36px; background: var(--coral);
+      border: none; border-radius: 9px; font-size: 12px; font-weight: 700; color: white;
+    }
+    .flash-add-btn:hover { opacity: 0.9; }
+    .flash-review-btn {
+      height: 36px; padding: 0 12px;
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 9px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.6);
+    }
+    .flash-footer-link {
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 32px 24px;
+    }
+    .flash-footer-link a {
+      font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.4);
+      display: flex; align-items: center; gap: 5px;
+      transition: color 0.15s;
+    }
+    .flash-footer-link a:hover { color: rgba(255,255,255,0.7); }
+
+    /* DISCOVER SECTION */
+    .discover-section {
+      max-width: 1136px; margin: 24px auto 0; width: calc(100% - 48px);
+      background: var(--white); border: 1px solid var(--border-light);
+      border-radius: 20px; overflow: hidden;
+    }
+    .discover-inner { padding: 36px; }
+    .discover-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .discover-header__left { display: flex; flex-direction: column; gap: 3px; }
+    .discover-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--grey-1); }
+    .discover-title { margin: 0; font-size: 16px; font-weight: 700; color: var(--dark); }
+    .discover-search-wrap {
+      position: relative; display: flex; align-items: center;
+      flex: 1; max-width: 440px; margin-left: 24px;
+    }
+    .discover-search-icon { position: absolute; left: 14px; color: var(--grey-1); pointer-events: none; display: flex; align-items: center; }
+    .discover-input {
+      width: 100%; height: 42px; padding: 0 40px 0 40px;
+      background: var(--pill-bg); border: 1.5px solid transparent;
+      border-radius: 10px; font-size: 13px; font-family: inherit;
+      color: var(--text-primary); outline: none; transition: border-color 0.15s, background 0.15s;
+    }
+    .discover-input:focus { border-color: var(--dark); background: white; }
+    .discover-input::placeholder { color: #b0b4be; }
+    .discover-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .discover-chip {
+      height: 28px; padding: 0 12px;
+      background: var(--pill-bg); border: 1px solid var(--border-light);
+      border-radius: 20px; font-size: 11px; font-weight: 600; color: var(--text-secondary);
+      transition: all 0.12s;
+    }
+    .discover-chip:hover, .discover-chip.is-active { background: var(--dark); color: white; border-color: var(--dark); }
+
+    /* LANDING-SPECIFIC: HERO SECTION */
+    .hero-section {
+      display: flex; gap: 0;
+    }
+    .hero-left {
+      flex: 1; padding: 44px 40px 44px 36px; min-width: 0;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 22px; padding: 0 10px; border-radius: 20px;
+      background: var(--green-bg); color: var(--green-text);
+      font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+      margin-bottom: 16px;
+    }
+    .hero-title {
+      margin: 0 0 14px; font-size: 32px; font-weight: 800;
+      letter-spacing: -1px; line-height: 1.1; color: var(--dark); max-width: 480px;
+    }
+    .hero-title em { font-style: normal; color: var(--coral); }
+    .hero-desc {
+      margin: 0 0 24px; font-size: 13px; color: var(--text-secondary);
+      line-height: 1.65; max-width: 420px;
+    }
+    .hero-features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .hero-feature { display: flex; align-items: flex-start; gap: 10px; }
+    .hero-feature__icon {
+      width: 28px; height: 28px; border-radius: 7px; background: var(--green-bg);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+    }
+    .hero-feature__text { font-size: 13px; color: var(--text-primary); font-weight: 500; line-height: 1.5; }
+    .hero-feature__text span { color: var(--text-secondary); font-weight: 400; }
+    .hero-logos { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .hero-logos-label { font-size: 10px; color: var(--grey-1); font-weight: 600; letter-spacing: 0.3px; }
+    .hero-logo-pill {
+      height: 22px; padding: 0 10px; border-radius: 20px;
+      background: var(--pill-bg); border: 1px solid var(--border-light);
+      font-size: 10px; font-weight: 700; color: var(--text-secondary);
+      display: flex; align-items: center;
+    }
+
+    /* HERO RIGHT — campaign builder widget */
+    .hero-right {
+      width: 360px; flex-shrink: 0;
+      border-left: 1px solid var(--border-light);
+      background: #fafafa;
+      padding: 32px 28px;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+    .widget-header { display: flex; flex-direction: column; gap: 4px; }
+    .widget-header__label { font-size: 10px; font-weight: 700; color: var(--grey-1); text-transform: uppercase; letter-spacing: 0.6px; }
+    .widget-header__title { font-size: 14px; font-weight: 700; color: var(--dark); line-height: 1.3; }
+    .widget-field { display: flex; flex-direction: column; gap: 5px; }
+    .widget-field label { font-size: 11px; font-weight: 600; color: var(--grey-1); }
+    .widget-input {
+      height: 40px; padding: 0 12px; border: 1.5px solid var(--border);
+      border-radius: 9px; font-size: 13px; font-family: inherit;
+      color: var(--text-primary); background: var(--white); outline: none;
+      transition: border-color 0.15s;
+    }
+    .widget-input:focus { border-color: var(--dark); }
+    .widget-input::placeholder { color: #b0b4be; }
+    .widget-select {
+      height: 40px; padding: 0 12px; border: 1.5px solid var(--border);
+      border-radius: 9px; font-size: 13px; font-family: inherit;
+      color: var(--text-primary); background: var(--white); outline: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23707481' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
+      cursor: pointer; transition: border-color 0.15s;
+    }
+    .widget-select:focus { border-color: var(--dark); }
+    .widget-row { display: flex; gap: 8px; }
+    .widget-row .widget-field { flex: 1; }
+    .widget-cta {
+      width: 100%; height: 44px; background: var(--coral); border: none; border-radius: 10px;
+      font-size: 13px; font-weight: 800; color: white;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      transition: opacity 0.15s;
+    }
+    .widget-cta:hover { opacity: 0.9; }
+    .widget-note { font-size: 11px; color: var(--grey-1); text-align: center; }
+    .widget-preview {
+      border-top: 1px solid var(--border-light); padding-top: 16px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .widget-preview__label { font-size: 10px; font-weight: 700; color: var(--grey-1); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .preview-stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    /* LANDING: STATS ROW SECTION */
+    .stats-row-section { padding: 28px 36px 36px; }
+    .stats-row-header { margin-bottom: 20px; }
+    .stats-row-header h2 { margin: 0; font-size: 18px; font-weight: 700; color: var(--dark); letter-spacing: -0.4px; }
+    .stats-row-header p { margin: 6px 0 0; font-size: 12px; color: var(--grey-1); }
+    .stats-row-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .stat-box--wide .stat-box__value { font-size: 26px; }
+
+    /* LANDING: TRUST SECTION */
+    .trust-section { padding: 28px 36px 36px; }
+    .trust-header { margin-bottom: 20px; }
+    .trust-header h2 { margin: 0; font-size: 18px; font-weight: 700; color: var(--dark); letter-spacing: -0.4px; }
+    .trust-header p { margin: 4px 0 0; font-size: 12px; color: var(--grey-1); }
+    .trust-row { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .trust-avatars { display: flex; align-items: center; }
+    .trust-avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      border: 2px solid white; margin-left: -10px;
+      background: var(--pill-bg); overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--grey-1);
+    }
+    .trust-avatar:first-child { margin-left: 0; }
+    .trust-stats { display: flex; gap: 32px; }
+    .trust-stat { display: flex; flex-direction: column; gap: 2px; }
+    .trust-stat__num { font-size: 22px; font-weight: 800; color: var(--dark); letter-spacing: -0.6px; }
+    .trust-stat__label { font-size: 11px; color: var(--grey-1); }
+
+    /* LANDING: AI FEATURE CARD */
+    .ai-section { padding: 0 36px 36px; }
+    .ai-card {
+      border: 1px solid var(--border-light); border-radius: 14px;
+      display: flex; align-items: stretch; overflow: hidden;
+    }
+    .ai-card__left {
+      flex: 1; padding: 24px 28px;
+    }
+    .ai-card__tag {
+      display: inline-flex; align-items: center; height: 20px; padding: 0 8px;
+      border-radius: 4px; background: var(--dark); color: white;
+      font-size: 9px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .ai-card__title { margin: 0 0 8px; font-size: 16px; font-weight: 700; color: var(--dark); letter-spacing: -0.3px; }
+    .ai-card__desc { margin: 0; font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+    .ai-card__right {
+      width: 220px; flex-shrink: 0; border-left: 1px solid var(--border-light);
+      background: #f8f8f8; padding: 24px 20px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .ai-card__right-label { font-size: 10px; font-weight: 700; color: var(--grey-1); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* LANDING: TESTIMONIAL CARDS */
+    .testimonials-section { padding: 28px 36px 36px; }
+    .testimonials-header { margin-bottom: 20px; }
+    .testimonials-header h2 { margin: 0; font-size: 18px; font-weight: 700; color: var(--dark); letter-spacing: -0.4px; }
+    .testimonials-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .testimonial-card {
+      border: 1px solid var(--border-light); border-radius: 14px;
+      padding: 20px 20px; display: flex; flex-direction: column; gap: 12px;
+    }
+    .testimonial-card--dark { background: var(--dark); border-color: var(--dark); }
+    .t-quote { font-size: 13px; color: var(--text-primary); line-height: 1.65; flex: 1; }
+    .testimonial-card--dark .t-quote { color: rgba(255,255,255,0.75); }
+    .t-author { display: flex; align-items: center; gap: 10px; }
+    .t-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--pill-bg); border: 1px solid var(--border-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: var(--grey-1); flex-shrink: 0;
+    }
+    .testimonial-card--dark .t-avatar { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.6); }
+    .t-name { font-size: 12px; font-weight: 700; color: var(--dark); }
+    .testimonial-card--dark .t-name { color: white; }
+    .t-role { font-size: 11px; color: var(--grey-1); }
+    .testimonial-card--dark .t-role { color: rgba(255,255,255,0.4); }
+
+    /* LANDING: CASE STUDY */
+    .case-section { padding: 0 36px 36px; }
+    .case-card {
+      border: 1px solid var(--border-light); border-radius: 14px; overflow: hidden;
+      display: flex;
+    }
+    .case-left { flex: 1; padding: 28px; }
+    .case-logo-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .case-logo-thumb {
+      width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 800; color: var(--dark); background: var(--pill-bg);
+    }
+    .case-logo-name { font-size: 13px; font-weight: 700; color: var(--dark); }
+    .case-quote {
+      font-size: 14px; font-weight: 600; color: var(--dark); line-height: 1.55; margin: 0 0 16px;
+      font-style: italic;
+    }
+    .case-attribution { display: flex; align-items: center; gap: 8px; }
+    .case-avatar {
+      width: 32px; height: 32px; border-radius: 50%; background: var(--pill-bg);
+      border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: var(--grey-1);
+    }
+    .case-attr-name { font-size: 12px; font-weight: 700; color: var(--dark); }
+    .case-attr-role { font-size: 11px; color: var(--grey-1); }
+    .case-right {
+      width: 260px; flex-shrink: 0; border-left: 1px solid var(--border-light);
+      background: #f8f8f8; padding: 28px 24px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .case-right-label { font-size: 10px; font-weight: 700; color: var(--grey-1); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .case-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    /* LANDING: BOTTOM CTA */
+    .bottom-cta-section { padding: 28px 36px 44px; }
+    .bottom-cta-card {
+      border: 1px solid var(--border-light); border-radius: 14px;
+      background: var(--dark); overflow: hidden;
+      display: flex; align-items: stretch;
+    }
+    .bottom-cta-left { flex: 1; padding: 40px 40px; }
+    .bottom-cta-eyebrow {
+      font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.4);
+      text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px;
+    }
+    .bottom-cta-title {
+      margin: 0 0 12px; font-size: 24px; font-weight: 800; color: white;
+      letter-spacing: -0.6px; line-height: 1.2;
+    }
+    .bottom-cta-desc { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6; max-width: 380px; }
+    .bottom-cta-checks { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
+    .bottom-cta-check { display: flex; align-items: center; gap: 8px; font-size: 12px; color: rgba(255,255,255,0.55); }
+    .bottom-cta-check svg { color: var(--coral); flex-shrink: 0; }
+    .bottom-cta-right {
+      width: 360px; flex-shrink: 0; border-left: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04); padding: 32px 28px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .bottom-cta-right .widget-header__label { color: rgba(255,255,255,0.4); }
+    .bottom-cta-right .widget-header__title { color: white; }
+    .bottom-cta-right .widget-field label { color: rgba(255,255,255,0.4); }
+    .bottom-cta-right .widget-input,
+    .bottom-cta-right .widget-select {
+      background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.12);
+      color: white;
+    }
+    .bottom-cta-right .widget-input::placeholder { color: rgba(255,255,255,0.25); }
+    .bottom-cta-right .widget-input:focus,
+    .bottom-cta-right .widget-select:focus { border-color: rgba(255,255,255,0.4); }
+    .bottom-cta-right .widget-note { color: rgba(255,255,255,0.3); }
+
+    /* FOOTER */
+    .site-footer {
+      max-width: 1136px; margin: 0 auto; width: calc(100% - 48px);
+      padding: 24px 0 40px;
+      display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+    }
+    .footer-logo { display: flex; align-items: center; gap: 7px; font-weight: 800; font-size: 13px; color: var(--grey-1); letter-spacing: -0.2px; }
+    .footer-links { display: flex; gap: 20px; list-style: none; padding: 0; margin: 0; }
+    .footer-links a { font-size: 12px; color: var(--grey-1); }
+    .footer-links a:hover { color: var(--dark); }
+    .footer-copy { font-size: 11px; color: #aaa; }
+
+    /* RESPONSIVE */
+    @media (max-width: 1000px) {
+      .core-grid { grid-template-columns: repeat(3,1fr); }
+      .flash-grid { grid-template-columns: repeat(2,1fr); }
+      .stats-row-grid { grid-template-columns: repeat(2,1fr); }
+      .hero-right { width: 300px; }
+    }
+    @media (max-width: 768px) {
+      .page-card, .flash-section, .discover-section { width: calc(100% - 24px); }
+      .hero-section { flex-direction: column; }
+      .hero-right { width: 100%; border-left: none; border-top: 1px solid var(--border-light); }
+      .core-grid { grid-template-columns: repeat(2,1fr); }
+      .flash-grid { grid-template-columns: 1fr; }
+      .trust-row { flex-direction: column; align-items: flex-start; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .case-card { flex-direction: column; }
+      .case-right { width: 100%; border-left: none; border-top: 1px solid var(--border-light); }
+      .bottom-cta-card { flex-direction: column; }
+      .bottom-cta-right { width: 100%; border-left: none; border-top: 1px solid rgba(255,255,255,0.08); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<header class="top-bar">
+  <a href="#" class="top-bar__logo">
+    <div class="logo-mark">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="5"/></svg>
+    </div>
+    SpotsNow
+  </a>
+  <nav class="top-bar__nav">
+    <button class="top-bar__nav-link">Discover</button>
+    <button class="top-bar__nav-link">How it works</button>
+    <button class="top-bar__nav-link">Creators</button>
+    <button class="top-bar__nav-link">Pricing</button>
+    <button class="top-bar__nav-link top-bar__nav-link--flash">
+      <span class="pulse-dot"></span>
+      Live spots
+    </button>
+  </nav>
+  <div class="top-bar__actions">
+    <button class="login-btn">Log in</button>
+    <button class="signup-btn">Start for free</button>
+    <button class="icon-btn" aria-label="Menu">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- Hero -->
+  <div class="page-card">
+    <section class="hero-section">
+      <div class="hero-left">
+        <div class="hero-eyebrow">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Podcast &amp; YouTube Creator Ads
+        </div>
+        <h1 class="hero-title">
+          Buy podcast and YouTube creator ads <em>with ease.</em>
+        </h1>
+        <p class="hero-desc">
+          Launch high-performing campaigns in minutes. Our AI scans 85,000+ shows to find the highest-converting placements for your brand — then you checkout.
+        </p>
+        <div class="hero-features">
+          <div class="hero-feature">
+            <div class="hero-feature__icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--green-text)" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <div class="hero-feature__text">
+              Browse open spots <span>and get episode pricing in real time</span>
+            </div>
+          </div>
+          <div class="hero-feature">
+            <div class="hero-feature__icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--green-text)" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div class="hero-feature__text">
+              Ads set minutes to find <span>avoid the red tape that costs delivery performance</span>
+            </div>
+          </div>
+          <div class="hero-feature">
+            <div class="hero-feature__icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--green-text)" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="hero-feature__text">
+              Advertise on a pro <span>and launch your first ad in 60 seconds</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-logos">
+          <span class="hero-logos-label">As seen on</span>
+          <span class="hero-logo-pill">Pockyt</span>
+          <span class="hero-logo-pill">Super.com</span>
+          <span class="hero-logo-pill">TOYOTA</span>
+          <span class="hero-logo-pill">LIQUID I.V.</span>
+          <span class="hero-logo-pill">NerdWallet</span>
+        </div>
+      </div>
+
+      <!-- Campaign builder widget -->
+      <div class="hero-right">
+        <div class="widget-header">
+          <div class="widget-header__label">Find the best converting shows</div>
+          <div class="widget-header__title">For your brand in 60 seconds</div>
+        </div>
+        <div class="widget-field">
+          <label>Website Domain</label>
+          <input type="text" class="widget-input" placeholder="yourcompany.com" />
+        </div>
+        <div class="widget-row">
+          <div class="widget-field">
+            <label>Budget</label>
+            <select class="widget-select">
+              <option>$10,000 – $25,000</option>
+              <option>$5,000 – $10,000</option>
+              <option>$25,000 – $50,000</option>
+              <option>$50,000+</option>
+            </select>
+          </div>
+          <div class="widget-field">
+            <label>Audience</label>
+            <select class="widget-select">
+              <option>25–44</option>
+              <option>18–34</option>
+              <option>35–54</option>
+            </select>
+          </div>
+        </div>
+        <button class="widget-cta">
+          Generate Campaign
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <p class="widget-note">Free to generate · No credit card required</p>
+
+        <div class="widget-preview">
+          <div class="widget-preview__label">Example output for your budget</div>
+          <div class="preview-stat-row">
+            <div class="stat-box stat-box--light">
+              <span class="stat-box__label">Est. ROAS</span>
+              <span class="stat-box__value">4.2x</span>
+            </div>
+            <div class="stat-box stat-box--dark">
+              <span class="stat-box__label">Potential Sales</span>
+              <span class="stat-box__value">$39,050</span>
+            </div>
+          </div>
+          <div class="preview-stat-row">
+            <div class="stat-box stat-box--light">
+              <span class="stat-box__label">Impressions</span>
+              <span class="stat-box__value">203K</span>
+            </div>
+            <div class="stat-box stat-box--light">
+              <span class="stat-box__label">Shows Matched</span>
+              <span class="stat-box__value">8,343</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider" />
+
+    <!-- Stats row -->
+    <div class="stats-row-section">
+      <div class="stats-row-header">
+        <h2>Don't overlook the highest performing digital ad channel.</h2>
+        <p>Podcast and YouTube creator ads consistently outperform every other digital format.</p>
+      </div>
+      <div class="stats-row-grid">
+        <div class="stat-box stat-box--dark stat-box--wide">
+          <span class="stat-box__label">Podcast Ads Short-term ROAS</span>
+          <span class="stat-box__value">4.2X</span>
+        </div>
+        <div class="stat-box stat-box--light stat-box--wide">
+          <span class="stat-box__label">Social Ads Short-term ROAS</span>
+          <span class="stat-box__value">3.6X</span>
+        </div>
+        <div class="stat-box stat-box--light stat-box--wide">
+          <span class="stat-box__label">Online Display Short-term ROAS</span>
+          <span class="stat-box__value">3.2X</span>
+        </div>
+        <div class="stat-box stat-box--light stat-box--wide">
+          <span class="stat-box__label">TV Short-term ROAS</span>
+          <span class="stat-box__value">2.2X</span>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- Trust section -->
+    <div class="trust-section">
+      <div class="trust-header">
+        <h2>Leverage trust from the most influential leaders in your tribe.</h2>
+        <p>And unlock the highest converting growth channels for countless brands.</p>
+      </div>
+      <div class="trust-row">
+        <div class="trust-avatars">
+          <div class="trust-avatar">JR</div>
+          <div class="trust-avatar">AB</div>
+          <div class="trust-avatar">TF</div>
+          <div class="trust-avatar">SC</div>
+          <div class="trust-avatar">MH</div>
+          <div class="trust-avatar">+</div>
+        </div>
+        <div class="trust-stats">
+          <div class="trust-stat">
+            <div class="trust-stat__num">$8.2B</div>
+            <div class="trust-stat__label">spent on placements</div>
+          </div>
+          <div class="trust-stat">
+            <div class="trust-stat__num">82,000</div>
+            <div class="trust-stat__label">creators to request ads from</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- AI research mode feature -->
+    <div class="ai-section">
+      <div class="ai-card">
+        <div class="ai-card__left">
+          <div class="ai-card__tag">Deep AI research mode</div>
+          <h3 class="ai-card__title">Use AI to find the highest compatible shows that are proven to perform.</h3>
+          <p class="ai-card__desc">
+            Use our compatibility score to find the winners and avoid the red flags that could destroy performance. Our model analyzes audience overlap, brand safety, and historical conversion data to surface only the shows most likely to drive ROAS for your specific product.
+          </p>
+        </div>
+        <div class="ai-card__right">
+          <div class="ai-card__right-label">Your Potential Sales</div>
+          <div class="stat-box stat-box--dark">
+            <span class="stat-box__label">Projected Revenue</span>
+            <span class="stat-box__value">$23,435</span>
+          </div>
+          <div class="stat-box stat-box--light">
+            <span class="stat-box__label">Shows Analyzed</span>
+            <span class="stat-box__value">203,000</span>
+          </div>
+          <div class="stat-box stat-box--light">
+            <span class="stat-box__label">Compatibility Score</span>
+            <span class="stat-box__value">3</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end page-card -->
+
+  <!-- AI-matched shows -->
+  <div class="page-card">
+    <div class="core-section">
+      <div class="core-section__header">
+        <h2 class="core-section__title">Research high compatibility shows that are proven to perform</h2>
+        <span class="core-section__meta">85,435 shows analyzed</span>
+      </div>
+      <div class="core-grid">
+        <!-- Card 1 -->
+        <article class="campaign-card">
+          <div class="card-top">
+            <img src="https://placehold.co/44x44/c0392b/fff?text=DS" alt="" class="card-thumb" width="44" height="44"/>
+            <div class="card-top-info">
+              <h4 class="card-title">Daily Stoic</h4>
+              <div class="card-top-row">
+                <span class="cat-pill">Health</span>
+                <span class="match-score">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="#0d6832"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  95%
+                </span>
+              </div>
+              <span style="font-size:10px;color:var(--grey-1);">$4,200</span>
+            </div>
+          </div>
+          <div class="card-metrics">
+            <div class="card-metric"><span class="metric-label">Episode Size</span><span class="metric-value">323,453</span></div>
+            <div class="card-metric"><span class="metric-label">Demo Match</span><span class="metric-value">85%</span></div>
+            <div class="card-metric"><span class="metric-label">ROAS Est.</span><span class="metric-value">3.2X</span></div>
+            <div class="card-metric"><span class="metric-label">Interest Match</span><span class="metric-value">90%</span></div>
+          </div>
+          <div class="card-footer">
+            <button class="review-btn">View spot</button>
+          </div>
+        </article>
+        <!-- Card 2 -->
+        <article class="campaign-card">
+          <div class="card-top">
+            <img src="https://placehold.co/44x44/2980b9/fff?text=HL" alt="" class="card-thumb" width="44" height="44"/>
+            <div class="card-top-info">
+              <h4 class="card-title">Huberman Lab</h4>
+              <div class="card-top-row">
+                <span class="cat-pill">Health</span>
+                <span class="match-score">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="#0d6832"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  92%
+                </span>
+              </div>
+              <span style="font-size:10px;color:var(--grey-1);">$6,800</span>
+            </div>
+          </div>
+          <div class="card-metrics">
+            <div class="card-metric"><span class="metric-label">Episode Size</span><span class="metric-value">512,000</span></div>
+            <div class="card-metric"><span class="metric-label">Demo Match</span><span class="metric-value">88%</span></div>
+            <div class="card-metric"><span class="metric-label">ROAS Est.</span><span class="metric-value">3.5X</span></div>
+            <div class="card-metric"><span class="metric-label">Interest Match</span><span class="metric-value">91%</span></div>
+          </div>
+          <div class="card-footer">
+            <button class="review-btn">View spot</button>
+          </div>
+        </article>
+        <!-- Card 3 -->
+        <article class="campaign-card">
+          <div class="card-top">
+            <img src="https://placehold.co/44x44/8e44ad/fff?text=TF" alt="" class="card-thumb" width="44" height="44"/>
+            <div class="card-top-info">
+              <h4 class="card-title">Tim Ferriss Show</h4>
+              <div class="card-top-row">
+                <span class="cat-pill">Business</span>
+                <span class="match-score">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="#0d6832"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  91%
+                </span>
+              </div>
+              <span style="font-size:10px;color:var(--grey-1);">$3,900</span>
+            </div>
+          </div>
+          <div class="card-metrics">
+            <div class="card-metric"><span class="metric-label">Episode Size</span><span class="metric-value">290,000</span></div>
+            <div class="card-metric"><span class="metric-label">Demo Match</span><span class="metric-value">82%</span></div>
+            <div class="card-metric"><span class="metric-label">ROAS Est.</span><span class="metric-value">3.1X</span></div>
+            <div class="card-metric"><span class="metric-label">Interest Match</span><span class="metric-value">87%</span></div>
+          </div>
+          <div class="card-footer">
+            <button class="review-btn">View spot</button>
+          </div>
+        </article>
+        <!-- Card 4 — why it matches dark card -->
+        <article class="campaign-card campaign-card--dark">
+          <div class="card-why">
+            <p class="card-why__label">Why it matches:</p>
+            <p class="card-why__text">Our AI matched these shows based on competitor spend patterns, audience demographic overlap, and historical ROAS data for your category.</p>
+            <button class="card-why__btn">Try it now, it's free</button>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flash Sales — same component as campaign.html -->
+  <section class="flash-section">
+    <div class="flash-banner">
+      <div class="flash-banner__left">
+        <div class="flash-label">
+          <div class="flash-label__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="flash-label__text">
+            <span class="flash-label__title">Flash Sales</span>
+            <span class="flash-label__sub">The "Hotel Tonight" for podcast & YouTube ads — discounted inventory before it's gone</span>
+          </div>
+        </div>
+      </div>
+      <div class="flash-countdown" aria-label="Time remaining">
+        <span class="flash-countdown__label">Ends in</span>
+        <div class="flash-countdown__timer">
+          <div class="countdown-block">
+            <span class="countdown-num" id="cd-h">04</span>
+            <span class="countdown-unit">hrs</span>
+          </div>
+          <span class="countdown-sep">:</span>
+          <div class="countdown-block">
+            <span class="countdown-num" id="cd-m">38</span>
+            <span class="countdown-unit">min</span>
+          </div>
+          <span class="countdown-sep">:</span>
+          <div class="countdown-block">
+            <span class="countdown-num" id="cd-s">17</span>
+            <span class="countdown-unit">sec</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flash-subtitle-row">
+      <span class="flash-subtitle">Prices revert to standard rates when the timer expires.</span>
+      <span class="flash-spots-left">
+        <span class="pulse-dot" style="background:var(--flash-orange);"></span>
+        4 spots remaining
+      </span>
+    </div>
+    <div class="flash-grid">
+      <!-- Flash Card 1 -->
+      <div class="flash-card">
+        <div class="flash-card__ribbon">
+          <span class="flash-card__save">Save 30% — $1,560 off</span>
+          <span class="flash-card__timer-badge">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            4h 38m
+          </span>
+        </div>
+        <div class="flash-card__body">
+          <div class="flash-card__show">
+            <img src="https://placehold.co/42x42/2ecc71/fff?text=NH" alt="" class="flash-card__thumb" width="42" height="42"/>
+            <div class="flash-card__show-info">
+              <p class="flash-card__title">New Heights</p>
+              <div class="flash-card__cats">
+                <span class="flash-cat-pill">Sport</span>
+                <span class="flash-cat-pill">Comedy</span>
+              </div>
+            </div>
+          </div>
+          <div class="flash-card__stats">
+            <div class="flash-card__impressions">
+              <span class="flash-card__imp-label">Est Impressions</span>
+              <span class="flash-card__imp-value">323,453</span>
+            </div>
+            <div class="flash-card__pricing">
+              <span class="flash-card__price-old">$5,200</span>
+              <span class="flash-card__price-new">$3,640</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:#ff6b00;display:inline-block;"></span>
+            <span style="font-size:10px;color:rgba(255,255,255,0.45);">2 spots left at this price</span>
+          </div>
+        </div>
+        <div class="flash-card__footer">
+          <button class="flash-add-btn">+ Add to Campaign</button>
+          <button class="flash-review-btn">Info</button>
+        </div>
+      </div>
+      <!-- Flash Card 2 -->
+      <div class="flash-card">
+        <div class="flash-card__ribbon">
+          <span class="flash-card__save">Save 35% — $2,100 off</span>
+          <span class="flash-card__timer-badge">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            4h 38m
+          </span>
+        </div>
+        <div class="flash-card__body">
+          <div class="flash-card__show">
+            <img src="https://placehold.co/42x42/e91e63/fff?text=CD" alt="" class="flash-card__thumb" width="42" height="42"/>
+            <div class="flash-card__show-info">
+              <p class="flash-card__title">Call Her Daddy</p>
+              <div class="flash-card__cats">
+                <span class="flash-cat-pill">Health</span>
+                <span class="flash-cat-pill">Business</span>
+              </div>
+            </div>
+          </div>
+          <div class="flash-card__stats">
+            <div class="flash-card__impressions">
+              <span class="flash-card__imp-label">Est Impressions</span>
+              <span class="flash-card__imp-value">489,000</span>
+            </div>
+            <div class="flash-card__pricing">
+              <span class="flash-card__price-old">$6,000</span>
+              <span class="flash-card__price-new">$3,900</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:#ff6b00;display:inline-block;"></span>
+            <span style="font-size:10px;color:rgba(255,255,255,0.45);">1 spot left at this price</span>
+          </div>
+        </div>
+        <div class="flash-card__footer">
+          <button class="flash-add-btn">+ Add to Campaign</button>
+          <button class="flash-review-btn">Info</button>
+        </div>
+      </div>
+      <!-- Flash Card 3 -->
+      <div class="flash-card">
+        <div class="flash-card__ribbon">
+          <span class="flash-card__save">Save 30% — $1,230 off</span>
+          <span class="flash-card__timer-badge">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            4h 38m
+          </span>
+        </div>
+        <div class="flash-card__body">
+          <div class="flash-card__show">
+            <img src="https://placehold.co/42x42/ff9800/fff?text=RF" alt="" class="flash-card__thumb" width="42" height="42"/>
+            <div class="flash-card__show-info">
+              <p class="flash-card__title">Realfoodology</p>
+              <div class="flash-card__cats">
+                <span class="flash-cat-pill">Health</span>
+                <span class="flash-cat-pill">Comedy</span>
+              </div>
+            </div>
+          </div>
+          <div class="flash-card__stats">
+            <div class="flash-card__impressions">
+              <span class="flash-card__imp-label">Est Impressions</span>
+              <span class="flash-card__imp-value">210,000</span>
+            </div>
+            <div class="flash-card__pricing">
+              <span class="flash-card__price-old">$4,100</span>
+              <span class="flash-card__price-new">$2,870</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:#ff6b00;display:inline-block;"></span>
+            <span style="font-size:10px;color:rgba(255,255,255,0.45);">3 spots left at this price</span>
+          </div>
+        </div>
+        <div class="flash-card__footer">
+          <button class="flash-add-btn">+ Add to Campaign</button>
+          <button class="flash-review-btn">Info</button>
+        </div>
+      </div>
+      <!-- Flash Card 4 -->
+      <div class="flash-card">
+        <div class="flash-card__ribbon">
+          <span class="flash-card__save">Save 30% — $1,440 off</span>
+          <span class="flash-card__timer-badge">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            4h 38m
+          </span>
+        </div>
+        <div class="flash-card__body">
+          <div class="flash-card__show">
+            <img src="https://placehold.co/42x42/9c27b0/fff?text=OP" alt="" class="flash-card__thumb" width="42" height="42"/>
+            <div class="flash-card__show-info">
+              <p class="flash-card__title">On Purpose</p>
+              <div class="flash-card__cats">
+                <span class="flash-cat-pill">Health</span>
+                <span class="flash-cat-pill">Society</span>
+              </div>
+            </div>
+          </div>
+          <div class="flash-card__stats">
+            <div class="flash-card__impressions">
+              <span class="flash-card__imp-label">Est Impressions</span>
+              <span class="flash-card__imp-value">298,000</span>
+            </div>
+            <div class="flash-card__pricing">
+              <span class="flash-card__price-old">$4,800</span>
+              <span class="flash-card__price-new">$3,360</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:#ff6b00;display:inline-block;"></span>
+            <span style="font-size:10px;color:rgba(255,255,255,0.45);">4 spots left at this price</span>
+          </div>
+        </div>
+        <div class="flash-card__footer">
+          <button class="flash-add-btn">+ Add to Campaign</button>
+          <button class="flash-review-btn">Info</button>
+        </div>
+      </div>
+    </div>
+    <div class="flash-footer-link">
+      <a href="#">Explore all discounted spots →</a>
+    </div>
+  </section>
+
+  <!-- Case study + testimonials -->
+  <div class="page-card">
+    <div class="case-section" style="padding-top:36px;">
+      <div class="case-card">
+        <div class="case-left">
+          <div class="case-logo-row">
+            <div class="case-logo-thumb">DW</div>
+            <div class="case-logo-name">DIY Wrap Club</div>
+          </div>
+          <blockquote class="case-quote">
+            "SpotsNow took the time and back-and-forth out of requesting a creator-read campaign. Simply browse your shows, authorize payments, submit tracking and talking points."
+          </blockquote>
+          <div class="case-attribution">
+            <div class="case-avatar">JH</div>
+            <div>
+              <div class="case-attr-name">Ji Hoon Hau</div>
+              <div class="case-attr-role">Founder, DIY Wrap Club</div>
+            </div>
+          </div>
+        </div>
+        <div class="case-right">
+          <div class="case-right-label">Campaign results</div>
+          <div class="case-stats-grid">
+            <div class="stat-box stat-box--dark">
+              <span class="stat-box__label">ROAS</span>
+              <span class="stat-box__value">3.5x</span>
+            </div>
+            <div class="stat-box stat-box--light">
+              <span class="stat-box__label">Revenue</span>
+              <span class="stat-box__value">$39K</span>
+            </div>
+            <div class="stat-box stat-box--light">
+              <span class="stat-box__label">Shows</span>
+              <span class="stat-box__value">8</span>
+            </div>
+            <div class="stat-box stat-box--light">
+              <span class="stat-box__label">vs Display</span>
+              <span class="stat-box__value">–52% CPA</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+    <div class="testimonials-section">
+      <div class="testimonials-header">
+        <h2>Brands and agencies love the ease of SpotsNow.</h2>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testimonial-card testimonial-card--dark">
+          <p class="t-quote">"SpotsNow is self-serve. I tested my first campaign in a 5-minute setup. I trust that SpotsNow will serve. I tested my first campaign in minutes setup."</p>
+          <div class="t-author">
+            <div class="t-avatar">AK</div>
+            <div>
+              <div class="t-name">Alex K.</div>
+              <div class="t-role">Head of Growth · DTC Brand</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <p class="t-quote">"We recommend this to 30% of agency budgets to high-performing niche shows. This is perfect for high-performing long-form creators."</p>
+          <div class="t-author">
+            <div class="t-avatar">MR</div>
+            <div>
+              <div class="t-name">Mia R. · Also Roma Long</div>
+              <div class="t-role">Media Director · Performance Agency</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- Bottom CTA with form -->
+    <div class="bottom-cta-section">
+      <div class="bottom-cta-card">
+        <div class="bottom-cta-left">
+          <div class="bottom-cta-eyebrow">Start unlocking sales</div>
+          <h2 class="bottom-cta-title">From your niche audience today.</h2>
+          <p class="bottom-cta-desc">Don't miss the highest converting sales channel for thousands of brands.</p>
+          <div class="bottom-cta-checks">
+            <div class="bottom-cta-check">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Free campaign preview — no credit card
+            </div>
+            <div class="bottom-cta-check">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              No agency fees or long-term contracts
+            </div>
+            <div class="bottom-cta-check">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              85,000+ shows across podcast and YouTube
+            </div>
+          </div>
+        </div>
+        <div class="bottom-cta-right">
+          <div class="widget-header">
+            <div class="widget-header__label">Find the best converting shows</div>
+            <div class="widget-header__title">For your brand in 60 seconds</div>
+          </div>
+          <div class="widget-field">
+            <label>Website Domain</label>
+            <input type="text" class="widget-input" placeholder="yourcompany.com" />
+          </div>
+          <div class="widget-row">
+            <div class="widget-field">
+              <label>Budget</label>
+              <select class="widget-select">
+                <option>$10,000 – $25,000</option>
+                <option>$5,000 – $10,000</option>
+                <option>$25,000 – $50,000</option>
+              </select>
+            </div>
+            <div class="widget-field">
+              <label>Audience</label>
+              <select class="widget-select">
+                <option>25–44</option>
+                <option>18–34</option>
+                <option>35–54</option>
+              </select>
+            </div>
+          </div>
+          <button class="widget-cta">
+            Generate Campaign
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+          <p class="widget-note">Free to generate · No credit card required</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end .page -->
+
+<div style="height:40px;"></div>
+
+<!-- Footer -->
+<footer>
+  <div class="site-footer">
+    <div class="footer-logo">
+      <div class="logo-mark">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="5"/></svg>
+      </div>
+      SpotsNow
+    </div>
+    <ul class="footer-links">
+      <li><a href="#">Advertisers</a></li>
+      <li><a href="#">Creators</a></li>
+      <li><a href="#">Pricing</a></li>
+      <li><a href="#">About</a></li>
+      <li><a href="#">Terms</a></li>
+      <li><a href="#">Privacy Policy</a></li>
+    </ul>
+    <p class="footer-copy">© 2026 SpotsNow</p>
+  </div>
+</footer>
+
+<script>
+  let cdTotalSecs = 4*3600 + 38*60 + 17
+  function tickCountdown() {
+    if (cdTotalSecs <= 0) return
+    cdTotalSecs--
+    const h = Math.floor(cdTotalSecs / 3600)
+    const m = Math.floor((cdTotalSecs % 3600) / 60)
+    const s = cdTotalSecs % 60
+    document.getElementById('cd-h').textContent = String(h).padStart(2,'0')
+    document.getElementById('cd-m').textContent = String(m).padStart(2,'0')
+    document.getElementById('cd-s').textContent = String(s).padStart(2,'0')
+  }
+  setInterval(tickCountdown, 1000)
+</script>
+
+</body>
+</html>

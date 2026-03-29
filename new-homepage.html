@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotsNow — Plan & Launch Podcast Ad Campaigns in Minutes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --dark: #0e1323;
+      --grey-1: #707481;
+      --text-primary: #252733;
+      --text-secondary: #5a5f6e;
+      --border: #dee0e4;
+      --border-light: #e8e8e8;
+      --white: #ffffff;
+      --coral: #ff6b6b;
+      --btn-dark: #111111;
+      --green-bg: #d6f0e0;
+      --green-text: #0d6832;
+      --pill-bg: #f3f4f6;
+      --flash-dark: #0f0c29;
+      --flash-orange: #ff6b00;
+      --flash-amber: #ffb300;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.5;
+      color: var(--dark); background: #f5f5f3;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font-family: inherit; cursor: pointer; }
+    img { display: block; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ─── TOP BAR ─── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 200;
+      height: 56px; display: flex; align-items: center; gap: 16px;
+      padding: 0 28px; background: var(--white);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .top-bar__logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 800; font-size: 15px; color: var(--dark);
+      text-decoration: none; flex-shrink: 0; letter-spacing: -0.3px;
+    }
+    .logo-mark {
+      width: 22px; height: 22px; border-radius: 6px;
+      background: var(--coral); display: flex; align-items: center; justify-content: center;
+    }
+    .top-bar__nav { display: flex; align-items: center; gap: 2px; flex: 1; }
+    .top-bar__nav-link {
+      padding: 6px 12px; border-radius: 8px; border: none; background: none;
+      font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer;
+    }
+    .top-bar__nav-link:hover { background: var(--pill-bg); color: var(--dark); }
+    .top-bar__actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-left: auto; }
+    .login-btn {
+      padding: 6px 14px; background: none;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; font-weight: 600; color: var(--text-primary);
+    }
+    .login-btn:hover { background: var(--pill-bg); }
+    .signup-btn {
+      padding: 7px 16px; background: var(--coral);
+      border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 700; color: white;
+    }
+    .signup-btn:hover { opacity: 0.88; }
+
+    /* ─── LAYOUT ─── */
+    .page { display: flex; flex-direction: column; padding-bottom: 60px; gap: 16px; }
+    .page-card {
+      background: var(--white);
+      max-width: 1136px; margin: 0 auto; width: calc(100% - 48px);
+      border-radius: 20px; border: 1px solid var(--border-light); overflow: hidden;
+    }
+    .page-card--first { margin-top: 24px; }
+    .section-divider { border: none; border-top: 1px solid var(--border-light); margin: 0; }
+
+    /* ─── HERO ─── */
+    .hero {
+      display: grid; grid-template-columns: 1fr 420px;
+      min-height: 460px;
+    }
+    .hero-left {
+      padding: 60px 52px 60px 52px;
+      display: flex; flex-direction: column; justify-content: center; gap: 28px;
+      border-right: 1px solid var(--border-light);
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--pill-bg); border: 1px solid var(--border-light);
+      border-radius: 20px; padding: 5px 12px 5px 8px;
+      font-size: 11px; font-weight: 700; color: var(--text-secondary);
+      width: fit-content; letter-spacing: 0.1px;
+    }
+    .hero-eyebrow-dot {
+      width: 18px; height: 18px; border-radius: 5px;
+      background: var(--coral); display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .hero-heading {
+      margin: 0; font-size: 44px; font-weight: 800;
+      letter-spacing: -1.2px; line-height: 1.06; color: var(--dark);
+      max-width: 540px;
+    }
+    .hero-heading em {
+      font-style: normal; color: var(--coral);
+    }
+    .hero-sub {
+      margin: 0; font-size: 15px; color: var(--text-secondary);
+      line-height: 1.65; max-width: 480px;
+    }
+    .hero-form { display: flex; flex-direction: column; gap: 10px; max-width: 420px; }
+    .hero-input-row { display: flex; gap: 8px; }
+    .hero-input {
+      flex: 1; height: 44px; padding: 0 16px;
+      background: var(--pill-bg); border: 1.5px solid transparent;
+      border-radius: 10px; font-size: 14px; font-family: inherit;
+      color: var(--text-primary); outline: none;
+    }
+    .hero-input:focus { border-color: var(--dark); background: white; }
+    .hero-input::placeholder { color: #b0b4be; }
+    .hero-cta {
+      height: 44px; padding: 0 22px; background: var(--dark);
+      border: none; border-radius: 10px;
+      font-size: 13px; font-weight: 700; color: white; white-space: nowrap;
+    }
+    .hero-cta:hover { background: #1c2340; }
+    .hero-trust {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; color: var(--grey-1);
+    }
+    .hero-trust-avatars { display: flex; }
+    .hero-trust-avatar {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 2px solid white; margin-left: -6px;
+      font-size: 8px; font-weight: 700; color: white;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .hero-trust-avatars .hero-trust-avatar:first-child { margin-left: 0; }
+
+    /* Hero right: mini product preview */
+    .hero-right {
+      padding: 32px 28px;
+      display: flex; flex-direction: column; gap: 16px;
+      background: #fafafa;
+    }
+    .hero-right__label {
+      font-size: 10px; font-weight: 700; color: var(--grey-1);
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .hero-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stat-box {
+      border-radius: 12px; padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 5px;
+    }
+    .stat-box--light { background: var(--white); border: 1px solid var(--border-light); }
+    .stat-box--dark { background: var(--btn-dark); }
+    .stat-box__label { font-size: 10px; font-weight: 600; letter-spacing: 0.1px; }
+    .stat-box--light .stat-box__label { color: var(--grey-1); }
+    .stat-box--dark .stat-box__label { color: rgba(255,255,255,0.5); }
+    .stat-box__value { font-size: 22px; font-weight: 800; letter-spacing: -0.6px; line-height: 1; }
+    .stat-box--light .stat-box__value { color: var(--dark); }
+    .stat-box--dark .stat-box__value { color: white; }
+
+    .hero-mini-card {
+      background: var(--white); border: 1px solid var(--border-light);
+      border-radius: 12px; padding: 12px 14px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .hero-mini-thumb {
+      width: 40px; height: 40px; border-radius: 8px;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 800; color: white; letter-spacing: -0.2px;
+    }
+    .hero-mini-info { flex: 1; min-width: 0; }
+    .hero-mini-title { font-size: 12px; font-weight: 700; color: var(--dark); margin: 0 0 4px; }
+    .hero-mini-row { display: flex; align-items: center; gap: 6px; }
+    .hero-mini-pill {
+      display: inline-flex; align-items: center; height: 16px; padding: 0 6px;
+      border-radius: 4px; background: var(--green-bg);
+      color: var(--green-text); font-size: 9px; font-weight: 700;
+    }
+    .hero-mini-score { font-size: 11px; font-weight: 700; color: var(--green-text); }
+    .hero-mini-roas { font-size: 11px; font-weight: 700; color: var(--dark); margin-left: auto; }
+
+    /* ─── LOGO STRIP ─── */
+    .logos-section { padding: 28px 48px; }
+    .logos-label {
+      font-size: 11px; font-weight: 600; color: var(--grey-1);
+      text-align: center; margin-bottom: 20px; letter-spacing: 0.3px;
+    }
+    .logos-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 32px; flex-wrap: wrap;
+    }
+    .logo-pill {
+      height: 32px; padding: 0 16px;
+      background: var(--pill-bg); border-radius: 8px;
+      display: flex; align-items: center;
+      font-size: 12px; font-weight: 700; color: var(--grey-1);
+      letter-spacing: -0.2px;
+    }
+
+    /* ─── OPPORTUNITY SECTION (dark) ─── */
+    .opportunity-section {
+      background: linear-gradient(135deg, var(--dark) 0%, #1a1f3a 60%, #0d1a2e 100%);
+      max-width: 1136px; margin: 0 auto; width: calc(100% - 48px);
+      border-radius: 20px; overflow: hidden; padding: 56px 52px;
+    }
+    .opp-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px; padding: 4px 12px;
+      font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5);
+      text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 24px;
+    }
+    .opp-heading {
+      margin: 0 0 12px; font-size: 38px; font-weight: 800;
+      letter-spacing: -1px; line-height: 1.1; color: white; max-width: 640px;
+    }
+    .opp-heading em { font-style: normal; color: var(--coral); }
+    .opp-sub {
+      margin: 0 0 48px; font-size: 15px; color: rgba(255,255,255,0.55);
+      line-height: 1.65; max-width: 560px;
+    }
+    .opp-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+    .opp-stat {
+      padding: 28px 32px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .opp-stat__num {
+      font-size: 48px; font-weight: 800; letter-spacing: -2px; line-height: 1;
+      color: white;
+    }
+    .opp-stat__num span { color: var(--coral); }
+    .opp-stat__label { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.5; max-width: 200px; }
+    .opp-stat__sublabel { font-size: 11px; color: rgba(255,255,255,0.28); margin-top: 2px; }
+
+    /* ─── HOW IT WORKS ─── */
+    .hiw-section { padding: 52px 52px 56px; }
+    .section-eyebrow {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.8px;
+      text-transform: uppercase; color: var(--grey-1); margin-bottom: 8px;
+    }
+    .section-heading {
+      margin: 0 0 48px; font-size: 30px; font-weight: 800;
+      letter-spacing: -0.7px; color: var(--dark);
+    }
+    .hiw-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+    .hiw-step {
+      padding: 0 28px 0 0;
+      border-right: 1px solid var(--border-light);
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .hiw-step:last-child { border-right: none; padding-right: 0; padding-left: 28px; }
+    .hiw-step:not(:first-child):not(:last-child) { padding: 0 28px; }
+    .hiw-step:first-child { padding-left: 0; }
+    .hiw-num {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--dark); display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800; color: white; flex-shrink: 0;
+    }
+    .hiw-step__title { font-size: 15px; font-weight: 700; color: var(--dark); margin: 0; }
+    .hiw-step__desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 0; }
+    .hiw-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--pill-bg); display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ─── SHOWS SECTION ─── */
+    .shows-section { padding: 52px 52px 56px; }
+    .shows-header {
+      display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px;
+    }
+    .shows-browse-link {
+      font-size: 12px; font-weight: 600; color: var(--coral);
+      display: flex; align-items: center; gap: 4px; border: none; background: none; padding: 0;
+    }
+    .shows-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+    /* Campaign card (same as campaign.html) */
+    .campaign-card {
+      background: var(--white); border: 1px solid var(--border-light);
+      border-radius: 14px; overflow: hidden; display: flex; flex-direction: column;
+    }
+    .card-top {
+      display: flex; gap: 10px; padding: 12px 12px 10px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .card-thumb {
+      width: 44px; height: 44px; border-radius: 9px;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; color: white;
+    }
+    .card-top-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .card-title {
+      margin: 0; font-size: 13px; font-weight: 700; color: var(--dark);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-top-row { display: flex; align-items: center; gap: 6px; }
+    .cat-pill {
+      display: inline-flex; align-items: center; height: 17px; padding: 0 6px;
+      border-radius: 4px; background: var(--green-bg);
+      color: var(--green-text); font-size: 9px; font-weight: 700;
+    }
+    .match-score { font-size: 11px; font-weight: 700; color: var(--green-text); }
+    .price-toggle {
+      background: none; border: none; padding: 0;
+      font-size: 10px; font-weight: 600; color: var(--grey-1); text-decoration: underline;
+      cursor: pointer;
+    }
+    .card-metrics {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1px; background: var(--border-light);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .card-metric {
+      background: var(--white); padding: 7px 10px;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .metric-label {
+      font-size: 8px; font-weight: 700; color: var(--grey-1);
+      letter-spacing: 0.4px; text-transform: uppercase;
+    }
+    .metric-value { font-size: 12px; font-weight: 700; color: var(--dark); }
+    .card-footer { display: flex; align-items: center; gap: 6px; padding: 8px 12px; }
+    .review-btn {
+      flex: 1; height: 30px; background: var(--white);
+      border: 1px solid var(--border); border-radius: 7px;
+      font-size: 11px; font-weight: 600; color: var(--dark);
+    }
+    .review-btn:hover { background: var(--pill-bg); }
+
+    /* ─── SOCIAL PROOF QUOTE ─── */
+    .quote-section { padding: 52px 52px 56px; }
+    .quote-inner {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+    }
+    .quote-left { display: flex; flex-direction: column; gap: 20px; }
+    .quote-mark {
+      font-size: 64px; line-height: 0.7; color: var(--coral);
+      font-weight: 800; margin-bottom: 8px;
+    }
+    .quote-text {
+      font-size: 20px; font-weight: 700; color: var(--dark);
+      line-height: 1.45; letter-spacing: -0.3px;
+      margin: 0;
+    }
+    .quote-attr { display: flex; align-items: center; gap: 12px; }
+    .quote-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800; color: white;
+    }
+    .quote-attr-info { display: flex; flex-direction: column; gap: 2px; }
+    .quote-name { font-size: 13px; font-weight: 700; color: var(--dark); }
+    .quote-role { font-size: 12px; color: var(--grey-1); }
+
+    .quote-right { display: flex; flex-direction: column; gap: 10px; }
+    .quote-stat-card {
+      background: var(--pill-bg); border-radius: 14px; padding: 20px 24px;
+      display: flex; align-items: center; gap: 20px;
+    }
+    .quote-stat-card--dark { background: var(--dark); }
+    .quote-stat-num {
+      font-size: 36px; font-weight: 800; letter-spacing: -1px;
+      color: var(--dark); flex-shrink: 0;
+    }
+    .quote-stat-card--dark .quote-stat-num { color: white; }
+    .quote-stat-num span { color: var(--coral); }
+    .quote-stat-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+    .quote-stat-card--dark .quote-stat-desc { color: rgba(255,255,255,0.5); }
+
+    /* ─── FINAL CTA ─── */
+    .cta-section {
+      background: var(--dark);
+      max-width: 1136px; margin: 0 auto; width: calc(100% - 48px);
+      border-radius: 20px; overflow: hidden;
+      padding: 64px 52px;
+      display: flex; align-items: center; justify-content: space-between; gap: 48px;
+    }
+    .cta-left { display: flex; flex-direction: column; gap: 16px; max-width: 520px; }
+    .cta-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px; padding: 4px 12px;
+      font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5);
+      text-transform: uppercase; letter-spacing: 0.8px; width: fit-content;
+    }
+    .cta-heading {
+      margin: 0; font-size: 36px; font-weight: 800;
+      letter-spacing: -0.9px; color: white; line-height: 1.1;
+    }
+    .cta-sub {
+      margin: 0; font-size: 14px; color: rgba(255,255,255,0.5); line-height: 1.65;
+    }
+    .cta-right { display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; min-width: 320px; }
+    .cta-input {
+      width: 100%; height: 48px; padding: 0 16px;
+      background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 10px; font-size: 14px; font-family: inherit;
+      color: white; outline: none;
+    }
+    .cta-input:focus { border-color: rgba(255,255,255,0.4); }
+    .cta-input::placeholder { color: rgba(255,255,255,0.3); }
+    .cta-btn {
+      width: 100%; height: 48px; background: var(--coral);
+      border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 700; color: white;
+    }
+    .cta-btn:hover { opacity: 0.9; }
+    .cta-note {
+      font-size: 11px; color: rgba(255,255,255,0.3); text-align: center;
+    }
+
+    /* ─── FOOTER ─── */
+    .footer {
+      max-width: 1136px; margin: 0 auto; width: calc(100% - 48px);
+      padding: 32px 0 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 800; font-size: 14px; color: var(--text-secondary);
+    }
+    .footer-links {
+      display: flex; gap: 24px;
+    }
+    .footer-link { font-size: 12px; color: var(--grey-1); }
+    .footer-link:hover { color: var(--dark); }
+    .footer-copy { font-size: 11px; color: var(--grey-1); }
+
+    /* ─── DISCOUNT RIBBON ─── */
+    .discount-ribbon {
+      background: linear-gradient(90deg, var(--flash-orange), #ff9500);
+      padding: 4px 10px; border-radius: 6px;
+      font-size: 10px; font-weight: 800; color: white; letter-spacing: -0.1px;
+      flex-shrink: 0;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-right { display: none; }
+      .opp-stats { grid-template-columns: 1fr; gap: 8px; }
+      .hiw-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+      .hiw-step, .hiw-step:last-child, .hiw-step:not(:first-child):not(:last-child) {
+        border-right: none; padding: 0;
+      }
+      .shows-grid { grid-template-columns: 1fr 1fr; }
+      .quote-inner { grid-template-columns: 1fr; }
+      .cta-section { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     TOP BAR
+════════════════════════════════════════ -->
+<header class="top-bar">
+  <a class="top-bar__logo" href="#">
+    <span class="logo-mark">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <circle cx="6" cy="6" r="4.5" stroke="white" stroke-width="1.5"/>
+        <circle cx="6" cy="6" r="1.5" fill="white"/>
+      </svg>
+    </span>
+    SpotsNow
+  </a>
+  <nav class="top-bar__nav">
+    <button class="top-bar__nav-link">Browse Shows</button>
+    <button class="top-bar__nav-link">How It Works</button>
+    <button class="top-bar__nav-link">Pricing</button>
+    <button class="top-bar__nav-link">For Publishers</button>
+  </nav>
+  <div class="top-bar__actions">
+    <button class="login-btn">Login</button>
+    <button class="signup-btn">Get Started Free</button>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- ═══════════════════════════════════════
+       HERO
+  ════════════════════════════════════════ -->
+  <div class="page-card page-card--first">
+    <div class="hero">
+
+      <!-- Left: copy + form -->
+      <div class="hero-left">
+        <div class="hero-eyebrow">
+          <span class="hero-eyebrow-dot">
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+              <circle cx="4" cy="4" r="3" fill="white"/>
+            </svg>
+          </span>
+          The most underpriced channel in marketing
+        </div>
+
+        <h1 class="hero-heading">
+          Plan & launch podcast campaigns with <em>AI intelligence</em>
+        </h1>
+
+        <p class="hero-sub">
+          Host-read podcast ads deliver <strong>4.2x ROAS</strong> — outperforming social, search, and display.
+          SpotsNow puts you in the game in minutes: browse 8,500+ shows, add to cart, upload your brief, and go live.
+        </p>
+
+        <div class="hero-form">
+          <div class="hero-input-row">
+            <input class="hero-input" type="email" placeholder="Enter your work email" />
+            <button class="hero-cta">Start Campaign →</button>
+          </div>
+          <div class="hero-trust">
+            <div class="hero-trust-avatars">
+              <div class="hero-trust-avatar" style="background:#6c63ff;">JH</div>
+              <div class="hero-trust-avatar" style="background:#ff6b6b;">MK</div>
+              <div class="hero-trust-avatar" style="background:#0d6832;">RL</div>
+              <div class="hero-trust-avatar" style="background:#ff6b00;">SA</div>
+            </div>
+            Trusted by 20,000+ brands · No setup fees · Live in 48hrs
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: mini campaign preview -->
+      <div class="hero-right">
+        <p class="hero-right__label">Your campaign forecast</p>
+        <div class="hero-stats-grid">
+          <div class="stat-box stat-box--light">
+            <span class="stat-box__label">Impressions</span>
+            <span class="stat-box__value">203K</span>
+          </div>
+          <div class="stat-box stat-box--dark">
+            <span class="stat-box__label">Potential Sales</span>
+            <span class="stat-box__value">$23,435</span>
+          </div>
+          <div class="stat-box stat-box--light">
+            <span class="stat-box__label">Est. ROAS</span>
+            <span class="stat-box__value">2.9x</span>
+          </div>
+          <div class="stat-box stat-box--light">
+            <span class="stat-box__label">Est. Spend</span>
+            <span class="stat-box__value">$14,023</span>
+          </div>
+        </div>
+
+        <p class="hero-right__label" style="margin-top:4px;">AI-matched shows</p>
+
+        <div class="hero-mini-card">
+          <div class="hero-mini-thumb" style="background: linear-gradient(135deg,#667eea,#764ba2);">DS</div>
+          <div class="hero-mini-info">
+            <p class="hero-mini-title">The Daily Stoic</p>
+            <div class="hero-mini-row">
+              <span class="hero-mini-pill">Health</span>
+              <span class="hero-mini-score">⬆ 95% match</span>
+              <span class="hero-mini-roas">3.2x ROAS est.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-mini-card">
+          <div class="hero-mini-thumb" style="background: linear-gradient(135deg,#f093fb,#f5576c);">HH</div>
+          <div class="hero-mini-info">
+            <p class="hero-mini-title">How I Built This</p>
+            <div class="hero-mini-row">
+              <span class="hero-mini-pill">Business</span>
+              <span class="hero-mini-score">⬆ 91% match</span>
+              <span class="hero-mini-roas">2.8x ROAS est.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-mini-card">
+          <div class="hero-mini-thumb" style="background: linear-gradient(135deg,#4facfe,#00f2fe);">MG</div>
+          <div class="hero-mini-info">
+            <p class="hero-mini-title">My First Million</p>
+            <div class="hero-mini-row">
+              <span class="hero-mini-pill">Finance</span>
+              <span class="hero-mini-score">⬆ 88% match</span>
+              <span class="hero-mini-roas">3.1x ROAS est.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       LOGO STRIP
+  ════════════════════════════════════════ -->
+  <div class="page-card">
+    <div class="logos-section">
+      <p class="logos-label">Brands running campaigns on SpotsNow</p>
+      <div class="logos-row">
+        <span class="logo-pill">BetterHelp</span>
+        <span class="logo-pill">AG1</span>
+        <span class="logo-pill">Squarespace</span>
+        <span class="logo-pill">Shopify</span>
+        <span class="logo-pill">Liquid I.V.</span>
+        <span class="logo-pill">MeUndies</span>
+        <span class="logo-pill">ZipRecruiter</span>
+        <span class="logo-pill">HelloFresh</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       OPPORTUNITY (dark section)
+  ════════════════════════════════════════ -->
+  <div class="opportunity-section">
+    <div class="opp-eyebrow">Why now</div>
+    <h2 class="opp-heading">Host-read ads aren't impressions.<br>They're <em>endorsements</em>.</h2>
+    <p class="opp-sub">
+      There's no skip button. No scrolling past. Just a trusted voice pitching your brand to a loyal,
+      engaged audience. BetterHelp and AG1 built billion-dollar businesses on this — while everyone else
+      was snoozing. The brands winning right now aren't stuck in spreadsheets.
+    </p>
+    <div class="opp-stats">
+      <div class="opp-stat">
+        <div class="opp-stat__num">4.2<span>x</span></div>
+        <div class="opp-stat__label">Average short-term ROAS from podcast ads</div>
+        <div class="opp-stat__sublabel">vs. 3.6x for paid social</div>
+      </div>
+      <div class="opp-stat">
+        <div class="opp-stat__num">50<span>%</span></div>
+        <div class="opp-stat__label">Of podcast ad inventory goes unsold every week</div>
+        <div class="opp-stat__sublabel">We surface those spots at up to 60% off</div>
+      </div>
+      <div class="opp-stat">
+        <div class="opp-stat__num">48<span>hr</span></div>
+        <div class="opp-stat__label">Average time from sign up to your ad going live</div>
+        <div class="opp-stat__sublabel">Fully self-serve. No agencies. No spreadsheets.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       HOW IT WORKS
+  ════════════════════════════════════════ -->
+  <div class="page-card">
+    <div class="hiw-section">
+      <p class="section-eyebrow">How it works</p>
+      <h2 class="section-heading">From idea to live campaign in minutes</h2>
+      <div class="hiw-grid">
+
+        <div class="hiw-step">
+          <div class="hiw-num">1</div>
+          <h3 class="hiw-step__title">AI plans your campaign</h3>
+          <p class="hiw-step__desc">Tell us your brand, budget, and goals. Our AI instantly surfaces the highest-converting shows matched to your audience and category.</p>
+        </div>
+
+        <div class="hiw-step">
+          <div class="hiw-num">2</div>
+          <h3 class="hiw-step__title">Browse & add to cart</h3>
+          <p class="hiw-step__desc">Review AI-matched shows with ROAS estimates, demo matches, and interest scores. Add spots to your cart like any e-commerce checkout.</p>
+        </div>
+
+        <div class="hiw-step">
+          <div class="hiw-num">3</div>
+          <h3 class="hiw-step__title">Upload your talking points</h3>
+          <p class="hiw-step__desc">Upload a brief or talking points. The host reads your ad in their own voice — the most trusted format in digital media.</p>
+        </div>
+
+        <div class="hiw-step">
+          <div class="hiw-num">4</div>
+          <h3 class="hiw-step__title">Track to the dollar</h3>
+          <p class="hiw-step__desc">Our audio pixel tracks conversions to the dollar. Real-time dashboards show ROAS, reach, and performance — just like AdWords.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SHOW CARDS
+  ════════════════════════════════════════ -->
+  <div class="page-card">
+    <div class="shows-section">
+      <div class="shows-header">
+        <div>
+          <p class="section-eyebrow">8,500+ shows analyzed</p>
+          <h2 class="section-heading" style="margin-bottom:0;">High-compatibility shows ready to perform</h2>
+        </div>
+        <button class="shows-browse-link">Browse all shows →</button>
+      </div>
+      <div class="shows-grid">
+
+        <!-- Card 1 -->
+        <div class="campaign-card">
+          <div class="card-top">
+            <div class="card-thumb" style="background:linear-gradient(135deg,#667eea,#764ba2);">DS</div>
+            <div class="card-top-info">
+              <p class="card-title">The Daily Stoic</p>
+              <div class="card-top-row">
+                <span class="cat-pill">Health</span>
+                <span class="match-score">⬆ 95%</span>
+              </div>
+              <button class="price-toggle">Show price ⌄</button>
+            </div>
+          </div>
+          <div class="card-metrics">
+            <div class="card-metric">
+              <span class="metric-label">Episode Size</span>
+              <span class="metric-value">323,453</span>
+            </div>
+            <div class="card-metric">
+              <span class="metric-label">Demo Match</span>
+              <span class="metric-value">85%</span>
+            </div>
+            <div class="card-metric">
+              <span class="metric-label">ROAS Est.</span>
+              <span class="metric-value">3.2x</span>
+            </div>
+            <div class="card-metric">
+              <span class="metric-label">Interest Match</span>
+              <span class="metric-value">90%</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button class="review-btn">Review match</button>
+            <span class="discount-ribbon">−42%</span>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="campaign-card">
+          <div class="card-top">
+            <div class="card-thumb" style="background:linear-gradient(135deg,#f093fb,#f5576c);">HH</div>
+            <div class="card-top-info">
+              <p class="card-title">How I Built This</p>
+              <div class="card-top-row">
+                <span class="cat-pill">Business</span>
+                <span class="match-score">⬆ 91%</span>
+              </div>
+              <button class="price-toggle">Show price ⌄</button>
+            </div>
+          </div>
+          <div class="card-metrics">
+            <div class="card-metric">
+              <span class="metric-label">Episode Size</span>
+              <span class="metric-value">512,000</span>
+            </div>
+            <div class="card-metric">
+              <span class="metric-label">Demo Match</span>
+              <span class="metric-value">82%</span>
+            </div>
+            <div class="card-metric">
+              <span class="metric-label">ROAS Est.</span>
+              <span class="metric-value">2.8x</span>
+            </div>
+            <div class="card-metric">
+              <span class="metric-label">Interest Match</span>
+              <span class="metric-value">87%</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button class="review-btn">Review match</button>
+            <span class="discount-ribbon">−38%</span>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="campaign-card">
+          <div class="card-top">
+            <div class="card-thumb" style="background:linear-gradient(135deg,#4facfe,#00f2fe);">MF</div>
+            <div class="card-top-info">
+              <p class="card-title">My First Million</p>
+              <div class="card-top-row">
+                <span class="cat-pill">Finance</span>
+                <span class="match-score">⬆ 88%</span>
+              </div>
+              <button class="price-toggle">Show price ⌄</button>
+            </div>
+          </div>
+          <div class="card-metrics">
+            <div class="card-metric">
+              <span class="metric-label">Episode Size</span>
+              <span class="metric-value">410,200</span>
+            </div>
+            <div class="card-metric">
+              <span class="metric-label">Demo Match</span>
+              <span class="metric-value">79%</span>
+            </div>
+            <div class="card-metric">
+              <span class="metric-label">ROAS Est.</span>
+              <span class="metric-value">3.1x</span>
+            </div>
+            <div class="card-metric">
+              <span class="metric-label">Interest Match</span>
+              <span class="metric-value">84%</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button class="review-btn">Review match</button>
+            <span class="discount-ribbon">−55%</span>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="campaign-card">
+          <div class="card-top">
+            <div class="card-thumb" style="background:linear-gradient(135deg,#43e97b,#38f9d7);">OD</div>
+            <div class="card-top-info">
+              <p class="card-title">Ologies with Alie Ward</p>
+              <div class="card-top-row">
+                <span class="cat-pill">Science</span>
+                <span class="match-score">⬆ 86%</span>
+              </div>
+              <button class="price-toggle">Show price ⌄</button>
+            </div>
+          </div>
+          <div class="card-metrics">
+            <div class="card-metric">
+              <span class="metric-label">Episode Size</span>
+              <span class="metric-value">285,000</span>
+            </div>
+            <div class="card-metric">
+              <span class="metric-label">Demo Match</span>
+              <span class="metric-value">76%</span>
+            </div>
+            <div class="card-metric">
+              <span class="metric-label">ROAS Est.</span>
+              <span class="metric-value">2.6x</span>
+            </div>
+            <div class="card-metric">
+              <span class="metric-label">Interest Match</span>
+              <span class="metric-value">80%</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button class="review-btn">Review match</button>
+            <span class="discount-ribbon">−60%</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SOCIAL PROOF
+  ════════════════════════════════════════ -->
+  <div class="page-card">
+    <div class="quote-section">
+      <div class="quote-inner">
+        <div class="quote-left">
+          <div class="quote-mark">"</div>
+          <p class="quote-text">We unlocked 3.5x ROAS in 2 months. The AI matching saved us weeks of research — we just picked our shows, uploaded our brief, and it ran.</p>
+          <div class="quote-attr">
+            <div class="quote-avatar" style="background:linear-gradient(135deg,#667eea,#764ba2);">JH</div>
+            <div class="quote-attr-info">
+              <span class="quote-name">Ji Hoon Han</span>
+              <span class="quote-role">Founder, DIY Wrap · 3.5x ROAS in 60 days</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="quote-right">
+          <div class="quote-stat-card">
+            <div class="quote-stat-num">4.2<span>x</span></div>
+            <div class="quote-stat-desc">Average short-term return on ad spend for podcast ads. Higher than social, search, and display.</div>
+          </div>
+          <div class="quote-stat-card quote-stat-card--dark">
+            <div class="quote-stat-num">2B<span>+</span></div>
+            <div class="quote-stat-desc" style="color:rgba(255,255,255,0.5);">Total impressions delivered to highly engaged podcast and YouTube audiences.</div>
+          </div>
+          <div class="quote-stat-card">
+            <div class="quote-stat-num">20<span style="font-size:22px;color:var(--grey-1);">K+</span></div>
+            <div class="quote-stat-desc">Brands that have run campaigns through SpotsNow — from bootstrapped startups to category leaders.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       FINAL CTA
+  ════════════════════════════════════════ -->
+  <div class="cta-section">
+    <div class="cta-left">
+      <div class="cta-eyebrow">Your window is open</div>
+      <h2 class="cta-heading">Podcast ads today are what Meta ads were in 2008.</h2>
+      <p class="cta-sub">
+        Early, underpriced, and full of upside for brands that move now.
+        The spots are discounted. The audience is engaged.
+        The only question is whether you'll be on the show — or wishing you were.
+      </p>
+    </div>
+    <div class="cta-right">
+      <input class="cta-input" type="email" placeholder="Enter your work email" />
+      <button class="cta-btn">Launch Your Campaign Today →</button>
+      <p class="cta-note">No setup fees · Live in 48 hours · Cancel anytime</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="footer-logo">
+      <span class="logo-mark">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <circle cx="6" cy="6" r="4.5" stroke="white" stroke-width="1.5"/>
+          <circle cx="6" cy="6" r="1.5" fill="white"/>
+        </svg>
+      </span>
+      SpotsNow
+    </div>
+    <div class="footer-links">
+      <a class="footer-link" href="#">Browse Shows</a>
+      <a class="footer-link" href="#">How It Works</a>
+      <a class="footer-link" href="#">Pricing</a>
+      <a class="footer-link" href="#">For Publishers</a>
+      <a class="footer-link" href="#">Privacy</a>
+    </div>
+    <span class="footer-copy">© 2026 SpotsNow. All rights reserved.</span>
+  </footer>
+
+</main>
+</body>
+</html>

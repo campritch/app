@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile Card — View Profile Button Mock</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --dark: #0e1323;
+      --grey-1: #707481;
+      --text-primary: #252733;
+      --text-secondary: #5a5f6e;
+      --border: #dee0e4;
+      --border-light: #e8e8e8;
+      --white: #ffffff;
+      --coral: #ff6b6b;
+      --green-bg: #d6f0e0;
+      --green-text: #0d6832;
+      --pill-bg: #f3f4f6;
+      --amber-bg: #fff3cd;
+      --amber-text: #92600a;
+      --red-bg: #fde8e8;
+      --red-text: #b91c1c;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f5f5f3;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 32px;
+      padding: 40px 24px;
+    }
+
+    /* ── SHARED CARD BASE ── */
+    .profile-card {
+      background: var(--white);
+      border-radius: 14px;
+      border: 1px solid var(--border-light);
+      width: 310px;
+      overflow: hidden;
+    }
+
+    /* ── CARD TOP ── */
+    .card-top {
+      display: flex;
+      gap: 10px;
+      padding: 12px 12px 10px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .card-thumb {
+      width: 52px; height: 52px;
+      border-radius: 10px; object-fit: cover; flex-shrink: 0;
+    }
+    .card-top-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .card-title-row { display: flex; align-items: center; gap: 6px; }
+    .card-title {
+      margin: 0; font-size: 14px; font-weight: 700; color: var(--dark);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-title-arrow {
+      color: var(--grey-1); font-size: 13px; flex-shrink: 0; line-height: 1;
+    }
+    .card-top-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .match-score {
+      display: flex; align-items: center; gap: 3px;
+      font-size: 11px; font-weight: 700; color: var(--green-text);
+    }
+    .cat-pill {
+      display: inline-flex; align-items: center; height: 17px; padding: 0 6px;
+      border-radius: 4px; background: var(--green-bg);
+      color: var(--green-text); font-size: 9px; font-weight: 700;
+    }
+
+    /* ── SOCIAL ICONS ROW ── */
+    .social-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .social-icon {
+      width: 18px; height: 18px; color: var(--grey-1);
+      flex-shrink: 0; opacity: 0.7;
+    }
+    .social-icon:hover { opacity: 1; }
+
+    /* ── METRICS ── */
+    .card-metrics {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 0; border-bottom: 1px solid var(--border-light);
+    }
+    .card-metric {
+      padding: 10px 12px; display: flex; flex-direction: column; gap: 3px;
+      border-right: 1px solid var(--border-light);
+    }
+    .card-metric:last-child { border-right: none; }
+    .metric-label {
+      font-size: 9px; font-weight: 600; color: var(--grey-1);
+      text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .metric-value { font-size: 14px; font-weight: 700; color: var(--dark); line-height: 1.2; }
+    .metric-badge {
+      display: inline-flex; align-items: center; height: 14px; padding: 0 5px;
+      border-radius: 3px; font-size: 8px; font-weight: 700;
+      margin-top: 1px; align-self: flex-start;
+    }
+    .metric-badge--red   { background: var(--red-bg);   color: var(--red-text); }
+    .metric-badge--green { background: var(--green-bg);  color: var(--green-text); }
+
+    /* ── ABOUT ── */
+    .card-about {
+      padding: 8px 12px;
+      font-size: 10px; color: var(--text-secondary); line-height: 1.5;
+      border-bottom: 1px solid var(--border-light);
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .card-about strong { color: var(--dark); }
+
+    /* ── FOOTER ── */
+    .card-footer {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 12px;
+    }
+    .view-profile-btn {
+      flex: 1; height: 32px;
+      background: var(--white);
+      border: 1px solid var(--border); border-radius: 7px;
+      font-size: 11px; font-weight: 600; color: var(--dark);
+      font-family: inherit; cursor: pointer;
+    }
+    .view-profile-btn:hover { background: var(--pill-bg); }
+
+    /* ─── LABEL ─── */
+    .variant-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px; font-weight: 600; color: var(--grey-1);
+      text-align: center; margin-bottom: 8px;
+      letter-spacing: 0.4px; text-transform: uppercase;
+    }
+    .variant-wrap { display: flex; flex-direction: column; }
+  </style>
+</head>
+<body>
+
+  <!-- BEFORE -->
+  <div class="variant-wrap">
+    <p class="variant-label">Before</p>
+    <article class="profile-card">
+      <div class="card-top">
+        <img src="https://picsum.photos/seed/food/52/52" alt="" class="card-thumb" />
+        <div class="card-top-info">
+          <div class="card-title-row">
+            <h4 class="card-title">Realfoodology</h4>
+            <span class="card-title-arrow">↗</span>
+          </div>
+          <div class="card-top-row">
+            <span class="match-score">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M6 1L2 6h3.5L4 9l4-5H4.5L6 1z" fill="currentColor"/></svg>
+              95% Match
+            </span>
+          </div>
+          <div class="card-top-row" style="margin-top:1px">
+            <span class="cat-pill">Health</span>
+            <span class="cat-pill">Business</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- View full profile button crammed into social row — the awkward bit -->
+      <div class="social-row" style="gap:10px">
+        <button style="height:26px;padding:0 10px;background:var(--white);border:1px solid var(--border);border-radius:6px;font-size:10px;font-weight:600;color:var(--dark);font-family:inherit;cursor:pointer;flex-shrink:0;">
+          View full profile
+        </button>
+        <!-- social icons -->
+        <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.11 7.86l-1.27 5.98c-.09.42-.34.52-.68.32l-1.88-1.39-1.03.99a.47.47 0 01-.38.19l.14-1.96 3.51-3.17c.15-.14-.03-.21-.24-.07L8.59 14.3l-1.85-.58c-.4-.13-.41-.4.09-.59l7.22-2.78c.33-.12.63.08.51.55z"/></svg>
+        <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M18.942 5.556a16.3 16.3 0 00-4.126-1.3 12.04 12.04 0 00-.529 1.1 15.175 15.175 0 00-4.573 0 11.586 11.586 0 00-.535-1.1 16.274 16.274 0 00-4.129 1.3 17.392 17.392 0 00-2.868 11.662 15.785 15.785 0 004.963 2.521 11.73 11.73 0 001.026-1.674 10.565 10.565 0 01-1.666-.805c.14-.102.276-.209.41-.314a11.33 11.33 0 009.694 0c.135.105.27.212.41.314-.53.314-1.08.58-1.669.806a11.72 11.72 0 001.025 1.673 15.75 15.75 0 004.967-2.52 17.38 17.38 0 00-2.866-11.662z"/></svg>
+        <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.742l7.774-8.903L2.15 2.25h6.963l4.266 5.64L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg>
+        <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V9.01a8.16 8.16 0 004.77 1.52V7.08a4.85 4.85 0 01-1-.39z"/></svg>
+        <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      </div>
+
+      <div class="card-metrics">
+        <div class="card-metric">
+          <span class="metric-label">Impressions per ep</span>
+          <span class="metric-value">323,453</span>
+        </div>
+        <div class="card-metric">
+          <span class="metric-label">Overall Match</span>
+          <span class="metric-value">84%</span>
+        </div>
+        <div class="card-metric">
+          <span class="metric-label">Demographic Match</span>
+          <span class="metric-value">67%</span>
+        </div>
+      </div>
+
+      <div class="card-metrics" style="border-bottom:none;">
+        <div class="card-metric">
+          <span class="metric-label">Ad Load</span>
+          <span class="metric-value">15%</span>
+          <span class="metric-badge metric-badge--red">HIGH</span>
+        </div>
+        <div class="card-metric">
+          <span class="metric-label">Host Read %</span>
+          <span class="metric-value">54%</span>
+          <span class="metric-badge metric-badge--green">GREAT</span>
+        </div>
+        <div class="card-metric">
+          <span class="metric-label">Av brand repeat</span>
+          <span class="metric-value">4.5</span>
+          <span class="metric-badge metric-badge--green">GREAT</span>
+        </div>
+      </div>
+
+      <div class="card-about" style="border-top:1px solid var(--border-light)">
+        <strong>About:</strong> The New Yorker Radio Hour, hosted by David Remnick, extends the…
+      </div>
+    </article>
+  </div>
+
+  <!-- AFTER -->
+  <div class="variant-wrap">
+    <p class="variant-label">After</p>
+    <article class="profile-card">
+      <div class="card-top">
+        <img src="https://picsum.photos/seed/food/52/52" alt="" class="card-thumb" />
+        <div class="card-top-info">
+          <div class="card-title-row">
+            <h4 class="card-title">Realfoodology</h4>
+            <span class="card-title-arrow">↗</span>
+          </div>
+          <div class="card-top-row">
+            <span class="match-score">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M6 1L2 6h3.5L4 9l4-5H4.5L6 1z" fill="currentColor"/></svg>
+              95% Match
+            </span>
+            <span class="cat-pill">Health</span>
+            <span class="cat-pill">Business</span>
+          </div>
+          <!-- Social icons live naturally under the title info -->
+          <div style="display:flex;align-items:center;gap:7px;margin-top:2px;">
+            <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.11 7.86l-1.27 5.98c-.09.42-.34.52-.68.32l-1.88-1.39-1.03.99a.47.47 0 01-.38.19l.14-1.96 3.51-3.17c.15-.14-.03-.21-.24-.07L8.59 14.3l-1.85-.58c-.4-.13-.41-.4.09-.59l7.22-2.78c.33-.12.63.08.51.55z"/></svg>
+            <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M18.942 5.556a16.3 16.3 0 00-4.126-1.3 12.04 12.04 0 00-.529 1.1 15.175 15.175 0 00-4.573 0 11.586 11.586 0 00-.535-1.1 16.274 16.274 0 00-4.129 1.3 17.392 17.392 0 00-2.868 11.662 15.785 15.785 0 004.963 2.521 11.73 11.73 0 001.026-1.674 10.565 10.565 0 01-1.666-.805c.14-.102.276-.209.41-.314a11.33 11.33 0 009.694 0c.135.105.27.212.41.314-.53.314-1.08.58-1.669.806a11.72 11.72 0 001.025 1.673 15.75 15.75 0 004.967-2.52 17.38 17.38 0 00-2.866-11.662z"/></svg>
+            <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.742l7.774-8.903L2.15 2.25h6.963l4.266 5.64L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg>
+            <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+            <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V9.01a8.16 8.16 0 004.77 1.52V7.08a4.85 4.85 0 01-1-.39z"/></svg>
+            <svg class="social-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-metrics">
+        <div class="card-metric">
+          <span class="metric-label">Impressions per ep</span>
+          <span class="metric-value">323,453</span>
+        </div>
+        <div class="card-metric">
+          <span class="metric-label">Overall Match</span>
+          <span class="metric-value">84%</span>
+        </div>
+        <div class="card-metric">
+          <span class="metric-label">Demographic Match</span>
+          <span class="metric-value">67%</span>
+        </div>
+      </div>
+
+      <div class="card-metrics" style="border-bottom:none;">
+        <div class="card-metric">
+          <span class="metric-label">Ad Load</span>
+          <span class="metric-value">15%</span>
+          <span class="metric-badge metric-badge--red">HIGH</span>
+        </div>
+        <div class="card-metric">
+          <span class="metric-label">Host Read %</span>
+          <span class="metric-value">54%</span>
+          <span class="metric-badge metric-badge--green">GREAT</span>
+        </div>
+        <div class="card-metric">
+          <span class="metric-label">Av brand repeat</span>
+          <span class="metric-value">4.5</span>
+          <span class="metric-badge metric-badge--green">GREAT</span>
+        </div>
+      </div>
+
+      <div class="card-about" style="border-top:1px solid var(--border-light)">
+        <strong>About:</strong> The New Yorker Radio Hour, hosted by David Remnick, extends the…
+      </div>
+
+      <!-- View profile button gets its own footer — natural home for a CTA -->
+      <div class="card-footer">
+        <button class="view-profile-btn">View full profile ↗</button>
+      </div>
+    </article>
+  </div>
+
+</body>
+</html>

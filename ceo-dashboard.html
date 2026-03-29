@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CEO Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --dark: #0e1323;
+      --grey-1: #707481;
+      --text-primary: #252733;
+      --text-secondary: #5a5f6e;
+      --border: #dee0e4;
+      --border-light: #e8e8e8;
+      --white: #ffffff;
+      --coral: #ff6b6b;
+      --coral-light: #fff1f1;
+      --btn-dark: #111111;
+      --green-bg: #d6f0e0;
+      --green-text: #0d6832;
+      --pill-bg: #f3f4f6;
+      --bg: #f5f5f3;
+      --week-accent: #4f6ef7;
+      --week-light: #eef1ff;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; overflow: hidden; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.4; color: var(--dark);
+      background: var(--bg); -webkit-font-smoothing: antialiased;
+    }
+    button, textarea, input { font-family: inherit; }
+
+    /* ── TOP BAR ── */
+    .top-bar {
+      height: 56px; display: flex; align-items: center; gap: 16px;
+      padding: 0 24px; background: var(--white);
+      border-bottom: 1px solid var(--border-light); flex-shrink: 0;
+    }
+    .top-bar__logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 800; font-size: 15px; color: var(--dark); letter-spacing: -0.3px;
+    }
+    .logo-mark {
+      width: 22px; height: 22px; border-radius: 6px;
+      background: var(--coral); display: flex; align-items: center; justify-content: center;
+    }
+    .top-bar__date { flex: 1; text-align: center; font-size: 13px; color: var(--grey-1); font-weight: 500; }
+    .top-bar__actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 32px; padding: 0 12px;
+      background: none; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 12px; font-weight: 600; color: var(--text-primary); cursor: pointer;
+    }
+    .btn-outline:hover { background: var(--pill-bg); }
+
+    /* ── PAGE SHELL ── */
+    .page-shell { display: flex; flex-direction: column; height: 100vh; }
+    .page-body {
+      display: flex; flex: 1; overflow: hidden;
+    }
+
+    /* ── LEFT PANEL (tasks) ── */
+    .left-panel {
+      flex: 1; overflow-y: auto; padding: 20px;
+      display: flex; flex-direction: column; gap: 16px;
+      min-width: 0;
+    }
+
+    /* ── REMINDER BANNER ── */
+    .reminder-banner {
+      background: linear-gradient(135deg, #0e1323 0%, #1e2540 100%);
+      border-radius: 14px; padding: 14px 18px;
+      display: flex; align-items: center; gap: 14px; color: white; flex-shrink: 0;
+    }
+    .reminder-banner.hidden { display: none; }
+    .reminder-icon {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: rgba(255,107,107,0.2); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 16px;
+    }
+    .reminder-text { flex: 1; }
+    .reminder-text strong { display: block; font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+    .reminder-text span { font-size: 11px; color: rgba(255,255,255,0.6); }
+    .reminder-dismiss {
+      background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 7px; padding: 5px 12px; font-size: 11px; font-weight: 600; color: white; cursor: pointer;
+    }
+    .reminder-dismiss:hover { background: rgba(255,255,255,0.2); }
+
+    /* ── SECTION CARDS ── */
+    .section-card {
+      background: var(--white); border-radius: 16px;
+      border: 1px solid var(--border-light); overflow: hidden; flex-shrink: 0;
+    }
+    .section-header {
+      display: flex; align-items: center; gap: 8px; padding: 16px 20px 14px;
+    }
+    .section-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .section-dot--critical { background: var(--coral); }
+    .section-dot--week { background: var(--week-accent); }
+    .section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-secondary); }
+    .section-count {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 18px; height: 18px; padding: 0 5px;
+      border-radius: 9px; font-size: 10px; font-weight: 700;
+    }
+    .section-count--critical { background: var(--coral-light); color: var(--coral); }
+    .section-count--week { background: var(--week-light); color: var(--week-accent); }
+
+    /* ── TASK LIST ── */
+    .task-list { border-top: 1px solid var(--border-light); }
+    .task-row {
+      display: flex; align-items: flex-start;
+      border-bottom: 1px solid var(--border-light); transition: background 0.1s; position: relative;
+    }
+    .task-row:last-child { border-bottom: none; }
+    .task-row:hover { background: #fafafa; }
+    .task-check {
+      width: 46px; height: 46px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; cursor: pointer;
+    }
+    .task-check__circle {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid var(--border); background: none;
+      display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+    }
+    .task-check:hover .task-check__circle { border-color: var(--coral); }
+    .task-check__circle svg { display: none; }
+    .task-check--done .task-check__circle { background: var(--green-bg); border-color: var(--green-text); }
+    .task-check--done .task-check__circle svg { display: block; }
+    .task-row__body { flex: 1; min-width: 0; padding: 12px 0; cursor: pointer; }
+    .task-row__title { font-size: 13px; font-weight: 600; color: var(--dark); line-height: 1.3; }
+    .task-row--done .task-row__title { text-decoration: line-through; opacity: 0.5; }
+    .task-row__sub { display: flex; align-items: center; gap: 6px; margin-top: 3px; flex-wrap: wrap; }
+    .task-row__desc { font-size: 11px; color: var(--text-secondary); }
+    .task-tag--link {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 5px;
+      background: var(--pill-bg); color: var(--grey-1); text-decoration: none;
+    }
+    .task-tag--link:hover { background: var(--dark); color: white; }
+    .task-row__actions {
+      display: flex; align-items: center; gap: 1px;
+      padding: 0 10px; opacity: 0; transition: opacity 0.1s; flex-shrink: 0; align-self: center;
+    }
+    .task-row:hover .task-row__actions { opacity: 1; }
+    .row-action-btn {
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; color: var(--grey-1); cursor: pointer;
+    }
+    .row-action-btn:hover { background: var(--pill-bg); color: var(--dark); }
+    .row-action-btn--delete:hover { background: var(--coral-light); color: var(--coral); }
+
+    /* ── TASK EDIT MODE ── */
+    .task-edit-row {
+      border-bottom: 1px solid var(--border-light); padding: 10px 14px 14px 46px; background: #fafeff;
+    }
+    .task-edit-row:last-child { border-bottom: none; }
+    .edit-title-input {
+      width: 100%; border: none; outline: none; background: none;
+      font-size: 13px; font-weight: 600; color: var(--dark);
+      padding: 0 0 7px 0; border-bottom: 2px solid var(--dark); margin-bottom: 10px;
+    }
+    .edit-fields { display: flex; flex-direction: column; gap: 6px; }
+    .edit-field { display: flex; align-items: flex-start; gap: 7px; }
+    .edit-field__icon { width: 14px; height: 14px; flex-shrink: 0; margin-top: 8px; color: var(--grey-1); }
+    .edit-field__input, .edit-field__textarea {
+      flex: 1; border: none; outline: none; background: none;
+      font-size: 12px; color: var(--text-primary); padding: 6px 0;
+      border-bottom: 1px solid var(--border-light); transition: border-color 0.15s;
+    }
+    .edit-field__input:focus, .edit-field__textarea:focus { border-bottom-color: var(--dark); }
+    .edit-field__input::placeholder, .edit-field__textarea::placeholder { color: var(--grey-1); }
+    .edit-field__textarea { resize: none; min-height: 50px; line-height: 1.5; }
+    .edit-actions { display: flex; align-items: center; gap: 7px; margin-top: 12px; }
+    .edit-save-btn {
+      height: 30px; padding: 0 14px; background: var(--btn-dark); border: none;
+      border-radius: 7px; font-size: 12px; font-weight: 700; color: white; cursor: pointer;
+    }
+    .edit-save-btn:hover { background: #2a2a2a; }
+    .edit-cancel-btn {
+      height: 30px; padding: 0 10px; background: none; border: 1px solid var(--border);
+      border-radius: 7px; font-size: 12px; font-weight: 600; color: var(--text-secondary); cursor: pointer;
+    }
+    .edit-cancel-btn:hover { background: var(--pill-bg); }
+    .edit-move-btn {
+      margin-left: auto; height: 30px; padding: 0 10px; background: none;
+      border: 1px solid var(--border); border-radius: 7px; font-size: 12px; font-weight: 600; color: var(--grey-1); cursor: pointer;
+    }
+    .edit-move-btn:hover { background: var(--pill-bg); color: var(--dark); }
+
+    /* ── QUICK ADD ── */
+    .quick-add-bar { border-top: 1px solid var(--border-light); }
+    .quick-add-trigger {
+      display: flex; align-items: center; gap: 9px;
+      width: 100%; padding: 12px 20px;
+      background: none; border: none; text-align: left;
+      color: var(--grey-1); font-size: 13px; cursor: text;
+      border-radius: 0 0 16px 16px; transition: background 0.1s;
+    }
+    .quick-add-trigger:hover { background: #fafafa; color: var(--text-secondary); }
+    .quick-add-active { display: none; align-items: center; gap: 9px; padding: 10px 20px 12px; }
+    .quick-add-active.shown { display: flex; }
+    .quick-add-input {
+      flex: 1; border: none; outline: none; background: none;
+      font-size: 13px; font-weight: 500; color: var(--dark); padding: 3px 0;
+    }
+    .quick-add-input::placeholder { color: var(--grey-1); font-weight: 400; }
+    .quick-add-hint { font-size: 10px; color: var(--grey-1); flex-shrink: 0; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state { padding: 20px; text-align: center; color: var(--grey-1); font-size: 12px; }
+
+    /* ══════════════════════════════════════
+       RIGHT PANEL
+    ══════════════════════════════════════ */
+    .right-panel {
+      width: 360px; flex-shrink: 0;
+      border-left: 1px solid var(--border-light);
+      display: flex; flex-direction: column; background: var(--white);
+      overflow: hidden;
+    }
+
+    /* ── CALENDAR PANEL ── */
+    .cal-panel {
+      display: flex; flex-direction: column;
+      flex: 3; border-bottom: 1px solid var(--border-light); overflow: hidden; min-height: 0;
+    }
+    .cal-nav {
+      display: flex; align-items: center; gap: 0;
+      padding: 12px 16px; border-bottom: 1px solid var(--border-light); flex-shrink: 0;
+    }
+    .cal-nav__btn {
+      width: 30px; height: 30px; border-radius: 7px; border: none;
+      background: none; display: flex; align-items: center; justify-content: center;
+      color: var(--grey-1); font-size: 16px; cursor: pointer;
+    }
+    .cal-nav__btn:hover { background: var(--pill-bg); color: var(--dark); }
+    .cal-nav__label {
+      flex: 1; text-align: center; font-size: 13px; font-weight: 700; color: var(--dark);
+    }
+    .cal-nav__today-btn {
+      height: 26px; padding: 0 10px; background: none;
+      border: 1px solid var(--border); border-radius: 6px;
+      font-size: 11px; font-weight: 600; color: var(--grey-1); cursor: pointer;
+    }
+    .cal-nav__today-btn:hover { background: var(--pill-bg); color: var(--dark); }
+    .cal-timeline-wrap { flex: 1; overflow-y: auto; position: relative; }
+    .cal-timeline { position: relative; }
+    .cal-no-data {
+      padding: 40px 20px; text-align: center; color: var(--grey-1); font-size: 12px;
+    }
+    .cal-no-data strong { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
+
+    /* Hour lines */
+    .hour-row {
+      position: absolute; left: 0; right: 0;
+      display: flex; align-items: flex-start; pointer-events: none;
+    }
+    .hour-label {
+      width: 40px; font-size: 10px; font-weight: 500; color: var(--grey-1);
+      text-align: right; padding-right: 8px; flex-shrink: 0; margin-top: -6px; line-height: 1;
+    }
+    .hour-tick { flex: 1; height: 1px; background: var(--border-light); }
+    .half-tick { flex: 1; height: 1px; background: #f0f0f0; }
+
+    /* Events */
+    .cal-event {
+      position: absolute; border-radius: 6px;
+      padding: 3px 7px; overflow: hidden; cursor: pointer;
+      transition: opacity 0.1s; left: 44px;
+    }
+    .cal-event:hover { opacity: 0.85; }
+    .cal-event--blocked { background: #f0f0f0; border-left: 2px solid #ccc; z-index: 0; }
+    .cal-event--internal { background: var(--week-light); border-left: 2px solid var(--week-accent); z-index: 1; }
+    .cal-event--external { background: var(--coral-light); border-left: 2px solid var(--coral); z-index: 1; }
+    .cal-event--personal { background: #fef9e7; border-left: 2px solid #d69e2e; z-index: 1; }
+    .cal-event__title {
+      font-size: 11px; font-weight: 600; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis; line-height: 1.3;
+    }
+    .cal-event--blocked .cal-event__title { color: #999; }
+    .cal-event--internal .cal-event__title { color: var(--week-accent); }
+    .cal-event--external .cal-event__title { color: var(--coral); }
+    .cal-event--personal .cal-event__title { color: #b7791f; }
+    .cal-event__time { font-size: 10px; opacity: 0.7; margin-top: 1px; }
+    .cal-event--blocked .cal-event__time { color: #aaa; }
+    .cal-event--internal .cal-event__time { color: var(--week-accent); }
+    .cal-event--external .cal-event__time { color: var(--coral); }
+    .cal-event--personal .cal-event__time { color: #b7791f; }
+
+    /* Current time indicator */
+    .cal-now-line {
+      position: absolute; left: 40px; right: 4px; height: 2px;
+      background: var(--coral); z-index: 10; pointer-events: none;
+    }
+    .cal-now-dot {
+      position: absolute; left: 36px; width: 8px; height: 8px;
+      border-radius: 50%; background: var(--coral); margin-top: -3px; z-index: 10;
+    }
+
+    /* ══════════════════════════════════════
+       SLACK PANEL
+    ══════════════════════════════════════ */
+    .slack-panel {
+      flex: 2; display: flex; flex-direction: column; overflow: hidden; min-height: 0;
+    }
+    .slack-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 12px 16px; border-bottom: 1px solid var(--border-light); flex-shrink: 0;
+    }
+    .slack-header__title { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-secondary); }
+    .slack-badge {
+      font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+      background: #fef9e7; color: #b7791f; letter-spacing: 0.3px;
+    }
+    .slack-status {
+      display: flex; align-items: center; gap: 5px;
+      margin-left: auto; font-size: 10px; color: var(--grey-1);
+    }
+    .slack-dot { width: 6px; height: 6px; border-radius: 50%; background: #cbd5e0; }
+    .slack-dot--live { background: #48bb78; }
+    .slack-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+
+    /* Message cards */
+    .slack-msg {
+      border: 1px solid var(--border-light); border-radius: 10px; overflow: hidden;
+    }
+    .slack-msg__head {
+      display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+      background: #fafafa; border-bottom: 1px solid var(--border-light);
+    }
+    .slack-avatar {
+      width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
+      background: var(--dark); display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: white;
+    }
+    .slack-msg__sender { font-size: 12px; font-weight: 600; color: var(--dark); }
+    .slack-msg__time { font-size: 10px; color: var(--grey-1); margin-left: auto; }
+    .slack-msg__text { font-size: 12px; color: var(--text-secondary); padding: 8px 10px; line-height: 1.5; }
+    .slack-msg__draft {
+      padding: 0 10px 10px;
+    }
+    .slack-draft-label { font-size: 10px; font-weight: 600; color: var(--grey-1); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; }
+    .slack-draft-input {
+      width: 100%; border: 1px solid var(--border); border-radius: 7px;
+      padding: 7px 9px; font-size: 12px; color: var(--dark);
+      resize: none; outline: none; min-height: 52px; line-height: 1.5; background: var(--white);
+      transition: border-color 0.15s;
+    }
+    .slack-draft-input:focus { border-color: var(--dark); }
+    .slack-draft-actions { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+    .slack-send-btn {
+      height: 26px; padding: 0 12px; background: var(--btn-dark); border: none;
+      border-radius: 6px; font-size: 11px; font-weight: 700; color: white; cursor: pointer;
+    }
+    .slack-send-btn:hover { background: #2a2a2a; }
+    .slack-copy-btn {
+      height: 26px; padding: 0 10px; background: none; border: 1px solid var(--border);
+      border-radius: 6px; font-size: 11px; font-weight: 600; color: var(--grey-1); cursor: pointer;
+    }
+    .slack-copy-btn:hover { background: var(--pill-bg); color: var(--dark); }
+
+    /* Add message input */
+    .slack-add-bar {
+      border-top: 1px solid var(--border-light); padding: 10px 12px; flex-shrink: 0;
+    }
+    .slack-add-row { display: flex; gap: 6px; align-items: flex-end; }
+    .slack-add-name {
+      width: 80px; flex-shrink: 0; border: 1px solid var(--border); border-radius: 7px;
+      padding: 7px 8px; font-size: 12px; color: var(--dark); outline: none; background: var(--white);
+    }
+    .slack-add-name:focus { border-color: var(--dark); }
+    .slack-add-name::placeholder { color: var(--grey-1); }
+    .slack-add-msg {
+      flex: 1; border: 1px solid var(--border); border-radius: 7px;
+      padding: 7px 9px; font-size: 12px; color: var(--dark); resize: none;
+      outline: none; min-height: 34px; line-height: 1.4; background: var(--white);
+    }
+    .slack-add-msg:focus { border-color: var(--dark); }
+    .slack-add-msg::placeholder { color: var(--grey-1); }
+    .slack-add-btn {
+      width: 32px; height: 32px; flex-shrink: 0; border-radius: 7px;
+      background: var(--btn-dark); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; color: white;
+    }
+    .slack-add-btn:hover { background: #2a2a2a; }
+
+    /* No messages */
+    .slack-empty { padding: 20px; text-align: center; color: var(--grey-1); font-size: 12px; }
+    .slack-empty strong { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     TASK SYNC  — Claude edits this to add tasks.
+     Bump syncVersion each change.
+══════════════════════════════════════════════ -->
+<script id="claude-sync" type="application/json">
+{
+  "syncVersion": 1,
+  "tasks": []
+}
+</script>
+
+<!-- ══════════════════════════════════════════════
+     CALENDAR SYNC — Claude refreshes this with
+     live events per day. Bump syncVersion each change.
+══════════════════════════════════════════════ -->
+<script id="cal-sync" type="application/json">
+{
+  "syncVersion": 1,
+  "days": {
+    "2026-03-23": [
+      {"id":"s6cq4bj1aev77n7a954p761v0s","title":"Blocked","start":"2026-03-23T08:45:00-04:00","end":"2026-03-23T18:15:00-04:00","type":"blocked","numAttendees":0,"link":""},
+      {"id":"68n2vmbtia9i5tfip84a2afvvg","title":"SpotsNow / Sportsculture HQ","start":"2026-03-23T10:00:00-04:00","end":"2026-03-23T10:30:00-04:00","type":"external","numAttendees":4,"link":"https://www.google.com/calendar/event?eid=NjhuMnZtYnRpYTlpNXRmaXA4NGEyYWZ2dmcgY2FtQHNwb3Rzbm93Lmlv"},
+      {"id":"c28vghnie4tbaaqeg5aahchosu","title":"Engineering Sync","start":"2026-03-23T10:15:00-04:00","end":"2026-03-23T10:45:00-04:00","type":"internal","numAttendees":9,"link":"https://www.notion.so/dropstation/Engineering-Sync-22cbb6074fe380299af2ce4f5bcba755"},
+      {"id":"01t3ctcor9outa64708kpv1vph","title":"Station Dev Stand Up","start":"2026-03-23T10:30:00-04:00","end":"2026-03-23T11:00:00-04:00","type":"internal","numAttendees":12,"link":""},
+      {"id":"mtt4kre518v5u7cdou97qih24c","title":"Blocked planning","start":"2026-03-23T11:00:00-04:00","end":"2026-03-23T13:00:00-04:00","type":"blocked","numAttendees":0,"link":""},
+      {"id":"bal23oug3c882vljdi40o3504o","title":"Call gentry","start":"2026-03-23T17:00:00-04:00","end":"2026-03-23T18:00:00-04:00","type":"external","numAttendees":0,"link":""},
+      {"id":"335uu0i0l19qbu3jk959nqchrs","title":"Wave Data","start":"2026-03-23T18:00:00-04:00","end":"2026-03-23T19:00:00-04:00","type":"external","numAttendees":0,"link":""},
+      {"id":"r9g8atq59a3eioj9qb8ctha0l0","title":"Planning for skye","start":"2026-03-23T19:00:00-04:00","end":"2026-03-23T21:45:00-04:00","type":"personal","numAttendees":0,"link":""}
+    ]
+  }
+}
+</script>
+
+<div class="page-shell">
+  <!-- TOP BAR -->
+  <nav class="top-bar">
+    <div class="top-bar__logo">
+      <div class="logo-mark">
+        <svg width="12" height="12" fill="none" viewBox="0 0 12 12">
+          <path d="M2 6h8M6 2v8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      CEO Dashboard
+    </div>
+    <div class="top-bar__date" id="today-date"></div>
+    <div class="top-bar__actions">
+      <button class="btn-outline" onclick="clearCompleted()">Clear done</button>
+    </div>
+  </nav>
+
+  <div class="page-body">
+    <!-- ════ LEFT: TASKS ════ -->
+    <div class="left-panel">
+      <!-- Reminder banner -->
+      <div class="reminder-banner hidden" id="reminder-banner">
+        <div class="reminder-icon">☀️</div>
+        <div class="reminder-text">
+          <strong id="reminder-greeting">Good morning! Set your day.</strong>
+          <span>No critical tasks yet — what needs to happen today?</span>
+        </div>
+        <button class="reminder-dismiss" onclick="dismissReminder()">Got it</button>
+      </div>
+
+      <!-- Critical Today -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-dot section-dot--critical"></div>
+          <span class="section-title">Critical Today</span>
+          <span class="section-count section-count--critical" id="count-critical">0</span>
+        </div>
+        <div class="task-list" id="list-critical"></div>
+        <div class="quick-add-bar">
+          <button class="quick-add-trigger" id="qa-trigger-critical" onclick="activateQuickAdd('critical')">
+            <svg width="13" height="13" fill="none" viewBox="0 0 13 13"><path d="M2.5 6.5h8M6.5 2.5v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Add a task
+          </button>
+          <div class="quick-add-active" id="qa-active-critical">
+            <svg width="13" height="13" fill="none" viewBox="0 0 13 13" style="color:var(--coral);flex-shrink:0"><path d="M2.5 6.5h8M6.5 2.5v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <input class="quick-add-input" id="qa-input-critical" type="text" placeholder="Task name" onkeydown="handleQuickAddKey(event,'critical')" />
+            <span class="quick-add-hint">↵ add · Esc cancel</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- This Week -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-dot section-dot--week"></div>
+          <span class="section-title">This Week</span>
+          <span class="section-count section-count--week" id="count-week">0</span>
+        </div>
+        <div class="task-list" id="list-week"></div>
+        <div class="quick-add-bar">
+          <button class="quick-add-trigger" id="qa-trigger-week" onclick="activateQuickAdd('week')">
+            <svg width="13" height="13" fill="none" viewBox="0 0 13 13"><path d="M2.5 6.5h8M6.5 2.5v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Add a task
+          </button>
+          <div class="quick-add-active" id="qa-active-week">
+            <svg width="13" height="13" fill="none" viewBox="0 0 13 13" style="color:var(--week-accent);flex-shrink:0"><path d="M2.5 6.5h8M6.5 2.5v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <input class="quick-add-input" id="qa-input-week" type="text" placeholder="Task name" onkeydown="handleQuickAddKey(event,'week')" />
+            <span class="quick-add-hint">↵ add · Esc cancel</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ RIGHT: CALENDAR + SLACK ════ -->
+    <div class="right-panel">
+
+      <!-- CALENDAR -->
+      <div class="cal-panel">
+        <div class="cal-nav">
+          <button class="cal-nav__btn" onclick="shiftDay(-1)">‹</button>
+          <span class="cal-nav__label" id="cal-nav-label">Today</span>
+          <button class="cal-nav__btn" onclick="shiftDay(1)">›</button>
+          <button class="cal-nav__today-btn" onclick="goToday()">Today</button>
+        </div>
+        <div class="cal-timeline-wrap" id="cal-timeline-wrap">
+          <div class="cal-timeline" id="cal-timeline"></div>
+        </div>
+      </div>
+
+      <!-- MORNING MESSAGES / SLACK DRAFTS -->
+      <div class="slack-panel">
+        <div class="slack-header">
+          <span class="slack-header__title">Morning Messages</span>
+          <span class="slack-badge">before 9am</span>
+          <div class="slack-status" id="slack-status">
+            <div class="slack-dot" id="slack-dot"></div>
+            <span id="slack-status-label">Manual</span>
+          </div>
+        </div>
+        <div class="slack-body" id="slack-body"></div>
+        <div class="slack-add-bar">
+          <div class="slack-add-row">
+            <input class="slack-add-name" id="slack-add-name" type="text" placeholder="Name" />
+            <textarea class="slack-add-msg" id="slack-add-msg" placeholder="Paste message…" rows="1"
+              onkeydown="handleSlackAddKey(event)" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+            <button class="slack-add-btn" onclick="addSlackMessage()">
+              <svg width="12" height="12" fill="none" viewBox="0 0 12 12"><path d="M2 6h8M6 2v8" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════
+// TASK STATE
+// ══════════════════════════════════
+const LS_KEY = 'ceo_v3';
+const LS_SYNC_KEY = 'ceo_sync_v';
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY)) || { tasks: [] }; }
+  catch { return { tasks: [] }; }
+}
+function saveState(s) { localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+
+function syncClaudeTasks() {
+  const el = document.getElementById('claude-sync');
+  if (!el) return;
+  let data; try { data = JSON.parse(el.textContent); } catch { return; }
+  const lastV = parseInt(localStorage.getItem(LS_SYNC_KEY) || '0', 10);
+  if (data.syncVersion <= lastV) return;
+  const state = loadState();
+  const ids = new Set(state.tasks.map(t => t.id));
+  for (const ct of data.tasks) {
+    if (!ids.has(ct.id)) { state.tasks.push({ ...ct, source: 'claude' }); }
+    else {
+      const idx = state.tasks.findIndex(t => t.id === ct.id);
+      if (idx !== -1 && state.tasks[idx].source === 'claude') {
+        const wasDone = state.tasks[idx].completed;
+        state.tasks[idx] = { ...ct, source: 'claude', completed: wasDone };
+      }
+    }
+  }
+  localStorage.setItem(LS_SYNC_KEY, data.syncVersion);
+  saveState(state);
+}
+
+// ══════════════════════════════════
+// DATE + REMINDER
+// ══════════════════════════════════
+function setupDate() {
+  const now = new Date();
+  document.getElementById('today-date').textContent = now.toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+  });
+  const today = now.toDateString();
+  if (localStorage.getItem('ceo_last_visit') !== today) {
+    localStorage.setItem('ceo_last_visit', today);
+    const state = loadState();
+    if (!state.tasks.some(t => t.section === 'critical' && !t.completed)) {
+      const h = now.getHours();
+      const g = h < 12 ? 'Good morning!' : h < 17 ? 'Good afternoon!' : 'Good evening!';
+      document.getElementById('reminder-greeting').textContent = `${g} Set your priorities for today.`;
+      document.getElementById('reminder-banner').classList.remove('hidden');
+    }
+  }
+}
+function dismissReminder() { document.getElementById('reminder-banner').classList.add('hidden'); }
+
+// ══════════════════════════════════
+// TASK RENDER
+// ══════════════════════════════════
+let expandedId = null;
+
+function renderAll() {
+  const state = loadState();
+  const critical = state.tasks.filter(t => t.section === 'critical');
+  const week = state.tasks.filter(t => t.section === 'week');
+  renderList('list-critical', critical);
+  renderList('list-week', week);
+  document.getElementById('count-critical').textContent = critical.filter(t => !t.completed).length;
+  document.getElementById('count-week').textContent = week.filter(t => !t.completed).length;
+}
+
+function renderList(listId, tasks) {
+  const list = document.getElementById(listId);
+  if (!tasks.length) { list.innerHTML = '<div class="empty-state">No tasks yet — add one below</div>'; return; }
+  const sorted = [...tasks].sort((a, b) => a.completed === b.completed ? 0 : a.completed ? 1 : -1);
+  list.innerHTML = sorted.map(t => t.id === expandedId ? editRowHTML(t) : viewRowHTML(t)).join('');
+}
+
+function esc(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function viewRowHTML(task) {
+  const done = task.completed;
+  const otherSection = task.section === 'critical' ? 'week' : 'critical';
+  const moveTitle = task.section === 'critical' ? 'Move to Week' : 'Make Critical';
+  const linkTag = task.link
+    ? `<a class="task-tag--link" href="${esc(task.link)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+         <svg width="9" height="9" fill="none" viewBox="0 0 10 10"><path d="M4 2H2a1 1 0 00-1 1v5a1 1 0 001 1h5a1 1 0 001-1V6M6 1h3m0 0v3M9 1 5 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+         Link
+       </a>` : '';
+  const descHTML = task.description ? `<span class="task-row__desc">${esc(task.description)}</span>` : '';
+  const sub = (linkTag || descHTML) ? `<div class="task-row__sub">${descHTML}${linkTag}</div>` : '';
+  return `
+    <div class="task-row ${done ? 'task-row--done' : ''}" id="row-${task.id}">
+      <button class="task-check ${done ? 'task-check--done' : ''}" onclick="toggleTask('${task.id}')">
+        <div class="task-check__circle">
+          <svg width="9" height="9" fill="none" viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3" stroke="#0d6832" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </button>
+      <div class="task-row__body" onclick="startEdit('${task.id}')">
+        <div class="task-row__title">${esc(task.title)}</div>
+        ${sub}
+      </div>
+      <div class="task-row__actions">
+        <button class="row-action-btn" onclick="startEdit('${task.id}')" title="Edit">
+          <svg width="12" height="12" fill="none" viewBox="0 0 12 12"><path d="M8.5 1.5l2 2-6.5 6.5H2v-2l6.5-6.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="row-action-btn" onclick="moveTask('${task.id}','${otherSection}')" title="${moveTitle}">
+          <svg width="12" height="12" fill="none" viewBox="0 0 12 12"><path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="row-action-btn row-action-btn--delete" onclick="deleteTask('${task.id}')" title="Delete">
+          <svg width="12" height="12" fill="none" viewBox="0 0 12 12"><path d="M2 4h8M5 4V3h2v1M5.5 6v3.5M6.5 6v3.5M2.5 4l.5 6a1 1 0 001 1h4a1 1 0 001-1l.5-6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>`;
+}
+
+function editRowHTML(task) {
+  const otherSection = task.section === 'critical' ? 'week' : 'critical';
+  const moveLabel = task.section === 'critical' ? 'Move to Week' : 'Make Critical';
+  return `
+    <div class="task-edit-row" id="row-${task.id}">
+      <input class="edit-title-input" id="edit-title-${task.id}" value="${esc(task.title)}" placeholder="Task name" onkeydown="handleEditKey(event,'${task.id}')" />
+      <div class="edit-fields">
+        <div class="edit-field">
+          <svg class="edit-field__icon" fill="none" viewBox="0 0 14 14"><path d="M2 7h10M7 2v10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          <input class="edit-field__input" id="edit-desc-${task.id}" value="${esc(task.description||'')}" placeholder="Description" onkeydown="if(event.key==='Enter'){event.preventDefault();saveEdit('${task.id}')}" />
+        </div>
+        <div class="edit-field">
+          <svg class="edit-field__icon" fill="none" viewBox="0 0 14 14"><path d="M2 4h10M2 7h10M2 10h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          <textarea class="edit-field__textarea" id="edit-notes-${task.id}" placeholder="Notes" rows="2">${esc(task.notes||'')}</textarea>
+        </div>
+        <div class="edit-field">
+          <svg class="edit-field__icon" fill="none" viewBox="0 0 14 14"><path d="M8.5 2H12v3.5M12 2 7 7M5.5 3.5H3a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <input class="edit-field__input" id="edit-link-${task.id}" value="${esc(task.link||'')}" placeholder="Link URL" type="url" onkeydown="if(event.key==='Enter'){event.preventDefault();saveEdit('${task.id}')}" />
+        </div>
+      </div>
+      <div class="edit-actions">
+        <button class="edit-save-btn" onclick="saveEdit('${task.id}')">Save</button>
+        <button class="edit-cancel-btn" onclick="cancelEdit()">Cancel</button>
+        <button class="edit-move-btn" onclick="moveTask('${task.id}','${otherSection}');cancelEdit()">${moveLabel}</button>
+      </div>
+    </div>`;
+}
+
+function startEdit(id) {
+  expandedId = id; renderAll();
+  setTimeout(() => { const i = document.getElementById('edit-title-'+id); if(i){i.focus();i.selectionStart=i.selectionEnd=i.value.length;} }, 0);
+}
+function cancelEdit() { expandedId = null; renderAll(); }
+function saveEdit(id) {
+  const title = (document.getElementById('edit-title-'+id)?.value||'').trim();
+  if (!title) return;
+  const state = loadState();
+  const task = state.tasks.find(t => t.id === id);
+  if (task) {
+    task.title = title;
+    task.description = (document.getElementById('edit-desc-'+id)?.value||'').trim();
+    task.notes = (document.getElementById('edit-notes-'+id)?.value||'').trim();
+    task.link = (document.getElementById('edit-link-'+id)?.value||'').trim();
+    task.source = 'ui'; task.updatedAt = new Date().toISOString();
+  }
+  saveState(state); expandedId = null; renderAll();
+}
+function handleEditKey(e, id) {
+  if (e.key === 'Enter') { e.preventDefault(); saveEdit(id); }
+  if (e.key === 'Escape') cancelEdit();
+}
+
+// ── Quick add ──
+function activateQuickAdd(section) {
+  if (expandedId) cancelEdit();
+  document.getElementById('qa-trigger-'+section).style.display = 'none';
+  document.getElementById('qa-active-'+section).classList.add('shown');
+  document.getElementById('qa-input-'+section).focus();
+}
+function deactivateQuickAdd(section) {
+  document.getElementById('qa-trigger-'+section).style.display = '';
+  document.getElementById('qa-active-'+section).classList.remove('shown');
+  document.getElementById('qa-input-'+section).value = '';
+}
+function commitQuickAdd(section) {
+  const val = document.getElementById('qa-input-'+section).value.trim();
+  if (val) {
+    const state = loadState();
+    state.tasks.push({ id:'ui-'+Date.now(), source:'ui', title:val, section, link:'', description:'', notes:'', completed:false, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() });
+    saveState(state); renderAll();
+  }
+  deactivateQuickAdd(section);
+}
+function handleQuickAddKey(e, section) {
+  if (e.key === 'Enter') { e.preventDefault(); commitQuickAdd(section); }
+  if (e.key === 'Escape') deactivateQuickAdd(section);
+}
+
+// ── Task actions ──
+function toggleTask(id) {
+  const state = loadState(); const t = state.tasks.find(t=>t.id===id);
+  if(t) t.completed = !t.completed; saveState(state); renderAll();
+}
+function deleteTask(id) {
+  if(expandedId===id) expandedId=null;
+  const state = loadState(); state.tasks = state.tasks.filter(t=>t.id!==id);
+  saveState(state); renderAll();
+}
+function moveTask(id, newSection) {
+  const state = loadState(); const t = state.tasks.find(t=>t.id===id);
+  if(t) t.section = newSection; saveState(state); renderAll();
+}
+function clearCompleted() {
+  const state = loadState(); state.tasks = state.tasks.filter(t=>!t.completed);
+  saveState(state); expandedId=null; renderAll();
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape'&&expandedId) cancelEdit(); });
+
+// ══════════════════════════════════
+// CALENDAR
+// ══════════════════════════════════
+const START_HOUR = 7;   // 7am
+const END_HOUR = 22;    // 10pm
+const PX_PER_HOUR = 52;
+const TIMELINE_H = (END_HOUR - START_HOUR) * PX_PER_HOUR;
+
+let calData = {};
+let calOffset = 0; // days from today
+
+function loadCalData() {
+  const el = document.getElementById('cal-sync');
+  if (!el) return;
+  try { calData = JSON.parse(el.textContent).days || {}; } catch {}
+}
+
+function dateKeyFromOffset(offset) {
+  const d = new Date(); d.setHours(0,0,0,0);
+  d.setDate(d.getDate() + offset);
+  return d.toISOString().slice(0, 10);
+}
+
+function shiftDay(delta) { calOffset += delta; renderCalendar(); }
+function goToday() { calOffset = 0; renderCalendar(); }
+
+function renderCalendar() {
+  const key = dateKeyFromOffset(calOffset);
+  const d = new Date(); d.setDate(d.getDate() + calOffset);
+  const label = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  document.getElementById('cal-nav-label').textContent = calOffset === 0 ? `Today — ${label}` : label;
+
+  const wrap = document.getElementById('cal-timeline-wrap');
+  const timeline = document.getElementById('cal-timeline');
+  const events = calData[key];
+
+  if (!events) {
+    timeline.style.height = '';
+    timeline.innerHTML = `<div class="cal-no-data"><strong>No calendar data</strong>Ask Claude to load ${label}</div>`;
+    return;
+  }
+
+  timeline.style.height = TIMELINE_H + 'px';
+
+  // Build HTML
+  let html = '';
+
+  // Hour lines + half-hour lines
+  for (let h = START_HOUR; h <= END_HOUR; h++) {
+    const top = (h - START_HOUR) * PX_PER_HOUR;
+    const label = h === 0 ? '12am' : h < 12 ? `${h}am` : h === 12 ? '12pm' : `${h-12}pm`;
+    html += `<div class="hour-row" style="top:${top}px"><span class="hour-label">${label}</span><div class="hour-tick"></div></div>`;
+    if (h < END_HOUR) {
+      const halfTop = top + PX_PER_HOUR / 2;
+      html += `<div class="hour-row" style="top:${halfTop}px"><span class="hour-label"></span><div class="half-tick"></div></div>`;
+    }
+  }
+
+  // Layout events (blocked as background, rest computed for columns)
+  const blocked = events.filter(e => e.type === 'blocked');
+  const regular = events.filter(e => e.type !== 'blocked');
+
+  // Blocked events — full width background
+  for (const ev of blocked) {
+    const pos = eventPos(ev.start, ev.end);
+    if (!pos) continue;
+    html += `<div class="cal-event cal-event--blocked" style="top:${pos.top}px;height:${pos.height}px;right:4px;" onclick="openCalEvent('${esc(ev.link)}')">
+      <div class="cal-event__title">${esc(ev.title)}</div>
+    </div>`;
+  }
+
+  // Compute columns for regular events
+  const laidOut = computeColumns(regular);
+  const rightPad = 4;
+  const leftBase = 44;
+  const availWidth = 360 - leftBase - rightPad; // approximate right panel width
+
+  for (const ev of laidOut) {
+    const pos = eventPos(ev.start, ev.end);
+    if (!pos) continue;
+    const colWidth = availWidth / ev._totalCols;
+    const left = leftBase + ev._col * colWidth;
+    const width = colWidth - 3;
+    const attendeeStr = ev.numAttendees > 0 ? ` · ${ev.numAttendees} people` : '';
+    const timeStr = fmtTime(ev.start) + (pos.height > 30 ? '–' + fmtTime(ev.end) : '');
+    html += `<div class="cal-event cal-event--${ev.type}" style="top:${pos.top}px;height:${pos.height}px;left:${left}px;width:${width}px;" onclick="openCalEvent('${esc(ev.link)}')">
+      <div class="cal-event__title">${esc(ev.title)}</div>
+      ${pos.height > 28 ? `<div class="cal-event__time">${timeStr}${attendeeStr}</div>` : ''}
+    </div>`;
+  }
+
+  // Current time line (only for today)
+  if (calOffset === 0) {
+    const now = new Date();
+    const mins = now.getHours() * 60 + now.getMinutes() - START_HOUR * 60;
+    if (mins >= 0 && mins <= (END_HOUR - START_HOUR) * 60) {
+      const top = (mins / 60) * PX_PER_HOUR;
+      html += `<div class="cal-now-dot" style="top:${top+1}px"></div>`;
+      html += `<div class="cal-now-line" style="top:${top+4}px"></div>`;
+    }
+  }
+
+  timeline.innerHTML = html;
+
+  // Scroll to current time or 8am
+  if (calOffset === 0) {
+    const now = new Date();
+    const scrollTo = Math.max(0, ((now.getHours() - 1 - START_HOUR) * PX_PER_HOUR));
+    wrap.scrollTop = scrollTo;
+  } else {
+    wrap.scrollTop = (8 - START_HOUR) * PX_PER_HOUR;
+  }
+}
+
+function eventPos(startISO, endISO) {
+  const start = new Date(startISO);
+  const end = new Date(endISO);
+  const startMins = start.getHours() * 60 + start.getMinutes() - START_HOUR * 60;
+  const endMins = end.getHours() * 60 + end.getMinutes() - START_HOUR * 60;
+  if (endMins <= 0 || startMins >= (END_HOUR - START_HOUR) * 60) return null;
+  const top = Math.max(0, startMins / 60 * PX_PER_HOUR);
+  const height = Math.max(18, (endMins - startMins) / 60 * PX_PER_HOUR - 2);
+  return { top, height };
+}
+
+function fmtTime(iso) {
+  const d = new Date(iso);
+  let h = d.getHours(), m = d.getMinutes();
+  const ampm = h >= 12 ? 'pm' : 'am';
+  h = h % 12 || 12;
+  return m === 0 ? `${h}${ampm}` : `${h}:${String(m).padStart(2,'0')}${ampm}`;
+}
+
+function computeColumns(events) {
+  const sorted = [...events].sort((a, b) => new Date(a.start) - new Date(b.start));
+  const cols = [];
+  sorted.forEach(ev => {
+    const s = new Date(ev.start).getTime(), e = new Date(ev.end).getTime();
+    let col = cols.findIndex(end => end <= s);
+    if (col === -1) { col = cols.length; cols.push(e); } else { cols[col] = e; }
+    ev._col = col;
+  });
+  sorted.forEach(ev => {
+    const s = new Date(ev.start).getTime(), e = new Date(ev.end).getTime();
+    let max = ev._col;
+    sorted.forEach(o => {
+      const os = new Date(o.start).getTime(), oe = new Date(o.end).getTime();
+      if (os < e && oe > s) max = Math.max(max, o._col || 0);
+    });
+    ev._totalCols = max + 1;
+  });
+  return sorted;
+}
+
+function openCalEvent(link) { if (link) window.open(link, '_blank'); }
+
+// Auto-refresh current time line every minute
+setInterval(() => { if (calOffset === 0) renderCalendar(); }, 60000);
+
+// ══════════════════════════════════
+// SLACK / MORNING MESSAGES
+// ══════════════════════════════════
+const LS_SLACK = 'ceo_slack_v1';
+
+function loadSlackMsgs() {
+  try { return JSON.parse(localStorage.getItem(LS_SLACK)) || []; } catch { return []; }
+}
+function saveSlackMsgs(msgs) { localStorage.setItem(LS_SLACK, JSON.stringify(msgs)); }
+
+function renderSlack() {
+  const msgs = loadSlackMsgs();
+  const body = document.getElementById('slack-body');
+  if (!msgs.length) {
+    body.innerHTML = `<div class="slack-empty"><strong>No morning messages yet</strong>Add messages below to draft replies</div>`;
+    return;
+  }
+  body.innerHTML = msgs.map((m, i) => slackMsgHTML(m, i)).join('');
+}
+
+function slackMsgHTML(msg, idx) {
+  const initials = msg.sender.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  const colors = ['#4f6ef7','#ff6b6b','#0d6832','#b7791f','#553c9a'];
+  const color = colors[msg.sender.charCodeAt(0) % colors.length];
+  return `
+    <div class="slack-msg" id="slack-msg-${idx}">
+      <div class="slack-msg__head">
+        <div class="slack-avatar" style="background:${color}">${initials}</div>
+        <span class="slack-msg__sender">${esc(msg.sender)}</span>
+        <span class="slack-msg__time">${esc(msg.time || '')}</span>
+        <button class="row-action-btn row-action-btn--delete" style="margin-left:4px" onclick="deleteSlackMsg(${idx})" title="Remove">
+          <svg width="11" height="11" fill="none" viewBox="0 0 12 12"><path d="M2 4h8M5 4V3h2v1M5.5 6v3.5M6.5 6v3.5M2.5 4l.5 6a1 1 0 001 1h4a1 1 0 001-1l.5-6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="slack-msg__text">${esc(msg.text)}</div>
+      <div class="slack-msg__draft">
+        <div class="slack-draft-label">Your reply</div>
+        <textarea class="slack-draft-input" id="draft-${idx}" placeholder="Draft a reply…" rows="2">${esc(msg.draft||'')}</textarea>
+        <div class="slack-draft-actions">
+          <button class="slack-send-btn" onclick="saveDraft(${idx})">Save</button>
+          <button class="slack-copy-btn" onclick="copyDraft(${idx})">Copy</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function addSlackMessage() {
+  const sender = document.getElementById('slack-add-name').value.trim();
+  const text = document.getElementById('slack-add-msg').value.trim();
+  if (!sender || !text) return;
+  const msgs = loadSlackMsgs();
+  const now = new Date();
+  const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  msgs.unshift({ sender, text, time, draft: '' });
+  saveSlackMsgs(msgs);
+  document.getElementById('slack-add-name').value = '';
+  const ta = document.getElementById('slack-add-msg');
+  ta.value = ''; ta.style.height = 'auto';
+  renderSlack();
+}
+
+function handleSlackAddKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addSlackMessage(); }
+}
+
+function saveDraft(idx) {
+  const msgs = loadSlackMsgs();
+  if (msgs[idx]) { msgs[idx].draft = document.getElementById('draft-'+idx)?.value || ''; saveSlackMsgs(msgs); }
+}
+
+function copyDraft(idx) {
+  saveDraft(idx);
+  const text = document.getElementById('draft-'+idx)?.value || '';
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target; btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+function deleteSlackMsg(idx) {
+  const msgs = loadSlackMsgs(); msgs.splice(idx, 1);
+  saveSlackMsgs(msgs); renderSlack();
+}
+
+// ══════════════════════════════════
+// INIT
+// ══════════════════════════════════
+syncClaudeTasks();
+setupDate();
+renderAll();
+loadCalData();
+renderCalendar();
+renderSlack();
+</script>
+</body>
+</html>
