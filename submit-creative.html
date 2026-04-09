@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Submit Creative — SpotsNow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #17212b;
+      --navy-light: #1e2d3d;
+      --coral: #ff6267;
+      --coral-dark: #e8474c;
+      --dark: #17212b;
+      --grey-1: #8a95a3;
+      --text-primary: #17212b;
+      --text-secondary: #5a6472;
+      --border: #C5CBD5;
+      --border-light: #e8eaed;
+      --white: #ffffff;
+      --green-bg: #dcfce7;
+      --green-text: #15803d;
+      --pill-bg: #f5f5f5;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.5;
+      color: var(--dark); background: #f9fafb;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* TOP BAR */
+    .top-bar {
+      position: sticky; top: 0; z-index: 200;
+      height: 60px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; background: var(--navy);
+    }
+    .top-bar__left { display: flex; align-items: center; gap: 12px; }
+    .top-bar__logo { display: flex; align-items: center; text-decoration: none; }
+    .top-bar__logo img { height: 26px; width: auto; filter: brightness(0) invert(1); }
+    .top-bar__divider { width: 1px; height: 20px; background: rgba(255,255,255,0.15); }
+    .top-bar__title { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.5); }
+    .back-btn {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6);
+      text-decoration: none; transition: color 0.15s;
+    }
+    .back-btn:hover { color: var(--white); }
+    .back-btn svg { flex-shrink: 0; }
+
+    /* HERO */
+    .hero {
+      background: var(--navy);
+      padding: 36px 32px 44px;
+      text-align: center;
+    }
+    .hero__eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,98,103,0.15); border: 1px solid rgba(255,98,103,0.3);
+      border-radius: 20px; padding: 4px 12px; margin-bottom: 14px;
+      font-size: 11px; font-weight: 600; color: var(--coral);
+      letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    .hero h1 {
+      margin: 0 0 10px; font-size: 28px; font-weight: 800;
+      color: var(--white); letter-spacing: -0.6px; line-height: 1.2;
+    }
+    .hero p {
+      margin: 0 auto; color: rgba(255,255,255,0.5);
+      font-size: 14px; max-width: 480px; line-height: 1.6;
+    }
+
+    /* FORM CARD */
+    .page { display: flex; flex-direction: column; padding-bottom: 56px; }
+    .form-card {
+      background: var(--white);
+      max-width: 680px; margin: -20px auto 0; width: calc(100% - 48px);
+      border-radius: 16px; border: 1px solid var(--border-light);
+      overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+
+    /* SECTIONS */
+    .form-section {
+      padding: 28px 32px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .form-section:last-child { border-bottom: none; }
+
+    .section-label {
+      font-size: 13px; font-weight: 700; color: var(--dark);
+      margin: 0 0 4px; letter-spacing: -0.1px;
+    }
+    .section-desc {
+      font-size: 12px; color: var(--text-secondary);
+      margin: 0 0 14px; line-height: 1.5;
+    }
+
+    /* INPUTS */
+    .field-group { display: flex; flex-direction: column; gap: 6px; }
+    .field-group label {
+      font-size: 11px; font-weight: 600; color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    input[type="text"], textarea {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px; color: var(--dark);
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--white); outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      width: 100%;
+    }
+    input[type="text"] {
+      height: 40px; padding: 0 14px;
+    }
+    textarea {
+      padding: 12px 14px; resize: vertical; min-height: 96px; line-height: 1.55;
+    }
+    input[type="text"]:focus, textarea:focus {
+      border-color: var(--coral);
+      box-shadow: 0 0 0 3px rgba(255,98,103,0.12);
+    }
+    input[type="text"]::placeholder, textarea::placeholder { color: var(--grey-1); }
+
+    /* TOP META */
+    .meta-row {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      padding: 24px 32px 20px;
+      border-bottom: 1px solid var(--border-light);
+      background: #fafafa;
+    }
+    .meta-field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
+    .meta-field label {
+      font-size: 11px; font-weight: 600; color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    /* UPLOAD ZONE */
+    .upload-zone {
+      border: 1.5px dashed var(--border); border-radius: 10px;
+      padding: 24px; text-align: center; cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      background: #fafafa;
+    }
+    .upload-zone:hover { border-color: var(--coral); background: rgba(255,98,103,0.03); }
+    .upload-zone.dragover { border-color: var(--coral); background: rgba(255,98,103,0.05); }
+    .upload-zone input { display: none; }
+    .upload-zone__icon { margin-bottom: 8px; color: var(--grey-1); }
+    .upload-zone p { margin: 0; font-size: 13px; color: var(--text-secondary); }
+    .upload-zone span { font-size: 11px; color: var(--grey-1); margin-top: 4px; display: block; }
+    .upload-zone .file-name {
+      margin-top: 8px; font-size: 12px; font-weight: 600;
+      color: var(--coral); display: none;
+    }
+
+    /* OR DIVIDER */
+    .or-divider {
+      display: flex; align-items: center; gap: 12px;
+      padding: 0 32px; margin: 4px 0;
+    }
+    .or-divider::before, .or-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border-light);
+    }
+    .or-divider span {
+      font-size: 11px; font-weight: 600; color: var(--grey-1);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    /* VERBATIM TAG */
+    .verbatim-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; font-weight: 600; color: var(--coral-dark);
+      background: rgba(255,98,103,0.1); border-radius: 4px;
+      padding: 2px 6px; margin-left: 8px; vertical-align: middle;
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+
+    /* FOOTER */
+    .form-footer {
+      display: flex; justify-content: flex-end; align-items: center; gap: 12px;
+      padding: 20px 32px;
+      border-top: 1px solid var(--border-light);
+      background: #fafafa;
+    }
+    .btn-secondary {
+      padding: 9px 20px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--white);
+      font-family: 'Inter', sans-serif; font-size: 13px;
+      font-weight: 600; color: var(--text-secondary);
+      cursor: pointer; transition: background 0.15s;
+      text-decoration: none; display: inline-flex; align-items: center;
+    }
+    .btn-secondary:hover { background: var(--pill-bg); }
+    .btn-primary {
+      padding: 9px 24px; border-radius: 8px;
+      border: none; background: var(--coral);
+      font-family: 'Inter', sans-serif; font-size: 13px;
+      font-weight: 700; color: var(--white);
+      cursor: pointer; transition: background 0.15s, transform 0.1s;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-primary:hover { background: var(--coral-dark); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* SUCCESS STATE */
+    .success-state {
+      display: none; flex-direction: column; align-items: center;
+      text-align: center; padding: 56px 32px;
+    }
+    .success-state.visible { display: flex; }
+    .success-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--green-bg);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+    }
+    .success-state h2 {
+      margin: 0 0 8px; font-size: 22px; font-weight: 700;
+      color: var(--dark); letter-spacing: -0.4px;
+    }
+    .success-state p {
+      margin: 0 0 24px; color: var(--text-secondary);
+      font-size: 14px; max-width: 340px; line-height: 1.6;
+    }
+    .success-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    .btn-download {
+      padding: 9px 20px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--white);
+      font-family: 'Inter', sans-serif; font-size: 13px;
+      font-weight: 600; color: var(--dark);
+      cursor: pointer; transition: background 0.15s;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-download:hover { background: var(--pill-bg); }
+    .notion-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 20px; border-radius: 8px;
+      background: var(--navy); color: var(--white);
+      font-size: 13px; font-weight: 600;
+      text-decoration: none; transition: opacity 0.15s;
+    }
+    .notion-link:hover { opacity: 0.85; }
+
+    .spinner {
+      width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white; border-radius: 50%;
+      animation: spin 0.6s linear infinite; display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar__left">
+    <a class="top-bar__logo" href="/pixel-setup">
+      <img src="spotsnow-logo.png" alt="SpotsNow" />
+    </a>
+    <div class="top-bar__divider"></div>
+    <span class="top-bar__title">Submit Creative</span>
+  </div>
+  <a class="back-btn" href="/pixel-setup">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M9 11L5 7l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Back to Pixel Setup
+  </a>
+</div>
+
+<div class="hero">
+  <div class="hero__eyebrow">Brand Onboarding</div>
+  <h1>Submit your creative brief</h1>
+  <p>Fill in your talking points below. We'll build your Notion brief automatically and share it with your campaign team.</p>
+</div>
+
+<div class="page">
+  <div class="form-card">
+
+    <!-- SUCCESS STATE -->
+    <div class="success-state" id="success-state">
+      <div class="success-icon">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <path d="M6 14l6 6 10-12" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h2>Creative submitted!</h2>
+      <p>Your brief has been added to Notion and your campaign team has been notified. You can download a copy of your talking points below.</p>
+      <div class="success-actions">
+        <button class="btn-download" onclick="downloadTalkingPoints()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Download Talking Points
+        </button>
+        <a class="notion-link" id="notion-link" href="#" target="_blank">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <rect x="2" y="1" width="10" height="12" rx="1.5" stroke="white" stroke-width="1.3"/>
+            <path d="M5 5h4M5 8h2" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+          View in Notion
+        </a>
+      </div>
+    </div>
+
+    <!-- FORM -->
+    <form id="creative-form" onsubmit="handleSubmit(event)">
+
+      <!-- BRAND META -->
+      <div class="meta-row">
+        <div class="meta-field">
+          <label>Brand Name *</label>
+          <input type="text" id="brandName" placeholder="e.g. Silk & Stone" required />
+        </div>
+        <div class="meta-field">
+          <label>Website URL</label>
+          <input type="text" id="brandUrl" placeholder="e.g. silkandstone.com" />
+        </div>
+      </div>
+
+      <!-- PRONUNCIATION -->
+      <div class="form-section">
+        <p class="section-label">Brand Pronunciation</p>
+        <p class="section-desc">How should the host pronounce your brand name? Write it out phonetically if helpful.</p>
+        <textarea id="brandPronunciation" placeholder="e.g. "Silk and Stone" — emphasis on Silk. Rhymes with 'milk'." rows="3"></textarea>
+      </div>
+
+      <!-- UPLOAD -->
+      <div class="form-section">
+        <p class="section-label">Attach your own talking points</p>
+        <p class="section-desc">If you have a talking point preference, please attach it here instead.</p>
+        <div class="upload-zone" onclick="document.getElementById('file-upload').click()" id="upload-zone">
+          <input type="file" id="file-upload" accept=".pdf,.doc,.docx" onchange="handleFileSelect(this)" />
+          <div class="upload-zone__icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M12 16V8M9 11l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <p>Upload PDF or Word doc</p>
+          <span>Drag and drop or click to browse</span>
+          <div class="file-name" id="file-name"></div>
+        </div>
+      </div>
+
+      <div class="or-divider"><span>or fill in below</span></div>
+
+      <!-- INTRODUCTION -->
+      <div class="form-section">
+        <p class="section-label">Introduction and thought starters</p>
+        <p class="section-desc">Explain the product and how it fits into your listeners' lives.</p>
+        <textarea id="introduction" placeholder="• Talk about the product and what stands out.&#10;• Explain how it's made and what makes it different." rows="4"></textarea>
+      </div>
+
+      <!-- PERSONAL EXPERIENCE -->
+      <div class="form-section">
+        <p class="section-label">Personal Experience</p>
+        <p class="section-desc">Please talk about why you love this product and speak to some of the points of differentiation.</p>
+        <textarea id="personalExperience" placeholder="• Relate this to your personal experience.&#10;• Talk about how you felt after the first use.&#10;• Add 1 reason why you trust this product over others." rows="4"></textarea>
+      </div>
+
+      <!-- CALL TO ACTION -->
+      <div class="form-section">
+        <p class="section-label">
+          Call to action
+          <span class="verbatim-tag">read verbatim</span>
+        </p>
+        <p class="section-desc">Must read this verbatim — write out exactly what the host should say.</p>
+        <textarea id="callToAction" placeholder="e.g. If you're not perfectly comfortable every night, you're settling for second best. My listeners get 40% off with code PODCASTNAME at checkout." rows="4"></textarea>
+      </div>
+
+      <!-- DON'T SAY -->
+      <div class="form-section">
+        <p class="section-label">Don't say</p>
+        <p class="section-desc">Please list anything you don't want the host to say.</p>
+        <textarea id="doNotSay" placeholder="• Please don't talk about anything else in our other product lines.&#10;• Don't mention pricing other than the discount code." rows="4"></textarea>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="form-footer">
+        <a class="btn-secondary" href="/pixel-setup">Cancel</a>
+        <button class="btn-primary" type="submit" id="submit-btn">
+          <div class="spinner" id="spinner"></div>
+          Submit Creative
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<script>
+  let submittedData = {};
+  let notionUrl = '';
+
+  function handleFileSelect(input) {
+    const file = input.files[0];
+    if (file) {
+      const nameEl = document.getElementById('file-name');
+      nameEl.textContent = file.name;
+      nameEl.style.display = 'block';
+    }
+  }
+
+  // Drag and drop
+  const zone = document.getElementById('upload-zone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      document.getElementById('file-upload').files = e.dataTransfer.files;
+      const nameEl = document.getElementById('file-name');
+      nameEl.textContent = file.name;
+      nameEl.style.display = 'block';
+    }
+  });
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn');
+    const spinner = document.getElementById('spinner');
+    btn.disabled = true;
+    spinner.style.display = 'block';
+
+    submittedData = {
+      brandName: document.getElementById('brandName').value.trim(),
+      brandUrl: document.getElementById('brandUrl').value.trim(),
+      brandPronunciation: document.getElementById('brandPronunciation').value.trim(),
+      introduction: document.getElementById('introduction').value.trim(),
+      personalExperience: document.getElementById('personalExperience').value.trim(),
+      callToAction: document.getElementById('callToAction').value.trim(),
+      doNotSay: document.getElementById('doNotSay').value.trim(),
+    };
+
+    try {
+      const res = await fetch('/api/submit-creative', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submittedData),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        notionUrl = data.url;
+        document.getElementById('notion-link').href = notionUrl;
+        document.getElementById('creative-form').style.display = 'none';
+        document.getElementById('success-state').classList.add('visible');
+      } else {
+        alert('Something went wrong. Please try again.');
+        btn.disabled = false;
+        spinner.style.display = 'none';
+      }
+    } catch (err) {
+      alert('Connection error. Please try again.');
+      btn.disabled = false;
+      spinner.style.display = 'none';
+    }
+  }
+
+  function downloadTalkingPoints() {
+    const d = submittedData;
+    const lines = [
+      `TALKING POINTS — ${d.brandName}`,
+      d.brandUrl ? `${d.brandUrl}` : '',
+      '',
+      d.brandPronunciation ? `BRAND PRONUNCIATION\n${d.brandPronunciation}\n` : '',
+      d.introduction ? `INTRODUCTION & THOUGHT STARTERS\n${d.introduction}\n` : '',
+      d.personalExperience ? `PERSONAL EXPERIENCE\n${d.personalExperience}\n` : '',
+      d.callToAction ? `CALL TO ACTION (READ VERBATIM)\n${d.callToAction}\n` : '',
+      d.doNotSay ? `DON'T SAY\n${d.doNotSay}\n` : '',
+    ].filter(Boolean).join('\n');
+
+    const blob = new Blob([lines], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${d.brandName.replace(/\s+/g, '-')}-talking-points.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+</script>
+
+</body>
+</html>

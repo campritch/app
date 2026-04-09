@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Magellan Pixel Setup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #17212b;
+      --navy-light: #1e2d3d;
+      --coral: #ff6267;
+      --coral-dark: #e8474c;
+      --dark: #17212b;
+      --grey-1: #8a95a3;
+      --text-primary: #17212b;
+      --text-secondary: #5a6472;
+      --border: #C5CBD5;
+      --border-light: #e8eaed;
+      --white: #ffffff;
+      --green-bg: #dcfce7;
+      --green-text: #15803d;
+      --pill-bg: #f5f5f5;
+      --amber-bg: #fff7ed;
+      --amber-text: #c2410c;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.5;
+      color: var(--dark); background: #f9fafb;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* TOP BAR — dark navy like spotsnow.io */
+    .top-bar {
+      position: sticky; top: 0; z-index: 200;
+      height: 60px; display: flex; align-items: center; gap: 16px;
+      padding: 0 32px; background: var(--navy);
+    }
+    .top-bar__logo {
+      display: flex; align-items: center;
+      text-decoration: none; flex-shrink: 0;
+    }
+    .top-bar__logo img { height: 26px; width: auto; filter: brightness(0) invert(1); }
+    .top-bar__divider {
+      width: 1px; height: 20px; background: rgba(255,255,255,0.15); margin: 0 4px;
+    }
+    .top-bar__title {
+      font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.5);
+    }
+
+    /* HERO — dark band at top */
+    .hero {
+      background: var(--navy);
+      padding: 40px 32px 48px;
+      text-align: center;
+    }
+    .hero__eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,98,103,0.15); border: 1px solid rgba(255,98,103,0.3);
+      border-radius: 20px; padding: 4px 12px; margin-bottom: 16px;
+      font-size: 11px; font-weight: 600; color: var(--coral); letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    .hero h1 {
+      margin: 0 0 12px; font-size: 32px; font-weight: 800; color: var(--white);
+      letter-spacing: -0.8px; line-height: 1.15;
+    }
+    .hero h1 span { color: var(--coral); }
+    .hero p {
+      margin: 0 auto; color: rgba(255,255,255,0.55); font-size: 15px;
+      max-width: 520px; line-height: 1.65;
+    }
+
+    /* PAGE LAYOUT */
+    .page { display: flex; flex-direction: column; padding-bottom: 56px; }
+
+    .page-card {
+      background: var(--white);
+      max-width: 760px; margin: -20px auto 0; width: calc(100% - 48px);
+      border-radius: 16px;
+      border: 1px solid var(--border-light);
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+
+    /* CONFIG BAR */
+    .config-bar {
+      padding: 24px 32px;
+      border-bottom: 1px solid var(--border-light);
+      background: #fafafa;
+      display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;
+    }
+    .config-field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
+    .config-field label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.6px; }
+    .config-field input {
+      height: 40px; padding: 0 14px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: 13px; color: var(--dark);
+      background: var(--white);
+      outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .config-field input:focus { border-color: var(--coral); box-shadow: 0 0 0 3px rgba(255,98,103,0.12); }
+    .config-field input::placeholder { color: var(--grey-1); }
+
+    .platform-toggle { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .platform-btn {
+      padding: 9px 18px; background: var(--white); border: none;
+      font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+    }
+    .platform-btn + .platform-btn { border-left: 1px solid var(--border); }
+    .platform-btn.active { background: var(--navy); color: var(--white); font-weight: 600; }
+
+    /* STEPS */
+    .steps { padding: 4px 0; }
+    .step { border-bottom: 1px solid var(--border-light); }
+    .step:last-child { border-bottom: none; }
+
+    .step-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 32px; cursor: pointer;
+      transition: background 0.12s;
+      user-select: none;
+    }
+    .step-header:hover { background: #fafafa; }
+
+    .step-number {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700;
+    }
+    .step-number--required { background: var(--coral); color: var(--white); }
+    .step-number--optional { background: var(--pill-bg); color: var(--grey-1); border: 1px solid var(--border); }
+
+    .step-label { flex: 1; }
+    .step-label strong { display: block; font-size: 14px; font-weight: 600; color: var(--dark); margin-bottom: 2px; }
+    .step-label span { font-size: 12px; color: var(--text-secondary); }
+
+    .step-badge {
+      font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px;
+      flex-shrink: 0;
+    }
+    .step-badge--required { background: rgba(255,98,103,0.1); color: var(--coral-dark); }
+    .step-badge--optional { background: var(--pill-bg); color: var(--grey-1); }
+    .step-badge--enabled { background: var(--green-bg); color: var(--green-text); }
+
+    .step-toggle {
+      width: 38px; height: 22px; border-radius: 11px;
+      background: var(--border); border: none; cursor: pointer;
+      position: relative; transition: background 0.2s; flex-shrink: 0; padding: 0;
+    }
+    .step-toggle::after {
+      content: ''; position: absolute; top: 3px; left: 3px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--white); transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .step-toggle.on { background: var(--coral); }
+    .step-toggle.on::after { transform: translateX(16px); }
+
+    .chevron { flex-shrink: 0; color: var(--grey-1); transition: transform 0.2s; }
+    .chevron.open { transform: rotate(180deg); }
+
+    .step-body { padding: 0 32px 24px; display: none; }
+    .step-body.open { display: block; }
+
+    .step-note {
+      font-size: 13px; color: var(--text-secondary);
+      margin: 0 0 16px; padding: 12px 14px;
+      background: #f8faff;
+      border-left: 3px solid var(--coral);
+      border-radius: 0 8px 8px 0;
+      line-height: 1.6;
+    }
+    .step-note strong { color: var(--navy); }
+
+    /* CODE BLOCK */
+    .code-block { position: relative; margin-top: 4px; }
+    .code-block pre {
+      margin: 0; padding: 18px 56px 18px 20px;
+      background: var(--navy); color: #c9d1d9;
+      border-radius: 10px; overflow-x: auto;
+      font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+      font-size: 12px; line-height: 1.65; white-space: pre;
+    }
+    .code-block pre .inserted-token { color: var(--coral); font-weight: 600; }
+
+    .copy-btn {
+      position: absolute; top: 10px; right: 10px;
+      padding: 4px 10px; border-radius: 6px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.6); font-family: 'Inter', sans-serif;
+      font-size: 11px; font-weight: 500; cursor: pointer; transition: background 0.15s;
+    }
+    .copy-btn:hover { background: rgba(255,255,255,0.15); }
+    .copy-btn.copied { background: var(--green-bg); color: var(--green-text); border-color: transparent; }
+
+    .where-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 600; color: var(--text-secondary);
+      background: var(--pill-bg); border-radius: 20px; padding: 4px 10px;
+      margin-bottom: 10px;
+    }
+    .where-tag svg { flex-shrink: 0; }
+
+    .field-rows { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+    .field-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .mini-field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 140px; }
+    .mini-field label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.4px; }
+    .mini-field input {
+      height: 34px; padding: 0 10px;
+      border: 1px solid var(--border); border-radius: 7px;
+      font-family: 'Inter', sans-serif; font-size: 12px; color: var(--dark);
+      background: var(--white); outline: none; transition: border-color 0.15s;
+    }
+    .mini-field input:focus { border-color: var(--coral); }
+    .mini-field input::placeholder { color: var(--grey-1); }
+
+    /* FOOTER */
+    .page-card-footer {
+      max-width: 760px; margin: 20px auto 0; width: calc(100% - 48px);
+      text-align: center; padding: 12px 0;
+    }
+    .page-card-footer p { margin: 0; font-size: 12px; color: var(--grey-1); }
+    .page-card-footer a { color: var(--coral); font-weight: 600; text-decoration: none; }
+    .page-card-footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a class="top-bar__logo" href="#">
+    <img src="spotsnow-logo.png" alt="SpotsNow" />
+  </a>
+  <div class="top-bar__divider"></div>
+  <span class="top-bar__title">Pixel Setup</span>
+  <div style="flex:1"></div>
+  <a href="/submit-creative" style="
+    padding: 8px 18px; border-radius: 8px;
+    background: var(--coral); color: white;
+    font-size: 13px; font-weight: 600;
+    text-decoration: none; transition: background 0.15s;
+    display: inline-flex; align-items: center; gap: 6px;
+  " onmouseover="this.style.background='#e8474c'" onmouseout="this.style.background='#ff6267'">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+      <path d="M6.5 1v11M1 6.5h11" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+    Submit Creative
+  </a>
+</div>
+
+<div class="hero">
+  <div class="hero__eyebrow">Magellan Attribution</div>
+  <h1>Get your <span>pixel</span> installed.<br>In minutes.</h1>
+  <p>Enter your token, pick your platform, and check the events you want to track. Copy each snippet straight into your site — no documentation required.</p>
+</div>
+
+<div class="page">
+
+  <div class="page-card">
+
+    <!-- CONFIG BAR -->
+    <div class="config-bar">
+      <div class="config-field">
+        <label>Your Pixel Token</label>
+        <input type="text" id="token-input" placeholder="Paste your Magellan token here…" oninput="updateAllCode()" />
+      </div>
+      <div class="config-field" style="flex: 0 0 auto;">
+        <label>Platform</label>
+        <div class="platform-toggle">
+          <button class="platform-btn active" onclick="setPlatform('js', this)">JavaScript</button>
+          <button class="platform-btn" onclick="setPlatform('shopify', this)">Shopify</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEPS -->
+    <div class="steps">
+
+      <!-- STEP 1: Token Setup -->
+      <div class="step" id="step-token">
+        <div class="step-header" onclick="toggleStep('token')">
+          <div class="step-number step-number--required">1</div>
+          <div class="step-label">
+            <strong>Token Setup</strong>
+            <span>Base pixel — install on every page</span>
+          </div>
+          <span class="step-badge step-badge--required">Required</span>
+          <svg class="chevron open" id="chevron-token" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="step-body open" id="body-token">
+          <div class="step-note">
+            <strong>Install once per page</strong> — paste this in the <code>&lt;head&gt;</code> of every page you want to track. Nothing works without this.
+          </div>
+          <span class="where-tag">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 3h10M1 6h10M1 9h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            &lt;head&gt; — every page
+          </span>
+          <div class="code-block">
+            <pre id="code-token"><!-- code injected by JS --></pre>
+            <button class="copy-btn" onclick="copyCode('code-token', this)">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: View Event -->
+      <div class="step" id="step-view">
+        <div class="step-header" onclick="toggleStep('view')">
+          <div class="step-number step-number--required">2</div>
+          <div class="step-label">
+            <strong>View Event</strong>
+            <span>Tracks page visits — required for all other events</span>
+          </div>
+          <span class="step-badge step-badge--required">Required</span>
+          <svg class="chevron open" id="chevron-view" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="step-body open" id="body-view">
+          <div class="step-note">
+            <strong>Must be on every tracked page,</strong> placed directly after the Token Setup script. All optional events below depend on this being present.
+          </div>
+          <span class="where-tag">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 3h10M1 6h10M1 9h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            &lt;head&gt; — every page, after Token Setup
+          </span>
+          <div class="code-block">
+            <pre id="code-view"><!-- code injected by JS --></pre>
+            <button class="copy-btn" onclick="copyCode('code-view', this)">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: Identify Event -->
+      <div class="step" id="step-identify">
+        <div class="step-header" onclick="toggleOptional('identify')">
+          <button class="step-toggle" id="toggle-identify" onclick="event.stopPropagation(); toggleOptional('identify')" aria-label="Enable identify event"></button>
+          <div class="step-label">
+            <strong>Identify Event</strong>
+            <span>Track logged-in users — attach to login &amp; registration pages</span>
+          </div>
+          <span class="step-badge step-badge--optional" id="badge-identify">Optional</span>
+          <svg class="chevron" id="chevron-identify" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="step-body" id="body-identify">
+          <div class="step-note">
+            Links a visitor to a known user ID. Add this to pages where users log in or register. Lets you see repeat visitors and build targeted follow-up lists.
+          </div>
+          <span class="where-tag">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 3h10M1 6h10M1 9h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            &lt;head&gt; — login &amp; registration pages
+          </span>
+          <div class="code-block">
+            <pre id="code-identify"><!-- code injected by JS --></pre>
+            <button class="copy-btn" onclick="copyCode('code-identify', this)">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: Lead Event -->
+      <div class="step" id="step-lead">
+        <div class="step-header" onclick="toggleOptional('lead')">
+          <button class="step-toggle" id="toggle-lead" onclick="event.stopPropagation(); toggleOptional('lead')" aria-label="Enable lead event"></button>
+          <div class="step-label">
+            <strong>Lead Event</strong>
+            <span>Newsletter signups, form submissions, subscription confirmations</span>
+          </div>
+          <span class="step-badge step-badge--optional" id="badge-lead">Optional</span>
+          <svg class="chevron" id="chevron-lead" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="step-body" id="body-lead">
+          <div class="step-note">
+            Fire when a user completes a signup or subscription action. Add to the page or form confirmation where the lead is generated.
+          </div>
+          <span class="where-tag">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 3h10M1 6h10M1 9h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            &lt;head&gt; — signup &amp; subscription confirmation pages
+          </span>
+          <div class="code-block">
+            <pre id="code-lead"><!-- code injected by JS --></pre>
+            <button class="copy-btn" onclick="copyCode('code-lead', this)">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5: Product Event -->
+      <div class="step" id="step-product">
+        <div class="step-header" onclick="toggleOptional('product')">
+          <button class="step-toggle" id="toggle-product" onclick="event.stopPropagation(); toggleOptional('product')" aria-label="Enable product event"></button>
+          <div class="step-label">
+            <strong>Product Event</strong>
+            <span>Track individual product page views</span>
+          </div>
+          <span class="step-badge step-badge--optional" id="badge-product">Optional</span>
+          <svg class="chevron" id="chevron-product" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="step-body" id="body-product">
+          <div class="step-note">
+            Add to every product page. Replace the placeholder values with your actual product data — this lets Magellan know which products are being viewed.
+          </div>
+          <span class="where-tag">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 3h10M1 6h10M1 9h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            &lt;head&gt; — each product page
+          </span>
+          <div class="field-rows">
+            <div class="field-row">
+              <div class="mini-field">
+                <label>Product ID</label>
+                <input id="field-product-id" type="text" placeholder="e.g. SKU_001" oninput="updateAllCode()" />
+              </div>
+              <div class="mini-field">
+                <label>Product Name</label>
+                <input id="field-product-name" type="text" placeholder="e.g. Collagen Powder" oninput="updateAllCode()" />
+              </div>
+              <div class="mini-field">
+                <label>Price (USD)</label>
+                <input id="field-product-price" type="text" placeholder="e.g. 39.99" oninput="updateAllCode()" />
+              </div>
+            </div>
+          </div>
+          <div class="code-block">
+            <pre id="code-product"><!-- code injected by JS --></pre>
+            <button class="copy-btn" onclick="copyCode('code-product', this)">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 6: Add to Cart Event -->
+      <div class="step" id="step-cart">
+        <div class="step-header" onclick="toggleOptional('cart')">
+          <button class="step-toggle" id="toggle-cart" onclick="event.stopPropagation(); toggleOptional('cart')" aria-label="Enable add to cart event"></button>
+          <div class="step-label">
+            <strong>Add to Cart Event</strong>
+            <span>Tracks item value — attach to the Add to Cart button click</span>
+          </div>
+          <span class="step-badge step-badge--optional" id="badge-cart">Optional</span>
+          <svg class="chevron" id="chevron-cart" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="step-body" id="body-cart">
+          <div class="step-note">
+            <strong>This one goes on a button click, not a page load.</strong> Your developer attaches this script to the Add to Cart button's click handler. This is how Magellan captures the purchase value for ROAS calculation.
+          </div>
+          <span class="where-tag">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="4" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4 4V3a2 2 0 014 0v1" stroke="currentColor" stroke-width="1.3"/></svg>
+            Button click — Add to Cart button
+          </span>
+          <div class="code-block">
+            <pre id="code-cart"><!-- code injected by JS --></pre>
+            <button class="copy-btn" onclick="copyCode('code-cart', this)">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 7: Checkout Event -->
+      <div class="step" id="step-checkout">
+        <div class="step-header" onclick="toggleOptional('checkout')">
+          <button class="step-toggle" id="toggle-checkout" onclick="event.stopPropagation(); toggleOptional('checkout')" aria-label="Enable checkout event"></button>
+          <div class="step-label">
+            <strong>Checkout Event</strong>
+            <span>Fires on the order confirmation / checkout completion page</span>
+          </div>
+          <span class="step-badge step-badge--optional" id="badge-checkout">Optional</span>
+          <svg class="chevron" id="chevron-checkout" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="step-body" id="body-checkout">
+          <div class="step-note">
+            Confirms a completed purchase. Add to the order confirmation or "Thank you" page. Works alongside the Add to Cart event to give a full picture of the purchase funnel.
+          </div>
+          <span class="where-tag">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 3h10M1 6h10M1 9h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            &lt;head&gt; — order confirmation page
+          </span>
+          <div class="code-block">
+            <pre id="code-checkout"><!-- code injected by JS --></pre>
+            <button class="copy-btn" onclick="copyCode('code-checkout', this)">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 8: Promo Code Event -->
+      <div class="step" id="step-promo">
+        <div class="step-header" onclick="toggleOptional('promo')">
+          <button class="step-toggle" id="toggle-promo" onclick="event.stopPropagation(); toggleOptional('promo')" aria-label="Enable promo code event"></button>
+          <div class="step-label">
+            <strong>Promo Code Event</strong>
+            <span>Track when a discount code is redeemed</span>
+          </div>
+          <span class="step-badge step-badge--optional" id="badge-promo">Optional</span>
+          <svg class="chevron" id="chevron-promo" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="step-body" id="body-promo">
+          <div class="step-note">
+            Place inside the code that handles promo code redemption — fires when the customer successfully applies a discount code.
+          </div>
+          <span class="where-tag">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="4" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4 4V3a2 2 0 014 0v1" stroke="currentColor" stroke-width="1.3"/></svg>
+            Promo code redemption handler
+          </span>
+          <div class="field-rows">
+            <div class="field-row">
+              <div class="mini-field">
+                <label>Your Promo Code</label>
+                <input id="field-promo-code" type="text" placeholder="e.g. PODCAST20" oninput="updateAllCode()" />
+              </div>
+            </div>
+          </div>
+          <div class="code-block">
+            <pre id="code-promo"><!-- code injected by JS --></pre>
+            <button class="copy-btn" onclick="copyCode('code-promo', this)">Copy</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /steps -->
+  </div><!-- /page-card -->
+
+  <div class="page-card-footer">
+    <p>Questions? Contact your <a href="#">SpotsNow account manager</a> or refer to <a href="https://www.notion.so/dropstation/Pixel-Set-up-Magellan-internal-32dbb6074fe380309836d0e0365bbb5c" target="_blank">the full Magellan documentation</a>.</p>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+  let platform = 'js';
+  const PLACEHOLDER = 'YOUR_TOKEN';
+
+  function getToken() {
+    const val = document.getElementById('token-input').value.trim();
+    return val || PLACEHOLDER;
+  }
+
+  function setPlatform(p, btn) {
+    platform = p;
+    document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    updateAllCode();
+  }
+
+  function esc(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function highlight(code) {
+    // Highlight the token wherever it appears
+    const token = getToken();
+    const escaped = esc(code);
+    if (token === PLACEHOLDER) {
+      return escaped.replace(esc(PLACEHOLDER), `<span class="inserted-token">${esc(PLACEHOLDER)}</span>`);
+    }
+    return escaped.replace(new RegExp(esc(token).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
+      `<span class="inserted-token">${esc(token)}</span>`);
+  }
+
+  function getCode(type) {
+    const token = getToken();
+    const isShopify = platform === 'shopify';
+
+    const productId = document.getElementById('field-product-id')?.value.trim() || 'YOUR_PRODUCT_ID';
+    const productName = document.getElementById('field-product-name')?.value.trim() || 'Your Product Name';
+    const productPrice = document.getElementById('field-product-price')?.value.trim() || '0.00';
+    const promoCode = document.getElementById('field-promo-code')?.value.trim() || 'YOUR_PROMO_CODE';
+
+    if (type === 'token') {
+      if (isShopify) {
+        return `{% comment %} Magellan Pixel — paste in theme.liquid <head> {% endcomment %}
+<script src="https://d5jg5e2b6fg6b.cloudfront.net/assets/magellan-sdk.js"
+  data-token="${token}"><\/script>`;
+      }
+      return `<!-- Magellan Pixel — paste in <head> on every page -->
+<script src="https://d5jg5e2b6fg6b.cloudfront.net/assets/magellan-sdk.js"
+  data-token="${token}"><\/script>`;
+    }
+
+    if (type === 'view') {
+      if (isShopify) {
+        return `{% comment %} View Event — paste after Token Setup in theme.liquid {% endcomment %}
+<script>magellan('trackEvent', 'view');<\/script>`;
+      }
+      return `<!-- View Event — paste after Token Setup, on every page -->
+<script>magellan('trackEvent', 'view');<\/script>`;
+    }
+
+    if (type === 'identify') {
+      if (isShopify) {
+        return `{% comment %} Identify Event — add to customer login/register template {% endcomment %}
+<script>
+  {% if customer %}
+  magellan('identify', { userId: '{{ customer.id }}' });
+  {% endif %}
+<\/script>`;
+      }
+      return `<!-- Identify Event — add to login/registration pages -->
+<script>
+  // Replace with your actual user ID (e.g. from session or auth library)
+  magellan('identify', { userId: 'CURRENT_USER_ID' });
+<\/script>`;
+    }
+
+    if (type === 'lead') {
+      if (isShopify) {
+        return `{% comment %} Lead Event — add to signup/subscription confirmation template {% endcomment %}
+<script>
+  magellan('trackEvent', 'lead', {
+    email: '{{ customer.email }}'
+  });
+<\/script>`;
+      }
+      return `<!-- Lead Event — add to signup/subscription confirmation pages -->
+<script>
+  magellan('trackEvent', 'lead', {
+    email: 'USER_EMAIL'   // replace with actual email if available
+  });
+<\/script>`;
+    }
+
+    if (type === 'product') {
+      if (isShopify) {
+        return `{% comment %} Product Event — add to product.liquid template {% endcomment %}
+<script>
+  magellan('trackEvent', 'product', {
+    productId:   '${productId}',
+    productName: '${productName}',
+    price:       ${productPrice},
+    currency:    'USD'
+  });
+<\/script>`;
+      }
+      return `<!-- Product Event — add to each product page -->
+<script>
+  magellan('trackEvent', 'product', {
+    productId:   '${productId}',
+    productName: '${productName}',
+    price:       ${productPrice},
+    currency:    'USD'
+  });
+<\/script>`;
+    }
+
+    if (type === 'cart') {
+      if (isShopify) {
+        return `{% comment %} Add to Cart Event — attach to add-to-cart button in product.liquid {% endcomment %}
+<script>
+  document.querySelector('[name="add"]').addEventListener('click', function() {
+    magellan('trackEvent', 'addToCart', {
+      productId:   '{{ product.id }}',
+      productName: '{{ product.title }}',
+      price:       {{ product.price | money_without_currency }},
+      quantity:    1,
+      currency:    'USD'
+    });
+  });
+<\/script>`;
+      }
+      return `<!-- Add to Cart Event — attach to your Add to Cart button's click handler -->
+<script>
+  document.getElementById('add-to-cart-btn').addEventListener('click', function() {
+    magellan('trackEvent', 'addToCart', {
+      productId:   'YOUR_PRODUCT_ID',
+      productName: 'Your Product Name',
+      price:       0.00,
+      quantity:    1,
+      currency:    'USD'
+    });
+  });
+<\/script>`;
+    }
+
+    if (type === 'checkout') {
+      if (isShopify) {
+        return `{% comment %} Checkout Event — add to order confirmation / thank_you.liquid {% endcomment %}
+<script>
+  magellan('trackEvent', 'checkout', {
+    orderId:  '{{ order.name }}',
+    total:    {{ checkout.total_price | money_without_currency }},
+    currency: 'USD'
+  });
+<\/script>`;
+      }
+      return `<!-- Checkout Event — add to order confirmation page -->
+<script>
+  magellan('trackEvent', 'checkout', {
+    orderId:  'ORDER_ID',   // replace with actual order ID
+    total:    0.00,          // replace with actual order total
+    currency: 'USD'
+  });
+<\/script>`;
+    }
+
+    if (type === 'promo') {
+      if (isShopify) {
+        return `{% comment %} Promo Code Event — fires when discount code is applied {% endcomment %}
+<script>
+  magellan('trackEvent', 'code', {
+    promoCode: '${promoCode}'
+  });
+<\/script>`;
+      }
+      return `<!-- Promo Code Event — place inside your promo code redemption handler -->
+<script>
+  magellan('trackEvent', 'code', {
+    promoCode: '${promoCode}'
+  });
+<\/script>`;
+    }
+
+    return '';
+  }
+
+  function updateAllCode() {
+    const types = ['token', 'view', 'identify', 'lead', 'product', 'cart', 'checkout', 'promo'];
+    types.forEach(type => {
+      const el = document.getElementById('code-' + type);
+      if (el) el.innerHTML = highlight(getCode(type));
+    });
+  }
+
+  function toggleStep(id) {
+    const body = document.getElementById('body-' + id);
+    const chevron = document.getElementById('chevron-' + id);
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    chevron.classList.toggle('open', !isOpen);
+  }
+
+  function toggleOptional(id) {
+    const toggle = document.getElementById('toggle-' + id);
+    const body = document.getElementById('body-' + id);
+    const badge = document.getElementById('badge-' + id);
+    const chevron = document.getElementById('chevron-' + id);
+    const isOn = toggle.classList.contains('on');
+
+    if (isOn) {
+      toggle.classList.remove('on');
+      body.classList.remove('open');
+      chevron.classList.remove('open');
+      badge.textContent = 'Optional';
+      badge.className = 'step-badge step-badge--optional';
+    } else {
+      toggle.classList.add('on');
+      body.classList.add('open');
+      chevron.classList.add('open');
+      badge.textContent = 'Enabled';
+      badge.className = 'step-badge step-badge--enabled';
+    }
+  }
+
+  function copyCode(id, btn) {
+    const pre = document.getElementById(id);
+    const text = pre.innerText || pre.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  // Init
+  updateAllCode();
+</script>
+</body>
+</html>
