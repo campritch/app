@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Talking Points Generator — SpotsNow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --navy: #17212b;
+      --coral: #ff6267;
+      --coral-dark: #e8474c;
+      --dark: #0e1323;
+      --grey-1: #8a95a3;
+      --text-primary: #17212b;
+      --text-secondary: #5a6472;
+      --border: #C5CBD5;
+      --border-light: #dee0e4;
+      --white: #ffffff;
+      --bg-input: #f4f4f4;
+      --bg-page: #fafafa;
+      --pill-bg: #f3f4f6;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.5;
+      color: var(--dark); background: var(--white);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV (matches spotsnow.io) ── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 200;
+      height: 74px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; background: var(--white);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .top-bar__left { display: flex; align-items: center; gap: 12px; }
+    .top-bar__logo { display: flex; align-items: center; text-decoration: none; }
+    .top-bar__logo img { height: 26px; width: auto; }
+    .top-bar__divider { width: 1px; height: 20px; background: var(--border-light); }
+    .top-bar__title { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+
+    /* ── HERO ── */
+    .hero {
+      background: var(--coral);
+      padding: 48px 32px 56px;
+      text-align: center;
+    }
+    .hero__eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 9999px; padding: 4px 14px; margin-bottom: 16px;
+      font-size: 11px; font-weight: 600; color: var(--white);
+      letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    .hero h1 {
+      margin: 0 0 10px; font-size: 28px; font-weight: 700;
+      color: var(--white); letter-spacing: -0.5px; line-height: 1.2;
+    }
+    .hero p {
+      margin: 0 auto; color: rgba(255,255,255,0.8);
+      font-size: 14px; max-width: 520px; line-height: 1.6;
+    }
+
+    /* ── PAGE ── */
+    .page { display: flex; flex-direction: column; padding-bottom: 56px; background: var(--bg-page); }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--white);
+      max-width: 720px; margin: 0 auto; width: calc(100% - 48px);
+      border-radius: 16px; border: 1px solid var(--border-light);
+      overflow: hidden;
+    }
+    .card--input { margin-top: -28px; margin-bottom: 24px; }
+    .card--output { margin-bottom: 24px; display: none; }
+    .card--output.visible { display: block; }
+
+    /* ── FORM SECTIONS ── */
+    .form-section {
+      padding: 24px 32px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .form-section:last-child { border-bottom: none; }
+
+    .section-label {
+      font-size: 14px; font-weight: 600; color: var(--text-primary);
+      margin: 0 0 4px;
+    }
+    .section-desc {
+      font-size: 13px; color: var(--grey-1);
+      margin: 0 0 14px; line-height: 1.5;
+    }
+
+    /* ── INPUTS (Airbnb-like) ── */
+    input[type="text"], input[type="url"], textarea {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px; color: var(--dark);
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--white); outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+    input[type="text"], input[type="url"] {
+      height: 44px; padding: 0 14px;
+    }
+    textarea {
+      padding: 12px 14px; resize: vertical; min-height: 80px; line-height: 1.55;
+    }
+    input:focus, textarea:focus {
+      border-color: var(--navy);
+      box-shadow: 0 0 0 2px rgba(23,33,43,0.1);
+    }
+    input::placeholder, textarea::placeholder { color: #b0b5bd; }
+
+    /* ── META ROW ── */
+    .meta-row {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      padding: 24px 32px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .meta-field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
+    .meta-field label {
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+    }
+
+    /* ── FOOTER ── */
+    .form-footer {
+      display: flex; justify-content: flex-end; align-items: center; gap: 10px;
+      padding: 20px 32px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    /* ── BUTTONS (matches spotsnow.io) ── */
+    .btn-secondary {
+      height: 36px; padding: 0 16px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--white);
+      font-family: 'Inter', sans-serif; font-size: 12px;
+      font-weight: 600; color: var(--text-primary);
+      cursor: pointer; transition: all 0.2s;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-secondary:hover { background: var(--pill-bg); }
+
+    .btn-primary {
+      height: 36px; padding: 0 16px; border-radius: 8px;
+      border: 1px solid var(--navy); background: var(--navy);
+      font-family: 'Inter', sans-serif; font-size: 12px;
+      font-weight: 600; color: var(--white);
+      cursor: pointer; transition: all 0.2s;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── VERBATIM TAG ── */
+    .verbatim-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; font-weight: 600; color: var(--coral-dark);
+      background: rgba(255,98,103,0.1); border-radius: 9999px;
+      padding: 2px 8px; margin-left: 8px; vertical-align: middle;
+      text-transform: uppercase; letter-spacing: 0.3px;
+    }
+
+    /* ── SPINNER ── */
+    .spinner {
+      width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white; border-radius: 50%;
+      animation: spin 0.6s linear infinite; display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── LOADING STATE ── */
+    .loading-overlay {
+      display: none; flex-direction: column; align-items: center;
+      justify-content: center; padding: 56px 32px; text-align: center;
+    }
+    .loading-overlay.visible { display: flex; }
+    .loading-spinner {
+      width: 32px; height: 32px; border: 2.5px solid var(--border-light);
+      border-top-color: var(--navy); border-radius: 50%;
+      animation: spin 0.7s linear infinite; margin-bottom: 16px;
+    }
+    .loading-overlay p { margin: 0; font-size: 14px; font-weight: 500; color: var(--text-primary); }
+    .loading-overlay .loading-step {
+      font-size: 13px; color: var(--grey-1); margin-top: 4px;
+    }
+
+    /* ── BRAND HEADER ── */
+    .brand-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 20px 32px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .brand-header__icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--pill-bg); color: var(--text-primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700; flex-shrink: 0;
+    }
+    .brand-header__info { flex: 1; min-width: 0; }
+    .brand-header__name {
+      font-size: 15px; font-weight: 600; color: var(--text-primary);
+      letter-spacing: -0.2px; margin: 0 0 1px;
+    }
+    .brand-header__url {
+      font-size: 12px; color: var(--grey-1);
+      text-decoration: none; margin: 0;
+    }
+    .brand-header__url:hover { text-decoration: underline; }
+
+    /* ── OUTPUT ACTIONS BAR ── */
+    .output-actions {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 32px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .output-actions__left {
+      font-size: 12px; font-weight: 600; color: var(--grey-1);
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .output-actions__right { display: flex; gap: 8px; }
+
+    /* ── EDITABLE TEXTAREA ── */
+    .output-textarea {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px; color: var(--dark);
+      border: 1px solid var(--border-light); border-radius: 8px;
+      background: var(--white); outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%; padding: 12px 14px;
+      resize: vertical; min-height: 80px; line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    .output-textarea:hover { border-color: var(--border); }
+    .output-textarea:focus {
+      border-color: var(--navy);
+      box-shadow: 0 0 0 2px rgba(23,33,43,0.1);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .top-bar { height: 60px; padding: 0 16px; }
+      .hero { padding: 32px 20px 40px; }
+      .meta-row { flex-direction: column; padding: 20px 20px; }
+      .meta-field { min-width: 100%; }
+      .form-section { padding: 20px 20px; }
+      .form-footer { padding: 16px 20px; }
+      .output-actions { padding: 12px 20px; flex-direction: column; gap: 10px; }
+      .brand-header { padding: 16px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar__left">
+    <a class="top-bar__logo" href="/">
+      <img src="spotsnow-logo.png" alt="SpotsNow" />
+    </a>
+    <div class="top-bar__divider"></div>
+    <span class="top-bar__title">Talking Points Generator</span>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero__eyebrow">AI-Powered</div>
+  <h1>Generate Talking Points</h1>
+  <p>Paste a SpotsNow campaign URL. We'll pull the brand, audience, and demographics automatically, then generate tailored talking points for creators.</p>
+</div>
+
+<div class="page">
+
+  <!-- STEP 1: URL INPUT -->
+  <div class="card card--input" id="step-url">
+    <form onsubmit="handleFetchCampaign(event)">
+      <div class="meta-row">
+        <div class="meta-field" style="min-width: 100%;">
+          <label>SpotsNow Campaign URL *</label>
+          <input type="url" id="campaignUrl" placeholder="https://spotsnow.io/c/..." required />
+        </div>
+      </div>
+      <div class="form-footer">
+        <button class="btn-primary" type="submit" id="fetch-btn">
+          <div class="spinner" id="fetch-spinner"></div>
+          Load Campaign
+        </button>
+      </div>
+    </form>
+    <div class="loading-overlay" id="fetch-loading">
+      <div class="loading-spinner"></div>
+      <p>Loading campaign data...</p>
+    </div>
+  </div>
+
+  <!-- STEP 2: EDITABLE CAMPAIGN FIELDS (pre-filled from API) -->
+  <div class="card card--input" id="step-config" style="display: none; margin-top: -20px;">
+    <div class="brand-header" id="config-brand-header">
+      <div class="brand-header__icon" id="config-brand-icon">B</div>
+      <div class="brand-header__info">
+        <p class="brand-header__name" id="config-brand-name">Brand</p>
+        <a class="brand-header__url" id="config-brand-url" href="#" target="_blank">brand.com</a>
+      </div>
+    </div>
+
+    <form onsubmit="handleGenerate(event)">
+      <div class="form-section">
+        <p class="section-label">Target Audience</p>
+        <p class="section-desc">Pulled from your campaign. Edit to refine who the talking points are written for.</p>
+        <textarea id="audienceDescriptions" rows="2" placeholder="e.g. holistic wellness seekers, integrative medicine patients"></textarea>
+      </div>
+
+      <div class="form-section">
+        <p class="section-label">Audience Interests</p>
+        <p class="section-desc">Comma-separated interests used to match podcasts.</p>
+        <textarea id="audienceInterests" rows="2" placeholder="e.g. ayurveda, holistic health, functional medicine"></textarea>
+      </div>
+
+      <div class="form-section">
+        <p class="section-label">Demographics</p>
+        <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px;">
+          <div class="meta-field" style="min-width: 120px;">
+            <label>Age Min</label>
+            <input type="text" id="ageMin" placeholder="25" />
+          </div>
+          <div class="meta-field" style="min-width: 120px;">
+            <label>Age Max</label>
+            <input type="text" id="ageMax" placeholder="44" />
+          </div>
+          <div class="meta-field" style="min-width: 160px;">
+            <label>Gender Split</label>
+            <input type="text" id="genderSplit" placeholder="e.g. 71% Female, 26% Male" />
+          </div>
+          <div class="meta-field" style="min-width: 120px;">
+            <label>Country</label>
+            <input type="text" id="country" placeholder="US" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <p class="section-label">Product or Service <span style="font-weight: 400; color: var(--grey-1);">(optional)</span></p>
+        <p class="section-desc">If the brand sells multiple products, specify which one this campaign is for.</p>
+        <input type="text" id="productName" placeholder="e.g. Telehealth App, Silk Pajama Set, Protein Powder..." />
+      </div>
+
+      <div class="form-footer">
+        <button class="btn-secondary" type="button" onclick="resetToStep1()">Back</button>
+        <button class="btn-primary" type="submit" id="generate-btn">
+          <div class="spinner" id="spinner"></div>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 1L9 5.5L14 6.5L10.5 9.5L11.5 14L7 11.5L2.5 14L3.5 9.5L0 6.5L5 5.5L7 1Z" fill="currentColor"/>
+          </svg>
+          Generate Talking Points
+        </button>
+      </div>
+    </form>
+
+    <div class="loading-overlay" id="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Generating talking points...</p>
+      <div class="loading-step" id="loading-step">Scraping brand website and generating...</div>
+    </div>
+  </div>
+
+  <!-- OUTPUT CARD -->
+  <div class="card card--output" id="output-card">
+
+    <div class="brand-header" id="brand-header">
+      <div class="brand-header__icon" id="brand-icon">B</div>
+      <div class="brand-header__info">
+        <p class="brand-header__name" id="brand-name">Brand Name</p>
+        <a class="brand-header__url" id="brand-url-display" href="#" target="_blank">brandname.com</a>
+      </div>
+    </div>
+
+    <div class="output-actions">
+      <span class="output-actions__left">Generated Talking Points</span>
+      <div class="output-actions__right">
+        <button class="btn-secondary" onclick="regenerate()">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M1 6a5 5 0 019-3M11 6a5 5 0 01-9 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M10 1v2.5H7.5M2 11V8.5H4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Regenerate
+        </button>
+        <button class="btn-secondary" onclick="downloadPDF()">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M6 1v7M3.5 5.5L6 8l2.5-2.5M1.5 9.5h9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Download PDF
+        </button>
+        <button class="btn-primary" onclick="createGoogleDoc()" id="gdoc-btn">
+          <div class="spinner" id="gdoc-spinner"></div>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M2 1.5h5.5L10 4v6.5a1 1 0 01-1 1H3a1 1 0 01-1-1v-9a1 1 0 011-1z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M4.5 7h3M4.5 9h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          Google Doc
+        </button>
+      </div>
+    </div>
+
+    <!-- INTRODUCTION -->
+    <div class="form-section">
+      <p class="section-label">Introduction and thought starters</p>
+      <p class="section-desc">Explain the product and how it fits into your listeners' lives.</p>
+      <textarea class="output-textarea" id="out-introduction" rows="5"></textarea>
+    </div>
+
+    <!-- PERSONAL EXPERIENCE -->
+    <div class="form-section">
+      <p class="section-label">Personal Experience</p>
+      <p class="section-desc">Talk about why you love this product and speak to the points of differentiation.</p>
+      <textarea class="output-textarea" id="out-personalExperience" rows="5"></textarea>
+    </div>
+
+    <!-- CALL TO ACTION -->
+    <div class="form-section">
+      <p class="section-label">
+        Call to action
+        <span class="verbatim-tag">read verbatim</span>
+      </p>
+      <p class="section-desc">Must read this verbatim — write out exactly what the host should say.</p>
+      <textarea class="output-textarea" id="out-callToAction" rows="4"></textarea>
+    </div>
+
+    <!-- KEY MESSAGES -->
+    <div class="form-section">
+      <p class="section-label">Key Messages</p>
+      <p class="section-desc">Core value propositions and differentiators the host should weave in naturally.</p>
+      <textarea class="output-textarea" id="out-keyMessages" rows="4"></textarea>
+    </div>
+
+    <!-- DON'T SAY -->
+    <div class="form-section">
+      <p class="section-label">Don't say</p>
+      <p class="section-desc">Anything the host should avoid saying.</p>
+      <textarea class="output-textarea" id="out-doNotSay" rows="4"></textarea>
+    </div>
+
+    <!-- BRAND PRONUNCIATION -->
+    <div class="form-section">
+      <p class="section-label">Brand Pronunciation</p>
+      <p class="section-desc">How the host should pronounce the brand name.</p>
+      <textarea class="output-textarea" id="out-pronunciation" rows="2"></textarea>
+    </div>
+
+    <div class="form-footer">
+      <button class="btn-secondary" onclick="downloadPDF()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M6 1v7M3.5 5.5L6 8l2.5-2.5M1.5 9.5h9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Download PDF
+      </button>
+      <button class="btn-primary" onclick="createGoogleDoc()" id="gdoc-btn-bottom">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 1.5h5.5L10 4v6.5a1 1 0 01-1 1H3a1 1 0 01-1-1v-9a1 1 0 011-1z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4.5 7h3M4.5 9h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        Google Doc
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8787' : '';
+
+  let currentBrandName = '';
+  let currentBrandUrl = '';
+
+  // ── Helpers ──
+  function toText(v) { return Array.isArray(v) ? v.join('\n') : (v || ''); }
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+  function updateLoadingStep(t) { document.getElementById('loading-step').textContent = t; }
+  function autoResize(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+  document.addEventListener('input', e => { if (e.target.classList.contains('output-textarea')) autoResize(e.target); });
+
+  function getSections() {
+    return [
+      { label: 'Introduction and Thought Starters', id: 'out-introduction' },
+      { label: 'Personal Experience', id: 'out-personalExperience' },
+      { label: 'Call to Action (Read Verbatim)', id: 'out-callToAction', verbatim: true },
+      { label: 'Key Messages', id: 'out-keyMessages' },
+      { label: "Don't Say", id: 'out-doNotSay' },
+      { label: 'Brand Pronunciation', id: 'out-pronunciation' },
+    ];
+  }
+
+  let currentCampaignUrl = '';
+
+  // ── Step 1: Fetch campaign data and pre-fill fields ──
+  async function handleFetchCampaign(e) {
+    e.preventDefault();
+    const btn = document.getElementById('fetch-btn');
+    const spinner = document.getElementById('fetch-spinner');
+    const loading = document.getElementById('fetch-loading');
+
+    const urlForm = document.getElementById('step-url').querySelector('form');
+
+    btn.disabled = true;
+    spinner.style.display = 'block';
+    urlForm.style.display = 'none';
+    loading.classList.add('visible');
+
+    currentCampaignUrl = document.getElementById('campaignUrl').value.trim();
+
+    try {
+      const res = await fetch(`${API_BASE}/api/generate-talking-points`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ campaignUrl: currentCampaignUrl, fetchOnly: true }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Server error' }));
+        throw new Error(err.error || 'Failed to load campaign');
+      }
+
+      const data = await res.json();
+      currentBrandName = data.brandName || 'Brand';
+      currentBrandUrl = data.brandDomain ? `https://${data.brandDomain}` : '';
+
+      // Pre-fill config fields
+      document.getElementById('config-brand-icon').textContent = currentBrandName.charAt(0).toUpperCase();
+      document.getElementById('config-brand-name').textContent = currentBrandName;
+      document.getElementById('config-brand-url').textContent = data.brandDomain || '';
+      document.getElementById('config-brand-url').href = currentBrandUrl;
+
+      document.getElementById('audienceDescriptions').value = (data.audienceDescriptions || []).join(', ');
+      document.getElementById('audienceInterests').value = (data.interests || []).join(', ');
+      document.getElementById('ageMin').value = data.ageMin || '';
+      document.getElementById('ageMax').value = data.ageMax || '';
+      document.getElementById('country').value = data.country || 'US';
+
+      document.getElementById('genderSplit').value = '';
+
+      // Show step 2
+      document.getElementById('step-url').style.display = 'none';
+      document.getElementById('step-config').style.display = '';
+
+    } catch (err) {
+      alert(err.message || 'Failed to load campaign.');
+      loading.classList.remove('visible');
+      urlForm.style.display = '';
+      btn.disabled = false;
+      spinner.style.display = 'none';
+    }
+  }
+
+  function resetToStep1() {
+    document.getElementById('step-config').style.display = 'none';
+    document.getElementById('step-url').style.display = '';
+    document.getElementById('step-url').querySelector('form').style.display = '';
+    document.getElementById('fetch-loading').classList.remove('visible');
+    document.getElementById('fetch-btn').disabled = false;
+    document.getElementById('fetch-spinner').style.display = 'none';
+  }
+
+  // ── Step 2: Generate talking points with (edited) audience data ──
+  async function handleGenerate(e) {
+    e.preventDefault();
+    const btn = document.getElementById('generate-btn');
+    const spinner = document.getElementById('spinner');
+    const form = e.target;
+    const loading = document.getElementById('loading-state');
+
+    btn.disabled = true;
+    spinner.style.display = 'block';
+    form.style.display = 'none';
+    document.getElementById('config-brand-header').style.display = 'none';
+    loading.classList.add('visible');
+
+    const productName = document.getElementById('productName').value.trim();
+
+    try {
+      updateLoadingStep('Scraping brand website...');
+      await sleep(300);
+      updateLoadingStep('Generating talking points with AI...');
+
+      const res = await fetch(`${API_BASE}/api/generate-talking-points`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          campaignUrl: currentCampaignUrl,
+          productName: productName || undefined,
+          audienceOverrides: {
+            audienceDescriptions: document.getElementById('audienceDescriptions').value.trim(),
+            interests: document.getElementById('audienceInterests').value.trim(),
+            ageMin: document.getElementById('ageMin').value.trim(),
+            ageMax: document.getElementById('ageMax').value.trim(),
+            genderSplit: document.getElementById('genderSplit').value.trim(),
+            country: document.getElementById('country').value.trim(),
+          },
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Server error' }));
+        throw new Error(err.error || 'Failed to generate talking points');
+      }
+
+      const data = await res.json();
+      currentBrandName = data.brandName || 'Brand';
+      currentBrandUrl = data.brandWebsite || currentBrandUrl;
+
+      document.getElementById('brand-icon').textContent = currentBrandName.charAt(0).toUpperCase();
+      document.getElementById('brand-name').textContent = currentBrandName;
+      document.getElementById('brand-url-display').textContent = currentBrandUrl.replace(/^https?:\/\//, '');
+      document.getElementById('brand-url-display').href = currentBrandUrl;
+
+      document.getElementById('out-introduction').value = toText(data.introduction);
+      document.getElementById('out-personalExperience').value = toText(data.personalExperience);
+      document.getElementById('out-callToAction').value = toText(data.callToAction);
+      document.getElementById('out-keyMessages').value = toText(data.keyMessages);
+      document.getElementById('out-doNotSay').value = toText(data.doNotSay);
+      document.getElementById('out-pronunciation').value = toText(data.pronunciation);
+
+      // Hide step 2, show output
+      loading.classList.remove('visible');
+      document.getElementById('step-config').style.display = 'none';
+      document.getElementById('output-card').classList.add('visible');
+      document.querySelectorAll('.output-textarea').forEach(autoResize);
+
+    } catch (err) {
+      alert(err.message || 'Something went wrong. Please try again.');
+      loading.classList.remove('visible');
+      form.style.display = '';
+      document.getElementById('config-brand-header').style.display = '';
+      btn.disabled = false;
+      spinner.style.display = 'none';
+    }
+  }
+
+  function regenerate() {
+    document.getElementById('output-card').classList.remove('visible');
+    // Go back to step 2 (editable fields) not step 1
+    document.getElementById('step-config').style.display = '';
+    document.getElementById('step-config').querySelector('form').style.display = '';
+    document.getElementById('config-brand-header').style.display = '';
+    document.getElementById('generate-btn').disabled = false;
+    document.getElementById('spinner').style.display = 'none';
+  }
+
+  // ── PDF Download (jsPDF) ──
+  function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const brand = currentBrandName || 'Brand';
+    const pageW = doc.internal.pageSize.getWidth();
+    const margin = 24;
+    const contentW = pageW - margin * 2;
+    let y = 28;
+
+    // Title
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.setTextColor(23, 33, 43);
+    doc.text(`Talking Points — ${brand}`, margin, y);
+    y += 7;
+
+    // Brand URL
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(138, 149, 163);
+    doc.text(currentBrandUrl.replace(/^https?:\/\//, ''), margin, y);
+    y += 12;
+
+    // Sections
+    for (const s of getSections()) {
+      const val = document.getElementById(s.id).value.trim();
+      if (!val) continue;
+
+      // Check if we need a new page
+      if (y > 260) { doc.addPage(); y = 24; }
+
+      // Section divider line
+      doc.setDrawColor(232, 234, 237);
+      doc.line(margin, y, pageW - margin, y);
+      y += 6;
+
+      // Section label
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(23, 33, 43);
+      let labelText = s.label;
+      doc.text(labelText, margin, y);
+      y += 6;
+
+      // Section content
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9.5);
+      doc.setTextColor(90, 100, 114);
+      const lines = doc.splitTextToSize(val, contentW);
+      for (const line of lines) {
+        if (y > 275) { doc.addPage(); y = 24; }
+        doc.text(line, margin, y);
+        y += 4.5;
+      }
+      y += 6;
+    }
+
+    // Footer
+    if (y > 265) { doc.addPage(); y = 24; }
+    doc.setDrawColor(232, 234, 237);
+    doc.line(margin, y, pageW - margin, y);
+    y += 5;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(138, 149, 163);
+    const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    doc.text(`Generated by SpotsNow · ${today}`, margin, y);
+
+    doc.save(`${brand.replace(/\s+/g, '-')}-talking-points.pdf`);
+  }
+
+  // ── Google Doc (downloads as .doc, opens natively in Google Docs) ──
+  async function createGoogleDoc() {
+    const btn = document.getElementById('gdoc-btn');
+    const spinner = document.getElementById('gdoc-spinner');
+    btn.disabled = true;
+    spinner.style.display = 'block';
+
+    const sections = getSections().map(s => ({
+      label: s.label,
+      content: document.getElementById(s.id).value.trim(),
+      verbatim: s.verbatim || false,
+    })).filter(s => s.content);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/download-doc`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brandName: currentBrandName,
+          brandWebsite: currentBrandUrl,
+          sections,
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to generate doc');
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${(currentBrandName || 'Brand').replace(/\s+/g, '-')}-talking-points.doc`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert(err.message || 'Failed to create Google Doc.');
+    } finally {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+    }
+  }
+</script>
+
+</body>
+</html>
