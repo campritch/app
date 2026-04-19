@@ -2,7 +2,7 @@
 // Streams SSE back to the browser. Password-gated.
 
 import Anthropic from '@anthropic-ai/sdk';
-import { tools, executeTool } from './tools/index.js';
+import { tools, executeTool } from './_tools/index.js';
 
 const MODEL = 'claude-opus-4-7';
 const MAX_ITERATIONS = 12;

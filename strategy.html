@@ -57,6 +57,12 @@ input, textarea, select { font-family: inherit; }
 .panel .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .panel input[type="date"] { background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 8px 10px; font-size: 12px; font-family: 'JetBrains Mono', monospace; width: 100%; }
 .panel input[type="date"]:focus { outline: none; border-color: var(--accent); }
+.panel .ingest-btn { width: 100%; margin-top: 8px; background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 8px 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.1s; }
+.panel .ingest-btn:hover:not(:disabled) { color: var(--text); border-color: var(--accent); }
+.panel .ingest-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.panel .ingest-log { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); margin-top: 8px; line-height: 1.5; min-height: 15px; white-space: pre-wrap; }
+.panel .ingest-log.ok { color: var(--good); }
+.panel .ingest-log.err { color: var(--bad); }
 .panel .csv-drop { border: 1px dashed var(--line); padding: 14px; text-align: center; font-size: 11px; color: var(--text-dim); cursor: pointer; transition: all 0.1s; }
 .panel .csv-drop:hover { border-color: var(--accent); color: var(--text); }
 .panel .csv-drop.ok { border-color: var(--good); color: var(--good); }
@@ -149,6 +155,8 @@ input, textarea, select { font-family: inherit; }
           <input type="date" id="in-from">
           <input type="date" id="in-to">
         </div>
+        <button id="btn-ingest" class="ingest-btn">Ingest transcripts into cache</button>
+        <div class="ingest-log" id="ingest-log"></div>
       </div>
 
       <div class="group">
@@ -273,6 +281,54 @@ function attachInputs() {
   });
   document.getElementById('btn-export').addEventListener('click', exportChat);
   document.getElementById('csv-file').addEventListener('change', uploadCsv);
+  document.getElementById('btn-ingest').addEventListener('click', ingestFathom);
+}
+
+async function ingestFathom() {
+  const from = state.dateFrom, to = state.dateTo;
+  if (!from || !to) { alert('Set a Fathom date range first.'); return; }
+  if (!confirm(`Ingest Fathom transcripts from ${from} to ${to}?\n\nThis hits Fathom\'s API, caches every business call (standups excluded) to Blob, and can take several minutes for long ranges.`)) return;
+
+  const btn = document.getElementById('btn-ingest');
+  const log = document.getElementById('ingest-log');
+  btn.disabled = true;
+  log.className = 'ingest-log';
+  log.textContent = 'starting...';
+
+  let cursor = null;
+  let totalIngested = 0, totalCached = 0, totalExcluded = 0, totalErrors = 0, chunks = 0;
+
+  try {
+    while (true) {
+      chunks += 1;
+      log.textContent = `chunk ${chunks} · ingested ${totalIngested} · cached ${totalCached} · excluded ${totalExcluded} · errors ${totalErrors}${cursor ? '\nworking...' : ''}`;
+
+      const res = await fetch('/api/fathom-ingest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password, from_date: from, to_date: to, cursor, max_pages: 5 }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+      const data = await res.json();
+      totalIngested += data.ingested || 0;
+      totalCached += data.cached_existing || 0;
+      totalExcluded += data.excluded || 0;
+      totalErrors += (data.errors || []).length;
+      cursor = data.next_cursor;
+      if (data.done) break;
+    }
+
+    log.className = 'ingest-log ok';
+    log.textContent = `done · ingested ${totalIngested} new · ${totalCached} already cached · ${totalExcluded} excluded · ${totalErrors} errors`;
+  } catch (err) {
+    log.className = 'ingest-log err';
+    log.textContent = `failed: ${err.message}`;
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 function exportChat() {
