@@ -99,6 +99,49 @@ export async function listCached() {
   return { count: entries.length, transcripts: entries };
 }
 
+// Pull transcripts for a specific list of meeting ids, cache each to Blob.
+// Input: { meeting_ids: string[], titles?: Record<id,string> }
+// Output: { ingested, cached_existing, errors }
+export async function ingestMeetings({ meeting_ids = [], titles = {} }) {
+  if (!Array.isArray(meeting_ids) || !meeting_ids.length) throw new Error('meeting_ids array required');
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    throw new Error('BLOB_READ_WRITE_TOKEN required for ingest (nowhere to persist transcripts)');
+  }
+
+  let ingested = 0;
+  let cached = 0;
+  const errors = [];
+
+  for (const id of meeting_ids) {
+    if (!id) continue;
+    try {
+      const existing = await readBlob(`fathom/${id}.json`);
+      if (existing?.transcript) { cached += 1; continue; }
+
+      const resp = await fathomGet(`/recordings/${encodeURIComponent(id)}/transcript`);
+      const transcript = typeof resp === 'string'
+        ? resp
+        : Array.isArray(resp.transcript)
+          ? resp.transcript.map((t) => `${t.speaker?.name || t.speaker || ''}: ${t.text || ''}`).join('\n')
+          : (resp.transcript || resp.text || '');
+
+      if (!transcript) { errors.push({ id, title: titles[id] || null, error: 'empty transcript' }); continue; }
+
+      await writeBlob(`fathom/${id}.json`, {
+        id,
+        title: titles[id] || null,
+        transcript,
+        fetched_at: new Date().toISOString(),
+      });
+      ingested += 1;
+    } catch (err) {
+      errors.push({ id, title: titles[id] || null, error: String(err?.message || err) });
+    }
+  }
+
+  return { ingested, cached_existing: cached, errors, total: meeting_ids.length };
+}
+
 // Bulk ingest: walk /meetings?include_transcript=true and cache each to Blob.
 // Resumable — accepts a cursor and returns next_cursor + done so the caller can chunk across requests.
 // Input: { from_date, to_date, cursor?, max_pages?, extra_exclude_patterns? }

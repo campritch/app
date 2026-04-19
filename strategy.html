@@ -63,6 +63,22 @@ input, textarea, select { font-family: inherit; }
 .panel .ingest-log { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); margin-top: 8px; line-height: 1.5; min-height: 15px; white-space: pre-wrap; }
 .panel .ingest-log.ok { color: var(--good); }
 .panel .ingest-log.err { color: var(--bad); }
+.panel .calls-list:empty { display: none; }
+.panel .calls-list { margin-top: 10px; background: var(--bg); border: 1px solid var(--line); max-height: 340px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 10px; }
+.panel .calls-hdr { padding: 8px 10px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; color: var(--text-dim); background: var(--surface-2); position: sticky; top: 0; }
+.panel .calls-hdr .sel-toggle { color: var(--accent); cursor: pointer; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+.panel .calls-hdr .sel-toggle:hover { filter: brightness(1.2); }
+.panel .call-row { padding: 7px 10px; border-bottom: 1px solid var(--line-soft); display: grid; grid-template-columns: 14px 50px 1fr; gap: 8px; cursor: pointer; align-items: start; }
+.panel .call-row:last-child { border-bottom: none; }
+.panel .call-row:hover { background: var(--surface-2); }
+.panel .call-row input { margin: 1px 0 0; accent-color: var(--accent); }
+.panel .call-row .dt { color: var(--text-faint); }
+.panel .call-row .ti { color: var(--text); font-family: 'Inter Tight', sans-serif; font-size: 11px; line-height: 1.35; }
+.panel .call-row .ti .meta { display: block; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-faint); margin-top: 2px; }
+.panel .calls-foot { padding: 8px 10px; border-top: 1px solid var(--line); background: var(--surface-2); position: sticky; bottom: 0; }
+.panel .calls-foot button { width: 100%; background: var(--accent); color: #fff; border: none; padding: 7px 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; cursor: pointer; }
+.panel .calls-foot button:hover:not(:disabled) { filter: brightness(1.08); }
+.panel .calls-foot button:disabled { opacity: 0.5; cursor: not-allowed; }
 .panel .csv-drop { border: 1px dashed var(--line); padding: 14px; text-align: center; font-size: 11px; color: var(--text-dim); cursor: pointer; transition: all 0.1s; }
 .panel .csv-drop:hover { border-color: var(--accent); color: var(--text); }
 .panel .csv-drop.ok { border-color: var(--good); color: var(--good); }
@@ -155,7 +171,8 @@ input, textarea, select { font-family: inherit; }
           <input type="date" id="in-from">
           <input type="date" id="in-to">
         </div>
-        <button id="btn-ingest" class="ingest-btn">Ingest transcripts into cache</button>
+        <button id="btn-browse" class="ingest-btn">Browse calls in range</button>
+        <div class="calls-list" id="calls-list"></div>
         <div class="ingest-log" id="ingest-log"></div>
       </div>
 
@@ -288,48 +305,115 @@ function attachInputs() {
   });
   document.getElementById('btn-export').addEventListener('click', exportChat);
   document.getElementById('csv-file').addEventListener('change', uploadCsv);
-  document.getElementById('btn-ingest').addEventListener('click', ingestFathom);
+  document.getElementById('btn-browse').addEventListener('click', browseFathom);
 }
 
-async function ingestFathom() {
+let loadedCalls = [];
+
+async function browseFathom() {
   const from = state.dateFrom, to = state.dateTo;
   if (!from || !to) { alert('Set a Fathom date range first.'); return; }
-  if (!confirm(`Ingest Fathom transcripts from ${from} to ${to}?\n\nThis hits Fathom\'s API, caches every business call (standups excluded) to Blob, and can take several minutes for long ranges.`)) return;
 
-  const btn = document.getElementById('btn-ingest');
+  const btn = document.getElementById('btn-browse');
+  const log = document.getElementById('ingest-log');
+  const listEl = document.getElementById('calls-list');
+  btn.disabled = true;
+  log.className = 'ingest-log';
+  log.textContent = 'loading...';
+  listEl.innerHTML = '';
+
+  try {
+    const res = await fetch('/api/fathom-list', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password, from_date: from, to_date: to }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    loadedCalls = data.meetings || [];
+    log.textContent = '';
+    renderCallsList(data);
+  } catch (err) {
+    log.className = 'ingest-log err';
+    log.textContent = `failed: ${err.message}`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function renderCallsList(data) {
+  const el = document.getElementById('calls-list');
+  const calls = data.meetings || [];
+  if (!calls.length) {
+    el.innerHTML = `<div class="calls-hdr"><span>0 business calls in range · ${data.excluded_count || 0} excluded</span></div>`;
+    return;
+  }
+
+  const hdr = `<div class="calls-hdr"><span>${calls.length} calls · ${data.excluded_count || 0} excluded (standups)</span><span class="sel-toggle" id="sel-all">select all</span></div>`;
+  const rows = calls.map((m, i) => {
+    const date = m.date ? new Date(m.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '—';
+    const atts = (m.attendees || []).slice(0, 3).join(', ') + ((m.attendees || []).length > 3 ? ` +${m.attendees.length - 3}` : '');
+    const dur = m.duration_minutes ? `${Math.round(m.duration_minutes)}m` : '';
+    return `<label class="call-row">
+      <input type="checkbox" class="call-cb" data-idx="${i}" checked>
+      <span class="dt">${escapeHtml(date)}</span>
+      <span class="ti">${escapeHtml(m.title || '(untitled)')}<span class="meta">${escapeHtml([dur, atts].filter(Boolean).join(' · ') || '—')}</span></span>
+    </label>`;
+  }).join('');
+  const foot = `<div class="calls-foot"><button id="btn-ingest-sel">Ingest <span id="sel-count">${calls.length}</span> selected</button></div>`;
+  el.innerHTML = hdr + rows + foot;
+
+  const selToggle = document.getElementById('sel-all');
+  let allOn = true;
+  selToggle.addEventListener('click', () => {
+    allOn = !allOn;
+    el.querySelectorAll('.call-cb').forEach((cb) => { cb.checked = allOn; });
+    selToggle.textContent = allOn ? 'select none' : 'select all';
+    updateSelCount();
+  });
+  el.querySelectorAll('.call-cb').forEach((cb) => cb.addEventListener('change', updateSelCount));
+  document.getElementById('btn-ingest-sel').addEventListener('click', ingestSelected);
+  updateSelCount();
+}
+
+function updateSelCount() {
+  const n = document.querySelectorAll('.call-cb:checked').length;
+  const out = document.getElementById('sel-count');
+  if (out) out.textContent = n;
+  const btn = document.getElementById('btn-ingest-sel');
+  if (btn) btn.disabled = n === 0;
+}
+
+async function ingestSelected() {
+  const checked = Array.from(document.querySelectorAll('.call-cb:checked'));
+  const selected = checked.map((cb) => loadedCalls[Number(cb.dataset.idx)]).filter(Boolean);
+  if (!selected.length) return;
+
+  const btn = document.getElementById('btn-ingest-sel');
   const log = document.getElementById('ingest-log');
   btn.disabled = true;
   log.className = 'ingest-log';
-  log.textContent = 'starting...';
+  log.textContent = `ingesting ${selected.length}...`;
 
-  let cursor = null;
-  let totalIngested = 0, totalCached = 0, totalExcluded = 0, totalErrors = 0, chunks = 0;
+  const meeting_ids = selected.map((m) => m.id);
+  const titles = Object.fromEntries(selected.map((m) => [m.id, m.title]));
 
   try {
-    while (true) {
-      chunks += 1;
-      log.textContent = `chunk ${chunks} · ingested ${totalIngested} · cached ${totalCached} · excluded ${totalExcluded} · errors ${totalErrors}${cursor ? '\nworking...' : ''}`;
-
-      const res = await fetch('/api/fathom-ingest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password, from_date: from, to_date: to, cursor, max_pages: 5 }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || `HTTP ${res.status}`);
-      }
-      const data = await res.json();
-      totalIngested += data.ingested || 0;
-      totalCached += data.cached_existing || 0;
-      totalExcluded += data.excluded || 0;
-      totalErrors += (data.errors || []).length;
-      cursor = data.next_cursor;
-      if (data.done) break;
+    const res = await fetch('/api/fathom-ingest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password, meeting_ids, titles }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${res.status}`);
     }
-
+    const data = await res.json();
     log.className = 'ingest-log ok';
-    log.textContent = `done · ingested ${totalIngested} new · ${totalCached} already cached · ${totalExcluded} excluded · ${totalErrors} errors`;
+    log.textContent = `done · ${data.ingested} new · ${data.cached_existing} already cached · ${data.errors?.length || 0} errors`;
   } catch (err) {
     log.className = 'ingest-log err';
     log.textContent = `failed: ${err.message}`;
