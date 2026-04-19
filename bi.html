@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpotsNow · GTM Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e0e; --surface: #161616; --surface-2: #1e1e1e; --surface-3: #262626;
+  --line: #2a2a2a; --line-soft: #1f1f1f;
+  --text: #e8e6e1; --text-dim: #8a857c; --text-faint: #5c5952;
+  --accent: #e05a4e; --accent-soft: #3a1a17;
+  --good: #7fb069; --warn: #d4a857; --bad: #c94a3a;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter Tight', sans-serif; font-size: 13px; line-height: 1.5; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 28px 36px 80px; }
+h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 500; letter-spacing: -0.02em; }
+
+.topbar { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 20px; border-bottom: 1px solid var(--line); margin-bottom: 24px; gap: 20px; flex-wrap: wrap; }
+.topbar h1 { font-size: 28px; font-weight: 600; line-height: 1; }
+.topbar h1 .accent { color: var(--accent); font-style: italic; font-weight: 400; }
+.topbar .sub { color: var(--text-dim); font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; margin-top: 6px; font-family: 'JetBrains Mono', monospace; }
+.topbar .sub .pulse { display: inline-block; width: 6px; height: 6px; background: var(--good); border-radius: 50%; margin-right: 6px; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.refresh-note { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.1em; background: var(--surface-2); border: 1px solid var(--line); padding: 8px 14px; border-radius: 2px; }
+.refresh-note strong { color: var(--accent); font-weight: 600; }
+
+.section { margin-bottom: 32px; }
+.section-hdr { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--line-soft); }
+.section-hdr h2 { font-size: 18px; font-weight: 600; }
+.section-hdr .tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.1em; }
+
+.verdict { background: linear-gradient(135deg, var(--accent-soft) 0%, var(--surface-2) 100%); border-left: 3px solid var(--accent); padding: 24px 28px; margin-bottom: 28px; }
+.verdict .label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+.verdict h2 { font-family: 'Fraunces', serif; font-size: 22px; line-height: 1.3; font-weight: 500; margin-bottom: 14px; color: var(--text); }
+.verdict p { color: var(--text-dim); font-size: 14px; line-height: 1.6; margin-bottom: 10px; }
+.verdict p:last-child { margin-bottom: 0; }
+.verdict strong { color: var(--text); font-weight: 600; }
+
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 28px; }
+.stat { background: var(--surface); padding: 18px 20px; }
+.stat .lbl { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); margin-bottom: 8px; }
+.stat .val { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 600; line-height: 1; }
+.stat .val.small { font-size: 24px; }
+.stat .delta { font-family: 'JetBrains Mono', monospace; font-size: 10px; margin-top: 6px; color: var(--text-dim); }
+.stat .delta.bad { color: var(--bad); } .stat .delta.warn { color: var(--warn); } .stat .delta.good { color: var(--good); }
+
+.launch-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 16px; }
+.launch-col { background: var(--surface); padding: 20px 24px; }
+.launch-col .hdr { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-faint); margin-bottom: 14px; display: flex; justify-content: space-between; }
+.launch-col .hdr .date-tag { color: var(--text-dim); }
+.launch-col h3 { font-family: 'Fraunces', serif; font-size: 16px; margin-bottom: 12px; font-weight: 500; }
+.mini-row { display: grid; grid-template-columns: 1fr 70px 60px; gap: 10px; padding: 8px 0; font-size: 12px; border-bottom: 1px solid var(--line-soft); align-items: center; }
+.mini-row:last-child { border-bottom: none; }
+.mini-row .n { font-family: 'JetBrains Mono', monospace; text-align: right; }
+.mini-row .c { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); text-align: right; }
+.mini-row .c.bad { color: var(--bad); } .mini-row .c.good { color: var(--good); } .mini-row .c.warn { color: var(--warn); }
+
+.funnel { background: var(--surface); border: 1px solid var(--line); padding: 24px 28px; margin-bottom: 28px; }
+.funnel-row { display: grid; grid-template-columns: 220px 1fr 100px 120px; align-items: center; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line-soft); }
+.funnel-row:last-child { border-bottom: none; }
+.funnel-row .step { font-family: 'Fraunces', serif; font-weight: 500; font-size: 14px; }
+.funnel-row .step .sub { display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); font-weight: 400; margin-top: 2px; }
+.funnel-bar { height: 18px; background: var(--surface-3); border-radius: 1px; position: relative; overflow: hidden; }
+.funnel-bar .fill { height: 100%; background: linear-gradient(90deg, var(--accent) 0%, #b8453a 100%); }
+.funnel-row .num { font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: right; }
+.funnel-row .conv { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); text-align: right; }
+.funnel-row .conv.bad { color: var(--bad); } .funnel-row .conv.good { color: var(--good); } .funnel-row .conv.warn { color: var(--warn); }
+
+.channel-table { background: var(--surface); border: 1px solid var(--line); margin-bottom: 28px; }
+.channel-table table { width: 100%; border-collapse: collapse; }
+.channel-table th { text-align: left; padding: 12px 20px; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); font-weight: 600; border-bottom: 1px solid var(--line); background: var(--surface-2); }
+.channel-table td { padding: 14px 20px; border-bottom: 1px solid var(--line-soft); font-size: 13px; }
+.channel-table td.num { font-family: 'JetBrains Mono', monospace; text-align: right; }
+.channel-table td.name { font-family: 'Fraunces', serif; font-weight: 500; }
+.channel-table tr:last-child td { border-bottom: none; }
+.channel-table tr:hover td { background: var(--surface-2); }
+.signal-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.signal-dot.good { background: var(--good); } .signal-dot.warn { background: var(--warn); } .signal-dot.bad { background: var(--bad); } .signal-dot.na { background: var(--text-faint); }
+
+.insight { background: var(--surface); border: 1px solid var(--line); padding: 20px 22px; margin-bottom: 16px; }
+.insight .badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; padding: 3px 8px; border-radius: 2px; margin-bottom: 10px; }
+.insight .badge.urgent { background: var(--bad); color: #fff; }
+.insight .badge.caution { background: var(--warn); color: #2a1d05; }
+.insight .badge.positive { background: var(--good); color: #0a1803; }
+.insight .badge.info { background: var(--surface-3); color: var(--text-dim); }
+.insight h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+.insight p { color: var(--text-dim); font-size: 13px; line-height: 1.55; }
+.insight p + p { margin-top: 8px; }
+.insight strong { color: var(--text); font-weight: 600; }
+
+.last-updated { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; text-align: right; margin-top: 24px; }
+
+.state-banner { padding: 40px 24px; text-align: center; border: 1px dashed var(--line); background: var(--surface); margin-bottom: 28px; }
+.state-banner .title { font-family: 'Fraunces', serif; font-size: 18px; margin-bottom: 6px; }
+.state-banner .msg { color: var(--text-dim); font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+.state-banner.error .title { color: var(--bad); }
+
+@media (max-width: 780px) {
+  .wrap { padding: 20px 16px; }
+  .stats, .launch-compare { grid-template-columns: 1fr; }
+  .funnel-row { grid-template-columns: 1fr; gap: 4px; }
+  .topbar { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap" id="app">
+  <div class="state-banner" id="loading">
+    <div class="title">Loading GTM data…</div>
+    <div class="msg">fetching /api/gtm-data</div>
+  </div>
+</div>
+
+<template id="tpl-dashboard">
+<div class="topbar">
+  <div>
+    <h1>GTM <span class="accent">Intelligence</span></h1>
+    <div class="sub"><span class="pulse"></span>SpotsNow · goal: planner views (qualified leads)</div>
+  </div>
+  <div class="refresh-note">To refresh · say <strong>"refresh the dashboard"</strong> in chat</div>
+</div>
+
+<div class="verdict">
+  <div class="label">The honest read</div>
+  <h2 data-slot="verdict-headline"></h2>
+  <p data-slot="verdict-windows"></p>
+  <p data-slot="verdict-core"></p>
+  <p data-slot="verdict-call"></p>
+</div>
+
+<section class="section">
+  <div class="section-hdr">
+    <h2>Since launch · pre vs post</h2>
+    <span class="tag">Planner views · 10d before and after ship</span>
+  </div>
+  <div class="launch-compare">
+    <div class="launch-col">
+      <div class="hdr"><span>Pre-launch</span><span class="date-tag" data-slot="pre-range"></span></div>
+      <h3>Baseline</h3>
+      <div class="mini-row"><span>Visitors</span><span class="n" data-slot="pre-visitors"></span><span class="c">100%</span></div>
+      <div class="mini-row"><span>Planner views</span><span class="n" data-slot="pre-planner"></span><span class="c" data-slot="pre-rate"></span></div>
+    </div>
+    <div class="launch-col">
+      <div class="hdr"><span>Post-launch</span><span class="date-tag" data-slot="post-range"></span></div>
+      <h3>After ship</h3>
+      <div class="mini-row"><span>Visitors</span><span class="n" data-slot="post-visitors"></span><span class="c">100%</span></div>
+      <div class="mini-row"><span>Planner views</span><span class="n" data-slot="post-planner"></span><span class="c" data-slot="post-rate"></span></div>
+    </div>
+  </div>
+  <div class="insight" data-slot="dilution-insight"></div>
+</section>
+
+<div class="stats">
+  <div class="stat">
+    <div class="lbl">Visitors</div>
+    <div class="val" data-slot="total-visitors"></div>
+    <div class="delta">Unique · last 14d</div>
+  </div>
+  <div class="stat">
+    <div class="lbl">Planner views</div>
+    <div class="val" data-slot="total-planner"></div>
+    <div class="delta" data-slot="total-planner-rate"></div>
+  </div>
+  <div class="stat">
+    <div class="lbl">Signups</div>
+    <div class="val" data-slot="total-signups"></div>
+    <div class="delta" data-slot="total-signups-rate"></div>
+  </div>
+  <div class="stat">
+    <div class="lbl">Requests</div>
+    <div class="val small" data-slot="total-requests"></div>
+    <div class="delta" data-slot="total-requests-rate"></div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="section-hdr">
+    <h2>Acquisition funnel</h2>
+    <span class="tag">Last 14 days · unique users</span>
+  </div>
+  <div class="funnel" data-slot="funnel"></div>
+</section>
+
+<section class="section">
+  <div class="section-hdr">
+    <h2>Channel performance to qualified lead</h2>
+    <span class="tag">Last 14d · conversion = planner view</span>
+  </div>
+  <div class="channel-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Source</th>
+          <th style="text-align:right">Visitors</th>
+          <th style="text-align:right">Share</th>
+          <th style="text-align:right">Leads</th>
+          <th style="text-align:right">Lead rate</th>
+          <th>Signal</th>
+        </tr>
+      </thead>
+      <tbody data-slot="channels"></tbody>
+    </table>
+  </div>
+
+  <div class="insight" data-slot="channel-insight"></div>
+</section>
+
+<section class="section">
+  <div class="section-hdr">
+    <h2>Known limitations</h2>
+    <span class="tag">Read before acting</span>
+  </div>
+  <div class="insight">
+    <p style="line-height: 1.7;">
+      <strong>Sample size:</strong> Planner views counted per 10-day window are in the double digits. Directional signal, not statistical proof.<br><br>
+      <strong>Meta attribution gap:</strong> Meta strips UTM values into numeric ad set IDs. To fix, set URL parameters in Meta Ads Manager to <code>utm_source=meta&amp;utm_campaign={{campaign.name}}&amp;utm_content={{ad.name}}</code>. Will not change the fundamental finding but will let you see which specific ad set dilutes worst.<br><br>
+      <strong>Direct traffic is mixed:</strong> "direct" / "undefined" is anyone typing the URL, clicking from Slack/iMessage, email without UTMs, or arriving via referrers that strip headers. Likely your highest-intent audience but you cannot decompose further without tagging your own links.<br><br>
+      <strong>RB2B identification is not in Mixpanel:</strong> your actual qualified-lead-handoff count is whatever RB2B identifies on planner views. This dashboard shows the Mixpanel-visible planner views.<br><br>
+      <strong>Dev/staging pollution:</strong> localhost, hosted.app and staging domains are excluded from the channel breakdown.
+    </p>
+  </div>
+</section>
+
+<div class="last-updated" data-slot="last-updated"></div>
+</template>
+
+<script>
+const fmtInt = (n) => (n ?? 0).toLocaleString('en-US');
+const fmtPct = (num, den, digits = 2) => den > 0 ? ((num / den) * 100).toFixed(digits) + '%' : '0%';
+
+function rateClass(pct) {
+  if (pct >= 3) return 'good';
+  if (pct >= 1.5) return 'warn';
+  return 'bad';
+}
+
+function signalFor(channel, totalVisits) {
+  const rate = channel.visits > 0 ? (channel.leads / channel.visits) * 100 : 0;
+  if (channel.visits < 10) {
+    if (channel.leads > 0) return { cls: 'good', text: 'Tiny sample, strong rate' };
+    return { cls: 'na', text: 'Too small to judge' };
+  }
+  const sharePct = (channel.visits / totalVisits) * 100;
+  if (sharePct > 50 && rate < 1) return { cls: 'bad', text: 'Volume without quality' };
+  if (rate >= 3) return { cls: 'good', text: 'Your actual lead engine' };
+  if (rate >= 1) return { cls: 'warn', text: 'Near-average, keep watching' };
+  return { cls: 'bad', text: 'Underperforming' };
+}
+
+function dilutionInsight(data) {
+  const pre = data.pre_launch;
+  const post = data.post_launch;
+  const preRate = pre.landing_page_view > 0 ? pre.campaign_planner_page_view / pre.landing_page_view * 100 : 0;
+  const postRate = post.landing_page_view > 0 ? post.campaign_planner_page_view / post.landing_page_view * 100 : 0;
+  const trafficMult = pre.landing_page_view > 0 ? (post.landing_page_view / pre.landing_page_view).toFixed(1) : '—';
+  const leadDelta = post.campaign_planner_page_view - pre.campaign_planner_page_view;
+  const isDilution = preRate > 0 && postRate < preRate * 0.6 && post.landing_page_view > pre.landing_page_view * 1.5;
+
+  if (isDilution) {
+    return {
+      badge: 'urgent', badgeText: 'Dilution from traffic surge',
+      html: `
+        <p><strong>${trafficMult}× the traffic, lead count ${leadDelta >= 0 ? 'roughly flat' : 'down'}.</strong> Pre-launch produced ${pre.campaign_planner_page_view} planner views at ${preRate.toFixed(2)}%. Post-launch produced ${post.campaign_planner_page_view} at ${postRate.toFixed(2)}%. This is not a product regression — the ship did not break anything. It is a channel quality issue correlating with the launch.</p>
+        <p><strong>What is likely driving it:</strong> Meta ads scaled up around the launch window. Check the channel table below — if a single paid channel is 50%+ of traffic and producing <1% lead rate, that is your dilution source.</p>
+        <p><strong>What to do:</strong> Pause the dominant paid channel for 72h and watch if the planner-view rate rebounds. If yes, dilution is confirmed. Double down on the channels with lead rate at or above ${preRate.toFixed(1)}%.</p>
+      `
+    };
+  }
+
+  if (postRate > preRate) {
+    return {
+      badge: 'positive', badgeText: 'Improving conversion',
+      html: `<p>Post-launch converts at <strong>${postRate.toFixed(2)}%</strong> vs ${preRate.toFixed(2)}% pre-launch on ${trafficMult}× the traffic. The new machine is better than the old one. Keep doing whatever you shipped.</p>`
+    };
+  }
+
+  return {
+    badge: 'info', badgeText: 'Stable',
+    html: `<p>Pre ${preRate.toFixed(2)}% → Post ${postRate.toFixed(2)}% on ${trafficMult}× traffic. No clear dilution signal, no clear uplift. Watch next 7 days.</p>`
+  };
+}
+
+function channelInsight(data) {
+  const channels = data.channels_top8 || [];
+  if (channels.length === 0) return { badge: 'info', badgeText: 'No channels', html: '<p>No channel breakdown available.</p>' };
+
+  const totalV = channels.reduce((s, c) => s + c.visits, 0);
+  const totalL = channels.reduce((s, c) => s + c.leads, 0);
+
+  const top = [...channels].sort((a, b) => b.visits - a.visits)[0];
+  const topShareV = (top.visits / totalV * 100);
+  const topShareL = totalL > 0 ? (top.leads / totalL * 100) : 0;
+  const topRate = top.visits > 0 ? top.leads / top.visits * 100 : 0;
+
+  const lead = [...channels].filter(c => c.visits >= 50).sort((a, b) => (b.leads / b.visits) - (a.leads / a.visits))[0] || top;
+  const leadShareV = (lead.visits / totalV * 100);
+  const leadShareL = totalL > 0 ? (lead.leads / totalL * 100) : 0;
+
+  if (topShareV > 50 && topRate < 1 && top !== lead) {
+    const ratio = (lead.leads / lead.visits) / Math.max(topRate / 100, 0.0001);
+    return {
+      badge: 'urgent', badgeText: 'Channel insight',
+      headline: `${top.name} is ${topShareV.toFixed(0)}% of traffic and ${topShareL.toFixed(0)}% of leads. ${lead.name} is ${leadShareV.toFixed(0)}% of traffic and ${leadShareL.toFixed(0)}% of leads.`,
+      html: `
+        <p><strong>${top.name}</strong> drove ${fmtInt(top.visits)} visitors in 14 days and produced ${top.leads} planner views. ${topRate.toFixed(2)}% rate vs <strong>${lead.name}</strong> at ${(lead.leads/lead.visits*100).toFixed(2)}%. You are paying for ${ratio.toFixed(0)}× worse conversion.</p>
+        <p><strong>Pause hypothesis test:</strong> kill ${top.name} for 72 hours. If lead volume holds from the other channels alone, ${top.name} is confirmed as pure waste at current targeting.</p>
+        <p><strong>The bigger opportunity:</strong> find the next small-but-converting channel and scale it. Higher leverage than fixing a broken paid funnel.</p>
+      `
+    };
+  }
+
+  return {
+    badge: 'info', badgeText: 'Channel read',
+    headline: `Top channel by volume: ${top.name} (${topShareV.toFixed(0)}% of traffic, ${topRate.toFixed(2)}% lead rate).`,
+    html: `<p>Your highest-converting channel with meaningful volume is <strong>${lead.name}</strong> at ${(lead.leads/lead.visits*100).toFixed(2)}%. Nothing here is obviously broken. Keep watching channels that have &gt;50 visits and &lt;1% rate — that is where waste hides.</p>`
+  };
+}
+
+function verdict(data) {
+  const pre = data.pre_launch;
+  const post = data.post_launch;
+  const preRate = pre.landing_page_view > 0 ? pre.campaign_planner_page_view / pre.landing_page_view * 100 : 0;
+  const postRate = post.landing_page_view > 0 ? post.campaign_planner_page_view / post.landing_page_view * 100 : 0;
+  const trafficMult = pre.landing_page_view > 0 ? (post.landing_page_view / pre.landing_page_view).toFixed(1) : '—';
+
+  let headline, call;
+  if (preRate > 0 && postRate < preRate * 0.6 && post.landing_page_view > pre.landing_page_view * 1.5) {
+    headline = 'Your lead machine is steady. New traffic is dilution, not addition.';
+    const channels = data.channels_top8 || [];
+    const big = channels.find(c => c.visits / Math.max(1, pre.landing_page_view + post.landing_page_view) > 0.3 && (c.leads / Math.max(1, c.visits)) < 0.01);
+    call = big
+      ? `<strong>The call:</strong> ${big.name} is driving the surge (${fmtInt(big.visits)} visits in 14d, ${big.leads} planner views, ${(big.leads / big.visits * 100).toFixed(2)}% rate). You are paying to dilute a healthy funnel. Pause ${big.name} for 72h, watch if the rate rebounds toward ${preRate.toFixed(1)}%, then decide whether to rebuild the targeting or kill the channel.`
+      : `<strong>The call:</strong> identify the dominant low-rate channel in the table below, pause it for 72h, watch the rate rebound.`;
+  } else if (postRate > preRate) {
+    headline = 'Post-launch is converting better. Whatever you shipped is working.';
+    call = `<strong>The call:</strong> keep shipping in the same direction. Double down on the top converting channels.`;
+  } else {
+    headline = 'Stable read. No dilution, no uplift.';
+    call = `<strong>The call:</strong> watch the funnel for another 7 days before making big channel changes.`;
+  }
+
+  return {
+    headline,
+    windows: `Pre-launch (10d): <strong>${fmtInt(pre.landing_page_view)} visitors → ${fmtInt(pre.campaign_planner_page_view)} planner views (${preRate.toFixed(2)}%)</strong>. Post-launch (10d): <strong>${fmtInt(post.landing_page_view)} visitors → ${fmtInt(post.campaign_planner_page_view)} planner views (${postRate.toFixed(2)}%)</strong>. Traffic went ${trafficMult}×. Qualified leads ${post.campaign_planner_page_view >= pre.campaign_planner_page_view ? 'roughly held' : 'dropped'}.`,
+    core: `Your core machine produces ~${Math.round(pre.campaign_planner_page_view)} qualified leads every 10 days from ~${fmtInt(pre.landing_page_view)} visits. Converting at ${preRate.toFixed(1)}%.`,
+    call
+  };
+}
+
+function render(data) {
+  const app = document.getElementById('app');
+  const tpl = document.getElementById('tpl-dashboard').content.cloneNode(true);
+
+  const totals = data.totals_14d;
+  const pre = data.pre_launch;
+  const post = data.post_launch;
+  const channels = data.channels_top8 || [];
+
+  const v = verdict(data);
+  tpl.querySelector('[data-slot="verdict-headline"]').textContent = v.headline;
+  tpl.querySelector('[data-slot="verdict-windows"]').innerHTML = v.windows;
+  tpl.querySelector('[data-slot="verdict-core"]').innerHTML = v.core;
+  tpl.querySelector('[data-slot="verdict-call"]').innerHTML = v.call;
+
+  tpl.querySelector('[data-slot="pre-range"]').textContent = `${pre.from} → ${pre.to}`;
+  tpl.querySelector('[data-slot="post-range"]').textContent = `${post.from} → ${post.to}`;
+  tpl.querySelector('[data-slot="pre-visitors"]').textContent = fmtInt(pre.landing_page_view);
+  tpl.querySelector('[data-slot="pre-planner"]').textContent = fmtInt(pre.campaign_planner_page_view);
+  tpl.querySelector('[data-slot="post-visitors"]').textContent = fmtInt(post.landing_page_view);
+  tpl.querySelector('[data-slot="post-planner"]').textContent = fmtInt(post.campaign_planner_page_view);
+
+  const preRateN = pre.landing_page_view > 0 ? pre.campaign_planner_page_view / pre.landing_page_view * 100 : 0;
+  const postRateN = post.landing_page_view > 0 ? post.campaign_planner_page_view / post.landing_page_view * 100 : 0;
+  const preRateEl = tpl.querySelector('[data-slot="pre-rate"]');
+  preRateEl.textContent = preRateN.toFixed(2) + '%';
+  preRateEl.classList.add(rateClass(preRateN));
+  const postRateEl = tpl.querySelector('[data-slot="post-rate"]');
+  postRateEl.textContent = postRateN.toFixed(2) + '%';
+  postRateEl.classList.add(rateClass(postRateN));
+
+  const dil = dilutionInsight(data);
+  const dilEl = tpl.querySelector('[data-slot="dilution-insight"]');
+  dilEl.innerHTML = `<div class="badge ${dil.badge}">${dil.badgeText}</div>${dil.html}`;
+
+  tpl.querySelector('[data-slot="total-visitors"]').textContent = fmtInt(totals.landing_page_view);
+  tpl.querySelector('[data-slot="total-planner"]').textContent = fmtInt(totals.campaign_planner_page_view);
+  tpl.querySelector('[data-slot="total-signups"]').textContent = fmtInt(totals.create_account_success);
+  tpl.querySelector('[data-slot="total-requests"]').textContent = fmtInt(totals.campaign_planner_send_request_click);
+
+  const plannerPct = totals.landing_page_view > 0 ? totals.campaign_planner_page_view / totals.landing_page_view * 100 : 0;
+  const plannerRateEl = tpl.querySelector('[data-slot="total-planner-rate"]');
+  plannerRateEl.textContent = plannerPct.toFixed(2) + '% of visitors';
+  plannerRateEl.classList.add(rateClass(plannerPct));
+
+  const signupPct = totals.campaign_planner_page_view > 0 ? totals.create_account_success / totals.campaign_planner_page_view * 100 : 0;
+  tpl.querySelector('[data-slot="total-signups-rate"]').textContent = signupPct.toFixed(0) + '% of planner views';
+
+  const requestPct = totals.campaign_planner_page_view > 0 ? totals.campaign_planner_send_request_click / totals.campaign_planner_page_view * 100 : 0;
+  tpl.querySelector('[data-slot="total-requests-rate"]').textContent = requestPct.toFixed(0) + '% of planner views';
+
+  const funnel = tpl.querySelector('[data-slot="funnel"]');
+  const steps = [
+    { label: 'Landing page view', id: 'landing_page_view', desc: 'visitors who loaded the landing page' },
+    { label: 'Planner reached (lead)', id: 'campaign_planner_page_view', desc: 'made it to the campaign planner' },
+    { label: 'Account created', id: 'create_account_success', desc: 'completed signup' },
+    { label: 'Request sent', id: 'campaign_planner_send_request_click', desc: 'submitted a campaign request' }
+  ];
+  const topV = totals.landing_page_view || 1;
+  const leadV = totals.campaign_planner_page_view || 0;
+  steps.forEach((step, idx) => {
+    const n = totals[step.id] || 0;
+    const pctOfTop = n / topV * 100;
+    let convText, convCls;
+    if (idx === 0) { convText = '100%'; convCls = ''; }
+    else if (idx === 1) {
+      convText = pctOfTop.toFixed(2) + '%';
+      convCls = rateClass(pctOfTop);
+    } else {
+      const pctOfLead = leadV > 0 ? n / leadV * 100 : 0;
+      convText = pctOfLead.toFixed(0) + '% of leads';
+      convCls = pctOfLead >= 50 ? 'warn' : 'bad';
+    }
+    const row = document.createElement('div');
+    row.className = 'funnel-row';
+    row.innerHTML = `
+      <div class="step">${step.label}<span class="sub">${step.id}</span></div>
+      <div class="funnel-bar"><div class="fill" style="width: ${Math.max(pctOfTop, 0.5)}%"></div></div>
+      <div class="num">${fmtInt(n)}</div>
+      <div class="conv ${convCls}">${convText}</div>
+    `;
+    funnel.appendChild(row);
+  });
+
+  const tbody = tpl.querySelector('[data-slot="channels"]');
+  const totalVisits = channels.reduce((s, c) => s + c.visits, 0);
+  channels.forEach(ch => {
+    const rate = ch.visits > 0 ? ch.leads / ch.visits * 100 : 0;
+    const share = totalVisits > 0 ? ch.visits / totalVisits * 100 : 0;
+    const sig = signalFor(ch, totalVisits);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="name">${ch.name}</td>
+      <td class="num">${fmtInt(ch.visits)}</td>
+      <td class="num">${share.toFixed(1)}%</td>
+      <td class="num">${fmtInt(ch.leads)}</td>
+      <td class="num">${rate.toFixed(2)}%</td>
+      <td><span class="signal-dot ${sig.cls}"></span>${sig.text}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const ci = channelInsight(data);
+  const ciEl = tpl.querySelector('[data-slot="channel-insight"]');
+  ciEl.innerHTML = `<div class="badge ${ci.badge}">${ci.badgeText}</div>${ci.headline ? `<h3>${ci.headline}</h3>` : ''}${ci.html}`;
+
+  const ts = data.generated_at ? new Date(data.generated_at) : null;
+  const tsStr = ts ? ts.toISOString().replace('T', ' ').slice(0, 16) + ' UTC' : 'unknown';
+  tpl.querySelector('[data-slot="last-updated"]').textContent = `Data pulled ${tsStr} · 14-day window · primary metric: campaign_planner_page_view · source: ${data.source || 'mixpanel'}`;
+
+  app.innerHTML = '';
+  app.appendChild(tpl);
+}
+
+function renderError(err, status) {
+  const app = document.getElementById('app');
+  const msg = status === 404
+    ? 'No GTM data cached yet. Say "refresh the dashboard" in chat to pull it.'
+    : `Failed to load GTM data (${err}).`;
+  app.innerHTML = `<div class="state-banner error"><div class="title">Dashboard unavailable</div><div class="msg">${msg}</div></div>`;
+}
+
+async function load() {
+  try {
+    let r = await fetch('/api/gtm-data', { cache: 'no-store' });
+    if (r.status === 404) {
+      const fallback = await fetch('/data/gtm-latest.json', { cache: 'no-store' });
+      if (fallback.ok) {
+        const data = await fallback.json();
+        render(data);
+        return;
+      }
+      renderError('not found', 404);
+      return;
+    }
+    if (!r.ok) {
+      try {
+        const fallback = await fetch('/data/gtm-latest.json', { cache: 'no-store' });
+        if (fallback.ok) { render(await fallback.json()); return; }
+      } catch (_) {}
+      renderError(`HTTP ${r.status}`, r.status);
+      return;
+    }
+    const data = await r.json();
+    render(data);
+  } catch (e) {
+    try {
+      const fallback = await fetch('/data/gtm-latest.json', { cache: 'no-store' });
+      if (fallback.ok) { render(await fallback.json()); return; }
+    } catch (_) {}
+    renderError(String(e), 0);
+  }
+}
+
+load();
+</script>
+
+</body>
+</html>
