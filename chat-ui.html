@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotsNow — Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --dark: #0e1323;
+      --grey-1: #707481;
+      --text-primary: #252733;
+      --text-secondary: #5a5f6e;
+      --border: #dee0e4;
+      --border-light: #e8e8e8;
+      --white: #ffffff;
+      --coral: #ff6b6b;
+      --btn-dark: #111111;
+      --green-bg: #d6f0e0;
+      --green-text: #0d6832;
+      --pill-bg: #f3f4f6;
+      --page-bg: #f5f5f3;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.4;
+      color: var(--dark); background: var(--page-bg);
+      -webkit-font-smoothing: antialiased;
+      height: 100vh; overflow: hidden;
+    }
+    button { font-family: inherit; cursor: pointer; }
+    img { display: block; }
+
+    /* ─── TOP BAR ─── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 200;
+      height: 56px; display: flex; align-items: center; gap: 16px;
+      padding: 0 28px; background: var(--white);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .top-bar__logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 800; font-size: 15px; color: var(--dark);
+      text-decoration: none; flex-shrink: 0; letter-spacing: -0.3px;
+    }
+    .logo-mark {
+      width: 22px; height: 22px; border-radius: 6px;
+      background: var(--coral); display: flex; align-items: center; justify-content: center;
+    }
+    .logo-mark svg { display: block; }
+    .top-bar__center {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .top-bar__nav {
+      display: flex; align-items: center; gap: 2px;
+    }
+    .top-bar__nav-item {
+      padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      color: var(--grey-1); background: none; border: none;
+      transition: all 0.15s;
+    }
+    .top-bar__nav-item:hover { background: var(--pill-bg); color: var(--text-primary); }
+    .top-bar__nav-item.active {
+      background: var(--dark); color: white; font-weight: 600;
+    }
+    .top-bar__actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .icon-btn {
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; border-radius: 8px; color: var(--dark);
+      transition: background 0.15s;
+    }
+    .icon-btn:hover { background: var(--pill-bg); }
+    .mcp-btn {
+      display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px;
+      background: var(--white); border: 1px solid var(--border); border-radius: 8px;
+      font-size: 12px; font-weight: 600; color: var(--text-primary);
+      transition: all 0.15s;
+    }
+    .mcp-btn:hover { background: var(--pill-bg); }
+    .mcp-btn svg { flex-shrink: 0; }
+    .login-btn {
+      padding: 6px 14px; background: none;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; font-weight: 600; color: var(--text-primary);
+      transition: all 0.15s;
+    }
+    .login-btn:hover { background: var(--pill-bg); }
+
+    /* ─── LAYOUT ─── */
+    .app-layout {
+      display: flex; height: calc(100vh - 56px);
+    }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar {
+      width: 260px; flex-shrink: 0;
+      background: var(--white); border-right: 1px solid var(--border-light);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .sidebar__header {
+      padding: 20px 20px 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sidebar__title {
+      font-size: 12px; font-weight: 700; color: var(--grey-1);
+      text-transform: uppercase; letter-spacing: 0.6px;
+    }
+    .new-chat-btn {
+      width: 28px; height: 28px; border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: 1px solid var(--border-light);
+      color: var(--grey-1); transition: all 0.15s;
+    }
+    .new-chat-btn:hover { background: var(--pill-bg); color: var(--dark); }
+    .sidebar__chats {
+      flex: 1; overflow-y: auto; padding: 12px 12px;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .chat-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 10px;
+      cursor: pointer; transition: background 0.12s;
+      border: none; background: none; width: 100%; text-align: left;
+    }
+    .chat-item:hover { background: var(--pill-bg); }
+    .chat-item.active { background: var(--pill-bg); }
+    .chat-item__icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--pill-bg); display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .chat-item.active .chat-item__icon { background: var(--dark); color: white; }
+    .chat-item__text {
+      flex: 1; min-width: 0;
+    }
+    .chat-item__name {
+      font-size: 13px; font-weight: 600; color: var(--text-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .chat-item__time {
+      font-size: 11px; color: var(--grey-1); margin-top: 1px;
+    }
+    .sidebar__footer {
+      padding: 16px 20px; border-top: 1px solid var(--border-light);
+    }
+    .sidebar__user {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sidebar__avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--coral); display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: white;
+    }
+    .sidebar__user-info { flex: 1; min-width: 0; }
+    .sidebar__user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .sidebar__user-plan { font-size: 11px; color: var(--grey-1); }
+
+    /* ─── MAIN CHAT AREA ─── */
+    .chat-main {
+      flex: 1; display: flex; flex-direction: column;
+      min-width: 0; position: relative;
+    }
+
+    /* ─── WELCOME STATE ─── */
+    .welcome {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 40px 24px;
+      max-width: 780px; margin: 0 auto; width: 100%;
+    }
+    .welcome.hidden { display: none; }
+    .welcome__icon {
+      width: 56px; height: 56px; border-radius: 16px;
+      background: var(--dark); display: flex; align-items: center; justify-content: center;
+      margin-bottom: 24px;
+    }
+    .welcome__title {
+      font-size: 24px; font-weight: 800; letter-spacing: -0.5px;
+      color: var(--dark); margin: 0 0 8px; text-align: center;
+    }
+    .welcome__sub {
+      font-size: 14px; color: var(--grey-1); margin: 0 0 36px; text-align: center;
+      max-width: 440px; line-height: 1.6;
+    }
+
+    /* ─── MODE TOGGLE ─── */
+    .mode-toggle {
+      display: flex; align-items: center; gap: 4px;
+      background: var(--pill-bg); border-radius: 12px; padding: 4px;
+      margin-bottom: 32px;
+    }
+    .mode-toggle__btn {
+      display: flex; align-items: center; gap: 7px;
+      padding: 10px 20px; border-radius: 9px;
+      font-size: 13px; font-weight: 600; color: var(--grey-1);
+      background: none; border: none;
+      transition: all 0.2s;
+    }
+    .mode-toggle__btn.active {
+      background: var(--white); color: var(--dark);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .mode-toggle__btn:hover:not(.active) { color: var(--text-primary); }
+    .mode-toggle__btn svg { flex-shrink: 0; }
+
+    /* ─── SUGGESTION CARDS ─── */
+    .suggestions {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      width: 100%;
+    }
+    .suggestion-card {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 18px 20px; border-radius: 14px;
+      background: var(--white); border: 1px solid var(--border-light);
+      cursor: pointer; transition: all 0.2s;
+      text-align: left;
+    }
+    .suggestion-card:hover {
+      border-color: var(--border);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+    .suggestion-card__icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .suggestion-card__icon--coral { background: #fff0f0; color: var(--coral); }
+    .suggestion-card__icon--blue { background: #eef2ff; color: #5167fc; }
+    .suggestion-card__icon--green { background: var(--green-bg); color: var(--green-text); }
+    .suggestion-card__icon--amber { background: #fef3cd; color: #b8860b; }
+    .suggestion-card__icon--purple { background: #f3eeff; color: #7c3aed; }
+    .suggestion-card__icon--dark { background: var(--pill-bg); color: var(--dark); }
+    .suggestion-card__text { flex: 1; min-width: 0; }
+    .suggestion-card__label {
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.6px; margin-bottom: 5px;
+    }
+    .suggestion-card__label--coral { color: var(--coral); }
+    .suggestion-card__label--blue { color: #5167fc; }
+    .suggestion-card__label--green { color: var(--green-text); }
+    .suggestion-card__label--amber { color: #b8860b; }
+    .suggestion-card__label--purple { color: #7c3aed; }
+    .suggestion-card__label--dark { color: var(--grey-1); }
+    .suggestion-card__title {
+      font-size: 13px; font-weight: 600; color: var(--dark);
+      line-height: 1.4; margin-bottom: 3px;
+    }
+    .suggestion-card__desc {
+      font-size: 12px; color: var(--grey-1); line-height: 1.5;
+    }
+
+    /* ─── CHAT MESSAGES ─── */
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 32px 24px;
+      display: none; flex-direction: column; gap: 24px;
+      max-width: 780px; margin: 0 auto; width: 100%;
+    }
+    .chat-messages.active { display: flex; }
+    .message {
+      display: flex; gap: 14px; align-items: flex-start;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .message--user { flex-direction: row-reverse; }
+    .message__avatar {
+      width: 32px; height: 32px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 11px; font-weight: 700;
+    }
+    .message__avatar--ai {
+      background: var(--dark); color: white;
+    }
+    .message__avatar--user {
+      background: var(--coral); color: white;
+    }
+    .message__content {
+      max-width: 560px; min-width: 0;
+    }
+    .message--user .message__content {
+      display: flex; flex-direction: column; align-items: flex-end;
+    }
+    .message__bubble {
+      padding: 14px 18px; border-radius: 14px;
+      font-size: 13px; line-height: 1.6;
+    }
+    .message--ai .message__bubble {
+      background: var(--white); border: 1px solid var(--border-light);
+      color: var(--text-primary);
+    }
+    .message--user .message__bubble {
+      background: var(--dark); color: white;
+    }
+    .message__time {
+      font-size: 11px; color: var(--grey-1); margin-top: 6px;
+      padding: 0 4px;
+    }
+
+    /* AI response cards inside messages */
+    .ai-card-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      margin-top: 12px;
+    }
+    .ai-insight-card {
+      padding: 14px 16px; border-radius: 12px;
+      background: var(--pill-bg); border: 1px solid var(--border-light);
+      transition: all 0.15s; cursor: pointer;
+    }
+    .ai-insight-card:hover {
+      background: var(--white); border-color: var(--border);
+    }
+    .ai-insight-card__rank {
+      font-size: 9px; font-weight: 700; color: var(--grey-1);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
+    }
+    .ai-insight-card__name {
+      font-size: 13px; font-weight: 700; color: var(--dark); margin-bottom: 2px;
+    }
+    .ai-insight-card__meta {
+      font-size: 11px; color: var(--grey-1); line-height: 1.4;
+    }
+    .ai-insight-card__stat {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 11px; font-weight: 700; color: var(--green-text);
+      background: var(--green-bg); padding: 2px 7px; border-radius: 5px;
+      margin-top: 6px;
+    }
+
+    /* Follow-up suggestions */
+    .follow-ups {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px;
+    }
+    .follow-up-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px 14px; border-radius: 20px;
+      background: var(--white); border: 1px solid var(--border-light);
+      font-size: 12px; font-weight: 500; color: var(--text-primary);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .follow-up-chip:hover {
+      background: var(--pill-bg); border-color: var(--border);
+    }
+    .follow-up-chip svg { flex-shrink: 0; color: var(--grey-1); }
+
+    /* ─── TYPING INDICATOR ─── */
+    .typing-indicator {
+      display: none; gap: 14px; align-items: flex-start;
+      animation: fadeIn 0.3s ease;
+    }
+    .typing-indicator.active { display: flex; }
+    .typing-dots {
+      display: flex; align-items: center; gap: 4px;
+      padding: 16px 20px; border-radius: 14px;
+      background: var(--white); border: 1px solid var(--border-light);
+    }
+    .typing-dots span {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--grey-1);
+      animation: typingBounce 1.4s ease-in-out infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-4px); opacity: 1; }
+    }
+
+    /* ─── INPUT BAR ─── */
+    .input-bar-wrapper {
+      padding: 0 24px 24px;
+      max-width: 780px; margin: 0 auto; width: 100%;
+    }
+    .input-bar {
+      display: flex; align-items: flex-end; gap: 10px;
+      background: var(--white); border: 1.5px solid var(--border-light);
+      border-radius: 16px; padding: 6px 6px 6px 18px;
+      transition: border-color 0.15s;
+    }
+    .input-bar:focus-within {
+      border-color: var(--dark);
+    }
+    .input-bar__input {
+      flex: 1; border: none; outline: none; resize: none;
+      font-family: inherit; font-size: 14px; line-height: 1.5;
+      color: var(--dark); background: none;
+      padding: 8px 0; min-height: 20px; max-height: 120px;
+    }
+    .input-bar__input::placeholder { color: #b0b4be; }
+    .input-bar__actions {
+      display: flex; align-items: center; gap: 4px; flex-shrink: 0;
+      padding-bottom: 2px;
+    }
+    .send-btn {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: var(--dark); border: none;
+      display: flex; align-items: center; justify-content: center;
+      color: white; transition: all 0.15s;
+    }
+    .send-btn:hover { opacity: 0.85; }
+    .send-btn:disabled { opacity: 0.35; cursor: default; }
+    .attach-btn {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: none; border: none;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--grey-1); transition: all 0.15s;
+    }
+    .attach-btn:hover { background: var(--pill-bg); color: var(--dark); }
+
+    .input-bar__disclaimer {
+      text-align: center; font-size: 11px; color: var(--grey-1);
+      margin-top: 10px; line-height: 1.4;
+    }
+
+    /* ─── MCP MODAL ─── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--white); border-radius: 20px;
+      width: 480px; max-width: calc(100% - 48px);
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+    .modal__header {
+      padding: 24px 28px 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal__title {
+      font-size: 18px; font-weight: 800; color: var(--dark);
+      letter-spacing: -0.3px;
+    }
+    .modal__close {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; color: var(--grey-1);
+      transition: all 0.15s;
+    }
+    .modal__close:hover { background: var(--pill-bg); color: var(--dark); }
+    .modal__body { padding: 20px 28px 28px; }
+    .modal__desc {
+      font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .connector-list {
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .connector-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px; border-radius: 12px;
+      background: var(--pill-bg); border: 1px solid transparent;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .connector-item:hover {
+      border-color: var(--border); background: var(--white);
+    }
+    .connector-item__icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .connector-item__icon--claude { background: #fdf0e8; }
+    .connector-item__icon--openai { background: #e8f5e9; }
+    .connector-item__icon--custom { background: #eef2ff; }
+    .connector-item__info { flex: 1; min-width: 0; }
+    .connector-item__name {
+      font-size: 13px; font-weight: 700; color: var(--dark);
+    }
+    .connector-item__desc {
+      font-size: 12px; color: var(--grey-1); margin-top: 1px;
+    }
+    .connector-item__badge {
+      font-size: 10px; font-weight: 700; padding: 3px 8px;
+      border-radius: 5px; text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .connector-item__badge--ready { background: var(--green-bg); color: var(--green-text); }
+    .connector-item__badge--soon { background: var(--pill-bg); color: var(--grey-1); }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--grey-1); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .top-bar { padding: 0 16px; }
+      .suggestions { grid-template-columns: 1fr; }
+      .welcome { padding: 24px 16px; }
+      .input-bar-wrapper { padding: 0 16px 16px; }
+      .chat-messages { padding: 24px 16px; }
+      .ai-card-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── TOP BAR ─── -->
+  <div class="top-bar">
+    <a href="#" class="top-bar__logo">
+      <div class="logo-mark">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      SpotsNow
+    </a>
+    <div class="top-bar__center">
+      <nav class="top-bar__nav">
+        <button class="top-bar__nav-item" onclick="window.open('https://spotsnow.io/browse','_blank')">Browse</button>
+        <button class="top-bar__nav-item active">Intelligence</button>
+        <button class="top-bar__nav-item">Campaigns</button>
+        <button class="top-bar__nav-item">Reports</button>
+      </nav>
+    </div>
+    <div class="top-bar__actions">
+      <button class="mcp-btn" onclick="openMcpModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+        Connect MCP
+      </button>
+      <button class="icon-btn" title="Notifications">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      </button>
+      <button class="login-btn">Log in</button>
+    </div>
+  </div>
+
+  <!-- ─── LAYOUT ─── -->
+  <div class="app-layout">
+
+    <!-- ─── SIDEBAR ─── -->
+    <div class="sidebar">
+      <div class="sidebar__header">
+        <span class="sidebar__title">Conversations</span>
+        <button class="new-chat-btn" onclick="resetChat()" title="New chat">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+      <div class="sidebar__chats">
+        <button class="chat-item active">
+          <div class="chat-item__icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          </div>
+          <div class="chat-item__text">
+            <div class="chat-item__name">New conversation</div>
+            <div class="chat-item__time">Just now</div>
+          </div>
+        </button>
+        <button class="chat-item">
+          <div class="chat-item__icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          </div>
+          <div class="chat-item__text">
+            <div class="chat-item__name">Health & wellness show analysis</div>
+            <div class="chat-item__time">Yesterday</div>
+          </div>
+        </button>
+        <button class="chat-item">
+          <div class="chat-item__icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          </div>
+          <div class="chat-item__text">
+            <div class="chat-item__name">Competitor spend breakdown</div>
+            <div class="chat-item__time">Apr 10</div>
+          </div>
+        </button>
+        <button class="chat-item">
+          <div class="chat-item__icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          </div>
+          <div class="chat-item__text">
+            <div class="chat-item__name">New-to-podcast brand report</div>
+            <div class="chat-item__time">Apr 8</div>
+          </div>
+        </button>
+      </div>
+      <div class="sidebar__footer">
+        <div class="sidebar__user">
+          <div class="sidebar__avatar">C</div>
+          <div class="sidebar__user-info">
+            <div class="sidebar__user-name">Cam Pritchard</div>
+            <div class="sidebar__user-plan">Pro plan</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── MAIN ─── -->
+    <div class="chat-main">
+
+      <!-- Welcome state -->
+      <div class="welcome" id="welcome">
+        <div class="welcome__icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <h1 class="welcome__title">SpotsNow Intelligence</h1>
+        <p class="welcome__sub">Ask anything about podcast advertising — discover shows, analyze spend, optimize creative, and uncover opportunities across 59,000+ shows.</p>
+
+        <!-- Mode toggle -->
+        <div class="mode-toggle">
+          <button class="mode-toggle__btn active" id="mode-publisher" onclick="setMode('publisher')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            Publisher
+          </button>
+          <button class="mode-toggle__btn" id="mode-advertiser" onclick="setMode('advertiser')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Advertiser
+          </button>
+        </div>
+
+        <!-- Suggestion cards (Publisher mode) -->
+        <div class="suggestions" id="suggestions-publisher">
+          <button class="suggestion-card" onclick="sendSuggestion('Run an analysis on the brands most likely to spend with my shows based on audience overlap, category fit, and current ad-spend trends.')">
+            <div class="suggestion-card__icon suggestion-card__icon--coral">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="suggestion-card__text">
+              <div class="suggestion-card__label suggestion-card__label--coral">Revenue</div>
+              <div class="suggestion-card__title">Brands most likely to spend with my shows</div>
+              <div class="suggestion-card__desc">Audience overlap, category fit, and spend signals</div>
+            </div>
+          </button>
+          <button class="suggestion-card" onclick="sendSuggestion('Show me new brands entering podcasting for the first time — first episodes aired in the last 90 days with their estimated budgets and categories.')">
+            <div class="suggestion-card__icon suggestion-card__icon--green">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            <div class="suggestion-card__text">
+              <div class="suggestion-card__label suggestion-card__label--green">Discovery</div>
+              <div class="suggestion-card__title">New brands entering podcasting</div>
+              <div class="suggestion-card__desc">First-time advertisers in the last 90 days</div>
+            </div>
+          </button>
+          <button class="suggestion-card" onclick="sendSuggestion('Which brands are moving from test budgets to scale-up mode? Show me advertisers that started with 1-3 shows and are now expanding to 5+ placements.')">
+            <div class="suggestion-card__icon suggestion-card__icon--blue">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <div class="suggestion-card__text">
+              <div class="suggestion-card__label suggestion-card__label--blue">Scaling</div>
+              <div class="suggestion-card__title">Brands moving to scale-up mode</div>
+              <div class="suggestion-card__desc">Test budgets expanding to multi-show campaigns</div>
+            </div>
+          </button>
+          <button class="suggestion-card" onclick="sendSuggestion('Give me a breakdown of the top spending categories this quarter and which show genres are getting the biggest budget increases.')">
+            <div class="suggestion-card__icon suggestion-card__icon--amber">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            </div>
+            <div class="suggestion-card__text">
+              <div class="suggestion-card__label suggestion-card__label--amber">Market Intel</div>
+              <div class="suggestion-card__title">Top spending categories this quarter</div>
+              <div class="suggestion-card__desc">Category spend trends and genre-level shifts</div>
+            </div>
+          </button>
+        </div>
+
+        <!-- Suggestion cards (Advertiser mode) -->
+        <div class="suggestions" id="suggestions-advertiser" style="display: none;">
+          <button class="suggestion-card" onclick="sendSuggestion('Find the top 20 performing shows in Health & Wellness for my brand. Rank by audience fit, engagement rate, and ROAS history.')">
+            <div class="suggestion-card__icon suggestion-card__icon--coral">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <div class="suggestion-card__text">
+              <div class="suggestion-card__label suggestion-card__label--coral">Discovery</div>
+              <div class="suggestion-card__title">Top 20 shows in Health for my brand</div>
+              <div class="suggestion-card__desc">Ranked by audience fit, engagement, and ROAS</div>
+            </div>
+          </button>
+          <button class="suggestion-card" onclick="sendSuggestion('Do a competitive analysis on my top competitor — what shows are they spending on, how much, and where are the whitespace opportunities for me?')">
+            <div class="suggestion-card__icon suggestion-card__icon--purple">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            </div>
+            <div class="suggestion-card__text">
+              <div class="suggestion-card__label suggestion-card__label--purple">Competitive</div>
+              <div class="suggestion-card__title">Competitor spend report & opportunities</div>
+              <div class="suggestion-card__desc">What they're buying and where you're missing</div>
+            </div>
+          </button>
+          <button class="suggestion-card" onclick="sendSuggestion('Take my ad creative and make it 5x more effective. Analyze the highest-converting repeat advertisers in similar industries and give me specific copy and delivery recommendations.')">
+            <div class="suggestion-card__icon suggestion-card__icon--amber">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div class="suggestion-card__text">
+              <div class="suggestion-card__label suggestion-card__label--amber">Creative</div>
+              <div class="suggestion-card__title">Optimize my creative for 5x performance</div>
+              <div class="suggestion-card__desc">Based on top-converting ads in your category</div>
+            </div>
+          </button>
+          <button class="suggestion-card" onclick="sendSuggestion('Build me a full campaign plan — suggest shows, estimate reach and CPMs, forecast ROAS, and generate a media plan I can share with my team.')">
+            <div class="suggestion-card__icon suggestion-card__icon--blue">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </div>
+            <div class="suggestion-card__text">
+              <div class="suggestion-card__label suggestion-card__label--blue">Planning</div>
+              <div class="suggestion-card__title">Build a full campaign plan</div>
+              <div class="suggestion-card__desc">Shows, reach, CPMs, ROAS forecast, and media plan</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Chat messages -->
+      <div class="chat-messages" id="chatMessages"></div>
+
+      <!-- Typing indicator -->
+      <div class="typing-indicator" id="typingIndicator" style="max-width:780px;margin:0 auto;width:100%;padding:0 24px 12px;">
+        <div class="message__avatar message__avatar--ai">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div class="typing-dots">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <!-- Input bar -->
+      <div class="input-bar-wrapper">
+        <div class="input-bar">
+          <textarea class="input-bar__input" id="chatInput" placeholder="Ask about shows, brands, campaigns, competitive intel..." rows="1" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+          <div class="input-bar__actions">
+            <button class="attach-btn" title="Attach file">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+            </button>
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="input-bar__disclaimer">SpotsNow Intelligence has access to 59,000+ shows and real-time ad-spend data</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── MCP MODAL ─── -->
+  <div class="modal-overlay" id="mcpModal" onclick="closeMcpModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal__header">
+        <span class="modal__title">Connect via MCP</span>
+        <button class="modal__close" onclick="closeMcpModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <p class="modal__desc">Connect SpotsNow Intelligence directly to your AI tools via Model Context Protocol. Query show data, ad spend, and campaign insights from any MCP-compatible client.</p>
+        <div class="connector-list">
+          <div class="connector-item">
+            <div class="connector-item__icon connector-item__icon--claude">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="#D97706" opacity="0.15"/><path d="M16 8l-4 8-4-8" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="connector-item__info">
+              <div class="connector-item__name">Claude Desktop</div>
+              <div class="connector-item__desc">Connect via claude_desktop_config.json</div>
+            </div>
+            <span class="connector-item__badge connector-item__badge--ready">Ready</span>
+          </div>
+          <div class="connector-item">
+            <div class="connector-item__icon connector-item__icon--custom">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5167fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <div class="connector-item__info">
+              <div class="connector-item__name">Claude Code</div>
+              <div class="connector-item__desc">Add as MCP server in your project</div>
+            </div>
+            <span class="connector-item__badge connector-item__badge--ready">Ready</span>
+          </div>
+          <div class="connector-item">
+            <div class="connector-item__icon connector-item__icon--openai">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0d6832" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+            </div>
+            <div class="connector-item__info">
+              <div class="connector-item__name">Custom Integration</div>
+              <div class="connector-item__desc">REST API + MCP server endpoint</div>
+            </div>
+            <span class="connector-item__badge connector-item__badge--soon">Coming soon</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─── State ───
+    let currentMode = 'publisher';
+
+    // ─── Mode Toggle ───
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById('mode-publisher').classList.toggle('active', mode === 'publisher');
+      document.getElementById('mode-advertiser').classList.toggle('active', mode === 'advertiser');
+      document.getElementById('suggestions-publisher').style.display = mode === 'publisher' ? 'grid' : 'none';
+      document.getElementById('suggestions-advertiser').style.display = mode === 'advertiser' ? 'grid' : 'none';
+    }
+
+    // ─── Chat Logic ───
+    function sendSuggestion(text) {
+      addUserMessage(text);
+      simulateResponse(text);
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      input.style.height = 'auto';
+      document.getElementById('sendBtn').disabled = true;
+      addUserMessage(text);
+      simulateResponse(text);
+    }
+
+    function handleKey(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+      setTimeout(() => {
+        document.getElementById('sendBtn').disabled = !document.getElementById('chatInput').value.trim();
+      }, 0);
+    }
+
+    function autoResize(el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+      document.getElementById('sendBtn').disabled = !el.value.trim();
+    }
+
+    function addUserMessage(text) {
+      document.getElementById('welcome').classList.add('hidden');
+      const chatEl = document.getElementById('chatMessages');
+      chatEl.classList.add('active');
+
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      const msg = document.createElement('div');
+      msg.className = 'message message--user';
+      msg.innerHTML = `
+        <div class="message__avatar message__avatar--user">C</div>
+        <div class="message__content">
+          <div class="message__bubble">${escapeHtml(text)}</div>
+          <div class="message__time">${time}</div>
+        </div>
+      `;
+      chatEl.appendChild(msg);
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
+    function simulateResponse(query) {
+      const typing = document.getElementById('typingIndicator');
+      typing.classList.add('active');
+      const chatEl = document.getElementById('chatMessages');
+      chatEl.scrollTop = chatEl.scrollHeight;
+
+      setTimeout(() => {
+        typing.classList.remove('active');
+        const response = generateResponse(query);
+        addAiMessage(response);
+      }, 1800 + Math.random() * 1200);
+    }
+
+    function addAiMessage(response) {
+      const chatEl = document.getElementById('chatMessages');
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      const msg = document.createElement('div');
+      msg.className = 'message message--ai';
+      msg.innerHTML = `
+        <div class="message__avatar message__avatar--ai">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div class="message__content">
+          <div class="message__bubble">${response.text}</div>
+          ${response.cards ? `<div class="ai-card-grid">${response.cards}</div>` : ''}
+          ${response.followUps ? `<div class="follow-ups">${response.followUps.map(f =>
+            `<button class="follow-up-chip" onclick="sendSuggestion('${escapeAttr(f)}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+              ${escapeHtml(f)}
+            </button>`
+          ).join('')}</div>` : ''}
+          <div class="message__time">${time}</div>
+        </div>
+      `;
+      chatEl.appendChild(msg);
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
+    // ─── Response Generator ───
+    function generateResponse(query) {
+      const q = query.toLowerCase();
+
+      if (q.includes('brands most likely') || q.includes('audience overlap')) {
+        return {
+          text: `Based on your show portfolio, I analyzed audience overlap, category adjacency, and active ad-spend signals across 59,000+ shows. Here are the <strong>top brands most likely to convert</strong> into placements with your network:`,
+          cards: `
+            <div class="ai-insight-card">
+              <div class="ai-insight-card__rank">#1 Match</div>
+              <div class="ai-insight-card__name">Athletic Greens (AG1)</div>
+              <div class="ai-insight-card__meta">Health & Wellness &middot; 87% audience overlap</div>
+              <div class="ai-insight-card__stat">+34% spend QoQ</div>
+            </div>
+            <div class="ai-insight-card">
+              <div class="ai-insight-card__rank">#2 Match</div>
+              <div class="ai-insight-card__name">BetterHelp</div>
+              <div class="ai-insight-card__meta">Mental Health &middot; 82% audience overlap</div>
+              <div class="ai-insight-card__stat">+28% spend QoQ</div>
+            </div>
+            <div class="ai-insight-card">
+              <div class="ai-insight-card__rank">#3 Match</div>
+              <div class="ai-insight-card__name">Shopify</div>
+              <div class="ai-insight-card__meta">Business & Tech &middot; 79% audience overlap</div>
+              <div class="ai-insight-card__stat">+41% spend QoQ</div>
+            </div>
+            <div class="ai-insight-card">
+              <div class="ai-insight-card__rank">#4 Match</div>
+              <div class="ai-insight-card__name">Liquid Death</div>
+              <div class="ai-insight-card__meta">Beverage &middot; 74% audience overlap</div>
+              <div class="ai-insight-card__stat">+56% spend QoQ</div>
+            </div>
+          `,
+          followUps: [
+            'Show me outreach templates for AG1',
+            'Which of these brands are new to my genre?',
+            'Pull the full top-20 list with CPMs'
+          ]
+        };
+      }
+
+      if (q.includes('new brands') && (q.includes('podcast') || q.includes('first'))) {
+        return {
+          text: `I found <strong>47 new brands</strong> that placed their first podcast ad in the last 90 days. Here are the highest-budget newcomers:`,
+          cards: `
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">New Entrant</div><div class="ai-insight-card__name">Huel</div><div class="ai-insight-card__meta">Nutrition &middot; First aired 38 days ago &middot; 12 shows</div><div class="ai-insight-card__stat">~$180K est. budget</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">New Entrant</div><div class="ai-insight-card__name">Notion</div><div class="ai-insight-card__meta">Productivity &middot; First aired 22 days ago &middot; 8 shows</div><div class="ai-insight-card__stat">~$140K est. budget</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">New Entrant</div><div class="ai-insight-card__name">Oura Ring</div><div class="ai-insight-card__meta">Health Tech &middot; First aired 51 days ago &middot; 6 shows</div><div class="ai-insight-card__stat">~$95K est. budget</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">New Entrant</div><div class="ai-insight-card__name">Perplexity AI</div><div class="ai-insight-card__meta">AI / Tech &middot; First aired 15 days ago &middot; 4 shows</div><div class="ai-insight-card__stat">~$75K est. budget</div></div>
+          `,
+          followUps: [
+            'Which of these overlap with my audience?',
+            'Show the full 47-brand list',
+            'Alert me when new brands enter my category'
+          ]
+        };
+      }
+
+      if (q.includes('scale') && (q.includes('mode') || q.includes('expanding') || q.includes('test'))) {
+        return {
+          text: `Found <strong>23 brands</strong> that started with test placements (1-3 shows) and are now actively scaling to 5+ shows. These are your best conversion targets:`,
+          cards: `
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Scaling Fast</div><div class="ai-insight-card__name">Helix Sleep</div><div class="ai-insight-card__meta">2 shows &rarr; 14 shows &middot; 6 months</div><div class="ai-insight-card__stat">7x placement growth</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Scaling Fast</div><div class="ai-insight-card__name">Masterclass</div><div class="ai-insight-card__meta">3 shows &rarr; 11 shows &middot; 4 months</div><div class="ai-insight-card__stat">3.7x placement growth</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Scaling</div><div class="ai-insight-card__name">Calm</div><div class="ai-insight-card__meta">1 show &rarr; 8 shows &middot; 5 months</div><div class="ai-insight-card__stat">8x placement growth</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Scaling</div><div class="ai-insight-card__name">ZocDoc</div><div class="ai-insight-card__meta">2 shows &rarr; 7 shows &middot; 3 months</div><div class="ai-insight-card__stat">3.5x placement growth</div></div>
+          `,
+          followUps: [
+            'Which scaling brands match my audience?',
+            'Show their ad creative and messaging',
+            'What categories are scaling fastest?'
+          ]
+        };
+      }
+
+      if (q.includes('top 20') && q.includes('health')) {
+        return {
+          text: `Here are the <strong>top 20 performing shows in Health & Wellness</strong>, ranked by a composite score of audience fit, engagement, and historical ROAS for brands in your category:`,
+          cards: `
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">#1</div><div class="ai-insight-card__name">Huberman Lab</div><div class="ai-insight-card__meta">3.2M listeners &middot; $42 CPM</div><div class="ai-insight-card__stat">4.8x avg ROAS</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">#2</div><div class="ai-insight-card__name">The Doctor's Farmacy</div><div class="ai-insight-card__meta">890K listeners &middot; $38 CPM</div><div class="ai-insight-card__stat">4.2x avg ROAS</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">#3</div><div class="ai-insight-card__name">On Purpose w/ Jay Shetty</div><div class="ai-insight-card__meta">2.1M listeners &middot; $35 CPM</div><div class="ai-insight-card__stat">3.9x avg ROAS</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">#4</div><div class="ai-insight-card__name">Feel Better, Live More</div><div class="ai-insight-card__meta">680K listeners &middot; $28 CPM</div><div class="ai-insight-card__stat">3.7x avg ROAS</div></div>
+          `,
+          followUps: [
+            'Show me the full top 20 list',
+            'Compare CPMs across these shows',
+            'Check availability for Q3 placements'
+          ]
+        };
+      }
+
+      if (q.includes('competitor') || q.includes('competitive')) {
+        return {
+          text: `I'll run a competitive intelligence report. Here's a sample breakdown of a <strong>competitor's podcast strategy</strong>:`,
+          cards: `
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Competitor Spend</div><div class="ai-insight-card__name">True Crime category</div><div class="ai-insight-card__meta">12 active shows &middot; $420K est. quarterly spend</div><div class="ai-insight-card__stat">Your gap: 8 shows</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Competitor Spend</div><div class="ai-insight-card__name">Business & Finance</div><div class="ai-insight-card__meta">8 active shows &middot; $310K est. quarterly spend</div><div class="ai-insight-card__stat">Your gap: 5 shows</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Whitespace</div><div class="ai-insight-card__name">Parenting & Family</div><div class="ai-insight-card__meta">Competitor: 0 shows &middot; High audience fit for you</div><div class="ai-insight-card__stat">Opportunity: $200K+</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Whitespace</div><div class="ai-insight-card__name">Sports & Fitness</div><div class="ai-insight-card__meta">Competitor: 1 show &middot; Growing category (+62% YoY)</div><div class="ai-insight-card__stat">Opportunity: $150K+</div></div>
+          `,
+          followUps: [
+            'Show me their actual ad creative',
+            'Which shows do we both advertise on?',
+            'Build a strategy to win in their weak spots'
+          ]
+        };
+      }
+
+      if (q.includes('creative') || q.includes('5x') || q.includes('converting')) {
+        return {
+          text: `I analyzed the <strong>top 100 highest-converting repeat advertisers</strong> in categories similar to yours. Here are specific recommendations to boost your creative performance:`,
+          cards: `
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Insight #1</div><div class="ai-insight-card__name">Lead with personal story</div><div class="ai-insight-card__meta">Top performers use host-read personal endorsements. Ads with personal anecdotes convert 3.2x higher than scripted reads.</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Insight #2</div><div class="ai-insight-card__name">60s mid-roll outperforms</div><div class="ai-insight-card__meta">60-second mid-roll placements show 2.8x higher conversion than pre-roll in your category.</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Insight #3</div><div class="ai-insight-card__name">Specific CTA with urgency</div><div class="ai-insight-card__meta">"Go to [brand].com/[show]" + time-limited offer drives 4.1x more conversions than generic CTAs.</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Insight #4</div><div class="ai-insight-card__name">Repeat exposure matters</div><div class="ai-insight-card__meta">Brands running 4+ episodes on the same show see 5.2x ROAS vs. single-episode placements.</div></div>
+          `,
+          followUps: [
+            'Rewrite my current ad script using these insights',
+            'Show me the best-performing ad transcripts',
+            'Which shows have the best host-read quality?'
+          ]
+        };
+      }
+
+      if (q.includes('campaign plan') || q.includes('media plan')) {
+        return {
+          text: `Here's a draft <strong>campaign plan</strong> built from your brand profile and current inventory:`,
+          cards: `
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Phase 1 &middot; Weeks 1-2</div><div class="ai-insight-card__name">Test &mdash; 5 shows</div><div class="ai-insight-card__meta">Est. reach: 1.2M &middot; Budget: $48K &middot; CPM: $32</div><div class="ai-insight-card__stat">Audience validation</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Phase 2 &middot; Weeks 3-6</div><div class="ai-insight-card__name">Scale &mdash; 12 shows</div><div class="ai-insight-card__meta">Est. reach: 4.8M &middot; Budget: $156K &middot; CPM: $28</div><div class="ai-insight-card__stat">Top performers</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Phase 3 &middot; Weeks 7-12</div><div class="ai-insight-card__name">Optimize &mdash; 8 shows</div><div class="ai-insight-card__meta">Est. reach: 6.2M &middot; Budget: $198K &middot; ROAS target: 4x+</div><div class="ai-insight-card__stat">Max ROAS</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Total</div><div class="ai-insight-card__name">12-week plan summary</div><div class="ai-insight-card__meta">Reach: 12.2M &middot; Budget: $402K &middot; ROAS: 3.8x</div><div class="ai-insight-card__stat">Revenue: $1.53M</div></div>
+          `,
+          followUps: [
+            'Export this as a shareable report',
+            'Adjust budget to $250K',
+            'Add more shows in True Crime category'
+          ]
+        };
+      }
+
+      if (q.includes('spending categories') || q.includes('top spending')) {
+        return {
+          text: `Here's the <strong>Q1 2026 category spend breakdown</strong> with quarter-over-quarter trends:`,
+          cards: `
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">#1 Category</div><div class="ai-insight-card__name">Health & Wellness</div><div class="ai-insight-card__meta">$18.4M total spend &middot; 342 active brands</div><div class="ai-insight-card__stat">+22% QoQ</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">#2 Category</div><div class="ai-insight-card__name">Technology & SaaS</div><div class="ai-insight-card__meta">$15.2M total spend &middot; 287 active brands</div><div class="ai-insight-card__stat">+38% QoQ</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">#3 Category</div><div class="ai-insight-card__name">Finance & Insurance</div><div class="ai-insight-card__meta">$12.8M total spend &middot; 198 active brands</div><div class="ai-insight-card__stat">+15% QoQ</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Fastest Growing</div><div class="ai-insight-card__name">AI & Developer Tools</div><div class="ai-insight-card__meta">$4.1M total spend &middot; 64 active brands</div><div class="ai-insight-card__stat">+142% QoQ</div></div>
+          `,
+          followUps: [
+            'Which genres are getting the most spend?',
+            'Show me AI & Dev Tools brands expanding',
+            'Compare my category vs. last quarter'
+          ]
+        };
+      }
+
+      return {
+        text: `Great question. Let me pull that data from our database of <strong>59,000+ shows</strong> and real-time ad-spend signals.<br><br>I'm analyzing audience demographics, historical campaign performance, and current market trends to give you the most actionable insights.`,
+        followUps: [
+          'Show me the raw data behind this',
+          'Export this as a report',
+          'What else should I be looking at?'
+        ]
+      };
+    }
+
+    // ─── MCP Modal ───
+    function openMcpModal() {
+      document.getElementById('mcpModal').classList.add('active');
+    }
+    function closeMcpModal(e) {
+      if (!e || e.target === document.getElementById('mcpModal')) {
+        document.getElementById('mcpModal').classList.remove('active');
+      }
+    }
+
+    // ─── Reset ───
+    function resetChat() {
+      document.getElementById('chatMessages').innerHTML = '';
+      document.getElementById('chatMessages').classList.remove('active');
+      document.getElementById('welcome').classList.remove('hidden');
+    }
+
+    // ─── Helpers ───
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+    function escapeAttr(str) {
+      return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>

@@ -1,12 +1,17 @@
 export const config = {
-  matcher: ['/bi', '/bi.html', '/api/gtm-data']
+  matcher: ['/', '/index.html', '/bi', '/bi.html', '/api/gtm-data']
 };
 
 export default function middleware(request) {
-  const expected = process.env.BI_PASSWORD;
+  const { pathname } = new URL(request.url);
+  const isBi = pathname === '/bi' || pathname === '/bi.html' || pathname === '/api/gtm-data';
+
+  const expected = isBi ? process.env.BI_PASSWORD : process.env.WIKI_PASSWORD;
+  const realm = isBi ? 'SpotsNow BI' : 'SpotsNow Wiki';
+  const envName = isBi ? 'BI_PASSWORD' : 'WIKI_PASSWORD';
 
   if (!expected) {
-    console.warn('[middleware] BI_PASSWORD not set — /bi is currently unprotected');
+    console.warn(`[middleware] ${envName} not set — ${pathname} is currently unprotected`);
     return;
   }
 
@@ -23,7 +28,7 @@ export default function middleware(request) {
   return new Response('Authentication required', {
     status: 401,
     headers: {
-      'WWW-Authenticate': 'Basic realm="SpotsNow BI", charset="UTF-8"',
+      'WWW-Authenticate': `Basic realm="${realm}", charset="UTF-8"`,
       'Content-Type': 'text/plain'
     }
   });

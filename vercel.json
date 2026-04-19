@@ -1,5 +1,5 @@
 {
-  "buildCommand": "mkdir -p dist && cp *.html dist/ && cp *.png dist/ 2>/dev/null; true && mkdir -p dist/data && cp data/*.json dist/data/ 2>/dev/null; true && mkdir -p dist/api",
+  "buildCommand": "mkdir -p dist && cp *.html dist/ && cp *.png dist/ 2>/dev/null; true && cp styles.css script.js dist/ 2>/dev/null; true && mkdir -p dist/data && cp data/*.json dist/data/ 2>/dev/null; true && mkdir -p dist/api",
   "outputDirectory": "dist",
   "framework": null,
   "functions": {
@@ -12,7 +12,6 @@
     "api/fathom-list.js": { "maxDuration": 60 }
   },
   "rewrites": [
-    { "source": "/", "destination": "/wiki.html" },
     { "source": "/pixel-setup", "destination": "/pixel-setup.html" },
     { "source": "/submit-creative", "destination": "/submit-creative.html" },
     { "source": "/investors", "destination": "/pitch-deck.html" },

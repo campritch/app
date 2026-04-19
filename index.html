@@ -1,159 +1,315 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="public/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QCode Dashboard | SpotsNow</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div class="dashboard">
-      <header class="top-bar" role="banner">
-        <a href="#" class="top-bar__logo" aria-label="SpotsNow home">SpotsNow</a>
-        <nav class="top-bar__nav" aria-label="Main">
-          <a href="#listings" class="top-bar__link">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
-              <path d="M1 3h10v1H1V3zm0 3h10v1H1V6zm0 3h10v1H1V9z" />
-            </svg>
-            Listings
-          </a>
-        </nav>
-      </header>
-      <main>
-        <header class="dashboard-header">
-          <img
-            src="https://placehold.co/112x112/0e1323/ffffff?text=QCODE"
-            alt=""
-            class="dashboard-header__logo"
-          />
-          <div class="dashboard-header__text">
-            <h1 class="dashboard-header__title">QCode Dashboard</h1>
-            <p class="dashboard-header__subtitle">
-              Add, manage and control your listings and the visibility of them.
-            </p>
-          </div>
-        </header>
-        <section class="stats-row" aria-label="Metrics">
-          <div class="stat-card">
-            <div class="stat-card__icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-            </div>
-            <div class="stat-card__content">
-              <span class="stat-card__label">Impressions</span>
-              <span class="stat-card__value" data-metric="impressions">---</span>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card__icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4M4 4h2v2H4V4zm12 0h2v2h-2V4zM4 18h2v2H4v-2zm12 0h2v2h-2v-2zM9 9h6v6H9z" />
-              </svg>
-            </div>
-            <div class="stat-card__content">
-              <span class="stat-card__label">Clicks</span>
-              <span class="stat-card__value" data-metric="clicks">---</span>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card__icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-            </div>
-            <div class="stat-card__content">
-              <span class="stat-card__label">Added to cart</span>
-              <span class="stat-card__value" data-metric="addedToCart">---</span>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card__icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                <polyline points="17 6 23 6 23 12" />
-              </svg>
-            </div>
-            <div class="stat-card__content">
-              <span class="stat-card__label">Requests</span>
-              <span class="stat-card__value" data-metric="requests">---</span>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card__icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="1" x2="12" y2="23" />
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-              </svg>
-            </div>
-            <div class="stat-card__content">
-              <span class="stat-card__label">Total Earned</span>
-              <span class="stat-card__value" data-metric="totalEarned">$ ---</span>
-            </div>
-          </div>
-        </section>
-        <section class="action-cards" aria-label="Actions">
-          <div class="action-card">
-            <div class="action-card__content">
-              <h3 class="action-card__title">View Listings</h3>
-              <p class="action-card__description">Start your first listing, fill your open spots and make new revenue.</p>
-            </div>
-            <a href="#listings" class="action-card__cta">Send Newsletter</a>
-          </div>
-          <div class="action-card">
-            <div class="action-card__content">
-              <h3 class="action-card__title">Send Fire Sales</h3>
-              <p class="action-card__description">Send emails to partners to showcase great shows</p>
-            </div>
-            <a href="#" class="action-card__cta">Send Newsletter</a>
-          </div>
-        </section>
-        <section id="listings" class="listings-section" aria-labelledby="listings-heading">
-          <h2 id="listings-heading" class="listings-section__heading">SpotsNow Listings</h2>
-          <p class="listings-section__subtitle">Preview the listings are shown on the SpotsNow platform.</p>
-          <div class="listings-toolbar">
-            <label for="listings-search" class="visually-hidden">Search listings</label>
-            <input
-              type="search"
-              id="listings-search"
-              class="listings-toolbar__search"
-              placeholder="Search"
-              aria-label="Search listings"
-            />
-            <div class="listings-tabs" role="tablist" aria-label="Listing type">
-              <button type="button" role="tab" aria-selected="true" class="listings-tab is-active">All</button>
-              <button type="button" role="tab" aria-selected="false" class="listings-tab">YouTubers</button>
-              <button type="button" role="tab" aria-selected="false" class="listings-tab">Podcasts</button>
-              <button type="button" role="tab" aria-selected="false" class="listings-tab">Agencies</button>
-              <button type="button" role="tab" aria-selected="false" class="listings-tab">Brands</button>
-            </div>
-            <button type="button" class="listings-toolbar__filter-btn" aria-label="Filters (3 applied)">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="4" y1="21" x2="4" y2="14" />
-                <line x1="4" y1="10" x2="4" y2="3" />
-                <line x1="12" y1="21" x2="12" y2="12" />
-                <line x1="12" y1="8" x2="12" y2="3" />
-                <line x1="20" y1="21" x2="20" y2="16" />
-                <line x1="20" y1="12" x2="20" y2="3" />
-                <line x1="1" y1="14" x2="7" y2="14" />
-                <line x1="9" y1="8" x2="15" y2="8" />
-                <line x1="17" y1="16" x2="23" y2="16" />
-              </svg>
-              3
-            </button>
-            <button type="button" class="listings-toolbar__manage">Manage Shows</button>
-          </div>
-          <div id="listings-grid" class="listings-grid" role="list"></div>
-        </section>
-      </main>
-    </div>
-    <script src="script.js"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotsNow Wiki</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #17212b;
+      --coral: #ff6267;
+      --dark: #0e1323;
+      --grey-1: #8a95a3;
+      --text-primary: #17212b;
+      --text-secondary: #5a6472;
+      --border: #C5CBD5;
+      --border-light: #dee0e4;
+      --white: #ffffff;
+      --bg-page: #fafafa;
+      --pill-bg: #f3f4f6;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.5;
+      color: var(--dark); background: var(--white);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* NAV */
+    .top-bar {
+      position: sticky; top: 0; z-index: 200;
+      height: 74px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; background: var(--white);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .top-bar__left { display: flex; align-items: center; gap: 12px; }
+    .top-bar__logo { display: flex; align-items: center; text-decoration: none; }
+    .top-bar__logo img { height: 26px; width: auto; }
+    .top-bar__divider { width: 1px; height: 20px; background: var(--border-light); }
+    .top-bar__title { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+
+    /* HERO */
+    .hero {
+      background: var(--coral);
+      padding: 56px 32px 64px;
+      text-align: center;
+    }
+    .hero h1 {
+      margin: 0 0 10px; font-size: 32px; font-weight: 700;
+      color: var(--white); letter-spacing: -0.5px; line-height: 1.2;
+    }
+    .hero p {
+      margin: 0 auto; color: rgba(255,255,255,0.8);
+      font-size: 15px; max-width: 480px; line-height: 1.6;
+    }
+
+    /* GRID */
+    .page {
+      max-width: 800px; margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+    .page__label {
+      font-size: 12px; font-weight: 600; color: var(--grey-1);
+      text-transform: uppercase; letter-spacing: 0.4px;
+      margin: 0 0 16px;
+    }
+    .page__label--spaced { margin-top: 40px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    /* CARD */
+    .tool-card {
+      display: flex; flex-direction: column;
+      padding: 24px; border-radius: 16px;
+      border: 1px solid var(--border-light);
+      background: var(--white);
+      text-decoration: none; color: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .tool-card:hover {
+      border-color: var(--border);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    .tool-card__icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px; font-size: 20px;
+    }
+    .tool-card__icon--coral { background: rgba(255,98,103,0.1); color: var(--coral); }
+    .tool-card__icon--navy { background: rgba(23,33,43,0.08); color: var(--navy); }
+    .tool-card__icon--green { background: rgba(16,185,129,0.1); color: #10b981; }
+    .tool-card__title-row {
+      display: flex; align-items: center; gap: 8px;
+      margin: 0 0 6px;
+    }
+    .tool-card__title {
+      font-size: 15px; font-weight: 600; color: var(--text-primary);
+      margin: 0; letter-spacing: -0.2px;
+    }
+    .tool-card__lock {
+      font-size: 10px; font-weight: 600; color: var(--grey-1);
+      background: var(--pill-bg); border-radius: 6px;
+      padding: 2px 6px; letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+    .tool-card__desc {
+      font-size: 13px; color: var(--grey-1);
+      margin: 0 0 16px; line-height: 1.5; flex: 1;
+    }
+    .tool-card__link {
+      font-size: 12px; font-weight: 600; color: var(--navy);
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .tool-card__link svg { transition: transform 0.15s; }
+    .tool-card:hover .tool-card__link svg { transform: translateX(2px); }
+
+    @media (max-width: 600px) {
+      .hero { padding: 40px 20px 48px; }
+      .hero h1 { font-size: 26px; }
+      .page { padding: 28px 16px 60px; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar__left">
+    <a class="top-bar__logo" href="/">
+      <img src="spotsnow-logo.png" alt="SpotsNow" />
+    </a>
+    <div class="top-bar__divider"></div>
+    <span class="top-bar__title">Wiki</span>
+  </div>
+</div>
+
+<div class="hero">
+  <h1>SpotsNow Wiki</h1>
+  <p>Tools, guides, and resources for running podcast advertising campaigns.</p>
+</div>
+
+<div class="page">
+  <p class="page__label">Advertiser tools</p>
+  <div class="grid">
+
+    <a class="tool-card" href="/pixel-setup">
+      <div class="tool-card__icon tool-card__icon--navy">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <rect x="2" y="2" width="16" height="16" rx="3" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="tool-card__title-row"><p class="tool-card__title">Magellan Pixel Setup</p></div>
+      <p class="tool-card__desc">Step-by-step guide for installing and configuring your Magellan attribution pixel.</p>
+      <span class="tool-card__link">
+        Open
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </a>
+
+    <a class="tool-card" href="/talking-points">
+      <div class="tool-card__icon tool-card__icon--coral">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 2L12 7.5L18 8.5L13.5 12L14.5 18L10 15L5.5 18L6.5 12L2 8.5L8 7.5L10 2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="tool-card__title-row"><p class="tool-card__title">Talking Points Generator</p></div>
+      <p class="tool-card__desc">Auto-generate podcast ad talking points from a SpotsNow campaign URL. AI-powered, editable, and exportable.</p>
+      <span class="tool-card__link">
+        Open
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </a>
+
+    <a class="tool-card" href="/submit-creative">
+      <div class="tool-card__icon tool-card__icon--green">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 3v10M5 8l5-5 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 15v2a1 1 0 001 1h12a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="tool-card__title-row"><p class="tool-card__title">Submit Creative</p></div>
+      <p class="tool-card__desc">Upload ad scripts and creative assets for an upcoming podcast campaign.</p>
+      <span class="tool-card__link">
+        Open
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </a>
+
+    <a class="tool-card" href="/ear-check">
+      <div class="tool-card__icon tool-card__icon--coral">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 2a6 6 0 00-6 6v4a3 3 0 003 3h.5a1.5 1.5 0 001.5-1.5V12a2 2 0 012-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="13.5" cy="9.5" r="1" fill="currentColor"/>
+        </svg>
+      </div>
+      <div class="tool-card__title-row"><p class="tool-card__title">Ear Check</p></div>
+      <p class="tool-card__desc">Scan podcast transcripts for brand mentions and surface where your ads actually ran.</p>
+      <span class="tool-card__link">
+        Open
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </a>
+
+    <a class="tool-card" href="/youtube-article">
+      <div class="tool-card__icon tool-card__icon--navy">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <rect x="2" y="5" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M9 8l4 2-4 2V8z" fill="currentColor"/>
+        </svg>
+      </div>
+      <div class="tool-card__title-row"><p class="tool-card__title">YouTube → Article</p></div>
+      <p class="tool-card__desc">Turn a YouTube video into a polished long-form article, ready to publish.</p>
+      <span class="tool-card__link">
+        Open
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </a>
+
+  </div>
+
+  <p class="page__label page__label--spaced">Internal</p>
+  <div class="grid">
+
+    <a class="tool-card" href="/proposal">
+      <div class="tool-card__icon tool-card__icon--navy">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M5 2h7l4 4v12a1 1 0 01-1 1H5a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M12 2v4h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M7 11h6M7 14h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="tool-card__title-row"><p class="tool-card__title">Proposal Builder</p></div>
+      <p class="tool-card__desc">Build and preview new advertiser proposals from a media plan.</p>
+      <span class="tool-card__link">
+        Open
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </a>
+
+    <a class="tool-card" href="/ad-ops">
+      <div class="tool-card__icon tool-card__icon--green">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M3 10h4l2-6 2 12 2-6h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="tool-card__title-row"><p class="tool-card__title">Ad Ops</p></div>
+      <p class="tool-card__desc">Campaign manager for tracking brand settings, creative, and live flights.</p>
+      <span class="tool-card__link">
+        Open
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </a>
+
+    <a class="tool-card" href="/chat">
+      <div class="tool-card__icon tool-card__icon--coral">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M3 5a2 2 0 012-2h10a2 2 0 012 2v7a2 2 0 01-2 2H8l-4 3V5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="tool-card__title-row"><p class="tool-card__title">SpotsNow Intelligence</p></div>
+      <p class="tool-card__desc">Chat with SpotsNow data, campaigns, and context in a single conversational UI.</p>
+      <span class="tool-card__link">
+        Open
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </a>
+
+    <a class="tool-card" href="/investors">
+      <div class="tool-card__icon tool-card__icon--green">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <rect x="2" y="4" width="16" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M7 18h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M6 11l3-3 2 2 3-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="tool-card__title-row"><p class="tool-card__title">Investor Pitch Deck</p></div>
+      <p class="tool-card__desc">Latest seed round pitch deck for SpotsNow.</p>
+      <span class="tool-card__link">
+        Open
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </a>
+
+  </div>
+</div>
+
+</body>
 </html>

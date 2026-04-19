@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotsNow — Ear Check</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --dark: #0e1323;
+      --grey-1: #707481;
+      --text-primary: #252733;
+      --text-secondary: #5a5f6e;
+      --border: #dee0e4;
+      --border-light: #e8e8e8;
+      --white: #ffffff;
+      --coral: #ff6b6b;
+      --btn-dark: #111111;
+      --green-bg: #d6f0e0;
+      --green-text: #0d6832;
+      --pill-bg: #f3f4f6;
+      --amber-bg: #fff3cd;
+      --amber-text: #856404;
+      --red-bg: #f8d7da;
+      --red-text: #721c24;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.5;
+      color: var(--dark); background: #f5f5f3;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font-family: inherit; cursor: pointer; }
+    img { display: block; }
+    input, select, textarea { font-family: inherit; }
+
+    /* ── TOP BAR ── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 200;
+      height: 56px; display: flex; align-items: center; gap: 16px;
+      padding: 0 28px; background: var(--white);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .top-bar__logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 800; font-size: 15px; color: var(--dark);
+      text-decoration: none; letter-spacing: -0.3px;
+    }
+    .logo-mark {
+      width: 22px; height: 22px; border-radius: 6px;
+      background: var(--coral); display: flex; align-items: center; justify-content: center;
+    }
+    .top-bar__right {
+      margin-left: auto; display: flex; align-items: center; gap: 12px;
+    }
+    .top-bar__link {
+      font-size: 13px; font-weight: 600; color: var(--text-secondary);
+      text-decoration: none;
+    }
+    .top-bar__link:hover { color: var(--dark); }
+
+    /* ── MAIN CONTAINER ── */
+    .main {
+      max-width: 800px; margin: 0 auto; padding: 48px 24px 120px;
+    }
+
+    /* ── HERO / URL INPUT STAGE ── */
+    .hero {
+      text-align: center; padding: 80px 0 60px;
+    }
+    .hero__badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--pill-bg); border-radius: 20px; padding: 5px 14px;
+      font-size: 11px; font-weight: 600; color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+    .hero__badge-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--coral);
+    }
+    .hero h1 {
+      margin: 0 0 12px; font-size: 36px; font-weight: 800;
+      letter-spacing: -1px; color: var(--dark); line-height: 1.1;
+    }
+    .hero p {
+      margin: 0 0 36px; font-size: 15px; color: var(--text-secondary);
+      max-width: 480px; margin-left: auto; margin-right: auto; line-height: 1.6;
+    }
+
+    /* URL input */
+    .url-input-wrap {
+      display: flex; gap: 10px; max-width: 520px; margin: 0 auto;
+    }
+    .url-input {
+      flex: 1; height: 50px; padding: 0 18px;
+      border: 2px solid var(--border); border-radius: 12px;
+      font-size: 15px; color: var(--dark); background: var(--white);
+      outline: none; transition: border-color 0.15s;
+    }
+    .url-input:focus { border-color: var(--dark); }
+    .url-input::placeholder { color: #b0b4be; }
+    .scan-btn {
+      height: 50px; padding: 0 28px; background: var(--coral);
+      border: none; border-radius: 12px;
+      font-size: 15px; font-weight: 700; color: white;
+      white-space: nowrap; transition: opacity 0.15s;
+    }
+    .scan-btn:hover { opacity: 0.9; }
+    .scan-btn:disabled { opacity: 0.5; cursor: default; }
+
+    /* ── SCANNING STATE ── */
+    .scanning { text-align: center; padding: 80px 0; display: none; }
+    .scanning.is-active { display: block; }
+    .spinner {
+      width: 48px; height: 48px; border: 3px solid var(--border-light);
+      border-top-color: var(--coral); border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 24px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .scanning h2 {
+      margin: 0 0 8px; font-size: 20px; font-weight: 700; color: var(--dark);
+    }
+    .scanning p { margin: 0; font-size: 14px; color: var(--grey-1); }
+    .scan-progress {
+      max-width: 360px; margin: 24px auto 0;
+      height: 4px; background: var(--border-light); border-radius: 2px; overflow: hidden;
+    }
+    .scan-progress__bar {
+      height: 100%; width: 0%; background: var(--coral);
+      border-radius: 2px; transition: width 0.3s;
+    }
+
+    /* ── RESULTS STAGE ── */
+    .results { display: none; }
+    .results.is-active { display: block; }
+
+    /* Results header */
+    .results-header {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 8px;
+    }
+    .results-header__icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: var(--coral); display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 800; color: white; flex-shrink: 0;
+    }
+    .results-header__info { flex: 1; }
+    .results-header__domain {
+      margin: 0; font-size: 22px; font-weight: 800; color: var(--dark);
+      letter-spacing: -0.5px;
+    }
+    .results-header__meta {
+      margin: 2px 0 0; font-size: 13px; color: var(--grey-1);
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+      margin: 24px 0;
+    }
+    .stat-box {
+      border-radius: 12px; padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .stat-box--light { background: var(--white); border: 1px solid var(--border-light); }
+    .stat-box--dark { background: var(--btn-dark); }
+    .stat-box__label { font-size: 10px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
+    .stat-box--light .stat-box__label { color: var(--grey-1); }
+    .stat-box--dark .stat-box__label { color: rgba(255,255,255,0.5); }
+    .stat-box__value { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
+    .stat-box--light .stat-box__value { color: var(--dark); }
+    .stat-box--dark .stat-box__value { color: white; }
+
+    /* Filter row */
+    .filter-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .filter-chip {
+      height: 32px; padding: 0 14px;
+      background: var(--white); border: 1px solid var(--border-light);
+      border-radius: 20px; font-size: 12px; font-weight: 600;
+      color: var(--text-secondary); transition: all 0.12s;
+    }
+    .filter-chip:hover, .filter-chip.is-active {
+      background: var(--dark); color: white; border-color: var(--dark);
+    }
+    .filter-count {
+      margin-left: auto; font-size: 12px; color: var(--grey-1); flex-shrink: 0;
+    }
+
+    /* ── AD DETECTION CARDS ── */
+    .ad-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .ad-card {
+      background: var(--white); border: 1px solid var(--border-light);
+      border-radius: 16px; overflow: hidden; transition: border-color 0.15s;
+    }
+    .ad-card:hover { border-color: var(--border); }
+    .ad-card.is-flagged { border-color: #f5c518; }
+    .ad-card.is-makegood { border-color: var(--coral); }
+
+    .ad-card__top {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 20px; cursor: pointer;
+    }
+    .ad-card__show-art {
+      width: 44px; height: 44px; border-radius: 10px;
+      object-fit: cover; flex-shrink: 0;
+    }
+    .ad-card__show-art-placeholder {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: var(--pill-bg); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: var(--grey-1);
+    }
+    .ad-card__info { flex: 1; min-width: 0; }
+    .ad-card__episode {
+      margin: 0; font-size: 14px; font-weight: 700; color: var(--dark);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .ad-card__show-name {
+      margin: 2px 0 0; font-size: 12px; color: var(--grey-1);
+    }
+    .ad-card__right {
+      display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    }
+    .ad-card__date {
+      font-size: 11px; color: var(--grey-1); white-space: nowrap;
+    }
+
+    /* Tags */
+    .tag {
+      display: inline-flex; align-items: center; height: 20px; padding: 0 8px;
+      border-radius: 4px; font-size: 9px; font-weight: 700; letter-spacing: 0.3px;
+    }
+    .tag--green { background: var(--green-bg); color: var(--green-text); }
+    .tag--amber { background: var(--amber-bg); color: var(--amber-text); }
+    .tag--red { background: var(--red-bg); color: var(--red-text); }
+    .tag--grey { background: var(--pill-bg); color: var(--text-secondary); }
+
+    .chevron {
+      width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+      color: var(--grey-1); transition: transform 0.2s;
+    }
+    .ad-card.is-open .chevron { transform: rotate(180deg); }
+
+    /* Expandable detail */
+    .ad-card__detail {
+      max-height: 0; overflow: hidden; transition: max-height 0.3s ease;
+    }
+    .ad-card.is-open .ad-card__detail {
+      max-height: 2000px;
+    }
+    .ad-card__detail-inner {
+      padding: 0 20px 20px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    /* Audio player */
+    .player {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--pill-bg); border-radius: 10px; padding: 10px 14px;
+      margin: 16px 0;
+    }
+    .play-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--coral); border: none;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: opacity 0.15s;
+    }
+    .play-btn:hover { opacity: 0.85; }
+    .play-btn svg { display: block; }
+    .player__track { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .player__bar-wrap {
+      height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;
+      cursor: pointer; position: relative;
+    }
+    .player__bar {
+      height: 100%; width: 35%; border-radius: 2px;
+      background: linear-gradient(90deg, var(--coral), #ff4757);
+    }
+    .player__times {
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: var(--grey-1); font-variant-numeric: tabular-nums;
+    }
+    .player__meta {
+      display: flex; align-items: center; gap: 8px; margin-top: 4px;
+    }
+    .player__meta-item {
+      font-size: 11px; color: var(--text-secondary);
+    }
+
+    /* Scores row */
+    .scores-row {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+      margin: 16px 0;
+    }
+    .score-card {
+      background: var(--pill-bg); border-radius: 10px; padding: 14px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .score-card__info { flex: 1; min-width: 0; }
+    .score-card__label {
+      font-size: 11px; font-weight: 700; color: var(--dark); margin: 0 0 2px;
+    }
+    .score-card__desc {
+      font-size: 10px; color: var(--grey-1); margin: 0;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .score-card__right {
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+    }
+    .score-badge {
+      height: 22px; padding: 0 8px; border-radius: 4px;
+      font-size: 10px; font-weight: 700;
+      display: inline-flex; align-items: center;
+    }
+    .score-badge--great { background: var(--green-bg); color: var(--green-text); }
+    .score-badge--good { background: #e0edff; color: #1a5ab8; }
+    .score-badge--low { background: var(--red-bg); color: var(--red-text); }
+
+    /* SVG donut */
+    .donut { width: 38px; height: 38px; flex-shrink: 0; }
+    .donut__bg { fill: none; stroke: var(--border-light); stroke-width: 3; }
+    .donut__fill { fill: none; stroke-width: 3; stroke-linecap: round; transition: stroke-dasharray 0.6s; }
+    .donut__fill--great { stroke: var(--green-text); }
+    .donut__fill--good { stroke: #1a5ab8; }
+    .donut__fill--low { stroke: var(--coral); }
+    .donut__text {
+      font-size: 8px; font-weight: 700; fill: var(--dark);
+      text-anchor: middle; dominant-baseline: central;
+    }
+
+    /* Action buttons */
+    .ad-card__actions {
+      display: flex; gap: 8px; margin-top: 16px;
+    }
+    .btn-flag {
+      height: 36px; padding: 0 16px;
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 8px; font-size: 12px; font-weight: 600; color: var(--text-primary);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-flag:hover { background: var(--pill-bg); }
+    .btn-makegood {
+      height: 36px; padding: 0 16px;
+      background: var(--coral); border: none; border-radius: 8px;
+      font-size: 12px; font-weight: 700; color: white;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-makegood:hover { opacity: 0.9; }
+    .btn-secondary {
+      height: 36px; padding: 0 16px;
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 8px; font-size: 12px; font-weight: 600; color: var(--text-primary);
+    }
+    .btn-secondary:hover { background: var(--pill-bg); }
+    .status-sent {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 600; color: var(--green-text);
+    }
+
+    /* Load more */
+    .load-more-wrap { text-align: center; margin-top: 20px; }
+    .load-more-btn {
+      height: 42px; padding: 0 32px;
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--text-primary);
+    }
+    .load-more-btn:hover { background: var(--pill-bg); }
+
+    /* ── MAKE-GOOD MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+      z-index: 500; display: none; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .modal-overlay.is-active { display: flex; }
+    .modal {
+      background: var(--white); border-radius: 16px; width: 100%; max-width: 480px;
+      max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    .modal__header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px; border-bottom: 1px solid var(--border-light);
+    }
+    .modal__title { margin: 0; font-size: 16px; font-weight: 700; color: var(--dark); }
+    .modal__close {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: none; border: none; font-size: 18px; color: var(--grey-1);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal__close:hover { background: var(--pill-bg); }
+    .modal__body { padding: 24px; }
+    .modal__footer {
+      padding: 16px 24px; border-top: 1px solid var(--border-light);
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+
+    /* Radio options */
+    .reason-list { display: flex; flex-direction: column; gap: 8px; }
+    .reason-option {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px; border: 1px solid var(--border-light);
+      border-radius: 10px; cursor: pointer; transition: border-color 0.12s;
+    }
+    .reason-option:hover { border-color: var(--border); }
+    .reason-option.is-selected { border-color: var(--coral); background: #fff5f5; }
+    .reason-radio {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid var(--border); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.12s;
+    }
+    .reason-option.is-selected .reason-radio {
+      border-color: var(--coral);
+    }
+    .reason-radio__dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--coral); transform: scale(0); transition: transform 0.12s;
+    }
+    .reason-option.is-selected .reason-radio__dot { transform: scale(1); }
+    .reason-label { font-size: 13px; font-weight: 500; color: var(--dark); }
+
+    /* Detail form */
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block; font-size: 12px; font-weight: 600; color: var(--dark);
+      margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%; height: 40px; padding: 0 14px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; color: var(--dark); outline: none;
+    }
+    .form-input:focus { border-color: var(--dark); }
+    .form-textarea {
+      width: 100%; min-height: 80px; padding: 10px 14px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; color: var(--dark); outline: none; resize: vertical;
+    }
+    .form-textarea:focus { border-color: var(--dark); }
+
+    /* Email step in modal */
+    .email-step { display: none; }
+    .email-step.is-active { display: block; }
+    .email-chips {
+      display: flex; flex-wrap: wrap; gap: 6px; padding: 8px;
+      border: 1px solid var(--border); border-radius: 8px;
+      min-height: 44px; align-items: center; cursor: text;
+    }
+    .email-chips:focus-within { border-color: var(--dark); }
+    .email-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 26px; padding: 0 8px 0 10px; border-radius: 6px;
+      background: var(--pill-bg); font-size: 12px; font-weight: 500; color: var(--dark);
+    }
+    .email-chip__x {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: none; border: none; font-size: 12px; color: var(--grey-1);
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+      padding: 0;
+    }
+    .email-chip__x:hover { color: var(--coral); }
+    .email-input-inline {
+      flex: 1; min-width: 120px; border: none; outline: none;
+      font-size: 13px; font-family: inherit; color: var(--dark);
+      background: transparent;
+    }
+
+    /* Success state */
+    .success-state { text-align: center; padding: 20px 0; }
+    .success-check {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--green-bg); margin: 0 auto 16px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .success-state h3 { margin: 0 0 6px; font-size: 16px; font-weight: 700; color: var(--dark); }
+    .success-state p { margin: 0; font-size: 13px; color: var(--grey-1); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .main { padding: 24px 16px 100px; }
+      .hero { padding: 40px 0 40px; }
+      .hero h1 { font-size: 28px; }
+      .url-input-wrap { flex-direction: column; }
+      .scan-btn { width: 100%; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .scores-row { grid-template-columns: 1fr; }
+      .ad-card__right { flex-direction: column; align-items: flex-end; gap: 4px; }
+      .ad-card__date { display: none; }
+      .filter-row { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+      .ad-card__actions { flex-direction: column; }
+    }
+
+    /* Hidden utility */
+    .is-hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<!-- ── TOP BAR ── -->
+<header class="top-bar">
+  <a class="top-bar__logo" href="#">
+    <div class="logo-mark">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M2 12c0 5 2 8 6 9 1-3 3-6 7-8-4-1-6-4-7-8C4 6 2 8 2 12z" fill="white"/><path d="M22 12c0 5-2 8-6 9-1-3-3-6-7-8 4-1 6-4 7-8 4 1 6 3 6 7z" fill="white" opacity=".6"/></svg>
+    </div>
+    SpotsNow
+  </a>
+  <div class="top-bar__right">
+    <a class="top-bar__link" href="#">Ear Check</a>
+  </div>
+</header>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- STAGE 1: URL Input -->
+  <section class="hero" id="heroSection">
+    <div class="hero__badge">
+      <div class="hero__badge-dot"></div>
+      Ear Check
+    </div>
+    <h1>Check your podcast ads</h1>
+    <p>Enter your brand's website and we'll scan every podcast transcript to find your ads, score them, and let you request make-goods.</p>
+    <div class="url-input-wrap">
+      <input class="url-input" id="urlInput" type="text" placeholder="ag1.com" />
+      <button class="scan-btn" id="scanBtn" onclick="startScan()">Scan</button>
+    </div>
+  </section>
+
+  <!-- STAGE 2: Scanning -->
+  <section class="scanning" id="scanningSection">
+    <div class="spinner"></div>
+    <h2 id="scanStatus">Scanning transcripts…</h2>
+    <p id="scanSub">Looking for ad mentions across 2,400+ episodes</p>
+    <div class="scan-progress">
+      <div class="scan-progress__bar" id="scanBar"></div>
+    </div>
+  </section>
+
+  <!-- STAGE 3: Results -->
+  <section class="results" id="resultsSection">
+
+    <!-- Header -->
+    <div class="results-header">
+      <div class="results-header__icon" id="brandIcon">A</div>
+      <div class="results-header__info">
+        <h2 class="results-header__domain" id="brandDomain">ag1.com</h2>
+        <p class="results-header__meta" id="brandMeta">Found across 14 episodes on 3 shows</p>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-box stat-box--dark">
+        <span class="stat-box__label">Detections</span>
+        <span class="stat-box__value" id="statDetections">14</span>
+      </div>
+      <div class="stat-box stat-box--dark">
+        <span class="stat-box__label">Shows</span>
+        <span class="stat-box__value" id="statShows">3</span>
+      </div>
+      <div class="stat-box stat-box--light">
+        <span class="stat-box__label">Avg Score</span>
+        <span class="stat-box__value" id="statAvgScore">78%</span>
+      </div>
+      <div class="stat-box stat-box--light">
+        <span class="stat-box__label">Make-goods</span>
+        <span class="stat-box__value" id="statMakegoods">0</span>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-row">
+      <button class="filter-chip is-active" data-filter="all" onclick="filterAds('all', this)">All</button>
+      <button class="filter-chip" data-filter="great" onclick="filterAds('great', this)">Great</button>
+      <button class="filter-chip" data-filter="good" onclick="filterAds('good', this)">Good</button>
+      <button class="filter-chip" data-filter="low" onclick="filterAds('low', this)">Needs Review</button>
+      <button class="filter-chip" data-filter="makegood" onclick="filterAds('makegood', this)">Make-good Sent</button>
+      <span class="filter-count" id="filterCount">Showing 3 of 14</span>
+    </div>
+
+    <!-- Ad cards list -->
+    <div class="ad-list" id="adList"></div>
+
+    <!-- Load more -->
+    <div class="load-more-wrap" id="loadMoreWrap">
+      <button class="load-more-btn" id="loadMoreBtn" onclick="loadMore()">Load more</button>
+    </div>
+
+  </section>
+</main>
+
+<!-- ── MAKE-GOOD MODAL ── -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal__header">
+      <h3 class="modal__title" id="modalTitle">Request make-good</h3>
+      <button class="modal__close" onclick="closeModal()">×</button>
+    </div>
+
+    <!-- Step 1: Reason -->
+    <div class="modal__body" id="modalStep1">
+      <p style="margin:0 0 14px; font-size:13px; color:var(--grey-1);">What went wrong with this ad?</p>
+      <div class="reason-list" id="reasonList">
+        <div class="reason-option" onclick="selectReason(this, 'Ad did not air')">
+          <div class="reason-radio"><div class="reason-radio__dot"></div></div>
+          <span class="reason-label">Ad did not air</span>
+        </div>
+        <div class="reason-option" onclick="selectReason(this, 'Ad was cut short')">
+          <div class="reason-radio"><div class="reason-radio__dot"></div></div>
+          <span class="reason-label">Ad was cut short</span>
+        </div>
+        <div class="reason-option" onclick="selectReason(this, 'Wrong promo code read')">
+          <div class="reason-radio"><div class="reason-radio__dot"></div></div>
+          <span class="reason-label">Wrong promo code read</span>
+        </div>
+        <div class="reason-option" onclick="selectReason(this, 'Wrong product mentioned')">
+          <div class="reason-radio"><div class="reason-radio__dot"></div></div>
+          <span class="reason-label">Wrong product mentioned</span>
+        </div>
+        <div class="reason-option" onclick="selectReason(this, 'Audio quality issue')">
+          <div class="reason-radio"><div class="reason-radio__dot"></div></div>
+          <span class="reason-label">Audio quality issue</span>
+        </div>
+        <div class="reason-option" onclick="selectReason(this, 'Other')">
+          <div class="reason-radio"><div class="reason-radio__dot"></div></div>
+          <span class="reason-label">Other</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Notes + Email -->
+    <div class="modal__body email-step" id="modalStep2">
+      <div class="form-group">
+        <label class="form-label">Notes (optional)</label>
+        <textarea class="form-textarea" id="mgNotes" placeholder="Any additional details…"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Send make-good request to</label>
+        <div class="email-chips" id="emailChips" onclick="document.getElementById('emailInline').focus()">
+          <input class="email-input-inline" id="emailInline" type="email" placeholder="ops@agency.com" onkeydown="handleEmailKey(event)" />
+        </div>
+        <p style="margin:6px 0 0; font-size:11px; color:var(--grey-1);">Press Enter to add multiple emails</p>
+      </div>
+    </div>
+
+    <!-- Step 3: Success -->
+    <div class="modal__body email-step" id="modalStep3">
+      <div class="success-state">
+        <div class="success-check">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7" stroke="#0d6832" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Make-good request sent</h3>
+        <p id="successEmail">Sent to ops@agency.com</p>
+      </div>
+    </div>
+
+    <div class="modal__footer" id="modalFooter">
+      <button class="btn-secondary" id="modalBack" onclick="modalPrev()" style="display:none">Back</button>
+      <button class="btn-makegood" id="modalNext" onclick="modalNext()">Next</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+const ADS_DATA = [
+  {
+    id: 1, episode: '#2475 — Andrew Jarecki', show: 'The Joe Rogan Experience', date: 'Mar 27, 2026',
+    type: 'HOST_READ', response: 'DIRECT_RESPONSE',
+    start: '18:40', end: '20:04', duration: '1:24',
+    scores: { length: 93, personalization: 75, positioning: 62 },
+    overall: 'great', color: '#8B5CF6'
+  },
+  {
+    id: 2, episode: '#2472 — Jeff Ross', show: 'The Joe Rogan Experience', date: 'Mar 24, 2026',
+    type: 'HOST_READ', response: 'DIRECT_RESPONSE',
+    start: '22:15', end: '22:44', duration: '0:29',
+    scores: { length: 45, personalization: 80, positioning: 88 },
+    overall: 'good', color: '#8B5CF6'
+  },
+  {
+    id: 3, episode: '#2469 — Brigham Buhler', show: 'The Joe Rogan Experience', date: 'Mar 18, 2026',
+    type: 'HOST_READ', response: 'DIRECT_RESPONSE',
+    start: '45:12', end: '46:14', duration: '1:02',
+    scores: { length: 78, personalization: 70, positioning: 72 },
+    overall: 'good', color: '#8B5CF6'
+  },
+  {
+    id: 4, episode: '#341 — Solo: The Science of Greens', show: 'Huberman Lab', date: 'Mar 20, 2026',
+    type: 'HOST_READ', response: 'DIRECT_RESPONSE',
+    start: '03:22', end: '04:52', duration: '1:30',
+    scores: { length: 95, personalization: 88, positioning: 91 },
+    overall: 'great', color: '#3B82F6'
+  },
+  {
+    id: 5, episode: '#340 — Dr. Peter Attia', show: 'Huberman Lab', date: 'Mar 17, 2026',
+    type: 'HOST_READ', response: 'DIRECT_RESPONSE',
+    start: '08:10', end: '09:12', duration: '1:02',
+    scores: { length: 80, personalization: 82, positioning: 85 },
+    overall: 'great', color: '#3B82F6'
+  },
+  {
+    id: 6, episode: '#339 — Sleep Protocols', show: 'Huberman Lab', date: 'Mar 13, 2026',
+    type: 'PRODUCED', response: 'BRAND_AWARENESS',
+    start: '00:00', end: '00:30', duration: '0:30',
+    scores: { length: 50, personalization: null, positioning: 90 },
+    overall: 'good', color: '#3B82F6'
+  },
+  {
+    id: 7, episode: '#892 — Interview: Tim Ferriss', show: 'The Diary of a CEO', date: 'Mar 22, 2026',
+    type: 'HOST_READ', response: 'DIRECT_RESPONSE',
+    start: '1:12:04', end: '1:12:38', duration: '0:34',
+    scores: { length: 38, personalization: 42, positioning: 35 },
+    overall: 'low', color: '#F59E0B'
+  },
+  {
+    id: 8, episode: '#891 — Lessons from Failure', show: 'The Diary of a CEO', date: 'Mar 19, 2026',
+    type: 'HOST_READ', response: 'DIRECT_RESPONSE',
+    start: '55:30', end: '56:48', duration: '1:18',
+    scores: { length: 88, personalization: 76, positioning: 80 },
+    overall: 'great', color: '#F59E0B'
+  },
+  {
+    id: 9, episode: '#2466 — Naval Ravikant', show: 'The Joe Rogan Experience', date: 'Mar 11, 2026',
+    type: 'HOST_READ', response: 'DIRECT_RESPONSE',
+    start: '32:10', end: '33:22', duration: '1:12',
+    scores: { length: 85, personalization: 90, positioning: 78 },
+    overall: 'great', color: '#8B5CF6'
+  },
+  {
+    id: 10, episode: '#338 — Cold Exposure Deep Dive', show: 'Huberman Lab', date: 'Mar 6, 2026',
+    type: 'HOST_READ', response: 'DIRECT_RESPONSE',
+    start: '05:40', end: '06:50', duration: '1:10',
+    scores: { length: 82, personalization: 79, positioning: 84 },
+    overall: 'great', color: '#3B82F6'
+  },
+  {
+    id: 11, episode: '#890 — How to Build Habits', show: 'The Diary of a CEO', date: 'Mar 15, 2026',
+    type: 'HOST_READ', response: 'DIRECT_RESPONSE',
+    start: '42:00', end: '42:55', duration: '0:55',
+    scores: { length: 68, personalization: 72, positioning: 66 },
+    overall: 'good', color: '#F59E0B'
+  },
+  {
+    id: 12, episode: '#2463 — Alex Hormozi', show: 'The Joe Rogan Experience', date: 'Mar 4, 2026',
+    type: 'HOST_READ', response: 'DIRECT_RESPONSE',
+    start: '1:45:20', end: '1:46:30', duration: '1:10',
+    scores: { length: 82, personalization: 85, positioning: 74 },
+    overall: 'great', color: '#8B5CF6'
+  },
+  {
+    id: 13, episode: '#337 — Gut Health Masterclass', show: 'Huberman Lab', date: 'Feb 27, 2026',
+    type: 'HOST_READ', response: 'DIRECT_RESPONSE',
+    start: '04:00', end: '05:20', duration: '1:20',
+    scores: { length: 90, personalization: 92, positioning: 88 },
+    overall: 'great', color: '#3B82F6'
+  },
+  {
+    id: 14, episode: '#889 — Money & Meaning', show: 'The Diary of a CEO', date: 'Mar 8, 2026',
+    type: 'PRODUCED', response: 'BRAND_AWARENESS',
+    start: '00:00', end: '00:30', duration: '0:30',
+    scores: { length: 50, personalization: null, positioning: 55 },
+    overall: 'low', color: '#F59E0B'
+  }
+];
+
+let visibleCount = 3;
+let currentFilter = 'all';
+let currentModalAd = null;
+let modalStep = 1;
+let selectedReason = '';
+let emailList = [];
+
+// ── SCAN FLOW ──
+function startScan() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) return;
+
+  document.getElementById('heroSection').style.display = 'none';
+  document.getElementById('scanningSection').classList.add('is-active');
+
+  const bar = document.getElementById('scanBar');
+  const status = document.getElementById('scanStatus');
+  const sub = document.getElementById('scanSub');
+
+  let progress = 0;
+  const steps = [
+    { p: 25, text: 'Scanning transcripts…', sub: 'Searching 2,400+ episodes for "' + url + '"' },
+    { p: 55, text: 'Found mentions…', sub: 'Analyzing ad segments across 14 episodes' },
+    { p: 80, text: 'Scoring ads…', sub: 'Evaluating length, personalization, positioning' },
+    { p: 100, text: 'Done!', sub: '14 ad detections ready' },
+  ];
+
+  let step = 0;
+  const iv = setInterval(() => {
+    if (step >= steps.length) {
+      clearInterval(iv);
+      setTimeout(showResults, 400);
+      return;
+    }
+    bar.style.width = steps[step].p + '%';
+    status.textContent = steps[step].text;
+    sub.textContent = steps[step].sub;
+    step++;
+  }, 800);
+
+  // Set brand info
+  const domain = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  document.getElementById('brandDomain').textContent = domain;
+  document.getElementById('brandIcon').textContent = domain.charAt(0).toUpperCase();
+}
+
+function showResults() {
+  document.getElementById('scanningSection').classList.remove('is-active');
+  document.getElementById('resultsSection').classList.add('is-active');
+  visibleCount = 3;
+  currentFilter = 'all';
+  renderAds();
+}
+
+// ── RENDER ADS ──
+function getFiltered() {
+  if (currentFilter === 'all') return ADS_DATA;
+  if (currentFilter === 'makegood') return ADS_DATA.filter(a => a.makegoodSent);
+  return ADS_DATA.filter(a => a.overall === currentFilter);
+}
+
+function renderAds() {
+  const filtered = getFiltered();
+  const visible = filtered.slice(0, visibleCount);
+  const list = document.getElementById('adList');
+  list.innerHTML = visible.map(ad => buildAdCard(ad)).join('');
+
+  document.getElementById('filterCount').textContent =
+    `Showing ${Math.min(visibleCount, filtered.length)} of ${filtered.length}`;
+
+  const loadWrap = document.getElementById('loadMoreWrap');
+  loadWrap.style.display = visibleCount >= filtered.length ? 'none' : '';
+}
+
+function buildAdCard(ad) {
+  const overallLabel = ad.overall === 'great' ? 'Great' : ad.overall === 'good' ? 'Good' : 'Needs Review';
+  const overallTag = ad.overall === 'great' ? 'tag--green' : ad.overall === 'good' ? 'tag--grey' : 'tag--red';
+  const avgScore = Math.round(
+    [ad.scores.length, ad.scores.personalization, ad.scores.positioning].filter(v => v !== null).reduce((a,b) => a+b, 0) /
+    [ad.scores.length, ad.scores.personalization, ad.scores.positioning].filter(v => v !== null).length
+  );
+
+  const borderClass = ad.makegoodSent ? 'is-makegood' : '';
+
+  return `
+    <div class="ad-card ${borderClass}" id="ad-${ad.id}">
+      <div class="ad-card__top" onclick="toggleCard(${ad.id})">
+        <div class="ad-card__show-art-placeholder" style="background:${ad.color}15; color:${ad.color}; font-weight:800; font-size:11px;">
+          ${ad.show.split(' ').map(w => w[0]).slice(0,2).join('')}
+        </div>
+        <div class="ad-card__info">
+          <p class="ad-card__episode">${esc(ad.episode)}</p>
+          <p class="ad-card__show-name">${esc(ad.show)}</p>
+        </div>
+        <div class="ad-card__right">
+          <span class="ad-card__date">${ad.date}</span>
+          <span class="tag ${overallTag}">${overallLabel} · ${avgScore}%</span>
+          ${ad.makegoodSent ? '<span class="tag tag--red">Make-good sent</span>' : ''}
+          <span class="chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        </div>
+      </div>
+      <div class="ad-card__detail">
+        <div class="ad-card__detail-inner">
+          <!-- Player -->
+          <div class="player">
+            <button class="play-btn"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 1.5v11l9-5.5-9-5.5z" fill="white"/></svg></button>
+            <div class="player__track">
+              <div class="player__bar-wrap"><div class="player__bar" style="width:${Math.random()*60+10}%"></div></div>
+              <div class="player__times"><span>${ad.start}</span><span>${ad.end}</span></div>
+            </div>
+          </div>
+          <div class="player__meta">
+            <span class="tag tag--grey">${ad.response.replace('_',' ')}</span>
+            <span class="tag tag--grey">${ad.type.replace('_',' ')}</span>
+            <span class="player__meta-item">Duration: ${ad.duration}</span>
+          </div>
+
+          <!-- Scores -->
+          <div class="scores-row">
+            ${buildScoreCard('Ad Length', ad.scores.length, 'How long the ad ran relative to best practices')}
+            ${buildScoreCard('Personalization', ad.scores.personalization, 'How much the host personalized the read')}
+            ${buildScoreCard('Positioning', ad.scores.positioning, 'Where the ad was placed in the episode')}
+          </div>
+
+          <!-- Actions -->
+          <div class="ad-card__actions">
+            ${ad.makegoodSent
+              ? `<span class="status-sent"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7" stroke="#0d6832" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Make-good request sent</span>`
+              : `<button class="btn-makegood" onclick="openModal(${ad.id})">
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+                  Request make-good
+                </button>`
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function buildScoreCard(label, score, desc) {
+  if (score === null) {
+    return `
+      <div class="score-card">
+        <div class="score-card__info">
+          <p class="score-card__label">${label}</p>
+          <p class="score-card__desc">N/A — produced ad</p>
+        </div>
+      </div>
+    `;
+  }
+  const tier = score >= 80 ? 'great' : score >= 60 ? 'good' : 'low';
+  const tierLabel = tier === 'great' ? 'Great' : tier === 'good' ? 'Good' : 'Low';
+  const circumference = 2 * Math.PI * 15;
+  const dasharray = (score / 100) * circumference;
+
+  return `
+    <div class="score-card">
+      <div class="score-card__info">
+        <p class="score-card__label">${label}</p>
+        <p class="score-card__desc">${esc(desc)}</p>
+      </div>
+      <div class="score-card__right">
+        <span class="score-badge score-badge--${tier}">${tierLabel}</span>
+        <svg class="donut" viewBox="0 0 38 38">
+          <circle class="donut__bg" cx="19" cy="19" r="15"/>
+          <circle class="donut__fill donut__fill--${tier}" cx="19" cy="19" r="15"
+            stroke-dasharray="${dasharray} ${circumference}"
+            transform="rotate(-90 19 19)"/>
+          <text class="donut__text" x="19" y="19">${score}%</text>
+        </svg>
+      </div>
+    </div>
+  `;
+}
+
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// ── INTERACTIONS ──
+function toggleCard(id) {
+  const card = document.getElementById('ad-' + id);
+  card.classList.toggle('is-open');
+}
+
+function filterAds(filter, btn) {
+  currentFilter = filter;
+  visibleCount = 3;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('is-active'));
+  btn.classList.add('is-active');
+  renderAds();
+}
+
+function loadMore() {
+  visibleCount += 5;
+  renderAds();
+}
+
+// ── MAKE-GOOD MODAL ──
+function openModal(adId) {
+  currentModalAd = adId;
+  modalStep = 1;
+  selectedReason = '';
+  emailList = [];
+  document.getElementById('mgNotes').value = '';
+  document.querySelectorAll('.reason-option').forEach(o => o.classList.remove('is-selected'));
+  updateModalView();
+  document.getElementById('modalOverlay').classList.add('is-active');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('is-active');
+}
+
+function selectReason(el, reason) {
+  selectedReason = reason;
+  document.querySelectorAll('.reason-option').forEach(o => o.classList.remove('is-selected'));
+  el.classList.add('is-selected');
+}
+
+function updateModalView() {
+  document.getElementById('modalStep1').style.display = modalStep === 1 ? '' : 'none';
+  document.getElementById('modalStep2').style.display = modalStep === 2 ? '' : 'none';
+  document.getElementById('modalStep2').classList.toggle('is-active', modalStep === 2);
+  document.getElementById('modalStep3').style.display = modalStep === 3 ? '' : 'none';
+  document.getElementById('modalStep3').classList.toggle('is-active', modalStep === 3);
+  document.getElementById('modalBack').style.display = modalStep === 2 ? '' : 'none';
+  document.getElementById('modalFooter').style.display = modalStep === 3 ? 'none' : '';
+
+  const nextBtn = document.getElementById('modalNext');
+  if (modalStep === 1) {
+    nextBtn.textContent = 'Next';
+    document.getElementById('modalTitle').textContent = 'Request make-good';
+  } else if (modalStep === 2) {
+    nextBtn.textContent = 'Send request';
+    document.getElementById('modalTitle').textContent = 'Add details & send';
+  }
+}
+
+function modalNext() {
+  if (modalStep === 1) {
+    if (!selectedReason) return;
+    modalStep = 2;
+    updateModalView();
+    // Reset email chips
+    renderEmailChips();
+  } else if (modalStep === 2) {
+    // Collect email from inline input
+    const inline = document.getElementById('emailInline');
+    if (inline.value.trim()) {
+      emailList.push(inline.value.trim());
+      inline.value = '';
+    }
+    if (emailList.length === 0) {
+      inline.focus();
+      return;
+    }
+    // Send
+    modalStep = 3;
+    document.getElementById('successEmail').textContent = 'Sent to ' + emailList.join(', ');
+    // Mark ad
+    const ad = ADS_DATA.find(a => a.id === currentModalAd);
+    if (ad) ad.makegoodSent = true;
+    updateModalView();
+    renderAds();
+    // Update stats
+    const mgCount = ADS_DATA.filter(a => a.makegoodSent).length;
+    document.getElementById('statMakegoods').textContent = mgCount;
+  }
+}
+
+function modalPrev() {
+  if (modalStep === 2) {
+    modalStep = 1;
+    updateModalView();
+  }
+}
+
+function handleEmailKey(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const val = e.target.value.trim();
+    if (val && val.includes('@')) {
+      emailList.push(val);
+      e.target.value = '';
+      renderEmailChips();
+    }
+  }
+  if (e.key === 'Backspace' && !e.target.value && emailList.length) {
+    emailList.pop();
+    renderEmailChips();
+  }
+}
+
+function renderEmailChips() {
+  const container = document.getElementById('emailChips');
+  const input = document.getElementById('emailInline');
+  container.innerHTML = emailList.map((em, i) => `
+    <span class="email-chip">${esc(em)}<button class="email-chip__x" onclick="removeEmail(${i})">×</button></span>
+  `).join('') + '<input class="email-input-inline" id="emailInline" type="email" placeholder="ops@agency.com" onkeydown="handleEmailKey(event)" />';
+}
+
+function removeEmail(i) {
+  emailList.splice(i, 1);
+  renderEmailChips();
+}
+</script>
+
+</body>
+</html>
