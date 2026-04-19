@@ -21,7 +21,6 @@
       --btn-dark: #111111;
       --pill-bg: #f3f4f6;
     }
-
     *, *::before, *::after { box-sizing: border-box; }
     body {
       margin: 0;
@@ -48,19 +47,15 @@
       width: 22px; height: 22px; border-radius: 6px;
       background: var(--coral); display: flex; align-items: center; justify-content: center;
     }
-    .top-bar__title {
-      flex: 1; font-size: 13px; font-weight: 600; color: var(--text-secondary);
-    }
+    .top-bar__title { flex: 1; font-size: 13px; font-weight: 600; color: var(--text-secondary); }
 
-    /* ── Page layout ── */
+    /* ── Page ── */
     .page { max-width: 900px; margin: 40px auto; padding: 0 24px 80px; }
 
     /* ── Cards ── */
     .card {
-      background: var(--white);
-      border: 1px solid var(--border-light);
-      border-radius: 20px;
-      margin-bottom: 24px;
+      background: var(--white); border: 1px solid var(--border-light);
+      border-radius: 20px; margin-bottom: 24px;
     }
     .card__header {
       display: flex; align-items: center; justify-content: space-between;
@@ -74,62 +69,54 @@
 
     /* ── Input card ── */
     .input-card { padding: 32px; }
-    .input-card h1 {
-      margin: 0 0 6px;
-      font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: var(--dark);
-    }
-    .input-card p {
-      margin: 0 0 24px;
-      font-size: 13px; color: var(--text-secondary); line-height: 1.6;
-    }
+    .input-card h1 { margin: 0 0 6px; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    .input-card p { margin: 0 0 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
     .input-row { display: flex; gap: 10px; }
     .url-input {
       flex: 1; height: 42px; padding: 0 14px;
       border: 1px solid var(--border); border-radius: 10px;
-      font-family: inherit; font-size: 13px; color: var(--text-primary);
-      outline: none; transition: border-color 0.15s;
+      font-family: inherit; font-size: 13px; outline: none; transition: border-color 0.15s;
     }
     .url-input:focus { border-color: var(--dark); }
     .url-input::placeholder { color: var(--grey-1); }
 
+    /* API key row */
+    .key-row {
+      display: flex; align-items: center; gap: 10px;
+      margin-top: 12px; padding: 12px 14px;
+      background: var(--pill-bg); border-radius: 10px;
+    }
+    .key-row label { font-size: 11px; font-weight: 600; color: var(--grey-1); white-space: nowrap; }
+    .key-input {
+      flex: 1; height: 28px; padding: 0 10px;
+      border: 1px solid var(--border); border-radius: 7px;
+      font-family: inherit; font-size: 12px; outline: none;
+      background: var(--white);
+    }
+    .key-input:focus { border-color: var(--dark); }
+    .key-save { height: 28px; padding: 0 12px; background: var(--dark); color: #fff; border: none; border-radius: 7px; font-size: 11px; font-weight: 600; }
+
     /* ── Buttons ── */
     .btn-dark {
-      height: 42px; padding: 0 20px;
-      background: var(--btn-dark); color: #fff;
-      border: none; border-radius: 10px;
-      font-size: 13px; font-weight: 600;
+      height: 42px; padding: 0 20px; background: var(--btn-dark); color: #fff;
+      border: none; border-radius: 10px; font-size: 13px; font-weight: 600;
       display: inline-flex; align-items: center; gap: 7px;
       white-space: nowrap; transition: opacity 0.15s;
     }
     .btn-dark:hover { opacity: 0.85; }
     .btn-dark:disabled { opacity: 0.45; cursor: default; }
     .btn-outline {
-      height: 32px; padding: 0 14px;
-      background: none; border: 1px solid var(--border); border-radius: 8px;
+      height: 32px; padding: 0 14px; background: none;
+      border: 1px solid var(--border); border-radius: 8px;
       font-size: 12px; font-weight: 600; color: var(--text-primary);
       display: inline-flex; align-items: center; gap: 6px;
     }
     .btn-outline:hover { background: var(--pill-bg); }
-    .btn-sm {
-      height: 28px; padding: 0 12px;
-      background: none; border: 1px solid var(--border); border-radius: 7px;
-      font-size: 11px; font-weight: 600; color: var(--text-primary);
-    }
-    .btn-sm:hover { background: var(--pill-bg); }
-    .btn-coral {
-      height: 36px; padding: 0 16px;
-      background: var(--coral); color: #fff;
-      border: none; border-radius: 9px;
-      font-size: 12px; font-weight: 600;
-      display: inline-flex; align-items: center; gap: 6px;
-    }
-    .btn-coral:hover { opacity: 0.9; }
 
     /* ── Status ── */
     .status {
-      margin-top: 16px; font-size: 13px;
-      display: flex; align-items: center; gap: 8px;
-      color: var(--text-secondary);
+      margin-top: 14px; font-size: 13px;
+      display: flex; align-items: center; gap: 8px; color: var(--text-secondary);
     }
     .status--error { color: #c0392b; }
     .spinner {
@@ -139,134 +126,62 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Article body ── */
+    /* ── Article ── */
     .article-body {
-      padding: 36px 40px;
-      font-size: 15px; line-height: 1.75; color: var(--text-primary);
+      padding: 36px 40px; font-size: 15px; line-height: 1.75; color: var(--text-primary);
+      min-height: 80px;
     }
-    .article-body h1 {
-      font-size: 26px; font-weight: 800; letter-spacing: -0.6px;
-      color: var(--dark); margin: 0 0 20px; line-height: 1.2;
-    }
-    .article-body h2 {
-      font-size: 18px; font-weight: 700; letter-spacing: -0.3px;
-      color: var(--dark); margin: 32px 0 12px;
-    }
+    .article-body h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.6px; color: var(--dark); margin: 0 0 20px; line-height: 1.2; }
+    .article-body h2 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; color: var(--dark); margin: 32px 0 12px; }
     .article-body h3 { font-size: 15px; font-weight: 700; color: var(--dark); margin: 24px 0 8px; }
     .article-body p { margin: 0 0 16px; }
     .article-body ul, .article-body ol { margin: 0 0 16px; padding-left: 22px; }
     .article-body li { margin-bottom: 6px; }
     .article-body blockquote {
       margin: 24px 0; padding: 14px 20px;
-      border-left: 3px solid var(--coral);
-      background: #fff5f5; border-radius: 0 8px 8px 0;
-      font-style: italic; color: var(--text-secondary);
+      border-left: 3px solid var(--coral); background: #fff5f5;
+      border-radius: 0 8px 8px 0; font-style: italic; color: var(--text-secondary);
     }
     .article-body strong { font-weight: 700; color: var(--dark); }
-    .article-body code {
-      background: var(--pill-bg); border-radius: 4px; padding: 2px 6px; font-size: 13px;
-    }
+    .article-body code { background: var(--pill-bg); border-radius: 4px; padding: 2px 6px; font-size: 13px; }
 
-    /* ── Thumbnail section ── */
-    .thumb-layout {
-      display: grid;
-      grid-template-columns: 1fr 260px;
-      gap: 24px;
-      align-items: start;
-    }
+    /* Streaming cursor */
+    .cursor { display: inline-block; width: 2px; height: 1em; background: var(--coral); margin-left: 2px; animation: blink 0.8s step-end infinite; vertical-align: text-bottom; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── Thumbnail ── */
+    .thumb-layout { display: grid; grid-template-columns: 1fr 260px; gap: 24px; align-items: start; }
     .thumb-preview {
-      border-radius: 12px; overflow: hidden;
-      border: 1px solid var(--border-light);
+      border-radius: 12px; overflow: hidden; border: 1px solid var(--border-light);
       aspect-ratio: 16/9; background: var(--pill-bg);
       display: flex; align-items: center; justify-content: center;
     }
-    .thumb-preview img {
-      width: 100%; height: 100%; object-fit: cover; display: block;
-    }
-    .thumb-preview--loading {
-      flex-direction: column; gap: 10px; color: var(--grey-1); font-size: 12px;
-    }
-
-    /* ── Controls ── */
-    .controls { display: flex; flex-direction: column; gap: 20px; }
-    .control-group label {
-      display: block; font-size: 11px; font-weight: 600;
-      color: var(--grey-1); text-transform: uppercase; letter-spacing: 0.5px;
-      margin-bottom: 8px;
-    }
-    .control-group input[type="text"] {
-      width: 100%; height: 34px; padding: 0 10px;
-      border: 1px solid var(--border); border-radius: 8px;
-      font-family: inherit; font-size: 12px; font-weight: 600;
-      color: var(--text-primary); outline: none;
-    }
+    .thumb-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .controls { display: flex; flex-direction: column; gap: 18px; }
+    .control-group label { display: block; font-size: 11px; font-weight: 600; color: var(--grey-1); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px; }
+    .control-group input[type="text"] { width: 100%; height: 34px; padding: 0 10px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 12px; font-weight: 600; outline: none; }
     .control-group input[type="text"]:focus { border-color: var(--dark); }
-
-    /* Slider */
-    .slider-wrap { display: flex; align-items: center; gap: 10px; }
+    .slider-wrap { display: flex; align-items: center; gap: 8px; }
     .slider-label { font-size: 11px; color: var(--grey-1); white-space: nowrap; }
-    input[type="range"] {
-      flex: 1; -webkit-appearance: none; height: 4px;
-      border-radius: 2px; background: var(--border); outline: none;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 16px; height: 16px;
-      border-radius: 50%; background: var(--dark); cursor: pointer;
-    }
-    .slider-val {
-      font-size: 11px; font-weight: 700; color: var(--dark);
-      min-width: 28px; text-align: right;
-    }
-
-    /* Chip selectors */
+    input[type="range"] { flex: 1; -webkit-appearance: none; height: 4px; border-radius: 2px; background: var(--border); outline: none; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--dark); cursor: pointer; }
+    .slider-val { font-size: 11px; font-weight: 700; color: var(--dark); min-width: 28px; text-align: right; }
     .chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
-    .chip {
-      height: 28px; padding: 0 12px;
-      border: 1px solid var(--border); border-radius: 20px;
-      font-size: 11px; font-weight: 600; color: var(--text-secondary);
-      background: none; cursor: pointer; transition: all 0.1s;
-    }
-    .chip.active {
-      background: var(--dark); color: #fff; border-color: var(--dark);
-    }
-    .chip--coral.active { background: var(--coral); border-color: var(--coral); }
-
-    /* Color swatches */
+    .chip { height: 28px; padding: 0 12px; border: 1px solid var(--border); border-radius: 20px; font-size: 11px; font-weight: 600; color: var(--text-secondary); background: none; cursor: pointer; transition: all 0.1s; }
+    .chip.active { background: var(--dark); color: #fff; border-color: var(--dark); }
     .swatch-row { display: flex; gap: 8px; }
-    .swatch {
-      width: 28px; height: 28px; border-radius: 8px; cursor: pointer;
-      border: 2px solid transparent; transition: border-color 0.1s;
-    }
+    .swatch { width: 28px; height: 28px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: border-color 0.1s; }
     .swatch.active { border-color: var(--dark); outline: 2px solid var(--dark); outline-offset: 2px; }
-
-    .thumb-actions { display: flex; gap: 8px; margin-top: 4px; }
-
-    /* Photo thumbs */
     .photo-grid { display: flex; gap: 6px; flex-wrap: wrap; }
-    .photo-chip {
-      width: 42px; height: 42px; border-radius: 8px;
-      border: 2px solid transparent; cursor: pointer;
-      overflow: hidden; transition: border-color 0.1s;
-      background: var(--pill-bg);
-    }
-    .photo-chip img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-chip { width: 42px; height: 42px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; overflow: hidden; background: var(--pill-bg); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: var(--grey-1); transition: border-color 0.1s; }
     .photo-chip.active { border-color: var(--coral); }
-    .photo-chip--label {
-      display: flex; align-items: center; justify-content: center;
-      font-size: 9px; font-weight: 700; color: var(--grey-1); text-align: center;
-      padding: 2px;
-    }
   </style>
 </head>
 <body>
 
 <header class="top-bar">
-  <a href="index.html" class="top-bar__logo">
-    <div class="logo-mark">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-        <circle cx="6" cy="6" r="4" fill="white"/>
-      </svg>
-    </div>
+  <a href="/" class="top-bar__logo">
+    <div class="logo-mark"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" fill="white"/></svg></div>
     SpotsNow
   </a>
   <span class="top-bar__title">YouTube → Article</span>
@@ -277,18 +192,32 @@
   <!-- Input -->
   <div class="card input-card">
     <h1>YouTube to Article</h1>
-    <p>Paste a YouTube URL — Claude fetches the transcript, writes a polished article, and generates a branded thumbnail.</p>
+    <p>Paste a YouTube URL — fetches the transcript, streams a polished article, and generates a branded thumbnail.</p>
     <div class="input-row">
-      <input id="url-input" class="url-input" type="url"
-        placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" />
+      <input id="url-input" class="url-input" type="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" />
       <button class="btn-dark" id="generate-btn" onclick="generate()">
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-          <path d="M2 6.5h9M6.5 2l4.5 4.5-4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M6.5 2l4.5 4.5-4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Generate
       </button>
     </div>
+    <div class="key-row" id="key-row">
+      <label>Anthropic key</label>
+      <input id="key-input" class="key-input" type="password" placeholder="sk-ant-..." autocomplete="off" />
+      <button class="key-save" onclick="saveKey()">Save</button>
+    </div>
     <div class="status" id="status" style="display:none;"></div>
+  </div>
+
+  <!-- Article -->
+  <div class="card" id="article-card" style="display:none;">
+    <div class="card__header">
+      <span class="card__label">Article</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-outline" onclick="copyMarkdown()">Copy markdown</button>
+        <button class="btn-outline" onclick="copyText()">Copy text</button>
+      </div>
+    </div>
+    <div class="article-body" id="article-body"></div>
   </div>
 
   <!-- Thumbnail -->
@@ -296,45 +225,29 @@
     <div class="card__header">
       <span class="card__label">Thumbnail</span>
       <div style="display:flex;gap:8px;">
-        <button class="btn-outline" onclick="regenThumb()" id="regen-btn">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M10 6A4 4 0 112 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-            <path d="M10 3v3h-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+        <button class="btn-outline" id="regen-btn" onclick="regenThumb()">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 6A4 4 0 112 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M10 3v3h-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Regenerate
         </button>
-        <button class="btn-outline" onclick="downloadThumb()">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M6 1v7M3 5l3 3 3-3M1 10h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Download
-        </button>
+        <button class="btn-outline" onclick="downloadThumb()">Download</button>
       </div>
     </div>
     <div class="card__body">
       <div class="thumb-layout">
-        <!-- Preview -->
         <div>
-          <div class="thumb-preview" id="thumb-preview">
-            <div class="spinner"></div>
-          </div>
+          <div class="thumb-preview" id="thumb-preview"><div class="spinner"></div></div>
         </div>
-
-        <!-- Controls -->
         <div class="controls">
-
           <div class="control-group">
-            <label>Headline line 1</label>
+            <label>Line 1</label>
             <input type="text" id="t-line1" placeholder="THE COST OF" />
           </div>
-
           <div class="control-group">
-            <label>Headline line 2 (highlight)</label>
+            <label>Line 2 (highlight)</label>
             <input type="text" id="t-line2" placeholder="PODCAST ADS" />
           </div>
-
           <div class="control-group">
-            <label>Style complexity</label>
+            <label>Complexity</label>
             <div class="slider-wrap">
               <span class="slider-label">Clean</span>
               <input type="range" id="complexity" min="0" max="100" value="70"
@@ -343,240 +256,317 @@
               <span class="slider-label">Elaborate</span>
             </div>
           </div>
-
           <div class="control-group">
             <label>Background</label>
             <div class="swatch-row">
-              <div class="swatch active" data-bg="dark"
-                style="background:#0e1323;" onclick="selectBg(this,'dark')" title="Dark navy"></div>
-              <div class="swatch" data-bg="black"
-                style="background:#111111;" onclick="selectBg(this,'black')" title="Black"></div>
-              <div class="swatch" data-bg="coral"
-                style="background:#ed7470;" onclick="selectBg(this,'coral')" title="Coral"></div>
-              <div class="swatch" data-bg="navy"
-                style="background:#0a0e28;" onclick="selectBg(this,'navy')" title="Deep navy"></div>
+              <div class="swatch active" onclick="selectBg(this,'dark')" style="background:#0e1323;" title="Dark navy"></div>
+              <div class="swatch" onclick="selectBg(this,'black')" style="background:#111111;" title="Black"></div>
+              <div class="swatch" onclick="selectBg(this,'coral')" style="background:#ed7470;" title="Coral"></div>
+              <div class="swatch" onclick="selectBg(this,'navy')" style="background:#0a0e28;" title="Deep navy"></div>
             </div>
           </div>
-
           <div class="control-group">
             <label>Photo side</label>
             <div class="chip-row">
-              <button class="chip active" data-side="right" onclick="selectSide(this,'right')">Right</button>
-              <button class="chip" data-side="left" onclick="selectSide(this,'left')">Left</button>
+              <button class="chip active" onclick="selectSide(this,'right')">Right</button>
+              <button class="chip" onclick="selectSide(this,'left')">Left</button>
             </div>
           </div>
-
           <div class="control-group">
             <label>Photo</label>
             <div class="photo-grid" id="photo-grid"></div>
           </div>
-
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Article -->
-  <div class="card" id="article-card" style="display:none;">
-    <div class="card__header">
-      <span class="card__label">Article</span>
-      <div style="display:flex;gap:8px;">
-        <button class="btn-outline" onclick="copyMarkdown()">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <rect x="4" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/>
-            <path d="M1 8V1.5A.5.5 0 011.5 1H8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-          </svg>
-          Copy markdown
-        </button>
-        <button class="btn-outline" onclick="copyText()">Copy text</button>
-      </div>
-    </div>
-    <div class="article-body" id="article-body"></div>
-  </div>
-
 </main>
 
 <script>
+// ── Config ─────────────────────────────────────────────────────────────────
 const isLocal = window.location.hostname === 'localhost';
-const API = isLocal ? 'http://localhost:5055' : '';
-const PATH = isLocal ? '' : '/api';
+const TRANSCRIPT_API = isLocal ? 'http://localhost:5055/generate' : '/api/transcript';
+const THUMB_API      = isLocal ? 'http://localhost:5055/thumbnail' : '/api/thumbnail';
+const CLAUDE_API     = 'https://api.anthropic.com/v1/messages';
+const PHOTOS = ['cam1','cam2','cam3','Cam'];
+
+const ARTICLE_PROMPT = (transcript) => `You are an expert writer and journalist. Below is the transcript of a YouTube video.
+
+Turn it into a well-structured, engaging article:
+- Compelling headline
+- Strong lede that hooks the reader
+- Clear sections with subheadings where appropriate
+- Readable style — not a transcript dump
+- Preserve key ideas, quotes, and insights
+- Brief conclusion
+
+At the very end, after the article, output this exact block:
+---THUMBNAIL---
+LINE1: [3-5 word context phrase, e.g. "THE COST OF"]
+LINE2: [2-4 word punchy key phrase, e.g. "PODCAST ADS"]
+---END---
+
+Return the article in clean markdown, then the THUMBNAIL block.
+
+Transcript:
+${transcript}`;
+
+// ── State ───────────────────────────────────────────────────────────────────
 let rawMarkdown = '';
-let thumbData = { line1: '', line2: '', complexity: 70, bg: 'dark', side: 'right', photo: 0 };
 let currentThumbB64 = '';
+let thumbData = { line1: '', line2: '', complexity: 70, bg: 'dark', side: 'right', photo: 0 };
+let renderTimer = null;
 
-const PHOTOS = [
-  { label: '1', path: 0 },
-  { label: '2', path: 1 },
-  { label: '3', path: 2 },
-  { label: 'Cam', path: 3 },
-  { label: 'B&W', path: 4 },
-];
+// ── API key ─────────────────────────────────────────────────────────────────
+function getKey() { return localStorage.getItem('anthropic_key') || ''; }
+function saveKey() {
+  const val = document.getElementById('key-input').value.trim();
+  if (val) { localStorage.setItem('anthropic_key', val); showKeyRow(false); }
+}
+function showKeyRow(show) {
+  document.getElementById('key-row').style.display = show ? 'flex' : 'none';
+}
 
-// Build photo chips
-(function buildPhotoGrid() {
+// Init key row
+(function() {
+  const k = getKey();
+  if (k) {
+    showKeyRow(false);
+  } else {
+    showKeyRow(true);
+  }
+})();
+
+// ── Photo chips ─────────────────────────────────────────────────────────────
+(function() {
   const grid = document.getElementById('photo-grid');
-  PHOTOS.forEach((p, i) => {
+  PHOTOS.forEach((name, i) => {
     const div = document.createElement('div');
-    div.className = 'photo-chip photo-chip--label' + (i === 0 ? ' active' : '');
-    div.dataset.idx = i;
-    div.textContent = p.label;
-    div.onclick = () => selectPhoto(div, i);
+    div.className = 'photo-chip' + (i === 0 ? ' active' : '');
+    div.textContent = name;
+    div.onclick = () => {
+      document.querySelectorAll('.photo-chip').forEach(c => c.classList.remove('active'));
+      div.classList.add('active');
+      thumbData.photo = i;
+    };
     grid.appendChild(div);
   });
 })();
 
+// ── Generate ────────────────────────────────────────────────────────────────
 async function generate() {
   const url = document.getElementById('url-input').value.trim();
   if (!url) return;
+
+  const key = getKey();
+  if (!key) { showKeyRow(true); showStatus('error', 'Add your Anthropic API key first.'); return; }
 
   const btn = document.getElementById('generate-btn');
   btn.disabled = true;
   document.getElementById('article-card').style.display = 'none';
   document.getElementById('thumb-card').style.display = 'none';
+  rawMarkdown = '';
+
   showStatus('loading', 'Fetching transcript…');
 
+  // Step 1: get transcript from backend
+  let transcript, videoId;
   try {
-    const res = await fetch(API + PATH + '/generate', {
+    const res = await fetch(TRANSCRIPT_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url }),
     });
     const data = await res.json();
-    if (!res.ok) { showStatus('error', data.error || 'Something went wrong'); return; }
+    if (!res.ok) { showStatus('error', data.error || 'Transcript fetch failed'); btn.disabled = false; return; }
+    transcript = data.transcript;
+    videoId = data.video_id;
+  } catch (e) {
+    showStatus('error', 'Could not reach the server. Is the backend running?');
+    btn.disabled = false;
+    return;
+  }
 
-    // Article
-    rawMarkdown = data.article;
-    document.getElementById('article-body').innerHTML = marked.parse(rawMarkdown);
-    document.getElementById('article-card').style.display = 'block';
+  // Step 2: stream article from Claude directly
+  showStatus('loading', 'Writing article…');
+  document.getElementById('article-card').style.display = 'block';
+  document.getElementById('article-body').innerHTML = '<span class="cursor"></span>';
 
-    // Thumbnail
-    thumbData.line1 = data.line1 || '';
-    thumbData.line2 = data.line2 || '';
-    document.getElementById('t-line1').value = thumbData.line1;
-    document.getElementById('t-line2').value = thumbData.line2;
-    document.getElementById('thumb-card').style.display = 'block';
+  try {
+    const res = await fetch(CLAUDE_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-6',
+        max_tokens: 4096,
+        stream: true,
+        messages: [{ role: 'user', content: ARTICLE_PROMPT(transcript) }],
+      }),
+    });
 
-    if (data.thumbnail) {
-      showThumb(data.thumbnail);
-    } else {
-      setThumbLoading();
+    if (!res.ok) {
+      const err = await res.json();
+      showStatus('error', err.error?.message || 'Claude API error');
+      btn.disabled = false;
+      return;
     }
 
-    document.getElementById('status').style.display = 'none';
-  } catch (err) {
-    showStatus('error', 'Could not reach the server. Is youtube_article_server.py running?');
-  } finally {
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // keep incomplete line
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const payload = line.slice(6).trim();
+        if (payload === '[DONE]') continue;
+        try {
+          const evt = JSON.parse(payload);
+          if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
+            rawMarkdown += evt.delta.text;
+            scheduleRender();
+          }
+        } catch {}
+      }
+    }
+
+    // Final render
+    renderArticle(true);
+
+  } catch (e) {
+    showStatus('error', 'Streaming error: ' + e.message);
     btn.disabled = false;
+    return;
   }
+
+  // Step 3: parse thumbnail lines and generate
+  let line1 = '', line2 = '';
+  if (rawMarkdown.includes('---THUMBNAIL---') && rawMarkdown.includes('---END---')) {
+    const block = rawMarkdown.split('---THUMBNAIL---')[1].split('---END---')[0];
+    for (const row of block.trim().split('\n')) {
+      if (row.startsWith('LINE1:')) line1 = row.replace('LINE1:', '').trim();
+      if (row.startsWith('LINE2:')) line2 = row.replace('LINE2:', '').trim();
+    }
+    // Remove thumbnail block from displayed article
+    rawMarkdown = rawMarkdown.split('---THUMBNAIL---')[0].trim();
+    renderArticle(true);
+  }
+
+  thumbData.line1 = line1;
+  thumbData.line2 = line2;
+  document.getElementById('t-line1').value = line1;
+  document.getElementById('t-line2').value = line2;
+  document.getElementById('thumb-card').style.display = 'block';
+  document.getElementById('status').style.display = 'none';
+  btn.disabled = false;
+
+  await regenThumb();
 }
 
+// ── Render helpers ──────────────────────────────────────────────────────────
+function scheduleRender() {
+  clearTimeout(renderTimer);
+  renderTimer = setTimeout(() => renderArticle(false), 80);
+}
+
+function renderArticle(final) {
+  const body = document.getElementById('article-body');
+  // Strip thumbnail block if present
+  const text = rawMarkdown.includes('---THUMBNAIL---')
+    ? rawMarkdown.split('---THUMBNAIL---')[0]
+    : rawMarkdown;
+  body.innerHTML = marked.parse(text) + (final ? '' : '<span class="cursor"></span>');
+}
+
+// ── Thumbnail ───────────────────────────────────────────────────────────────
 async function regenThumb() {
   const btn = document.getElementById('regen-btn');
-  btn.disabled = true;
-  setThumbLoading();
+  if (btn) btn.disabled = true;
+  document.getElementById('thumb-preview').innerHTML = '<div class="spinner"></div>';
 
   const line1 = document.getElementById('t-line1').value.trim();
   const line2 = document.getElementById('t-line2').value.trim();
   const complexity = parseInt(document.getElementById('complexity').value) / 100;
 
   try {
-    const res = await fetch(API + PATH + '/thumbnail', {
+    const res = await fetch(THUMB_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        line1, line2,
-        complexity,
-        bg_name: thumbData.bg,
-        photo_side: thumbData.side,
-        photo_index: thumbData.photo,
-      }),
+      body: JSON.stringify({ line1, line2, complexity, bg_name: thumbData.bg, photo_side: thumbData.side, photo_index: thumbData.photo }),
     });
     const data = await res.json();
-    if (res.ok && data.thumbnail) showThumb(data.thumbnail);
-    else setThumbError(data.error || 'Generation failed');
+    if (res.ok && data.thumbnail) {
+      currentThumbB64 = data.thumbnail;
+      const img = document.createElement('img');
+      img.src = 'data:image/png;base64,' + data.thumbnail;
+      document.getElementById('thumb-preview').innerHTML = '';
+      document.getElementById('thumb-preview').appendChild(img);
+    } else {
+      document.getElementById('thumb-preview').innerHTML = `<span style="font-size:12px;color:#c0392b;padding:16px">${data.error || 'Failed'}</span>`;
+    }
   } catch (e) {
-    setThumbError('Server not reachable');
+    document.getElementById('thumb-preview').innerHTML = `<span style="font-size:12px;color:#c0392b;padding:16px">Server not reachable</span>`;
   } finally {
-    btn.disabled = false;
+    if (btn) btn.disabled = false;
   }
-}
-
-function showThumb(b64) {
-  currentThumbB64 = b64;
-  const preview = document.getElementById('thumb-preview');
-  preview.innerHTML = '';
-  const img = document.createElement('img');
-  img.src = 'data:image/png;base64,' + b64;
-  preview.appendChild(img);
-}
-
-function setThumbLoading() {
-  document.getElementById('thumb-preview').innerHTML =
-    '<div class="spinner"></div>';
-}
-
-function setThumbError(msg) {
-  document.getElementById('thumb-preview').innerHTML =
-    `<span style="font-size:12px;color:#c0392b;padding:16px;text-align:center">${msg}</span>`;
 }
 
 function downloadThumb() {
   if (!currentThumbB64) return;
   const a = document.createElement('a');
-  const line2 = document.getElementById('t-line2').value || 'thumbnail';
-  a.download = line2.toLowerCase().replace(/\s+/g, '-') + '.png';
+  a.download = (document.getElementById('t-line2').value || 'thumbnail').toLowerCase().replace(/\s+/g,'-') + '.png';
   a.href = 'data:image/png;base64,' + currentThumbB64;
   a.click();
 }
 
 function selectBg(el, name) {
   document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
-  el.classList.add('active');
-  thumbData.bg = name;
+  el.classList.add('active'); thumbData.bg = name;
 }
-
 function selectSide(el, side) {
-  document.querySelectorAll('.chip[data-side]').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  thumbData.side = side;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active'); thumbData.side = side;
 }
 
-function selectPhoto(el, idx) {
-  document.querySelectorAll('.photo-chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  thumbData.photo = idx;
+// ── Copy ────────────────────────────────────────────────────────────────────
+function copyMarkdown() {
+  navigator.clipboard.writeText(rawMarkdown).then(() => flash(event.target, 'Copied!'));
+}
+function copyText() {
+  navigator.clipboard.writeText(document.getElementById('article-body').innerText)
+    .then(() => flash(event.target, 'Copied!'));
+}
+function flash(el, msg) {
+  const btn = el.closest('button');
+  const orig = btn.innerText; btn.innerText = msg;
+  setTimeout(() => btn.innerText = orig, 1500);
 }
 
+// ── Status ──────────────────────────────────────────────────────────────────
 function showStatus(type, text) {
   const el = document.getElementById('status');
   el.style.display = 'flex';
   el.className = 'status' + (type === 'error' ? ' status--error' : '');
-  el.innerHTML = type === 'loading'
-    ? `<div class="spinner"></div> ${text}`
-    : text;
+  el.innerHTML = type === 'loading' ? `<div class="spinner"></div> ${text}` : text;
 }
 
-function copyMarkdown() {
-  navigator.clipboard.writeText(rawMarkdown).then(() => {
-    const btn = event.target.closest('button');
-    const orig = btn.innerText; btn.innerText = 'Copied!';
-    setTimeout(() => btn.innerText = orig, 1500);
-  });
-}
+document.getElementById('url-input').addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+document.getElementById('key-input').addEventListener('keydown', e => { if (e.key === 'Enter') saveKey(); });
 
-function copyText() {
-  const text = document.getElementById('article-body').innerText;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = event.target.closest('button');
-    const orig = btn.innerText; btn.innerText = 'Copied!';
-    setTimeout(() => btn.innerText = orig, 1500);
-  });
-}
-
-document.getElementById('url-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') generate();
-});
+// Pre-fill key input if saved
+const savedKey = getKey();
+if (savedKey) document.getElementById('key-input').value = savedKey;
 </script>
-
 </body>
 </html>
