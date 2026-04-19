@@ -166,6 +166,11 @@ input, textarea, select { font-family: inherit; }
           <input type="file" id="csv-file" accept=".csv,text/csv">
         </label>
       </div>
+
+      <div class="group">
+        <div class="label">Supplementary data <span class="hint">QB, Mercury, ad-hoc</span></div>
+        <textarea class="links" id="in-supp" placeholder="Paste tables, CSV snippets, Mixpanel exports, or anything else the agent should treat as business context. Label each section (e.g. '## Q1 QuickBooks spend')."></textarea>
+      </div>
     </aside>
 
     <section class="chat">
@@ -203,7 +208,7 @@ function loadState() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
   } catch {}
-  return { messages: [], strategy: '', notionLinks: '', dateFrom: '', dateTo: '' };
+  return { messages: [], strategy: '', notionLinks: '', supp: '', dateFrom: '', dateTo: '' };
 }
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -257,6 +262,7 @@ async function verifyPassword(pw) {
 function hydrate() {
   document.getElementById('in-strategy').value = state.strategy || '';
   document.getElementById('in-links').value = state.notionLinks || '';
+  document.getElementById('in-supp').value = state.supp || '';
   document.getElementById('in-from').value = state.dateFrom || '';
   document.getElementById('in-to').value = state.dateTo || '';
   renderMessages();
@@ -266,6 +272,7 @@ function hydrate() {
 function attachInputs() {
   document.getElementById('in-strategy').addEventListener('input', (e) => { state.strategy = e.target.value; saveState(); });
   document.getElementById('in-links').addEventListener('input', (e) => { state.notionLinks = e.target.value; saveState(); });
+  document.getElementById('in-supp').addEventListener('input', (e) => { state.supp = e.target.value; saveState(); });
   document.getElementById('in-from').addEventListener('input', (e) => { state.dateFrom = e.target.value; saveState(); });
   document.getElementById('in-to').addEventListener('input', (e) => { state.dateTo = e.target.value; saveState(); });
 
@@ -468,6 +475,7 @@ async function send() {
         password,
         strategy: state.strategy,
         notionLinks: state.notionLinks,
+        supp: state.supp,
         dateRange: { from: state.dateFrom, to: state.dateTo },
         messages: state.messages
           .filter((m, i) => i < state.messages.length - 1) // exclude the empty pending assistant

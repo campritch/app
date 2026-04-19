@@ -39,7 +39,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'POST only' });
   }
 
-  const { password, messages, strategy, notionLinks, dateRange } = req.body || {};
+  const { password, messages, strategy, notionLinks, supp, dateRange } = req.body || {};
 
   // Password gate
   const expected = process.env.STRATEGY_PASSWORD;
@@ -59,7 +59,7 @@ export default async function handler(req, res) {
   const client = new Anthropic({ apiKey });
 
   // Build the context block from user inputs. Cached at block level so follow-ups are cheap.
-  const contextBlock = buildContextBlock({ strategy, notionLinks, dateRange });
+  const contextBlock = buildContextBlock({ strategy, notionLinks, supp, dateRange });
 
   const workingMessages = [
     ...(contextBlock ? [{ role: 'user', content: [{ type: 'text', text: contextBlock, cache_control: { type: 'ephemeral' } }] }] : []),
@@ -126,13 +126,16 @@ export default async function handler(req, res) {
   }
 }
 
-function buildContextBlock({ strategy, notionLinks, dateRange }) {
+function buildContextBlock({ strategy, notionLinks, supp, dateRange }) {
   const parts = [];
   if (strategy && strategy.trim()) {
     parts.push(`## Current business strategy (Cam's words)\n\n${strategy.trim()}`);
   }
   if (notionLinks && notionLinks.trim()) {
     parts.push(`## Relevant Notion links (fetch via notion_fetch_page as needed)\n\n${notionLinks.trim()}`);
+  }
+  if (supp && supp.trim()) {
+    parts.push(`## Supplementary data pasted by Cam (QuickBooks, Mercury, one-off exports)\n\n${supp.trim()}`);
   }
   if (dateRange?.from || dateRange?.to) {
     parts.push(`## Default Fathom date range\n\nfrom: ${dateRange.from || '(none)'}\nto: ${dateRange.to || '(none)'}`);
