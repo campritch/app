@@ -1,12 +1,17 @@
 {
-  "buildCommand": "mkdir -p dist && cp *.html dist/ && cp *.png dist/ 2>/dev/null; true",
+  "buildCommand": "mkdir -p dist && cp *.html dist/ && cp *.png dist/ 2>/dev/null; true && mkdir -p dist/api",
   "outputDirectory": "dist",
   "framework": null,
+  "functions": {
+    "api/generate.py": { "maxDuration": 60 },
+    "api/thumbnail.py": { "maxDuration": 30 }
+  },
   "rewrites": [
     { "source": "/", "destination": "/wiki.html" },
     { "source": "/pixel-setup", "destination": "/pixel-setup.html" },
     { "source": "/submit-creative", "destination": "/submit-creative.html" },
     { "source": "/investors", "destination": "/pitch-deck.html" },
-    { "source": "/talking-points", "destination": "/talking-points.html" }
+    { "source": "/talking-points", "destination": "/talking-points.html" },
+    { "source": "/youtube-article", "destination": "/youtube-article.html" }
   ]
 }
