@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpotsNow · Strategy Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e0e; --surface: #161616; --surface-2: #1e1e1e; --surface-3: #262626;
+  --line: #2a2a2a; --line-soft: #1f1f1f;
+  --text: #e8e6e1; --text-dim: #8a857c; --text-faint: #5c5952;
+  --accent: #e05a4e; --accent-soft: #3a1a17;
+  --good: #7fb069; --warn: #d4a857; --bad: #c94a3a;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter Tight', sans-serif; font-size: 13px; line-height: 1.5; }
+h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 500; letter-spacing: -0.02em; }
+button { font-family: inherit; cursor: pointer; }
+input, textarea, select { font-family: inherit; }
+
+/* ── Password gate ── */
+.gate { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.gate-card { background: var(--surface); border: 1px solid var(--line); padding: 40px 44px; width: 360px; }
+.gate-card h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+.gate-card h1 .a { color: var(--accent); font-style: italic; font-weight: 400; }
+.gate-card .sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 24px; }
+.gate-card input { width: 100%; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 10px 12px; font-size: 14px; margin-bottom: 10px; }
+.gate-card input:focus { outline: none; border-color: var(--accent); }
+.gate-card button { width: 100%; background: var(--accent); color: #fff; border: none; padding: 10px 14px; font-weight: 600; font-size: 13px; letter-spacing: 0.02em; }
+.gate-card button:hover { filter: brightness(1.08); }
+.gate-card .err { color: var(--bad); font-family: 'JetBrains Mono', monospace; font-size: 11px; margin-top: 10px; min-height: 15px; }
+
+/* ── Shell ── */
+.app { display: grid; grid-template-rows: 52px 1fr; height: 100vh; }
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 0 24px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.topbar h1 { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+.topbar h1 .a { color: var(--accent); font-style: italic; font-weight: 400; }
+.topbar .actions { display: flex; gap: 8px; }
+.topbar .actions button { background: transparent; color: var(--text-dim); border: 1px solid var(--line); padding: 6px 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+.topbar .actions button:hover { color: var(--text); border-color: var(--text-dim); }
+
+.main { display: grid; grid-template-columns: 340px 1fr; overflow: hidden; }
+
+/* ── Left panel ── */
+.panel { border-right: 1px solid var(--line); background: var(--surface); overflow-y: auto; padding: 20px 22px; }
+.panel .group { margin-bottom: 22px; }
+.panel .label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+.panel .label .hint { color: var(--text-faint); text-transform: none; letter-spacing: 0; font-size: 10px; }
+.panel textarea { width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--line); padding: 10px 12px; font-size: 12px; font-family: inherit; resize: vertical; }
+.panel textarea:focus { outline: none; border-color: var(--accent); }
+.panel textarea.strategy { min-height: 180px; font-family: 'Fraunces', serif; font-size: 13px; line-height: 1.55; }
+.panel textarea.links { min-height: 90px; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.panel .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.panel input[type="date"] { background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 8px 10px; font-size: 12px; font-family: 'JetBrains Mono', monospace; width: 100%; }
+.panel input[type="date"]:focus { outline: none; border-color: var(--accent); }
+.panel .csv-drop { border: 1px dashed var(--line); padding: 14px; text-align: center; font-size: 11px; color: var(--text-dim); cursor: pointer; transition: all 0.1s; }
+.panel .csv-drop:hover { border-color: var(--accent); color: var(--text); }
+.panel .csv-drop.ok { border-color: var(--good); color: var(--good); }
+.panel .csv-drop input { display: none; }
+
+/* ── Chat ── */
+.chat { display: grid; grid-template-rows: 1fr auto; min-height: 0; }
+.stream { overflow-y: auto; padding: 24px 32px 12px; }
+.stream .empty { color: var(--text-faint); font-family: 'Fraunces', serif; font-size: 16px; font-style: italic; max-width: 520px; line-height: 1.55; }
+.stream .empty .tip { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 14px; display: block; }
+
+.msg { margin-bottom: 22px; max-width: 880px; }
+.msg .who { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 6px; display: flex; gap: 10px; align-items: center; }
+.msg .who .tag { color: var(--accent); }
+.msg.user .who .tag { color: var(--text); }
+.msg .body { font-size: 14px; line-height: 1.6; color: var(--text); white-space: pre-wrap; word-wrap: break-word; }
+.msg.user .body { color: var(--text); background: var(--surface); border-left: 2px solid var(--accent); padding: 12px 16px; }
+.msg .body p { margin-bottom: 10px; }
+.msg .body h1, .msg .body h2, .msg .body h3 { font-family: 'Fraunces', serif; margin: 14px 0 8px; }
+.msg .body h1 { font-size: 20px; } .msg .body h2 { font-size: 17px; } .msg .body h3 { font-size: 15px; }
+.msg .body ul, .msg .body ol { margin: 8px 0 8px 20px; } .msg .body li { margin-bottom: 4px; }
+.msg .body code { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--surface-2); padding: 1px 6px; border-radius: 2px; }
+.msg .body strong { color: var(--text); font-weight: 600; }
+
+.tool-log { background: var(--surface); border: 1px solid var(--line); margin: 10px 0; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.tool-log .tl-row { padding: 8px 14px; border-bottom: 1px solid var(--line-soft); display: flex; gap: 12px; align-items: center; }
+.tool-log .tl-row:last-child { border-bottom: none; }
+.tool-log .tl-row .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--warn); flex-shrink: 0; }
+.tool-log .tl-row.ok .dot { background: var(--good); }
+.tool-log .tl-row.err .dot { background: var(--bad); }
+.tool-log .tl-row .name { color: var(--text); }
+.tool-log .tl-row .meta { color: var(--text-faint); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tool-log .tl-row .bytes { color: var(--text-faint); font-size: 10px; }
+
+.cursor { display: inline-block; width: 8px; height: 14px; background: var(--accent); vertical-align: text-bottom; animation: blink 1s infinite; }
+@keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+
+/* ── Input dock ── */
+.dock { border-top: 1px solid var(--line); padding: 14px 32px 18px; background: var(--surface); }
+.dock .box { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; max-width: 880px; }
+.dock textarea { background: var(--bg); color: var(--text); border: 1px solid var(--line); padding: 10px 14px; font-size: 14px; resize: none; min-height: 44px; max-height: 200px; font-family: inherit; line-height: 1.5; }
+.dock textarea:focus { outline: none; border-color: var(--accent); }
+.dock button { background: var(--accent); color: #fff; border: none; padding: 10px 18px; font-weight: 600; font-size: 13px; height: 44px; }
+.dock button:hover:not(:disabled) { filter: brightness(1.08); }
+.dock button:disabled { opacity: 0.5; cursor: not-allowed; }
+.dock .meta { max-width: 880px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); margin-top: 8px; text-transform: uppercase; letter-spacing: 0.1em; display: flex; gap: 14px; }
+.dock .meta .status.thinking { color: var(--warn); }
+.dock .meta .status.ok { color: var(--good); }
+.dock .meta .status.err { color: var(--bad); }
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <h1>Strategy <span class="a">Agent</span></h1>
+    <div class="sub">Restricted · CEO only</div>
+    <form id="gate-form">
+      <input type="password" id="gate-pass" placeholder="Password" autofocus>
+      <button type="submit">Enter</button>
+    </form>
+    <div class="err" id="gate-err"></div>
+  </div>
+</div>
+
+<div class="app" id="app" style="display: none;">
+  <div class="topbar">
+    <h1>Strategy <span class="a">Agent</span></h1>
+    <div class="actions">
+      <button id="btn-export">Export Chat</button>
+      <button id="btn-new">New Conversation</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <aside class="panel">
+      <div class="group">
+        <div class="label">Current strategy</div>
+        <textarea class="strategy" id="in-strategy" placeholder="Paste or write your current business strategy. The agent will reflect on it every turn — flag contradictions with data, push back where reasoning is weak."></textarea>
+      </div>
+
+      <div class="group">
+        <div class="label">Notion links</div>
+        <textarea class="links" id="in-links" placeholder="Paste Notion URLs, one per line. Agent fetches on demand via notion_fetch_page."></textarea>
+      </div>
+
+      <div class="group">
+        <div class="label">Fathom date range <span class="hint">calls to pull</span></div>
+        <div class="row">
+          <input type="date" id="in-from">
+          <input type="date" id="in-to">
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="label">Burn CSV <span class="hint" id="csv-status">not uploaded</span></div>
+        <label class="csv-drop" id="csv-drop">
+          Drop or click to upload
+          <input type="file" id="csv-file" accept=".csv,text/csv">
+        </label>
+      </div>
+    </aside>
+
+    <section class="chat">
+      <div class="stream" id="stream">
+        <div class="empty">
+          Ask anything strategic. The agent has tools for Fathom calls, Notion docs, HubSpot, the internal BI snapshot, and your burn sheet.
+          <span class="tip">Try: "Pull last 30 days of sales calls and tell me why meta ads aren't converting."</span>
+        </div>
+      </div>
+
+      <div class="dock">
+        <div class="box">
+          <textarea id="in-msg" placeholder="Ask the agent..." rows="1"></textarea>
+          <button id="btn-send">Send</button>
+        </div>
+        <div class="meta">
+          <span class="status" id="status">idle</span>
+          <span id="iter-info"></span>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'strategy_chat_v1';
+
+// ── State ─────────────────────────────────────────────────────────────
+let state = loadState();
+let password = '';
+let streaming = false;
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { messages: [], strategy: '', notionLinks: '', dateFrom: '', dateTo: '' };
+}
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+// ── Password gate ─────────────────────────────────────────────────────
+const gate = document.getElementById('gate');
+const app = document.getElementById('app');
+document.getElementById('gate-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const pw = document.getElementById('gate-pass').value.trim();
+  if (!pw) return;
+  // We verify by sending a harmless "ping" to /api/strategy-chat with an empty message list;
+  // it will 401 immediately if the password is wrong, without hitting Claude.
+  const ok = await verifyPassword(pw);
+  if (!ok) {
+    document.getElementById('gate-err').textContent = 'Wrong password.';
+    return;
+  }
+  password = pw;
+  sessionStorage.setItem('strategy_pw', pw);
+  gate.style.display = 'none';
+  app.style.display = 'grid';
+  hydrate();
+});
+
+async function verifyPassword(pw) {
+  try {
+    const res = await fetch('/api/strategy-chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw, messages: [] }),
+    });
+    if (res.status === 401) return false;
+    // Any other status (even 400 for empty messages) means password was accepted.
+    return true;
+  } catch { return false; }
+}
+
+// Auto-unlock if we already passed once this tab session.
+(function autoUnlock() {
+  const pw = sessionStorage.getItem('strategy_pw');
+  if (!pw) return;
+  password = pw;
+  gate.style.display = 'none';
+  app.style.display = 'grid';
+  hydrate();
+})();
+
+// ── Hydrate UI from state ─────────────────────────────────────────────
+function hydrate() {
+  document.getElementById('in-strategy').value = state.strategy || '';
+  document.getElementById('in-links').value = state.notionLinks || '';
+  document.getElementById('in-from').value = state.dateFrom || '';
+  document.getElementById('in-to').value = state.dateTo || '';
+  renderMessages();
+  attachInputs();
+}
+
+function attachInputs() {
+  document.getElementById('in-strategy').addEventListener('input', (e) => { state.strategy = e.target.value; saveState(); });
+  document.getElementById('in-links').addEventListener('input', (e) => { state.notionLinks = e.target.value; saveState(); });
+  document.getElementById('in-from').addEventListener('input', (e) => { state.dateFrom = e.target.value; saveState(); });
+  document.getElementById('in-to').addEventListener('input', (e) => { state.dateTo = e.target.value; saveState(); });
+
+  const ta = document.getElementById('in-msg');
+  ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 200) + 'px'; });
+  ta.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  });
+  document.getElementById('btn-send').addEventListener('click', send);
+  document.getElementById('btn-new').addEventListener('click', () => {
+    if (!confirm('Clear conversation history?')) return;
+    state.messages = []; saveState(); renderMessages();
+  });
+  document.getElementById('btn-export').addEventListener('click', exportChat);
+  document.getElementById('csv-file').addEventListener('change', uploadCsv);
+}
+
+function exportChat() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `strategy-chat-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function uploadCsv(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const text = await file.text();
+  const drop = document.getElementById('csv-drop');
+  const status = document.getElementById('csv-status');
+  status.textContent = 'uploading...';
+  try {
+    const res = await fetch('/api/burn-upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/csv', 'X-Strategy-Password': password },
+      body: text,
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const j = await res.json();
+    drop.classList.add('ok');
+    drop.childNodes[0].nodeValue = `Uploaded · ${file.name} (${j.bytes} bytes) `;
+    status.textContent = 'ready';
+  } catch (err) {
+    status.textContent = 'failed';
+    alert('Upload failed: ' + err.message);
+  }
+}
+
+// ── Rendering ─────────────────────────────────────────────────────────
+function renderMessages() {
+  const el = document.getElementById('stream');
+  if (!state.messages.length) {
+    el.innerHTML = `<div class="empty">Ask anything strategic. The agent has tools for Fathom calls, Notion docs, HubSpot, the internal BI snapshot, and your burn sheet.<span class="tip">Try: "Pull last 30 days of sales calls and tell me why meta ads aren't converting."</span></div>`;
+    return;
+  }
+  el.innerHTML = '';
+  for (const m of state.messages) el.appendChild(renderMessage(m));
+  el.scrollTop = el.scrollHeight;
+}
+
+function renderMessage(m) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + m.role;
+  const who = m.role === 'user' ? 'You' : 'Agent';
+  d.innerHTML = `<div class="who"><span class="tag">${who}</span></div><div class="body"></div>`;
+  const body = d.querySelector('.body');
+  if (m.role === 'user') {
+    body.textContent = m.content;
+  } else {
+    body.innerHTML = mdToHtml(m.content);
+  }
+  if (m.toolCalls?.length) {
+    const tl = toolLogEl(m.toolCalls);
+    d.appendChild(tl);
+  }
+  return d;
+}
+
+function toolLogEl(calls) {
+  const wrap = document.createElement('div');
+  wrap.className = 'tool-log';
+  for (const c of calls) {
+    const row = document.createElement('div');
+    row.className = 'tl-row ' + (c.ok ? 'ok' : c.error ? 'err' : '');
+    row.innerHTML = `<span class="dot"></span><span class="name">${escapeHtml(c.name)}</span><span class="meta">${escapeHtml(JSON.stringify(c.input || {}).slice(0, 120))}</span><span class="bytes">${c.bytes ? c.bytes + 'b' : c.error ? 'err' : ''}</span>`;
+    wrap.appendChild(row);
+  }
+  return wrap;
+}
+
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function mdToHtml(md) {
+  // Minimal markdown — headings, bold, italics, code, bullets, paragraphs.
+  const esc = escapeHtml(md);
+  const lines = esc.split('\n');
+  const out = [];
+  let inList = false, listType = null;
+  const flushList = () => { if (inList) { out.push(`</${listType}>`); inList = false; listType = null; } };
+  for (const line of lines) {
+    if (/^###\s+/.test(line)) { flushList(); out.push(`<h3>${line.replace(/^###\s+/, '')}</h3>`); }
+    else if (/^##\s+/.test(line)) { flushList(); out.push(`<h2>${line.replace(/^##\s+/, '')}</h2>`); }
+    else if (/^#\s+/.test(line)) { flushList(); out.push(`<h1>${line.replace(/^#\s+/, '')}</h1>`); }
+    else if (/^\s*[-*]\s+/.test(line)) {
+      if (!inList || listType !== 'ul') { flushList(); out.push('<ul>'); inList = true; listType = 'ul'; }
+      out.push(`<li>${line.replace(/^\s*[-*]\s+/, '')}</li>`);
+    } else if (/^\s*\d+\.\s+/.test(line)) {
+      if (!inList || listType !== 'ol') { flushList(); out.push('<ol>'); inList = true; listType = 'ol'; }
+      out.push(`<li>${line.replace(/^\s*\d+\.\s+/, '')}</li>`);
+    } else if (line.trim() === '') { flushList(); out.push(''); }
+    else { flushList(); out.push(`<p>${line}</p>`); }
+  }
+  flushList();
+  return out.join('\n')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>');
+}
+
+// ── Send ──────────────────────────────────────────────────────────────
+async function send() {
+  if (streaming) return;
+  const ta = document.getElementById('in-msg');
+  const text = ta.value.trim();
+  if (!text) return;
+
+  state.messages.push({ role: 'user', content: text });
+  saveState();
+  ta.value = ''; ta.style.height = 'auto';
+
+  const pending = { role: 'assistant', content: '', toolCalls: [] };
+  state.messages.push(pending);
+  renderMessages();
+
+  const stream = document.getElementById('stream');
+  const lastMsgEl = stream.lastElementChild;
+  const bodyEl = lastMsgEl.querySelector('.body');
+  bodyEl.innerHTML = '<span class="cursor"></span>';
+
+  setStatus('thinking', 'streaming...');
+  streaming = true;
+  document.getElementById('btn-send').disabled = true;
+
+  try {
+    const res = await fetch('/api/strategy-chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        password,
+        strategy: state.strategy,
+        notionLinks: state.notionLinks,
+        dateRange: { from: state.dateFrom, to: state.dateTo },
+        messages: state.messages
+          .filter((m, i) => i < state.messages.length - 1) // exclude the empty pending assistant
+          .map((m) => ({ role: m.role, content: m.content })),
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+    let accumulated = '';
+    let currentToolStart = null;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const chunks = buf.split('\n\n');
+      buf = chunks.pop();
+      for (const chunk of chunks) {
+        const eventMatch = chunk.match(/^event:\s*(.+)$/m);
+        const dataMatch = chunk.match(/^data:\s*(.+)$/m);
+        if (!eventMatch || !dataMatch) continue;
+        const evt = eventMatch[1].trim();
+        let data; try { data = JSON.parse(dataMatch[1]); } catch { continue; }
+
+        if (evt === 'text') {
+          accumulated += data.delta;
+          pending.content = accumulated;
+          bodyEl.innerHTML = mdToHtml(accumulated) + '<span class="cursor"></span>';
+          stream.scrollTop = stream.scrollHeight;
+        } else if (evt === 'tool_start') {
+          currentToolStart = { id: data.id, name: data.name };
+        } else if (evt === 'tool_call') {
+          pending.toolCalls.push({ id: data.id, name: data.name, input: data.input });
+          renderToolLog(lastMsgEl, pending.toolCalls);
+        } else if (evt === 'tool_result') {
+          const tc = pending.toolCalls.find((c) => c.id === data.id);
+          if (tc) { tc.ok = data.ok; tc.bytes = data.bytes; tc.error = data.error; }
+          renderToolLog(lastMsgEl, pending.toolCalls);
+        } else if (evt === 'iteration') {
+          document.getElementById('iter-info').textContent = `iter ${data.n}`;
+        } else if (evt === 'done') {
+          setStatus('ok', `done · ${data.usage?.output_tokens || 0} out, ${data.usage?.input_tokens || 0} in`);
+        } else if (evt === 'error') {
+          throw new Error(data.message);
+        }
+      }
+    }
+
+    bodyEl.innerHTML = mdToHtml(accumulated);
+    saveState();
+  } catch (err) {
+    pending.content = (pending.content || '') + `\n\n_Error: ${err.message}_`;
+    bodyEl.innerHTML = mdToHtml(pending.content);
+    setStatus('err', err.message);
+    saveState();
+  } finally {
+    streaming = false;
+    document.getElementById('btn-send').disabled = false;
+  }
+}
+
+function renderToolLog(msgEl, calls) {
+  let tl = msgEl.querySelector('.tool-log');
+  if (tl) tl.remove();
+  if (!calls.length) return;
+  const body = msgEl.querySelector('.body');
+  body.parentNode.insertBefore(toolLogEl(calls), body);
+}
+
+function setStatus(cls, text) {
+  const s = document.getElementById('status');
+  s.className = 'status ' + cls;
+  s.textContent = text;
+}
+</script>
+
+</body>
+</html>
