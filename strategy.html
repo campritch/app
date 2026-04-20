@@ -92,33 +92,35 @@ input, textarea, select { font-family: inherit; }
 .stream .empty { color: var(--text-faint); font-family: 'Fraunces', serif; font-size: 16px; font-style: italic; max-width: 520px; line-height: 1.55; }
 .stream .empty .tip { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 14px; display: block; }
 
-.msg { margin-bottom: 28px; max-width: 760px; }
-.msg .who { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 10px; display: flex; gap: 10px; align-items: center; }
+.msg { margin-bottom: 16px; max-width: 760px; }
+.msg .who { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 6px; display: flex; gap: 10px; align-items: center; }
 .msg .who .tag { color: var(--accent); }
 .msg.user .who .tag { color: var(--text); }
-.msg .body { font-size: 15px; line-height: 1.7; color: var(--text); word-wrap: break-word; }
-.msg.user .body { color: var(--text); background: var(--surface); border-left: 2px solid var(--accent); padding: 14px 18px; font-size: 14px; line-height: 1.55; white-space: pre-wrap; }
-.msg .body p { margin-bottom: 14px; }
+.msg .body { font-size: 13.5px; line-height: 1.55; color: var(--text); word-wrap: break-word; }
+.msg.user .body { background: var(--surface); border-left: 2px solid var(--accent); padding: 10px 14px; white-space: pre-wrap; }
+.msg .body p { margin-bottom: 8px; }
 .msg .body p:last-child { margin-bottom: 0; }
-.msg .body h1, .msg .body h2, .msg .body h3 { font-family: 'Fraunces', serif; font-weight: 500; margin: 20px 0 10px; line-height: 1.25; letter-spacing: -0.01em; }
+.msg .body h1, .msg .body h2, .msg .body h3 { font-family: 'Inter Tight', sans-serif; font-weight: 600; margin: 14px 0 6px; line-height: 1.35; letter-spacing: -0.005em; color: var(--text); }
 .msg .body h1:first-child, .msg .body h2:first-child, .msg .body h3:first-child { margin-top: 0; }
-.msg .body h1 { font-size: 22px; } .msg .body h2 { font-size: 18px; } .msg .body h3 { font-size: 16px; }
-.msg .body ul, .msg .body ol { margin: 10px 0 14px 4px; padding-left: 22px; }
-.msg .body li { margin-bottom: 6px; padding-left: 4px; }
+.msg .body h1 { font-size: 15px; }
+.msg .body h2 { font-size: 14px; }
+.msg .body h3 { font-size: 13.5px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+.msg .body ul, .msg .body ol { margin: 4px 0 8px; padding-left: 20px; }
+.msg .body li { margin-bottom: 2px; }
 .msg .body li::marker { color: var(--text-faint); }
-.msg .body ul ul, .msg .body ol ol { margin: 6px 0; }
-.msg .body code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: var(--surface-2); padding: 1px 6px; border-radius: 3px; color: var(--accent); }
-.msg .body pre { background: var(--surface); border: 1px solid var(--line); border-left: 2px solid var(--accent); padding: 14px 16px; margin: 12px 0; overflow-x: auto; }
-.msg .body pre code { background: none; padding: 0; color: var(--text); font-size: 12.5px; line-height: 1.55; }
+.msg .body ul ul, .msg .body ol ol { margin: 2px 0; }
+.msg .body code { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--surface-2); padding: 1px 5px; border-radius: 2px; color: var(--text); }
+.msg .body pre { background: var(--surface); border: 1px solid var(--line-soft); padding: 10px 12px; margin: 8px 0; overflow-x: auto; border-radius: 2px; }
+.msg .body pre code { background: none; padding: 0; color: var(--text); font-size: 12px; line-height: 1.5; }
 .msg .body strong { color: var(--text); font-weight: 600; }
-.msg .body em { color: var(--text-dim); font-style: italic; }
-.msg .body blockquote { border-left: 2px solid var(--line); padding-left: 14px; color: var(--text-dim); margin: 12px 0; font-style: italic; }
-.msg .body a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted currentColor; }
-.msg .body a:hover { filter: brightness(1.2); }
-.msg .body hr { border: none; border-top: 1px solid var(--line); margin: 20px 0; }
-.msg .body table { border-collapse: collapse; margin: 12px 0; width: 100%; }
-.msg .body th, .msg .body td { border-bottom: 1px solid var(--line-soft); padding: 8px 10px; text-align: left; font-size: 13px; }
-.msg .body th { color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+.msg .body em { color: var(--text); font-style: italic; }
+.msg .body blockquote { border-left: 2px solid var(--line); padding-left: 10px; color: var(--text-dim); margin: 8px 0; }
+.msg .body a { color: var(--accent); text-decoration: none; }
+.msg .body a:hover { text-decoration: underline; }
+.msg .body hr { border: none; border-top: 1px solid var(--line-soft); margin: 12px 0; }
+.msg .body table { border-collapse: collapse; margin: 8px 0; width: 100%; font-size: 12.5px; }
+.msg .body th, .msg .body td { border-bottom: 1px solid var(--line-soft); padding: 5px 8px; text-align: left; }
+.msg .body th { color: var(--text-dim); font-weight: 600; }
 
 .tool-log { background: var(--surface); border: 1px solid var(--line); margin: 10px 0; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
 .tool-log .tl-row { padding: 8px 14px; border-bottom: 1px solid var(--line-soft); display: flex; gap: 12px; align-items: center; }
@@ -377,11 +379,15 @@ async function loadRemoteState() {
     if (!res.ok) return;
     const remote = await res.json();
     if (!remote) return;
-    // Context fields: remote wins if newer
+    // Context fields: remote wins ONLY if remote is non-empty.
+    // Empty remote never overwrites local content — protects against data loss
+    // when a refresh happens before the debounced save has flushed.
     const fields = ['strategy', 'notionLinks', 'supp', 'dateFrom', 'dateTo'];
     let changed = false;
     for (const k of fields) {
-      if (remote[k] !== undefined && remote[k] !== state[k]) { state[k] = remote[k]; changed = true; }
+      const remoteVal = remote[k] || '';
+      const localVal = state[k] || '';
+      if (remoteVal && remoteVal !== localVal) { state[k] = remoteVal; changed = true; }
     }
     // Conversations: merge by id, remote updatedAt wins per conversation
     if (Array.isArray(remote.conversations) && remote.conversations.length) {
@@ -409,6 +415,26 @@ function saveRemoteStateDebounced() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(saveRemoteState, 900);
 }
+
+// Flush any pending save when the user leaves the page so refreshes never lose content.
+window.addEventListener('beforeunload', () => {
+  if (!saveTimer || !password) return;
+  clearTimeout(saveTimer);
+  const body = JSON.stringify({
+    password,
+    strategy: state.strategy,
+    notionLinks: state.notionLinks,
+    supp: state.supp,
+    dateFrom: state.dateFrom,
+    dateTo: state.dateTo,
+    conversations: state.conversations,
+    currentConversationId: state.currentConversationId,
+  });
+  // sendBeacon is the only reliable way to fire a POST during unload
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon('/api/strategy-state', new Blob([body], { type: 'application/json' }));
+  }
+});
 
 async function saveRemoteState() {
   if (syncing) return;
