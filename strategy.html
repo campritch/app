@@ -50,7 +50,23 @@ input, textarea, select { font-family: inherit; }
 /* ── Left panel ── */
 .panel { border-right: 1px solid var(--line); background: var(--surface); overflow-y: auto; padding: 20px 22px; }
 .panel .group { margin-bottom: 22px; }
-.panel .label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+.panel .label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.panel .label .field-meta { display: flex; gap: 8px; align-items: center; }
+.panel .field-status { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; color: var(--text-faint); text-transform: none; }
+.panel .field-status.ok { color: var(--good); }
+.panel .field-status.err { color: var(--bad); }
+.panel .field-status.saving { color: var(--warn); }
+.panel .field-edit-btn { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 2px 8px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; }
+.panel .field-edit-btn:hover { color: var(--text); border-color: var(--accent); }
+.panel .field-view { min-height: 36px; font-size: 12px; line-height: 1.5; color: var(--text); white-space: pre-wrap; word-wrap: break-word; background: var(--bg); border: 1px solid var(--line-soft); padding: 10px 12px; max-height: 220px; overflow-y: auto; }
+.panel .field-view.empty { color: var(--text-faint); font-style: italic; font-size: 11px; border-style: dashed; }
+.panel .field-editor[hidden], .panel .field-view[hidden] { display: none !important; }
+.panel .field-actions { display: flex; gap: 6px; margin-top: 8px; }
+.panel .btn-save-field { flex: 1; background: var(--accent); color: #fff; border: none; padding: 7px 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; cursor: pointer; border-radius: 2px; }
+.panel .btn-save-field:hover:not(:disabled) { filter: brightness(1.08); }
+.panel .btn-save-field:disabled { opacity: 0.5; cursor: not-allowed; }
+.panel .btn-cancel-field { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 7px 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; }
+.panel .btn-cancel-field:hover { color: var(--text); border-color: var(--text-dim); }
 .panel .label .hint { color: var(--text-faint); text-transform: none; letter-spacing: 0; font-size: 10px; }
 .panel textarea { width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--line); padding: 10px 12px; font-size: 12px; font-family: inherit; resize: vertical; }
 .panel textarea:focus { outline: none; border-color: var(--accent); }
@@ -193,14 +209,40 @@ input, textarea, select { font-family: inherit; }
 
   <div class="main">
     <aside class="panel">
-      <div class="group">
-        <div class="label">Current strategy</div>
-        <textarea class="strategy" id="in-strategy" placeholder="Paste or write your current business strategy. The agent will reflect on it every turn — flag contradictions with data, push back where reasoning is weak."></textarea>
+      <div class="group" data-group="strategy">
+        <div class="label">
+          Current strategy
+          <span class="field-meta">
+            <span class="field-status" data-status="strategy"></span>
+            <button class="field-edit-btn" data-edit="strategy">Edit</button>
+          </span>
+        </div>
+        <div class="field-view" data-view="strategy"></div>
+        <div class="field-editor" data-editor="strategy" hidden>
+          <textarea class="strategy" id="in-strategy" placeholder="Paste or write your current business strategy. Click Save when done."></textarea>
+          <div class="field-actions">
+            <button class="btn-save-field" data-save="strategy">Save</button>
+            <button class="btn-cancel-field" data-cancel="strategy">Cancel</button>
+          </div>
+        </div>
       </div>
 
-      <div class="group">
-        <div class="label">Notion links</div>
-        <textarea class="links" id="in-links" placeholder="Paste Notion URLs, one per line. Agent fetches on demand via notion_fetch_page."></textarea>
+      <div class="group" data-group="notionLinks">
+        <div class="label">
+          Notion links
+          <span class="field-meta">
+            <span class="field-status" data-status="notionLinks"></span>
+            <button class="field-edit-btn" data-edit="notionLinks">Edit</button>
+          </span>
+        </div>
+        <div class="field-view" data-view="notionLinks"></div>
+        <div class="field-editor" data-editor="notionLinks" hidden>
+          <textarea class="links" id="in-links" placeholder="Paste Notion URLs, one per line."></textarea>
+          <div class="field-actions">
+            <button class="btn-save-field" data-save="notionLinks">Save</button>
+            <button class="btn-cancel-field" data-cancel="notionLinks">Cancel</button>
+          </div>
+        </div>
       </div>
 
       <div class="group">
@@ -222,9 +264,22 @@ input, textarea, select { font-family: inherit; }
         </label>
       </div>
 
-      <div class="group">
-        <div class="label">Supplementary data <span class="hint">QB, Mercury, ad-hoc</span></div>
-        <textarea class="links" id="in-supp" placeholder="Paste tables, CSV snippets, Mixpanel exports, or anything else the agent should treat as business context. Label each section (e.g. '## Q1 QuickBooks spend')."></textarea>
+      <div class="group" data-group="supp">
+        <div class="label">
+          Supplementary data <span class="hint">QB, Mercury, ad-hoc</span>
+          <span class="field-meta">
+            <span class="field-status" data-status="supp"></span>
+            <button class="field-edit-btn" data-edit="supp">Edit</button>
+          </span>
+        </div>
+        <div class="field-view" data-view="supp"></div>
+        <div class="field-editor" data-editor="supp" hidden>
+          <textarea class="links" id="in-supp" placeholder="Paste tables, CSV snippets, Mixpanel exports, or anything else the agent should treat as business context."></textarea>
+          <div class="field-actions">
+            <button class="btn-save-field" data-save="supp">Save</button>
+            <button class="btn-cancel-field" data-cancel="supp">Cancel</button>
+          </div>
+        </div>
       </div>
     </aside>
 
@@ -485,6 +540,94 @@ function hydrateInputs() {
   document.getElementById('in-supp').value = state.supp || '';
   document.getElementById('in-from').value = state.dateFrom || '';
   document.getElementById('in-to').value = state.dateTo || '';
+  renderFieldView('strategy');
+  renderFieldView('notionLinks');
+  renderFieldView('supp');
+}
+
+// ── View/edit field system ─────────────────────────────────────────────
+const FIELD_TO_INPUT = { strategy: 'in-strategy', notionLinks: 'in-links', supp: 'in-supp' };
+
+function renderFieldView(name) {
+  const wrap = document.querySelector(`[data-view="${name}"]`);
+  if (!wrap) return;
+  const content = state[name] || '';
+  wrap.textContent = content || 'Nothing saved yet. Click Edit to add.';
+  wrap.classList.toggle('empty', !content);
+}
+
+function toggleFieldMode(name, mode) {
+  document.querySelector(`[data-view="${name}"]`).hidden = mode === 'edit';
+  document.querySelector(`[data-editor="${name}"]`).hidden = mode !== 'edit';
+  if (mode === 'edit') {
+    const ta = document.getElementById(FIELD_TO_INPUT[name]);
+    ta.focus();
+    ta.setSelectionRange(ta.value.length, ta.value.length);
+  }
+}
+
+function setFieldStatus(name, text, cls = '') {
+  const el = document.querySelector(`[data-status="${name}"]`);
+  if (!el) return;
+  el.className = 'field-status' + (cls ? ' ' + cls : '');
+  el.textContent = text;
+}
+
+async function saveField(name) {
+  const ta = document.getElementById(FIELD_TO_INPUT[name]);
+  const newVal = ta.value;
+  state[name] = newVal;
+  saveState();
+
+  const saveBtn = document.querySelector(`[data-save="${name}"]`);
+  saveBtn.disabled = true;
+  setFieldStatus(name, 'saving...', 'saving');
+
+  try {
+    await saveRemoteStateNow();
+    setFieldStatus(name, 'saved', 'ok');
+    renderFieldView(name);
+    toggleFieldMode(name, 'view');
+    setTimeout(() => setFieldStatus(name, ''), 2500);
+  } catch (err) {
+    setFieldStatus(name, 'failed: ' + err.message, 'err');
+  } finally {
+    saveBtn.disabled = false;
+  }
+}
+
+function cancelFieldEdit(name) {
+  const ta = document.getElementById(FIELD_TO_INPUT[name]);
+  ta.value = state[name] || '';
+  toggleFieldMode(name, 'view');
+  setFieldStatus(name, '');
+}
+
+// Synchronous (non-debounced) remote save used by explicit Save buttons.
+// Returns the promise so callers can await / catch.
+async function saveRemoteStateNow() {
+  clearTimeout(saveTimer);
+  const res = await fetch('/api/strategy-state', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      password,
+      strategy: state.strategy,
+      notionLinks: state.notionLinks,
+      supp: state.supp,
+      dateFrom: state.dateFrom,
+      dateTo: state.dateTo,
+      conversations: state.conversations,
+      currentConversationId: state.currentConversationId,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  setSyncStatus(`synced · last saved ${timeAgo(data.updated_at)}`);
+  return data;
 }
 
 // ── Hydrate UI from state ─────────────────────────────────────────────
@@ -497,12 +640,21 @@ function hydrate() {
 }
 
 function attachInputs() {
-  const onEdit = (k) => (e) => { state[k] = e.target.value; saveState(); saveRemoteStateDebounced(); };
-  document.getElementById('in-strategy').addEventListener('input', onEdit('strategy'));
-  document.getElementById('in-links').addEventListener('input', onEdit('notionLinks'));
-  document.getElementById('in-supp').addEventListener('input', onEdit('supp'));
-  document.getElementById('in-from').addEventListener('input', onEdit('dateFrom'));
-  document.getElementById('in-to').addEventListener('input', onEdit('dateTo'));
+  // Date range auto-saves (it's just two date pickers, low risk)
+  const onDateEdit = (k) => (e) => { state[k] = e.target.value; saveState(); saveRemoteStateDebounced(); };
+  document.getElementById('in-from').addEventListener('input', onDateEdit('dateFrom'));
+  document.getElementById('in-to').addEventListener('input', onDateEdit('dateTo'));
+
+  // Edit/Save/Cancel buttons for text fields
+  document.querySelectorAll('[data-edit]').forEach((btn) => {
+    btn.addEventListener('click', () => toggleFieldMode(btn.dataset.edit, 'edit'));
+  });
+  document.querySelectorAll('[data-save]').forEach((btn) => {
+    btn.addEventListener('click', () => saveField(btn.dataset.save));
+  });
+  document.querySelectorAll('[data-cancel]').forEach((btn) => {
+    btn.addEventListener('click', () => cancelFieldEdit(btn.dataset.cancel));
+  });
 
   const ta = document.getElementById('in-msg');
   ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 200) + 'px'; });
