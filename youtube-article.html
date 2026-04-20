@@ -80,21 +80,6 @@
     .url-input:focus { border-color: var(--dark); }
     .url-input::placeholder { color: var(--grey-1); }
 
-    /* API key row */
-    .key-row {
-      display: flex; align-items: center; gap: 10px;
-      margin-top: 12px; padding: 12px 14px;
-      background: var(--pill-bg); border-radius: 10px;
-    }
-    .key-row label { font-size: 11px; font-weight: 600; color: var(--grey-1); white-space: nowrap; }
-    .key-input {
-      flex: 1; height: 28px; padding: 0 10px;
-      border: 1px solid var(--border); border-radius: 7px;
-      font-family: inherit; font-size: 12px; outline: none;
-      background: var(--white);
-    }
-    .key-input:focus { border-color: var(--dark); }
-    .key-save { height: 28px; padding: 0 12px; background: var(--dark); color: #fff; border: none; border-radius: 7px; font-size: 11px; font-weight: 600; }
 
     /* ── Buttons ── */
     .btn-dark {
@@ -199,11 +184,6 @@
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M6.5 2l4.5 4.5-4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Generate
       </button>
-    </div>
-    <div class="key-row" id="key-row">
-      <label>Anthropic key</label>
-      <input id="key-input" class="key-input" type="password" placeholder="sk-ant-..." autocomplete="off" />
-      <button class="key-save" onclick="saveKey()">Save</button>
     </div>
     <div class="status" id="status" style="display:none;"></div>
   </div>
@@ -318,25 +298,17 @@ let currentThumbB64 = '';
 let thumbData = { line1: '', line2: '', complexity: 70, bg: 'dark', side: 'right', photo: 0 };
 let renderTimer = null;
 
-// ── API key ─────────────────────────────────────────────────────────────────
-function getKey() { return localStorage.getItem('anthropic_key') || ''; }
-function saveKey() {
-  const val = document.getElementById('key-input').value.trim();
-  if (val) { localStorage.setItem('anthropic_key', val); showKeyRow(false); }
+// ── API key — fetched once from /api/config, cached for session ──────────────
+let _cachedKey = '';
+async function getKey() {
+  if (_cachedKey) return _cachedKey;
+  try {
+    const res = await fetch(isLocal ? 'http://localhost:5055/config' : '/api/config');
+    const data = await res.json();
+    _cachedKey = data.key || '';
+  } catch {}
+  return _cachedKey;
 }
-function showKeyRow(show) {
-  document.getElementById('key-row').style.display = show ? 'flex' : 'none';
-}
-
-// Init key row
-(function() {
-  const k = getKey();
-  if (k) {
-    showKeyRow(false);
-  } else {
-    showKeyRow(true);
-  }
-})();
 
 // ── Photo chips ─────────────────────────────────────────────────────────────
 (function() {
@@ -359,8 +331,8 @@ async function generate() {
   const url = document.getElementById('url-input').value.trim();
   if (!url) return;
 
-  const key = getKey();
-  if (!key) { showKeyRow(true); showStatus('error', 'Add your Anthropic API key first.'); return; }
+  const key = await getKey();
+  if (!key) { showStatus('error', 'API key not found — check Vercel env vars.'); btn.disabled = false; return; }
 
   const btn = document.getElementById('generate-btn');
   btn.disabled = true;
@@ -562,11 +534,8 @@ function showStatus(type, text) {
 }
 
 document.getElementById('url-input').addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
-document.getElementById('key-input').addEventListener('keydown', e => { if (e.key === 'Enter') saveKey(); });
-
-// Pre-fill key input if saved
-const savedKey = getKey();
-if (savedKey) document.getElementById('key-input').value = savedKey;
+// Warm up the key cache on load so first generate is instant
+getKey();
 </script>
 </body>
 </html>
