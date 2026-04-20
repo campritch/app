@@ -54,6 +54,9 @@ async function runJQL(script, params) {
   return res.json();
 }
 
+// JQL: count distinct users per event in the window.
+// Pattern: groupByUser collapses to one row per (user, event); outer groupBy
+// counts rows per event which equals distinct user count.
 const TOTALS_JQL = `
 function main() {
   return Events({
@@ -61,7 +64,11 @@ function main() {
     to_date: params.to_date,
     event_selectors: params.events.map(function(e) { return { event: e }; })
   })
-  .groupBy(["name"], mixpanel.reducer.count_unique("distinct_id"));
+  .groupByUser(["name"], mixpanel.reducer.any())
+  .groupBy(
+    [function(row) { return row.key[1]; }],
+    mixpanel.reducer.count()
+  );
 }
 `.trim();
 
@@ -73,9 +80,13 @@ function main() {
     to_date: params.to_date,
     event_selectors: events.map(function(e) { return { event: e }; })
   })
-  .groupBy(
+  .groupByUser(
     ["name", function(e) { return e.properties.utm_source || "undefined"; }],
-    mixpanel.reducer.count_unique("distinct_id")
+    mixpanel.reducer.any()
+  )
+  .groupBy(
+    [function(row) { return row.key[1]; }, function(row) { return row.key[2]; }],
+    mixpanel.reducer.count()
   );
 }
 `.trim();
