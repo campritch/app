@@ -1,31 +1,52 @@
-// Burn adapter: reads data/burn.csv (user drops an export from the Google Sheet here).
-// Also supports user-uploaded CSV via /api/burn-upload -> /tmp fallback.
+// Burn adapter: reads the uploaded burn CSV from Vercel Blob (persistent across function instances),
+// with fallback to the committed data/burn.csv if no upload exists.
+// Uploads are written via /api/burn-upload (which writes to Blob).
 
 import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const committedPath = fileURLToPath(new URL('../../data/burn.csv', import.meta.url));
-const tmpPath = '/tmp/burn-upload.csv';
+const BLOB_KEY = 'strategy/burn.csv';
 
 export async function read() {
   let raw;
   let source;
-  if (existsSync(tmpPath)) {
-    raw = readFileSync(tmpPath, 'utf-8');
-    source = 'uploaded';
-  } else if (existsSync(committedPath)) {
+  let uploaded_at = null;
+
+  // 1. Try Blob (most recent upload)
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const { list } = await import('@vercel/blob');
+      const { blobs } = await list({ prefix: BLOB_KEY, limit: 1 });
+      const match = blobs.find((b) => b.pathname === BLOB_KEY);
+      if (match) {
+        const res = await fetch(match.url);
+        if (res.ok) {
+          raw = await res.text();
+          source = 'blob';
+          uploaded_at = match.uploadedAt || null;
+        }
+      }
+    } catch (err) {
+      console.warn('burn blob read failed', err);
+    }
+  }
+
+  // 2. Fallback to committed CSV
+  if (!raw && existsSync(committedPath)) {
     raw = readFileSync(committedPath, 'utf-8');
     source = 'committed';
-  } else {
-    return { error: 'No burn CSV found', hint: 'Upload via the UI or commit to data/burn.csv' };
   }
+
+  if (!raw) return { error: 'No burn CSV found', hint: 'Upload via the Burn CSV box in the left panel, or commit to data/burn.csv' };
 
   const rows = parseCsv(raw);
   return {
     source,
+    uploaded_at,
     columns: rows[0] || [],
     row_count: Math.max(0, rows.length - 1),
-    rows: rows.slice(1, 500), // cap at 500 data rows
+    rows: rows.slice(1, 500),
     truncated: rows.length - 1 > 500,
   };
 }

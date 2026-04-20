@@ -6,6 +6,7 @@ import * as notion from './notion.js';
 import * as hubspot from './hubspot.js';
 import * as bi from './bi.js';
 import * as burn from './burn.js';
+import * as web from './web.js';
 
 const TOOL_DEFS = [
   // ── Fathom ──────────────────────────────────────────────────────────────
@@ -117,6 +118,21 @@ const TOOL_DEFS = [
     description: 'Read the uploaded burn / finance CSV. Returns parsed rows. Use for monthly burn, runway, spend categories.',
     input_schema: { type: 'object', properties: {} },
     execute: burn.read,
+  },
+
+  // ── Web fetch ──────────────────────────────────────────────────────────
+  {
+    name: 'fetch_url',
+    description: 'Fetch any public URL (pitch deck, landing page, competitor site, blog post, etc.) and return the main text content. Use when Cam references a link he wants you to read, or when you need to verify something on a public website.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        url: { type: 'string', description: 'Full URL including https://' },
+        max_chars: { type: 'number', description: 'Max characters of content to return. Default 40000.' },
+      },
+      required: ['url'],
+    },
+    execute: web.fetchUrl,
   },
 ];
 

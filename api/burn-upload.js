@@ -1,8 +1,5 @@
-// Accepts a CSV upload and stashes it in /tmp so the burn tool can read it.
-// Password-gated. /tmp persists for the warm function instance only; that's fine —
-// if it evaporates, Cam just re-uploads on the next session.
-
-import { writeFileSync } from 'node:fs';
+// Accepts a CSV upload and writes it to Vercel Blob at strategy/burn.csv.
+// Password-gated. Previous version used /tmp which is per-instance; Blob is shared.
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -14,8 +11,10 @@ export default async function handler(req, res) {
   if (password !== process.env.STRATEGY_PASSWORD) {
     return res.status(401).json({ error: 'bad password' });
   }
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return res.status(500).json({ error: 'BLOB_READ_WRITE_TOKEN not configured' });
+  }
 
-  // Expect text/csv body sent raw from the browser (simple + no multipart deps).
   let body = req.body;
   if (body == null) {
     body = await new Promise((resolve, reject) => {
@@ -31,8 +30,14 @@ export default async function handler(req, res) {
   if (body.length > 2_000_000) return res.status(413).json({ error: 'CSV too large (>2MB)' });
 
   try {
-    writeFileSync('/tmp/burn-upload.csv', body, 'utf-8');
-    return res.status(200).json({ ok: true, bytes: body.length });
+    const { put } = await import('@vercel/blob');
+    const result = await put('strategy/burn.csv', body, {
+      access: 'public',
+      contentType: 'text/csv',
+      addRandomSuffix: false,
+      allowOverwrite: true,
+    });
+    return res.status(200).json({ ok: true, bytes: body.length, url: result.url });
   } catch (err) {
     return res.status(500).json({ error: String(err?.message || err) });
   }

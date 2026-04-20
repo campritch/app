@@ -78,11 +78,7 @@ export async function getTranscript({ meeting_id }) {
   if (cached) return { ...cached, source: 'cache' };
 
   const data = await fathomGet(`/recordings/${encodeURIComponent(meeting_id)}/transcript`);
-  const transcript = typeof data === 'string'
-    ? data
-    : Array.isArray(data.transcript)
-      ? data.transcript.map((t) => `${t.speaker?.name || t.speaker || ''}: ${t.text || ''}`).join('\n')
-      : (data.transcript || data.text || JSON.stringify(data));
+  const transcript = normalizeTranscript(data);
 
   const record = {
     id: meeting_id,
@@ -119,11 +115,7 @@ export async function ingestMeetings({ meeting_ids = [], titles = {} }) {
       if (existing?.transcript) { cached += 1; continue; }
 
       const resp = await fathomGet(`/recordings/${encodeURIComponent(id)}/transcript`);
-      const transcript = typeof resp === 'string'
-        ? resp
-        : Array.isArray(resp.transcript)
-          ? resp.transcript.map((t) => `${t.speaker?.name || t.speaker || ''}: ${t.text || ''}`).join('\n')
-          : (resp.transcript || resp.text || '');
+      const transcript = normalizeTranscript(resp);
 
       if (!transcript) { errors.push({ id, title: titles[id] || null, error: 'empty transcript' }); continue; }
 
@@ -179,18 +171,11 @@ export async function ingestRange({ from_date, to_date, cursor, max_pages = 5, e
       if (existing?.transcript) { cached += 1; continue; }
 
       try {
-        let transcript = m.transcript;
-        if (Array.isArray(transcript)) {
-          transcript = transcript.map((t) => `${t.speaker?.name || t.speaker || ''}: ${t.text || ''}`).join('\n');
-        }
+        let transcript = m.transcript != null ? normalizeTranscript(m) : '';
         // Fallback: pull separately if list response didn't bundle it
         if (!transcript) {
           const resp = await fathomGet(`/recordings/${encodeURIComponent(id)}/transcript`);
-          transcript = typeof resp === 'string'
-            ? resp
-            : Array.isArray(resp.transcript)
-              ? resp.transcript.map((t) => `${t.speaker?.name || t.speaker || ''}: ${t.text || ''}`).join('\n')
-              : (resp.transcript || resp.text || '');
+          transcript = normalizeTranscript(resp);
         }
         if (!transcript) { errors.push({ id, title, error: 'no transcript returned' }); continue; }
 
@@ -222,6 +207,30 @@ export async function ingestRange({ from_date, to_date, cursor, max_pages = 5, e
     next_cursor: cursor || null,
     done: !cursor,
   };
+}
+
+// Fathom transcript responses come in many shapes depending on endpoint:
+//   - plain string
+//   - { transcript: string }
+//   - { transcript: [{ speaker: {name|display_name|username|email}, text, timestamp }] }
+//   - { transcript: [{ speaker: "Cam", ... }] }
+// Normalize to a single "Speaker: line" per utterance.
+function normalizeTranscript(data) {
+  if (!data) return '';
+  if (typeof data === 'string') return data;
+  const payload = data.transcript != null ? data.transcript : data;
+  if (typeof payload === 'string') return payload;
+  if (Array.isArray(payload)) {
+    return payload.map((t) => {
+      const sp = t.speaker;
+      const name = typeof sp === 'string'
+        ? sp
+        : sp?.name || sp?.display_name || sp?.username || sp?.email || '';
+      const text = t.text || t.content || '';
+      return name ? `${name}: ${text}` : text;
+    }).filter(Boolean).join('\n');
+  }
+  return data.text || '';
 }
 
 // ── Vercel Blob helpers (graceful fallback if BLOB_READ_WRITE_TOKEN not set) ─
