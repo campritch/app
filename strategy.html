@@ -573,27 +573,24 @@ function setFieldStatus(name, text, cls = '') {
   el.textContent = text;
 }
 
-async function saveField(name) {
+function saveField(name) {
   const ta = document.getElementById(FIELD_TO_INPUT[name]);
-  const newVal = ta.value;
-  state[name] = newVal;
-  saveState();
+  state[name] = ta.value;
+  saveState();              // instant local persist
+  renderFieldView(name);    // instant UI refresh
+  toggleFieldMode(name, 'view');
+  setFieldStatus(name, 'saved locally · syncing...', 'saving');
 
-  const saveBtn = document.querySelector(`[data-save="${name}"]`);
-  saveBtn.disabled = true;
-  setFieldStatus(name, 'saving...', 'saving');
-
-  try {
-    await saveRemoteStateNow();
-    setFieldStatus(name, 'saved', 'ok');
-    renderFieldView(name);
-    toggleFieldMode(name, 'view');
-    setTimeout(() => setFieldStatus(name, ''), 2500);
-  } catch (err) {
-    setFieldStatus(name, 'failed: ' + err.message, 'err');
-  } finally {
-    saveBtn.disabled = false;
-  }
+  // Server sync runs in the background. Errors surface in the status line
+  // but never block the UI. Local remains the source of truth.
+  saveRemoteStateNow()
+    .then(() => {
+      setFieldStatus(name, 'saved', 'ok');
+      setTimeout(() => setFieldStatus(name, ''), 2500);
+    })
+    .catch((err) => {
+      setFieldStatus(name, 'remote sync failed: ' + err.message, 'err');
+    });
 }
 
 function cancelFieldEdit(name) {
