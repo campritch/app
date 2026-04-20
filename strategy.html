@@ -39,7 +39,8 @@ input, textarea, select { font-family: inherit; }
 .topbar { display: flex; align-items: center; justify-content: space-between; padding: 0 24px; border-bottom: 1px solid var(--line); background: var(--surface); }
 .topbar h1 { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
 .topbar h1 .a { color: var(--accent); font-style: italic; font-weight: 400; }
-.topbar .actions { display: flex; gap: 8px; }
+.topbar .actions { display: flex; gap: 8px; align-items: center; }
+.topbar .sync-status { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; margin-right: 8px; }
 .topbar .actions button { background: transparent; color: var(--text-dim); border: 1px solid var(--line); padding: 6px 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
 .topbar .actions button:hover { color: var(--text); border-color: var(--text-dim); }
 
@@ -148,6 +149,7 @@ input, textarea, select { font-family: inherit; }
   <div class="topbar">
     <h1>Strategy <span class="a">Agent</span></h1>
     <div class="actions">
+      <span id="sync-status" class="sync-status"></span>
       <button id="btn-export">Export Chat</button>
       <button id="btn-new">New Conversation</button>
     </div>
@@ -275,23 +277,101 @@ async function verifyPassword(pw) {
   hydrate();
 })();
 
-// ── Hydrate UI from state ─────────────────────────────────────────────
-function hydrate() {
+// ── Server-side state sync (Blob) ─────────────────────────────────────
+// Left-panel inputs persist to Vercel Blob so they survive across devices.
+// On app open: fetch server state, merge into localStorage, re-hydrate.
+// On edit: debounced POST.
+let saveTimer = null;
+let syncing = false;
+
+async function loadRemoteState() {
+  try {
+    const res = await fetch('/api/strategy-state', { method: 'GET', headers: { 'X-Strategy-Password': password } });
+    if (!res.ok) return;
+    const remote = await res.json();
+    if (!remote) return;
+    // Remote wins for context fields; chat history stays local
+    const fields = ['strategy', 'notionLinks', 'supp', 'dateFrom', 'dateTo'];
+    let changed = false;
+    for (const k of fields) {
+      if (remote[k] !== undefined && remote[k] !== state[k]) { state[k] = remote[k]; changed = true; }
+    }
+    if (changed) { saveState(); hydrateInputs(); }
+    if (remote.updated_at) setSyncStatus(`synced · last saved ${timeAgo(remote.updated_at)}`);
+  } catch (err) {
+    console.warn('loadRemoteState failed', err);
+  }
+}
+
+function saveRemoteStateDebounced() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveRemoteState, 900);
+}
+
+async function saveRemoteState() {
+  if (syncing) return;
+  syncing = true;
+  setSyncStatus('saving...');
+  try {
+    const res = await fetch('/api/strategy-state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        password,
+        strategy: state.strategy,
+        notionLinks: state.notionLinks,
+        supp: state.supp,
+        dateFrom: state.dateFrom,
+        dateTo: state.dateTo,
+      }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    setSyncStatus(`synced · last saved ${timeAgo(data.updated_at)}`);
+  } catch (err) {
+    setSyncStatus(`save failed: ${err.message}`);
+  } finally {
+    syncing = false;
+  }
+}
+
+function setSyncStatus(msg) {
+  const el = document.getElementById('sync-status');
+  if (el) el.textContent = msg;
+}
+
+function timeAgo(iso) {
+  if (!iso) return 'never';
+  const s = Math.round((Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return `${s}s ago`;
+  if (s < 3600) return `${Math.round(s / 60)}m ago`;
+  if (s < 86400) return `${Math.round(s / 3600)}h ago`;
+  return `${Math.round(s / 86400)}d ago`;
+}
+
+function hydrateInputs() {
   document.getElementById('in-strategy').value = state.strategy || '';
   document.getElementById('in-links').value = state.notionLinks || '';
   document.getElementById('in-supp').value = state.supp || '';
   document.getElementById('in-from').value = state.dateFrom || '';
   document.getElementById('in-to').value = state.dateTo || '';
+}
+
+// ── Hydrate UI from state ─────────────────────────────────────────────
+function hydrate() {
+  hydrateInputs();
   renderMessages();
   attachInputs();
+  loadRemoteState();
 }
 
 function attachInputs() {
-  document.getElementById('in-strategy').addEventListener('input', (e) => { state.strategy = e.target.value; saveState(); });
-  document.getElementById('in-links').addEventListener('input', (e) => { state.notionLinks = e.target.value; saveState(); });
-  document.getElementById('in-supp').addEventListener('input', (e) => { state.supp = e.target.value; saveState(); });
-  document.getElementById('in-from').addEventListener('input', (e) => { state.dateFrom = e.target.value; saveState(); });
-  document.getElementById('in-to').addEventListener('input', (e) => { state.dateTo = e.target.value; saveState(); });
+  const onEdit = (k) => (e) => { state[k] = e.target.value; saveState(); saveRemoteStateDebounced(); };
+  document.getElementById('in-strategy').addEventListener('input', onEdit('strategy'));
+  document.getElementById('in-links').addEventListener('input', onEdit('notionLinks'));
+  document.getElementById('in-supp').addEventListener('input', onEdit('supp'));
+  document.getElementById('in-from').addEventListener('input', onEdit('dateFrom'));
+  document.getElementById('in-to').addEventListener('input', onEdit('dateTo'));
 
   const ta = document.getElementById('in-msg');
   ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 200) + 'px'; });
