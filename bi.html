@@ -15,10 +15,17 @@
   --text: #e8e6e1; --text-dim: #8a857c; --text-faint: #5c5952;
   --accent: #e05a4e; --accent-soft: #3a1a17;
   --good: #7fb069; --warn: #d4a857; --bad: #c94a3a;
+  --chat-width: 440px;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: var(--bg); color: var(--text); font-family: 'Inter Tight', sans-serif; font-size: 13px; line-height: 1.5; }
-.wrap { max-width: 1120px; margin: 0 auto; padding: 28px 36px 120px; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter Tight', sans-serif; font-size: 13px; line-height: 1.5; overflow: hidden; }
+
+.layout { display: flex; height: 100vh; }
+.dashboard-col { flex: 1; overflow-y: auto; }
+.chat-col { width: var(--chat-width); min-width: var(--chat-width); border-left: 1px solid var(--line); background: var(--surface); display: flex; flex-direction: column; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 28px 36px 80px; }
+
 h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 500; letter-spacing: -0.02em; }
 
 .topbar { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 20px; border-bottom: 1px solid var(--line); margin-bottom: 24px; gap: 20px; flex-wrap: wrap; }
@@ -35,6 +42,8 @@ h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 500; letter-spacing: -
 .btn.primary:hover { background: #c54b40; }
 .btn.ghost { background: transparent; }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn .spin { display: inline-block; width: 10px; height: 10px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .range-pills { display: inline-flex; background: var(--surface-2); border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
 .range-pills .btn { background: transparent; border: none; border-right: 1px solid var(--line); border-radius: 0; padding: 8px 12px; }
@@ -121,16 +130,12 @@ h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 500; letter-spacing: -
 .state-banner .msg { color: var(--text-dim); font-size: 12px; font-family: 'JetBrains Mono', monospace; }
 .state-banner.error .title { color: var(--bad); }
 
-/* Chat fab + panel */
-.chat-fab { position: fixed; bottom: 24px; right: 24px; background: var(--accent); color: #fff; border: none; border-radius: 50%; width: 56px; height: 56px; font-size: 22px; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,0.4); z-index: 90; transition: transform 0.15s; }
-.chat-fab:hover { transform: scale(1.05); }
-.chat-panel { position: fixed; top: 0; right: 0; width: 440px; max-width: 100vw; height: 100vh; background: var(--surface); border-left: 1px solid var(--line); z-index: 95; display: none; flex-direction: column; box-shadow: -8px 0 30px rgba(0,0,0,0.4); }
-.chat-panel.open { display: flex; }
+/* Persistent chat column */
 .chat-hdr { padding: 18px 20px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
 .chat-hdr h3 { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; }
 .chat-hdr .sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px; }
-.chat-hdr .x { background: transparent; border: 0; color: var(--text-dim); cursor: pointer; font-size: 22px; padding: 4px 8px; }
-.chat-hdr .x:hover { color: var(--text); }
+.chat-hdr .reset { background: transparent; border: 1px solid var(--line); color: var(--text-dim); cursor: pointer; font-size: 10px; padding: 4px 10px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; border-radius: 2px; }
+.chat-hdr .reset:hover { color: var(--text); border-color: var(--accent); }
 .chat-body { flex: 1; overflow-y: auto; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
 .chat-msg { display: flex; flex-direction: column; gap: 4px; }
 .chat-msg .who { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-faint); }
@@ -150,29 +155,64 @@ h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 500; letter-spacing: -
 .chat-empty .sug-btn { display: block; margin-top: 6px; background: var(--surface-2); border: 1px solid var(--line); color: var(--text); padding: 8px 12px; font-size: 11px; width: 100%; text-align: left; cursor: pointer; font-family: 'Inter Tight', sans-serif; border-radius: 2px; }
 .chat-empty .sug-btn:hover { border-color: var(--accent); }
 
+.toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--surface-2); border: 1px solid var(--line); padding: 10px 18px; border-radius: 2px; font-family: 'JetBrains Mono', monospace; font-size: 11px; z-index: 200; box-shadow: 0 6px 20px rgba(0,0,0,0.3); display: none; }
+.toast.show { display: block; }
+.toast.err { border-color: var(--bad); color: var(--bad); }
+
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
 
+/* Mobile: stack, chat collapses to bottom drawer toggled by FAB */
 @media (max-width: 900px) {
-  .wrap { padding: 20px 16px; }
+  body { overflow: auto; }
+  .layout { flex-direction: column; height: auto; min-height: 100vh; }
+  .dashboard-col { overflow: visible; }
+  .chat-col { width: 100%; min-width: 0; border-left: none; border-top: 1px solid var(--line); position: fixed; bottom: 0; left: 0; right: 0; height: 70vh; transform: translateY(100%); transition: transform 0.3s; z-index: 95; }
+  .chat-col.open { transform: translateY(0); }
+  .chat-fab-mobile { display: flex; position: fixed; bottom: 20px; right: 20px; background: var(--accent); color: #fff; border: none; border-radius: 50%; width: 52px; height: 52px; font-size: 20px; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,0.4); z-index: 90; align-items: center; justify-content: center; }
+  .wrap { padding: 20px 16px 120px; }
   .stats { grid-template-columns: 1fr 1fr; }
   .launch-compare { grid-template-columns: 1fr; }
   .funnel-row { grid-template-columns: 1fr; gap: 4px; }
   .topbar { flex-direction: column; align-items: flex-start; }
-  .chat-panel { width: 100vw; }
 }
+.chat-fab-mobile { display: none; }
 </style>
 </head>
 <body>
 
-<div class="wrap" id="app">
-  <div class="state-banner" id="loading">
-    <div class="title">Loading GTM data…</div>
-    <div class="msg">fetching /api/gtm-data</div>
+<div class="layout">
+  <div class="dashboard-col">
+    <div class="wrap" id="app">
+      <div class="state-banner" id="loading">
+        <div class="title">Loading GTM data…</div>
+        <div class="msg">fetching /api/gtm-data</div>
+      </div>
+    </div>
   </div>
+
+  <aside class="chat-col" id="chatPanel">
+    <div class="chat-hdr">
+      <div>
+        <h3>Strategy chat</h3>
+        <div class="sub">Grounded in live dashboard</div>
+      </div>
+      <button class="reset" id="chatReset" title="Clear conversation">Reset</button>
+    </div>
+    <div class="chat-body" id="chatBody"></div>
+    <div class="chat-footer">
+      <div class="chat-input-wrap">
+        <textarea class="chat-input" id="chatInput" rows="1" placeholder="What should I pause? Why did generates drop?"></textarea>
+        <button class="chat-send" id="chatSend">Send</button>
+      </div>
+    </div>
+  </aside>
 </div>
+
+<button class="chat-fab-mobile" id="chatFab" title="Open chat">💬</button>
+<div class="toast" id="toast"></div>
 
 <template id="tpl-dashboard">
 <div class="topbar">
@@ -188,6 +228,7 @@ h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 500; letter-spacing: -
       <button class="btn" data-range="30">30d</button>
       <button class="btn" data-range="90">90d</button>
     </div>
+    <button class="btn primary" id="generateBtn">Generate</button>
   </div>
 </div>
 
@@ -283,6 +324,26 @@ h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 500; letter-spacing: -
   <div data-slot="channel-insights"></div>
 </section>
 
+<section class="section" data-slot="seo-section" style="display: none;">
+  <div class="section-hdr">
+    <h2>Organic search · Ahrefs</h2>
+    <span class="tag" data-slot="seo-tag"></span>
+  </div>
+  <div class="channel-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Keyword</th>
+          <th style="text-align:right">Volume</th>
+          <th style="text-align:right">Position</th>
+          <th style="text-align:right">Est. traffic</th>
+        </tr>
+      </thead>
+      <tbody data-slot="seo-rows"></tbody>
+    </table>
+  </div>
+</section>
+
 <section class="section">
   <div class="section-hdr">
     <h2>Known limitations</h2>
@@ -292,8 +353,7 @@ h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 500; letter-spacing: -
     <p style="line-height: 1.7;">
       <strong>Sample size:</strong> generate counts per range are in the double digits at most. Directional signal, not statistical proof.<br><br>
       <strong>Meta attribution:</strong> Meta strips UTMs into numeric ad-set IDs. Set URL parameters in Ads Manager to <code>utm_source=meta&amp;utm_campaign={{campaign.name}}&amp;utm_content={{ad.name}}</code> to split Meta into named ad sets.<br><br>
-      <strong>Direct is mixed:</strong> "direct" / "undefined" includes typed URLs, Slack/iMessage clicks, untagged emails, and true word of mouth. Tag your own outbound links to shrink this bucket.<br><br>
-      <strong>Custom date range:</strong> disabled in v1 — requires live Mixpanel refresh endpoint. Coming in v1.1.
+      <strong>Direct is mixed:</strong> "direct" / "undefined" includes typed URLs, Slack/iMessage clicks, untagged emails, and true word of mouth.
     </p>
   </div>
 </section>
@@ -301,64 +361,75 @@ h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 500; letter-spacing: -
 <div class="last-updated" data-slot="last-updated"></div>
 </template>
 
-<button class="chat-fab" id="chatFab" title="Ask about the dashboard">💬</button>
-
-<aside class="chat-panel" id="chatPanel" aria-hidden="true">
-  <div class="chat-hdr">
-    <div>
-      <h3>Ask the dashboard</h3>
-      <div class="sub">Grounded in current data</div>
-    </div>
-    <button class="x" id="chatClose" title="Close">×</button>
-  </div>
-  <div class="chat-body" id="chatBody"></div>
-  <div class="chat-footer">
-    <div class="chat-input-wrap">
-      <textarea class="chat-input" id="chatInput" rows="1" placeholder="What should I pause? Why did generates drop?"></textarea>
-      <button class="chat-send" id="chatSend">Send</button>
-    </div>
-  </div>
-</aside>
-
 <script>
-/* ---------- State ---------- */
 let DATA = null;
+let AHREFS = null;
 let currentRange = 14;
 let apiKey = null;
-const chatHistory = [];
+let chatHistory = [];
 
-/* ---------- Utils ---------- */
 const fmtInt = (n) => (n ?? 0).toLocaleString('en-US');
 const rateClass = (rate, warnBelow, goodAbove) => rate < warnBelow ? 'bad' : rate < goodAbove ? 'warn' : 'good';
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escInline(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/`([^`]+)`/g, '<code>$1</code>'); }
+function setText(slot, text) { const el = document.querySelector(`[data-slot="${slot}"]`); if (el) el.textContent = text; }
+function setHTML(slot, html) { const el = document.querySelector(`[data-slot="${slot}"]`); if (el) el.innerHTML = html; }
+function toast(msg, isErr) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.toggle('err', !!isErr); t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3500); }
 
-/* ---------- Data loading ---------- */
-async function loadData() {
+/* ---------- Initial data load ---------- */
+async function loadInitial() {
   try {
     let r = await fetch('/api/gtm-data', { cache: 'no-store' });
-    if (r.status === 404) {
-      r = await fetch('/data/gtm-latest.json', { cache: 'no-store' });
-      if (!r.ok) return renderError('No GTM data cached yet. Run a refresh first.', 404);
-    } else if (!r.ok) {
-      const fallback = await fetch('/data/gtm-latest.json', { cache: 'no-store' });
-      if (fallback.ok) r = fallback;
-      else return renderError(`HTTP ${r.status}`, r.status);
-    }
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     DATA = await r.json();
+    AHREFS = DATA.ahrefs || null;
     renderAll();
   } catch (e) {
     try {
-      const fallback = await fetch('/data/gtm-latest.json', { cache: 'no-store' });
-      if (fallback.ok) { DATA = await fallback.json(); renderAll(); return; }
+      const fb = await fetch('/data/gtm-latest.json', { cache: 'no-store' });
+      if (fb.ok) { DATA = await fb.json(); renderAll(); return; }
     } catch (_) {}
-    renderError(String(e), 0);
+    const app = document.getElementById('app');
+    app.innerHTML = `<div class="state-banner error"><div class="title">Dashboard unavailable</div><div class="msg">${esc(String(e))}</div></div>`;
   }
 }
 
-function renderError(msg, code) {
-  const app = document.getElementById('app');
-  app.innerHTML = `<div class="state-banner error"><div class="title">Dashboard unavailable</div><div class="msg">${esc(msg)}</div></div>`;
+/* ---------- Live refresh ---------- */
+async function runGenerate() {
+  const btn = document.getElementById('generateBtn');
+  if (!btn) return;
+  btn.disabled = true;
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<span class="spin"></span> Generating';
+  try {
+    const r = await fetch(`/api/gtm-data?live=1&range=${currentRange}`, { cache: 'no-store' });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      throw new Error(err.detail || err.error || `HTTP ${r.status}`);
+    }
+    const fresh = await r.json();
+    mergeFresh(fresh);
+    renderForRange();
+    renderSEO();
+    toast(`Refreshed ${currentRange}d from Mixpanel`);
+  } catch (e) {
+    toast(`Refresh failed: ${e.message}`, true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = orig;
+  }
+}
+
+function mergeFresh(fresh) {
+  // fresh = { range, totals, channels, launch_windows, generated_at, source, primary_metric, ahrefs? }
+  if (!DATA) DATA = { ranges: {} };
+  DATA.ranges = DATA.ranges || {};
+  DATA.ranges[String(fresh.range)] = { totals: fresh.totals, channels: fresh.channels };
+  DATA.launch_windows = fresh.launch_windows;
+  DATA.generated_at = fresh.generated_at;
+  DATA.source = fresh.source;
+  DATA.primary_metric = fresh.primary_metric;
+  if (fresh.ahrefs) AHREFS = fresh.ahrefs;
 }
 
 /* ---------- Render ---------- */
@@ -367,7 +438,9 @@ function renderAll() {
   app.innerHTML = '';
   app.appendChild(document.getElementById('tpl-dashboard').content.cloneNode(true));
   wireRangePills();
+  document.getElementById('generateBtn').addEventListener('click', runGenerate);
   renderForRange();
+  renderSEO();
 }
 
 function wireRangePills() {
@@ -384,7 +457,14 @@ function wireRangePills() {
 
 function renderForRange() {
   const range = DATA.ranges[String(currentRange)];
-  if (!range) return;
+  if (!range) {
+    const app = document.getElementById('app');
+    const note = document.createElement('div');
+    note.className = 'state-banner';
+    note.innerHTML = `<div class="title">No data for ${currentRange}d yet</div><div class="msg">click Generate to pull fresh from Mixpanel</div>`;
+    document.querySelector('[data-slot="verdict-headline"]').textContent = `No ${currentRange}d data — click Generate`;
+    return;
+  }
   renderVerdict(range);
   renderLaunchCompare();
   renderStats(range);
@@ -394,22 +474,16 @@ function renderForRange() {
   setText('last-updated', `Data pulled ${ts} · ${currentRange}-day window · primary: ${DATA.primary_metric || 'landing_demographics_generate_click'} · source: ${DATA.source || 'mixpanel'}`);
 }
 
-function setText(slot, text) {
-  const el = document.querySelector(`[data-slot="${slot}"]`);
-  if (el) el.textContent = text;
-}
-function setHTML(slot, html) {
-  const el = document.querySelector(`[data-slot="${slot}"]`);
-  if (el) el.innerHTML = html;
-}
-
-/* ---------- Verdict ---------- */
 function renderVerdict(range) {
   const t = range.totals;
   const genRate = t.visitors > 0 ? (t.generates / t.visitors * 100) : 0;
-
-  const pre = DATA.launch_windows.pre;
-  const post = DATA.launch_windows.post;
+  const pre = DATA.launch_windows?.pre;
+  const post = DATA.launch_windows?.post;
+  if (!pre || !post) {
+    setText('verdict-label', 'Loading');
+    setText('verdict-headline', 'Dashboard loading…');
+    return;
+  }
   const preRate = pre.visitors > 0 ? (pre.generates / pre.visitors * 100) : 0;
   const postRate = post.visitors > 0 ? (post.generates / post.visitors * 100) : 0;
   const trafficMult = pre.visitors > 0 ? (post.visitors / pre.visitors).toFixed(1) : '—';
@@ -422,39 +496,34 @@ function renderVerdict(range) {
     const channels = range.channels || [];
     const culprit = channels.find(c => c.visits > t.visitors * 0.3 && (c.generates / Math.max(1, c.visits)) < 0.01);
     call = culprit
-      ? `<strong>The call:</strong> pause <code>${esc(culprit.name)}</code> (${fmtInt(culprit.visits)} visits → ${culprit.generates} generates, ${(culprit.generates / Math.max(1, culprit.visits) * 100).toFixed(2)}% rate) for 72 hours. If generate rate rebounds toward ${preRate.toFixed(1)}%, dilution is confirmed — then rebuild targeting or redirect the budget.`
-      : `<strong>The call:</strong> identify the dominant low-rate channel in the table below, pause it for 72h, watch the rate rebound.`;
+      ? `<strong>The call:</strong> pause <code>${esc(culprit.name)}</code> (${fmtInt(culprit.visits)} visits → ${culprit.generates} generates, ${(culprit.generates / Math.max(1, culprit.visits) * 100).toFixed(2)}% rate) for 72 hours. If generate rate rebounds toward ${preRate.toFixed(1)}%, dilution is confirmed.`
+      : `<strong>The call:</strong> identify the dominant low-rate channel below, pause it for 72h, watch the rate rebound.`;
   } else if (postRate > preRate) {
     label = 'The honest read · improvement';
     headline = 'Post-launch is converting better than pre-launch.';
-    call = `<strong>The call:</strong> identify what shipped and protect it. Consider doubling down on the channel mix that is now converting.`;
+    call = `<strong>The call:</strong> identify what shipped and protect it.`;
   } else {
     label = 'The honest read · stable';
     headline = 'No clear dilution, no clear uplift.';
     call = `<strong>The call:</strong> watch another 7 days before making big channel changes.`;
   }
-
   setText('verdict-label', label);
   setText('verdict-headline', headline);
-  setHTML('verdict-windows', `Pre-launch: <strong>${fmtInt(pre.visitors)} visitors, ${fmtInt(pre.generates)} generates (${preRate.toFixed(2)}%)</strong>. Post-launch: <strong>${fmtInt(post.visitors)} visitors, ${fmtInt(post.generates)} generates (${postRate.toFixed(2)}%)</strong>. Traffic went ${trafficMult}×. Generates ${absDelta >= 0 ? 'held or rose' : 'fell'} absolutely.`);
+  setHTML('verdict-windows', `Pre-launch: <strong>${fmtInt(pre.visitors)} visitors, ${fmtInt(pre.generates)} generates (${preRate.toFixed(2)}%)</strong>. Post-launch: <strong>${fmtInt(post.visitors)} visitors, ${fmtInt(post.generates)} generates (${postRate.toFixed(2)}%)</strong>. Traffic ${trafficMult}×. Generates ${absDelta >= 0 ? 'held or rose' : 'fell'} absolutely.`);
   setHTML('verdict-core', `In the last ${currentRange} days your blended generate rate is <strong>${genRate.toFixed(2)}%</strong> of ${fmtInt(t.visitors)} visitors.`);
   setHTML('verdict-call', call);
 }
 
-/* ---------- Launch compare ---------- */
 function renderLaunchCompare() {
-  const pre = DATA.launch_windows.pre;
-  const post = DATA.launch_windows.post;
+  const pre = DATA.launch_windows?.pre;
+  const post = DATA.launch_windows?.post;
+  if (!pre || !post) return;
   setText('pre-range', `${pre.from} → ${pre.to}`);
   setText('post-range', `${post.from} → ${post.to}`);
-
-  const cells = [
-    ['pre-v', pre.visitors], ['pre-g', pre.generates], ['pre-s', pre.signups], ['pre-r', pre.requests],
-    ['post-v', post.visitors], ['post-g', post.generates], ['post-s', post.signups], ['post-r', post.requests]
-  ];
-  cells.forEach(([slot, val]) => setText(slot, fmtInt(val)));
-
-  const rate = (num, den) => den > 0 ? (num / den * 100) : 0;
+  const cells = [['pre-v', pre.visitors], ['pre-g', pre.generates], ['pre-s', pre.signups], ['pre-r', pre.requests],
+                 ['post-v', post.visitors], ['post-g', post.generates], ['post-s', post.signups], ['post-r', post.requests]];
+  cells.forEach(([s, v]) => setText(s, fmtInt(v)));
+  const rate = (n, d) => d > 0 ? (n / d * 100) : 0;
   const setRate = (slot, val, warn, good) => {
     const el = document.querySelector(`[data-slot="${slot}"]`);
     if (!el) return;
@@ -474,25 +543,16 @@ function renderLaunchCompare() {
   const totalGens = pre.generates + post.generates;
   const trafficMult = pre.visitors > 0 ? (post.visitors / pre.visitors) : 0;
   const absDelta = post.generates - pre.generates;
-
   let html;
-  if (totalGens < 10) {
-    html = `<div class="badge info">Too small to conclude</div><p><strong>Sample too small.</strong> Only ${totalGens} generates across both windows. Treat as directional.</p>`;
-  } else if (trafficMult >= 2 && relChange < -30 && absDelta < 0) {
-    html = `<div class="badge urgent">Real regression on primary metric</div><p><strong>Generates fell from ${pre.generates} to ${post.generates} while traffic went up ${trafficMult.toFixed(1)}×.</strong> Rate dropped ${Math.abs(relChange).toFixed(0)}% relative. Absolute decline rules out "the funnel just shifted channel mix."</p><p><strong>48-hour diagnostic:</strong> pause the dominant paid channel, A/B compare the generate flow if possible, watch 5 session replays of low-quality traffic vs 5 from high-quality.</p>`;
-  } else if (trafficMult >= 2 && relChange < -30) {
-    html = `<div class="badge urgent">Dilution from traffic surge</div><p>Generate rate dropped ${Math.abs(relChange).toFixed(0)}% while traffic went up ${trafficMult.toFixed(1)}×. Absolute generates still positive (${pre.generates} → ${post.generates}), but efficiency collapsed. Likely paid-traffic dilution.</p>`;
-  } else if (Math.abs(relChange) < 20) {
-    html = `<div class="badge info">Essentially flat</div><p>Generate rate ${preRate.toFixed(2)}% → ${postRate.toFixed(2)}%. Launch did not meaningfully move the needle on the primary metric.</p>`;
-  } else if (relChange > 20) {
-    html = `<div class="badge positive">Improvement</div><p>Generate rate ${preRate.toFixed(2)}% → ${postRate.toFixed(2)}%, a ${relChange.toFixed(0)}% lift. Identify what drove it and protect it.</p>`;
-  } else {
-    html = `<div class="badge urgent">Regression</div><p>Generate rate ${preRate.toFixed(2)}% → ${postRate.toFixed(2)}%, a ${Math.abs(relChange).toFixed(0)}% drop with ${totalGens} total generates. Check session replays and console errors since deploy.</p>`;
-  }
+  if (totalGens < 10) html = `<div class="badge info">Too small to conclude</div><p>Only ${totalGens} generates across both windows.</p>`;
+  else if (trafficMult >= 2 && relChange < -30 && absDelta < 0) html = `<div class="badge urgent">Real regression on primary metric</div><p><strong>Generates fell from ${pre.generates} to ${post.generates} while traffic went up ${trafficMult.toFixed(1)}×.</strong> Rate dropped ${Math.abs(relChange).toFixed(0)}% relative.</p><p><strong>48h diagnostic:</strong> pause the dominant paid channel, watch 5 session replays from low-quality traffic vs 5 from high-quality.</p>`;
+  else if (trafficMult >= 2 && relChange < -30) html = `<div class="badge urgent">Dilution from traffic surge</div><p>Generate rate dropped ${Math.abs(relChange).toFixed(0)}% while traffic went up ${trafficMult.toFixed(1)}×.</p>`;
+  else if (Math.abs(relChange) < 20) html = `<div class="badge info">Essentially flat</div><p>${preRate.toFixed(2)}% → ${postRate.toFixed(2)}%.</p>`;
+  else if (relChange > 20) html = `<div class="badge positive">Improvement</div><p>${preRate.toFixed(2)}% → ${postRate.toFixed(2)}%, ${relChange.toFixed(0)}% lift.</p>`;
+  else html = `<div class="badge urgent">Regression</div><p>${preRate.toFixed(2)}% → ${postRate.toFixed(2)}%, ${Math.abs(relChange).toFixed(0)}% drop.</p>`;
   setHTML('launch-insight', html);
 }
 
-/* ---------- Stats ---------- */
 function renderStats(range) {
   const t = range.totals;
   const genRate = t.visitors > 0 ? (t.generates / t.visitors * 100) : 0;
@@ -500,26 +560,21 @@ function renderStats(range) {
   const ge = document.querySelector('[data-slot="s-generates-d"]');
   ge.textContent = genRate.toFixed(2) + '% of visitors · last ' + currentRange + 'd';
   ge.className = 'delta ' + rateClass(genRate, 2, 4);
-
   setText('s-visitors', fmtInt(t.visitors));
   setText('s-visitors-d', `Unique · last ${currentRange}d`);
-
   setText('s-signups', fmtInt(t.signups));
   const sRate = t.generates > 0 ? (t.signups / t.generates * 100) : 0;
   const se = document.querySelector('[data-slot="s-signups-d"]');
   se.textContent = sRate.toFixed(0) + '% of generates';
   se.className = 'delta ' + rateClass(sRate, 30, 60);
-
   setText('s-requests', fmtInt(t.requests));
   const rRate = t.generates > 0 ? (t.requests / t.generates * 100) : 0;
   setText('s-requests-d', `${rRate.toFixed(0)}% of generates`);
-
   setText('s-calls', fmtInt(t.calls));
   const cRate = t.generates > 0 ? (t.calls / t.generates * 100) : 0;
   setText('s-calls-d', `${cRate.toFixed(0)}% of generates`);
 }
 
-/* ---------- Funnel ---------- */
 function renderFunnel(range) {
   const t = range.totals;
   setText('funnel-tag', `Last ${currentRange} days · unique users`);
@@ -538,16 +593,10 @@ function renderFunnel(range) {
     if (idx === 0) { convText = '100%'; convCls = ''; }
     else if (idx === 1) { convText = localPct.toFixed(2) + '% of ' + s.pctLbl; convCls = rateClass(localPct, 2, 4); }
     else { convText = localPct.toFixed(0) + '% of ' + s.pctLbl; convCls = rateClass(localPct, 30, 60); }
-    return `<div class="funnel-row${s.key ? ' key' : ''}">
-      <div class="step">${esc(s.label)}<span class="sub">${esc(s.event)}</span></div>
-      <div class="funnel-bar"><div class="fill" style="width: ${Math.max(pctOfTop, 0.4)}%"></div></div>
-      <div class="num">${fmtInt(s.value)}</div>
-      <div class="conv ${convCls}">${convText}</div>
-    </div>`;
+    return `<div class="funnel-row${s.key ? ' key' : ''}"><div class="step">${esc(s.label)}<span class="sub">${esc(s.event)}</span></div><div class="funnel-bar"><div class="fill" style="width: ${Math.max(pctOfTop, 0.4)}%"></div></div><div class="num">${fmtInt(s.value)}</div><div class="conv ${convCls}">${convText}</div></div>`;
   }).join('');
 }
 
-/* ---------- Channels ---------- */
 function renderChannels(range) {
   setText('channel-tag', `By utm_source · last ${currentRange}d`);
   const channels = (range.channels || []).slice().sort((a, b) => {
@@ -566,64 +615,66 @@ function renderChannels(range) {
     else { sig = 'warn'; sigText = 'Underperforming'; rateColor = 'var(--warn)'; }
     return `<tr><td class="name">${esc(c.name)}</td><td class="num">${fmtInt(c.visits)}</td><td class="num">${fmtInt(c.generates)}</td><td class="num" style="color: ${rateColor}">${rate.toFixed(2)}%</td><td><span class="signal-dot ${sig}"></span>${sigText}</td></tr>`;
   }).join('');
-  renderChannelInsights(channels, range);
-}
 
-function renderChannelInsights(channels, range) {
   const container = document.querySelector('[data-slot="channel-insights"]');
   const totalV = channels.reduce((s, c) => s + c.visits, 0);
   const totalG = channels.reduce((s, c) => s + c.generates, 0);
   const insights = [];
-
   const laggards = channels.filter(c => c.visits >= 200 && (c.generates / c.visits) < 0.01);
   if (laggards.length) {
     const worst = laggards[0];
     const rate = worst.generates / worst.visits * 100;
-    insights.push(`<div class="insight"><div class="badge urgent">What's not working</div><h3>${esc(worst.name)} is ${((worst.visits / totalV) * 100).toFixed(0)}% of traffic and ${((worst.generates / Math.max(1, totalG)) * 100).toFixed(0)}% of generates</h3><p>${fmtInt(worst.visits)} visitors in the last ${currentRange}d produced ${worst.generates} generates (${rate.toFixed(2)}%). This is pulling your blended rate down.</p><p><strong>Action:</strong> pause for 72h. Re-measure generate rate on remaining traffic. If it climbs, you have your answer.</p></div>`);
+    insights.push(`<div class="insight"><div class="badge urgent">What's not working</div><h3>${esc(worst.name)} is ${((worst.visits / totalV) * 100).toFixed(0)}% of traffic and ${((worst.generates / Math.max(1, totalG)) * 100).toFixed(0)}% of generates</h3><p>${fmtInt(worst.visits)} visitors produced ${worst.generates} generates (${rate.toFixed(2)}%). Pulling blended rate down.</p><p><strong>Action:</strong> pause 72h, re-measure.</p></div>`);
   }
-
   const winners = channels.filter(c => c.generates >= 1 && (c.generates / Math.max(1, c.visits)) >= 0.03);
   if (winners.length) {
-    const bestNames = winners.slice(0, 3).map(c => esc(c.name)).join(', ');
-    insights.push(`<div class="insight"><div class="badge positive">What's working</div><h3>${bestNames}</h3><p>These channels convert visitors to generates at the rates your business needs. They're small in volume but directionally strong. <strong>Action:</strong> scale the acquisition motion behind each — more Reddit engagement, more PR placements, more of whatever is driving direct.</p></div>`);
+    const names = winners.slice(0, 3).map(c => esc(c.name)).join(', ');
+    insights.push(`<div class="insight"><div class="badge positive">What's working</div><h3>${names}</h3><p>These convert at business-needed rates. Scale the acquisition motion behind each.</p></div>`);
   }
-
   const direct = channels.find(c => c.name === 'Direct / untagged');
   if (direct && direct.generates > 0) {
-    const directShareG = totalG > 0 ? (direct.generates / totalG * 100) : 0;
-    insights.push(`<div class="insight"><div class="badge caution">What's unknown</div><h3>Direct traffic is ${((direct.visits / totalV) * 100).toFixed(0)}% of visitors and ${directShareG.toFixed(0)}% of generates — unattributed</h3><p>${fmtInt(direct.visits)} visitors with no UTM, no referrer. ${direct.generates} of them generated campaigns. This is both your most valuable segment and the one you understand least.</p><p><strong>Action this week:</strong> add UTMs to every link you personally share (LinkedIn, signatures, outbound DMs). Ask every new generator how they heard about you.</p></div>`);
+    insights.push(`<div class="insight"><div class="badge caution">What's unknown</div><h3>Direct is ${((direct.visits / totalV) * 100).toFixed(0)}% visitors, ${((direct.generates / Math.max(1, totalG)) * 100).toFixed(0)}% generates — unattributed</h3><p><strong>Action:</strong> add UTMs to every link you personally share. Ask new generators how they heard about you.</p></div>`);
   }
-
   container.innerHTML = insights.join('');
 }
 
-/* ---------- Chat panel ---------- */
-const chatFab = document.getElementById('chatFab');
+function renderSEO() {
+  if (!AHREFS || !AHREFS.keywords || !AHREFS.keywords.length) return;
+  const section = document.querySelector('[data-slot="seo-section"]');
+  if (!section) return;
+  section.style.display = '';
+  setText('seo-tag', `${AHREFS.keyword_count} keywords · ${AHREFS.target}`);
+  const tbody = document.querySelector('[data-slot="seo-rows"]');
+  tbody.innerHTML = AHREFS.keywords.slice(0, 15).map(k => {
+    const pos = k.position ?? '—';
+    const posColor = pos === '—' ? 'var(--text-dim)' : pos <= 3 ? 'var(--good)' : pos <= 10 ? 'var(--warn)' : 'var(--text-dim)';
+    return `<tr><td class="name">${esc(k.keyword)}</td><td class="num">${fmtInt(k.volume)}</td><td class="num" style="color: ${posColor}">${pos}</td><td class="num">${fmtInt(k.traffic)}</td></tr>`;
+  }).join('');
+}
+
+/* ---------- Chat ---------- */
 const chatPanel = document.getElementById('chatPanel');
-const chatClose = document.getElementById('chatClose');
+const chatFab = document.getElementById('chatFab');
 const chatBody = document.getElementById('chatBody');
 const chatInput = document.getElementById('chatInput');
 const chatSend = document.getElementById('chatSend');
+const chatReset = document.getElementById('chatReset');
 
-chatFab.addEventListener('click', () => { chatPanel.classList.add('open'); chatInput.focus(); if (chatBody.children.length === 0) renderChatEmpty(); });
-chatClose.addEventListener('click', () => chatPanel.classList.remove('open'));
-chatInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
-});
-chatInput.addEventListener('input', () => {
-  chatInput.style.height = 'auto';
-  chatInput.style.height = Math.min(160, chatInput.scrollHeight) + 'px';
-});
+chatFab.addEventListener('click', () => chatPanel.classList.toggle('open'));
+chatReset.addEventListener('click', () => { chatHistory = []; chatBody.innerHTML = ''; renderChatEmpty(); });
+chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } });
+chatInput.addEventListener('input', () => { chatInput.style.height = 'auto'; chatInput.style.height = Math.min(160, chatInput.scrollHeight) + 'px'; });
 chatSend.addEventListener('click', sendChat);
+renderChatEmpty();
 
 function renderChatEmpty() {
   chatBody.innerHTML = `
     <div class="chat-empty">
-      Ask anything about the data currently shown.
+      Ask anything about what's working, what's not, or what to do next.
       <div class="suggest">Try</div>
-      <button class="sug-btn" data-q="What's driving the generate regression post-launch?">What's driving the generate regression post-launch?</button>
-      <button class="sug-btn" data-q="If I pause the Meta ad set, what do I expect to see in 72 hours?">If I pause the Meta ad set, what do I expect to see in 72 hours?</button>
+      <button class="sug-btn" data-q="What should I pause and why?">What should I pause and why?</button>
       <button class="sug-btn" data-q="Which channel gives me the best ROI on time for the next 2 weeks?">Which channel gives me the best ROI on time for the next 2 weeks?</button>
+      <button class="sug-btn" data-q="What's our SEO position like, and what should we optimize for?">What's our SEO position like, and what should we optimize for?</button>
     </div>
   `;
   chatBody.querySelectorAll('.sug-btn').forEach(b => b.addEventListener('click', () => { chatInput.value = b.dataset.q; sendChat(); }));
@@ -643,7 +694,7 @@ function addMsg(who, initialContent = '') {
 async function ensureApiKey() {
   if (apiKey) return apiKey;
   const r = await fetch('/api/config');
-  if (!r.ok) throw new Error(`config fetch failed ${r.status}`);
+  if (!r.ok) throw new Error(`config ${r.status}`);
   const j = await r.json();
   apiKey = j.key;
   if (!apiKey) throw new Error('No API key configured on the server');
@@ -651,38 +702,38 @@ async function ensureApiKey() {
 }
 
 function buildSystemPrompt() {
+  if (!DATA || !DATA.ranges) return 'Dashboard still loading.';
   const range = DATA.ranges[String(currentRange)];
-  const pre = DATA.launch_windows.pre;
-  const post = DATA.launch_windows.post;
-  return `You are an honest, concise GTM analyst for SpotsNow. You answer questions grounded in the dashboard data below. You do NOT make up numbers. If the answer is not in the data, say so clearly.
+  const pre = DATA.launch_windows?.pre;
+  const post = DATA.launch_windows?.post;
+  const ahrefsLines = AHREFS && AHREFS.keywords && AHREFS.keywords.length
+    ? `\nORGANIC SEARCH (Ahrefs, ${AHREFS.target}, top ${Math.min(15, AHREFS.keywords.length)} by position):\n${AHREFS.keywords.slice(0, 15).map(k => `- "${k.keyword}" — vol ${k.volume}, pos ${k.position ?? '?'}, est traffic ${k.traffic}`).join('\n')}`
+    : '\nORGANIC SEARCH: no Ahrefs data loaded.';
 
-Style: direct, no fluff. Use short paragraphs and occasional bold text for emphasis. Never say "great question" or "certainly". Do not hedge when the data is clear. American spelling, spaced hyphens only.
+  return `You are an honest, concise GTM analyst for SpotsNow. You answer questions grounded in the dashboard data below. You do NOT make up numbers. If the answer is not in the data, say so plainly.
 
-Primary conversion metric: ${DATA.primary_metric || 'landing_demographics_generate_click'} (a "generate" = a qualified lead).
+Style: direct, no fluff. Short paragraphs, occasional **bold** for emphasis. Never say "great question" or "certainly". Don't hedge when the data is clear. American spelling, spaced hyphens only.
 
-Current window selected by the user: last ${currentRange} days.
+Primary conversion metric: ${DATA.primary_metric || 'landing_demographics_generate_click'} (a "generate" = qualified lead).
 
-CURRENT WINDOW TOTALS:
-- Visitors: ${range.totals.visitors}
-- Generates: ${range.totals.generates} (${(range.totals.generates / Math.max(1, range.totals.visitors) * 100).toFixed(2)}% of visitors)
-- Signups: ${range.totals.signups}
-- Requests: ${range.totals.requests}
-- Calls booked: ${range.totals.calls}
+CURRENT WINDOW: last ${currentRange} days
+- Visitors: ${range?.totals?.visitors ?? '?'}
+- Generates: ${range?.totals?.generates ?? '?'} (${range?.totals?.visitors > 0 ? (range.totals.generates / range.totals.visitors * 100).toFixed(2) : '?'}% of visitors)
+- Signups: ${range?.totals?.signups ?? '?'}
+- Requests: ${range?.totals?.requests ?? '?'}
+- Calls booked: ${range?.totals?.calls ?? '?'}
 
 CHANNELS THIS WINDOW (sorted by generate rate):
-${range.channels.slice().sort((a, b) => (b.generates / Math.max(1, b.visits)) - (a.generates / Math.max(1, a.visits))).map(c => `- ${c.name}: ${c.visits} visits, ${c.generates} generates, ${(c.generates / Math.max(1, c.visits) * 100).toFixed(2)}% rate`).join('\n')}
+${(range?.channels || []).slice().sort((a, b) => (b.generates / Math.max(1, b.visits)) - (a.generates / Math.max(1, a.visits))).map(c => `- ${c.name}: ${c.visits} visits, ${c.generates} generates, ${(c.generates / Math.max(1, c.visits) * 100).toFixed(2)}%`).join('\n') || '(none)'}
 
-LAUNCH WINDOWS (fixed, always 10d each):
-- Pre-launch ${pre.from} → ${pre.to}: ${pre.visitors} visitors, ${pre.generates} generates (${(pre.generates / Math.max(1, pre.visitors) * 100).toFixed(2)}%), ${pre.signups} signups, ${pre.requests} requests, ${pre.calls} calls
-- Post-launch ${post.from} → ${post.to}: ${post.visitors} visitors, ${post.generates} generates (${(post.generates / Math.max(1, post.visitors) * 100).toFixed(2)}%), ${post.signups} signups, ${post.requests} requests, ${post.calls} calls
+LAUNCH WINDOWS (fixed, 10d each):
+- Pre ${pre?.from} → ${pre?.to}: ${pre?.visitors} visitors, ${pre?.generates} generates (${pre?.visitors > 0 ? (pre.generates / pre.visitors * 100).toFixed(2) : '?'}%)
+- Post ${post?.from} → ${post?.to}: ${post?.visitors} visitors, ${post?.generates} generates (${post?.visitors > 0 ? (post.generates / post.visitors * 100).toFixed(2) : '?'}%)
+${ahrefsLines}
 
-OTHER RANGES AVAILABLE: ${Object.keys(DATA.ranges).map(r => r + 'd').join(', ')}. The user can switch between them with the range pills.
+OTHER RANGES AVAILABLE: 3d, 7d, 14d, 30d, 90d. User can switch via range pills + Generate button for live re-pull.
 
-Known caveats:
-- Sample sizes are small; treat single-digit differences as directional.
-- "Direct / untagged" is any visitor without a utm_source: typed URLs, Slack clicks, unttagged emails, real word of mouth.
-- Meta strips UTMs into numeric ad-set IDs (120238...), so "Meta ad set" rows are paid Meta traffic.
-- Project history is ~30 days; 90d and 30d views return identical numbers.`;
+Known caveats: sample sizes are small (treat single-digit deltas as directional), Meta strips UTMs into numeric ad-set IDs, "Direct / untagged" includes any visit without utm_source, project history goes back ~30 days so 30d and 90d views may match.`;
 }
 
 async function sendChat() {
@@ -691,17 +742,13 @@ async function sendChat() {
   chatInput.value = '';
   chatInput.style.height = 'auto';
   chatSend.disabled = true;
-
   if (chatBody.querySelector('.chat-empty')) chatBody.innerHTML = '';
-
   addMsg('user', text);
   chatHistory.push({ role: 'user', content: text });
   const assistantEl = addMsg('assistant', '');
-  let assistantBuffer = '';
-
+  let buf = '';
   try {
     const key = await ensureApiKey();
-    const system = buildSystemPrompt();
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -714,43 +761,38 @@ async function sendChat() {
         model: 'claude-sonnet-4-6',
         max_tokens: 1024,
         stream: true,
-        system,
+        system: buildSystemPrompt(),
         messages: chatHistory
       })
     });
-
-    if (!response.ok) {
-      const err = await response.text();
-      throw new Error(`Claude API ${response.status}: ${err}`);
-    }
-
+    if (!response.ok) throw new Error(`Claude ${response.status}: ${(await response.text()).slice(0, 200)}`);
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    let buffer = '';
+    let chunk = '';
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      buffer += decoder.decode(value, { stream: true });
+      chunk += decoder.decode(value, { stream: true });
       let idx;
-      while ((idx = buffer.indexOf('\n\n')) >= 0) {
-        const chunk = buffer.slice(0, idx);
-        buffer = buffer.slice(idx + 2);
-        for (const line of chunk.split('\n')) {
+      while ((idx = chunk.indexOf('\n\n')) >= 0) {
+        const piece = chunk.slice(0, idx);
+        chunk = chunk.slice(idx + 2);
+        for (const line of piece.split('\n')) {
           if (!line.startsWith('data: ')) continue;
-          const payload = line.slice(6);
-          if (payload === '[DONE]') break;
+          const p = line.slice(6);
+          if (p === '[DONE]') break;
           try {
-            const evt = JSON.parse(payload);
-            if (evt.type === 'content_block_delta' && evt.delta && evt.delta.type === 'text_delta') {
-              assistantBuffer += evt.delta.text;
-              assistantEl.innerHTML = escInline(assistantBuffer);
+            const evt = JSON.parse(p);
+            if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
+              buf += evt.delta.text;
+              assistantEl.innerHTML = escInline(buf);
               chatBody.scrollTop = chatBody.scrollHeight;
             }
           } catch (_) {}
         }
       }
     }
-    chatHistory.push({ role: 'assistant', content: assistantBuffer });
+    chatHistory.push({ role: 'assistant', content: buf });
   } catch (e) {
     assistantEl.innerHTML = `<span style="color: var(--bad)">Error: ${esc(e.message)}</span>`;
   } finally {
@@ -759,8 +801,8 @@ async function sendChat() {
   }
 }
 
-/* ---------- Boot ---------- */
-loadData();
+/* Boot */
+loadInitial();
 </script>
 
 </body>

@@ -1,11 +1,11 @@
 // HubSpot adapter: deals, contacts, pipeline overview.
-// Env: HUBSPOT_ACCESS_TOKEN (private app token with crm.objects.deals.read + crm.objects.contacts.read).
+// Env: HUBSPOT_PRIVATE_APP_TOKEN (private app token with crm.objects.deals.read + crm.objects.contacts.read).
 
 const BASE = 'https://api.hubapi.com';
 
 function assertToken() {
-  const t = process.env.HUBSPOT_ACCESS_TOKEN;
-  if (!t) throw new Error('HUBSPOT_ACCESS_TOKEN not set');
+  const t = process.env.HUBSPOT_PRIVATE_APP_TOKEN || process.env.HUBSPOT_ACCESS_TOKEN;
+  if (!t) throw new Error('HUBSPOT_PRIVATE_APP_TOKEN not set');
   return t;
 }
 
