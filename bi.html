@@ -154,6 +154,10 @@ h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 500; letter-spacing: -
 .chat-empty .suggest { display: block; margin-top: 12px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; font-size: 10px; }
 .chat-empty .sug-btn { display: block; margin-top: 6px; background: var(--surface-2); border: 1px solid var(--line); color: var(--text); padding: 8px 12px; font-size: 11px; width: 100%; text-align: left; cursor: pointer; font-family: 'Inter Tight', sans-serif; border-radius: 2px; }
 .chat-empty .sug-btn:hover { border-color: var(--accent); }
+.chat-status { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); padding: 4px 10px; background: var(--surface-2); border: 1px solid var(--line-soft); border-radius: 2px; display: flex; align-items: center; gap: 8px; }
+.chat-status .status-dot { width: 6px; height: 6px; background: var(--warn); border-radius: 50%; animation: pulse 1.2s infinite; display: inline-block; }
+.chat-status .status-dot.good { background: var(--good); animation: none; }
+.chat-status .status-dot.bad { background: var(--bad); animation: none; }
 
 .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--surface-2); border: 1px solid var(--line); padding: 10px 18px; border-radius: 2px; font-family: 'JetBrains Mono', monospace; font-size: 11px; z-index: 200; box-shadow: 0 6px 20px rgba(0,0,0,0.3); display: none; }
 .toast.show { display: block; }
@@ -365,8 +369,8 @@ h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 500; letter-spacing: -
 let DATA = null;
 let AHREFS = null;
 let currentRange = 14;
-let apiKey = null;
 let chatHistory = [];
+const STRATEGY_PW_KEY = 'strategyPassword';
 
 const fmtInt = (n) => (n ?? 0).toLocaleString('en-US');
 const rateClass = (rate, warnBelow, goodAbove) => rate < warnBelow ? 'bad' : rate < goodAbove ? 'warn' : 'good';
@@ -670,11 +674,12 @@ renderChatEmpty();
 function renderChatEmpty() {
   chatBody.innerHTML = `
     <div class="chat-empty">
-      Ask anything about what's working, what's not, or what to do next.
+      Ask anything. The agent pulls live from Mixpanel, HubSpot, Notion, Fathom and the burn sheet as needed.
       <div class="suggest">Try</div>
-      <button class="sug-btn" data-q="What should I pause and why?">What should I pause and why?</button>
-      <button class="sug-btn" data-q="Which channel gives me the best ROI on time for the next 2 weeks?">Which channel gives me the best ROI on time for the next 2 weeks?</button>
-      <button class="sug-btn" data-q="What's our SEO position like, and what should we optimize for?">What's our SEO position like, and what should we optimize for?</button>
+      <button class="sug-btn" data-q="What should I pause this week and why?">What should I pause this week and why?</button>
+      <button class="sug-btn" data-q="Cross-reference HubSpot deals with GTM data — where is the friction?">Cross-reference HubSpot deals with GTM data — where is the friction?</button>
+      <button class="sug-btn" data-q="Summarize my substantive Fathom calls from the last 7 days and what needs follow-up.">Summarize my substantive Fathom calls from the last 7 days and what needs follow-up.</button>
+      <button class="sug-btn" data-q="Looking at the burn vs pipeline, how much runway do I actually have?">Looking at the burn vs pipeline, how much runway do I actually have?</button>
     </div>
   `;
   chatBody.querySelectorAll('.sug-btn').forEach(b => b.addEventListener('click', () => { chatInput.value = b.dataset.q; sendChat(); }));
@@ -691,108 +696,149 @@ function addMsg(who, initialContent = '') {
   return content;
 }
 
-async function ensureApiKey() {
-  if (apiKey) return apiKey;
-  const r = await fetch('/api/config');
-  if (!r.ok) throw new Error(`config ${r.status}`);
-  const j = await r.json();
-  apiKey = j.key;
-  if (!apiKey) throw new Error('No API key configured on the server');
-  return apiKey;
+function getStrategyPassword() {
+  let pw = sessionStorage.getItem(STRATEGY_PW_KEY);
+  if (!pw) {
+    pw = window.prompt('Strategy chat password (stored for this session only):');
+    if (!pw) return null;
+    sessionStorage.setItem(STRATEGY_PW_KEY, pw);
+  }
+  return pw;
 }
 
-function buildSystemPrompt() {
-  if (!DATA || !DATA.ranges) return 'Dashboard still loading.';
+function clearStrategyPassword() {
+  sessionStorage.removeItem(STRATEGY_PW_KEY);
+}
+
+function buildContextSupp() {
+  // Hand the agent a one-shot snapshot of the currently-selected range + Ahrefs
+  // so it doesn't have to round-trip through its bi tool for basic questions.
+  if (!DATA || !DATA.ranges) return '';
   const range = DATA.ranges[String(currentRange)];
+  if (!range) return '';
   const pre = DATA.launch_windows?.pre;
   const post = DATA.launch_windows?.post;
-  const ahrefsLines = AHREFS && AHREFS.keywords && AHREFS.keywords.length
-    ? `\nORGANIC SEARCH (Ahrefs, ${AHREFS.target}, top ${Math.min(15, AHREFS.keywords.length)} by position):\n${AHREFS.keywords.slice(0, 15).map(k => `- "${k.keyword}" — vol ${k.volume}, pos ${k.position ?? '?'}, est traffic ${k.traffic}`).join('\n')}`
-    : '\nORGANIC SEARCH: no Ahrefs data loaded.';
+  const lines = [];
+  lines.push(`User is currently viewing the /bi dashboard · selected range: last ${currentRange} days`);
+  lines.push('');
+  lines.push(`Totals (${currentRange}d): visitors ${range.totals.visitors}, generates ${range.totals.generates}, signups ${range.totals.signups}, requests ${range.totals.requests}, calls ${range.totals.calls}.`);
+  if (range.channels?.length) {
+    lines.push('Channels:');
+    range.channels.slice().sort((a, b) => b.visits - a.visits).forEach(c => {
+      const rate = c.visits > 0 ? (c.generates / c.visits * 100).toFixed(2) : '0.00';
+      lines.push(`- ${c.name}: ${c.visits} visits, ${c.generates} generates (${rate}%)`);
+    });
+  }
+  if (pre && post) {
+    lines.push('');
+    lines.push(`Launch windows (fixed 10d each): pre ${pre.from}→${pre.to} = ${pre.visitors} visitors / ${pre.generates} generates; post ${post.from}→${post.to} = ${post.visitors} visitors / ${post.generates} generates.`);
+  }
+  if (AHREFS && AHREFS.keywords?.length) {
+    lines.push('');
+    lines.push(`Ahrefs top organic keywords for ${AHREFS.target}:`);
+    AHREFS.keywords.slice(0, 15).forEach(k => {
+      lines.push(`- "${k.keyword}" vol ${k.volume} pos ${k.position ?? '?'} traffic ${k.traffic}`);
+    });
+  }
+  return lines.join('\n');
+}
 
-  return `You are an honest, concise GTM analyst for SpotsNow. You answer questions grounded in the dashboard data below. You do NOT make up numbers. If the answer is not in the data, say so plainly.
-
-Style: direct, no fluff. Short paragraphs, occasional **bold** for emphasis. Never say "great question" or "certainly". Don't hedge when the data is clear. American spelling, spaced hyphens only.
-
-Primary conversion metric: ${DATA.primary_metric || 'landing_demographics_generate_click'} (a "generate" = qualified lead).
-
-CURRENT WINDOW: last ${currentRange} days
-- Visitors: ${range?.totals?.visitors ?? '?'}
-- Generates: ${range?.totals?.generates ?? '?'} (${range?.totals?.visitors > 0 ? (range.totals.generates / range.totals.visitors * 100).toFixed(2) : '?'}% of visitors)
-- Signups: ${range?.totals?.signups ?? '?'}
-- Requests: ${range?.totals?.requests ?? '?'}
-- Calls booked: ${range?.totals?.calls ?? '?'}
-
-CHANNELS THIS WINDOW (sorted by generate rate):
-${(range?.channels || []).slice().sort((a, b) => (b.generates / Math.max(1, b.visits)) - (a.generates / Math.max(1, a.visits))).map(c => `- ${c.name}: ${c.visits} visits, ${c.generates} generates, ${(c.generates / Math.max(1, c.visits) * 100).toFixed(2)}%`).join('\n') || '(none)'}
-
-LAUNCH WINDOWS (fixed, 10d each):
-- Pre ${pre?.from} → ${pre?.to}: ${pre?.visitors} visitors, ${pre?.generates} generates (${pre?.visitors > 0 ? (pre.generates / pre.visitors * 100).toFixed(2) : '?'}%)
-- Post ${post?.from} → ${post?.to}: ${post?.visitors} visitors, ${post?.generates} generates (${post?.visitors > 0 ? (post.generates / post.visitors * 100).toFixed(2) : '?'}%)
-${ahrefsLines}
-
-OTHER RANGES AVAILABLE: 3d, 7d, 14d, 30d, 90d. User can switch via range pills + Generate button for live re-pull.
-
-Known caveats: sample sizes are small (treat single-digit deltas as directional), Meta strips UTMs into numeric ad-set IDs, "Direct / untagged" includes any visit without utm_source, project history goes back ~30 days so 30d and 90d views may match.`;
+function addStatusLine(text) {
+  const el = document.createElement('div');
+  el.className = 'chat-status';
+  el.innerHTML = `<span class="status-dot"></span>${esc(text)}`;
+  chatBody.appendChild(el);
+  chatBody.scrollTop = chatBody.scrollHeight;
+  return el;
 }
 
 async function sendChat() {
   const text = chatInput.value.trim();
   if (!text) return;
+
+  const password = getStrategyPassword();
+  if (!password) return;
+
   chatInput.value = '';
   chatInput.style.height = 'auto';
   chatSend.disabled = true;
   if (chatBody.querySelector('.chat-empty')) chatBody.innerHTML = '';
   addMsg('user', text);
   chatHistory.push({ role: 'user', content: text });
+
   const assistantEl = addMsg('assistant', '');
   let buf = '';
+  let pendingTools = new Map(); // id → status element
+
   try {
-    const key = await ensureApiKey();
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('/api/strategy-chat', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1024,
-        stream: true,
-        system: buildSystemPrompt(),
-        messages: chatHistory
+        password,
+        messages: chatHistory,
+        supp: buildContextSupp()
       })
     });
-    if (!response.ok) throw new Error(`Claude ${response.status}: ${(await response.text()).slice(0, 200)}`);
+
+    if (response.status === 401) {
+      clearStrategyPassword();
+      throw new Error('Wrong password. Click Send again to re-enter.');
+    }
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${response.status}`);
+    }
+
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let chunk = '';
+
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
       chunk += decoder.decode(value, { stream: true });
+
       let idx;
       while ((idx = chunk.indexOf('\n\n')) >= 0) {
         const piece = chunk.slice(0, idx);
         chunk = chunk.slice(idx + 2);
+        let evtName = 'message';
+        let dataStr = '';
         for (const line of piece.split('\n')) {
-          if (!line.startsWith('data: ')) continue;
-          const p = line.slice(6);
-          if (p === '[DONE]') break;
-          try {
-            const evt = JSON.parse(p);
-            if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
-              buf += evt.delta.text;
-              assistantEl.innerHTML = escInline(buf);
-              chatBody.scrollTop = chatBody.scrollHeight;
-            }
-          } catch (_) {}
+          if (line.startsWith('event: ')) evtName = line.slice(7).trim();
+          else if (line.startsWith('data: ')) dataStr += line.slice(6);
+        }
+        if (!dataStr) continue;
+        let data;
+        try { data = JSON.parse(dataStr); } catch (_) { continue; }
+
+        if (evtName === 'text') {
+          buf += data.delta || '';
+          assistantEl.innerHTML = escInline(buf);
+          chatBody.scrollTop = chatBody.scrollHeight;
+        } else if (evtName === 'tool_start') {
+          const status = addStatusLine(`Calling ${data.name}…`);
+          pendingTools.set(data.id, status);
+        } else if (evtName === 'tool_result') {
+          const status = pendingTools.get(data.id);
+          if (status) {
+            if (data.ok) status.innerHTML = `<span class="status-dot good"></span>${esc(data.name)} · ${fmtInt(data.bytes)} bytes`;
+            else status.innerHTML = `<span class="status-dot bad"></span>${esc(data.name)} failed: ${esc(data.error || '')}`;
+            pendingTools.delete(data.id);
+          }
+        } else if (evtName === 'iteration') {
+          // soft divider between iterations
+        } else if (evtName === 'done') {
+          // stream finished
+        } else if (evtName === 'error') {
+          assistantEl.innerHTML += `<div style="color: var(--bad); margin-top: 8px;">Agent error: ${esc(data.message)}</div>`;
         }
       }
     }
-    chatHistory.push({ role: 'assistant', content: buf });
+
+    if (buf) chatHistory.push({ role: 'assistant', content: buf });
+    else assistantEl.innerHTML = `<span style="color: var(--text-dim)">(no response)</span>`;
   } catch (e) {
     assistantEl.innerHTML = `<span style="color: var(--bad)">Error: ${esc(e.message)}</span>`;
   } finally {
