@@ -23,13 +23,15 @@ export default async function handler(req, res) {
       return res.status(200).json(state || { strategy: '', notionLinks: '', supp: '', dateFrom: '', dateTo: '', updated_at: null });
     }
     if (req.method === 'POST') {
-      const { strategy, notionLinks, supp, dateFrom, dateTo } = req.body || {};
+      const { strategy, notionLinks, supp, dateFrom, dateTo, conversations, currentConversationId } = req.body || {};
       const record = {
         strategy: strategy || '',
         notionLinks: notionLinks || '',
         supp: supp || '',
         dateFrom: dateFrom || '',
         dateTo: dateTo || '',
+        conversations: Array.isArray(conversations) ? conversations : [],
+        currentConversationId: currentConversationId || null,
         updated_at: new Date().toISOString(),
       };
       await writeBlob(record);
