@@ -1,7 +1,9 @@
 """Vercel serverless function: fetch YouTube transcript only."""
 
+import os
 import re
 import json
+import tempfile
 from http.server import BaseHTTPRequestHandler
 from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound
 
@@ -9,6 +11,17 @@ from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, No
 def extract_video_id(url):
     match = re.search(r"(?:v=|youtu\.be/|embed/|v/|shorts/)([A-Za-z0-9_-]{11})", url)
     return match.group(1) if match else None
+
+
+def get_api():
+    """Return a YouTubeTranscriptApi instance, using cookies if available."""
+    cookie_content = os.environ.get("YOUTUBE_COOKIES", "").strip()
+    if cookie_content:
+        tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False)
+        tmp.write(cookie_content)
+        tmp.close()
+        return YouTubeTranscriptApi(cookies=tmp.name)
+    return YouTubeTranscriptApi()
 
 
 class handler(BaseHTTPRequestHandler):
@@ -50,7 +63,8 @@ class handler(BaseHTTPRequestHandler):
             return
 
         try:
-            transcript = YouTubeTranscriptApi().fetch(video_id)
+            api = get_api()
+            transcript = api.fetch(video_id)
             text = " ".join(chunk.text for chunk in transcript)
         except TranscriptsDisabled:
             self.send_json(400, {"error": "Transcripts are disabled for this video"})
