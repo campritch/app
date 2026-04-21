@@ -326,13 +326,52 @@ async function getKey() {
   });
 })();
 
+// ── Transcript (browser-side, avoids cloud IP blocks) ───────────────────────
+function extractVideoId(url) {
+  const m = url.match(/(?:v=|youtu\.be\/|embed\/|v\/|shorts\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+async function fetchTranscript(videoId) {
+  const proxy = 'https://api.allorigins.win/get?url=';
+  const ytUrl = `https://www.youtube.com/watch?v=${videoId}`;
+
+  // Fetch the YouTube page through CORS proxy
+  const pageRes = await fetch(proxy + encodeURIComponent(ytUrl));
+  if (!pageRes.ok) throw new Error('Could not fetch YouTube page');
+  const { contents: html } = await pageRes.json();
+
+  // Pull out ytInitialPlayerResponse
+  const jsonMatch = html.match(/ytInitialPlayerResponse\s*=\s*(\{.+?\})\s*;/s);
+  if (!jsonMatch) throw new Error('Could not parse YouTube page');
+  const player = JSON.parse(jsonMatch[1]);
+
+  const tracks = player?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+  if (!tracks?.length) throw new Error('No captions found for this video');
+
+  // Prefer English, fall back to first available
+  const track = tracks.find(t => t.languageCode === 'en') ||
+                tracks.find(t => t.languageCode?.startsWith('en')) ||
+                tracks[0];
+
+  // Fetch the caption XML
+  const capRes = await fetch(proxy + encodeURIComponent(track.baseUrl));
+  if (!capRes.ok) throw new Error('Could not fetch captions');
+  const { contents: xml } = await capRes.json();
+
+  // Parse XML and return plain text
+  const doc = new DOMParser().parseFromString(xml, 'text/xml');
+  return Array.from(doc.getElementsByTagName('text'))
+    .map(t => t.textContent
+      .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+      .replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/\n/g, ' '))
+    .join(' ');
+}
+
 // ── Generate ────────────────────────────────────────────────────────────────
 async function generate() {
   const url = document.getElementById('url-input').value.trim();
   if (!url) return;
-
-  const key = await getKey();
-  if (!key) { showStatus('error', 'API key not found — check Vercel env vars.'); btn.disabled = false; return; }
 
   const btn = document.getElementById('generate-btn');
   btn.disabled = true;
@@ -342,25 +381,22 @@ async function generate() {
 
   showStatus('loading', 'Fetching transcript…');
 
-  // Step 1: get transcript from backend
+  // Step 1: get transcript directly from browser (no cloud IP issues)
   let transcript, videoId;
   try {
-    const res = await fetch(TRANSCRIPT_API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url }),
-    });
-    const data = await res.json();
-    if (!res.ok) { showStatus('error', data.error || 'Transcript fetch failed'); btn.disabled = false; return; }
-    transcript = data.transcript;
-    videoId = data.video_id;
+    videoId = extractVideoId(url);
+    if (!videoId) throw new Error('Could not parse a video ID from that URL');
+    transcript = await fetchTranscript(videoId);
   } catch (e) {
-    showStatus('error', 'Could not reach the server. Is the backend running?');
+    showStatus('error', e.message || 'Transcript fetch failed');
     btn.disabled = false;
     return;
   }
 
-  // Step 2: stream article from Claude directly
+  // Step 2: get API key and stream article from Claude directly
+  const key = await getKey();
+  if (!key) { showStatus('error', 'API key not found — check Vercel env vars.'); btn.disabled = false; return; }
+
   showStatus('loading', 'Writing article…');
   document.getElementById('article-card').style.display = 'block';
   document.getElementById('article-body').innerHTML = '<span class="cursor"></span>';
