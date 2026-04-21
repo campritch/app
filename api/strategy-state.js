@@ -45,19 +45,17 @@ export default async function handler(req, res) {
 }
 
 async function readBlob() {
-  const { list } = await import('@vercel/blob');
-  const { blobs } = await list({ prefix: BLOB_KEY, limit: 1 });
-  const match = blobs.find((b) => b.pathname === BLOB_KEY);
-  if (!match) return null;
-  const res = await fetch(match.url);
-  if (!res.ok) return null;
-  return await res.json();
+  const { get } = await import('@vercel/blob');
+  const result = await get(BLOB_KEY, { access: 'private' });
+  if (!result || !result.stream) return null;
+  const text = await new Response(result.stream).text();
+  try { return JSON.parse(text); } catch { return null; }
 }
 
 async function writeBlob(record) {
   const { put } = await import('@vercel/blob');
   return await put(BLOB_KEY, JSON.stringify(record), {
-    access: 'public',
+    access: 'private',
     contentType: 'application/json',
     addRandomSuffix: false,
     allowOverwrite: true,

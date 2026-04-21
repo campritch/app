@@ -32,7 +32,7 @@ export default async function handler(req, res) {
   try {
     const { put } = await import('@vercel/blob');
     const result = await put('strategy/burn.csv', body, {
-      access: 'public',
+      access: 'private',
       contentType: 'text/csv',
       addRandomSuffix: false,
       allowOverwrite: true,

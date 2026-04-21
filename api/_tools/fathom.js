@@ -248,12 +248,10 @@ async function readBlob(key) {
   const mod = await getBlobClient();
   if (!mod) return null;
   try {
-    const { blobs } = await mod.list({ prefix: key, limit: 1 });
-    const match = blobs.find((b) => b.pathname === key);
-    if (!match) return null;
-    const res = await fetch(match.url);
-    if (!res.ok) return null;
-    return await res.json();
+    const result = await mod.get(key, { access: 'private' });
+    if (!result || !result.stream) return null;
+    const text = await new Response(result.stream).text();
+    return JSON.parse(text);
   } catch {
     return null;
   }
@@ -263,7 +261,7 @@ async function writeBlob(key, data) {
   const mod = await getBlobClient();
   if (!mod) return null;
   try {
-    return await mod.put(key, JSON.stringify(data), { access: 'public', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true });
+    return await mod.put(key, JSON.stringify(data), { access: 'private', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true });
   } catch (err) {
     console.warn('blob write failed', err);
     return null;

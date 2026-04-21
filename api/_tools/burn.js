@@ -16,16 +16,12 @@ export async function read() {
   // 1. Try Blob (most recent upload)
   if (process.env.BLOB_READ_WRITE_TOKEN) {
     try {
-      const { list } = await import('@vercel/blob');
-      const { blobs } = await list({ prefix: BLOB_KEY, limit: 1 });
-      const match = blobs.find((b) => b.pathname === BLOB_KEY);
-      if (match) {
-        const res = await fetch(match.url);
-        if (res.ok) {
-          raw = await res.text();
-          source = 'blob';
-          uploaded_at = match.uploadedAt || null;
-        }
+      const { get } = await import('@vercel/blob');
+      const result = await get(BLOB_KEY, { access: 'private' });
+      if (result && result.stream) {
+        raw = await new Response(result.stream).text();
+        source = 'blob';
+        uploaded_at = result.blob?.uploadedAt || null;
       }
     } catch (err) {
       console.warn('burn blob read failed', err);
