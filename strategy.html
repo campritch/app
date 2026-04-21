@@ -102,40 +102,67 @@ input, textarea, select { font-family: inherit; }
 .panel .csv-drop.ok { border-color: var(--good); color: var(--good); }
 .panel .csv-drop input { display: none; }
 
+/* ── Cached transcripts manager ── */
+.panel .cached-list { background: var(--bg); border: 1px solid var(--line); max-height: 320px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 10px; }
+.panel .cached-hdr { padding: 8px 10px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; color: var(--text-dim); background: var(--surface-2); position: sticky; top: 0; z-index: 1; }
+.panel .cached-hdr .clear-all { background: transparent; border: none; color: var(--bad); cursor: pointer; font-family: inherit; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 0; }
+.panel .cached-hdr .clear-all:hover { filter: brightness(1.2); }
+.panel .cached-row { padding: 8px 10px; border-bottom: 1px solid var(--line-soft); display: grid; grid-template-columns: 46px 1fr auto; gap: 8px; align-items: start; }
+.panel .cached-row:last-child { border-bottom: none; }
+.panel .cached-row .dt { color: var(--text-faint); padding-top: 2px; }
+.panel .cached-row .ti { color: var(--text); font-family: 'Inter Tight', sans-serif; font-size: 11px; line-height: 1.35; }
+.panel .cached-row .ti .meta { display: block; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-faint); margin-top: 2px; }
+.panel .cached-row .acts { display: flex; gap: 4px; flex-shrink: 0; }
+.panel .cached-row .acts button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 3px 8px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border-radius: 2px; }
+.panel .cached-row .acts .v:hover { color: var(--text); border-color: var(--accent); }
+.panel .cached-row .acts .d:hover { color: var(--bad); border-color: var(--bad); }
+.panel .cached-empty { padding: 16px 10px; color: var(--text-faint); font-family: 'Fraunces', serif; font-style: italic; text-align: center; font-size: 11px; }
+
+/* ── Modal (transcript viewer + generic) ── */
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.72); display: none; align-items: center; justify-content: center; z-index: 200; padding: 40px; }
+.modal-bg.open { display: flex; }
+.modal { background: var(--surface); border: 1px solid var(--line); width: 100%; max-width: 760px; max-height: 85vh; display: flex; flex-direction: column; }
+.modal-hdr { padding: 14px 20px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.modal-hdr .t { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 500; color: var(--text); line-height: 1.35; }
+.modal-hdr .m { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; display: block; }
+.modal-hdr .x { background: transparent; border: 1px solid var(--line); color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 4px 10px; cursor: pointer; flex-shrink: 0; }
+.modal-hdr .x:hover { color: var(--text); border-color: var(--text-dim); }
+.modal-body { flex: 1; overflow-y: auto; padding: 20px 24px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 14px; line-height: 1.7; color: var(--text); white-space: pre-wrap; }
+
 /* ── Chat ── */
 .chat { display: grid; grid-template-rows: 1fr auto; min-height: 0; }
 .stream { overflow-y: auto; padding: 24px 32px 12px; }
 .stream .empty { color: var(--text-faint); font-family: 'Fraunces', serif; font-size: 16px; font-style: italic; max-width: 520px; line-height: 1.55; }
 .stream .empty .tip { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 14px; display: block; }
 
-.msg { margin-bottom: 16px; max-width: 760px; }
+.msg { margin-bottom: 20px; max-width: 760px; }
 .msg .who { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 6px; display: flex; gap: 10px; align-items: center; }
 .msg .who .tag { color: var(--accent); }
 .msg.user .who .tag { color: var(--text); }
-.msg .body { font-size: 13.5px; line-height: 1.55; color: var(--text); word-wrap: break-word; }
+.msg .body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.65; color: var(--text); word-wrap: break-word; letter-spacing: 0; }
 .msg.user .body { background: var(--surface); border-left: 2px solid var(--accent); padding: 10px 14px; white-space: pre-wrap; }
-.msg .body p { margin-bottom: 8px; }
+.msg .body p { margin-bottom: 12px; }
 .msg .body p:last-child { margin-bottom: 0; }
-.msg .body h1, .msg .body h2, .msg .body h3 { font-family: 'Inter Tight', sans-serif; font-weight: 600; margin: 14px 0 6px; line-height: 1.35; letter-spacing: -0.005em; color: var(--text); }
+.msg .body h1, .msg .body h2, .msg .body h3 { font-family: inherit; font-weight: 600; margin: 18px 0 8px; line-height: 1.35; letter-spacing: -0.005em; color: var(--text); }
 .msg .body h1:first-child, .msg .body h2:first-child, .msg .body h3:first-child { margin-top: 0; }
-.msg .body h1 { font-size: 15px; }
-.msg .body h2 { font-size: 14px; }
-.msg .body h3 { font-size: 13.5px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
-.msg .body ul, .msg .body ol { margin: 4px 0 8px; padding-left: 20px; }
-.msg .body li { margin-bottom: 2px; }
+.msg .body h1 { font-size: 17px; }
+.msg .body h2 { font-size: 16px; }
+.msg .body h3 { font-size: 15px; color: var(--text); font-weight: 600; }
+.msg .body ul, .msg .body ol { margin: 6px 0 12px; padding-left: 22px; }
+.msg .body li { margin-bottom: 4px; }
 .msg .body li::marker { color: var(--text-faint); }
-.msg .body ul ul, .msg .body ol ol { margin: 2px 0; }
-.msg .body code { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--surface-2); padding: 1px 5px; border-radius: 2px; color: var(--text); }
-.msg .body pre { background: var(--surface); border: 1px solid var(--line-soft); padding: 10px 12px; margin: 8px 0; overflow-x: auto; border-radius: 2px; }
-.msg .body pre code { background: none; padding: 0; color: var(--text); font-size: 12px; line-height: 1.5; }
+.msg .body ul ul, .msg .body ol ol { margin: 4px 0; }
+.msg .body code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--surface-2); padding: 1px 5px; border-radius: 2px; color: var(--text); }
+.msg .body pre { background: var(--surface); border: 1px solid var(--line-soft); padding: 10px 12px; margin: 10px 0; overflow-x: auto; border-radius: 2px; }
+.msg .body pre code { background: none; padding: 0; color: var(--text); font-size: 13px; line-height: 1.5; }
 .msg .body strong { color: var(--text); font-weight: 600; }
 .msg .body em { color: var(--text); font-style: italic; }
-.msg .body blockquote { border-left: 2px solid var(--line); padding-left: 10px; color: var(--text-dim); margin: 8px 0; }
+.msg .body blockquote { border-left: 2px solid var(--line); padding-left: 12px; color: var(--text-dim); margin: 10px 0; }
 .msg .body a { color: var(--accent); text-decoration: none; }
 .msg .body a:hover { text-decoration: underline; }
-.msg .body hr { border: none; border-top: 1px solid var(--line-soft); margin: 12px 0; }
-.msg .body table { border-collapse: collapse; margin: 8px 0; width: 100%; font-size: 12.5px; }
-.msg .body th, .msg .body td { border-bottom: 1px solid var(--line-soft); padding: 5px 8px; text-align: left; }
+.msg .body hr { border: none; border-top: 1px solid var(--line-soft); margin: 14px 0; }
+.msg .body table { border-collapse: collapse; margin: 10px 0; width: 100%; font-size: 14px; }
+.msg .body th, .msg .body td { border-bottom: 1px solid var(--line-soft); padding: 6px 10px; text-align: left; }
 .msg .body th { color: var(--text-dim); font-weight: 600; }
 
 .tool-log { background: var(--surface); border: 1px solid var(--line); margin: 10px 0; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
@@ -257,6 +284,18 @@ input, textarea, select { font-family: inherit; }
       </div>
 
       <div class="group">
+        <div class="label">
+          Ingested transcripts <span class="hint" id="cached-count">0 cached</span>
+          <span class="field-meta">
+            <button class="field-edit-btn" id="btn-cache-refresh">Refresh</button>
+          </span>
+        </div>
+        <div class="cached-list" id="cached-list">
+          <div class="cached-empty">No transcripts ingested yet.</div>
+        </div>
+      </div>
+
+      <div class="group">
         <div class="label">Burn CSV <span class="hint" id="csv-status">not uploaded</span></div>
         <label class="csv-drop" id="csv-drop">
           Drop or click to upload
@@ -310,6 +349,19 @@ input, textarea, select { font-family: inherit; }
       </div>
       <div class="history-list" id="history-list"></div>
     </aside>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div>
+        <div class="t" id="modal-title">Transcript</div>
+        <span class="m" id="modal-meta"></span>
+      </div>
+      <button class="x" id="modal-close">Close</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
   </div>
 </div>
 
@@ -634,6 +686,7 @@ function hydrate() {
   renderHistory();
   attachInputs();
   loadRemoteState();
+  loadCachedTranscripts();
 }
 
 function attachInputs() {
@@ -664,6 +717,10 @@ function attachInputs() {
   document.getElementById('btn-export').addEventListener('click', exportChat);
   document.getElementById('csv-file').addEventListener('change', uploadCsv);
   document.getElementById('btn-browse').addEventListener('click', browseFathom);
+  document.getElementById('btn-cache-refresh').addEventListener('click', () => loadCachedTranscripts(true));
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('modal-bg').addEventListener('click', (e) => { if (e.target.id === 'modal-bg') closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 }
 
 let loadedCalls = [];
@@ -772,12 +829,125 @@ async function ingestSelected() {
     const data = await res.json();
     log.className = 'ingest-log ok';
     log.textContent = `done · ${data.ingested} new · ${data.cached_existing} already cached · ${data.errors?.length || 0} errors`;
+    loadCachedTranscripts(true);
   } catch (err) {
     log.className = 'ingest-log err';
     log.textContent = `failed: ${err.message}`;
   } finally {
     btn.disabled = false;
   }
+}
+
+// ── Cached transcripts manager ────────────────────────────────────────
+let cachedItems = [];
+
+async function loadCachedTranscripts(force = false) {
+  if (!password) return;
+  try {
+    const res = await fetch('/api/fathom-cache', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password, action: 'list' }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    cachedItems = Array.isArray(data.items) ? data.items : [];
+    renderCachedList();
+  } catch (err) {
+    const el = document.getElementById('cached-list');
+    el.innerHTML = `<div class="cached-empty">load failed: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+function renderCachedList() {
+  const el = document.getElementById('cached-list');
+  const cnt = document.getElementById('cached-count');
+  cnt.textContent = `${cachedItems.length} cached`;
+  if (!cachedItems.length) {
+    el.innerHTML = '<div class="cached-empty">No transcripts ingested yet.</div>';
+    return;
+  }
+  const rows = cachedItems.map((it, idx) => {
+    const when = it.date ? new Date(it.date).toISOString().slice(5, 10).replace('-', '/') : '—';
+    const kb = it.bytes ? `${Math.round(it.bytes / 1024)}kb` : '';
+    const title = it.title || it.id;
+    return `<div class="cached-row">
+      <span class="dt">${escapeHtml(when)}</span>
+      <span class="ti">${escapeHtml(title)}<span class="meta">${escapeHtml(kb)}</span></span>
+      <span class="acts"><button class="v" data-view="${idx}">View</button><button class="d" data-del="${idx}">Del</button></span>
+    </div>`;
+  });
+  el.innerHTML =
+    `<div class="cached-hdr"><span>${cachedItems.length} cached</span><button class="clear-all" id="btn-cache-clear">Clear all</button></div>` +
+    rows.join('');
+  el.querySelectorAll('[data-view]').forEach((b) => {
+    b.addEventListener('click', () => viewCached(Number(b.dataset.view)));
+  });
+  el.querySelectorAll('[data-del]').forEach((b) => {
+    b.addEventListener('click', () => deleteCached(Number(b.dataset.del)));
+  });
+  document.getElementById('btn-cache-clear').addEventListener('click', clearAllCached);
+}
+
+async function viewCached(idx) {
+  const it = cachedItems[idx];
+  if (!it) return;
+  openModal(it.title || it.id, `${it.date ? new Date(it.date).toLocaleString() : ''}${it.attendees?.length ? ' · ' + it.attendees.join(', ') : ''}`, 'Loading...');
+  try {
+    const res = await fetch('/api/fathom-cache', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password, action: 'view', id: it.id }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const rec = await res.json();
+    document.getElementById('modal-body').textContent = rec.transcript || '(no transcript body)';
+  } catch (err) {
+    document.getElementById('modal-body').textContent = `Failed: ${err.message}`;
+  }
+}
+
+async function deleteCached(idx) {
+  const it = cachedItems[idx];
+  if (!it) return;
+  if (!confirm(`Remove "${it.title || it.id}" from the agent's context?`)) return;
+  try {
+    const res = await fetch('/api/fathom-cache', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password, action: 'delete', id: it.id }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    loadCachedTranscripts(true);
+  } catch (err) {
+    alert(`Delete failed: ${err.message}`);
+  }
+}
+
+async function clearAllCached() {
+  if (!confirm(`Remove ALL ${cachedItems.length} cached transcripts? This can't be undone.`)) return;
+  try {
+    const res = await fetch('/api/fathom-cache', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password, action: 'clear' }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    loadCachedTranscripts(true);
+  } catch (err) {
+    alert(`Clear failed: ${err.message}`);
+  }
+}
+
+function openModal(title, meta, body) {
+  document.getElementById('modal-title').textContent = title || '';
+  document.getElementById('modal-meta').textContent = meta || '';
+  document.getElementById('modal-body').textContent = body || '';
+  document.getElementById('modal-bg').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-bg').classList.remove('open');
 }
 
 function exportChat() {

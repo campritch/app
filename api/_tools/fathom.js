@@ -86,13 +86,104 @@ export async function getTranscript({ meeting_id }) {
     fetched_at: new Date().toISOString(),
   };
 
-  await writeBlob(`fathom/${meeting_id}.json`, record);
+  await writeFathomRecord(meeting_id, record);
   return { ...record, source: 'fresh' };
 }
 
 export async function listCached() {
   const entries = await listBlob('fathom/');
   return { count: entries.length, transcripts: entries };
+}
+
+// ── Cache management: manifest-backed detailed listing + delete ────────
+const MANIFEST_KEY = 'fathom/_index.json';
+
+export async function listCachedDetailed() {
+  const manifest = await readBlob(MANIFEST_KEY);
+  if (manifest && Array.isArray(manifest.items)) {
+    return { count: manifest.items.length, items: manifest.items, source: 'manifest' };
+  }
+  // Fallback / migration: rebuild manifest from existing cache entries
+  return await rebuildManifest();
+}
+
+export async function rebuildManifest() {
+  const mod = await getBlobClient();
+  if (!mod) return { count: 0, items: [] };
+  const { blobs } = await mod.list({ prefix: 'fathom/' });
+  const items = [];
+  for (const b of blobs) {
+    if (b.pathname === MANIFEST_KEY) continue;
+    const record = await readBlob(b.pathname);
+    if (!record) continue;
+    items.push({
+      id: record.id || b.pathname.replace(/^fathom\//, '').replace(/\.json$/, ''),
+      title: record.title || null,
+      date: record.date || null,
+      attendees: record.attendees || [],
+      bytes: b.size,
+      cached_at: record.fetched_at || b.uploadedAt,
+    });
+  }
+  items.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  await writeBlob(MANIFEST_KEY, { items, updated_at: new Date().toISOString() });
+  return { count: items.length, items, source: 'rebuilt' };
+}
+
+export async function readCached(id) {
+  if (!id) throw new Error('id required');
+  return await readBlob(`fathom/${id}.json`);
+}
+
+export async function deleteCached(id) {
+  if (!id) throw new Error('id required');
+  const mod = await getBlobClient();
+  if (!mod) throw new Error('BLOB_READ_WRITE_TOKEN required');
+  const key = `fathom/${id}.json`;
+  const { blobs } = await mod.list({ prefix: key, limit: 5 });
+  const match = blobs.find((b) => b.pathname === key);
+  if (match) await mod.del(match.url);
+  await removeFromManifest(id);
+  return { deleted: !!match };
+}
+
+export async function clearCached() {
+  const mod = await getBlobClient();
+  if (!mod) throw new Error('BLOB_READ_WRITE_TOKEN required');
+  const { blobs } = await mod.list({ prefix: 'fathom/' });
+  const urls = blobs.map((b) => b.url);
+  if (urls.length) await mod.del(urls);
+  return { deleted: urls.length };
+}
+
+async function writeFathomRecord(id, record) {
+  await writeBlob(`fathom/${id}.json`, record);
+  const bytes = new TextEncoder().encode(JSON.stringify(record)).length;
+  await updateManifest({
+    id,
+    title: record.title || null,
+    date: record.date || null,
+    attendees: record.attendees || [],
+    bytes,
+    cached_at: record.fetched_at || new Date().toISOString(),
+  });
+}
+
+async function updateManifest(entry) {
+  const manifest = (await readBlob(MANIFEST_KEY)) || { items: [] };
+  const items = Array.isArray(manifest.items) ? manifest.items : [];
+  const idx = items.findIndex((x) => x.id === entry.id);
+  if (idx >= 0) items[idx] = entry;
+  else items.push(entry);
+  items.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  await writeBlob(MANIFEST_KEY, { items, updated_at: new Date().toISOString() });
+}
+
+async function removeFromManifest(id) {
+  const manifest = await readBlob(MANIFEST_KEY);
+  if (!manifest || !Array.isArray(manifest.items)) return;
+  const items = manifest.items.filter((x) => x.id !== id);
+  await writeBlob(MANIFEST_KEY, { items, updated_at: new Date().toISOString() });
 }
 
 // Pull transcripts for a specific list of meeting ids, cache each to Blob.
@@ -119,12 +210,13 @@ export async function ingestMeetings({ meeting_ids = [], titles = {} }) {
 
       if (!transcript) { errors.push({ id, title: titles[id] || null, error: 'empty transcript' }); continue; }
 
-      await writeBlob(`fathom/${id}.json`, {
+      const record = {
         id,
         title: titles[id] || null,
         transcript,
         fetched_at: new Date().toISOString(),
-      });
+      };
+      await writeFathomRecord(id, record);
       ingested += 1;
     } catch (err) {
       errors.push({ id, title: titles[id] || null, error: String(err?.message || err) });
@@ -179,7 +271,7 @@ export async function ingestRange({ from_date, to_date, cursor, max_pages = 5, e
         }
         if (!transcript) { errors.push({ id, title, error: 'no transcript returned' }); continue; }
 
-        await writeBlob(`fathom/${id}.json`, {
+        const record = {
           id,
           title,
           date: m.scheduled_start_time || m.created_at || m.recording_start_time || null,
@@ -187,7 +279,8 @@ export async function ingestRange({ from_date, to_date, cursor, max_pages = 5, e
           recorded_by: m.recorded_by?.email || m.recorded_by?.name || null,
           transcript,
           fetched_at: new Date().toISOString(),
-        });
+        };
+        await writeFathomRecord(id, record);
         ingested += 1;
       } catch (err) {
         errors.push({ id, title, error: String(err?.message || err) });
