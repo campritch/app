@@ -1,5 +1,5 @@
 export const config = {
-  matcher: ['/', '/index.html', '/api/wiki-auth', '/bi', '/bi.html', '/api/gtm-data']
+  matcher: ['/nav', '/nav.html', '/api/wiki-auth', '/bi', '/bi.html', '/api/gtm-data']
 };
 
 const WIKI_COOKIE = 'sn_wiki';
