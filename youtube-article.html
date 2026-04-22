@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
     :root {
       --dark: #0e1323;
@@ -160,6 +161,84 @@
     .photo-grid { display: flex; gap: 6px; flex-wrap: wrap; }
     .photo-chip { width: 42px; height: 42px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; overflow: hidden; background: var(--pill-bg); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: var(--grey-1); transition: border-color 0.1s; }
     .photo-chip.active { border-color: var(--coral); }
+
+    /* ── Instagram slides ── */
+    .ig-slides-row {
+      display: flex; gap: 12px; overflow-x: auto; padding-bottom: 4px;
+    }
+    .ig-slides-row::-webkit-scrollbar { height: 4px; }
+    .ig-slides-row::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .ig-slide-wrap { flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; }
+    .ig-slide-num { font-size: 11px; font-weight: 600; color: var(--grey-1); text-align: center; }
+    .ig-dl-btn {
+      height: 26px; padding: 0 10px; font-size: 11px; font-weight: 600;
+      background: none; border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text-secondary); cursor: pointer; width: 100%;
+    }
+    .ig-dl-btn:hover { background: var(--pill-bg); }
+
+    /* The actual 1:1 slide — rendered at 360px, exported at 1080px */
+    .ig-slide {
+      width: 360px; height: 360px;
+      border-radius: 12px; overflow: hidden;
+      display: flex; flex-direction: column;
+      justify-content: space-between;
+      padding: 32px; position: relative;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+    }
+    .ig-slide--dark  { background: #0e1323; color: #fff; }
+    .ig-slide--coral { background: #ed7470; color: #fff; }
+    .ig-slide--black { background: #111111; color: #fff; }
+    .ig-slide--white { background: #ffffff; color: #0e1323; }
+
+    .ig-slide__tag {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; opacity: 0.5;
+    }
+    .ig-slide__body { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    .ig-slide__eyebrow {
+      font-size: 13px; font-weight: 600; opacity: 0.6; margin-bottom: 10px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .ig-slide__headline {
+      font-size: 28px; font-weight: 800; line-height: 1.15;
+      letter-spacing: -0.5px; margin: 0;
+    }
+    .ig-slide__headline em {
+      font-style: normal; color: #ed7470;
+    }
+    .ig-slide--coral .ig-slide__headline em,
+    .ig-slide--white .ig-slide__headline em {
+      color: #0e1323;
+    }
+    .ig-slide__sub {
+      margin-top: 14px; font-size: 15px; line-height: 1.55; opacity: 0.75;
+    }
+    .ig-slide__brand {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 700; opacity: 0.5;
+    }
+    .ig-slide__dot {
+      width: 10px; height: 10px; border-radius: 50%; background: #ed7470; flex-shrink: 0;
+    }
+    .ig-slide--coral .ig-slide__dot { background: #0e1323; }
+
+    /* Caption box */
+    .ig-caption-box {
+      background: var(--pill-bg); border-radius: 12px; padding: 20px 24px;
+    }
+    .ig-caption-box p {
+      margin: 0; font-size: 14px; line-height: 1.7; color: var(--text-primary);
+      white-space: pre-wrap;
+    }
+    .ig-caption-copy {
+      margin-top: 12px; height: 30px; padding: 0 12px;
+      background: none; border: 1px solid var(--border); border-radius: 7px;
+      font-size: 11px; font-weight: 600; color: var(--text-secondary); cursor: pointer;
+    }
+    .ig-caption-copy:hover { background: var(--white); }
   </style>
 </head>
 <body>
@@ -186,6 +265,29 @@
       </button>
     </div>
     <div class="status" id="status" style="display:none;"></div>
+  </div>
+
+  <!-- Instagram Carousel -->
+  <div class="card" id="ig-card" style="display:none;">
+    <div class="card__header">
+      <span class="card__label">Instagram Carousel</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-outline" onclick="downloadAllSlides()">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 5l3 3 3-3M1 10h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download all
+        </button>
+      </div>
+    </div>
+    <div class="card__body" style="display:flex;flex-direction:column;gap:20px;">
+      <div class="ig-slides-row" id="ig-slides-row"></div>
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--grey-1);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Caption</div>
+        <div class="ig-caption-box">
+          <p id="ig-caption-text"></p>
+          <button class="ig-caption-copy" onclick="copyCaption()">Copy caption</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Article -->
@@ -270,6 +372,36 @@ const TRANSCRIPT_API = isLocal ? 'http://localhost:5055/generate' : '/api/transc
 const THUMB_API      = isLocal ? 'http://localhost:5055/thumbnail' : '/api/thumbnail';
 const CLAUDE_API     = 'https://api.anthropic.com/v1/messages';
 const PHOTOS = ['cam1','cam2','cam3','Cam'];
+
+const IG_PROMPT = (transcript) => `You are a top-tier social media strategist specialising in Instagram carousel content that drives saves and shares.
+
+Given the YouTube transcript below, create a high-converting Instagram carousel with exactly 4 slides plus a caption.
+
+CAROUSEL FORMAT (the text-heavy bold-statement format that performs best on Instagram right now):
+- Slide 1: HOOK — one provocative, counterintuitive, or bold statement that stops the scroll. Short. Punchy.
+- Slide 2: THE PROBLEM or CONTEXT — one key insight or tension from the video.
+- Slide 3: THE INSIGHT — the most useful, surprising or actionable point.
+- Slide 4: THE TAKEAWAY / CTA — what the reader should do or think differently about. End with "Save this."
+
+RULES:
+- Each slide: one EYEBROW (3-5 word context label), one HEADLINE (max 12 words, punchy), one BODY (1-2 sentences max, optional)
+- Headlines should feel bold and direct — written for someone scrolling fast
+- Use *italics* around the single most powerful word or phrase in each headline (rendered in coral/accent)
+- Caption: strong hook line, 3-4 lines of context, 3-5 hashtags. Conversational, not corporate.
+
+Return ONLY this JSON, no other text:
+{
+  "slides": [
+    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "dark" },
+    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "coral" },
+    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "dark" },
+    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "black" }
+  ],
+  "caption": "..."
+}
+
+Transcript:
+${transcript}`;
 
 const ARTICLE_PROMPT = (transcript) => `You are an expert writer and journalist. Below is the transcript of a YouTube video.
 
@@ -479,7 +611,13 @@ async function generate() {
   document.getElementById('status').style.display = 'none';
   btn.disabled = false;
 
-  await regenThumb();
+  // Run thumbnail and Instagram generation in parallel
+  const [igData] = await Promise.all([
+    generateInstagram(transcript, key),
+    regenThumb(),
+  ]);
+
+  if (igData) renderSlides(igData);
 }
 
 // ── Render helpers ──────────────────────────────────────────────────────────
@@ -545,6 +683,90 @@ function selectBg(el, name) {
 function selectSide(el, side) {
   document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active'); thumbData.side = side;
+}
+
+// ── Instagram carousel ──────────────────────────────────────────────────────
+async function generateInstagram(transcript, key) {
+  try {
+    const res = await fetch(CLAUDE_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-6',
+        max_tokens: 2048,
+        messages: [{ role: 'user', content: IG_PROMPT(transcript) }],
+      }),
+    });
+    const data = await res.json();
+    const raw = data.content?.[0]?.text || '';
+    // Strip markdown code fences if present
+    const json = raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+    return JSON.parse(json);
+  } catch (e) {
+    console.error('Instagram generation failed:', e);
+    return null;
+  }
+}
+
+function headlineHtml(text) {
+  // Convert *word* to <em>word</em>
+  return text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+}
+
+function buildSlide(slide, index) {
+  const bgClass = `ig-slide--${slide.bg || 'dark'}`;
+  const labelMap = { dark: 'Slide', coral: 'Slide', black: 'Slide', white: 'Slide' };
+  return `
+    <div class="ig-slide-wrap">
+      <div class="ig-slide-num">Slide ${index + 1}</div>
+      <div class="ig-slide ${bgClass}" id="ig-slide-${index}">
+        <div class="ig-slide__tag">SpotsNow</div>
+        <div class="ig-slide__body">
+          ${slide.eyebrow ? `<div class="ig-slide__eyebrow">${slide.eyebrow}</div>` : ''}
+          <p class="ig-slide__headline">${headlineHtml(slide.headline)}</p>
+          ${slide.body ? `<p class="ig-slide__sub">${slide.body}</p>` : ''}
+        </div>
+        <div class="ig-slide__brand">
+          <div class="ig-slide__dot"></div>
+          spotsnow.io
+        </div>
+      </div>
+      <button class="ig-dl-btn" onclick="downloadSlide(${index})">Download PNG</button>
+    </div>`;
+}
+
+function renderSlides(igData) {
+  const row = document.getElementById('ig-slides-row');
+  row.innerHTML = igData.slides.map((s, i) => buildSlide(s, i)).join('');
+  document.getElementById('ig-caption-text').textContent = igData.caption;
+  document.getElementById('ig-card').style.display = 'block';
+}
+
+async function downloadSlide(index) {
+  const el = document.getElementById(`ig-slide-${index}`);
+  // Render at 3x = 1080px from 360px
+  const canvas = await html2canvas(el, { scale: 3, useCORS: true, backgroundColor: null });
+  const a = document.createElement('a');
+  a.download = `spotsnow-slide-${index + 1}.png`;
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+
+async function downloadAllSlides() {
+  for (let i = 0; i < 4; i++) {
+    await downloadSlide(i);
+    await new Promise(r => setTimeout(r, 300));
+  }
+}
+
+function copyCaption() {
+  const text = document.getElementById('ig-caption-text').textContent;
+  navigator.clipboard.writeText(text).then(() => flash(event.target, 'Copied!'));
 }
 
 // ── Copy ────────────────────────────────────────────────────────────────────
