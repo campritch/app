@@ -102,21 +102,41 @@ input, textarea, select { font-family: inherit; }
 .panel .csv-drop.ok { border-color: var(--good); color: var(--good); }
 .panel .csv-drop input { display: none; }
 
-/* ── Cached transcripts manager ── */
-.panel .cached-list { background: var(--bg); border: 1px solid var(--line); max-height: 320px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 10px; }
-.panel .cached-hdr { padding: 8px 10px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; color: var(--text-dim); background: var(--surface-2); position: sticky; top: 0; z-index: 1; }
-.panel .cached-hdr .clear-all { background: transparent; border: none; color: var(--bad); cursor: pointer; font-family: inherit; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 0; }
-.panel .cached-hdr .clear-all:hover { filter: brightness(1.2); }
-.panel .cached-row { padding: 8px 10px; border-bottom: 1px solid var(--line-soft); display: grid; grid-template-columns: 46px 1fr auto; gap: 8px; align-items: start; }
-.panel .cached-row:last-child { border-bottom: none; }
-.panel .cached-row .dt { color: var(--text-faint); padding-top: 2px; }
-.panel .cached-row .ti { color: var(--text); font-family: 'Inter Tight', sans-serif; font-size: 11px; line-height: 1.35; }
-.panel .cached-row .ti .meta { display: block; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-faint); margin-top: 2px; }
-.panel .cached-row .acts { display: flex; gap: 4px; flex-shrink: 0; }
-.panel .cached-row .acts button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 3px 8px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border-radius: 2px; }
-.panel .cached-row .acts .v:hover { color: var(--text); border-color: var(--accent); }
-.panel .cached-row .acts .d:hover { color: var(--bad); border-color: var(--bad); }
-.panel .cached-empty { padding: 16px 10px; color: var(--text-faint); font-family: 'Fraunces', serif; font-style: italic; text-align: center; font-size: 11px; }
+/* ── Unified transcripts panel ── */
+.panel .range-pills { display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap; }
+.panel .range-pills button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 4px 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; flex: 1; }
+.panel .range-pills button:hover { color: var(--text); border-color: var(--text-dim); }
+.panel .range-pills button.active { color: var(--accent); border-color: var(--accent); }
+.panel .tx-list { background: var(--bg); border: 1px solid var(--line); max-height: 420px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 10px; }
+.panel .tx-list .empty { padding: 16px 10px; color: var(--text-faint); font-family: 'Fraunces', serif; font-style: italic; text-align: center; font-size: 11px; }
+.panel .tx-row { padding: 8px 10px; border-bottom: 1px solid var(--line-soft); display: grid; grid-template-columns: 16px 46px 1fr auto; gap: 8px; align-items: start; cursor: pointer; }
+.panel .tx-row:last-child { border-bottom: none; }
+.panel .tx-row:hover { background: var(--surface-2); }
+.panel .tx-row.cached { background: rgba(127, 176, 105, 0.04); }
+.panel .tx-row input[type="checkbox"] { margin: 2px 0 0; accent-color: var(--accent); cursor: pointer; }
+.panel .tx-row .dt { color: var(--text-faint); padding-top: 2px; }
+.panel .tx-row .ti { color: var(--text); font-family: 'Inter Tight', sans-serif; font-size: 11.5px; line-height: 1.35; min-width: 0; }
+.panel .tx-row .ti .meta { display: block; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-faint); margin-top: 2px; word-break: break-word; }
+.panel .tx-row .status { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; flex-shrink: 0; }
+.panel .tx-row .badge { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 6px; border-radius: 2px; }
+.panel .tx-row .badge.ok { color: var(--good); border: 1px solid var(--good); }
+.panel .tx-row .badge.none { color: var(--text-faint); border: 1px solid var(--line); }
+.panel .tx-row .row-acts { display: flex; gap: 4px; }
+.panel .tx-row .row-acts button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 2px 6px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border-radius: 2px; }
+.panel .tx-row .row-acts .v:hover { color: var(--text); border-color: var(--accent); }
+.panel .tx-row .row-acts .d:hover { color: var(--bad); border-color: var(--bad); }
+.panel .tx-foot { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+.panel .tx-foot button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 7px 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; }
+.panel .tx-foot .tx-more:hover { color: var(--text); border-color: var(--text-dim); }
+.panel .tx-foot .tx-gen { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+.panel .tx-foot .tx-gen:hover:not(:disabled) { filter: brightness(1.08); }
+.panel .tx-foot .tx-gen:disabled { opacity: 0.4; cursor: not-allowed; background: transparent; color: var(--text-faint); border-color: var(--line); }
+
+/* Stop button in dock */
+.dock .box .stop-btn { background: transparent; color: var(--bad); border: 1px solid var(--bad); padding: 10px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; height: 44px; cursor: pointer; display: none; }
+.dock .box .stop-btn:hover { filter: brightness(1.15); }
+.dock.streaming .send-btn { display: none; }
+.dock.streaming .stop-btn { display: inline-block; }
 
 /* ── Modal (transcript viewer + generic) ── */
 .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.72); display: none; align-items: center; justify-content: center; z-index: 200; padding: 40px; }
@@ -311,26 +331,25 @@ input, textarea, select { font-family: inherit; }
       </div>
 
       <div class="group">
-        <div class="label">Fathom date range <span class="hint">calls to pull</span></div>
-        <div class="row">
-          <input type="date" id="in-from">
-          <input type="date" id="in-to">
-        </div>
-        <button id="btn-browse" class="ingest-btn">Browse calls in range</button>
-        <div class="calls-list" id="calls-list"></div>
-        <div class="ingest-log" id="ingest-log"></div>
-      </div>
-
-      <div class="group">
         <div class="label">
-          Ingested transcripts <span class="hint" id="cached-count">0 cached</span>
+          Transcripts <span class="hint" id="tx-summary">loading...</span>
           <span class="field-meta">
-            <button class="field-edit-btn" id="btn-cache-refresh">Refresh</button>
+            <button class="field-edit-btn" id="btn-tx-refresh">Refresh</button>
           </span>
         </div>
-        <div class="cached-list" id="cached-list">
-          <div class="cached-empty">No transcripts ingested yet.</div>
+        <div class="range-pills" id="range-pills">
+          <button data-range="7">7d</button>
+          <button data-range="30" class="active">30d</button>
+          <button data-range="90">90d</button>
+          <button data-range="180">6mo</button>
+          <button data-range="all">All</button>
         </div>
+        <div class="tx-list" id="tx-list"></div>
+        <div class="tx-foot" id="tx-foot" hidden>
+          <button class="tx-more" id="btn-tx-more">Show more</button>
+          <button class="tx-gen" id="btn-tx-gen" disabled>Generate 0 selected</button>
+        </div>
+        <div class="ingest-log" id="ingest-log"></div>
       </div>
 
       <div class="group">
@@ -395,10 +414,11 @@ input, textarea, select { font-family: inherit; }
         </div>
       </div>
 
-      <div class="dock">
+      <div class="dock" id="dock">
         <div class="box">
           <textarea id="in-msg" placeholder="Ask the agent..." rows="1"></textarea>
-          <button id="btn-send">Send</button>
+          <button id="btn-send" class="send-btn">Send</button>
+          <button id="btn-stop" class="stop-btn">Stop</button>
         </div>
         <div class="meta">
           <span class="status" id="status">idle</span>
@@ -731,8 +751,6 @@ function hydrateInputs() {
   document.getElementById('in-links').value = state.notionLinks || '';
   document.getElementById('in-supp').value = state.supp || '';
   document.getElementById('in-notion-parent').value = state.notionParentId || '';
-  document.getElementById('in-from').value = state.dateFrom || '';
-  document.getElementById('in-to').value = state.dateTo || '';
   renderFieldView('strategy');
   renderFieldView('notionLinks');
   renderFieldView('supp');
@@ -829,15 +847,10 @@ function hydrate() {
   renderHistory();
   attachInputs();
   loadRemoteState();
-  loadCachedTranscripts();
+  loadTranscripts();
 }
 
 function attachInputs() {
-  // Date range auto-saves (it's just two date pickers, low risk)
-  const onDateEdit = (k) => (e) => { state[k] = e.target.value; saveState(); saveRemoteStateDebounced(); };
-  document.getElementById('in-from').addEventListener('input', onDateEdit('dateFrom'));
-  document.getElementById('in-to').addEventListener('input', onDateEdit('dateTo'));
-
   // Edit/Save/Cancel buttons for text fields
   document.querySelectorAll('[data-edit]').forEach((btn) => {
     btn.addEventListener('click', () => toggleFieldMode(btn.dataset.edit, 'edit'));
@@ -859,8 +872,11 @@ function attachInputs() {
   document.getElementById('btn-new-conv').addEventListener('click', newConv);
   document.getElementById('btn-export').addEventListener('click', exportChat);
   document.getElementById('csv-file').addEventListener('change', uploadCsv);
-  document.getElementById('btn-browse').addEventListener('click', browseFathom);
-  document.getElementById('btn-cache-refresh').addEventListener('click', () => loadCachedTranscripts(true));
+  document.getElementById('btn-tx-refresh').addEventListener('click', loadTranscripts);
+  document.getElementById('btn-tx-gen').addEventListener('click', generateSelected);
+  document.getElementById('btn-tx-more').addEventListener('click', () => { txDisplayCount += 50; renderTxList(); });
+  document.querySelectorAll('#range-pills button').forEach((b) => b.addEventListener('click', () => setRange(b.dataset.range)));
+  document.getElementById('btn-stop').addEventListener('click', stopGeneration);
   document.getElementById('modal-close').addEventListener('click', closeModal);
   document.getElementById('modal-bg').addEventListener('click', (e) => { if (e.target.id === 'modal-bg') closeModal(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closePublishModal(); closePromptModal(); } });
@@ -879,181 +895,177 @@ function attachInputs() {
   document.getElementById('pr-save').addEventListener('click', savePrompt);
 }
 
-let loadedCalls = [];
+// ── Unified transcripts panel ─────────────────────────────────────────
+// All Fathom meetings in range + cached status + select/ingest/view/delete in one list.
+let txMeetings = [];             // from /api/fathom-list
+let txCachedById = new Map();    // id -> cached item (from /api/fathom-cache list)
+let txSelectedIds = new Set();   // user-selected ids to transcribe
+let txDisplayCount = 50;         // client-side pagination
+let txRange = '30';              // '7' | '30' | '90' | '180' | 'all'
+let txLoading = false;
 
-async function browseFathom() {
-  const from = state.dateFrom, to = state.dateTo;
-  if (!from || !to) { alert('Set a Fathom date range first.'); return; }
+function computeRangeDates(range) {
+  const to = new Date();
+  const from = new Date();
+  if (range === 'all') from.setFullYear(to.getFullYear() - 5);
+  else from.setDate(to.getDate() - Number(range));
+  const fmt = (d) => d.toISOString().slice(0, 10);
+  return { from_date: fmt(from), to_date: fmt(to) };
+}
 
-  const btn = document.getElementById('btn-browse');
+async function loadTranscripts() {
+  if (txLoading || !password) return;
+  txLoading = true;
+  const sum = document.getElementById('tx-summary');
+  sum.textContent = 'loading...';
   const log = document.getElementById('ingest-log');
-  const listEl = document.getElementById('calls-list');
-  btn.disabled = true;
   log.className = 'ingest-log';
-  log.textContent = 'loading...';
-  listEl.innerHTML = '';
+  log.textContent = '';
 
   try {
-    const res = await fetch('/api/fathom-list', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password, from_date: from, to_date: to }),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || `HTTP ${res.status}`);
-    }
-    const data = await res.json();
-    loadedCalls = data.meetings || [];
-    log.textContent = '';
-    renderCallsList(data);
+    const { from_date, to_date } = computeRangeDates(txRange);
+    const [listRes, cacheRes] = await Promise.all([
+      fetch('/api/fathom-list', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password, from_date, to_date }) }),
+      fetch('/api/fathom-cache', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password, action: 'list' }) }),
+    ]);
+    if (!listRes.ok) { const e = await listRes.json().catch(() => ({})); throw new Error(e.error || `fathom-list HTTP ${listRes.status}`); }
+    if (!cacheRes.ok) { const e = await cacheRes.json().catch(() => ({})); throw new Error(e.error || `fathom-cache HTTP ${cacheRes.status}`); }
+    const listData = await listRes.json();
+    const cacheData = await cacheRes.json();
+
+    txMeetings = listData.meetings || [];
+    const cacheItems = Array.isArray(cacheData.items) ? cacheData.items : [];
+    txCachedById = new Map(cacheItems.map((it) => [String(it.id), it]));
+
+    // Merge in any cached transcripts that are OUTSIDE the fathom date window
+    // (so "All" doesn't hide your historical cache).
+    const listIds = new Set(txMeetings.map((m) => String(m.id)));
+    const extras = cacheItems.filter((it) => !listIds.has(String(it.id))).map((it) => ({
+      id: it.id,
+      title: it.title || it.id,
+      date: it.date,
+      attendees: it.attendees || [],
+      share_url: null,
+      _cacheOnly: true,
+    }));
+    txMeetings = [...txMeetings, ...extras].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+    txDisplayCount = 50;
+    renderTxList();
   } catch (err) {
-    log.className = 'ingest-log err';
-    log.textContent = `failed: ${err.message}`;
+    document.getElementById('tx-list').innerHTML = `<div class="empty">Failed: ${escapeHtml(err.message)}</div>`;
+    sum.textContent = 'error';
   } finally {
-    btn.disabled = false;
+    txLoading = false;
   }
 }
 
-function renderCallsList(data) {
-  const el = document.getElementById('calls-list');
-  const calls = data.meetings || [];
-  if (!calls.length) {
-    el.innerHTML = `<div class="calls-hdr"><span>0 business calls in range · ${data.excluded_count || 0} excluded</span></div>`;
+function renderTxList() {
+  const el = document.getElementById('tx-list');
+  const foot = document.getElementById('tx-foot');
+  const sum = document.getElementById('tx-summary');
+  const cachedCount = [...txCachedById.keys()].length;
+  const totalCount = txMeetings.length;
+  sum.textContent = `${cachedCount}/${totalCount} cached`;
+
+  if (!totalCount) {
+    el.innerHTML = '<div class="empty">No calls in this range.</div>';
+    foot.hidden = true;
     return;
   }
 
-  const hdr = `<div class="calls-hdr"><span>${calls.length} calls · ${data.excluded_count || 0} excluded (standups)</span><span class="sel-toggle" id="sel-all">select all</span></div>`;
-  const rows = calls.map((m, i) => {
-    const date = m.date ? new Date(m.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '—';
-    const atts = (m.attendees || []).slice(0, 3).join(', ') + ((m.attendees || []).length > 3 ? ` +${m.attendees.length - 3}` : '');
-    const dur = m.duration_minutes ? `${Math.round(m.duration_minutes)}m` : '';
-    return `<label class="call-row">
-      <input type="checkbox" class="call-cb" data-idx="${i}" checked>
-      <span class="dt">${escapeHtml(date)}</span>
-      <span class="ti">${escapeHtml(m.title || '(untitled)')}<span class="meta">${escapeHtml([dur, atts].filter(Boolean).join(' · ') || '—')}</span></span>
-    </label>`;
+  const visible = txMeetings.slice(0, txDisplayCount);
+  const rows = visible.map((m) => {
+    const id = String(m.id);
+    const cached = txCachedById.get(id);
+    const when = m.date ? new Date(m.date).toISOString().slice(5, 10).replace('-', '/') : '—';
+    const atts = (m.attendees || []).slice(0, 2).join(', ') + ((m.attendees || []).length > 2 ? ` +${m.attendees.length - 2}` : '');
+    const title = m.title || '(untitled)';
+    const sel = txSelectedIds.has(id) ? 'checked' : '';
+    const badge = cached ? `<span class="badge ok">✓ cached</span>` : `<span class="badge none">not cached</span>`;
+    const acts = cached ? `<div class="row-acts"><button class="v" data-view="${escapeHtml(id)}">View</button><button class="d" data-del="${escapeHtml(id)}">Del</button></div>` : '';
+    return `<div class="tx-row${cached ? ' cached' : ''}" data-id="${escapeHtml(id)}">
+      <input type="checkbox" class="tx-cb" data-id="${escapeHtml(id)}" ${sel}>
+      <span class="dt">${escapeHtml(when)}</span>
+      <span class="ti">${escapeHtml(title)}<span class="meta">${escapeHtml(atts || '—')}</span></span>
+      <div class="status">${badge}${acts}</div>
+    </div>`;
   }).join('');
-  const foot = `<div class="calls-foot"><button id="btn-ingest-sel">Ingest <span id="sel-count">${calls.length}</span> selected</button></div>`;
-  el.innerHTML = hdr + rows + foot;
+  el.innerHTML = rows;
 
-  const selToggle = document.getElementById('sel-all');
-  let allOn = true;
-  selToggle.addEventListener('click', () => {
-    allOn = !allOn;
-    el.querySelectorAll('.call-cb').forEach((cb) => { cb.checked = allOn; });
-    selToggle.textContent = allOn ? 'select none' : 'select all';
-    updateSelCount();
+  // Click row toggles checkbox (except on action buttons)
+  el.querySelectorAll('.tx-row').forEach((row) => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('.row-acts') || e.target.tagName === 'INPUT') return;
+      const id = row.dataset.id;
+      if (txSelectedIds.has(id)) txSelectedIds.delete(id); else txSelectedIds.add(id);
+      updateGenButton();
+      const cb = row.querySelector('.tx-cb');
+      if (cb) cb.checked = txSelectedIds.has(id);
+    });
   });
-  el.querySelectorAll('.call-cb').forEach((cb) => cb.addEventListener('change', updateSelCount));
-  document.getElementById('btn-ingest-sel').addEventListener('click', ingestSelected);
-  updateSelCount();
+  el.querySelectorAll('.tx-cb').forEach((cb) => {
+    cb.addEventListener('change', () => {
+      const id = cb.dataset.id;
+      if (cb.checked) txSelectedIds.add(id); else txSelectedIds.delete(id);
+      updateGenButton();
+    });
+  });
+  el.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); viewTx(b.dataset.view); }));
+  el.querySelectorAll('[data-del]').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); deleteTx(b.dataset.del); }));
+
+  foot.hidden = false;
+  document.getElementById('btn-tx-more').hidden = txDisplayCount >= totalCount;
+  document.getElementById('btn-tx-more').textContent = `Show more (${Math.max(0, totalCount - txDisplayCount)} hidden)`;
+  updateGenButton();
 }
 
-function updateSelCount() {
-  const n = document.querySelectorAll('.call-cb:checked').length;
-  const out = document.getElementById('sel-count');
-  if (out) out.textContent = n;
-  const btn = document.getElementById('btn-ingest-sel');
-  if (btn) btn.disabled = n === 0;
+function updateGenButton() {
+  // Count selected that are NOT already cached (the ones we'd actually transcribe)
+  const toGenerate = [...txSelectedIds].filter((id) => !txCachedById.has(id));
+  const btn = document.getElementById('btn-tx-gen');
+  btn.disabled = toGenerate.length === 0;
+  btn.textContent = `Generate ${toGenerate.length} selected`;
 }
 
-async function ingestSelected() {
-  const checked = Array.from(document.querySelectorAll('.call-cb:checked'));
-  const selected = checked.map((cb) => loadedCalls[Number(cb.dataset.idx)]).filter(Boolean);
-  if (!selected.length) return;
+async function generateSelected() {
+  const toGenerate = [...txSelectedIds].filter((id) => !txCachedById.has(id));
+  if (!toGenerate.length) return;
 
-  const btn = document.getElementById('btn-ingest-sel');
+  const titleById = Object.fromEntries(txMeetings.map((m) => [String(m.id), m.title]));
   const log = document.getElementById('ingest-log');
+  const btn = document.getElementById('btn-tx-gen');
   btn.disabled = true;
   log.className = 'ingest-log';
-  log.textContent = `ingesting ${selected.length}...`;
-
-  const meeting_ids = selected.map((m) => m.id);
-  const titles = Object.fromEntries(selected.map((m) => [m.id, m.title]));
+  log.textContent = `generating ${toGenerate.length} transcript${toGenerate.length === 1 ? '' : 's'}...`;
 
   try {
     const res = await fetch('/api/fathom-ingest', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password, meeting_ids, titles }),
+      body: JSON.stringify({ password, meeting_ids: toGenerate, titles: titleById }),
     });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || `HTTP ${res.status}`);
-    }
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `HTTP ${res.status}`); }
     const data = await res.json();
     log.className = 'ingest-log ok';
     log.textContent = `done · ${data.ingested} new · ${data.cached_existing} already cached · ${data.errors?.length || 0} errors`;
-    loadCachedTranscripts(true);
+    txSelectedIds.clear();
+    loadTranscripts();
   } catch (err) {
     log.className = 'ingest-log err';
     log.textContent = `failed: ${err.message}`;
-  } finally {
     btn.disabled = false;
   }
 }
 
-// ── Cached transcripts manager ────────────────────────────────────────
-let cachedItems = [];
-
-async function loadCachedTranscripts(force = false) {
-  if (!password) return;
+async function viewTx(id) {
+  const meta = txCachedById.get(String(id)) || txMeetings.find((m) => String(m.id) === String(id)) || {};
+  openModal(meta.title || id, `${meta.date ? new Date(meta.date).toLocaleString() : ''}${meta.attendees?.length ? ' · ' + meta.attendees.join(', ') : ''}`, 'Loading...');
   try {
     const res = await fetch('/api/fathom-cache', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password, action: 'list' }),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    cachedItems = Array.isArray(data.items) ? data.items : [];
-    renderCachedList();
-  } catch (err) {
-    const el = document.getElementById('cached-list');
-    el.innerHTML = `<div class="cached-empty">load failed: ${escapeHtml(err.message)}</div>`;
-  }
-}
-
-function renderCachedList() {
-  const el = document.getElementById('cached-list');
-  const cnt = document.getElementById('cached-count');
-  cnt.textContent = `${cachedItems.length} cached`;
-  if (!cachedItems.length) {
-    el.innerHTML = '<div class="cached-empty">No transcripts ingested yet.</div>';
-    return;
-  }
-  const rows = cachedItems.map((it, idx) => {
-    const when = it.date ? new Date(it.date).toISOString().slice(5, 10).replace('-', '/') : '—';
-    const kb = it.bytes ? `${Math.round(it.bytes / 1024)}kb` : '';
-    const title = it.title || it.id;
-    return `<div class="cached-row">
-      <span class="dt">${escapeHtml(when)}</span>
-      <span class="ti">${escapeHtml(title)}<span class="meta">${escapeHtml(kb)}</span></span>
-      <span class="acts"><button class="v" data-view="${idx}">View</button><button class="d" data-del="${idx}">Del</button></span>
-    </div>`;
-  });
-  el.innerHTML =
-    `<div class="cached-hdr"><span>${cachedItems.length} cached</span><button class="clear-all" id="btn-cache-clear">Clear all</button></div>` +
-    rows.join('');
-  el.querySelectorAll('[data-view]').forEach((b) => {
-    b.addEventListener('click', () => viewCached(Number(b.dataset.view)));
-  });
-  el.querySelectorAll('[data-del]').forEach((b) => {
-    b.addEventListener('click', () => deleteCached(Number(b.dataset.del)));
-  });
-  document.getElementById('btn-cache-clear').addEventListener('click', clearAllCached);
-}
-
-async function viewCached(idx) {
-  const it = cachedItems[idx];
-  if (!it) return;
-  openModal(it.title || it.id, `${it.date ? new Date(it.date).toLocaleString() : ''}${it.attendees?.length ? ' · ' + it.attendees.join(', ') : ''}`, 'Loading...');
-  try {
-    const res = await fetch('/api/fathom-cache', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password, action: 'view', id: it.id }),
+      body: JSON.stringify({ password, action: 'view', id }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const rec = await res.json();
@@ -1063,36 +1075,34 @@ async function viewCached(idx) {
   }
 }
 
-async function deleteCached(idx) {
-  const it = cachedItems[idx];
-  if (!it) return;
-  if (!confirm(`Remove "${it.title || it.id}" from the agent's context?`)) return;
+async function deleteTx(id) {
+  const meta = txCachedById.get(String(id)) || {};
+  if (!confirm(`Remove "${meta.title || id}" from the agent's context?`)) return;
   try {
     const res = await fetch('/api/fathom-cache', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password, action: 'delete', id: it.id }),
+      body: JSON.stringify({ password, action: 'delete', id }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    loadCachedTranscripts(true);
+    loadTranscripts();
   } catch (err) {
     alert(`Delete failed: ${err.message}`);
   }
 }
 
-async function clearAllCached() {
-  if (!confirm(`Remove ALL ${cachedItems.length} cached transcripts? This can't be undone.`)) return;
-  try {
-    const res = await fetch('/api/fathom-cache', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password, action: 'clear' }),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    loadCachedTranscripts(true);
-  } catch (err) {
-    alert(`Clear failed: ${err.message}`);
-  }
+function setRange(range) {
+  txRange = range;
+  document.querySelectorAll('#range-pills button').forEach((b) => {
+    b.classList.toggle('active', b.dataset.range === range);
+  });
+  // Keep state.dateFrom/dateTo in sync so the agent sees the current window.
+  const { from_date, to_date } = computeRangeDates(range);
+  state.dateFrom = from_date;
+  state.dateTo = to_date;
+  saveState();
+  saveRemoteStateDebounced();
+  loadTranscripts();
 }
 
 function openModal(title, meta, body) {
@@ -1510,6 +1520,15 @@ function mdToHtml(md) {
 }
 
 // ── Send ──────────────────────────────────────────────────────────────
+let currentAbort = null;
+
+function stopGeneration() {
+  if (currentAbort) {
+    currentAbort.abort();
+    currentAbort = null;
+  }
+}
+
 async function send() {
   if (streaming) return;
   const ta = document.getElementById('in-msg');
@@ -1536,18 +1555,39 @@ async function send() {
 
   setStatus('thinking', 'streaming...');
   streaming = true;
+  currentAbort = new AbortController();
   document.getElementById('btn-send').disabled = true;
+  document.getElementById('dock').classList.add('streaming');
 
   try {
+    // Build cross-conversation memory: the last 5 other conversations' titles + first user msg.
+    // Gives the agent continuity across chats without blowing context.
+    const priorSummaries = state.conversations
+      .filter((c) => c.id !== conv.id && (c.messages || []).length > 0)
+      .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''))
+      .slice(0, 5)
+      .map((c) => {
+        const firstUser = (c.messages || []).find((m) => m.role === 'user')?.content || '';
+        const lastAssist = [...(c.messages || [])].reverse().find((m) => m.role === 'assistant')?.content || '';
+        return {
+          title: c.title || 'Untitled',
+          when: c.updatedAt || '',
+          firstQuestion: firstUser.slice(0, 400),
+          lastAnswer: lastAssist.slice(0, 600),
+        };
+      });
+
     const res = await fetch('/api/strategy-chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: currentAbort.signal,
       body: JSON.stringify({
         password,
         strategy: state.strategy,
         notionLinks: state.notionLinks,
         supp: state.supp,
         dateRange: { from: state.dateFrom, to: state.dateTo },
+        priorSummaries,
         messages: conv.messages
           .filter((m, i) => i < conv.messages.length - 1) // exclude the empty pending assistant
           .map((m) => ({ role: m.role, content: m.content })),
@@ -1607,16 +1647,19 @@ async function send() {
     renderHistory();
     saveRemoteStateDebounced();
   } catch (err) {
-    pending.content = (pending.content || '') + `\n\n_Error: ${err.message}_`;
+    const aborted = err.name === 'AbortError';
+    pending.content = (pending.content || '') + (aborted ? '\n\n_Stopped by you._' : `\n\n_Error: ${err.message}_`);
     bodyEl.innerHTML = mdToHtml(pending.content);
-    setStatus('err', err.message);
+    setStatus(aborted ? 'ok' : 'err', aborted ? 'stopped' : err.message);
     conv.updatedAt = new Date().toISOString();
     saveState();
     renderHistory();
     saveRemoteStateDebounced();
   } finally {
     streaming = false;
+    currentAbort = null;
     document.getElementById('btn-send').disabled = false;
+    document.getElementById('dock').classList.remove('streaming');
   }
 }
 

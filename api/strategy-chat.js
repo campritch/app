@@ -39,7 +39,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'POST only' });
   }
 
-  const { password, messages, strategy, notionLinks, supp, dateRange } = req.body || {};
+  const { password, messages, strategy, notionLinks, supp, dateRange, priorSummaries } = req.body || {};
 
   // Password gate
   const expected = process.env.STRATEGY_PASSWORD;
@@ -59,7 +59,7 @@ export default async function handler(req, res) {
   const client = new Anthropic({ apiKey });
 
   // Build the context block from user inputs. Cached at block level so follow-ups are cheap.
-  const contextBlock = buildContextBlock({ strategy, notionLinks, supp, dateRange });
+  const contextBlock = buildContextBlock({ strategy, notionLinks, supp, dateRange, priorSummaries });
 
   const workingMessages = [
     ...(contextBlock ? [{ role: 'user', content: [{ type: 'text', text: contextBlock, cache_control: { type: 'ephemeral' } }] }] : []),
@@ -126,7 +126,7 @@ export default async function handler(req, res) {
   }
 }
 
-function buildContextBlock({ strategy, notionLinks, supp, dateRange }) {
+function buildContextBlock({ strategy, notionLinks, supp, dateRange, priorSummaries }) {
   const parts = [];
   if (strategy && strategy.trim()) {
     parts.push(`## Current business strategy (Cam's words)\n\n${strategy.trim()}`);
@@ -139,6 +139,13 @@ function buildContextBlock({ strategy, notionLinks, supp, dateRange }) {
   }
   if (dateRange?.from || dateRange?.to) {
     parts.push(`## Default Fathom date range\n\nfrom: ${dateRange.from || '(none)'}\nto: ${dateRange.to || '(none)'}`);
+  }
+  if (Array.isArray(priorSummaries) && priorSummaries.length) {
+    const lines = priorSummaries.map((p) => {
+      const when = p.when ? new Date(p.when).toISOString().slice(0, 10) : '';
+      return `### ${p.title}${when ? ` (${when})` : ''}\nCam asked: ${p.firstQuestion}\nYou answered (excerpt): ${p.lastAnswer}`;
+    });
+    parts.push(`## Recent prior conversations with Cam (for continuity)\n\nThese are summaries of recent separate chats. Use them so you don't ask Cam to repeat context he's already shared.\n\n${lines.join('\n\n')}`);
   }
   if (!parts.length) return '';
   return parts.join('\n\n');
