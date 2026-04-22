@@ -464,18 +464,47 @@ function extractVideoId(url) {
   return m ? m[1] : null;
 }
 
+// CORS proxies — tried in order; first success wins
+const PROXIES = [
+  {
+    wrap: u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+    extract: async r => r.text(),
+  },
+  {
+    wrap: u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+    extract: async r => (await r.json()).contents,
+  },
+  {
+    wrap: u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+    extract: async r => r.text(),
+  },
+];
+
+async function proxyFetch(targetUrl) {
+  let lastErr = new Error('All proxies failed');
+  for (const p of PROXIES) {
+    try {
+      const res = await fetch(p.wrap(targetUrl));
+      if (!res.ok) { lastErr = new Error(`Proxy returned ${res.status}`); continue; }
+      const text = await p.extract(res);
+      if (!text) { lastErr = new Error('Empty response from proxy'); continue; }
+      return text;
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr;
+}
+
 async function fetchTranscript(videoId) {
-  const proxy = 'https://api.allorigins.win/get?url=';
   const ytUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
-  // Fetch the YouTube page through CORS proxy
-  const pageRes = await fetch(proxy + encodeURIComponent(ytUrl));
-  if (!pageRes.ok) throw new Error('Could not fetch YouTube page');
-  const { contents: html } = await pageRes.json();
+  // Fetch YouTube page (try each proxy until one works)
+  const html = await proxyFetch(ytUrl);
 
   // Pull out ytInitialPlayerResponse
   const jsonMatch = html.match(/ytInitialPlayerResponse\s*=\s*(\{.+?\})\s*;/s);
-  if (!jsonMatch) throw new Error('Could not parse YouTube page');
+  if (!jsonMatch) throw new Error('Could not parse YouTube page — the proxy may have returned a bot-check page');
   const player = JSON.parse(jsonMatch[1]);
 
   const tracks = player?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
@@ -486,10 +515,8 @@ async function fetchTranscript(videoId) {
                 tracks.find(t => t.languageCode?.startsWith('en')) ||
                 tracks[0];
 
-  // Fetch the caption XML
-  const capRes = await fetch(proxy + encodeURIComponent(track.baseUrl));
-  if (!capRes.ok) throw new Error('Could not fetch captions');
-  const { contents: xml } = await capRes.json();
+  // Fetch the caption XML (same proxy fallback logic)
+  const xml = await proxyFetch(track.baseUrl);
 
   // Parse XML and return plain text
   const doc = new DOMParser().parseFromString(xml, 'text/xml');
