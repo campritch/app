@@ -239,6 +239,23 @@
       font-size: 11px; font-weight: 600; color: var(--text-secondary); cursor: pointer;
     }
     .ig-caption-copy:hover { background: var(--white); }
+
+    /* ── Transcript paste fallback ── */
+    .paste-box { margin-top: 18px; display: none; }
+    .paste-box__hint {
+      font-size: 13px; color: var(--text-secondary); margin: 0 0 10px; line-height: 1.6;
+    }
+    .paste-box__hint strong { color: var(--text-primary); }
+    .paste-box__hint a { color: var(--coral); font-weight: 600; text-decoration: none; }
+    .paste-box__hint a:hover { text-decoration: underline; }
+    #transcript-paste {
+      width: 100%; height: 110px; padding: 12px 14px;
+      border: 1px solid var(--border); border-radius: 10px;
+      font-family: inherit; font-size: 13px; line-height: 1.5; color: var(--text-primary);
+      resize: vertical; outline: none; transition: border-color 0.15s;
+    }
+    #transcript-paste:focus { border-color: var(--dark); }
+    #transcript-paste::placeholder { color: var(--grey-1); }
   </style>
 </head>
 <body>
@@ -265,6 +282,23 @@
       </button>
     </div>
     <div class="status" id="status" style="display:none;"></div>
+
+    <!-- Shown only when auto-fetch fails -->
+    <div class="paste-box" id="paste-box">
+      <p class="paste-box__hint">
+        Couldn't fetch the transcript automatically (YouTube blocks automated requests).
+        Open the video, click <strong>···</strong> below it &rarr; <strong>Show transcript</strong>,
+        select all the text, and paste it here.
+        <a href="#" id="paste-yt-link" target="_blank">Open video &rarr;</a>
+      </p>
+      <textarea id="transcript-paste" placeholder="Paste transcript here…"></textarea>
+      <div style="margin-top:10px;">
+        <button class="btn-dark" onclick="generateFromPaste()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M6.5 2l4.5 4.5-4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Generate from transcript
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Instagram Carousel -->
@@ -496,38 +530,83 @@ async function proxyFetch(targetUrl) {
   throw lastErr;
 }
 
-async function fetchTranscript(videoId) {
-  const ytUrl = `https://www.youtube.com/watch?v=${videoId}`;
-
-  // Fetch YouTube page (try each proxy until one works)
-  const html = await proxyFetch(ytUrl);
-
-  // Pull out ytInitialPlayerResponse
-  const jsonMatch = html.match(/ytInitialPlayerResponse\s*=\s*(\{.+?\})\s*;/s);
-  if (!jsonMatch) throw new Error('Could not parse YouTube page — the proxy may have returned a bot-check page');
-  const player = JSON.parse(jsonMatch[1]);
-
-  const tracks = player?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
-  if (!tracks?.length) throw new Error('No captions found for this video');
-
-  // Prefer English, fall back to first available
-  const track = tracks.find(t => t.languageCode === 'en') ||
-                tracks.find(t => t.languageCode?.startsWith('en')) ||
-                tracks[0];
-
-  // Fetch the caption XML (same proxy fallback logic)
-  const xml = await proxyFetch(track.baseUrl);
-
-  // Parse XML and return plain text
+function parseTranscriptXml(xml) {
   const doc = new DOMParser().parseFromString(xml, 'text/xml');
-  return Array.from(doc.getElementsByTagName('text'))
+  const items = doc.getElementsByTagName('text');
+  if (!items.length) throw new Error('Empty transcript XML');
+  return Array.from(items)
     .map(t => t.textContent
       .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
       .replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/\n/g, ' '))
     .join(' ');
 }
 
+async function fetchTranscript(videoId) {
+  // ── Strategy 1: YouTube timedtext REST API (simpler endpoint, less bot protection) ──
+  try {
+    const listXml = await proxyFetch(
+      `https://www.youtube.com/api/timedtext?type=list&v=${videoId}`
+    );
+    if (listXml && listXml.includes('<track')) {
+      const listDoc = new DOMParser().parseFromString(listXml, 'text/xml');
+      const tracks = Array.from(listDoc.querySelectorAll('track'));
+      const track = tracks.find(t => t.getAttribute('lang_code') === 'en') ||
+                    tracks.find(t => t.getAttribute('lang_code')?.startsWith('en')) ||
+                    tracks[0];
+      if (track) {
+        const lang = track.getAttribute('lang_code') || 'en';
+        const name = track.getAttribute('name') || '';
+        let captionUrl = `https://www.youtube.com/api/timedtext?v=${videoId}&lang=${lang}`;
+        if (name) captionUrl += `&name=${encodeURIComponent(name)}`;
+        const xml = await proxyFetch(captionUrl);
+        if (xml && xml.includes('<text')) return parseTranscriptXml(xml);
+      }
+    }
+  } catch (e) {
+    console.warn('Timedtext API strategy failed:', e.message);
+  }
+
+  // ── Strategy 2: Scrape watch page for caption URL ──
+  try {
+    const html = await proxyFetch(`https://www.youtube.com/watch?v=${videoId}`);
+    const jsonMatch = html.match(/ytInitialPlayerResponse\s*=\s*(\{.+?\})\s*;/s);
+    if (jsonMatch) {
+      const player = JSON.parse(jsonMatch[1]);
+      const tracks = player?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+      if (tracks?.length) {
+        const track = tracks.find(t => t.languageCode === 'en') ||
+                      tracks.find(t => t.languageCode?.startsWith('en')) ||
+                      tracks[0];
+        const xml = await proxyFetch(track.baseUrl);
+        if (xml && xml.includes('<text')) return parseTranscriptXml(xml);
+      }
+    }
+  } catch (e) {
+    console.warn('Page-scrape strategy failed:', e.message);
+  }
+
+  // Both strategies failed — caller shows the paste box
+  throw new Error('AUTO_FETCH_FAILED');
+}
+
 // ── Generate ────────────────────────────────────────────────────────────────
+function showPasteBox(videoId) {
+  const box = document.getElementById('paste-box');
+  box.style.display = 'block';
+  const link = document.getElementById('paste-yt-link');
+  if (videoId) link.href = `https://www.youtube.com/watch?v=${videoId}`;
+  document.getElementById('transcript-paste').focus();
+}
+
+async function generateFromPaste() {
+  const transcript = document.getElementById('transcript-paste').value.trim();
+  if (!transcript) { alert('Please paste the transcript first.'); return; }
+  const url = document.getElementById('url-input').value.trim();
+  const videoId = extractVideoId(url) || 'unknown';
+  document.getElementById('paste-box').style.display = 'none';
+  await runGeneration(transcript, videoId);
+}
+
 async function generate() {
   const url = document.getElementById('url-input').value.trim();
   if (!url) return;
@@ -536,6 +615,7 @@ async function generate() {
   btn.disabled = true;
   document.getElementById('article-card').style.display = 'none';
   document.getElementById('thumb-card').style.display = 'none';
+  document.getElementById('paste-box').style.display = 'none';
   rawMarkdown = '';
 
   showStatus('loading', 'Fetching transcript…');
@@ -547,10 +627,25 @@ async function generate() {
     if (!videoId) throw new Error('Could not parse a video ID from that URL');
     transcript = await fetchTranscript(videoId);
   } catch (e) {
-    showStatus('error', e.message || 'Transcript fetch failed');
+    if (e.message === 'AUTO_FETCH_FAILED') {
+      showStatus('error', 'YouTube blocked automatic transcript fetch — paste it manually below.');
+      showPasteBox(videoId);
+    } else {
+      showStatus('error', e.message || 'Transcript fetch failed');
+    }
     btn.disabled = false;
     return;
   }
+
+  await runGeneration(transcript, videoId);
+}
+
+async function runGeneration(transcript, videoId) {
+  const btn = document.getElementById('generate-btn');
+  btn.disabled = true;
+  document.getElementById('article-card').style.display = 'none';
+  document.getElementById('thumb-card').style.display = 'none';
+  rawMarkdown = '';
 
   // Step 2: get API key and stream article from Claude directly
   const key = await getKey();
