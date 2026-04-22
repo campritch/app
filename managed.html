@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ad Ops, as a Service — SpotsNow Managed</title>
+<meta name="description" content="Agency-grade podcast ad ops for in-house teams spending $300K+/month. Take back the hours you lose to scheduling, air checks, make-goods, and reporting. Starting at $1,800/mo.">
+<meta name="author" content="SpotsNow">
+<meta name="theme-color" content="#e8562a">
+
+<!-- Open Graph / Social -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://spotsnow.wiki/adops">
+<meta property="og:title" content="Ad Ops, as a Service — SpotsNow Managed">
+<meta property="og:description" content="Take back the hours you lose to ad ops. Agency-grade execution without the price tag, complexity, or overhead.">
+<meta property="og:site_name" content="SpotsNow">
+<meta property="og:image" content="https://spotsnow.wiki/adops/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="https://spotsnow.wiki/adops">
+<meta name="twitter:title" content="Ad Ops, as a Service — SpotsNow Managed">
+<meta name="twitter:description" content="Take back the hours you lose to ad ops. Agency-grade execution without the price tag, complexity, or overhead.">
+<meta name="twitter:image" content="https://spotsnow.wiki/adops/og.png">
+
+<!-- Favicon (inline SVG — no extra file needed) -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23e8562a'/%3E%3Ctext x='50' y='70' font-family='Helvetica,Arial,sans-serif' font-size='64' font-weight='700' fill='%23f4f1ec' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
+
+<style>
+  :root {
+    --bg: #f4f1ec;
+    --ink: #1a1816;
+    --ink-dim: #5c564e;
+    --ink-dimmer: #8a8278;
+    --accent: #e8562a;
+    --accent-soft: #f4a58a;
+    --rule: #d9d3c7;
+    --rule-soft: #e8e2d4;
+    --card: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; scroll-snap-type: y mandatory; height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    line-height: 1.55;
+    letter-spacing: -0.005em;
+    -webkit-font-smoothing: antialiased;
+    height: 100%;
+    overflow-y: scroll;
+  }
+
+  .S {
+    min-height: 100vh;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 96px;
+    position: relative;
+    border-bottom: 1px solid var(--rule);
+  }
+  /* Slide 4 is content-dense — tighter vertical padding */
+  .S.dense { padding: 56px 96px; }
+
+  .slide-num {
+    position: absolute;
+    top: 28px;
+    right: 40px;
+    font-family: ui-monospace, 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: var(--ink-dimmer);
+  }
+  .logo {
+    position: absolute;
+    top: 28px;
+    right: 160px;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    font-size: 18px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .logo em {
+    font-style: normal;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .eyebrow {
+    font-family: ui-monospace, 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 32px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-size: clamp(48px, 6vw, 88px);
+    line-height: 1;
+    letter-spacing: -0.025em;
+    max-width: 16ch;
+    color: var(--ink);
+  }
+  h1 em { font-style: normal; color: var(--accent); font-weight: 700; }
+
+  /* ═══ SLIDE 1 — COVER ═══ */
+  .cover h1 {
+    font-size: clamp(56px, 7.2vw, 108px);
+    max-width: 14ch;
+    margin-bottom: 32px;
+  }
+  .cover-sub {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    font-size: clamp(20px, 2vw, 26px);
+    line-height: 1.4;
+    color: var(--ink-dim);
+    max-width: 40ch;
+    margin-bottom: 72px;
+    letter-spacing: -0.01em;
+  }
+  .cover-footer {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    width: fit-content;
+  }
+  .cover-footer-label {
+    font-family: ui-monospace, 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-dimmer);
+  }
+  .logo-slot {
+    font-weight: 600;
+    font-size: 20px;
+    letter-spacing: -0.01em;
+    opacity: 0.85;
+  }
+  .logo-slot.apple { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; color: var(--ink); }
+  .logo-slot.airbnb { color: #FF5A5F; font-weight: 700; }
+  .logo-slot.hershey { color: #6b2c2a; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; }
+  .logo-slot.veritone {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    font-size: 16px;
+    text-transform: uppercase;
+    color: #1c3558;
+  }
+  .logo-slot.veritone em { font-style: normal; color: #5a7a9c; font-weight: 700; }
+
+  /* ═══ SLIDE 2 — PROBLEM (full-bleed quote stack) ═══ */
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+  .problem-h {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-size: clamp(44px, 4.8vw, 72px);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    max-width: 14ch;
+  }
+  .problem-h em { font-style: normal; color: var(--accent); font-weight: 700; }
+
+  .quote-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .quote-card {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    padding: 32px 32px 26px;
+    position: relative;
+  }
+  .quote-card::before {
+    content: '"';
+    position: absolute;
+    top: -10px;
+    left: 22px;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 72px;
+    line-height: 1;
+    color: var(--accent);
+    font-weight: 400;
+  }
+  .quote-text {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    font-size: 19px;
+    line-height: 1.5;
+    color: var(--ink);
+    margin-bottom: 20px;
+    padding-top: 8px;
+    letter-spacing: -0.01em;
+  }
+  .quote-attr {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .quote-logo {
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.01em;
+  }
+  .quote-logo.apple { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; color: var(--ink); }
+  .quote-logo.airbnb { color: #FF5A5F; }
+  .quote-role {
+    font-family: ui-monospace, 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-dimmer);
+    padding-left: 14px;
+    border-left: 1px solid var(--rule);
+  }
+
+  /* ═══ SLIDE 3 — THE KILLER NUMBER ═══ */
+  .killer {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  .killer .eyebrow { justify-content: center; }
+  .killer .eyebrow::before { display: none; }
+  .killer-top {
+    font-family: ui-monospace, 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 28px;
+    font-weight: 500;
+  }
+  .killer-hero {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(16px, 2vw, 32px);
+    margin-bottom: 20px;
+  }
+  .killer-num {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-size: clamp(180px, 22vw, 340px);
+    line-height: 0.82;
+    color: var(--accent);
+    letter-spacing: -0.05em;
+  }
+  .killer-num em { font-style: normal; }
+  .killer-unit {
+    display: flex;
+    align-items: center;
+    color: var(--ink);
+  }
+  .killer-unit span {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-size: clamp(36px, 4.8vw, 68px);
+    line-height: 1;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+  }
+  .killer-label {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-size: clamp(26px, 2.8vw, 40px);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--ink-dim);
+    max-width: 20ch;
+    margin: 0 auto 40px;
+  }
+  .killer-label em { font-style: normal; color: var(--accent); font-weight: 700; }
+
+  .killer-breakdown {
+    display: flex;
+    gap: 36px;
+    align-items: center;
+    padding: 20px 32px;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    font-family: ui-monospace, 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin: 0 auto;
+  }
+  .killer-breakdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .killer-breakdown-item .bd-clock {
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .killer-breakdown-item b {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .killer-breakdown-div {
+    width: 1px;
+    height: 24px;
+    background: var(--rule);
+  }
+
+  /* ═══ SLIDE 4 — SCALE ═══ */
+  .scale-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  .scale-headline {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-size: clamp(44px, 4.6vw, 68px);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    max-width: 14ch;
+    margin-bottom: 32px;
+  }
+  .scale-headline em { font-style: normal; color: var(--accent); font-weight: 700; }
+  .scale-sub {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--ink-dim);
+    max-width: 40ch;
+    letter-spacing: -0.005em;
+  }
+
+  .scale-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .scale-row {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 32px;
+    align-items: center;
+  }
+  .scale-row.hero {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .scale-row.hero .scale-label { color: var(--accent-soft); }
+  .scale-row.hero .scale-desc { color: #c9c2b6; }
+
+  .scale-num {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-size: 64px;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 140px;
+  }
+  .scale-row.hero .scale-num { color: var(--accent-soft); }
+  .scale-label {
+    font-family: ui-monospace, 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-dimmer);
+    margin-bottom: 6px;
+  }
+  .scale-desc {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1.45;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+  .scale-desc em { font-style: normal; color: var(--accent); font-weight: 600; }
+
+  /* ═══ WHAT WE HANDLE ═══ */
+  .handle-intro {
+    margin-bottom: 20px;
+  }
+  .handle-h {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-size: clamp(32px, 3.4vw, 48px);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    white-space: nowrap;
+    margin-bottom: 12px;
+  }
+  .handle-h em { font-style: normal; color: var(--accent); font-weight: 700; }
+  .handle-sub {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    font-size: 17px;
+    line-height: 1.45;
+    color: var(--ink-dim);
+    max-width: 60ch;
+    letter-spacing: -0.005em;
+  }
+  .handle-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: var(--card);
+    border: 1px solid var(--rule);
+    margin-bottom: 12px;
+  }
+  .handle-cell {
+    padding: 16px 18px 14px;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .handle-cell:nth-child(4n) { border-right: none; }
+  .handle-cell.row-bottom { border-bottom: none; }
+  .handle-num {
+    font-family: ui-monospace, 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+  .handle-name {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+  .handle-desc {
+    font-size: 12px;
+    color: var(--ink-dim);
+    line-height: 1.4;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+  }
+
+  .handle-strips {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .handle-strip {
+    padding: 14px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 80px;
+    justify-content: center;
+  }
+  .handle-strip.onboard {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent);
+  }
+  .handle-strip.carve {
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .handle-strip-label {
+    font-family: ui-monospace, 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .handle-strip.onboard .handle-strip-label { color: var(--accent); }
+  .handle-strip.carve .handle-strip-label { color: var(--accent-soft); }
+  .handle-strip-text {
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.45;
+    letter-spacing: -0.005em;
+  }
+  .handle-strip.onboard .handle-strip-text { color: var(--ink); }
+  .handle-strip.onboard .handle-strip-text strong { font-weight: 700; color: var(--accent); }
+  .handle-strip.carve .handle-strip-text { color: var(--bg); }
+  .handle-strip.carve .handle-strip-text strong { font-weight: 700; color: var(--accent-soft); }
+
+  /* ═══ WHO IT'S FOR ═══ */
+  .who-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 8px;
+  }
+  .who-card {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    padding: 28px 28px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .who-card.feature {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .who-card.feature .who-label { color: var(--accent-soft); }
+  .who-card.feature .who-desc { color: #c9c2b6; }
+  .who-label {
+    font-family: ui-monospace, 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-dimmer);
+    font-weight: 500;
+  }
+  .who-headline {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .who-card.feature .who-headline { color: var(--bg); }
+  .who-headline em { font-style: normal; color: var(--accent); font-weight: 700; }
+  .who-card.feature .who-headline em { color: var(--accent-soft); }
+  .who-desc {
+    font-size: 14.5px;
+    font-weight: 500;
+    color: var(--ink-dim);
+    line-height: 1.5;
+    letter-spacing: -0.005em;
+  }
+  .who-examples {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule-soft);
+    font-family: ui-monospace, 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-dimmer);
+    font-weight: 500;
+  }
+  .who-card.feature .who-examples { border-color: #2a2622; color: var(--accent-soft); }
+
+  /* ═══ WHO IT'S FOR — HERO SLIDE ═══ */
+  .whoforhero {
+    justify-content: center;
+  }
+  .whoforhero-h {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-size: clamp(56px, 7.2vw, 124px);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    max-width: 16ch;
+    margin-bottom: 48px;
+  }
+  .whoforhero-h em { font-style: normal; color: var(--accent); font-weight: 700; }
+  .whoforhero-sub {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    font-size: clamp(22px, 2.2vw, 32px);
+    line-height: 1.4;
+    color: var(--ink-dim);
+    max-width: 44ch;
+    letter-spacing: -0.01em;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+  }
+  .whoforhero-sub strong { color: var(--ink); font-weight: 700; }
+
+  /* ═══ SLIDE 5 — THE OFFER ═══ */
+  .offer-h {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-size: clamp(44px, 4.8vw, 72px);
+    line-height: 1;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    max-width: 16ch;
+    margin-bottom: 56px;
+  }
+  .offer-h em { font-style: normal; color: var(--accent); font-weight: 700; }
+
+  .pricing-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 0;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    margin-bottom: 40px;
+  }
+  .tier {
+    padding: 26px 22px 24px;
+    border-right: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .tier:last-child { border-right: none; }
+  .tier.featured {
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .tier.featured .tier-name { color: var(--accent-soft); }
+  .tier.featured .tier-cap { color: #c9c2b6; }
+  .tier-name {
+    font-family: ui-monospace, 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .tier-price {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .tier-price em { font-style: normal; color: var(--accent); font-weight: 700; }
+  .tier-price-unit {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-dimmer);
+    margin-left: 4px;
+  }
+  .tier.featured .tier-price-unit { color: #c9c2b6; }
+  .tier-cap {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--ink-dim);
+    line-height: 1.35;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule-soft);
+    letter-spacing: -0.005em;
+  }
+  .tier.featured .tier-cap { border-color: #2a2622; }
+
+  .offer-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+  }
+  .offer-cta {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    font-size: 20px;
+    color: var(--ink);
+    line-height: 1.35;
+    max-width: 48ch;
+    letter-spacing: -0.01em;
+  }
+  .offer-cta em { color: var(--accent); font-style: normal; font-weight: 700; }
+  .offer-contact {
+    font-family: ui-monospace, 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-dimmer);
+    text-align: right;
+    line-height: 2;
+  }
+  .offer-contact a { color: var(--ink); text-decoration: none; font-weight: 500; }
+
+  /* Nav */
+  .nav {
+    position: fixed;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 10;
+  }
+  .nav a {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--rule);
+    transition: background 0.2s, transform 0.2s;
+    display: block;
+  }
+  .nav a:hover { background: var(--accent); transform: scale(1.3); }
+
+  /* ═══ RESPONSIVE ═══ */
+  @media (max-width: 1100px) {
+    .S { padding: 64px 48px; }
+    .problem-grid, .scale-grid { grid-template-columns: 1fr; gap: 48px; }
+    .killer-num { font-size: clamp(140px, 30vw, 240px); }
+    .killer-unit span { font-size: clamp(28px, 4vw, 48px); }
+    .killer-breakdown { gap: 20px; padding: 18px 24px; }
+    .pricing-row { grid-template-columns: 1fr 1fr; }
+    .tier:nth-child(1), .tier:nth-child(2) { border-bottom: 1px solid var(--rule); }
+    .tier:nth-child(2) { border-right: none; }
+    .tier:nth-child(4) { border-right: none; }
+    .tier.featured { border-color: var(--ink); }
+    .handle-grid { grid-template-columns: repeat(2, 1fr); }
+    .handle-cell:nth-child(4n) { border-right: 1px solid var(--rule); }
+    .handle-cell:nth-child(2n) { border-right: none; }
+    .handle-cell.row-bottom { border-bottom: 1px solid var(--rule); }
+    .handle-cell:nth-last-child(-n+2) { border-bottom: none; }
+    .who-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 720px) {
+    .S { padding: 64px 28px 48px; }
+    .logo { left: 24px; right: auto; font-size: 16px; }
+    .slide-num { right: 24px; }
+    .cover h1 { font-size: 44px; max-width: 12ch; }
+    h1, .problem-h, .scale-headline, .offer-h, .handle-h { font-size: 34px; }
+    .handle-h { white-space: normal; }
+    .cover-sub { font-size: 18px; margin-bottom: 48px; }
+    .cover-footer { flex-wrap: wrap; gap: 20px; }
+    .killer-num { font-size: 120px; }
+    .killer-unit span { font-size: 28px; }
+    .killer-label { font-size: 22px; }
+    .killer-breakdown { flex-direction: column; gap: 12px; padding: 20px 24px; font-size: 10px; align-items: flex-start; }
+    .killer-breakdown-div { display: none; }
+    .scale-row { grid-template-columns: 1fr; gap: 8px; padding: 20px 22px; }
+    .scale-num { font-size: 48px; min-width: 0; }
+    .scale-desc { font-size: 16px; }
+    .pricing-row { grid-template-columns: 1fr; }
+    .tier { border-right: none; border-bottom: 1px solid var(--rule); }
+    .tier.featured { border-color: var(--ink); }
+    .tier-price { font-size: 40px; }
+    .offer-footer { flex-direction: column; gap: 20px; align-items: flex-start; }
+    .offer-contact { text-align: left; }
+    .quote-text { font-size: 18px; }
+    .nav { right: 10px; }
+    .handle-grid { grid-template-columns: 1fr; }
+    .handle-cell { border-right: none !important; border-bottom: 1px solid var(--rule); }
+    .handle-cell:last-child { border-bottom: none; }
+    .handle-strips { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="#s1"></a>
+  <a href="#s2"></a>
+  <a href="#s3"></a>
+  <a href="#s4"></a>
+  <a href="#s5"></a>
+  <a href="#s6"></a>
+  <a href="#s7"></a>
+</nav>
+
+<!-- ═══ 1 · COVER ═══ -->
+<section class="S cover" id="s1">
+  <div class="logo">Spots<em>Now</em> Managed</div>
+  <div class="slide-num">01 / 07</div>
+
+  <div class="eyebrow">For In-House Teams &amp; Agencies</div>
+  <h1>Ad Ops, <em>as a Service.</em></h1>
+  <div class="cover-sub">
+    Agency-grade execution. Without the price tag, complexity, or overhead.
+  </div>
+
+  <div class="cover-footer">
+    <div class="cover-footer-label">Informed by buyers at</div>
+    <div class="logo-slot apple">&#63743; Apple</div>
+    <div class="logo-slot airbnb">Airbnb</div>
+    <div class="logo-slot veritone">Veritone <em>One</em></div>
+  </div>
+</section>
+
+<!-- ═══ 2 · WHO IT'S FOR ═══ -->
+<section class="S whoforhero" id="s2">
+  <div class="logo">Spots<em>Now</em> Managed</div>
+  <div class="slide-num">02 / 07</div>
+
+  <div class="eyebrow">Who It's For</div>
+
+  <div class="whoforhero-h">
+    Built for in-house teams spending over <em>$300K a month</em> on podcast ads.
+  </div>
+
+  <div class="whoforhero-sub">
+    You've <strong>proven creator-read works.</strong> The bottleneck is ops &mdash; and it's stopping you from scaling spend.
+  </div>
+</section>
+
+<!-- ═══ 3 · THE KILLER NUMBER ═══ -->
+<section class="S killer" id="s3">
+  <div class="logo">Spots<em>Now</em> Managed</div>
+  <div class="slide-num">03 / 07</div>
+
+  <div class="eyebrow">The Killer Metric</div>
+
+  <div class="killer-top">Every month. Every show. Every time.</div>
+
+  <div class="killer-hero">
+    <div class="killer-num"><em>11</em></div>
+    <div class="killer-unit">
+      <span>hours</span>
+    </div>
+  </div>
+
+  <div class="killer-label">
+    Per show, lost to <em>ad ops back-and-forth.</em>
+  </div>
+
+  <div class="killer-breakdown">
+    <div class="killer-breakdown-item">
+      <svg class="bd-clock" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+        <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <b>Outreach</b> 3.0h
+    </div>
+    <div class="killer-breakdown-div"></div>
+    <div class="killer-breakdown-item">
+      <svg class="bd-clock" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+        <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <b>Negotiation</b> 1.5h
+    </div>
+    <div class="killer-breakdown-div"></div>
+    <div class="killer-breakdown-item">
+      <svg class="bd-clock" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+        <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <b>IO &amp; creative</b> 2.5h
+    </div>
+    <div class="killer-breakdown-div"></div>
+    <div class="killer-breakdown-item">
+      <svg class="bd-clock" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+        <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <b>Air check</b> 1h
+    </div>
+    <div class="killer-breakdown-div"></div>
+    <div class="killer-breakdown-item">
+      <svg class="bd-clock" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+        <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <b>Tracking</b> 1h
+    </div>
+    <div class="killer-breakdown-div"></div>
+    <div class="killer-breakdown-item">
+      <svg class="bd-clock" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+        <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <b>Reporting</b> 2h
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 4 · WHAT WE HANDLE ═══ -->
+<section class="S dense" id="s4">
+  <div class="logo">Spots<em>Now</em> Managed</div>
+  <div class="slide-num">04 / 07</div>
+
+  <div class="eyebrow">What We Handle</div>
+
+  <div class="handle-intro">
+    <div class="handle-h">We run the <em>entire lifecycle.</em></div>
+    <div class="handle-sub">
+      Twelve jobs, across strategy, launch, and in-flight. You stay in control of the narrative. We take care of the execution.
+    </div>
+  </div>
+
+  <div class="handle-grid">
+    <div class="handle-cell">
+      <div class="handle-num">01 &middot; Strategy</div>
+      <div class="handle-name">Goals &amp; KPI alignment</div>
+      <div class="handle-desc">We build the measurement plan against your ROAS, CAC, or reach targets.</div>
+    </div>
+    <div class="handle-cell">
+      <div class="handle-num">02 &middot; Strategy</div>
+      <div class="handle-name">Show selection</div>
+      <div class="handle-desc">Shortlist built from your audience, past performance, and category fit.</div>
+    </div>
+    <div class="handle-cell">
+      <div class="handle-num">03 &middot; Strategy</div>
+      <div class="handle-name">Rate negotiation</div>
+      <div class="handle-desc">We push shows on CPM, added value, and exclusivity windows.</div>
+    </div>
+    <div class="handle-cell">
+      <div class="handle-num">04 &middot; Setup</div>
+      <div class="handle-name">Insertion orders</div>
+      <div class="handle-desc">IOs drafted, sent, tracked, and stored in one place.</div>
+    </div>
+
+    <div class="handle-cell">
+      <div class="handle-num">05 &middot; Creative</div>
+      <div class="handle-name">Creative brief &amp; copy direction</div>
+      <div class="handle-desc">We draft the host-read brief so every show is saying the right thing.</div>
+    </div>
+    <div class="handle-cell">
+      <div class="handle-num">06 &middot; Creative</div>
+      <div class="handle-name">Creative QA</div>
+      <div class="handle-desc">Host-read copy reviewed for brand safety, compliance, and positioning.</div>
+    </div>
+    <div class="handle-cell">
+      <div class="handle-num">07 &middot; Launch</div>
+      <div class="handle-name">Timing &amp; scheduling</div>
+      <div class="handle-desc">Air dates negotiated and confirmed with every producer.</div>
+    </div>
+    <div class="handle-cell">
+      <div class="handle-num">08 &middot; Launch</div>
+      <div class="handle-name">Pixel setup &amp; testing</div>
+      <div class="handle-desc">Tags installed and verified with shows and attribution partners.</div>
+    </div>
+
+    <div class="handle-cell row-bottom">
+      <div class="handle-num">09 &middot; In-flight</div>
+      <div class="handle-name">Air checks</div>
+      <div class="handle-desc">Every ad read verified for copy, timing, and delivery.</div>
+    </div>
+    <div class="handle-cell row-bottom">
+      <div class="handle-num">10 &middot; In-flight</div>
+      <div class="handle-name">Make-goods</div>
+      <div class="handle-desc">Chasing shows on missed or under-delivered spots. Replacement inventory negotiated.</div>
+    </div>
+    <div class="handle-cell row-bottom">
+      <div class="handle-num">11 &middot; Reporting</div>
+      <div class="handle-name">Pacing &amp; performance</div>
+      <div class="handle-desc">Weekly tracking against the KPIs we set on day one.</div>
+    </div>
+    <div class="handle-cell row-bottom">
+      <div class="handle-num">12 &middot; Reporting</div>
+      <div class="handle-name">Weekly exec summary</div>
+      <div class="handle-desc">One email. What's pacing, what's at risk, what we're doing about it.</div>
+    </div>
+  </div>
+
+  <div class="handle-strips">
+    <div class="handle-strip onboard">
+      <div class="handle-strip-label">How it starts</div>
+      <div class="handle-strip-text">
+        <strong>One 60-minute onboarding call.</strong> A dedicated specialist is assigned, goals mapped, shows confirmed. Then it all moves to <strong>Slack</strong>.
+      </div>
+    </div>
+    <div class="handle-strip carve">
+      <div class="handle-strip-label">What we don't touch</div>
+      <div class="handle-strip-text">
+        <strong>Your accounts payable.</strong> You pay shows directly, keep every vendor relationship. No middleman, no procurement risk.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 5 · IT SCALES WITH YOU ═══ -->
+<section class="S" id="s5">
+  <div class="logo">Spots<em>Now</em> Managed</div>
+  <div class="slide-num">05 / 07</div>
+
+  <div class="scale-grid">
+    <div>
+      <div class="eyebrow">The Cost of Doing Nothing</div>
+      <div class="scale-headline">
+        It gets <em>worse</em> as you scale.
+      </div>
+      <div class="scale-sub">
+        Every show you add is another 11 hours a month. The job doesn't get easier. It gets bigger.
+      </div>
+    </div>
+
+    <div class="scale-stack">
+      <div class="scale-row">
+        <div class="scale-num">55h</div>
+        <div>
+          <div class="scale-label">Running 5 shows</div>
+          <div class="scale-desc">More than a week a month. Gone.</div>
+        </div>
+      </div>
+
+      <div class="scale-row hero">
+        <div class="scale-num">110h</div>
+        <div>
+          <div class="scale-label">Running 10 shows</div>
+          <div class="scale-desc"><em>Two-thirds of a full-time role.</em> All of it admin.</div>
+        </div>
+      </div>
+
+      <div class="scale-row">
+        <div class="scale-num">220h</div>
+        <div>
+          <div class="scale-label">Running 20 shows</div>
+          <div class="scale-desc">More than one FTE. None of it strategic.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 6 · THREE WAYS TEAMS USE US ═══ -->
+<section class="S" id="s6">
+  <div class="logo">Spots<em>Now</em> Managed</div>
+  <div class="slide-num">06 / 07</div>
+
+  <div class="eyebrow">Three Ways Teams Use Us</div>
+  <div class="handle-h" style="margin-bottom:36px;">One service. <em>Three kinds of upside.</em></div>
+
+  <div class="who-grid">
+    <div class="who-card">
+      <div class="who-label">Upside A &middot; Capacity</div>
+      <div class="who-headline">Raise the ceiling on what your team can <em>run.</em></div>
+      <div class="who-desc">
+        You've hit the limit of campaigns you can launch in a quarter. We extend your team's capacity so you can say yes to more shows, bigger flights, and faster tests.
+      </div>
+      <div class="who-examples">More campaigns &middot; More shows &middot; More tests</div>
+    </div>
+
+    <div class="who-card feature">
+      <div class="who-label">Upside B &middot; Performance</div>
+      <div class="who-headline">Better <em>accuracy.</em> Better <em>outcomes.</em></div>
+      <div class="who-desc">
+        Tighter air checks, cleaner attribution, faster make-goods. Fewer spots lost to missed dates or wrong copy. The work gets measurably more precise because a specialist owns it end-to-end.
+      </div>
+      <div class="who-examples">Fewer misses &middot; Cleaner data &middot; Better ROAS</div>
+    </div>
+
+    <div class="who-card">
+      <div class="who-label">Upside C &middot; Cost</div>
+      <div class="who-headline">Replace the agency taking <em>10&ndash;15%</em> of spend.</div>
+      <div class="who-desc">
+        Flat retainer instead of a percentage of every dollar. Keep the vendor relationships you've built. Get faster execution and clearer attribution than the agency handoff allows.
+      </div>
+      <div class="who-examples">Agency replacement</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 7 · THE OFFER ═══ -->
+<section class="S" id="s7">
+  <div class="logo">Spots<em>Now</em> Managed</div>
+  <div class="slide-num">07 / 07</div>
+
+  <div class="eyebrow">The Offer</div>
+  <div class="offer-h">Simple pricing, <em>unlocking huge bottlenecks.</em></div>
+
+  <div class="pricing-row">
+    <div class="tier">
+      <div class="tier-name">Starter</div>
+      <div class="tier-price">$1,800<span class="tier-price-unit">/mo</span></div>
+      <div class="tier-cap">Up to $500K monthly managed spend.</div>
+    </div>
+    <div class="tier featured">
+      <div class="tier-name">Scale</div>
+      <div class="tier-price">$3,990<span class="tier-price-unit">/mo</span></div>
+      <div class="tier-cap">Over $500K monthly managed spend.</div>
+    </div>
+    <div class="tier">
+      <div class="tier-name">Enterprise</div>
+      <div class="tier-price"><em>Custom</em></div>
+      <div class="tier-cap">Over $1M monthly managed spend. Dedicated team, custom SLAs.</div>
+    </div>
+    <div class="tier">
+      <div class="tier-name">À la carte</div>
+      <div class="tier-price"><em>Quote</em></div>
+      <div class="tier-cap">Need help with specific pieces only? Ask for a quote.</div>
+    </div>
+  </div>
+
+  <div class="offer-footer">
+    <div class="offer-cta">
+      We become an extension of your team, goals, and creative strategy &mdash; <em>but you always make the final decisions.</em>
+    </div>
+    <div class="offer-contact">
+      <a href="mailto:cam@spotsnow.io">cam@spotsnow.io</a><br>
+      Two-month minimum &middot; Month-to-month thereafter
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
