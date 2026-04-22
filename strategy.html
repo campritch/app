@@ -129,6 +129,44 @@ input, textarea, select { font-family: inherit; }
 .modal-hdr .x:hover { color: var(--text); border-color: var(--text-dim); }
 .modal-body { flex: 1; overflow-y: auto; padding: 20px 24px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 14px; line-height: 1.7; color: var(--text); white-space: pre-wrap; }
 
+/* Publish-to-Notion form variant of the modal */
+.modal-form { padding: 20px 24px; display: grid; gap: 14px; font-family: 'Inter Tight', sans-serif; }
+.modal-form label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); display: block; margin-bottom: 6px; }
+.modal-form input[type="text"], .modal-form textarea { width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--line); padding: 10px 12px; font-size: 13px; font-family: inherit; }
+.modal-form input[type="text"]:focus, .modal-form textarea:focus { outline: none; border-color: var(--accent); }
+.modal-form textarea { min-height: 160px; resize: vertical; line-height: 1.55; }
+.modal-form .hint { font-size: 11px; color: var(--text-faint); margin-top: 4px; }
+.modal-form .result { font-family: 'JetBrains Mono', monospace; font-size: 11px; min-height: 16px; }
+.modal-form .result.ok { color: var(--good); }
+.modal-form .result.err { color: var(--bad); }
+.modal-form .result a { color: var(--accent); text-decoration: underline; }
+.modal-form .row { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+.modal-form button { background: var(--accent); color: #fff; border: none; padding: 10px 20px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; cursor: pointer; }
+.modal-form button:hover:not(:disabled) { filter: brightness(1.08); }
+.modal-form button:disabled { opacity: 0.5; cursor: not-allowed; }
+.modal-form button.secondary { background: transparent; color: var(--text-dim); border: 1px solid var(--line); }
+.modal-form button.secondary:hover { color: var(--text); border-color: var(--text-dim); }
+
+/* Assistant-message action row ("→ Notion") */
+.msg .actions { margin-top: 8px; display: flex; gap: 8px; }
+.msg .actions button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 4px 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; }
+.msg .actions button:hover { color: var(--text); border-color: var(--accent); }
+
+/* Saved prompts panel */
+.panel .prompts-list { background: var(--bg); border: 1px solid var(--line); max-height: 260px; overflow-y: auto; }
+.panel .prompts-list:empty + .prompts-empty { display: block; }
+.panel .prompts-empty { color: var(--text-faint); font-family: 'Fraunces', serif; font-style: italic; font-size: 11px; padding: 10px 12px; text-align: center; background: var(--bg); border: 1px dashed var(--line); }
+.panel .prompt-row { padding: 8px 10px; border-bottom: 1px solid var(--line-soft); display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: start; }
+.panel .prompt-row:last-child { border-bottom: none; }
+.panel .prompt-row .pname { font-size: 11.5px; color: var(--text); line-height: 1.35; font-family: 'Inter Tight', sans-serif; font-weight: 500; }
+.panel .prompt-row .pbody { font-size: 10px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; margin-top: 3px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.panel .prompt-row .pacts { display: flex; gap: 4px; flex-shrink: 0; }
+.panel .prompt-row .pacts button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 3px 8px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border-radius: 2px; }
+.panel .prompt-row .pacts .run:hover { color: var(--text); border-color: var(--accent); }
+.panel .prompt-row .pacts .del:hover { color: var(--bad); border-color: var(--bad); }
+.panel .add-prompt-btn { width: 100%; margin-top: 8px; background: transparent; border: 1px dashed var(--line); color: var(--text-dim); padding: 8px 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; }
+.panel .add-prompt-btn:hover { color: var(--text); border-color: var(--accent); border-style: solid; }
+
 /* ── Chat ── */
 .chat { display: grid; grid-template-rows: 1fr auto; min-height: 0; }
 .stream { overflow-y: auto; padding: 24px 32px 12px; }
@@ -320,6 +358,33 @@ input, textarea, select { font-family: inherit; }
           </div>
         </div>
       </div>
+
+      <div class="group">
+        <div class="label">
+          Saved prompts <span class="hint" id="prompts-count">0 saved</span>
+        </div>
+        <div class="prompts-list" id="prompts-list"></div>
+        <div class="prompts-empty" id="prompts-empty" style="display:none;">Save prompts you run often. Click Run to send.</div>
+        <button class="add-prompt-btn" id="btn-add-prompt">+ New prompt</button>
+      </div>
+
+      <div class="group" data-group="notionParentId">
+        <div class="label">
+          Notion publish target
+          <span class="field-meta">
+            <span class="field-status" data-status="notionParentId"></span>
+            <button class="field-edit-btn" data-edit="notionParentId">Edit</button>
+          </span>
+        </div>
+        <div class="field-view" data-view="notionParentId"></div>
+        <div class="field-editor" data-editor="notionParentId" hidden>
+          <textarea class="links" id="in-notion-parent" placeholder="Paste the Notion page URL where published responses should land. The integration must be invited to this page."></textarea>
+          <div class="field-actions">
+            <button class="btn-save-field" data-save="notionParentId">Save</button>
+            <button class="btn-cancel-field" data-cancel="notionParentId">Cancel</button>
+          </div>
+        </div>
+      </div>
     </aside>
 
     <section class="chat">
@@ -365,6 +430,69 @@ input, textarea, select { font-family: inherit; }
   </div>
 </div>
 
+<div class="modal-bg" id="publish-bg">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div>
+        <div class="t">Publish to Notion</div>
+        <span class="m">Creates a new page under the parent</span>
+      </div>
+      <button class="x" id="publish-close">Close</button>
+    </div>
+    <div class="modal-form">
+      <div>
+        <label>Title</label>
+        <input type="text" id="pub-title" placeholder="Page title">
+      </div>
+      <div>
+        <label>Parent page URL or ID</label>
+        <input type="text" id="pub-parent" placeholder="https://www.notion.so/...">
+        <div class="hint">The Notion integration must be explicitly invited to this page.</div>
+      </div>
+      <div>
+        <label>Markdown body</label>
+        <textarea id="pub-body"></textarea>
+      </div>
+      <div class="row">
+        <div class="result" id="pub-result"></div>
+        <div>
+          <button class="secondary" id="pub-cancel">Cancel</button>
+          <button id="pub-go">Publish</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="prompt-bg">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div>
+        <div class="t" id="prompt-modal-title">New prompt</div>
+        <span class="m">Reusable prompt you can run in one click</span>
+      </div>
+      <button class="x" id="prompt-close">Close</button>
+    </div>
+    <div class="modal-form">
+      <div>
+        <label>Name</label>
+        <input type="text" id="pr-name" placeholder="Weekly sales call synthesis">
+      </div>
+      <div>
+        <label>Prompt body</label>
+        <textarea id="pr-body" placeholder="Describe what the agent should do. e.g. Pull the last 14 days of sales calls and give me the three most common buyer objections, each with one example quote."></textarea>
+      </div>
+      <div class="row">
+        <div class="result" id="pr-result"></div>
+        <div>
+          <button class="secondary" id="pr-cancel">Cancel</button>
+          <button id="pr-save">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 const STORAGE_KEY = 'strategy_chat_v1';
 
@@ -388,6 +516,7 @@ function freshState() {
     conversations: [],
     currentConversationId: null,
     strategy: '', notionLinks: '', supp: '', dateFrom: '', dateTo: '',
+    savedPrompts: [], notionParentId: '',
   };
 }
 function migrateState(s) {
@@ -405,7 +534,8 @@ function migrateState(s) {
   }
   delete s.messages;
   if (!s.currentConversationId && s.conversations.length) s.currentConversationId = s.conversations[0].id;
-  for (const k of ['strategy', 'notionLinks', 'supp', 'dateFrom', 'dateTo']) if (s[k] == null) s[k] = '';
+  for (const k of ['strategy', 'notionLinks', 'supp', 'dateFrom', 'dateTo', 'notionParentId']) if (s[k] == null) s[k] = '';
+  if (!Array.isArray(s.savedPrompts)) s.savedPrompts = [];
   return s;
 }
 function convId() { return 'c_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4); }
@@ -489,12 +619,18 @@ async function loadRemoteState() {
     // Context fields: remote wins ONLY if remote is non-empty.
     // Empty remote never overwrites local content — protects against data loss
     // when a refresh happens before the debounced save has flushed.
-    const fields = ['strategy', 'notionLinks', 'supp', 'dateFrom', 'dateTo'];
+    const fields = ['strategy', 'notionLinks', 'supp', 'dateFrom', 'dateTo', 'notionParentId'];
     let changed = false;
     for (const k of fields) {
       const remoteVal = remote[k] || '';
       const localVal = state[k] || '';
       if (remoteVal && remoteVal !== localVal) { state[k] = remoteVal; changed = true; }
+    }
+    // savedPrompts: array — if remote is non-empty and differs in length/ids, use remote
+    if (Array.isArray(remote.savedPrompts) && remote.savedPrompts.length) {
+      const remoteIds = remote.savedPrompts.map((p) => p.id).sort().join('|');
+      const localIds = (state.savedPrompts || []).map((p) => p.id).sort().join('|');
+      if (remoteIds !== localIds) { state.savedPrompts = remote.savedPrompts; changed = true; }
     }
     // Conversations: merge by id, remote updatedAt wins per conversation
     if (Array.isArray(remote.conversations) && remote.conversations.length) {
@@ -532,6 +668,8 @@ window.addEventListener('beforeunload', () => {
     strategy: state.strategy,
     notionLinks: state.notionLinks,
     supp: state.supp,
+    notionParentId: state.notionParentId,
+    savedPrompts: state.savedPrompts,
     dateFrom: state.dateFrom,
     dateTo: state.dateTo,
     conversations: state.conversations,
@@ -556,6 +694,8 @@ async function saveRemoteState() {
         strategy: state.strategy,
         notionLinks: state.notionLinks,
         supp: state.supp,
+        notionParentId: state.notionParentId,
+        savedPrompts: state.savedPrompts,
         dateFrom: state.dateFrom,
         dateTo: state.dateTo,
         conversations: state.conversations,
@@ -590,15 +730,18 @@ function hydrateInputs() {
   document.getElementById('in-strategy').value = state.strategy || '';
   document.getElementById('in-links').value = state.notionLinks || '';
   document.getElementById('in-supp').value = state.supp || '';
+  document.getElementById('in-notion-parent').value = state.notionParentId || '';
   document.getElementById('in-from').value = state.dateFrom || '';
   document.getElementById('in-to').value = state.dateTo || '';
   renderFieldView('strategy');
   renderFieldView('notionLinks');
   renderFieldView('supp');
+  renderFieldView('notionParentId');
+  renderPrompts();
 }
 
 // ── View/edit field system ─────────────────────────────────────────────
-const FIELD_TO_INPUT = { strategy: 'in-strategy', notionLinks: 'in-links', supp: 'in-supp' };
+const FIELD_TO_INPUT = { strategy: 'in-strategy', notionLinks: 'in-links', supp: 'in-supp', notionParentId: 'in-notion-parent' };
 
 function renderFieldView(name) {
   const wrap = document.querySelector(`[data-view="${name}"]`);
@@ -720,7 +863,20 @@ function attachInputs() {
   document.getElementById('btn-cache-refresh').addEventListener('click', () => loadCachedTranscripts(true));
   document.getElementById('modal-close').addEventListener('click', closeModal);
   document.getElementById('modal-bg').addEventListener('click', (e) => { if (e.target.id === 'modal-bg') closeModal(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closePublishModal(); closePromptModal(); } });
+
+  // Publish-to-Notion modal
+  document.getElementById('publish-close').addEventListener('click', closePublishModal);
+  document.getElementById('pub-cancel').addEventListener('click', closePublishModal);
+  document.getElementById('publish-bg').addEventListener('click', (e) => { if (e.target.id === 'publish-bg') closePublishModal(); });
+  document.getElementById('pub-go').addEventListener('click', doPublish);
+
+  // Saved-prompts modal
+  document.getElementById('btn-add-prompt').addEventListener('click', () => openPromptModal(null));
+  document.getElementById('prompt-close').addEventListener('click', closePromptModal);
+  document.getElementById('pr-cancel').addEventListener('click', closePromptModal);
+  document.getElementById('prompt-bg').addEventListener('click', (e) => { if (e.target.id === 'prompt-bg') closePromptModal(); });
+  document.getElementById('pr-save').addEventListener('click', savePrompt);
 }
 
 let loadedCalls = [];
@@ -950,6 +1106,168 @@ function closeModal() {
   document.getElementById('modal-bg').classList.remove('open');
 }
 
+// ── Saved prompts ─────────────────────────────────────────────────────
+let editingPromptId = null;
+
+function renderPrompts() {
+  const list = document.getElementById('prompts-list');
+  const empty = document.getElementById('prompts-empty');
+  const cnt = document.getElementById('prompts-count');
+  const prompts = state.savedPrompts || [];
+  cnt.textContent = `${prompts.length} saved`;
+  if (!prompts.length) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  list.innerHTML = prompts.map((p, idx) => `
+    <div class="prompt-row">
+      <div>
+        <div class="pname">${escapeHtml(p.name || 'Untitled')}</div>
+        <div class="pbody">${escapeHtml((p.body || '').slice(0, 160))}</div>
+      </div>
+      <div class="pacts">
+        <button class="run" data-run="${idx}">Run</button>
+        <button class="edit" data-edit-prompt="${idx}">Edit</button>
+        <button class="del" data-del-prompt="${idx}">Del</button>
+      </div>
+    </div>
+  `).join('');
+  list.querySelectorAll('[data-run]').forEach((b) => b.addEventListener('click', () => runPrompt(Number(b.dataset.run))));
+  list.querySelectorAll('[data-edit-prompt]').forEach((b) => b.addEventListener('click', () => openPromptModal(Number(b.dataset.editPrompt))));
+  list.querySelectorAll('[data-del-prompt]').forEach((b) => b.addEventListener('click', () => deletePrompt(Number(b.dataset.delPrompt))));
+}
+
+function openPromptModal(idx) {
+  const p = (typeof idx === 'number') ? (state.savedPrompts || [])[idx] : null;
+  editingPromptId = p ? p.id : null;
+  document.getElementById('prompt-modal-title').textContent = p ? 'Edit prompt' : 'New prompt';
+  document.getElementById('pr-name').value = p?.name || '';
+  document.getElementById('pr-body').value = p?.body || '';
+  document.getElementById('pr-result').textContent = '';
+  document.getElementById('prompt-bg').classList.add('open');
+  setTimeout(() => document.getElementById('pr-name').focus(), 50);
+}
+
+function closePromptModal() {
+  document.getElementById('prompt-bg').classList.remove('open');
+  editingPromptId = null;
+}
+
+function savePrompt() {
+  const name = document.getElementById('pr-name').value.trim();
+  const body = document.getElementById('pr-body').value.trim();
+  const result = document.getElementById('pr-result');
+  if (!name || !body) { result.className = 'result err'; result.textContent = 'Name and body required.'; return; }
+
+  if (!Array.isArray(state.savedPrompts)) state.savedPrompts = [];
+  if (editingPromptId) {
+    const idx = state.savedPrompts.findIndex((p) => p.id === editingPromptId);
+    if (idx >= 0) state.savedPrompts[idx] = { ...state.savedPrompts[idx], name, body, updatedAt: new Date().toISOString() };
+  } else {
+    state.savedPrompts.unshift({
+      id: 'p_' + Math.random().toString(36).slice(2, 10),
+      name, body,
+      createdAt: new Date().toISOString(),
+    });
+  }
+  saveState();
+  saveRemoteStateDebounced();
+  renderPrompts();
+  closePromptModal();
+}
+
+function deletePrompt(idx) {
+  const p = (state.savedPrompts || [])[idx];
+  if (!p) return;
+  if (!confirm(`Delete "${p.name}"?`)) return;
+  state.savedPrompts.splice(idx, 1);
+  saveState();
+  saveRemoteStateDebounced();
+  renderPrompts();
+}
+
+function runPrompt(idx) {
+  const p = (state.savedPrompts || [])[idx];
+  if (!p) return;
+  const ta = document.getElementById('in-msg');
+  ta.value = p.body;
+  ta.style.height = 'auto';
+  ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
+  ta.focus();
+  send();
+}
+
+// ── Publish to Notion ─────────────────────────────────────────────────
+let publishingMessage = null;
+
+function openPublishModal(m) {
+  publishingMessage = m;
+  const content = m.content || '';
+  // Auto-title: first line or first heading, stripped of markdown
+  const firstLine = content.split('\n').find((l) => l.trim()) || '';
+  const cleaned = firstLine.replace(/^#+\s*/, '').replace(/[*_`]/g, '').trim();
+  const defaultTitle = (cleaned.length > 3 && cleaned.length < 200) ? cleaned : 'Strategy agent response';
+  document.getElementById('pub-title').value = defaultTitle;
+  document.getElementById('pub-parent').value = state.notionParentId || '';
+  document.getElementById('pub-body').value = content;
+  document.getElementById('pub-result').textContent = '';
+  document.getElementById('pub-result').className = 'result';
+  document.getElementById('pub-go').disabled = false;
+  document.getElementById('publish-bg').classList.add('open');
+  setTimeout(() => document.getElementById('pub-title').focus(), 50);
+}
+
+function closePublishModal() {
+  document.getElementById('publish-bg').classList.remove('open');
+  publishingMessage = null;
+}
+
+async function doPublish() {
+  const title = document.getElementById('pub-title').value.trim();
+  const parent = document.getElementById('pub-parent').value.trim();
+  const body = document.getElementById('pub-body').value.trim();
+  const result = document.getElementById('pub-result');
+  const btn = document.getElementById('pub-go');
+
+  if (!title || !parent || !body) {
+    result.className = 'result err';
+    result.textContent = 'Title, parent, and body are required.';
+    return;
+  }
+
+  btn.disabled = true;
+  result.className = 'result';
+  result.textContent = 'Publishing...';
+
+  try {
+    const res = await fetch('/api/notion-publish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password, parent_page_id: parent, title, markdown: body }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    result.className = 'result ok';
+    result.innerHTML = `Published. <a href="${escapeHtml(data.url)}" target="_blank">Open in Notion →</a>`;
+    // If parent was edited and differs from stored default, offer to save it
+    if (parent && parent !== (state.notionParentId || '')) {
+      state.notionParentId = parent;
+      saveState();
+      saveRemoteStateDebounced();
+      renderFieldView('notionParentId');
+    }
+  } catch (err) {
+    result.className = 'result err';
+    result.textContent = `Failed: ${err.message}`;
+    btn.disabled = false;
+  }
+}
+
 function exportChat() {
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -1077,6 +1395,16 @@ function renderMessage(m) {
   if (m.toolCalls?.length) {
     const tl = toolLogEl(m.toolCalls);
     d.appendChild(tl);
+  }
+  // Publish-to-Notion action on assistant messages with actual content
+  if (m.role === 'assistant' && (m.content || '').trim()) {
+    const acts = document.createElement('div');
+    acts.className = 'actions';
+    const btn = document.createElement('button');
+    btn.textContent = '→ Notion';
+    btn.addEventListener('click', () => openPublishModal(m));
+    acts.appendChild(btn);
+    d.appendChild(acts);
   }
   return d;
 }

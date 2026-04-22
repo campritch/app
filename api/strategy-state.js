@@ -20,14 +20,16 @@ export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
       const state = await readBlob();
-      return res.status(200).json(state || { strategy: '', notionLinks: '', supp: '', dateFrom: '', dateTo: '', updated_at: null });
+      return res.status(200).json(state || { strategy: '', notionLinks: '', supp: '', notionParentId: '', savedPrompts: [], dateFrom: '', dateTo: '', updated_at: null });
     }
     if (req.method === 'POST') {
-      const { strategy, notionLinks, supp, dateFrom, dateTo, conversations, currentConversationId } = req.body || {};
+      const { strategy, notionLinks, supp, notionParentId, savedPrompts, dateFrom, dateTo, conversations, currentConversationId } = req.body || {};
       const record = {
         strategy: strategy || '',
         notionLinks: notionLinks || '',
         supp: supp || '',
+        notionParentId: notionParentId || '',
+        savedPrompts: Array.isArray(savedPrompts) ? savedPrompts : [],
         dateFrom: dateFrom || '',
         dateTo: dateTo || '',
         conversations: Array.isArray(conversations) ? conversations : [],
