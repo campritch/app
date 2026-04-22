@@ -11,14 +11,14 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
     :root {
-      --dark: #0e1323;
+      --dark: #1A2832;
       --grey-1: #707481;
       --text-primary: #252733;
       --text-secondary: #5a5f6e;
       --border: #dee0e4;
       --border-light: #e8e8e8;
       --white: #ffffff;
-      --coral: #ed7470;
+      --coral: #FF6868;
       --btn-dark: #111111;
       --pill-bg: #f3f4f6;
     }
@@ -188,42 +188,42 @@
       font-family: 'Inter', sans-serif;
       cursor: pointer;
     }
-    .ig-slide--dark  { background: #0e1323; color: #fff; }
-    .ig-slide--coral { background: #ed7470; color: #fff; }
-    .ig-slide--black { background: #111111; color: #fff; }
-    .ig-slide--white { background: #ffffff; color: #0e1323; }
+    /* Slide color palette: dark=#1A2832, coral=#FF6868, white=#ffffff */
+    .ig-slide--dark  { background: #1A2832; color: #ffffff; }
+    .ig-slide--coral { background: #FF6868; color: #ffffff; }
+    .ig-slide--black { background: #1A2832; color: #ffffff; }
+    .ig-slide--white { background: #ffffff; color: #000000; }
 
-    .ig-slide__tag {
-      font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
-      text-transform: uppercase; opacity: 0.5;
-    }
+    .ig-slide__tag { display: none; }
     .ig-slide__body { flex: 1; display: flex; flex-direction: column; justify-content: center; }
     .ig-slide__eyebrow {
-      font-size: 13px; font-weight: 600; opacity: 0.6; margin-bottom: 10px;
-      text-transform: uppercase; letter-spacing: 0.5px;
+      font-size: 13px; font-weight: 700; margin-bottom: 10px;
+      text-transform: uppercase; letter-spacing: 1px; opacity: 0.55;
     }
     .ig-slide__headline {
       font-size: 28px; font-weight: 800; line-height: 1.15;
       letter-spacing: -0.5px; margin: 0;
     }
     .ig-slide__headline em {
-      font-style: normal; color: #ed7470;
+      font-style: normal; color: #FF6868;
     }
-    .ig-slide--coral .ig-slide__headline em,
-    .ig-slide--white .ig-slide__headline em {
-      color: #0e1323;
-    }
+    .ig-slide--coral .ig-slide__headline em { color: #1A2832; }
+    .ig-slide--white .ig-slide__headline em  { color: #FF6868; }
     .ig-slide__sub {
-      margin-top: 14px; font-size: 15px; line-height: 1.55; opacity: 0.75;
+      margin-top: 14px; font-size: 15px; line-height: 1.55; opacity: 0.8;
     }
     .ig-slide__brand {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 12px; font-weight: 700; opacity: 0.5;
+      display: flex; align-items: center;
     }
-    .ig-slide__dot {
-      width: 10px; height: 10px; border-radius: 50%; background: #ed7470; flex-shrink: 0;
+    .ig-slide__brand img {
+      height: 18px; width: auto; opacity: 0.5;
     }
-    .ig-slide--coral .ig-slide__dot { background: #0e1323; }
+    /* On white slide, logo needs to be dark */
+    .ig-slide--white .ig-slide__brand img {
+      filter: invert(1);
+      opacity: 0.45;
+    }
+    .ig-slide__dot { display: none; }
 
     /* Caption box */
     .ig-caption-box {
@@ -375,9 +375,9 @@
           <div class="control-group">
             <label>Background</label>
             <div class="swatch-row">
-              <div class="swatch active" onclick="selectBg(this,'dark')" style="background:#0e1323;" title="Dark navy"></div>
+              <div class="swatch active" onclick="selectBg(this,'dark')" style="background:#1A2832;" title="Dark"></div>
               <div class="swatch" onclick="selectBg(this,'black')" style="background:#111111;" title="Black"></div>
-              <div class="swatch" onclick="selectBg(this,'coral')" style="background:#ed7470;" title="Coral"></div>
+              <div class="swatch" onclick="selectBg(this,'coral')" style="background:#FF6868;" title="Coral"></div>
               <div class="swatch" onclick="selectBg(this,'navy')" style="background:#0a0e28;" title="Deep navy"></div>
             </div>
           </div>
@@ -854,8 +854,7 @@ function buildSlide(slide, index) {
           ${slide.body ? `<p class="ig-slide__sub">${slide.body}</p>` : ''}
         </div>
         <div class="ig-slide__brand">
-          <div class="ig-slide__dot"></div>
-          spotsnow.io
+          <img src="/spotsnow-logo-white.png" alt="SpotsNow" />
         </div>
       </div>
       <button class="ig-dl-btn" onclick="downloadSlide(${index})">Download PNG</button>
