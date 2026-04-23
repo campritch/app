@@ -106,36 +106,27 @@ input, textarea, select { font-family: inherit; }
 .panel .tx-open-btn { width: 100%; background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: all 0.1s; }
 .panel .tx-open-btn:hover { color: var(--text); border-color: var(--accent); }
 
-/* ── Slide-over transcript drawer ── */
-.tx-drawer-scrim { position: fixed; inset: 0; background: rgba(0,0,0,0.4); opacity: 0; pointer-events: none; transition: opacity 0.18s; z-index: 90; }
-.tx-drawer-scrim.open { opacity: 1; pointer-events: auto; }
-.tx-drawer { position: fixed; top: 52px; bottom: 0; left: 320px; width: 36vw; min-width: 440px; max-width: 640px; background: var(--surface); border-right: 1px solid var(--line); display: flex; flex-direction: column; z-index: 95; transform: translateX(-100%); transition: transform 0.22s ease-out; box-shadow: 6px 0 22px rgba(0,0,0,0.4); }
-.tx-drawer.open { transform: translateX(0); }
-@media (max-width: 1200px) { .tx-drawer { left: 300px; width: 50vw; } }
+/* ── Transcript library modal (reuses .modal-bg + .modal) ── */
+.modal.tx-modal { max-width: 860px; width: 100%; max-height: 88vh; display: flex; flex-direction: column; }
+.modal-hdr .x { background: var(--accent); color: #fff; border: none; padding: 8px 18px; font-weight: 600; }
+.modal-hdr .x:hover { filter: brightness(1.08); }
+.tx-modal-controls { padding: 14px 20px; border-bottom: 1px solid var(--line-soft); display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+.tx-modal .range-pills { display: flex; gap: 4px; flex-wrap: wrap; }
+.tx-modal .range-pills button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 5px 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; flex: 1; min-width: 50px; }
+.tx-modal .range-pills button:hover { color: var(--text); border-color: var(--text-dim); }
+.tx-modal .range-pills button.active { color: var(--accent); border-color: var(--accent); }
+.tx-modal .tx-custom-range { display: flex; gap: 6px; align-items: center; }
+.tx-modal .tx-custom-range input[type="date"] { flex: 1; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 6px 8px; font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+.tx-modal .tx-custom-range input[type="date"]:focus { outline: none; border-color: var(--accent); }
+.tx-modal .tx-custom-range .sep { color: var(--text-faint); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.tx-modal .tx-custom-range button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 6px 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
+.tx-modal .tx-custom-range button:hover { color: var(--text); border-color: var(--accent); }
+.tx-modal .tx-sel-bar { display: flex; gap: 4px; }
+.tx-modal .tx-sel-bar button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 5px 8px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border-radius: 2px; flex: 1; }
+.tx-modal .tx-sel-bar button:hover { color: var(--text); border-color: var(--accent); }
 
-.tx-drawer-hdr { padding: 14px 20px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-shrink: 0; }
-.tx-drawer-hdr .t { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 500; color: var(--text); }
-.tx-drawer-hdr .m { display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
-.tx-drawer-hdr .x { background: var(--accent); border: none; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; padding: 8px 18px; cursor: pointer; flex-shrink: 0; border-radius: 2px; }
-.tx-drawer-hdr .x:hover { filter: brightness(1.08); }
-
-.tx-drawer-controls { padding: 14px 20px; border-bottom: 1px solid var(--line-soft); display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
-.tx-drawer .range-pills { display: flex; gap: 4px; flex-wrap: wrap; }
-.tx-drawer .range-pills button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 5px 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; flex: 1; min-width: 50px; }
-.tx-drawer .range-pills button:hover { color: var(--text); border-color: var(--text-dim); }
-.tx-drawer .range-pills button.active { color: var(--accent); border-color: var(--accent); }
-.tx-drawer .tx-custom-range { display: flex; gap: 6px; align-items: center; }
-.tx-drawer .tx-custom-range input[type="date"] { flex: 1; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 6px 8px; font-size: 11px; font-family: 'JetBrains Mono', monospace; }
-.tx-drawer .tx-custom-range input[type="date"]:focus { outline: none; border-color: var(--accent); }
-.tx-drawer .tx-custom-range .sep { color: var(--text-faint); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
-.tx-drawer .tx-custom-range button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 6px 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
-.tx-drawer .tx-custom-range button:hover { color: var(--text); border-color: var(--accent); }
-.tx-drawer .tx-sel-bar { display: flex; gap: 4px; }
-.tx-drawer .tx-sel-bar button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 5px 8px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border-radius: 2px; flex: 1; }
-.tx-drawer .tx-sel-bar button:hover { color: var(--text); border-color: var(--accent); }
-
-.tx-drawer-list { flex: 1; overflow-y: auto; background: var(--bg); }
-.tx-drawer-list .empty { padding: 30px 16px; color: var(--text-faint); font-family: 'Fraunces', serif; font-style: italic; text-align: center; font-size: 13px; }
+.tx-modal-list { flex: 1; overflow-y: auto; background: var(--bg); min-height: 300px; }
+.tx-modal-list .empty { padding: 30px 16px; color: var(--text-faint); font-family: 'Fraunces', serif; font-style: italic; text-align: center; font-size: 13px; }
 
 .tx-row { padding: 10px 18px; border-bottom: 1px solid var(--line-soft); display: grid; grid-template-columns: 18px 58px 1fr auto; gap: 12px; align-items: start; cursor: pointer; }
 .tx-row:last-child { border-bottom: none; }
@@ -154,12 +145,12 @@ input, textarea, select { font-family: inherit; }
 .tx-row .row-acts .v:hover { color: var(--text); border-color: var(--accent); }
 .tx-row .row-acts .d:hover { color: var(--bad); border-color: var(--bad); }
 
-.tx-drawer-foot { padding: 14px 20px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; background: var(--surface); }
-.tx-drawer-foot button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; font-weight: 600; }
-.tx-drawer-foot .tx-more:hover { color: var(--text); border-color: var(--text-dim); }
-.tx-drawer-foot .tx-gen { background: var(--accent); color: #fff; border-color: var(--accent); }
-.tx-drawer-foot .tx-gen:hover:not(:disabled) { filter: brightness(1.08); }
-.tx-drawer-foot .tx-gen:disabled { opacity: 0.4; cursor: not-allowed; background: transparent; color: var(--text-faint); border-color: var(--line); }
+.tx-modal-foot { padding: 14px 20px; border-top: 1px solid var(--line); display: flex; gap: 10px; flex-shrink: 0; background: var(--surface); }
+.tx-modal-foot button { flex: 1; background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; font-weight: 600; }
+.tx-modal-foot .tx-more:hover { color: var(--text); border-color: var(--text-dim); }
+.tx-modal-foot .tx-gen { background: var(--accent); color: #fff; border-color: var(--accent); }
+.tx-modal-foot .tx-gen:hover:not(:disabled) { filter: brightness(1.08); }
+.tx-modal-foot .tx-gen:disabled { opacity: 0.4; cursor: not-allowed; background: transparent; color: var(--text-faint); border-color: var(--line); }
 
 /* Dock hint showing what the agent is seeing */
 .dock .ctx-hint { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; max-width: 880px; margin: 0 auto 6px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
@@ -510,43 +501,44 @@ input, textarea, select { font-family: inherit; }
   </div>
 </div>
 
-<div class="tx-drawer" id="tx-drawer">
-  <div class="tx-drawer-hdr">
-    <div>
-      <div class="t">Transcript library</div>
-      <span class="m" id="tx-drawer-summary">—</span>
+<div class="modal-bg" id="tx-modal-bg">
+  <div class="modal tx-modal">
+    <div class="modal-hdr">
+      <div>
+        <div class="t">Transcript library</div>
+        <span class="m" id="tx-drawer-summary">—</span>
+      </div>
+      <button class="x" id="tx-drawer-close">Done</button>
     </div>
-    <button class="x" id="tx-drawer-close">Done</button>
-  </div>
-  <div class="tx-drawer-controls">
-    <div class="range-pills" id="range-pills">
-      <button data-range="7">7d</button>
-      <button data-range="30" class="active">30d</button>
-      <button data-range="90">90d</button>
-      <button data-range="180">6mo</button>
-      <button data-range="365">1y</button>
-      <button data-range="all">All</button>
+    <div class="tx-modal-controls">
+      <div class="range-pills" id="range-pills">
+        <button data-range="7">7d</button>
+        <button data-range="30" class="active">30d</button>
+        <button data-range="90">90d</button>
+        <button data-range="180">6mo</button>
+        <button data-range="365">1y</button>
+        <button data-range="all">All</button>
+      </div>
+      <div class="tx-custom-range">
+        <input type="date" id="tx-from" title="Custom from">
+        <span class="sep">→</span>
+        <input type="date" id="tx-to" title="Custom to">
+        <button id="btn-tx-custom">Apply</button>
+      </div>
+      <div class="tx-sel-bar">
+        <button id="btn-tx-sel-unsaved">Select all unsaved</button>
+        <button id="btn-tx-sel-all">Select all</button>
+        <button id="btn-tx-sel-clear">Clear</button>
+        <button id="btn-tx-refresh">Refresh</button>
+      </div>
     </div>
-    <div class="tx-custom-range">
-      <input type="date" id="tx-from" title="Custom from">
-      <span class="sep">→</span>
-      <input type="date" id="tx-to" title="Custom to">
-      <button id="btn-tx-custom">Apply</button>
+    <div class="tx-modal-list" id="tx-list"></div>
+    <div class="tx-modal-foot" id="tx-foot" hidden>
+      <button class="tx-more" id="btn-tx-more">Show more</button>
+      <button class="tx-gen" id="btn-tx-gen" disabled>Generate 0 selected</button>
     </div>
-    <div class="tx-sel-bar">
-      <button id="btn-tx-sel-unsaved">Select all unsaved</button>
-      <button id="btn-tx-sel-all">Select all</button>
-      <button id="btn-tx-sel-clear">Clear</button>
-      <button id="btn-tx-refresh">Refresh</button>
-    </div>
-  </div>
-  <div class="tx-drawer-list" id="tx-list"></div>
-  <div class="tx-drawer-foot" id="tx-foot" hidden>
-    <button class="tx-more" id="btn-tx-more">Show more</button>
-    <button class="tx-gen" id="btn-tx-gen" disabled>Generate 0 selected</button>
   </div>
 </div>
-<div class="tx-drawer-scrim" id="tx-drawer-scrim"></div>
 
 <div class="modal-bg" id="prompt-bg">
   <div class="modal">
@@ -946,12 +938,12 @@ function attachInputs() {
   document.getElementById('btn-tx-custom').addEventListener('click', applyCustomRange);
   document.getElementById('btn-tx-open').addEventListener('click', openTxDrawer);
   document.getElementById('tx-drawer-close').addEventListener('click', closeTxDrawer);
-  document.getElementById('tx-drawer-scrim').addEventListener('click', closeTxDrawer);
+  document.getElementById('tx-modal-bg').addEventListener('click', (e) => { if (e.target.id === 'tx-modal-bg') closeTxDrawer(); });
   document.getElementById('ctx-open-library').addEventListener('click', openTxDrawer);
   document.getElementById('btn-stop').addEventListener('click', stopGeneration);
   document.getElementById('modal-close').addEventListener('click', closeModal);
   document.getElementById('modal-bg').addEventListener('click', (e) => { if (e.target.id === 'modal-bg') closeModal(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closePublishModal(); closePromptModal(); } });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closePublishModal(); closePromptModal(); closeTxDrawer(); } });
 
   // Publish-to-Notion modal
   document.getElementById('publish-close').addEventListener('click', closePublishModal);
@@ -1173,12 +1165,10 @@ async function deleteTx(id) {
 }
 
 function openTxDrawer() {
-  document.getElementById('tx-drawer').classList.add('open');
-  document.getElementById('tx-drawer-scrim').classList.add('open');
+  document.getElementById('tx-modal-bg').classList.add('open');
 }
 function closeTxDrawer() {
-  document.getElementById('tx-drawer').classList.remove('open');
-  document.getElementById('tx-drawer-scrim').classList.remove('open');
+  document.getElementById('tx-modal-bg').classList.remove('open');
 }
 
 function applyCustomRange() {
