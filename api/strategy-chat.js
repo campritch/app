@@ -3,6 +3,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { tools, executeTool } from './_tools/index.js';
+import { listCachedDetailed } from './_tools/fathom.js';
 
 const MODEL = 'claude-opus-4-7';
 const MAX_ITERATIONS = 12;
@@ -58,8 +59,23 @@ export default async function handler(req, res) {
 
   const client = new Anthropic({ apiKey });
 
+  // Load the saved transcript manifest so the agent always knows what's
+  // available without needing to tool-call list_cached. Failure is non-fatal.
+  let savedTranscripts = [];
+  try {
+    const cache = await listCachedDetailed();
+    savedTranscripts = (cache.items || []).map((it) => ({
+      id: it.id,
+      title: it.title || null,
+      date: it.date || null,
+      attendees: it.attendees || [],
+    }));
+  } catch (e) {
+    console.warn('loading saved transcripts for context failed', e);
+  }
+
   // Build the context block from user inputs. Cached at block level so follow-ups are cheap.
-  const contextBlock = buildContextBlock({ strategy, notionLinks, supp, dateRange, priorSummaries });
+  const contextBlock = buildContextBlock({ strategy, notionLinks, supp, dateRange, priorSummaries, savedTranscripts });
 
   const workingMessages = [
     ...(contextBlock ? [{ role: 'user', content: [{ type: 'text', text: contextBlock, cache_control: { type: 'ephemeral' } }] }] : []),
@@ -126,8 +142,16 @@ export default async function handler(req, res) {
   }
 }
 
-function buildContextBlock({ strategy, notionLinks, supp, dateRange, priorSummaries }) {
+function buildContextBlock({ strategy, notionLinks, supp, dateRange, priorSummaries, savedTranscripts }) {
   const parts = [];
+  if (Array.isArray(savedTranscripts) && savedTranscripts.length) {
+    const lines = savedTranscripts.map((t) => {
+      const when = t.date ? new Date(t.date).toISOString().slice(0, 10) : '—';
+      const who = (t.attendees || []).slice(0, 3).join(', ');
+      return `- ${when} · ${t.title || '(no title)'} · id=${t.id}${who ? ` · with ${who}` : ''}`;
+    });
+    parts.push(`## Saved transcripts (${savedTranscripts.length})\n\nThese transcripts are already cached and available. Call fathom_get_transcript with the id to read any of them. Assume Cam wants you to consider ALL of these unless he names specific ones.\n\n${lines.join('\n')}`);
+  }
   if (strategy && strategy.trim()) {
     parts.push(`## Current business strategy (Cam's words)\n\n${strategy.trim()}`);
   }

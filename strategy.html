@@ -102,38 +102,70 @@ input, textarea, select { font-family: inherit; }
 .panel .csv-drop.ok { border-color: var(--good); color: var(--good); }
 .panel .csv-drop input { display: none; }
 
-/* ── Unified transcripts panel ── */
-.panel .tx-sel-bar { display: flex; gap: 4px; margin-bottom: 6px; }
-.panel .tx-sel-bar button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 4px 8px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; flex: 1; }
-.panel .tx-sel-bar button:hover { color: var(--text); border-color: var(--accent); }
-.panel .range-pills { display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap; }
-.panel .range-pills button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 4px 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; flex: 1; }
-.panel .range-pills button:hover { color: var(--text); border-color: var(--text-dim); }
-.panel .range-pills button.active { color: var(--accent); border-color: var(--accent); }
-.panel .tx-list { background: var(--bg); border: 1px solid var(--line); max-height: 420px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 10px; }
-.panel .tx-list .empty { padding: 16px 10px; color: var(--text-faint); font-family: 'Fraunces', serif; font-style: italic; text-align: center; font-size: 11px; }
-.panel .tx-row { padding: 8px 10px; border-bottom: 1px solid var(--line-soft); display: grid; grid-template-columns: 16px 46px 1fr auto; gap: 8px; align-items: start; cursor: pointer; }
-.panel .tx-row:last-child { border-bottom: none; }
-.panel .tx-row:hover { background: var(--surface-2); }
-.panel .tx-row.cached { background: rgba(127, 176, 105, 0.04); }
-.panel .tx-row input[type="checkbox"] { margin: 2px 0 0; accent-color: var(--accent); cursor: pointer; }
-.panel .tx-row .dt { color: var(--text-faint); padding-top: 2px; }
-.panel .tx-row .ti { color: var(--text); font-family: 'Inter Tight', sans-serif; font-size: 11.5px; line-height: 1.35; min-width: 0; }
-.panel .tx-row .ti .meta { display: block; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-faint); margin-top: 2px; word-break: break-word; }
-.panel .tx-row .status { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; flex-shrink: 0; }
-.panel .tx-row .badge { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 6px; border-radius: 2px; }
-.panel .tx-row .badge.ok { color: var(--good); border: 1px solid var(--good); }
-.panel .tx-row .badge.none { color: var(--text-faint); border: 1px solid var(--line); }
-.panel .tx-row .row-acts { display: flex; gap: 4px; }
-.panel .tx-row .row-acts button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 2px 6px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border-radius: 2px; }
-.panel .tx-row .row-acts .v:hover { color: var(--text); border-color: var(--accent); }
-.panel .tx-row .row-acts .d:hover { color: var(--bad); border-color: var(--bad); }
-.panel .tx-foot { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
-.panel .tx-foot button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 7px 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; }
-.panel .tx-foot .tx-more:hover { color: var(--text); border-color: var(--text-dim); }
-.panel .tx-foot .tx-gen { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
-.panel .tx-foot .tx-gen:hover:not(:disabled) { filter: brightness(1.08); }
-.panel .tx-foot .tx-gen:disabled { opacity: 0.4; cursor: not-allowed; background: transparent; color: var(--text-faint); border-color: var(--line); }
+/* ── Compact transcripts block in left panel ── */
+.panel .tx-open-btn { width: 100%; background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: all 0.1s; }
+.panel .tx-open-btn:hover { color: var(--text); border-color: var(--accent); }
+
+/* ── Slide-over transcript drawer ── */
+.tx-drawer-scrim { position: fixed; inset: 0; background: rgba(0,0,0,0.4); opacity: 0; pointer-events: none; transition: opacity 0.18s; z-index: 90; }
+.tx-drawer-scrim.open { opacity: 1; pointer-events: auto; }
+.tx-drawer { position: fixed; top: 52px; bottom: 0; left: 320px; width: 36vw; min-width: 440px; max-width: 640px; background: var(--surface); border-right: 1px solid var(--line); display: flex; flex-direction: column; z-index: 95; transform: translateX(-100%); transition: transform 0.22s ease-out; box-shadow: 6px 0 22px rgba(0,0,0,0.4); }
+.tx-drawer.open { transform: translateX(0); }
+@media (max-width: 1200px) { .tx-drawer { left: 300px; width: 50vw; } }
+
+.tx-drawer-hdr { padding: 14px 20px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-shrink: 0; }
+.tx-drawer-hdr .t { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 500; color: var(--text); }
+.tx-drawer-hdr .m { display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+.tx-drawer-hdr .x { background: var(--accent); border: none; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; padding: 8px 18px; cursor: pointer; flex-shrink: 0; border-radius: 2px; }
+.tx-drawer-hdr .x:hover { filter: brightness(1.08); }
+
+.tx-drawer-controls { padding: 14px 20px; border-bottom: 1px solid var(--line-soft); display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+.tx-drawer .range-pills { display: flex; gap: 4px; flex-wrap: wrap; }
+.tx-drawer .range-pills button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 5px 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; flex: 1; min-width: 50px; }
+.tx-drawer .range-pills button:hover { color: var(--text); border-color: var(--text-dim); }
+.tx-drawer .range-pills button.active { color: var(--accent); border-color: var(--accent); }
+.tx-drawer .tx-custom-range { display: flex; gap: 6px; align-items: center; }
+.tx-drawer .tx-custom-range input[type="date"] { flex: 1; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 6px 8px; font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+.tx-drawer .tx-custom-range input[type="date"]:focus { outline: none; border-color: var(--accent); }
+.tx-drawer .tx-custom-range .sep { color: var(--text-faint); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.tx-drawer .tx-custom-range button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 6px 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
+.tx-drawer .tx-custom-range button:hover { color: var(--text); border-color: var(--accent); }
+.tx-drawer .tx-sel-bar { display: flex; gap: 4px; }
+.tx-drawer .tx-sel-bar button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 5px 8px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border-radius: 2px; flex: 1; }
+.tx-drawer .tx-sel-bar button:hover { color: var(--text); border-color: var(--accent); }
+
+.tx-drawer-list { flex: 1; overflow-y: auto; background: var(--bg); }
+.tx-drawer-list .empty { padding: 30px 16px; color: var(--text-faint); font-family: 'Fraunces', serif; font-style: italic; text-align: center; font-size: 13px; }
+
+.tx-row { padding: 10px 18px; border-bottom: 1px solid var(--line-soft); display: grid; grid-template-columns: 18px 58px 1fr auto; gap: 12px; align-items: start; cursor: pointer; }
+.tx-row:last-child { border-bottom: none; }
+.tx-row:hover { background: var(--surface-2); }
+.tx-row.cached { background: rgba(127, 176, 105, 0.05); }
+.tx-row input[type="checkbox"] { margin: 3px 0 0; accent-color: var(--accent); cursor: pointer; width: 14px; height: 14px; }
+.tx-row .dt { color: var(--text-faint); padding-top: 2px; font-family: 'JetBrains Mono', monospace; font-size: 10px; }
+.tx-row .ti { color: var(--text); font-family: 'Inter Tight', sans-serif; font-size: 13px; line-height: 1.4; min-width: 0; font-weight: 500; }
+.tx-row .ti .meta { display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); margin-top: 3px; word-break: break-word; font-weight: 400; }
+.tx-row .status { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; flex-shrink: 0; }
+.tx-row .badge { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 6px; border-radius: 2px; white-space: nowrap; }
+.tx-row .badge.ok { color: var(--good); border: 1px solid var(--good); }
+.tx-row .badge.none { color: var(--text-faint); border: 1px solid var(--line); }
+.tx-row .row-acts { display: flex; gap: 4px; }
+.tx-row .row-acts button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 2px 7px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border-radius: 2px; }
+.tx-row .row-acts .v:hover { color: var(--text); border-color: var(--accent); }
+.tx-row .row-acts .d:hover { color: var(--bad); border-color: var(--bad); }
+
+.tx-drawer-foot { padding: 14px 20px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; background: var(--surface); }
+.tx-drawer-foot button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; font-weight: 600; }
+.tx-drawer-foot .tx-more:hover { color: var(--text); border-color: var(--text-dim); }
+.tx-drawer-foot .tx-gen { background: var(--accent); color: #fff; border-color: var(--accent); }
+.tx-drawer-foot .tx-gen:hover:not(:disabled) { filter: brightness(1.08); }
+.tx-drawer-foot .tx-gen:disabled { opacity: 0.4; cursor: not-allowed; background: transparent; color: var(--text-faint); border-color: var(--line); }
+
+/* Dock hint showing what the agent is seeing */
+.dock .ctx-hint { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; max-width: 880px; margin: 0 auto 6px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.dock .ctx-hint .pill { color: var(--good); border: 1px solid var(--line-soft); padding: 2px 8px; border-radius: 2px; }
+.dock .ctx-hint a { color: var(--accent); text-decoration: none; cursor: pointer; }
+.dock .ctx-hint a:hover { text-decoration: underline; }
 
 /* Stop button in dock */
 .dock .box .stop-btn { background: transparent; color: var(--bad); border: 1px solid var(--bad); padding: 10px 18px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; height: 44px; cursor: pointer; display: none; }
@@ -337,27 +369,8 @@ input, textarea, select { font-family: inherit; }
       <div class="group">
         <div class="label">
           Transcripts <span class="hint" id="tx-summary">loading...</span>
-          <span class="field-meta">
-            <button class="field-edit-btn" id="btn-tx-refresh">Refresh</button>
-          </span>
         </div>
-        <div class="range-pills" id="range-pills">
-          <button data-range="7">7d</button>
-          <button data-range="30" class="active">30d</button>
-          <button data-range="90">90d</button>
-          <button data-range="180">6mo</button>
-          <button data-range="all">All</button>
-        </div>
-        <div class="tx-sel-bar">
-          <button id="btn-tx-sel-unsaved">Select all unsaved</button>
-          <button id="btn-tx-sel-all">Select all</button>
-          <button id="btn-tx-sel-clear">Clear</button>
-        </div>
-        <div class="tx-list" id="tx-list"></div>
-        <div class="tx-foot" id="tx-foot" hidden>
-          <button class="tx-more" id="btn-tx-more">Show more</button>
-          <button class="tx-gen" id="btn-tx-gen" disabled>Generate 0 selected</button>
-        </div>
+        <button class="tx-open-btn" id="btn-tx-open">Open transcript library →</button>
         <div class="ingest-log" id="ingest-log"></div>
       </div>
 
@@ -424,6 +437,10 @@ input, textarea, select { font-family: inherit; }
       </div>
 
       <div class="dock" id="dock">
+        <div class="ctx-hint">
+          <span class="pill" id="ctx-tx-pill">0 transcripts</span>
+          <span>the agent sees every saved transcript by default · <a id="ctx-open-library">manage library</a></span>
+        </div>
         <div class="box">
           <textarea id="in-msg" placeholder="Ask the agent..." rows="1"></textarea>
           <button id="btn-send" class="send-btn">Send</button>
@@ -492,6 +509,44 @@ input, textarea, select { font-family: inherit; }
     </div>
   </div>
 </div>
+
+<div class="tx-drawer" id="tx-drawer">
+  <div class="tx-drawer-hdr">
+    <div>
+      <div class="t">Transcript library</div>
+      <span class="m" id="tx-drawer-summary">—</span>
+    </div>
+    <button class="x" id="tx-drawer-close">Done</button>
+  </div>
+  <div class="tx-drawer-controls">
+    <div class="range-pills" id="range-pills">
+      <button data-range="7">7d</button>
+      <button data-range="30" class="active">30d</button>
+      <button data-range="90">90d</button>
+      <button data-range="180">6mo</button>
+      <button data-range="365">1y</button>
+      <button data-range="all">All</button>
+    </div>
+    <div class="tx-custom-range">
+      <input type="date" id="tx-from" title="Custom from">
+      <span class="sep">→</span>
+      <input type="date" id="tx-to" title="Custom to">
+      <button id="btn-tx-custom">Apply</button>
+    </div>
+    <div class="tx-sel-bar">
+      <button id="btn-tx-sel-unsaved">Select all unsaved</button>
+      <button id="btn-tx-sel-all">Select all</button>
+      <button id="btn-tx-sel-clear">Clear</button>
+      <button id="btn-tx-refresh">Refresh</button>
+    </div>
+  </div>
+  <div class="tx-drawer-list" id="tx-list"></div>
+  <div class="tx-drawer-foot" id="tx-foot" hidden>
+    <button class="tx-more" id="btn-tx-more">Show more</button>
+    <button class="tx-gen" id="btn-tx-gen" disabled>Generate 0 selected</button>
+  </div>
+</div>
+<div class="tx-drawer-scrim" id="tx-drawer-scrim"></div>
 
 <div class="modal-bg" id="prompt-bg">
   <div class="modal">
@@ -888,6 +943,11 @@ function attachInputs() {
   document.getElementById('btn-tx-sel-unsaved').addEventListener('click', () => selectTx('unsaved'));
   document.getElementById('btn-tx-sel-all').addEventListener('click', () => selectTx('all'));
   document.getElementById('btn-tx-sel-clear').addEventListener('click', () => selectTx('clear'));
+  document.getElementById('btn-tx-custom').addEventListener('click', applyCustomRange);
+  document.getElementById('btn-tx-open').addEventListener('click', openTxDrawer);
+  document.getElementById('tx-drawer-close').addEventListener('click', closeTxDrawer);
+  document.getElementById('tx-drawer-scrim').addEventListener('click', closeTxDrawer);
+  document.getElementById('ctx-open-library').addEventListener('click', openTxDrawer);
   document.getElementById('btn-stop').addEventListener('click', stopGeneration);
   document.getElementById('modal-close').addEventListener('click', closeModal);
   document.getElementById('modal-bg').addEventListener('click', (e) => { if (e.target.id === 'modal-bg') closeModal(); });
@@ -919,11 +979,15 @@ let txLoading = false;
 function computeRangeDates(range) {
   const to = new Date();
   const from = new Date();
-  if (range === 'all') from.setFullYear(to.getFullYear() - 5);
+  if (range === 'all') from.setFullYear(to.getFullYear() - 15);
+  else if (range === 'custom') return { from_date: txCustomFrom, to_date: txCustomTo };
   else from.setDate(to.getDate() - Number(range));
   const fmt = (d) => d.toISOString().slice(0, 10);
   return { from_date: fmt(from), to_date: fmt(to) };
 }
+
+let txCustomFrom = '';
+let txCustomTo = '';
 
 async function loadTranscripts() {
   if (txLoading || !password) return;
@@ -976,9 +1040,14 @@ function renderTxList() {
   const el = document.getElementById('tx-list');
   const foot = document.getElementById('tx-foot');
   const sum = document.getElementById('tx-summary');
+  const drawerSum = document.getElementById('tx-drawer-summary');
+  const ctxPill = document.getElementById('ctx-tx-pill');
   const savedCount = [...txCachedById.keys()].length;
   const totalCount = txMeetings.length;
-  sum.textContent = `${savedCount} of ${totalCount} saved`;
+  const summaryText = `${savedCount} of ${totalCount} saved`;
+  sum.textContent = `${savedCount} saved`;
+  if (drawerSum) drawerSum.textContent = summaryText;
+  if (ctxPill) ctxPill.textContent = savedCount === 1 ? '1 transcript' : `${savedCount} transcripts`;
 
   if (!totalCount) {
     el.innerHTML = '<div class="empty">No calls in this range.</div>';
@@ -1101,6 +1170,29 @@ async function deleteTx(id) {
   } catch (err) {
     alert(`Delete failed: ${err.message}`);
   }
+}
+
+function openTxDrawer() {
+  document.getElementById('tx-drawer').classList.add('open');
+  document.getElementById('tx-drawer-scrim').classList.add('open');
+}
+function closeTxDrawer() {
+  document.getElementById('tx-drawer').classList.remove('open');
+  document.getElementById('tx-drawer-scrim').classList.remove('open');
+}
+
+function applyCustomRange() {
+  const from = document.getElementById('tx-from').value;
+  const to = document.getElementById('tx-to').value;
+  if (!from || !to) { alert('Pick both a from and to date.'); return; }
+  if (from > to) { alert('From date must be on or before to date.'); return; }
+  txCustomFrom = from; txCustomTo = to;
+  txRange = 'custom';
+  document.querySelectorAll('#range-pills button').forEach((b) => b.classList.remove('active'));
+  state.dateFrom = from; state.dateTo = to;
+  saveState();
+  saveRemoteStateDebounced();
+  loadTranscripts();
 }
 
 function selectTx(mode) {
