@@ -331,13 +331,22 @@
       <div style="display:flex;gap:8px;">
         <button class="btn-outline" onclick="copyMarkdown()">Copy markdown</button>
         <button class="btn-outline" onclick="copyText()">Copy text</button>
-        <button class="btn-outline" id="claude-btn" onclick="openInClaude()" style="display:none;">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M9 1H11V3M11 1L6 6M5 2H2C1.45 2 1 2.45 1 3V10C1 10.55 1.45 11 2 11H9C9.55 11 10 10.55 10 10V7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Generate assets in Claude ↗
-        </button>
       </div>
     </div>
     <div class="article-body" id="article-body"></div>
+  </div>
+
+  <!-- Generate in Claude CTA -->
+  <div id="claude-card" style="display:none; margin-bottom:24px;">
+    <button id="claude-btn" onclick="openInClaude()" style="
+      width:100%; height:52px; background:#1A2832; color:#fff; border:none;
+      border-radius:16px; font-family:inherit; font-size:14px; font-weight:700;
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      cursor:pointer; letter-spacing:-0.2px; transition:opacity 0.15s;
+    ">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 2H14V4M14 2L8 8M7 3H3C2.45 3 2 3.45 2 4V13C2 13.55 2.45 14 3 14H12C12.55 14 13 13.55 13 13V9" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Generate Instagram + Thumbnail assets in Claude ↗
+    </button>
   </div>
 
   <!-- Thumbnail -->
@@ -619,6 +628,7 @@ async function generate() {
   btn.disabled = true;
   document.getElementById('article-card').style.display = 'none';
   document.getElementById('thumb-card').style.display = 'none';
+  document.getElementById('claude-card').style.display = 'none';
   document.getElementById('paste-box').style.display = 'none';
   rawMarkdown = '';
 
@@ -649,6 +659,7 @@ async function runGeneration(transcript, videoId) {
   btn.disabled = true;
   document.getElementById('article-card').style.display = 'none';
   document.getElementById('thumb-card').style.display = 'none';
+  document.getElementById('claude-card').style.display = 'none';
   rawMarkdown = '';
 
   // Step 2: get API key and stream article from Claude directly
@@ -734,8 +745,8 @@ async function runGeneration(transcript, videoId) {
   document.getElementById('t-line1').value = line1;
   document.getElementById('t-line2').value = line2;
   document.getElementById('thumb-card').style.display = 'block';
+  document.getElementById('claude-card').style.display = 'block';
   document.getElementById('status').style.display = 'none';
-  document.getElementById('claude-btn').style.display = 'inline-flex';
   btn.disabled = false;
 
   // Run thumbnail and Instagram generation in parallel
@@ -973,14 +984,12 @@ async function openInClaude() {
   }
   // Open Claude in new tab
   window.open('https://claude.ai/new', '_blank');
-  // Show toast
+  // Show confirmation on button
   const btn = document.getElementById('claude-btn');
   const orig = btn.innerHTML;
-  btn.innerHTML = '✓ Prompt copied — paste into Claude';
-  btn.style.background = '#1A2832';
-  btn.style.color = '#fff';
-  btn.style.border = 'none';
-  setTimeout(() => { btn.innerHTML = orig; btn.style = ''; }, 3000);
+  btn.innerHTML = '✓ Prompt copied to clipboard — paste it into Claude';
+  btn.style.background = '#2a7a4b';
+  setTimeout(() => { btn.innerHTML = orig; btn.style.background = '#1A2832'; }, 3000);
 }
 
 // ── Status ──────────────────────────────────────────────────────────────────
