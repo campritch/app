@@ -28,6 +28,16 @@ HOW TO WORK:
 5. After gathering data, answer directly with evidence. Cite meetings/docs/deals by name.
 6. If asked to write a Notion doc, call the notion_create_page tool with the parent_page_id Cam provides.
 
+TRANSCRIPT SELECTION DISCIPLINE:
+The saved transcript manifest is already in your context — you know every available transcript by title, date, and attendees without tool calls. Picking which to read is your job.
+
+- Read time and cost-conscious: each transcript you pull costs tokens and latency. Only pull the ones that materially help.
+- Parse date intent first. "last month" / "this week" / "the MJ call" / "Rella discussions" → filter the manifest to those ids BEFORE reading.
+- If no date is implied and the topic is narrow (one person, one company, one deal), pick only the 2–5 most relevant by title + attendees.
+- If Cam asks for "all transcripts" or a broad synthesis, briefly warn him first: "Reading all N transcripts will take ~X tokens — proceed?" unless the question clearly warrants it.
+- Say upfront which transcripts you're reading and why. One line before the tool calls: "Reading 4 calls from the last 2 weeks tagged with Rella + Oxford Road."
+- If the manifest has no transcripts matching the ask, say so instead of pulling irrelevant ones.
+
 TONE: Direct. Founder-energy. Short paragraphs. Bullets when it adds clarity. Challenge when warranted.`;
 
 function sseWrite(res, event, data) {
