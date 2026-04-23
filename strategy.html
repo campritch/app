@@ -124,6 +124,11 @@ input, textarea, select { font-family: inherit; }
 .tx-modal .tx-sel-bar { display: flex; gap: 4px; }
 .tx-modal .tx-sel-bar button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 5px 8px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border-radius: 2px; flex: 1; }
 .tx-modal .tx-sel-bar button:hover { color: var(--text); border-color: var(--accent); }
+.tx-modal .tx-toggle { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; }
+.tx-modal .tx-toggle input { accent-color: var(--accent); cursor: pointer; width: 13px; height: 13px; }
+.tx-modal .tx-toggle:hover { color: var(--text); }
+.tx-row.is-standup .ti .meta::before { content: "standup · "; color: var(--warn); }
+.tx-row.is-standup { opacity: 0.78; }
 
 .tx-modal-list { flex: 1; overflow-y: auto; background: var(--bg); min-height: 300px; }
 .tx-modal-list .empty { padding: 30px 16px; color: var(--text-faint); font-family: 'Fraunces', serif; font-style: italic; text-align: center; font-size: 13px; }
@@ -531,6 +536,10 @@ input, textarea, select { font-family: inherit; }
         <button id="btn-tx-sel-clear">Clear</button>
         <button id="btn-tx-refresh">Refresh</button>
       </div>
+      <label class="tx-toggle">
+        <input type="checkbox" id="tx-show-standups">
+        Show standups (recurring syncs, 1:1s, retros)
+      </label>
     </div>
     <div class="tx-modal-list" id="tx-list"></div>
     <div class="tx-modal-foot" id="tx-foot" hidden>
@@ -936,6 +945,10 @@ function attachInputs() {
   document.getElementById('btn-tx-sel-all').addEventListener('click', () => selectTx('all'));
   document.getElementById('btn-tx-sel-clear').addEventListener('click', () => selectTx('clear'));
   document.getElementById('btn-tx-custom').addEventListener('click', applyCustomRange);
+  document.getElementById('tx-show-standups').addEventListener('change', (e) => {
+    txShowStandups = e.target.checked;
+    loadTranscripts();
+  });
   document.getElementById('btn-tx-open').addEventListener('click', openTxDrawer);
   document.getElementById('tx-drawer-close').addEventListener('click', closeTxDrawer);
   document.getElementById('tx-modal-bg').addEventListener('click', (e) => { if (e.target.id === 'tx-modal-bg') closeTxDrawer(); });
@@ -980,6 +993,7 @@ function computeRangeDates(range) {
 
 let txCustomFrom = '';
 let txCustomTo = '';
+let txShowStandups = false;
 
 async function loadTranscripts() {
   if (txLoading || !password) return;
@@ -993,7 +1007,7 @@ async function loadTranscripts() {
   try {
     const { from_date, to_date } = computeRangeDates(txRange);
     const [listRes, cacheRes] = await Promise.all([
-      fetch('/api/fathom-list', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password, from_date, to_date }) }),
+      fetch('/api/fathom-list', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password, from_date, to_date, include_standups: txShowStandups }) }),
       fetch('/api/fathom-cache', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password, action: 'list' }) }),
     ]);
     if (!listRes.ok) { const e = await listRes.json().catch(() => ({})); throw new Error(e.error || `fathom-list HTTP ${listRes.status}`); }
@@ -1057,7 +1071,10 @@ function renderTxList() {
     const sel = txSelectedIds.has(id) ? 'checked' : '';
     const badge = cached ? `<span class="badge ok" title="Permanently saved to storage">✓ saved</span>` : `<span class="badge none">not saved</span>`;
     const acts = cached ? `<div class="row-acts"><button class="v" data-view="${escapeHtml(id)}">View</button><button class="d" data-del="${escapeHtml(id)}">Del</button></div>` : '';
-    return `<div class="tx-row${cached ? ' cached' : ''}" data-id="${escapeHtml(id)}">
+    const classes = ['tx-row'];
+    if (cached) classes.push('cached');
+    if (m.is_standup) classes.push('is-standup');
+    return `<div class="${classes.join(' ')}" data-id="${escapeHtml(id)}">
       <input type="checkbox" class="tx-cb" data-id="${escapeHtml(id)}" ${sel}>
       <span class="dt">${escapeHtml(when)}</span>
       <span class="ti">${escapeHtml(title)}<span class="meta">${escapeHtml(atts || '—')}</span></span>
@@ -1189,11 +1206,16 @@ function selectTx(mode) {
   if (mode === 'clear') {
     txSelectedIds.clear();
   } else if (mode === 'all') {
-    for (const m of txMeetings) txSelectedIds.add(String(m.id));
+    // "Select all" skips standups even when they're visible — the user explicitly
+    // asked for an "exclude standups" bulk action. If they want to include one,
+    // they can tick it individually.
+    for (const m of txMeetings) {
+      if (!m.is_standup) txSelectedIds.add(String(m.id));
+    }
   } else if (mode === 'unsaved') {
     for (const m of txMeetings) {
       const id = String(m.id);
-      if (!txCachedById.has(id)) txSelectedIds.add(id);
+      if (!txCachedById.has(id) && !m.is_standup) txSelectedIds.add(id);
     }
   }
   renderTxList();

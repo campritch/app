@@ -2,7 +2,19 @@
 // Env: FATHOM_API_KEY, FATHOM_API_BASE (default https://api.fathom.ai/external/v1), BLOB_READ_WRITE_TOKEN (optional).
 
 const DEFAULT_BASE = process.env.FATHOM_API_BASE || 'https://api.fathom.ai/external/v1';
-const STANDUP_PATTERNS = [/\bstand.?up\b/i, /\bdaily\b/i, /\bsync\b/i, /\b1\s*[:x\/]\s*1\b/i, /\b1on1\b/i];
+// Recurring-meeting noise we exclude by default. Matches plurals (standups, 1:1s, syncs)
+// which the previous \b-anchored version missed.
+const STANDUP_PATTERNS = [
+  /\bstand.?ups?\b/i,
+  /\bdailys?\b/i,
+  /\bsyncs?\b/i,
+  /\b1\s*[:x\/]\s*1s?\b/i,
+  /\b1on1s?\b/i,
+  /\bretros?\b/i,
+  /\bretrospectives?\b/i,
+  /\bcheck.?ins?\b/i,
+  /\bweekly\s+(team|all\s*hands|status|meeting)\b/i,
+];
 
 function assertKey() {
   const k = process.env.FATHOM_API_KEY;
@@ -27,12 +39,14 @@ async function fathomGet(path, params) {
 // Pagination uses cursor + next_cursor. Transcript lives at /recordings/{id}/transcript.
 // Meeting objects expose the recording id via recording.id (fallback to recording_id / id).
 
-const PAGE_CAP = 20; // safety: max pages to walk on one listMeetings call
+const PAGE_CAP = 100; // 100 pages × Fathom's page size — covers multi-year history
 
-export async function listMeetings({ from_date, to_date, extra_exclude_patterns = [] }) {
+export async function listMeetings({ from_date, to_date, extra_exclude_patterns = [], include_standups = false }) {
   if (!from_date || !to_date) throw new Error('from_date and to_date required');
 
-  const excludes = [...STANDUP_PATTERNS, ...extra_exclude_patterns.map((p) => new RegExp(p, 'i'))];
+  const excludes = include_standups
+    ? extra_exclude_patterns.map((p) => new RegExp(p, 'i'))
+    : [...STANDUP_PATTERNS, ...extra_exclude_patterns.map((p) => new RegExp(p, 'i'))];
   const all = [];
   let cursor;
   let pages = 0;
@@ -42,6 +56,7 @@ export async function listMeetings({ from_date, to_date, extra_exclude_patterns 
       created_after: `${from_date}T00:00:00Z`,
       created_before: `${to_date}T23:59:59Z`,
       cursor,
+      limit: 100, // Fathom ignores unsupported params; safe to send
     });
     const items = Array.isArray(data) ? data : (data.items || data.meetings || data.results || []);
     all.push(...items);
@@ -50,21 +65,23 @@ export async function listMeetings({ from_date, to_date, extra_exclude_patterns 
     if (!cursor) break;
   }
 
-  const filtered = all
-    .map((m) => ({
-      id: m.recording?.id || m.recording_id || m.id || m.meeting_id,
-      title: m.title || m.meeting_title || '(untitled)',
-      date: m.scheduled_start_time || m.created_at || m.recording_start_time || null,
-      attendees: (m.calendar_invitees || m.invitees || m.attendees || []).map((a) => a.email || a.name).filter(Boolean),
-      recorded_by: m.recorded_by?.email || m.recorded_by?.name || null,
-      duration_minutes: m.duration || m.duration_minutes || null,
-      share_url: m.url || m.share_url || null,
-    }))
-    .filter((m) => !excludes.some((re) => re.test(m.title)));
+  const mapped = all.map((m) => ({
+    id: m.recording?.id || m.recording_id || m.id || m.meeting_id,
+    title: m.title || m.meeting_title || '(untitled)',
+    date: m.scheduled_start_time || m.created_at || m.recording_start_time || null,
+    attendees: (m.calendar_invitees || m.invitees || m.attendees || []).map((a) => a.email || a.name).filter(Boolean),
+    recorded_by: m.recorded_by?.email || m.recorded_by?.name || null,
+    duration_minutes: m.duration || m.duration_minutes || null,
+    share_url: m.url || m.share_url || null,
+    is_standup: STANDUP_PATTERNS.some((re) => re.test(m.title || m.meeting_title || '')),
+  }));
+  const filtered = excludes.length
+    ? mapped.filter((m) => !excludes.some((re) => re.test(m.title)))
+    : mapped;
 
   return {
     count: filtered.length,
-    excluded_count: all.length - filtered.length,
+    excluded_count: mapped.length - filtered.length,
     pages_walked: pages,
     hit_page_cap: pages >= PAGE_CAP && !!cursor,
     meetings: filtered,
