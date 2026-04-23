@@ -103,6 +103,9 @@ input, textarea, select { font-family: inherit; }
 .panel .csv-drop input { display: none; }
 
 /* ── Unified transcripts panel ── */
+.panel .tx-sel-bar { display: flex; gap: 4px; margin-bottom: 6px; }
+.panel .tx-sel-bar button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 4px 8px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; flex: 1; }
+.panel .tx-sel-bar button:hover { color: var(--text); border-color: var(--accent); }
 .panel .range-pills { display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap; }
 .panel .range-pills button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 4px 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; flex: 1; }
 .panel .range-pills button:hover { color: var(--text); border-color: var(--text-dim); }
@@ -193,34 +196,34 @@ input, textarea, select { font-family: inherit; }
 .stream .empty { color: var(--text-faint); font-family: 'Fraunces', serif; font-size: 16px; font-style: italic; max-width: 520px; line-height: 1.55; }
 .stream .empty .tip { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 14px; display: block; }
 
-.msg { margin-bottom: 20px; max-width: 760px; }
+.msg { margin-bottom: 16px; max-width: 760px; }
 .msg .who { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 6px; display: flex; gap: 10px; align-items: center; }
 .msg .who .tag { color: var(--accent); }
 .msg.user .who .tag { color: var(--text); }
-.msg .body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.65; color: var(--text); word-wrap: break-word; letter-spacing: 0; }
-.msg.user .body { background: var(--surface); border-left: 2px solid var(--accent); padding: 10px 14px; white-space: pre-wrap; }
-.msg .body p { margin-bottom: 12px; }
+.msg .body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Helvetica, Arial, sans-serif; font-size: 13px; line-height: 1.55; color: var(--text); word-wrap: break-word; letter-spacing: 0; }
+.msg.user .body { background: var(--surface); border-left: 2px solid var(--accent); padding: 9px 13px; white-space: pre-wrap; }
+.msg .body p { margin-bottom: 9px; }
 .msg .body p:last-child { margin-bottom: 0; }
-.msg .body h1, .msg .body h2, .msg .body h3 { font-family: inherit; font-weight: 600; margin: 18px 0 8px; line-height: 1.35; letter-spacing: -0.005em; color: var(--text); }
+.msg .body h1, .msg .body h2, .msg .body h3 { font-family: inherit; font-weight: 600; margin: 14px 0 6px; line-height: 1.35; letter-spacing: -0.005em; color: var(--text); }
 .msg .body h1:first-child, .msg .body h2:first-child, .msg .body h3:first-child { margin-top: 0; }
-.msg .body h1 { font-size: 17px; }
-.msg .body h2 { font-size: 16px; }
-.msg .body h3 { font-size: 15px; color: var(--text); font-weight: 600; }
-.msg .body ul, .msg .body ol { margin: 6px 0 12px; padding-left: 22px; }
-.msg .body li { margin-bottom: 4px; }
+.msg .body h1 { font-size: 15px; }
+.msg .body h2 { font-size: 14px; }
+.msg .body h3 { font-size: 13px; color: var(--text); font-weight: 600; }
+.msg .body ul, .msg .body ol { margin: 4px 0 9px; padding-left: 20px; }
+.msg .body li { margin-bottom: 3px; }
 .msg .body li::marker { color: var(--text-faint); }
-.msg .body ul ul, .msg .body ol ol { margin: 4px 0; }
-.msg .body code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--surface-2); padding: 1px 5px; border-radius: 2px; color: var(--text); }
-.msg .body pre { background: var(--surface); border: 1px solid var(--line-soft); padding: 10px 12px; margin: 10px 0; overflow-x: auto; border-radius: 2px; }
-.msg .body pre code { background: none; padding: 0; color: var(--text); font-size: 13px; line-height: 1.5; }
+.msg .body ul ul, .msg .body ol ol { margin: 3px 0; }
+.msg .body code { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; background: var(--surface-2); padding: 1px 5px; border-radius: 2px; color: var(--text); }
+.msg .body pre { background: var(--surface); border: 1px solid var(--line-soft); padding: 9px 11px; margin: 8px 0; overflow-x: auto; border-radius: 2px; }
+.msg .body pre code { background: none; padding: 0; color: var(--text); font-size: 11.5px; line-height: 1.5; }
 .msg .body strong { color: var(--text); font-weight: 600; }
 .msg .body em { color: var(--text); font-style: italic; }
-.msg .body blockquote { border-left: 2px solid var(--line); padding-left: 12px; color: var(--text-dim); margin: 10px 0; }
+.msg .body blockquote { border-left: 2px solid var(--line); padding-left: 11px; color: var(--text-dim); margin: 8px 0; }
 .msg .body a { color: var(--accent); text-decoration: none; }
 .msg .body a:hover { text-decoration: underline; }
-.msg .body hr { border: none; border-top: 1px solid var(--line-soft); margin: 14px 0; }
-.msg .body table { border-collapse: collapse; margin: 10px 0; width: 100%; font-size: 14px; }
-.msg .body th, .msg .body td { border-bottom: 1px solid var(--line-soft); padding: 6px 10px; text-align: left; }
+.msg .body hr { border: none; border-top: 1px solid var(--line-soft); margin: 12px 0; }
+.msg .body table { border-collapse: collapse; margin: 8px 0; width: 100%; font-size: 12px; }
+.msg .body th, .msg .body td { border-bottom: 1px solid var(--line-soft); padding: 5px 8px; text-align: left; }
 .msg .body th { color: var(--text-dim); font-weight: 600; }
 
 .tool-log { background: var(--surface); border: 1px solid var(--line); margin: 10px 0; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
@@ -245,8 +248,9 @@ input, textarea, select { font-family: inherit; }
 .history-list { flex: 1; overflow-y: auto; }
 .history-item { padding: 12px 16px; border-bottom: 1px solid var(--line-soft); cursor: pointer; position: relative; transition: background 0.1s; }
 .history-item:hover { background: var(--surface-2); }
-.history-item.active { background: var(--surface-2); border-left: 2px solid var(--accent); padding-left: 14px; }
-.history-item .title { font-size: 12.5px; line-height: 1.4; color: var(--text); font-family: 'Fraunces', serif; font-weight: 500; margin-bottom: 4px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.history-item.active { background: var(--line-soft); border-left: 1px solid var(--accent); padding-left: 15px; }
+.history-item.active .title { color: var(--text); }
+.history-item .title { font-size: 12px; line-height: 1.4; color: var(--text-dim); font-family: 'Inter Tight', sans-serif; font-weight: 400; margin-bottom: 4px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .history-item .meta { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; display: flex; justify-content: space-between; align-items: center; }
 .history-item .meta .count { color: var(--text-faint); }
 .history-item .del { opacity: 0; background: none; border: none; color: var(--text-faint); cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 2px 6px; transition: opacity 0.1s; }
@@ -343,6 +347,11 @@ input, textarea, select { font-family: inherit; }
           <button data-range="90">90d</button>
           <button data-range="180">6mo</button>
           <button data-range="all">All</button>
+        </div>
+        <div class="tx-sel-bar">
+          <button id="btn-tx-sel-unsaved">Select all unsaved</button>
+          <button id="btn-tx-sel-all">Select all</button>
+          <button id="btn-tx-sel-clear">Clear</button>
         </div>
         <div class="tx-list" id="tx-list"></div>
         <div class="tx-foot" id="tx-foot" hidden>
@@ -876,6 +885,9 @@ function attachInputs() {
   document.getElementById('btn-tx-gen').addEventListener('click', generateSelected);
   document.getElementById('btn-tx-more').addEventListener('click', () => { txDisplayCount += 50; renderTxList(); });
   document.querySelectorAll('#range-pills button').forEach((b) => b.addEventListener('click', () => setRange(b.dataset.range)));
+  document.getElementById('btn-tx-sel-unsaved').addEventListener('click', () => selectTx('unsaved'));
+  document.getElementById('btn-tx-sel-all').addEventListener('click', () => selectTx('all'));
+  document.getElementById('btn-tx-sel-clear').addEventListener('click', () => selectTx('clear'));
   document.getElementById('btn-stop').addEventListener('click', stopGeneration);
   document.getElementById('modal-close').addEventListener('click', closeModal);
   document.getElementById('modal-bg').addEventListener('click', (e) => { if (e.target.id === 'modal-bg') closeModal(); });
@@ -964,9 +976,9 @@ function renderTxList() {
   const el = document.getElementById('tx-list');
   const foot = document.getElementById('tx-foot');
   const sum = document.getElementById('tx-summary');
-  const cachedCount = [...txCachedById.keys()].length;
+  const savedCount = [...txCachedById.keys()].length;
   const totalCount = txMeetings.length;
-  sum.textContent = `${cachedCount}/${totalCount} cached`;
+  sum.textContent = `${savedCount} of ${totalCount} saved`;
 
   if (!totalCount) {
     el.innerHTML = '<div class="empty">No calls in this range.</div>';
@@ -982,7 +994,7 @@ function renderTxList() {
     const atts = (m.attendees || []).slice(0, 2).join(', ') + ((m.attendees || []).length > 2 ? ` +${m.attendees.length - 2}` : '');
     const title = m.title || '(untitled)';
     const sel = txSelectedIds.has(id) ? 'checked' : '';
-    const badge = cached ? `<span class="badge ok">✓ cached</span>` : `<span class="badge none">not cached</span>`;
+    const badge = cached ? `<span class="badge ok" title="Permanently saved to storage">✓ saved</span>` : `<span class="badge none">not saved</span>`;
     const acts = cached ? `<div class="row-acts"><button class="v" data-view="${escapeHtml(id)}">View</button><button class="d" data-del="${escapeHtml(id)}">Del</button></div>` : '';
     return `<div class="tx-row${cached ? ' cached' : ''}" data-id="${escapeHtml(id)}">
       <input type="checkbox" class="tx-cb" data-id="${escapeHtml(id)}" ${sel}>
@@ -1077,7 +1089,7 @@ async function viewTx(id) {
 
 async function deleteTx(id) {
   const meta = txCachedById.get(String(id)) || {};
-  if (!confirm(`Remove "${meta.title || id}" from the agent's context?`)) return;
+  if (!confirm(`Remove the saved transcript "${meta.title || id}"? The agent will no longer see it.`)) return;
   try {
     const res = await fetch('/api/fathom-cache', {
       method: 'POST',
@@ -1089,6 +1101,20 @@ async function deleteTx(id) {
   } catch (err) {
     alert(`Delete failed: ${err.message}`);
   }
+}
+
+function selectTx(mode) {
+  if (mode === 'clear') {
+    txSelectedIds.clear();
+  } else if (mode === 'all') {
+    for (const m of txMeetings) txSelectedIds.add(String(m.id));
+  } else if (mode === 'unsaved') {
+    for (const m of txMeetings) {
+      const id = String(m.id);
+      if (!txCachedById.has(id)) txSelectedIds.add(id);
+    }
+  }
+  renderTxList();
 }
 
 function setRange(range) {
