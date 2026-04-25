@@ -419,6 +419,21 @@
 
 </main>
 
+<!-- Hidden thumbnail render div (640×360, off-screen) -->
+<div id="thumb-render" style="position:fixed;left:-2000px;top:0;width:640px;height:360px;overflow:hidden;font-family:'Inter',sans-serif;box-sizing:border-box;">
+  <div id="thumb-bg" style="position:absolute;inset:0;background:#1A2832;"></div>
+  <div id="thumb-photo-wrap" style="position:absolute;top:0;bottom:0;right:0;width:48%;overflow:hidden;">
+    <img id="thumb-photo" src="/cutouts/cam1.png" crossorigin="anonymous" style="width:100%;height:100%;object-fit:cover;object-position:top center;display:block;" />
+  </div>
+  <div id="thumb-text" style="position:absolute;top:0;bottom:0;left:0;width:58%;display:flex;flex-direction:column;justify-content:center;padding:32px 36px;box-sizing:border-box;">
+    <div id="thumb-l1" style="font-weight:800;font-size:36px;line-height:1.1;color:#ffffff;letter-spacing:-0.025em;margin-bottom:10px;"></div>
+    <div id="thumb-l2-wrap" style="display:inline-flex;">
+      <span id="thumb-l2" style="background:#F06060;font-weight:800;font-size:46px;line-height:1.15;color:#ffffff;letter-spacing:-0.025em;padding:4px 14px 8px;display:inline-block;"></span>
+    </div>
+    <img src="/spotsnow-logo-white.png" crossorigin="anonymous" style="margin-top:20px;height:16px;width:auto;max-width:130px;object-fit:contain;object-position:left center;display:block;" />
+  </div>
+</div>
+
 <script>
 // ── Config ─────────────────────────────────────────────────────────────────
 const isLocal = window.location.hostname === 'localhost';
@@ -783,34 +798,55 @@ function renderArticle(final) {
   body.innerHTML = marked.parse(text) + (final ? '' : '<span class="cursor"></span>');
 }
 
-// ── Thumbnail ───────────────────────────────────────────────────────────────
+// ── Thumbnail (browser-side html2canvas) ────────────────────────────────────
 async function regenThumb() {
   const btn = document.getElementById('regen-btn');
   if (btn) btn.disabled = true;
   document.getElementById('thumb-preview').innerHTML = '<div class="spinner"></div>';
 
   const line1 = document.getElementById('t-line1').value.trim();
-  const line2 = document.getElementById('t-line2').value.trim();
-  const complexity = parseInt(document.getElementById('complexity').value) / 100;
+  const line2  = document.getElementById('t-line2').value.trim();
+  const photoName = PHOTOS[thumbData.photo] || 'cam1';
+  const side = thumbData.side || 'right';
+  const bgColors = { dark: '#1A2832', black: '#111111', coral: '#FF6868', navy: '#0a0e28' };
+  const bgColor = bgColors[thumbData.bg] || '#1A2832';
+
+  // Populate hidden render div
+  document.getElementById('thumb-bg').style.background = bgColor;
+  const photoWrap = document.getElementById('thumb-photo-wrap');
+  const textDiv   = document.getElementById('thumb-text');
+  if (side === 'right') {
+    photoWrap.style.right = '0'; photoWrap.style.left = 'auto';
+    textDiv.style.left = '0';   textDiv.style.right = 'auto';
+  } else {
+    photoWrap.style.left = '0'; photoWrap.style.right = 'auto';
+    textDiv.style.right = '0'; textDiv.style.left = 'auto';
+  }
+  document.getElementById('thumb-photo').src = '/cutouts/' + photoName + '.png';
+  document.getElementById('thumb-l1').textContent = line1;
+  document.getElementById('thumb-l2').textContent = line2;
+
+  // Wait for photo to load
+  await new Promise(resolve => {
+    const img = document.getElementById('thumb-photo');
+    if (img.complete && img.naturalWidth) { resolve(); return; }
+    img.onload = resolve; img.onerror = resolve;
+    setTimeout(resolve, 2000);
+  });
 
   try {
-    const res = await fetch(THUMB_API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ line1, line2, complexity, bg_name: thumbData.bg, photo_side: thumbData.side, photo_index: thumbData.photo }),
+    const canvas = await html2canvas(document.getElementById('thumb-render'), {
+      scale: 2, useCORS: true, backgroundColor: null, width: 640, height: 360,
     });
-    const data = await res.json();
-    if (res.ok && data.thumbnail) {
-      currentThumbB64 = data.thumbnail;
-      const img = document.createElement('img');
-      img.src = 'data:image/png;base64,' + data.thumbnail;
-      document.getElementById('thumb-preview').innerHTML = '';
-      document.getElementById('thumb-preview').appendChild(img);
-    } else {
-      document.getElementById('thumb-preview').innerHTML = `<span style="font-size:12px;color:#c0392b;padding:16px">${data.error || 'Failed'}</span>`;
-    }
+    const dataUrl = canvas.toDataURL('image/png');
+    currentThumbB64 = dataUrl.replace('data:image/png;base64,', '');
+    const img = document.createElement('img');
+    img.src = dataUrl;
+    document.getElementById('thumb-preview').innerHTML = '';
+    document.getElementById('thumb-preview').appendChild(img);
   } catch (e) {
-    document.getElementById('thumb-preview').innerHTML = `<span style="font-size:12px;color:#c0392b;padding:16px">Server not reachable</span>`;
+    document.getElementById('thumb-preview').innerHTML =
+      `<span style="font-size:12px;color:#c0392b;padding:16px">Render failed: ${e.message}</span>`;
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -998,15 +1034,18 @@ ${article}`;
 
 function openInClaude() {
   const prompt = buildClaudePrompt();
-  // ?q= pre-fills the Claude.ai message box — user just hits Send
-  const url = 'https://claude.ai/new?q=' + encodeURIComponent(prompt);
-  window.open(url, '_blank');
-
   const btn = document.getElementById('claude-btn');
   const orig = btn.innerHTML;
-  btn.innerHTML = '✓ Opening Claude with prompt pre-filled…';
-  btn.style.background = '#2a7a4b';
-  setTimeout(() => { btn.innerHTML = orig; btn.style.background = '#1A2832'; }, 3000);
+  navigator.clipboard.writeText(prompt).then(() => {
+    window.open('https://claude.ai/new', '_blank');
+    btn.innerHTML = '✓ Prompt copied — paste with Cmd+V in Claude';
+    btn.style.background = '#2a7a4b';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.background = '#1A2832'; }, 7000);
+  }).catch(() => {
+    window.open('https://claude.ai/new', '_blank');
+    btn.innerHTML = 'Claude opened — copy the prompt manually';
+    setTimeout(() => { btn.innerHTML = orig; }, 4000);
+  });
 }
 
 // ── Status ──────────────────────────────────────────────────────────────────
@@ -1023,4 +1062,4 @@ getKey();
 </script>
 </body>
 </html>
-<!-- deploy Wed Apr 22 22:34:31 CDT 2026 -->
+<!-- deploy Tue Apr 22 2026 — browser thumbnail + clipboard Claude button -->
