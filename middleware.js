@@ -1,255 +1,132 @@
+import { verifySession, classifyEmail, hasAccess } from './lib/auth.js';
+
+// Three tiers:
+//   ceo  — only cam@spotsnow.io
+//   team — anyone with @spotsnow.io or @dropstation.io
+//   open — anyone (not listed → middleware doesn't fire)
+
+const CEO_PATHS = new Set([
+  '/nav', '/nav.html',
+  '/strategy', '/strategy.html',
+  '/ceo-dashboard', '/ceo-dashboard.html',
+  '/bi', '/bi.html',
+  '/api/gtm-data'
+]);
+
+const TEAM_PATHS = new Set([
+  '/ad-ops', '/ad-ops.html',
+  '/talking-points', '/talking-points.html',
+  '/chat', '/chat-ui.html',
+  '/proposal', '/proposal.html',
+  '/ear-check', '/ear-check.html',
+  '/pixel-setup', '/pixel-setup.html',
+  '/submit-creative', '/submit-creative.html',
+  '/youtube-article', '/youtube-article.html',
+  '/empty-state', '/empty-state.html',
+  '/home', '/home.html',
+  '/homepage', '/homepage.html',
+  '/landing', '/landing.html',
+  '/media-plans', '/media-plans.html',
+  '/new-homepage', '/new-homepage.html'
+]);
+
 export const config = {
-  matcher: ['/nav', '/nav.html', '/api/wiki-auth', '/bi', '/bi.html', '/api/gtm-data']
+  matcher: [
+    '/nav', '/nav.html',
+    '/strategy', '/strategy.html',
+    '/ceo-dashboard', '/ceo-dashboard.html',
+    '/bi', '/bi.html',
+    '/api/gtm-data',
+    '/ad-ops', '/ad-ops.html',
+    '/talking-points', '/talking-points.html',
+    '/chat', '/chat-ui.html',
+    '/proposal', '/proposal.html',
+    '/ear-check', '/ear-check.html',
+    '/pixel-setup', '/pixel-setup.html',
+    '/submit-creative', '/submit-creative.html',
+    '/youtube-article', '/youtube-article.html',
+    '/empty-state', '/empty-state.html',
+    '/home', '/home.html',
+    '/homepage', '/homepage.html',
+    '/landing', '/landing.html',
+    '/media-plans', '/media-plans.html',
+    '/new-homepage', '/new-homepage.html'
+  ]
 };
 
-const WIKI_COOKIE = 'sn_wiki';
-const MAX_AGE = 60 * 60 * 24 * 30; // 30 days
-
 export default async function middleware(request) {
-  const { pathname } = new URL(request.url);
-  const isBi = pathname === '/bi' || pathname === '/bi.html' || pathname === '/api/gtm-data';
-  return isBi ? biAuth(request) : wikiAuth(request, pathname);
-}
+  const url = new URL(request.url);
+  const pathname = url.pathname;
 
-function biAuth(request) {
-  const expected = process.env.BI_PASSWORD;
-  if (!expected) {
-    console.warn('[middleware] BI_PASSWORD not set — /bi is currently unprotected');
+  const requiredTier = CEO_PATHS.has(pathname) ? 'ceo'
+                     : TEAM_PATHS.has(pathname) ? 'team'
+                     : null;
+  if (!requiredTier) return;
+
+  const secret = process.env.SESSION_SECRET;
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  if (!secret || !clientId) {
+    console.warn('[middleware] Auth not configured — page open');
     return;
   }
-  const auth = request.headers.get('authorization') || '';
-  if (auth.startsWith('Basic ')) {
-    try {
-      const decoded = atob(auth.slice(6));
-      const sep = decoded.indexOf(':');
-      if ((sep >= 0 ? decoded.slice(sep + 1) : '') === expected) return;
-    } catch (_) {}
-  }
-  return new Response('Authentication required', {
-    status: 401,
-    headers: {
-      'WWW-Authenticate': 'Basic realm="SpotsNow BI", charset="UTF-8"',
-      'Content-Type': 'text/plain'
-    }
-  });
-}
 
-async function wikiAuth(request, pathname) {
-  const expected = process.env.WIKI_PASSWORD;
-  if (!expected) {
-    console.warn('[middleware] WIKI_PASSWORD not set — / is currently unprotected');
-    return;
-  }
-  const validToken = await tokenFor(expected);
+  const cookie = request.headers.get('cookie') || '';
+  const match = cookie.match(/(?:^|; )sn_user=([^;]+)/);
+  const session = match ? await verifySession(match[1], secret) : null;
 
-  if (pathname === '/api/wiki-auth') {
-    if (request.method !== 'POST') {
-      return new Response('Method not allowed', { status: 405 });
-    }
-    let body = {};
-    try { body = await request.json(); } catch (_) {}
-    if (body.password === expected) {
-      return new Response(JSON.stringify({ ok: true }), {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Set-Cookie': `${WIKI_COOKIE}=${validToken}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${MAX_AGE}`
-        }
-      });
-    }
-    return new Response(JSON.stringify({ ok: false }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' }
-    });
+  if (!session) {
+    const loginUrl = new URL('/api/google-login', url.origin);
+    loginUrl.searchParams.set('next', pathname + url.search);
+    return Response.redirect(loginUrl.toString(), 302);
   }
 
-  const cookieHeader = request.headers.get('cookie') || '';
-  const match = cookieHeader.match(new RegExp(`(?:^|; )${WIKI_COOKIE}=([^;]+)`));
-  if (match && match[1] === validToken) return;
-
-  return new Response(loginHtml(), {
-    status: 401,
-    headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'no-store'
-    }
-  });
+  const userTier = classifyEmail(session.email);
+  if (!hasAccess(userTier, requiredTier)) {
+    return forbiddenResponse(session.email, requiredTier);
+  }
 }
 
-async function tokenFor(pwd) {
-  const data = new TextEncoder().encode(pwd + '|spotsnow-wiki');
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-function loginHtml() {
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SpotsNow Wiki</title>
-<meta name="robots" content="noindex" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+function forbiddenResponse(email, requiredTier) {
+  const need = requiredTier === 'ceo'
+    ? 'This page is for cam@spotsnow.io only.'
+    : 'This page is for SpotsNow / Dropstation team members only.';
+  const html = `<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Access denied — SpotsNow Wiki</title>
+<meta name="robots" content="noindex"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
-:root {
-  --navy: #17212b;
-  --coral: #ff6267;
-  --dark: #0e1323;
-  --grey-1: #8a95a3;
-  --text-primary: #17212b;
-  --text-secondary: #5a6472;
-  --border: #C5CBD5;
-  --border-light: #dee0e4;
-  --white: #ffffff;
-  --bg-page: #fafafa;
-}
-*, *::before, *::after { box-sizing: border-box; }
-html, body { height: 100%; }
-body {
-  margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 14px; line-height: 1.5;
-  color: var(--dark);
-  background: var(--bg-page);
-  -webkit-font-smoothing: antialiased;
-  display: flex; align-items: center; justify-content: center;
-  padding: 24px;
-}
-.card {
-  width: 100%; max-width: 380px;
-  background: var(--white);
-  border: 1px solid var(--border-light);
-  border-radius: 20px;
-  padding: 40px 32px 32px;
-  box-shadow: 0 4px 24px rgba(14, 19, 35, 0.04);
-  text-align: center;
-}
-.card__logo {
-  width: 48px; height: 48px; border-radius: 14px;
-  background: var(--coral);
-  display: inline-flex; align-items: center; justify-content: center;
-  margin-bottom: 20px;
-}
-.card__logo svg { display: block; }
-.card__title {
-  margin: 0 0 6px;
-  font-size: 20px; font-weight: 700;
-  letter-spacing: -0.3px;
-  color: var(--text-primary);
-}
-.card__subtitle {
-  margin: 0 0 28px;
-  font-size: 13px;
-  color: var(--grey-1);
-}
-form { text-align: left; }
-label {
-  display: block;
-  font-size: 12px; font-weight: 600;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  margin: 0 0 8px;
-}
-.input-wrap {
-  position: relative;
-}
-input[type="password"] {
-  width: 100%;
-  font: inherit; font-size: 14px;
-  color: var(--text-primary);
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 14px;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  -webkit-appearance: none; appearance: none;
-}
-input[type="password"]:focus {
-  outline: none;
-  border-color: var(--coral);
-  box-shadow: 0 0 0 3px rgba(255, 98, 103, 0.15);
-}
-.error {
-  margin: 10px 0 0;
-  font-size: 12px; color: var(--coral);
-  min-height: 16px;
-}
-button {
-  width: 100%;
-  margin-top: 16px;
-  font: inherit; font-size: 14px; font-weight: 600;
-  color: var(--white);
-  background: var(--navy);
-  border: none; border-radius: 10px;
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: background 0.15s, transform 0.05s;
-}
-button:hover { background: var(--dark); }
-button:active { transform: translateY(1px); }
-button:disabled { opacity: 0.6; cursor: not-allowed; }
-.footer {
-  margin-top: 28px;
-  font-size: 11px; color: var(--grey-1);
-  letter-spacing: 0.3px;
-}
-</style>
-</head>
-<body>
-<main class="card">
-  <div class="card__logo" aria-hidden="true">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <path d="M6 12h8a5 5 0 005-5V5M18 12l-4-4M18 12l-4 4" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-  </div>
-  <h1 class="card__title">SpotsNow Wiki</h1>
-  <p class="card__subtitle">Enter the password to continue.</p>
-  <form id="f" autocomplete="on">
-    <label for="p">Password</label>
-    <div class="input-wrap">
-      <input id="p" name="password" type="password" autocomplete="current-password" required autofocus />
-    </div>
-    <p class="error" id="err" role="alert"></p>
-    <button type="submit" id="b">Unlock</button>
-  </form>
+  :root { --navy:#17212b; --coral:#ff6267; --grey:#5a6472; --bg:#fafafa; --border:#dee0e4; --white:#fff; }
+  *,*::before,*::after { box-sizing:border-box; }
+  html,body { height:100%; margin:0; }
+  body { font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; color:var(--navy); background:var(--bg); display:flex; align-items:center; justify-content:center; padding:24px; -webkit-font-smoothing:antialiased; }
+  .card { width:100%; max-width:420px; background:var(--white); border:1px solid var(--border); border-radius:20px; padding:40px 32px; box-shadow:0 4px 24px rgba(14,19,35,0.04); text-align:center; }
+  .logo { width:48px; height:48px; border-radius:14px; background:var(--coral); display:inline-flex; align-items:center; justify-content:center; margin-bottom:20px; }
+  h1 { font-size:20px; font-weight:700; margin:0 0 8px; letter-spacing:-0.3px; }
+  p { font-size:14px; color:var(--grey); margin:0 0 12px; line-height:1.5; }
+  .email { font-weight:600; color:var(--navy); }
+  .btn { display:inline-block; margin-top:16px; font-size:14px; font-weight:600; color:var(--white); background:var(--navy); border-radius:10px; padding:12px 18px; text-decoration:none; }
+  .btn:hover { background:#0e1323; }
+  .footer { margin-top:24px; font-size:11px; color:#8a95a3; letter-spacing:0.3px; }
+</style></head>
+<body><main class="card">
+  <div class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 9v4M12 17h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4a2 2 0 00-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <h1>Access denied</h1>
+  <p>You're signed in as <span class="email">${escapeHtml(email)}</span>.</p>
+  <p>${need}</p>
+  <a class="btn" href="/api/google-logout?next=/api/google-login">Try a different account</a>
   <p class="footer">spotsnow.wiki</p>
-</main>
-<script>
-(function () {
-  var f = document.getElementById('f');
-  var p = document.getElementById('p');
-  var b = document.getElementById('b');
-  var err = document.getElementById('err');
-  f.addEventListener('submit', async function (e) {
-    e.preventDefault();
-    err.textContent = '';
-    b.disabled = true;
-    var original = b.textContent;
-    b.textContent = 'Unlocking…';
-    try {
-      var res = await fetch('/api/wiki-auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: p.value })
-      });
-      if (res.ok) {
-        window.location.reload();
-        return;
-      }
-      err.textContent = 'Incorrect password.';
-    } catch (_) {
-      err.textContent = 'Something went wrong. Try again.';
-    }
-    b.disabled = false;
-    b.textContent = original;
-    p.select();
+</main></body></html>`;
+  return new Response(html, {
+    status: 403,
+    headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
   });
-})();
-</script>
-</body>
-</html>`;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 }
