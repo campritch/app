@@ -969,25 +969,15 @@ Return ONLY this JSON, no other text:
 ${article}`;
 }
 
-async function openInClaude() {
+function openInClaude() {
   const prompt = buildClaudePrompt();
-  try {
-    await navigator.clipboard.writeText(prompt);
-  } catch (e) {
-    // Fallback: show prompt in a textarea
-    const ta = document.createElement('textarea');
-    ta.value = prompt;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-  }
-  // Open Claude in new tab
-  window.open('https://claude.ai/new', '_blank');
-  // Show confirmation on button
+  // ?q= pre-fills the Claude.ai message box — user just hits Send
+  const url = 'https://claude.ai/new?q=' + encodeURIComponent(prompt);
+  window.open(url, '_blank');
+
   const btn = document.getElementById('claude-btn');
   const orig = btn.innerHTML;
-  btn.innerHTML = '✓ Prompt copied to clipboard — paste it into Claude';
+  btn.innerHTML = '✓ Opening Claude with prompt pre-filled…';
   btn.style.background = '#2a7a4b';
   setTimeout(() => { btn.innerHTML = orig; btn.style.background = '#1A2832'; }, 3000);
 }
