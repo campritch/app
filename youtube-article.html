@@ -188,41 +188,48 @@
       font-family: 'Inter', sans-serif;
       cursor: pointer;
     }
-    /* Slide color palette: dark=#1A2832, coral=#FF6868, white=#ffffff */
-    .ig-slide--dark  { background: #1A2832; color: #ffffff; }
-    .ig-slide--coral { background: #FF6868; color: #ffffff; }
-    .ig-slide--black { background: #1A2832; color: #ffffff; }
-    .ig-slide--white { background: #ffffff; color: #000000; }
+    /* ── Brand palette (spotsnow.wiki/brand) ──
+       Salmon #F06060 · Navy #17212B · Ink #000000 · Paper #FFFFFF */
+    .ig-slide--navy   { background: #17212B; color: #ffffff; }
+    .ig-slide--dark   { background: #17212B; color: #ffffff; }  /* alias */
+    .ig-slide--salmon { background: #F06060; color: #ffffff; }
+    .ig-slide--coral  { background: #F06060; color: #ffffff; }  /* alias */
+    .ig-slide--white  { background: #ffffff; color: #000000; }
+    .ig-slide--black  { background: #000000; color: #ffffff; }
 
     .ig-slide__tag { display: none; }
     .ig-slide__body { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+
+    /* Eyebrow — Inter 700, ALL CAPS, salmon, 0.06em tracking (brand spec) */
     .ig-slide__eyebrow {
-      font-size: 13px; font-weight: 700; margin-bottom: 10px;
-      text-transform: uppercase; letter-spacing: 1px; opacity: 0.55;
+      font-size: 13px; font-weight: 700; margin-bottom: 12px;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: #F06060;
     }
+    .ig-slide--salmon .ig-slide__eyebrow,
+    .ig-slide--coral  .ig-slide__eyebrow { color: rgba(255,255,255,0.75); }
+
+    /* Headline — Inter 800, tight tracking (brand spec) */
     .ig-slide__headline {
-      font-size: 28px; font-weight: 800; line-height: 1.15;
-      letter-spacing: -0.5px; margin: 0;
+      font-size: 30px; font-weight: 800; line-height: 1.1;
+      letter-spacing: -0.025em; margin: 0;
     }
-    .ig-slide__headline em {
-      font-style: normal; color: #FF6868;
-    }
-    .ig-slide--coral .ig-slide__headline em { color: #1A2832; }
-    .ig-slide--white .ig-slide__headline em  { color: #FF6868; }
+    /* Accent word (*word*) — salmon on dark/black, navy on salmon, salmon on white */
+    .ig-slide__headline em { font-style: normal; color: #F06060; }
+    .ig-slide--salmon .ig-slide__headline em,
+    .ig-slide--coral  .ig-slide__headline em { color: #17212B; }
+    .ig-slide--white  .ig-slide__headline em { color: #F06060; }
+
+    /* Body copy — Inter 400, 15px, 1.55 leading (brand spec) */
     .ig-slide__sub {
-      margin-top: 14px; font-size: 15px; line-height: 1.55; opacity: 0.8;
+      margin-top: 16px; font-size: 15px; line-height: 1.55;
+      font-weight: 400; opacity: 0.75;
     }
-    .ig-slide__brand {
-      display: flex; align-items: center;
-    }
-    .ig-slide__brand img {
-      height: 18px; width: auto; opacity: 0.5;
-    }
-    /* On white slide, logo needs to be dark */
-    .ig-slide--white .ig-slide__brand img {
-      filter: invert(1);
-      opacity: 0.45;
-    }
+
+    /* Logo — white on dark/salmon, dark (inverted) on white */
+    .ig-slide__brand { display: flex; align-items: center; }
+    .ig-slide__brand img { height: 16px; width: auto; opacity: 0.45; }
+    .ig-slide--white .ig-slide__brand img { filter: invert(1); opacity: 0.35; }
     .ig-slide__dot { display: none; }
 
     /* Caption box */
@@ -420,29 +427,32 @@ const THUMB_API      = isLocal ? 'http://localhost:5055/thumbnail' : '/api/thumb
 const CLAUDE_API     = 'https://api.anthropic.com/v1/messages';
 const PHOTOS = ['cam1','cam2','cam3','Cam'];
 
-const IG_PROMPT = (transcript) => `You are a top-tier social media strategist specialising in Instagram carousel content that drives saves and shares.
+const IG_PROMPT = (transcript) => `You are creating Instagram carousel assets for SpotsNow using our exact brand guidelines.
 
-Given the YouTube transcript below, create a high-converting Instagram carousel with exactly 4 slides plus a caption.
+BRAND (spotsnow.wiki/brand):
+- Salmon accent: #F06060 | Navy dark bg: #17212B | Ink: #000000 | Paper: #FFFFFF
+- Font: Inter 800, tracking -0.025em for headlines | Inter 700 ALL CAPS for eyebrows
+- Voice: Direct. Bold. Founder energy. No fluff. Never corporate.
 
-CAROUSEL FORMAT (the text-heavy bold-statement format that performs best on Instagram right now):
-- Slide 1: HOOK — one provocative, counterintuitive, or bold statement that stops the scroll. Short. Punchy.
-- Slide 2: THE PROBLEM or CONTEXT — one key insight or tension from the video.
-- Slide 3: THE INSIGHT — the most useful, surprising or actionable point.
-- Slide 4: THE TAKEAWAY / CTA — what the reader should do or think differently about. End with "Save this."
+CAROUSEL FORMAT — bold-statement style, 4 slides:
+- Slide 1 (navy): HOOK — provocative or counterintuitive claim that stops the scroll. Short.
+- Slide 2 (salmon): PROBLEM — key tension or pain point.
+- Slide 3 (navy): INSIGHT — most useful or surprising point.
+- Slide 4 (white): TAKEAWAY — what to do differently. End with "Save this."
 
 RULES:
-- Each slide: one EYEBROW (3-5 word context label), one HEADLINE (max 12 words, punchy), one BODY (1-2 sentences max, optional)
-- Headlines should feel bold and direct — written for someone scrolling fast
-- Use *italics* around the single most powerful word or phrase in each headline (rendered in coral/accent)
-- Caption: strong hook line, 3-4 lines of context, 3-5 hashtags. Conversational, not corporate.
+- eyebrow: 3-5 words ALL CAPS — context label for the headline
+- headline: max 12 words, punchy. Wrap single most powerful word in *asterisks* (renders as #F06060 salmon)
+- body: 1-2 sentences max, omit if headline stands alone
+- Caption: hook → 3-4 lines insight → CTA → 3-5 hashtags. Conversational, not corporate.
 
 Return ONLY this JSON, no other text:
 {
   "slides": [
-    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "dark" },
-    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "coral" },
-    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "dark" },
-    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "black" }
+    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "navy" },
+    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "salmon" },
+    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "navy" },
+    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "white" }
   ],
   "caption": "..."
 }
@@ -923,47 +933,64 @@ function flash(el, msg) {
 // ── Open in Claude ───────────────────────────────────────────────────────────
 function buildClaudePrompt() {
   const article = rawMarkdown.split('---THUMBNAIL---')[0].trim();
-  return `You are a top-tier social media strategist for SpotsNow, a podcast advertising marketplace.
+  return `You are creating Instagram carousel assets for SpotsNow using our exact brand guidelines.
 
-Given the article below, generate Instagram carousel assets and a YouTube thumbnail brief.
+## SpotsNow Brand Guidelines (spotsnow.wiki/brand)
+
+**Colors**
+- Salmon (primary accent): #F06060
+- Navy (dark background): #17212B
+- Ink (black): #000000
+- Paper (white): #FFFFFF
+
+**Typography — Inter only**
+- Headlines: Inter 800, tracking -0.025em, line-height 1.1
+- Eyebrow labels: Inter 700, 13px, ALL CAPS, salmon color, tracking 0.06em
+- Body: Inter 400, 15px, line-height 1.55
+
+**Voice**
+Direct. Bold. No fluff. Founder energy. Results-focused. Never corporate.
+
+---
 
 ## Deliver
 
 ### 1. Instagram Carousel — 4 slides
-Bold-statement carousel format (Alex Hormozi / Justin Welsh style). Each slide = one standalone punchy statement.
+Bold-statement carousel (the format performing best right now). Each slide = one standalone punchy statement.
 
-- Slide 1 — HOOK: Provocative or bold claim that stops the scroll. Short. No fluff.
-- Slide 2 — PROBLEM/CONTEXT: Key tension or insight from the article.
-- Slide 3 — THE INSIGHT: Most useful or surprising point.
-- Slide 4 — TAKEAWAY/CTA: What to do or think differently. End with "Save this."
+- Slide 1 (navy bg) — HOOK: Provocative or counterintuitive claim that stops the scroll. Short.
+- Slide 2 (salmon bg) — PROBLEM: Key tension or pain point from the article.
+- Slide 3 (navy bg) — INSIGHT: Most useful or surprising point.
+- Slide 4 (white bg) — TAKEAWAY: What to do or think differently. End with "Save this."
 
-Rules:
-- EYEBROW: 3-5 words, ALL CAPS
-- HEADLINE: max 12 words, punchy. Wrap the single most powerful word in *asterisks* (rendered in coral accent)
-- BODY: 1-2 sentences max (skip if headline stands alone)
-- bg: rotate dark / coral / dark / white
+**Slide rules:**
+- eyebrow: 3-5 words, ALL CAPS — provides context for the headline
+- headline: max 12 words, punchy. Wrap the single most powerful word in *asterisks* — rendered as #F06060 salmon accent
+- body: 1-2 sentences max, skip entirely if headline stands alone
+- bg values: "navy" / "salmon" / "navy" / "white"
 
 ### 2. Caption
-Hook → 3-4 lines insight → CTA → 3-5 hashtags. Conversational, not corporate.
+Strong hook line → 3-4 lines of insight → clear CTA → 3-5 relevant hashtags.
+Conversational founder voice. Not corporate.
 
-### 3. Thumbnail brief
-- LINE1: 3-6 word context phrase, ALL CAPS (e.g. "THE REAL COST OF")
-- LINE2: 2-4 word punchy phrase, ALL CAPS (e.g. "PODCAST ADS") — shown on coral highlight box
+### 3. YouTube Thumbnail text
+- line1: 3-6 word context phrase, ALL CAPS (e.g. "THE REAL COST OF")
+- line2: 2-4 word punchy phrase, ALL CAPS (e.g. "PODCAST ADS") — displayed on salmon highlight box
+
+---
 
 ## Output
-Return ONLY this JSON, no other text:
-\`\`\`json
+Return ONLY this JSON, no markdown, no other text:
 {
   "slides": [
-    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "dark" },
-    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "coral" },
-    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "dark" },
+    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "navy" },
+    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "salmon" },
+    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "navy" },
     { "eyebrow": "...", "headline": "...", "body": "...", "bg": "white" }
   ],
   "caption": "...",
   "thumbnail": { "line1": "...", "line2": "..." }
 }
-\`\`\`
 
 ## Article
 ${article}`;
