@@ -200,7 +200,6 @@
     flex-direction: column;
   }
   .compare-card.dark { background: var(--ink); color: white; border-color: var(--ink); }
-  .compare-card.mint { background: var(--mint); color: var(--ink); border-color: var(--green-soft); }
   .compare-eyebrow {
     color: var(--salmon);
     font-weight: 700;
@@ -209,10 +208,8 @@
     text-transform: uppercase;
     margin-bottom: 12px;
   }
-  .compare-card.dark .compare-eyebrow { color: var(--salmon-mid); }
-  .compare-card.mint .compare-eyebrow { color: var(--green); }
+  .compare-card.dark .compare-eyebrow { color: #8FD9A8; }
   .compare-heading { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 26px; line-height: 1.15; letter-spacing: -0.025em; margin-bottom: 28px; }
-  .compare-card.mint .compare-heading { color: var(--ink); }
   .check-list { list-style: none; flex: 1; }
   .check-list li {
     font-size: 16px;
@@ -222,7 +219,6 @@
     color: var(--ink-body);
   }
   .compare-card.dark .check-list li { color: rgba(255,255,255,0.85); }
-  .compare-card.mint .check-list li { color: var(--ink-body); }
   .check-list li::before {
     content: '';
     position: absolute;
@@ -235,7 +231,6 @@
     transform: rotate(-45deg);
   }
   .compare-card.dark .check-list li::before { border-color: rgba(255,255,255,0.85); }
-  .compare-card.mint .check-list li::before { border-color: var(--green); }
   /* X-list for "before" — uses cross instead of check */
   .x-list { list-style: none; flex: 1; }
   .x-list li {
@@ -647,7 +642,6 @@
       <a href="#logo">Logo</a>
       <a href="#color">Color</a>
       <a href="#type">Type</a>
-      <a href="#cards">Cards</a>
       <a href="#marketing">Marketing</a>
       <a href="#wild">In the wild</a>
       <a href="#voice">Voice</a>
@@ -733,7 +727,7 @@
           <li>No real-time view of who's running or how it's performing</li>
         </ul>
       </div>
-      <div class="compare-card mint">
+      <div class="compare-card dark">
         <div class="compare-eyebrow">With SpotsNow</div>
         <h3 class="compare-heading">Self-serve, transparent, live in 12 hours.</h3>
         <ul class="check-list">
@@ -742,13 +736,6 @@
           <li>Audio pixel attribution. 7x more accurate than promo codes.</li>
           <li>Real-time dashboard for spend, plays, conversions, ROAS</li>
         </ul>
-        <div class="mint-hand hand-mark green">
-          <svg width="48" height="34" viewBox="0 0 48 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M44 5 C 30 4, 18 12, 6 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-            <path d="M14 16 L 5 25 L 14 28" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <span>this side</span>
-        </div>
       </div>
     </div>
   </div>
@@ -912,84 +899,9 @@
   </div>
 </section>
 
-<section class="chapter" id="cards">
-  <div class="container">
-    <div class="section-num">07 / Cards</div>
-    <div class="kicker">The product card system</div>
-    <h2 class="h2">
-      One card pattern. <span class="accent">Three roles.</span>
-    </h2>
-    <p class="lead">
-      The product card is the workhorse on spotsnow.io. Salmon ALL CAPS kicker, bold title with a period at the end, body copy, checkmark feature list, footer with a status pill, outline CTA at the bottom. Use this whenever you're comparing things or breaking down features. Don't invent a different card.
-    </p>
-
-    <div class="pattern-grid">
-      <div class="pattern-card">
-        <div class="pattern-icon">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-        </div>
-        <div class="pattern-eyebrow">LAST MINUTE SPOT</div>
-        <h3 class="pattern-title">Available right now.</h3>
-        <p class="pattern-body">Discounted spots from shows with open availability.</p>
-        <ul class="pattern-list">
-          <li>Instant book</li>
-          <li>Discounted rates from shows with open slots</li>
-          <li>Hosts must approve campaign</li>
-          <li>Best for low cost tests</li>
-        </ul>
-        <div class="pattern-footer">
-          <span class="pattern-footer-label">Starting from</span>
-          <span class="pill pill-green">Up to 67% Off</span>
-        </div>
-        <a class="pattern-cta">Review spots</a>
-      </div>
-
-      <div class="pattern-card">
-        <div class="pattern-icon">
-          <svg viewBox="0 0 24 24"><line x1="6" y1="7" x2="18" y2="7"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="6" y1="17" x2="18" y2="17"/></svg>
-        </div>
-        <div class="pattern-eyebrow">STANDARD BOOKING</div>
-        <h3 class="pattern-title">Run a campaign.</h3>
-        <p class="pattern-body">Request individual shows or multi-episode packages.</p>
-        <ul class="pattern-list">
-          <li>Single shows or episode packages</li>
-          <li>AI-matched to your brand and audience</li>
-          <li>Host-read or pre-recorded, your choice</li>
-          <li>Best for driving high conversions</li>
-        </ul>
-        <div class="pattern-footer">
-          <span class="pattern-footer-label">Most popular</span>
-          <span class="pill pill-dark">Recommended</span>
-        </div>
-        <a class="pattern-cta">Build my campaign</a>
-      </div>
-
-      <div class="pattern-card">
-        <div class="pattern-icon">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
-        </div>
-        <div class="pattern-eyebrow">AUDIENCE BUNDLE</div>
-        <h3 class="pattern-title">Hand-picked target audiences.</h3>
-        <p class="pattern-body">Buy across a curated network of shows in one purchase.</p>
-        <ul class="pattern-list">
-          <li>Pre-curated bundles by category</li>
-          <li>Consistent messaging across multiple shows</li>
-          <li>Single campaign plan, one approval</li>
-          <li>Best for brand awareness at scale</li>
-        </ul>
-        <div class="pattern-footer">
-          <span class="pattern-footer-label">For scale</span>
-          <span class="pill pill-light">Max reach</span>
-        </div>
-        <a class="pattern-cta">Explore bundles</a>
-      </div>
-    </div>
-  </div>
-</section>
-
 <section class="chapter surface" id="buttons">
   <div class="container">
-    <div class="section-num">08 / Buttons</div>
+    <div class="section-num">07 / Buttons</div>
     <div class="kicker">CTAs and actions</div>
     <h2 class="h2">
       Three buttons. <span class="accent">One is the hero.</span>
@@ -1023,7 +935,7 @@
      ============================================================ -->
 <section class="chapter" id="marketing">
   <div class="container">
-    <div class="section-num">09 / Marketing layouts</div>
+    <div class="section-num">08 / Marketing layouts</div>
     <div class="kicker">Two reusable patterns</div>
     <h2 class="h2">
       Posters and product showcases. <span class="accent">Two layouts that travel.</span>
@@ -1079,7 +991,7 @@
      ============================================================ -->
 <section class="chapter surface" id="wild">
   <div class="container">
-    <div class="section-num">10 / In the wild</div>
+    <div class="section-num">09 / In the wild</div>
     <div class="kicker">The brand doing its job</div>
     <h2 class="h2">
       What it actually <span class="accent">looks like.</span>
@@ -1103,7 +1015,7 @@
 
 <section class="chapter" id="voice">
   <div class="container">
-    <div class="section-num">11 / Voice</div>
+    <div class="section-num">10 / Voice</div>
     <div class="kicker">How we talk</div>
     <h2 class="h2">
       Specific, fast, <span class="accent">founder-casual.</span>
@@ -1156,7 +1068,7 @@
 
 <section class="chapter surface" id="legal">
   <div class="container">
-    <div class="section-num">12 / Legal</div>
+    <div class="section-num">11 / Legal</div>
     <div class="kicker">What we can publish</div>
     <h2 class="h2">
       Green light, <span class="accent">red light.</span>
