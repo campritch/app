@@ -499,19 +499,21 @@
   .wild-tile {
     border-radius: 16px;
     overflow: hidden;
-    background: var(--surface);
+    background: var(--paper);
     border: 1px solid var(--hairline);
     position: relative;
     display: flex;
     flex-direction: column;
+    padding: 28px;
   }
   .wild-tile img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    object-position: top center;
+    object-fit: contain;
+    object-position: center;
     display: block;
   }
+  .wild-tile.feature, .wild-tile.full { background: var(--surface); }
   .wild-tile.feature { grid-column: span 4; grid-row: span 2; }
   .wild-tile.tall { grid-column: span 2; grid-row: span 2; }
   .wild-tile.wide { grid-column: span 4; grid-row: span 1; }
@@ -576,10 +578,11 @@
     border-bottom: 1px solid var(--hairline);
   }
   .marketing-preview img {
-    width: 100%;
-    height: 100%;
+    width: 106%;
+    height: 106%;
+    margin: -3% 0 0 -3%;
     object-fit: cover;
-    object-position: top center;
+    object-position: center;
     display: block;
   }
   .marketing-meta { padding: 24px; }
