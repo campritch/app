@@ -109,6 +109,50 @@
       border: 0;
     }
 
+    /* ── ABOUT ── */
+    .about {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 24px 64px;
+    }
+    .section-card {
+      background: var(--white);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 28px;
+    }
+    .section-eyebrow {
+      font-size: 10px; font-weight: 700; color: var(--grey-1);
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .section-title {
+      margin: 0 0 6px; font-size: 22px; font-weight: 800;
+      color: var(--dark); letter-spacing: -0.02em;
+    }
+    .section-sub {
+      margin: 0 0 20px; font-size: 14px; color: #5a5f6e;
+      max-width: 640px;
+    }
+    .about-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .stat {
+      background: var(--pill-bg);
+      border-radius: 14px;
+      padding: 18px 20px;
+    }
+    .stat__num {
+      font-size: 28px; font-weight: 900; letter-spacing: -0.03em;
+      color: var(--dark); line-height: 1;
+    }
+    .stat__label {
+      font-size: 12px; font-weight: 600; color: #5a5f6e;
+      margin-top: 6px;
+    }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 860px) {
       .page { padding: 16px; min-height: 0; align-items: stretch; }
@@ -117,6 +161,8 @@
         padding: 28px 24px;
         gap: 24px;
       }
+      .about { padding: 0 16px 48px; }
+      .about-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -157,6 +203,30 @@
     </div>
   </section>
 </main>
+
+<section class="about">
+  <div class="section-card">
+    <div class="section-eyebrow">About the show</div>
+    <h2 class="section-title">Built by SpotsNow, for the people running the buys</h2>
+    <p class="section-sub">
+      Each episode goes deep with the people actually shaping the $32B host-read podcast advertising market — performance leads, agency heads, founders, and the creators with the largest captive audiences in media.
+    </p>
+    <div class="about-grid">
+      <div class="stat">
+        <div class="stat__num">$32B</div>
+        <div class="stat__label">Host-read podcast ad market</div>
+      </div>
+      <div class="stat">
+        <div class="stat__num">100%</div>
+        <div class="stat__label">Operator-led conversations</div>
+      </div>
+      <div class="stat">
+        <div class="stat__num">Weekly</div>
+        <div class="stat__label">New episodes every Thursday</div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <script src="https://player.vimeo.com/api/player.js"></script>
 </body>
