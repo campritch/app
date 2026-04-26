@@ -14,16 +14,15 @@
       --dark: #0e1323;
       --grey-1: #707481;
       --text-primary: #252733;
-      --text-secondary: #5a5f6e;
       --border: #dee0e4;
       --border-light: #e8e8e8;
       --white: #ffffff;
       --coral: #ff6b6b;
-      --btn-dark: #111111;
       --pill-bg: #f3f4f6;
     }
 
     *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
       margin: 0;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -31,180 +30,78 @@
       color: var(--dark); background: #f5f5f3;
       -webkit-font-smoothing: antialiased;
     }
-    button, a { font-family: inherit; }
+    a { font-family: inherit; }
 
-    /* ── TOP BAR ── */
-    .top-bar {
-      position: sticky; top: 0; z-index: 200;
-      height: 56px; display: flex; align-items: center; gap: 16px;
-      padding: 0 28px; background: var(--white);
-      border-bottom: 1px solid var(--border-light);
+    /* ── PAGE ── */
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
     }
-    .top-bar__logo {
-      display: flex; align-items: center; gap: 8px;
-      font-weight: 800; font-size: 15px; color: var(--dark);
-      text-decoration: none; flex-shrink: 0; letter-spacing: -0.3px;
-    }
-    .logo-mark {
-      width: 22px; height: 22px; border-radius: 6px;
-      background: var(--coral); display: flex; align-items: center; justify-content: center;
-    }
-    .top-bar__url-pill {
-      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px;
-      background: var(--pill-bg); border-radius: 10px; padding: 6px 18px;
-      max-width: 340px; margin: 0 auto;
-    }
-    .top-bar__url-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
-    .top-bar__url-sub  { font-size: 11px; color: var(--grey-1); }
-    .top-bar__actions  { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-    .login-btn {
-      padding: 7px 14px; background: none;
-      border: 1px solid var(--border); border-radius: 8px;
-      font-size: 13px; font-weight: 600; color: var(--text-primary);
-      text-decoration: none;
-    }
-    .login-btn:hover { background: var(--pill-bg); }
-    .login-btn--dark {
-      background: var(--btn-dark); color: white; border-color: var(--btn-dark);
-    }
-    .login-btn--dark:hover { background: #000; }
-
-    /* ── PAGE LAYOUT ── */
-    .page { max-width: 1024px; margin: 0 auto; padding: 24px 24px 80px; }
 
     /* ── HERO ── */
     .hero {
       background: #000;
       border-radius: 24px;
-      padding: 56px 48px 48px;
+      padding: 44px 48px;
       color: white;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1.15fr;
       gap: 48px;
       align-items: center;
-      overflow: hidden;
-      position: relative;
+      width: 100%;
     }
-    .hero__brand {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: 999px;
-      padding: 6px 12px 6px 8px;
-      font-size: 12px; font-weight: 600;
-      color: rgba(255,255,255,0.85);
-      margin-bottom: 22px;
-      width: fit-content;
-    }
-    .hero__brand .logo-mark { width: 18px; height: 18px; border-radius: 5px; }
     .hero__title {
-      font-size: clamp(44px, 6.4vw, 80px);
+      font-size: clamp(44px, 5.6vw, 76px);
       line-height: 0.95;
       font-weight: 900;
       letter-spacing: -0.03em;
-      margin: 0 0 20px;
+      margin: 0 0 18px;
       text-transform: uppercase;
     }
-    .hero__title span { display: block; }
-    .hero__title .small { font-size: 0.55em; font-weight: 800; letter-spacing: -0.01em; opacity: 0.85; }
+    .hero__title .small {
+      display: block;
+      font-size: 0.5em; font-weight: 800;
+      letter-spacing: -0.01em; opacity: 0.85;
+      margin-top: 4px;
+    }
     .hero__sub {
       font-size: 16px; line-height: 1.55;
       color: rgba(255,255,255,0.75);
-      margin: 0 0 28px;
+      margin: 0 0 24px;
       max-width: 460px;
     }
-    .hero__cta-row { display: flex; gap: 10px; flex-wrap: wrap; }
-    .btn {
+
+    /* ── LISTEN PILLS (inline in hero) ── */
+    .listen-row {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .listen-pill {
       display: inline-flex; align-items: center; gap: 8px;
-      padding: 11px 18px;
-      border-radius: 10px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      color: white;
       font-size: 13px; font-weight: 600;
       text-decoration: none;
-      border: 1px solid transparent;
-      transition: transform 0.08s ease, background 0.12s ease;
-      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.14);
+      transition: background 0.12s;
     }
-    .btn:active { transform: translateY(1px); }
-    .btn--white { background: white; color: var(--dark); }
-    .btn--white:hover { background: #f3f4f6; }
-    .btn--ghost {
-      background: transparent; color: white;
-      border-color: rgba(255,255,255,0.22);
-    }
-    .btn--ghost:hover { background: rgba(255,255,255,0.08); }
+    .listen-pill:hover { background: rgba(255,255,255,0.16); }
+    .listen-pill svg { display: block; }
 
-    /* Cover artwork on the right */
-    .hero__cover {
-      position: relative;
-      aspect-ratio: 1 / 1;
-      border-radius: 16px;
-      overflow: hidden;
-      background: #000;
-      display: flex; flex-direction: column; justify-content: space-between;
-      padding: 20px 22px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.05);
-      max-width: 420px;
-      width: 100%;
-      margin-left: auto;
-    }
-    .hero__cover-logo {
-      display: flex; align-items: center; gap: 6px;
-      font-weight: 800; font-size: 14px; color: white;
-      letter-spacing: -0.2px;
-      align-self: center;
-      margin-top: 4px;
-    }
-    .hero__cover-logo .logo-mark { width: 18px; height: 18px; border-radius: 5px; }
-    .hero__cover-title {
-      font-size: clamp(32px, 4.5vw, 56px);
-      line-height: 0.92;
-      font-weight: 900;
-      letter-spacing: -0.025em;
-      text-align: center;
-      color: white;
-      text-transform: uppercase;
-      margin-top: 18px;
-    }
-    .hero__cover-title .of { font-size: 0.5em; font-weight: 800; display: block; margin-top: 4px; }
-    .hero__cover-statues {
-      display: flex; justify-content: center; align-items: flex-end;
-      gap: 6px; margin-top: auto;
-      font-size: 64px;
-      filter: grayscale(1) contrast(1.05);
-      opacity: 0.92;
-    }
-
-    /* ── SECTION CARD ── */
-    .section-card {
-      background: var(--white);
-      border: 1px solid var(--border-light);
-      border-radius: 20px;
-      padding: 28px;
-      margin-top: 24px;
-    }
-    .section-eyebrow {
-      font-size: 10px; font-weight: 700; color: var(--grey-1);
-      text-transform: uppercase; letter-spacing: 1px;
-      margin-bottom: 8px;
-    }
-    .section-title {
-      margin: 0 0 6px; font-size: 22px; font-weight: 800;
-      color: var(--dark); letter-spacing: -0.02em;
-    }
-    .section-sub {
-      margin: 0 0 20px; font-size: 14px; color: var(--text-secondary);
-      max-width: 640px;
-    }
-
-    /* ── VIDEO EMBED ── */
+    /* ── VIDEO ── */
     .video-frame {
       position: relative;
       width: 100%;
       padding-top: 75%;
-      background: #000;
+      background: #111;
       border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 12px 40px rgba(14,19,35,0.18);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.45);
     }
     .video-frame iframe {
       position: absolute; inset: 0;
@@ -212,144 +109,45 @@
       border: 0;
     }
 
-    /* ── ABOUT GRID ── */
-    .about-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-top: 24px;
-    }
-    .stat {
-      background: var(--pill-bg);
-      border-radius: 14px;
-      padding: 18px 20px;
-    }
-    .stat__num {
-      font-size: 28px; font-weight: 900; letter-spacing: -0.03em;
-      color: var(--dark); line-height: 1;
-    }
-    .stat__label {
-      font-size: 12px; font-weight: 600; color: var(--text-secondary);
-      margin-top: 6px;
-    }
-
-    /* ── LISTEN ── */
-    .listen-row {
-      display: flex; flex-wrap: wrap; gap: 10px;
-      margin-top: 4px;
-    }
-    .listen-pill {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: var(--pill-bg);
-      color: var(--dark);
-      font-size: 13px; font-weight: 600;
-      text-decoration: none;
-      border: 1px solid transparent;
-      transition: background 0.12s, border-color 0.12s;
-    }
-    .listen-pill:hover { background: white; border-color: var(--border); }
-    .listen-pill svg { display: block; }
-
-    /* ── FOOTER ── */
-    .footer {
-      text-align: center;
-      font-size: 12px; color: var(--grey-1);
-      margin-top: 32px;
-    }
-    .footer a { color: var(--text-secondary); text-decoration: none; }
-    .footer a:hover { color: var(--dark); }
-
     /* ── RESPONSIVE ── */
     @media (max-width: 860px) {
-      .top-bar__url-pill { display: none; }
+      .page { padding: 16px; min-height: 0; align-items: stretch; }
       .hero {
         grid-template-columns: 1fr;
-        padding: 40px 28px 32px;
-        gap: 32px;
+        padding: 28px 24px;
+        gap: 24px;
       }
-      .hero__cover { margin: 0 auto; max-width: 320px; }
-      .about-grid { grid-template-columns: 1fr; }
-      .page { padding: 16px 16px 60px; }
     }
   </style>
 </head>
 <body>
 
-<!-- Top Bar -->
-<header class="top-bar">
-  <a href="/" class="top-bar__logo">
-    <div class="logo-mark">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="5"/></svg>
-    </div>
-    SpotsNow
-  </a>
-  <div class="top-bar__url-pill">
-    <span class="top-bar__url-name">Titans of Advertising</span>
-    <span class="top-bar__url-sub">A SpotsNow Original · Business, Media</span>
-  </div>
-  <nav class="top-bar__actions">
-    <a href="https://www.spotsnow.io" class="login-btn">SpotsNow</a>
-    <a href="#listen" class="login-btn login-btn--dark">Listen</a>
-  </nav>
-</header>
-
-<!-- Page -->
 <main class="page">
-
-  <!-- HERO -->
   <section class="hero">
     <div>
-      <span class="hero__brand">
-        <span class="logo-mark">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="5"/></svg>
-        </span>
-        A SpotsNow Original
-      </span>
       <h1 class="hero__title">
-        <span>Titans</span>
+        Titans
         <span class="small">of Advertising</span>
       </h1>
       <p class="hero__sub">
-        Conversations with the operators, founders, and creators reshaping how brands buy media. Built for marketers who want the real story behind the numbers.
+        Conversations with the operators, founders, and creators reshaping how brands buy media. A SpotsNow Original.
       </p>
-      <div class="hero__cta-row">
-        <a href="#watch" class="btn btn--white">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-          Watch the sizzle
+      <div class="listen-row">
+        <a class="listen-pill" href="#" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.59 14.41a.75.75 0 01-1.03.25c-2.82-1.72-6.37-2.11-10.55-1.16a.75.75 0 11-.33-1.46c4.57-1.04 8.5-.59 11.66 1.34.36.22.47.69.25 1.03zm1.23-2.74a.94.94 0 01-1.29.31c-3.23-1.99-8.16-2.56-11.99-1.4a.94.94 0 01-.55-1.79c4.39-1.34 9.83-.7 13.53 1.59.44.27.58.85.3 1.29zm.11-2.86c-3.87-2.3-10.27-2.51-13.97-1.39a1.13 1.13 0 11-.66-2.16c4.26-1.29 11.34-1.04 15.81 1.61a1.13 1.13 0 01-1.18 1.94z"/></svg>
+          Spotify
         </a>
-        <a href="#listen" class="btn btn--ghost">Listen on your platform</a>
+        <a class="listen-pill" href="#" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#A855F7"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4.5c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm-2.5 9.7c-.04-.31.13-.61.42-.74.65-.29 1.34-.46 2.08-.46s1.43.17 2.08.46c.29.13.46.43.42.74l-.34 2.51c-.07.55-.62.95-1.18.85a5.42 5.42 0 01-1.96 0c-.56.1-1.11-.3-1.18-.85l-.34-2.51z"/></svg>
+          Apple
+        </a>
+        <a class="listen-pill" href="#" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#FF0000"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          YouTube
+        </a>
       </div>
     </div>
 
-    <!-- Cover artwork (CSS rendition of the podcast cover) -->
-    <div class="hero__cover" aria-hidden="true">
-      <div class="hero__cover-logo">
-        <span class="logo-mark">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="5"/></svg>
-        </span>
-        SpotsNow
-      </div>
-      <div class="hero__cover-title">
-        Titans
-        <span class="of">of Advertising</span>
-      </div>
-      <div class="hero__cover-statues">
-        <span style="transform: translateY(4px);">⚖️</span>
-        <span style="font-size: 1.2em;">🌍</span>
-        <span style="transform: translateY(4px);">🏹</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- VIDEO EMBED -->
-  <section class="section-card" id="watch">
-    <div class="section-eyebrow">Sizzle reel</div>
-    <h2 class="section-title">A 90-second look at what's coming</h2>
-    <p class="section-sub">
-      Highlights from the first season — the conversations, the guests, and the bets we're making on where advertising goes next.
-    </p>
     <div class="video-frame">
       <iframe
         src="https://player.vimeo.com/video/1186723318?badge=0&autopause=0&player_id=0&app_id=58479"
@@ -358,63 +156,6 @@
         title="Titans of Advertising Sizzle"></iframe>
     </div>
   </section>
-
-  <!-- ABOUT -->
-  <section class="section-card">
-    <div class="section-eyebrow">About the show</div>
-    <h2 class="section-title">Built by SpotsNow, for the people running the buys</h2>
-    <p class="section-sub">
-      Each episode goes deep with the people actually shaping the $32B host-read podcast advertising market — performance leads, agency heads, founders, and the creators with the largest captive audiences in media.
-    </p>
-
-    <div class="about-grid">
-      <div class="stat">
-        <div class="stat__num">$32B</div>
-        <div class="stat__label">Host-read podcast ad market</div>
-      </div>
-      <div class="stat">
-        <div class="stat__num">100%</div>
-        <div class="stat__label">Operator-led conversations</div>
-      </div>
-      <div class="stat">
-        <div class="stat__num">Weekly</div>
-        <div class="stat__label">New episodes every Thursday</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- LISTEN -->
-  <section class="section-card" id="listen">
-    <div class="section-eyebrow">Subscribe</div>
-    <h2 class="section-title">Listen wherever you get your podcasts</h2>
-    <p class="section-sub">
-      Follow the show so you never miss a drop.
-    </p>
-
-    <div class="listen-row">
-      <a class="listen-pill" href="#" target="_blank" rel="noopener">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.59 14.41a.75.75 0 01-1.03.25c-2.82-1.72-6.37-2.11-10.55-1.16a.75.75 0 11-.33-1.46c4.57-1.04 8.5-.59 11.66 1.34.36.22.47.69.25 1.03zm1.23-2.74a.94.94 0 01-1.29.31c-3.23-1.99-8.16-2.56-11.99-1.4a.94.94 0 01-.55-1.79c4.39-1.34 9.83-.7 13.53 1.59.44.27.58.85.3 1.29zm.11-2.86c-3.87-2.3-10.27-2.51-13.97-1.39a1.13 1.13 0 11-.66-2.16c4.26-1.29 11.34-1.04 15.81 1.61a1.13 1.13 0 01-1.18 1.94z"/></svg>
-        Spotify
-      </a>
-      <a class="listen-pill" href="#" target="_blank" rel="noopener">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="#A855F7"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4.5c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm-2.5 9.7c-.04-.31.13-.61.42-.74.65-.29 1.34-.46 2.08-.46s1.43.17 2.08.46c.29.13.46.43.42.74l-.34 2.51c-.07.55-.62.95-1.18.85a5.42 5.42 0 01-1.96 0c-.56.1-1.11-.3-1.18-.85l-.34-2.51z"/></svg>
-        Apple Podcasts
-      </a>
-      <a class="listen-pill" href="#" target="_blank" rel="noopener">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="#FF0000"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-        YouTube
-      </a>
-      <a class="listen-pill" href="#" target="_blank" rel="noopener">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="#0e1323"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l7 4.5-7 4.5z"/></svg>
-        RSS
-      </a>
-    </div>
-  </section>
-
-  <p class="footer">
-    Titans of Advertising is a SpotsNow Original. <a href="https://www.spotsnow.io">www.spotsnow.io</a>
-  </p>
-
 </main>
 
 <script src="https://player.vimeo.com/api/player.js"></script>
