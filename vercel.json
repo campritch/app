@@ -15,6 +15,14 @@
     "api/strategy-state.js": { "maxDuration": 30 },
     "api/supadata.js": { "maxDuration": 15 }
   },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
+    }
+  ],
   "rewrites": [
     { "source": "/nav", "destination": "/nav.html" },
     { "source": "/pixel-setup", "destination": "/pixel-setup.html" },
