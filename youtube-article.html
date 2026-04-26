@@ -716,12 +716,28 @@ async function generate() {
 
   showStatus('loading', 'Fetching transcript…');
 
-  // Step 1: get transcript directly from browser (no cloud IP issues)
+  // Step 1: get transcript — try Supadata (server-side), then browser proxies, then paste
   let transcript, videoId;
   try {
     videoId = extractVideoId(url);
     if (!videoId) throw new Error('Could not parse a video ID from that URL');
-    transcript = await fetchTranscript(videoId);
+
+    // 1a. Supadata API (server-side — bypasses YouTube bot detection)
+    try {
+      const r = await fetch('/api/supadata', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoId }),
+      });
+      if (r.ok) {
+        const d = await r.json();
+        if (d.transcript) transcript = d.transcript;
+      }
+    } catch {}
+
+    // 1b. Browser-side proxy fallback
+    if (!transcript) transcript = await fetchTranscript(videoId);
+
   } catch (e) {
     if (e.message === 'AUTO_FETCH_FAILED') {
       showStatus('error', 'YouTube blocked automatic transcript fetch — paste it manually below.');
