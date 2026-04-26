@@ -164,13 +164,13 @@
 
     /* ── Instagram slides ── */
     .ig-slides-row {
-      display: flex; gap: 12px; overflow-x: auto; padding-bottom: 4px;
+      display: flex; gap: 14px; overflow-x: auto; padding-bottom: 4px;
     }
     .ig-slides-row::-webkit-scrollbar { height: 4px; }
     .ig-slides-row::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
     .ig-slide-wrap { flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; }
-    .ig-slide-num { font-size: 11px; font-weight: 600; color: var(--grey-1); text-align: center; }
+    .ig-slide-lbl { font-size: 11px; font-weight: 600; color: var(--grey-1); text-align: center; }
     .ig-dl-btn {
       height: 26px; padding: 0 10px; font-size: 11px; font-weight: 600;
       background: none; border: 1px solid var(--border); border-radius: 6px;
@@ -178,58 +178,115 @@
     }
     .ig-dl-btn:hover { background: var(--pill-bg); }
 
-    /* The actual 1:1 slide — rendered at 360px, exported at 1080px */
+    /* ── Slide canvas — portrait 4:5, exports at 1080×1350 (3x scale) ── */
     .ig-slide {
-      width: 360px; height: 360px;
-      border-radius: 12px; overflow: hidden;
+      width: 360px; height: 450px;
+      border-radius: 10px; overflow: hidden;
       display: flex; flex-direction: column;
-      justify-content: space-between;
-      padding: 32px; position: relative;
+      padding: 24px; box-sizing: border-box;
+      position: relative;
       font-family: 'Inter', sans-serif;
       cursor: pointer;
     }
-    /* ── Brand palette (spotsnow.wiki/brand) ──
-       Salmon #F06060 · Navy #17212B · Ink #000000 · Paper #FFFFFF */
-    .ig-slide--navy   { background: #17212B; color: #ffffff; }
-    .ig-slide--dark   { background: #17212B; color: #ffffff; }  /* alias */
-    .ig-slide--salmon { background: #F06060; color: #ffffff; }
-    .ig-slide--coral  { background: #F06060; color: #ffffff; }  /* alias */
-    .ig-slide--white  { background: #ffffff; color: #000000; }
-    .ig-slide--black  { background: #000000; color: #ffffff; }
 
-    .ig-slide__tag { display: none; }
-    .ig-slide__body { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    /* ── Backgrounds — brand palette ── */
+    .ig-slide--navy   { background: #17212B; color: #fff; }
+    .ig-slide--dark   { background: #17212B; color: #fff; }
+    .ig-slide--salmon { background: #F06060; color: #fff; }
+    .ig-slide--coral  { background: #F06060; color: #fff; }
+    .ig-slide--white  { background: #fff;    color: #000; }
+    .ig-slide--black  { background: #000;    color: #fff; }
 
-    /* Eyebrow — Inter 700, ALL CAPS, salmon, 0.06em tracking (brand spec) */
+    /* ── Top row: logo + dot grid ── */
+    .ig-slide__top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 8px; flex-shrink: 0;
+    }
+    .ig-slide__logo { height: 18px; width: auto; display: block; }
+    .ig-slide--white .ig-slide__logo { filter: invert(1) brightness(0); }
+
+    /* Dot grid — 3 col × 6 row, top-right corner */
+    .ig-slide__dot-grid {
+      width: 40px; height: 70px; flex-shrink: 0;
+      background-image: radial-gradient(circle, currentColor 2px, transparent 2px);
+      background-size: 13px 13px;
+    }
+    .ig-slide--navy .ig-slide__dot-grid,
+    .ig-slide--dark .ig-slide__dot-grid,
+    .ig-slide--black .ig-slide__dot-grid { color: rgba(255,255,255,0.35); }
+    .ig-slide--salmon .ig-slide__dot-grid,
+    .ig-slide--coral  .ig-slide__dot-grid { color: rgba(255,255,255,0.22); }
+    .ig-slide--white  .ig-slide__dot-grid { color: rgba(0,0,0,0.18); }
+
+    /* ── Large slide number — salmon, only on dark slides ── */
+    .ig-slide__display-num {
+      font-size: 80px; font-weight: 800; line-height: 0.9;
+      letter-spacing: -0.04em; color: #F06060;
+      margin-bottom: 2px; flex-shrink: 0;
+    }
+
+    /* ── Badge: salmon square + white circle ── */
+    .ig-slide__badge {
+      display: flex; align-items: center; gap: 4px;
+      margin-bottom: 10px; flex-shrink: 0;
+    }
+    .ig-slide__badge-sq   { width: 13px; height: 13px; background: #F06060; }
+    .ig-slide__badge-circ { width: 15px; height: 15px; border-radius: 50%; background: #fff; }
+    /* Badge variants by bg */
+    .ig-slide--salmon .ig-slide__badge-sq   { background: rgba(255,255,255,0.9); }
+    .ig-slide--salmon .ig-slide__badge-circ { background: #17212B; }
+    .ig-slide--white  .ig-slide__badge-sq   { background: #F06060; }
+    .ig-slide--white  .ig-slide__badge-circ { background: #17212B; }
+
+    /* ── Content: eyebrow + headline + body ── */
+    .ig-slide__content {
+      flex: 1; display: flex; flex-direction: column; justify-content: flex-end;
+      min-height: 0;
+    }
     .ig-slide__eyebrow {
-      font-size: 13px; font-weight: 700; margin-bottom: 12px;
-      text-transform: uppercase; letter-spacing: 0.06em;
-      color: #F06060;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #F06060; margin-bottom: 7px;
     }
     .ig-slide--salmon .ig-slide__eyebrow,
-    .ig-slide--coral  .ig-slide__eyebrow { color: rgba(255,255,255,0.75); }
+    .ig-slide--coral  .ig-slide__eyebrow { color: rgba(255,255,255,0.7); }
+    .ig-slide--white  .ig-slide__eyebrow { color: #F06060; }
 
-    /* Headline — Inter 800, tight tracking (brand spec) */
+    /* Headlines — uppercase on dark slides, mixed case on color/white */
     .ig-slide__headline {
-      font-size: 30px; font-weight: 800; line-height: 1.1;
-      letter-spacing: -0.025em; margin: 0;
+      font-size: 28px; font-weight: 800; line-height: 1.07;
+      letter-spacing: -0.025em; margin: 0; text-transform: uppercase;
     }
-    /* Accent word (*word*) — salmon on dark/black, navy on salmon, salmon on white */
+    .ig-slide--salmon .ig-slide__headline,
+    .ig-slide--coral  .ig-slide__headline,
+    .ig-slide--white  .ig-slide__headline {
+      text-transform: none; font-size: 30px; line-height: 1.08;
+    }
+    /* Accent word */
     .ig-slide__headline em { font-style: normal; color: #F06060; }
     .ig-slide--salmon .ig-slide__headline em,
     .ig-slide--coral  .ig-slide__headline em { color: #17212B; }
     .ig-slide--white  .ig-slide__headline em { color: #F06060; }
 
-    /* Body copy — Inter 400, 15px, 1.55 leading (brand spec) */
     .ig-slide__sub {
-      margin-top: 16px; font-size: 15px; line-height: 1.55;
-      font-weight: 400; opacity: 0.75;
+      margin-top: 11px; font-size: 12.5px; font-weight: 600;
+      line-height: 1.5; opacity: 0.85;
     }
 
-    /* Logo — white on dark/salmon, dark (inverted) on white */
-    .ig-slide__brand { display: flex; align-items: center; }
-    .ig-slide__brand img { height: 16px; width: auto; opacity: 0.45; }
-    .ig-slide--white .ig-slide__brand img { filter: invert(1); opacity: 0.35; }
+    /* ── Footer: thin rule + url + arrow ── */
+    .ig-slide__footer {
+      margin-top: 14px; padding-top: 9px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+      flex-shrink: 0;
+    }
+    .ig-slide--white .ig-slide__footer { border-top-color: rgba(0,0,0,0.12); }
+    .ig-slide__footer-row {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .ig-slide__url  { font-size: 9.5px; font-weight: 700; letter-spacing: 0.01em; }
+    .ig-slide__fwd  { font-size: 13px; font-weight: 700; }
+
+    /* legacy alias — keep hidden */
+    .ig-slide__tag { display: none; }
     .ig-slide__dot { display: none; }
 
     /* Caption box */
@@ -903,21 +960,46 @@ function headlineHtml(text) {
 }
 
 function buildSlide(slide, index) {
-  const bgClass = `ig-slide--${slide.bg || 'dark'}`;
-  const labelMap = { dark: 'Slide', coral: 'Slide', black: 'Slide', white: 'Slide' };
+  const bg = slide.bg || 'navy';
+  const bgClass = `ig-slide--${bg}`;
+  const isDark = bg === 'navy' || bg === 'dark' || bg === 'black';
+  // Show large number only on dark slides; display 1-based index
+  const numHtml = isDark
+    ? `<div class="ig-slide__display-num">${index + 1}</div>`
+    : '';
   return `
     <div class="ig-slide-wrap">
-      <div class="ig-slide-num">Slide ${index + 1}</div>
+      <div class="ig-slide-lbl">Slide ${index + 1}</div>
       <div class="ig-slide ${bgClass}" id="ig-slide-${index}">
-        <div class="ig-slide__tag">SpotsNow</div>
-        <div class="ig-slide__body">
+
+        <!-- Logo + dot grid -->
+        <div class="ig-slide__top">
+          <img src="/spotsnow-logo-white.png" alt="SpotsNow" class="ig-slide__logo" />
+          <div class="ig-slide__dot-grid"></div>
+        </div>
+
+        <!-- Number (dark slides only) + badge -->
+        ${numHtml}
+        <div class="ig-slide__badge">
+          <div class="ig-slide__badge-sq"></div>
+          <div class="ig-slide__badge-circ"></div>
+        </div>
+
+        <!-- Content -->
+        <div class="ig-slide__content">
           ${slide.eyebrow ? `<div class="ig-slide__eyebrow">${slide.eyebrow}</div>` : ''}
           <p class="ig-slide__headline">${headlineHtml(slide.headline)}</p>
           ${slide.body ? `<p class="ig-slide__sub">${slide.body}</p>` : ''}
         </div>
-        <div class="ig-slide__brand">
-          <img src="/spotsnow-logo-white.png" alt="SpotsNow" />
+
+        <!-- Footer -->
+        <div class="ig-slide__footer">
+          <div class="ig-slide__footer-row">
+            <span class="ig-slide__url">www.spotsnow.io</span>
+            <span class="ig-slide__fwd">&#8594;</span>
+          </div>
         </div>
+
       </div>
       <button class="ig-dl-btn" onclick="downloadSlide(${index})">Download PNG</button>
     </div>`;
