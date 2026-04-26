@@ -36,30 +36,32 @@
     .page {
       max-width: 1180px;
       margin: 0 auto;
-      padding: 24px;
+      padding: 20px 24px;
       min-height: 100vh;
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      justify-content: center;
+      gap: 16px;
     }
 
     /* ── HERO ── */
     .hero {
       background: #000;
       border-radius: 24px;
-      padding: 44px 48px;
+      padding: 36px 44px;
       color: white;
       display: grid;
-      grid-template-columns: 1fr 1.15fr;
-      gap: 48px;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 40px;
       align-items: center;
       width: 100%;
     }
     .hero__title {
-      font-size: clamp(44px, 5.6vw, 76px);
+      font-size: clamp(40px, 5vw, 68px);
       line-height: 0.95;
       font-weight: 900;
       letter-spacing: -0.03em;
-      margin: 0 0 18px;
+      margin: 0 0 14px;
       text-transform: uppercase;
     }
     .hero__title .small {
@@ -69,19 +71,17 @@
       margin-top: 4px;
     }
     .hero__sub {
-      font-size: 16px; line-height: 1.55;
+      font-size: 15px; line-height: 1.5;
       color: rgba(255,255,255,0.75);
-      margin: 0 0 24px;
+      margin: 0 0 20px;
       max-width: 460px;
     }
 
-    /* ── LISTEN PILLS (inline in hero) ── */
-    .listen-row {
-      display: flex; flex-wrap: wrap; gap: 8px;
-    }
+    /* ── LISTEN PILLS ── */
+    .listen-row { display: flex; flex-wrap: wrap; gap: 8px; }
     .listen-pill {
       display: inline-flex; align-items: center; gap: 8px;
-      padding: 9px 14px;
+      padding: 8px 14px;
       border-radius: 999px;
       background: rgba(255,255,255,0.08);
       color: white;
@@ -109,60 +109,61 @@
       border: 0;
     }
 
-    /* ── ABOUT ── */
-    .about {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 0 24px 64px;
-    }
-    .section-card {
+    /* ── ABOUT (inline below hero, still above the fold) ── */
+    .about-card {
       background: var(--white);
       border: 1px solid var(--border-light);
       border-radius: 20px;
-      padding: 28px;
+      padding: 18px 24px;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr 1fr;
+      gap: 20px;
+      align-items: center;
     }
-    .section-eyebrow {
+    .about-copy {
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .about-eyebrow {
       font-size: 10px; font-weight: 700; color: var(--grey-1);
       text-transform: uppercase; letter-spacing: 1px;
-      margin-bottom: 8px;
     }
-    .section-title {
-      margin: 0 0 6px; font-size: 22px; font-weight: 800;
-      color: var(--dark); letter-spacing: -0.02em;
-    }
-    .section-sub {
-      margin: 0 0 20px; font-size: 14px; color: #5a5f6e;
-      max-width: 640px;
-    }
-    .about-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
+    .about-title {
+      margin: 0; font-size: 15px; font-weight: 800;
+      color: var(--dark); letter-spacing: -0.01em;
+      line-height: 1.25;
     }
     .stat {
       background: var(--pill-bg);
-      border-radius: 14px;
-      padding: 18px 20px;
+      border-radius: 12px;
+      padding: 12px 14px;
     }
     .stat__num {
-      font-size: 28px; font-weight: 900; letter-spacing: -0.03em;
+      font-size: 22px; font-weight: 900; letter-spacing: -0.03em;
       color: var(--dark); line-height: 1;
     }
     .stat__label {
-      font-size: 12px; font-weight: 600; color: #5a5f6e;
-      margin-top: 6px;
+      font-size: 11px; font-weight: 600; color: #5a5f6e;
+      margin-top: 4px;
     }
 
     /* ── RESPONSIVE ── */
-    @media (max-width: 860px) {
-      .page { padding: 16px; min-height: 0; align-items: stretch; }
+    @media (max-width: 960px) {
+      .page { padding: 16px; min-height: 0; gap: 16px; }
       .hero {
         grid-template-columns: 1fr;
         padding: 28px 24px;
         gap: 24px;
       }
-      .about { padding: 0 16px 48px; }
-      .about-grid { grid-template-columns: 1fr; }
+      .about-card {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+      .about-copy {
+        grid-column: 1 / -1;
+      }
+    }
+    @media (max-width: 560px) {
+      .about-card { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -202,31 +203,26 @@
         title="Titans of Advertising Sizzle"></iframe>
     </div>
   </section>
-</main>
 
-<section class="about">
-  <div class="section-card">
-    <div class="section-eyebrow">About the show</div>
-    <h2 class="section-title">Built by SpotsNow, for the people running the buys</h2>
-    <p class="section-sub">
-      Each episode goes deep with the people actually shaping the $32B host-read podcast advertising market — performance leads, agency heads, founders, and the creators with the largest captive audiences in media.
-    </p>
-    <div class="about-grid">
-      <div class="stat">
-        <div class="stat__num">$32B</div>
-        <div class="stat__label">Host-read podcast ad market</div>
-      </div>
-      <div class="stat">
-        <div class="stat__num">100%</div>
-        <div class="stat__label">Operator-led conversations</div>
-      </div>
-      <div class="stat">
-        <div class="stat__num">Weekly</div>
-        <div class="stat__label">New episodes every Thursday</div>
-      </div>
+  <section class="about-card">
+    <div class="about-copy">
+      <span class="about-eyebrow">About the show</span>
+      <h2 class="about-title">Built by SpotsNow, for the people running the buys.</h2>
     </div>
-  </div>
-</section>
+    <div class="stat">
+      <div class="stat__num">$32B</div>
+      <div class="stat__label">Host-read podcast ad market</div>
+    </div>
+    <div class="stat">
+      <div class="stat__num">100%</div>
+      <div class="stat__label">Operator-led conversations</div>
+    </div>
+    <div class="stat">
+      <div class="stat__num">Weekly</div>
+      <div class="stat__label">New episodes every Thursday</div>
+    </div>
+  </section>
+</main>
 
 <script src="https://player.vimeo.com/api/player.js"></script>
 </body>
