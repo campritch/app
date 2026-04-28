@@ -1294,6 +1294,8 @@
         <input id="cf-name" name="name" type="text" autocomplete="name" required>
         <label for="cf-email">Email</label>
         <input id="cf-email" name="email" type="email" autocomplete="email" required>
+        <label for="cf-linkedin">LinkedIn URL</label>
+        <input id="cf-linkedin" name="linkedinUrl" type="url" placeholder="linkedin.com/in/yourhandle" required>
         <label for="cf-fund">Partner fund</label>
         <input id="cf-fund" name="fund" type="text" placeholder="e.g. a16z Speedrun" required>
         <label for="cf-arr">Est. ARR (or stage)</label>
@@ -1358,11 +1360,16 @@
       const payload = {
         name: (data.get('name') || '').toString().trim(),
         email: (data.get('email') || '').toString().trim(),
+        linkedinUrl: (data.get('linkedinUrl') || '').toString().trim(),
         fund: (data.get('fund') || '').toString().trim(),
         arr: (data.get('arr') || '').toString().trim(),
       };
-      if (!payload.name || !payload.email || !payload.fund || !payload.arr) {
+      if (!payload.name || !payload.email || !payload.linkedinUrl || !payload.fund || !payload.arr) {
         showError('All fields are required.');
+        return;
+      }
+      if (!/linkedin\.com\/in\//i.test(payload.linkedinUrl)) {
+        showError('Please paste a full LinkedIn profile URL (linkedin.com/in/…).');
         return;
       }
 
