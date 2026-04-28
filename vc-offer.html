@@ -1025,6 +1025,33 @@
     font-family: inherit;
   }
   .claim-modal .submit:hover { background: #d94d52; }
+  .claim-modal .submit[disabled] { opacity: 0.6; cursor: wait; }
+  .claim-modal .form-error {
+    margin-top: 14px;
+    padding: 10px 12px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .claim-modal__success {
+    text-align: center;
+    padding: 8px 0 4px;
+  }
+  .claim-modal__success .check {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .claim-modal__success h3 { margin-bottom: 8px; }
+  .claim-modal__success p { color: var(--ink-soft); font-size: 14px; line-height: 1.5; }
 
   .slide-header .brand-logo {
     display: block;
@@ -1093,7 +1120,7 @@
     </div>
 
     <div class="eyebrow">Step 1 · Free for every portco</div>
-    <h2 style="margin-bottom: 20px;">Get your competitor report <em>free.</em></h2>
+    <h2 style="margin-bottom: 20px;">Competitor spend report <em>— included free</em> (no obligation).</h2>
     <p class="lede" style="margin-bottom: 36px;">See all the spenders in your industry. What they're buying, where, and how much. Delivered in 48 hours. No campaign required.</p>
 
     <div class="report-frame">
@@ -1259,19 +1286,29 @@
 <div class="claim-modal" id="claim-form" hidden role="dialog" aria-modal="true" aria-labelledby="claim-title">
   <div class="claim-modal__box">
     <button class="claim-modal__close" type="button" aria-label="Close" data-claim-close>×</button>
-    <h3 id="claim-title">Claim the offer.</h3>
-    <p class="sub">Drop your details and we'll reply same day with the next steps.</p>
-    <form id="claim-form-el" novalidate>
-      <label for="cf-name">Your name</label>
-      <input id="cf-name" name="name" type="text" autocomplete="name" required>
-      <label for="cf-email">Email</label>
-      <input id="cf-email" name="email" type="email" autocomplete="email" required>
-      <label for="cf-fund">Partner fund</label>
-      <input id="cf-fund" name="fund" type="text" placeholder="e.g. a16z Speedrun" required>
-      <label for="cf-arr">Est. ARR (or stage)</label>
-      <input id="cf-arr" name="arr" type="text" placeholder="e.g. $1.2M ARR / pre-revenue" required>
-      <button class="submit" type="submit">Send to SpotsNow</button>
-    </form>
+    <div id="claim-form-view">
+      <h3 id="claim-title">Claim the offer.</h3>
+      <p class="sub">Drop your details and we'll reply same day with the next steps.</p>
+      <form id="claim-form-el" novalidate>
+        <label for="cf-name">Your name</label>
+        <input id="cf-name" name="name" type="text" autocomplete="name" required>
+        <label for="cf-email">Email</label>
+        <input id="cf-email" name="email" type="email" autocomplete="email" required>
+        <label for="cf-fund">Partner fund</label>
+        <input id="cf-fund" name="fund" type="text" placeholder="e.g. a16z Speedrun" required>
+        <label for="cf-arr">Est. ARR (or stage)</label>
+        <input id="cf-arr" name="arr" type="text" placeholder="e.g. $1.2M ARR / pre-revenue" required>
+        <button class="submit" type="submit" id="cf-submit">Send to SpotsNow</button>
+        <div id="cf-error" class="form-error" hidden></div>
+      </form>
+    </div>
+    <div id="claim-success-view" class="claim-modal__success" hidden>
+      <div class="check" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h3>You're in.</h3>
+      <p>We'll reply within the day with the next steps for your portfolio.</p>
+    </div>
   </div>
 </div>
 
@@ -1279,33 +1316,76 @@
   (() => {
     const modal = document.getElementById('claim-form');
     const form = document.getElementById('claim-form-el');
+    const formView = document.getElementById('claim-form-view');
+    const successView = document.getElementById('claim-success-view');
+    const submitBtn = document.getElementById('cf-submit');
+    const errorEl = document.getElementById('cf-error');
     const triggers = document.querySelectorAll('[data-claim-trigger]');
     const closes = document.querySelectorAll('[data-claim-close]');
-    const open = (e) => { if (e) e.preventDefault(); modal.hidden = false; setTimeout(() => document.getElementById('cf-name').focus(), 60); };
+
+    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    const API_URL = isLocal
+      ? 'http://localhost:3007/api/vc-claim'
+      : 'https://outreach.spotsnow.wiki/api/vc-claim';
+
+    const showError = (msg) => { errorEl.textContent = msg; errorEl.hidden = false; };
+    const clearError = () => { errorEl.hidden = true; errorEl.textContent = ''; };
+    const reset = () => {
+      form.reset();
+      clearError();
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send to SpotsNow';
+      formView.hidden = false;
+      successView.hidden = true;
+    };
+    const open = (e) => {
+      if (e) e.preventDefault();
+      reset();
+      modal.hidden = false;
+      setTimeout(() => document.getElementById('cf-name').focus(), 60);
+    };
     const close = () => { modal.hidden = true; };
+
     triggers.forEach(b => b.addEventListener('click', open));
     closes.forEach(b => b.addEventListener('click', close));
     modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) close(); });
-    form.addEventListener('submit', (e) => {
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      clearError();
       const data = new FormData(form);
-      const name = (data.get('name') || '').trim();
-      const email = (data.get('email') || '').trim();
-      const fund = (data.get('fund') || '').trim();
-      const arr = (data.get('arr') || '').trim();
-      if (!name || !email || !fund || !arr) return;
-      const subject = encodeURIComponent('VC Portfolio Offer · ' + fund);
-      const body = encodeURIComponent(
-        'Name: ' + name + '\n' +
-        'Email: ' + email + '\n' +
-        'Partner fund: ' + fund + '\n' +
-        'Est. ARR / stage: ' + arr + '\n\n' +
-        'Forwarded from the VC Portfolio offer page.'
-      );
-      window.location.href = 'mailto:cam@spotsnow.io?subject=' + subject + '&body=' + body;
-      close();
-      form.reset();
+      const payload = {
+        name: (data.get('name') || '').toString().trim(),
+        email: (data.get('email') || '').toString().trim(),
+        fund: (data.get('fund') || '').toString().trim(),
+        arr: (data.get('arr') || '').toString().trim(),
+      };
+      if (!payload.name || !payload.email || !payload.fund || !payload.arr) {
+        showError('All fields are required.');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending…';
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          const text = await res.text().catch(() => '');
+          throw new Error('HTTP ' + res.status + (text ? ': ' + text : ''));
+        }
+        formView.hidden = true;
+        successView.hidden = false;
+      } catch (err) {
+        console.error('[claim] submit failed:', err);
+        showError("Something went wrong. Email cam@spotsnow.io and we'll handle it.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send to SpotsNow';
+      }
     });
   })();
 </script>
