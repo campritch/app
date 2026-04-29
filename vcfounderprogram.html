@@ -1249,29 +1249,54 @@
       padding-top: 16px !important;
     }
 
-    /* slide 4 — split intentionally at the section divider so each
-       half fits cleanly on its own landscape page */
-    .channel-block { break-inside: avoid; page-break-inside: avoid; }
-    .channel-grid { gap: 12px !important; }
-    .channel-card { padding: 18px !important; }
-    .section-divider {
-      break-before: page;
-      page-break-before: always;
-      break-inside: avoid;
-      page-break-inside: avoid;
-      margin-top: 0 !important;
-      padding-top: 0 !important;
-      border-top: none !important;
+    /* slide 4 — fit benchmarks + case studies on one landscape page */
+    #s4 {
+      padding: 28px 56px 32px !important;
     }
+    #s4 h2 { margin-bottom: 6px !important; font-size: 26px !important; }
+    #s4 .eyebrow { margin-bottom: 6px !important; }
+    .channel-block { margin-top: 4px !important; }
+    .channel-grid { gap: 10px !important; }
+    .channel-card { padding: 10px 14px !important; }
+    .channel-card .channel-figure { font-size: 32px !important; line-height: 1.05 !important; margin: 2px 0 !important; }
+    .channel-card .channel-name { font-size: 12px !important; }
+    .channel-card .channel-label { font-size: 10px !important; }
+    .channel-source { font-size: 10px !important; margin-top: 6px !important; }
+
+    .section-divider {
+      margin-top: 14px !important;
+      padding-top: 12px !important;
+    }
+    .section-divider .eyebrow { margin-bottom: 4px !important; }
+    .section-divider h2 { font-size: 22px !important; margin-bottom: 4px !important; }
+    .section-divider .lede { margin-bottom: 0 !important; font-size: 12px !important; }
+
     .pro-grid {
       grid-template-columns: 1fr 1fr !important;
-      break-inside: avoid;
-      page-break-inside: avoid;
-      break-before: avoid;
-      page-break-before: avoid;
-      gap: 16px !important;
+      gap: 12px !important;
+      margin-top: 10px !important;
     }
-    .pro-card { break-inside: avoid; padding: 18px !important; }
+    .pro-card { padding: 12px !important; }
+    .pro-card .thumb {
+      aspect-ratio: auto !important;
+      height: 96px !important;
+      min-height: 0 !important;
+      margin-bottom: 8px !important;
+      overflow: hidden !important;
+    }
+    .pro-card .thumb img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      object-position: center !important;
+    }
+    .pro-card .thumb .dex-name { font-size: 22px !important; }
+    .pro-card .thumb .dex-label { font-size: 9px !important; }
+    .pro-card h3 { font-size: 14px !important; margin: 6px 0 2px !important; }
+    .pro-card .stat { margin: 2px 0 !important; }
+    .pro-card .stat .figure { font-size: 26px !important; }
+    .pro-card .stat .unit { font-size: 12px !important; }
+    .pro-card p { font-size: 11px !important; line-height: 1.4 !important; margin-top: 4px !important; }
 
     /* ensure images never overflow */
     img { max-width: 100%; height: auto; }
