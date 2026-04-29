@@ -1132,6 +1132,150 @@
     line-height: 0;
     text-decoration: none;
   }
+
+  /* PRINT / PDF — landscape, one slide per page, polished */
+  @media print {
+    @page {
+      size: Letter landscape;
+      margin: 0;
+    }
+
+    html, body {
+      background: #ffffff !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    /* hide interactive / web-only chrome */
+    .nav,
+    .scroll-cue,
+    .claim-modal,
+    .video-embed,
+    .hero-cta {
+      display: none !important;
+    }
+
+    .page {
+      max-width: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .slide {
+      margin: 0 !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      padding: 36px 56px 40px !important;
+      page-break-after: always;
+      break-after: page;
+    }
+
+    .slide:last-of-type {
+      page-break-after: auto;
+      break-after: auto;
+    }
+
+    /* hero (slide 1) — keep two-column on print, tighten spacing */
+    .hero-full {
+      display: grid !important;
+      grid-template-columns: 1.05fr 1fr !important;
+      gap: 40px !important;
+      align-items: center;
+    }
+    .hero-image {
+      box-shadow: none !important;
+    }
+
+    /* type tightens slightly on print so it doesn't run over */
+    h1 { font-size: 44px !important; }
+    h2 { font-size: 30px !important; }
+    h3 { font-size: 19px !important; }
+    .lede { font-size: 15px !important; }
+
+    /* keep the large visuals within a single landscape page */
+    .hero-full .hero-image {
+      max-height: 78vh !important;
+      width: auto !important;
+      max-width: 100% !important;
+      object-fit: contain !important;
+      margin: 0 auto !important;
+      display: block !important;
+    }
+
+    /* slide 2 — keep title + image on one page */
+    #s2 { break-inside: avoid; page-break-inside: avoid; }
+    #s2 h2 { margin-bottom: 8px !important; }
+    #s2 .lede { margin-bottom: 16px !important; }
+    .report-frame {
+      background: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+      text-align: center;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    .report-frame img,
+    .report-frame .hero-image {
+      max-height: 52vh !important;
+      width: auto !important;
+      max-width: 100% !important;
+      object-fit: contain !important;
+      margin: 0 auto !important;
+      display: block !important;
+      box-shadow: none !important;
+    }
+
+    /* offer blocks side by side on print */
+    .offer-blocks {
+      grid-template-columns: 1fr 1fr !important;
+      gap: 16px !important;
+    }
+    .offer-block {
+      padding: 24px !important;
+      break-inside: avoid;
+    }
+
+    /* keep slide-3 signoff with the rest of the slide */
+    .signoff {
+      break-inside: avoid;
+      page-break-inside: avoid;
+      margin-top: 20px !important;
+      padding-top: 16px !important;
+    }
+
+    /* slide 4 — split intentionally at the section divider so each
+       half fits cleanly on its own landscape page */
+    .channel-block { break-inside: avoid; page-break-inside: avoid; }
+    .channel-grid { gap: 12px !important; }
+    .channel-card { padding: 18px !important; }
+    .section-divider {
+      break-before: page;
+      page-break-before: always;
+      break-inside: avoid;
+      page-break-inside: avoid;
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+      border-top: none !important;
+    }
+    .pro-grid {
+      grid-template-columns: 1fr 1fr !important;
+      break-inside: avoid;
+      page-break-inside: avoid;
+      break-before: avoid;
+      page-break-before: avoid;
+      gap: 16px !important;
+    }
+    .pro-card { break-inside: avoid; padding: 18px !important; }
+
+    /* ensure images never overflow */
+    img { max-width: 100%; height: auto; }
+  }
 </style>
 </head>
 <body>
