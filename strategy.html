@@ -163,6 +163,23 @@ input, textarea, select { font-family: inherit; }
 .tx-modal-foot .tx-gen:hover:not(:disabled) { filter: brightness(1.08); }
 .tx-modal-foot .tx-gen:disabled { opacity: 0.4; cursor: not-allowed; background: transparent; color: var(--text-faint); border-color: var(--line); }
 
+/* Knowledge bank dropzone */
+.tx-modal .kb-drop { display: block; border: 1px dashed var(--line); padding: 18px 14px; text-align: center; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); letter-spacing: 0.05em; transition: border-color 0.15s, color 0.15s; }
+.tx-modal .kb-drop:hover, .tx-modal .kb-drop.drag { border-color: var(--accent); color: var(--text); }
+.tx-modal .kb-drop input { display: none; }
+.tx-modal .kb-row { padding: 10px 18px; border-bottom: 1px solid var(--line-soft); display: grid; grid-template-columns: 60px 1fr auto; gap: 12px; align-items: start; }
+.tx-modal .kb-row:last-child { border-bottom: none; }
+.tx-modal .kb-row:hover { background: var(--surface-2); }
+.tx-modal .kb-row .typ { color: var(--text-faint); font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; padding-top: 3px; }
+.tx-modal .kb-row .ti { color: var(--text); font-family: 'Inter Tight', sans-serif; font-size: 13px; line-height: 1.4; min-width: 0; font-weight: 500; word-break: break-word; }
+.tx-modal .kb-row .ti .meta { display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); margin-top: 3px; font-weight: 400; }
+.tx-modal .kb-row .ti .preview { display: block; font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 11px; color: var(--text-dim); margin-top: 4px; line-height: 1.45; max-height: 36px; overflow: hidden; }
+.tx-modal .kb-row .acts { display: flex; gap: 4px; }
+.tx-modal .kb-row .acts button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 2px 7px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border-radius: 2px; }
+.tx-modal .kb-row .acts .v:hover { color: var(--text); border-color: var(--accent); }
+.tx-modal .kb-row .acts .d:hover { color: var(--bad); border-color: var(--bad); }
+.tx-modal .kb-empty { padding: 30px 16px; color: var(--text-faint); font-family: 'Fraunces', serif; font-style: italic; text-align: center; font-size: 13px; }
+
 /* Dock hint showing what the agent is seeing */
 .dock .ctx-hint { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; max-width: 880px; margin: 0 auto 6px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .dock .ctx-hint .pill { color: var(--good); border: 1px solid var(--line-soft); padding: 2px 8px; border-radius: 2px; }
@@ -377,6 +394,13 @@ input, textarea, select { font-family: inherit; }
       </div>
 
       <div class="group">
+        <div class="label">
+          Knowledge bank <span class="hint" id="kb-summary">0 items</span>
+        </div>
+        <button class="tx-open-btn" id="btn-kb-open">Open knowledge bank →</button>
+      </div>
+
+      <div class="group">
         <div class="label">Burn CSV <span class="hint" id="csv-status">not uploaded</span></div>
         <label class="csv-drop" id="csv-drop">
           Drop or click to upload
@@ -553,6 +577,29 @@ input, textarea, select { font-family: inherit; }
       <button class="tx-more" id="btn-tx-more">Show more</button>
       <button class="tx-gen" id="btn-tx-gen" disabled>Run &amp; save 0</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="kb-modal-bg">
+  <div class="modal tx-modal">
+    <div class="modal-hdr">
+      <div>
+        <div class="t">Knowledge bank</div>
+        <span class="m" id="kb-modal-summary">0 items</span>
+      </div>
+      <button class="x" id="kb-modal-close">Done</button>
+    </div>
+    <div class="tx-modal-controls">
+      <label class="kb-drop" id="kb-drop">
+        <span id="kb-drop-text">Drop files here or click to upload (max ~22MB each)</span>
+        <input type="file" id="kb-file" multiple>
+      </label>
+      <div class="tx-sel-bar">
+        <button id="btn-kb-refresh">Refresh</button>
+      </div>
+    </div>
+    <div class="tx-modal-list" id="kb-list"></div>
+    <div class="tx-modal-status" id="kb-status" hidden></div>
   </div>
 </div>
 
@@ -920,6 +967,7 @@ function hydrate() {
   attachInputs();
   loadRemoteState();
   loadTranscripts();
+  loadKb();
 }
 
 function attachInputs() {
@@ -959,11 +1007,17 @@ function attachInputs() {
   document.getElementById('btn-tx-open').addEventListener('click', openTxDrawer);
   document.getElementById('tx-drawer-close').addEventListener('click', closeTxDrawer);
   document.getElementById('tx-modal-bg').addEventListener('click', (e) => { if (e.target.id === 'tx-modal-bg') closeTxDrawer(); });
+  document.getElementById('btn-kb-open').addEventListener('click', openKbModal);
+  document.getElementById('kb-modal-close').addEventListener('click', closeKbModal);
+  document.getElementById('kb-modal-bg').addEventListener('click', (e) => { if (e.target.id === 'kb-modal-bg') closeKbModal(); });
+  document.getElementById('btn-kb-refresh').addEventListener('click', loadKb);
+  document.getElementById('kb-file').addEventListener('change', onKbPick);
+  attachKbDragDrop();
   document.getElementById('ctx-open-library').addEventListener('click', openTxDrawer);
   document.getElementById('btn-stop').addEventListener('click', stopGeneration);
   document.getElementById('modal-close').addEventListener('click', closeModal);
   document.getElementById('modal-bg').addEventListener('click', (e) => { if (e.target.id === 'modal-bg') closeModal(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closePublishModal(); closePromptModal(); closeTxDrawer(); } });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closePublishModal(); closePromptModal(); closeTxDrawer(); closeKbModal(); } });
 
   // Publish-to-Notion modal
   document.getElementById('publish-close').addEventListener('click', closePublishModal);
@@ -1211,6 +1265,163 @@ function openTxDrawer() {
 }
 function closeTxDrawer() {
   document.getElementById('tx-modal-bg').classList.remove('open');
+}
+
+// ── Knowledge bank ───────────────────────────────────────────────────
+let kbItems = [];
+
+function openKbModal() {
+  document.getElementById('kb-modal-bg').classList.add('open');
+  loadKb();
+}
+function closeKbModal() {
+  document.getElementById('kb-modal-bg').classList.remove('open');
+}
+
+async function loadKb() {
+  if (!password) return;
+  try {
+    const res = await fetch('/api/kb-manage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password, action: 'list' }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    kbItems = data.items || [];
+    renderKb();
+  } catch (err) {
+    setKbStatus('err', `Load failed: ${err.message}`);
+  }
+}
+
+function renderKb() {
+  const el = document.getElementById('kb-list');
+  document.getElementById('kb-summary').textContent = `${kbItems.length} item${kbItems.length === 1 ? '' : 's'}`;
+  document.getElementById('kb-modal-summary').textContent = `${kbItems.length} item${kbItems.length === 1 ? '' : 's'}`;
+  if (!kbItems.length) {
+    el.innerHTML = '<div class="kb-empty">No files yet. Drop files above to add to your knowledge bank.</div>';
+    return;
+  }
+  el.innerHTML = kbItems.map((it) => {
+    const kb = it.bytes ? `${Math.round(it.bytes / 1024)}kb` : '';
+    const when = it.uploaded_at ? new Date(it.uploaded_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
+    const preview = it.preview ? `<span class="preview">${escapeHtml(it.preview.slice(0, 240))}${it.preview.length > 240 ? '…' : ''}</span>` : '';
+    return `<div class="kb-row" data-id="${escapeHtml(it.id)}">
+      <span class="typ">${escapeHtml(it.type || 'file')}</span>
+      <span class="ti">${escapeHtml(it.name)}<span class="meta">${kb}${when ? ` · ${when}` : ''}${it.notes ? ` · ${escapeHtml(it.notes)}` : ''}</span>${preview}</span>
+      <span class="acts"><button class="v" data-view="${escapeHtml(it.id)}">View</button><button class="d" data-del="${escapeHtml(it.id)}">Del</button></span>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', () => viewKb(b.dataset.view)));
+  el.querySelectorAll('[data-del]').forEach((b) => b.addEventListener('click', () => deleteKb(b.dataset.del)));
+}
+
+function setKbStatus(state, text) {
+  const el = document.getElementById('kb-status');
+  if (!el) return;
+  if (!state) { el.hidden = true; el.className = 'tx-modal-status'; el.innerHTML = ''; return; }
+  el.hidden = false;
+  el.className = 'tx-modal-status ' + state;
+  el.innerHTML = (state === 'running' ? '<span class="spin"></span>' : '') + escapeHtml(text);
+}
+
+async function onKbPick(e) {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+  await uploadKbFiles(files);
+  e.target.value = '';
+}
+
+function attachKbDragDrop() {
+  const drop = document.getElementById('kb-drop');
+  ['dragenter', 'dragover'].forEach((evt) => drop.addEventListener(evt, (e) => { e.preventDefault(); drop.classList.add('drag'); }));
+  ['dragleave', 'drop'].forEach((evt) => drop.addEventListener(evt, (e) => { e.preventDefault(); drop.classList.remove('drag'); }));
+  drop.addEventListener('drop', (e) => {
+    const files = Array.from(e.dataTransfer?.files || []);
+    if (files.length) uploadKbFiles(files);
+  });
+}
+
+async function uploadKbFiles(files) {
+  setKbStatus('running', `Uploading ${files.length} file${files.length === 1 ? '' : 's'}…`);
+  let okCount = 0;
+  let errCount = 0;
+  for (const file of files) {
+    try {
+      const body_b64 = await fileToBase64(file);
+      const res = await fetch('/api/kb-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password, name: file.name, mime: file.type, body_b64 }),
+      });
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `HTTP ${res.status}`); }
+      okCount += 1;
+    } catch (err) {
+      console.warn('kb upload failed', file.name, err);
+      errCount += 1;
+    }
+  }
+  setKbStatus(errCount && !okCount ? 'err' : 'ok', `Uploaded ${okCount}${errCount ? ` · ${errCount} failed` : ''}`);
+  setTimeout(() => setKbStatus(null), 4000);
+  await loadKb();
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const s = String(reader.result || '');
+      const i = s.indexOf(',');
+      resolve(i >= 0 ? s.slice(i + 1) : s);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function viewKb(id) {
+  const it = kbItems.find((x) => x.id === id);
+  if (!it) return;
+  openModal(it.name, `${it.type} · ${it.bytes ? Math.round(it.bytes / 1024) + 'kb' : ''}${it.notes ? ' · ' + it.notes : ''}`, 'Loading…');
+  try {
+    const res = await fetch('/api/kb-manage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password, action: 'view', id }),
+    });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `HTTP ${res.status}`); }
+    const data = await res.json();
+    const body = document.getElementById('modal-body');
+    if (it.type === 'image' && data.body_b64) {
+      body.innerHTML = `<img src="data:${escapeHtml(it.mime || 'image/png')};base64,${data.body_b64}" style="max-width:100%; height:auto; display:block;">`;
+    } else if (data.content != null) {
+      body.textContent = data.content;
+    } else if (data.body_b64) {
+      body.textContent = `Binary file (${it.mime}, ${it.bytes} bytes). Cannot preview here — open via the agent or download from Vercel Blob.`;
+    } else {
+      body.textContent = '(no content)';
+    }
+  } catch (err) {
+    document.getElementById('modal-body').textContent = `Failed: ${err.message}`;
+  }
+}
+
+async function deleteKb(id) {
+  const it = kbItems.find((x) => x.id === id);
+  if (!it) return;
+  if (!confirm(`Remove "${it.name}" from your knowledge bank? The agent will lose access to it.`)) return;
+  try {
+    const res = await fetch('/api/kb-manage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password, action: 'delete', id }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    await loadKb();
+  } catch (err) {
+    alert(`Delete failed: ${err.message}`);
+  }
 }
 
 function applyCustomRange() {

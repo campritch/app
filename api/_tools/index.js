@@ -7,6 +7,7 @@ import * as hubspot from './hubspot.js';
 import * as bi from './bi.js';
 import * as burn from './burn.js';
 import * as web from './web.js';
+import * as kb from './kb.js';
 
 const TOOL_DEFS = [
   // ── Fathom ──────────────────────────────────────────────────────────────
@@ -118,6 +119,18 @@ const TOOL_DEFS = [
     description: 'Read the uploaded burn / finance CSV. Returns parsed rows. Use for monthly burn, runway, spend categories.',
     input_schema: { type: 'object', properties: {} },
     execute: burn.read,
+  },
+
+  // ── Knowledge bank ─────────────────────────────────────────────────────
+  {
+    name: 'kb_get_item',
+    description: 'Read the full body of a single knowledge-bank item by id. The KB manifest (id, name, type, notes, preview) is already in your context — only call this when you actually need the full content. For text/csv/json items returns content as a string; for images and other binary returns base64 with mime + size so you can describe or hand off.',
+    input_schema: {
+      type: 'object',
+      properties: { id: { type: 'string', description: 'KB item id (looks like kb_xxxxxxxx).' } },
+      required: ['id'],
+    },
+    execute: kb.tool_kb_get_item,
   },
 
   // ── Web fetch ──────────────────────────────────────────────────────────

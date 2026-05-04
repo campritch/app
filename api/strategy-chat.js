@@ -3,6 +3,8 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { tools, executeTool } from './_tools/index.js';
+import { listManifest as listKbManifest } from './_tools/kb.js';
+import { listCachedDetailed as listFathomManifest } from './_tools/fathom.js';
 import { listCachedDetailed } from './_tools/fathom.js';
 
 const MODEL = 'claude-opus-4-7';
@@ -72,20 +74,25 @@ export default async function handler(req, res) {
   // Load the saved transcript manifest so the agent always knows what's
   // available without needing to tool-call list_cached. Failure is non-fatal.
   let savedTranscripts = [];
+  let kbItems = [];
   try {
-    const cache = await listCachedDetailed();
+    const [cache, kb] = await Promise.all([
+      listCachedDetailed().catch(() => ({ items: [] })),
+      listKbManifest().catch(() => []),
+    ]);
     savedTranscripts = (cache.items || []).map((it) => ({
       id: it.id,
       title: it.title || null,
       date: it.date || null,
       attendees: it.attendees || [],
     }));
+    kbItems = kb || [];
   } catch (e) {
-    console.warn('loading saved transcripts for context failed', e);
+    console.warn('loading saved manifests for context failed', e);
   }
 
   // Build the context block from user inputs. Cached at block level so follow-ups are cheap.
-  const contextBlock = buildContextBlock({ strategy, notionLinks, supp, dateRange, priorSummaries, savedTranscripts });
+  const contextBlock = buildContextBlock({ strategy, notionLinks, supp, dateRange, priorSummaries, savedTranscripts, kbItems });
 
   const workingMessages = [
     ...(contextBlock ? [{ role: 'user', content: [{ type: 'text', text: contextBlock, cache_control: { type: 'ephemeral' } }] }] : []),
@@ -152,7 +159,7 @@ export default async function handler(req, res) {
   }
 }
 
-function buildContextBlock({ strategy, notionLinks, supp, dateRange, priorSummaries, savedTranscripts }) {
+function buildContextBlock({ strategy, notionLinks, supp, dateRange, priorSummaries, savedTranscripts, kbItems }) {
   const parts = [];
   if (Array.isArray(savedTranscripts) && savedTranscripts.length) {
     const lines = savedTranscripts.map((t) => {
@@ -161,6 +168,16 @@ function buildContextBlock({ strategy, notionLinks, supp, dateRange, priorSummar
       return `- ${when} · ${t.title || '(no title)'} · id=${t.id}${who ? ` · with ${who}` : ''}`;
     });
     parts.push(`## Saved transcripts (${savedTranscripts.length})\n\nThese transcripts are already cached and available. Call fathom_get_transcript with the id to read any of them. Assume Cam wants you to consider ALL of these unless he names specific ones.\n\n${lines.join('\n')}`);
+  }
+  if (Array.isArray(kbItems) && kbItems.length) {
+    const lines = kbItems.map((it) => {
+      const when = it.uploaded_at ? new Date(it.uploaded_at).toISOString().slice(0, 10) : '—';
+      const kb = it.bytes ? `${Math.round(it.bytes / 1024)}kb` : '';
+      const note = it.notes ? ` · ${it.notes}` : '';
+      const prev = it.preview ? `\n   preview: ${it.preview.slice(0, 240).replace(/\n/g, ' ')}…` : '';
+      return `- ${when} · ${it.name} · type=${it.type} · ${kb} · id=${it.id}${note}${prev}`;
+    });
+    parts.push(`## Knowledge bank (${kbItems.length} files Cam has uploaded)\n\nFiles Cam has saved as persistent context: documents, exports, screenshots, anything. Pull a body via kb_get_item({id}) only when needed. Text/CSV/JSON items have a short preview inline; images and PDFs require kb_get_item to actually inspect.\n\n${lines.join('\n')}`);
   }
   if (strategy && strategy.trim()) {
     parts.push(`## Current business strategy (Cam's words)\n\n${strategy.trim()}`);
