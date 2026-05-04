@@ -150,6 +150,12 @@ input, textarea, select { font-family: inherit; }
 .tx-row .row-acts .v:hover { color: var(--text); border-color: var(--accent); }
 .tx-row .row-acts .d:hover { color: var(--bad); border-color: var(--bad); }
 
+.tx-modal-status { padding: 12px 20px; border-top: 1px solid var(--line); background: var(--surface-2); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); display: flex; align-items: center; gap: 10px; }
+.tx-modal-status.running { color: var(--warn); }
+.tx-modal-status.ok { color: var(--good); }
+.tx-modal-status.err { color: var(--bad); }
+.tx-modal-status .spin { width: 12px; height: 12px; border: 2px solid var(--line); border-top-color: var(--warn); border-radius: 50%; animation: tx-spin 0.8s linear infinite; flex-shrink: 0; }
+@keyframes tx-spin { to { transform: rotate(360deg); } }
 .tx-modal-foot { padding: 14px 20px; border-top: 1px solid var(--line); display: flex; gap: 10px; flex-shrink: 0; background: var(--surface); }
 .tx-modal-foot button { flex: 1; background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; font-weight: 600; }
 .tx-modal-foot .tx-more:hover { color: var(--text); border-color: var(--text-dim); }
@@ -228,15 +234,15 @@ input, textarea, select { font-family: inherit; }
 .msg .who { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 6px; display: flex; gap: 10px; align-items: center; }
 .msg .who .tag { color: var(--accent); }
 .msg.user .who .tag { color: var(--text); }
-.msg .body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Helvetica, Arial, sans-serif; font-size: 13px; line-height: 1.55; color: var(--text); word-wrap: break-word; letter-spacing: 0; }
-.msg.user .body { background: var(--surface); border-left: 2px solid var(--accent); padding: 9px 13px; white-space: pre-wrap; }
+.msg .body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Helvetica, Arial, sans-serif; font-size: 13px; line-height: 1.55; color: var(--text); word-wrap: break-word; letter-spacing: 0; font-weight: 380; }
+.msg.user .body { background: var(--surface); border-left: 2px solid var(--accent); padding: 9px 13px; white-space: pre-wrap; font-weight: 380; }
 .msg .body p { margin-bottom: 9px; }
 .msg .body p:last-child { margin-bottom: 0; }
-.msg .body h1, .msg .body h2, .msg .body h3 { font-family: inherit; font-weight: 600; margin: 14px 0 6px; line-height: 1.35; letter-spacing: -0.005em; color: var(--text); }
+.msg .body h1, .msg .body h2, .msg .body h3 { font-family: inherit; font-weight: 540; margin: 14px 0 6px; line-height: 1.35; letter-spacing: -0.005em; color: var(--text); }
 .msg .body h1:first-child, .msg .body h2:first-child, .msg .body h3:first-child { margin-top: 0; }
 .msg .body h1 { font-size: 15px; }
 .msg .body h2 { font-size: 14px; }
-.msg .body h3 { font-size: 13px; color: var(--text); font-weight: 600; }
+.msg .body h3 { font-size: 13px; color: var(--text); font-weight: 540; }
 .msg .body ul, .msg .body ol { margin: 4px 0 9px; padding-left: 20px; }
 .msg .body li { margin-bottom: 3px; }
 .msg .body li::marker { color: var(--text-faint); }
@@ -244,7 +250,7 @@ input, textarea, select { font-family: inherit; }
 .msg .body code { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; background: var(--surface-2); padding: 1px 5px; border-radius: 2px; color: var(--text); }
 .msg .body pre { background: var(--surface); border: 1px solid var(--line-soft); padding: 9px 11px; margin: 8px 0; overflow-x: auto; border-radius: 2px; }
 .msg .body pre code { background: none; padding: 0; color: var(--text); font-size: 11.5px; line-height: 1.5; }
-.msg .body strong { color: var(--text); font-weight: 600; }
+.msg .body strong { color: var(--text); font-weight: 540; }
 .msg .body em { color: var(--text); font-style: italic; }
 .msg .body blockquote { border-left: 2px solid var(--line); padding-left: 11px; color: var(--text-dim); margin: 8px 0; }
 .msg .body a { color: var(--accent); text-decoration: none; }
@@ -542,9 +548,10 @@ input, textarea, select { font-family: inherit; }
       </label>
     </div>
     <div class="tx-modal-list" id="tx-list"></div>
+    <div class="tx-modal-status" id="tx-status" hidden></div>
     <div class="tx-modal-foot" id="tx-foot" hidden>
       <button class="tx-more" id="btn-tx-more">Show more</button>
-      <button class="tx-gen" id="btn-tx-gen" disabled>Generate 0 selected</button>
+      <button class="tx-gen" id="btn-tx-gen" disabled>Run &amp; save 0</button>
     </div>
   </div>
 </div>
@@ -1111,40 +1118,58 @@ function renderTxList() {
 }
 
 function updateGenButton() {
-  // Count selected that are NOT already cached (the ones we'd actually transcribe)
-  const toGenerate = [...txSelectedIds].filter((id) => !txCachedById.has(id));
+  // Count selected that are NOT already cached (the ones we'd actually fetch & store)
+  const toRun = [...txSelectedIds].filter((id) => !txCachedById.has(id));
   const btn = document.getElementById('btn-tx-gen');
-  btn.disabled = toGenerate.length === 0;
-  btn.textContent = `Generate ${toGenerate.length} selected`;
+  btn.disabled = toRun.length === 0;
+  btn.textContent = toRun.length === 0 ? 'Run & save' : `Run & save (${toRun.length})`;
+}
+
+function setTxStatus(state, text) {
+  const el = document.getElementById('tx-status');
+  if (!el) return;
+  if (!state) {
+    el.hidden = true;
+    el.className = 'tx-modal-status';
+    el.innerHTML = '';
+    return;
+  }
+  el.hidden = false;
+  el.className = 'tx-modal-status ' + state;
+  el.innerHTML = (state === 'running' ? '<span class="spin"></span>' : '') + escapeHtml(text);
 }
 
 async function generateSelected() {
-  const toGenerate = [...txSelectedIds].filter((id) => !txCachedById.has(id));
-  if (!toGenerate.length) return;
+  const toRun = [...txSelectedIds].filter((id) => !txCachedById.has(id));
+  if (!toRun.length) return;
 
   const titleById = Object.fromEntries(txMeetings.map((m) => [String(m.id), m.title]));
-  const log = document.getElementById('ingest-log');
   const btn = document.getElementById('btn-tx-gen');
   btn.disabled = true;
-  log.className = 'ingest-log';
-  log.textContent = `generating ${toGenerate.length} transcript${toGenerate.length === 1 ? '' : 's'}...`;
+  btn.textContent = `Running… ${toRun.length}`;
+  setTxStatus('running', `Saving ${toRun.length} full transcript${toRun.length === 1 ? '' : 's'} to your library… (~1–3s each, please don't close this)`);
 
   try {
     const res = await fetch('/api/fathom-ingest', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password, meeting_ids: toGenerate, titles: titleById }),
+      body: JSON.stringify({ password, meeting_ids: toRun, titles: titleById }),
     });
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `HTTP ${res.status}`); }
     const data = await res.json();
-    log.className = 'ingest-log ok';
-    log.textContent = `done · ${data.ingested} new · ${data.cached_existing} already cached · ${data.errors?.length || 0} errors`;
+    const errs = data.errors?.length || 0;
+    if (errs && data.ingested === 0) {
+      setTxStatus('err', `Failed: ${data.errors[0]?.error || 'unknown'}`);
+    } else {
+      setTxStatus('ok', `Saved ${data.ingested} transcript${data.ingested === 1 ? '' : 's'}${data.cached_existing ? ` · ${data.cached_existing} already saved` : ''}${errs ? ` · ${errs} error${errs === 1 ? '' : 's'}` : ''}`);
+    }
     txSelectedIds.clear();
-    loadTranscripts();
+    await loadTranscripts();
+    setTimeout(() => setTxStatus(null), 6000);
   } catch (err) {
-    log.className = 'ingest-log err';
-    log.textContent = `failed: ${err.message}`;
+    setTxStatus('err', `Failed: ${err.message}`);
     btn.disabled = false;
+    btn.textContent = `Run & save (${toRun.length})`;
   }
 }
 
@@ -1750,8 +1775,11 @@ async function send() {
         if (evt === 'text') {
           accumulated += data.delta;
           pending.content = accumulated;
+          // Stick-to-bottom: only auto-scroll if the user was already near the bottom.
+          // Threshold of 60px gives wiggle room for the cursor + line-height.
+          const wasAtBottom = (stream.scrollHeight - stream.scrollTop - stream.clientHeight) < 60;
           bodyEl.innerHTML = mdToHtml(accumulated) + '<span class="cursor"></span>';
-          stream.scrollTop = stream.scrollHeight;
+          if (wasAtBottom) stream.scrollTop = stream.scrollHeight;
         } else if (evt === 'tool_start') {
           currentToolStart = { id: data.id, name: data.name };
         } else if (evt === 'tool_call') {
