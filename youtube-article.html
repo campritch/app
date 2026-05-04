@@ -307,6 +307,15 @@
     }
     .ig-caption-copy:hover { background: var(--white); }
 
+    /* ── Mode tabs ── */
+    .mode-tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+    .mode-tab {
+      height: 30px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--border);
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      background: none; cursor: pointer; transition: all 0.12s;
+    }
+    .mode-tab.active { background: var(--dark); color: #fff; border-color: var(--dark); }
+
     /* ── Transcript paste fallback ── */
     .paste-box { margin-top: 18px; display: none; }
     .paste-box__hint {
@@ -315,14 +324,14 @@
     .paste-box__hint strong { color: var(--text-primary); }
     .paste-box__hint a { color: var(--coral); font-weight: 600; text-decoration: none; }
     .paste-box__hint a:hover { text-decoration: underline; }
-    #transcript-paste {
-      width: 100%; height: 110px; padding: 12px 14px;
+    #transcript-paste, #article-paste {
+      width: 100%; height: 140px; padding: 12px 14px;
       border: 1px solid var(--border); border-radius: 10px;
       font-family: inherit; font-size: 13px; line-height: 1.5; color: var(--text-primary);
-      resize: vertical; outline: none; transition: border-color 0.15s;
+      resize: vertical; outline: none; transition: border-color 0.15s; box-sizing: border-box;
     }
-    #transcript-paste:focus { border-color: var(--dark); }
-    #transcript-paste::placeholder { color: var(--grey-1); }
+    #transcript-paste:focus, #article-paste:focus { border-color: var(--dark); }
+    #transcript-paste::placeholder, #article-paste::placeholder { color: var(--grey-1); }
   </style>
 </head>
 <body>
@@ -339,15 +348,37 @@
 
   <!-- Input -->
   <div class="card input-card">
-    <h1>YouTube to Article</h1>
-    <p>Paste a YouTube URL — fetches the transcript, streams a polished article, and generates a branded thumbnail.</p>
-    <div class="input-row">
-      <input id="url-input" class="url-input" type="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" />
-      <button class="btn-dark" id="generate-btn" onclick="generate()">
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M6.5 2l4.5 4.5-4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Generate
-      </button>
+    <h1>Content to Assets</h1>
+    <p>Turn a YouTube video or your own article into a polished article, branded Instagram carousel, and YouTube thumbnail.</p>
+
+    <!-- Mode tabs -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tab-yt" onclick="switchMode('yt')">YouTube URL</button>
+      <button class="mode-tab" id="tab-article" onclick="switchMode('article')">Paste article</button>
     </div>
+
+    <!-- YouTube mode -->
+    <div id="mode-yt">
+      <div class="input-row">
+        <input id="url-input" class="url-input" type="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" />
+        <button class="btn-dark" id="generate-btn" onclick="generate()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M6.5 2l4.5 4.5-4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Generate
+        </button>
+      </div>
+    </div>
+
+    <!-- Paste article mode -->
+    <div id="mode-article" style="display:none;">
+      <textarea id="article-paste" placeholder="Paste your article or LinkedIn post here…"></textarea>
+      <div style="margin-top:10px;">
+        <button class="btn-dark" id="article-btn" onclick="generateFromArticle()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M6.5 2l4.5 4.5-4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Generate slides
+        </button>
+      </div>
+    </div>
+
     <div class="status" id="status" style="display:none;"></div>
 
     <!-- Shown only when auto-fetch fails -->
@@ -536,7 +567,8 @@ Return ONLY this JSON, no other text:
     { "eyebrow": "...", "headline": "...", "body": "...", "bg": "navy" },
     { "eyebrow": "...", "headline": "...", "body": "...", "bg": "white" }
   ],
-  "caption": "..."
+  "caption": "...",
+  "thumbnail": { "line1": "3-6 WORD CONTEXT PHRASE", "line2": "2-4 WORD HOOK" }
 }
 
 Transcript:
@@ -720,6 +752,55 @@ async function generateFromPaste() {
   const videoId = extractVideoId(url) || 'unknown';
   document.getElementById('paste-box').style.display = 'none';
   await runGeneration(transcript, videoId);
+}
+
+// ── Mode switcher ────────────────────────────────────────────────────────────
+function switchMode(mode) {
+  document.getElementById('mode-yt').style.display      = mode === 'yt'      ? 'block' : 'none';
+  document.getElementById('mode-article').style.display = mode === 'article' ? 'block' : 'none';
+  document.getElementById('tab-yt').classList.toggle('active',      mode === 'yt');
+  document.getElementById('tab-article').classList.toggle('active', mode === 'article');
+}
+
+// ── Generate from pasted article (skips article rewrite, goes straight to slides) ──
+async function generateFromArticle() {
+  const articleText = document.getElementById('article-paste').value.trim();
+  if (!articleText) return;
+
+  const btn = document.getElementById('article-btn');
+  btn.disabled = true;
+  document.getElementById('ig-card').style.display = 'none';
+  document.getElementById('thumb-card').style.display = 'none';
+  document.getElementById('claude-card').style.display = 'none';
+
+  showStatus('loading', 'Generating slides…');
+
+  const key = await getKey();
+  if (!key) { showStatus('error', 'API key not found.'); btn.disabled = false; return; }
+
+  const igData = await generateInstagram(articleText, key);
+  if (!igData) { showStatus('error', 'Slide generation failed — try again.'); btn.disabled = false; return; }
+
+  renderSlides(igData);
+
+  // Pre-fill thumbnail from IG data if available
+  if (igData.thumbnail) {
+    const l1 = (igData.thumbnail.line1 || '').toUpperCase();
+    const l2 = (igData.thumbnail.line2 || '').toUpperCase();
+    thumbData.line1 = l1; thumbData.line2 = l2;
+    document.getElementById('t-line1').value = l1;
+    document.getElementById('t-line2').value = l2;
+    document.getElementById('thumb-card').style.display = 'block';
+    regenThumb();
+  }
+
+  // Store article for Claude button
+  rawMarkdown = articleText;
+  document.getElementById('claude-card').style.display = 'block';
+
+  showStatus('', '');
+  document.getElementById('status').style.display = 'none';
+  btn.disabled = false;
 }
 
 async function generate() {
