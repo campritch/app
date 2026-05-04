@@ -6,127 +6,104 @@
   <title>SpotsNow Wiki</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
       --navy: #17212b;
       --coral: #ff6267;
-      --dark: #0e1323;
       --grey-1: #8a95a3;
       --text-primary: #17212b;
       --text-secondary: #5a6472;
-      --border: #C5CBD5;
       --border-light: #dee0e4;
-      --white: #ffffff;
-      --bg-page: #fafafa;
-      --pill-bg: #f3f4f6;
+      --link: #1a4ea6;
+      --link-visited: #6b3aa0;
     }
 
     *, *::before, *::after { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      font-size: 14px; line-height: 1.5;
-      color: var(--dark); background: var(--white);
+      font-size: 14px; line-height: 1.55;
+      color: var(--text-primary); background: #ffffff;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* NAV */
+    /* TOP BAR */
     .top-bar {
       position: sticky; top: 0; z-index: 200;
-      height: 74px; display: flex; align-items: center; justify-content: space-between;
-      padding: 0 32px; background: var(--white);
+      height: 64px; display: flex; align-items: center;
+      padding: 0 24px; background: #fff;
       border-bottom: 1px solid var(--border-light);
     }
     .top-bar__left { display: flex; align-items: center; gap: 12px; }
     .top-bar__logo { display: flex; align-items: center; text-decoration: none; }
-    .top-bar__logo img { height: 26px; width: auto; }
-    .top-bar__divider { width: 1px; height: 20px; background: var(--border-light); }
+    .top-bar__logo img { height: 24px; width: auto; }
+    .top-bar__divider { width: 1px; height: 18px; background: var(--border-light); }
     .top-bar__title { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
 
-    /* HERO */
-    .hero {
-      background: var(--coral);
-      padding: 56px 32px 64px;
-      text-align: center;
-    }
-    .hero h1 {
-      margin: 0 0 10px; font-size: 32px; font-weight: 700;
-      color: var(--white); letter-spacing: -0.5px; line-height: 1.2;
-    }
-    .hero p {
-      margin: 0 auto; color: rgba(255,255,255,0.8);
-      font-size: 15px; max-width: 480px; line-height: 1.6;
-    }
-
-    /* GRID */
+    /* PAGE */
     .page {
-      max-width: 800px; margin: 0 auto;
-      padding: 40px 24px 80px;
+      max-width: 920px; margin: 0 auto;
+      padding: 32px 24px 80px;
     }
-    .page__label {
-      font-size: 12px; font-weight: 600; color: var(--grey-1);
-      text-transform: uppercase; letter-spacing: 0.4px;
-      margin: 0 0 16px;
+    .page__intro {
+      margin: 0 0 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-light);
     }
-    .page__label--spaced { margin-top: 40px; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 16px;
+    .page__intro h1 {
+      margin: 0 0 4px;
+      font-size: 22px; font-weight: 700; color: var(--text-primary);
+      letter-spacing: -0.3px;
+    }
+    .page__intro p {
+      margin: 0; font-size: 13px; color: var(--grey-1);
     }
 
-    /* CARD */
-    .tool-card {
-      display: flex; flex-direction: column;
-      padding: 24px; border-radius: 16px;
-      border: 1px solid var(--border-light);
-      background: var(--white);
-      text-decoration: none; color: inherit;
-      transition: border-color 0.2s, box-shadow 0.2s;
+    /* SECTIONS */
+    .section { margin-bottom: 26px; }
+    .section h2 {
+      margin: 0 0 8px;
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      color: var(--coral);
     }
-    .tool-card:hover {
-      border-color: var(--border);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    .section ul {
+      margin: 0; padding: 0;
+      list-style: none;
+      column-count: 2;
+      column-gap: 32px;
     }
-    .tool-card__icon {
-      width: 44px; height: 44px; border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 16px; font-size: 20px;
+    .section li {
+      break-inside: avoid;
+      padding: 4px 0;
+      font-size: 14px;
+      line-height: 1.45;
     }
-    .tool-card__icon--coral { background: rgba(255,98,103,0.1); color: var(--coral); }
-    .tool-card__icon--navy { background: rgba(23,33,43,0.08); color: var(--navy); }
-    .tool-card__icon--green { background: rgba(16,185,129,0.1); color: #10b981; }
-    .tool-card__title-row {
-      display: flex; align-items: center; gap: 8px;
-      margin: 0 0 6px;
+    .section a {
+      color: var(--link);
+      text-decoration: none;
+      font-weight: 600;
     }
-    .tool-card__title {
-      font-size: 15px; font-weight: 600; color: var(--text-primary);
-      margin: 0; letter-spacing: -0.2px;
+    .section a:hover { text-decoration: underline; }
+    .section a:visited { color: var(--link-visited); }
+    .section .desc {
+      color: var(--grey-1);
+      font-size: 12px;
+      font-weight: 400;
     }
-    .tool-card__lock {
-      font-size: 10px; font-weight: 600; color: var(--grey-1);
-      background: var(--pill-bg); border-radius: 6px;
-      padding: 2px 6px; letter-spacing: 0.3px;
-      text-transform: uppercase;
+    .section .lock {
+      display: inline-block;
+      font-size: 9px; font-weight: 600;
+      background: #f3f4f6; color: var(--grey-1);
+      padding: 1px 5px; border-radius: 4px;
+      letter-spacing: 0.3px; text-transform: uppercase;
+      margin-left: 4px; vertical-align: 1px;
     }
-    .tool-card__desc {
-      font-size: 13px; color: var(--grey-1);
-      margin: 0 0 16px; line-height: 1.5; flex: 1;
-    }
-    .tool-card__link {
-      font-size: 12px; font-weight: 600; color: var(--navy);
-      display: inline-flex; align-items: center; gap: 4px;
-    }
-    .tool-card__link svg { transition: transform 0.15s; }
-    .tool-card:hover .tool-card__link svg { transform: translateX(2px); }
 
     @media (max-width: 600px) {
-      .hero { padding: 40px 20px 48px; }
-      .hero h1 { font-size: 26px; }
-      .page { padding: 28px 16px 60px; }
-      .grid { grid-template-columns: 1fr; }
+      .section ul { column-count: 1; }
+      .page { padding: 24px 16px 60px; }
     }
   </style>
 </head>
@@ -142,173 +119,83 @@
   </div>
 </div>
 
-<div class="hero">
-  <h1>SpotsNow Wiki</h1>
-  <p>Tools, guides, and resources for running podcast advertising campaigns.</p>
-</div>
-
 <div class="page">
-  <p class="page__label">Advertiser tools</p>
-  <div class="grid">
 
-    <a class="tool-card" href="/pixel-setup">
-      <div class="tool-card__icon tool-card__icon--navy">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <rect x="2" y="2" width="16" height="16" rx="3" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="tool-card__title-row"><p class="tool-card__title">Magellan Pixel Setup</p></div>
-      <p class="tool-card__desc">Step-by-step guide for installing and configuring your Magellan attribution pixel.</p>
-      <span class="tool-card__link">
-        Open
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </span>
-    </a>
-
-    <a class="tool-card" href="/talking-points">
-      <div class="tool-card__icon tool-card__icon--coral">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M10 2L12 7.5L18 8.5L13.5 12L14.5 18L10 15L5.5 18L6.5 12L2 8.5L8 7.5L10 2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="tool-card__title-row"><p class="tool-card__title">Talking Points Generator</p></div>
-      <p class="tool-card__desc">Auto-generate podcast ad talking points from a SpotsNow campaign URL. AI-powered, editable, and exportable.</p>
-      <span class="tool-card__link">
-        Open
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </span>
-    </a>
-
-    <a class="tool-card" href="/submit-creative">
-      <div class="tool-card__icon tool-card__icon--green">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M10 3v10M5 8l5-5 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M3 15v2a1 1 0 001 1h12a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div class="tool-card__title-row"><p class="tool-card__title">Submit Creative</p></div>
-      <p class="tool-card__desc">Upload ad scripts and creative assets for an upcoming podcast campaign.</p>
-      <span class="tool-card__link">
-        Open
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </span>
-    </a>
-
-    <a class="tool-card" href="/ear-check">
-      <div class="tool-card__icon tool-card__icon--coral">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M10 2a6 6 0 00-6 6v4a3 3 0 003 3h.5a1.5 1.5 0 001.5-1.5V12a2 2 0 012-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <circle cx="13.5" cy="9.5" r="1" fill="currentColor"/>
-        </svg>
-      </div>
-      <div class="tool-card__title-row"><p class="tool-card__title">Ear Check</p></div>
-      <p class="tool-card__desc">Scan podcast transcripts for brand mentions and surface where your ads actually ran.</p>
-      <span class="tool-card__link">
-        Open
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </span>
-    </a>
-
-    <a class="tool-card" href="/youtube-article">
-      <div class="tool-card__icon tool-card__icon--navy">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <rect x="2" y="5" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M9 8l4 2-4 2V8z" fill="currentColor"/>
-        </svg>
-      </div>
-      <div class="tool-card__title-row"><p class="tool-card__title">YouTube → Article</p></div>
-      <p class="tool-card__desc">Turn a YouTube video into a polished long-form article, ready to publish.</p>
-      <span class="tool-card__link">
-        Open
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </span>
-    </a>
-
+  <div class="page__intro">
+    <h1>SpotsNow Wiki</h1>
+    <p>Every page, tool, and draft in one place.</p>
   </div>
 
-  <p class="page__label page__label--spaced">Internal</p>
-  <div class="grid">
-
-    <a class="tool-card" href="/proposal">
-      <div class="tool-card__icon tool-card__icon--navy">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M5 2h7l4 4v12a1 1 0 01-1 1H5a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-          <path d="M12 2v4h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-          <path d="M7 11h6M7 14h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div class="tool-card__title-row"><p class="tool-card__title">Proposal Builder</p></div>
-      <p class="tool-card__desc">Build and preview new advertiser proposals from a media plan.</p>
-      <span class="tool-card__link">
-        Open
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </span>
-    </a>
-
-    <a class="tool-card" href="/ad-ops">
-      <div class="tool-card__icon tool-card__icon--green">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M3 10h4l2-6 2 12 2-6h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="tool-card__title-row"><p class="tool-card__title">Ad Ops</p></div>
-      <p class="tool-card__desc">Campaign manager for tracking brand settings, creative, and live flights.</p>
-      <span class="tool-card__link">
-        Open
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </span>
-    </a>
-
-    <a class="tool-card" href="/chat">
-      <div class="tool-card__icon tool-card__icon--coral">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M3 5a2 2 0 012-2h10a2 2 0 012 2v7a2 2 0 01-2 2H8l-4 3V5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="tool-card__title-row"><p class="tool-card__title">SpotsNow Intelligence</p></div>
-      <p class="tool-card__desc">Chat with SpotsNow data, campaigns, and context in a single conversational UI.</p>
-      <span class="tool-card__link">
-        Open
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </span>
-    </a>
-
-    <a class="tool-card" href="/investors">
-      <div class="tool-card__icon tool-card__icon--green">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <rect x="2" y="4" width="16" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M7 18h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <path d="M6 11l3-3 2 2 3-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="tool-card__title-row"><p class="tool-card__title">Investor Pitch Deck</p></div>
-      <p class="tool-card__desc">Latest seed round pitch deck for SpotsNow.</p>
-      <span class="tool-card__link">
-        Open
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </span>
-    </a>
-
+  <div class="section">
+    <h2>Advertiser tools</h2>
+    <ul>
+      <li><a href="/pixel-setup">Magellan Pixel Setup</a> &middot; <span class="desc">Install + configure attribution pixel</span></li>
+      <li><a href="/talking-points">Talking Points Generator</a> &middot; <span class="desc">Auto-draft host talking points from a campaign URL</span></li>
+      <li><a href="/submit-creative">Submit Creative</a> &middot; <span class="desc">Upload scripts + assets for an upcoming flight</span></li>
+      <li><a href="/ear-check">Ear Check</a> &middot; <span class="desc">Scan transcripts for brand mentions</span></li>
+      <li><a href="/youtube-article">YouTube to Article</a> &middot; <span class="desc">Turn a video into a publishable article</span></li>
+    </ul>
   </div>
+
+  <div class="section">
+    <h2>Internal ops</h2>
+    <ul>
+      <li><a href="/ad-ops">Ad Ops</a> &middot; <span class="desc">Brand + flight manager</span></li>
+      <li><a href="/proposal">Proposal Builder</a> &middot; <span class="desc">Build new advertiser proposals</span></li>
+      <li><a href="/chat">SpotsNow Intelligence</a> &middot; <span class="desc">Chat with company data + context</span></li>
+      <li><a href="/bi">BI Dashboard</a><span class="lock">Locked</span> &middot; <span class="desc">GTM, revenue, pipeline metrics</span></li>
+      <li><a href="/media-plans.html">Media Plans</a> &middot; <span class="desc">Internal media plan tool</span></li>
+      <li><a href="/ceo-dashboard.html">CEO Dashboard</a> &middot; <span class="desc">Single-pane operating view</span></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Strategy &amp; fundraising</h2>
+    <ul>
+      <li><a href="/strategy">Strategy Agent</a><span class="lock">Locked</span> &middot; <span class="desc">Outreach call brain. Fathom + company context</span></li>
+      <li><a href="/investors">Investor Pitch Deck</a> &middot; <span class="desc">Latest seed deck</span></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Brand &amp; marketing</h2>
+    <ul>
+      <li><a href="/brand">Brand Guidelines</a> &middot; <span class="desc">Colors, type, hand-drawn accents</span></li>
+      <li><a href="/managed">Managed (Ad Ops as a Service)</a> &middot; <span class="desc">Public landing for SpotsNow Managed</span></li>
+      <li><a href="/partners">Partners</a> &middot; <span class="desc">Show partner program landing</span></li>
+      <li><a href="/titans">Titans of Advertising</a> &middot; <span class="desc">Long-form brand piece</span></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>VC &amp; founder programs</h2>
+    <ul>
+      <li><a href="/vcfounderprogram">VC Founder Program</a> &middot; <span class="desc">Original landing, a16z angle</span></li>
+      <li><a href="/vcoffer">VC Offer</a> &middot; <span class="desc">Carbon copy with a16z removed</span></li>
+      <li><a href="/vc-offer">VC Offer (legacy)</a> &middot; <span class="desc">Older /vc-offer route</span></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Homepage drafts</h2>
+    <ul>
+      <li><a href="/home.html">home.html</a></li>
+      <li><a href="/homepage.html">homepage.html</a></li>
+      <li><a href="/new-homepage.html">new-homepage.html</a></li>
+      <li><a href="/landing.html">landing.html</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Design references &amp; mocks</h2>
+    <ul>
+      <li><a href="/campaign.html">Campaign (design system base)</a> &middot; <span class="desc">Canonical SpotsNow component library</span></li>
+      <li><a href="/recent-episodes.html">Recent Episodes</a></li>
+      <li><a href="/empty-state.html">Empty State</a></li>
+      <li><a href="/profile-card-mock.html">Profile Card Mock</a></li>
+    </ul>
+  </div>
+
 </div>
 
 </body>
