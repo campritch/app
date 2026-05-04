@@ -542,15 +542,19 @@ Return ONLY this JSON, no other text:
 Transcript:
 ${transcript}`;
 
-const ARTICLE_PROMPT = (transcript) => `You are an expert writer and journalist. Below is the transcript of a YouTube video.
+const ARTICLE_PROMPT = (transcript) => `You are ghostwriting a first-person article for Cam Pritchard, co-founder of SpotsNow. Below is a transcript of Cam speaking.
 
-Turn it into a well-structured, engaging article:
-- Compelling headline
-- Strong lede that hooks the reader
-- Clear sections with subheadings where appropriate
-- Readable style — not a transcript dump
-- Preserve key ideas, quotes, and insights
-- Brief conclusion
+Turn it into a punchy, persuasive first-person article — written as if Cam authored it himself.
+
+Rules:
+- Write entirely in first person ("I", "we", "my"). Never say "in this video", "the speaker", "Cam says", or any third-person framing.
+- No meta-references to the transcript or video. Just the ideas, stated directly.
+- Voice: direct, founder energy, short sentences, no corporate hedging. Cam says what he means.
+- Structure: strong hook → clear argument with subheadings → concrete takeaways → punchy close
+- Headline should be bold and opinionated — not neutral
+- Lede should make a provocative or counterintuitive claim that pulls the reader in
+- Use "I" for personal experience, "you" to address the reader directly
+- Keep it tight — cut anything that doesn't add to the argument
 
 At the very end, after the article, output this exact block:
 ---THUMBNAIL---
