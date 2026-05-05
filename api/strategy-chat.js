@@ -94,9 +94,14 @@ export default async function handler(req, res) {
   // Build the context block from user inputs. Cached at block level so follow-ups are cheap.
   const contextBlock = buildContextBlock({ strategy, notionLinks, supp, dateRange, priorSummaries, savedTranscripts, kbItems });
 
+  // Convert any client-side attachments on user messages into Claude content
+  // blocks. Images become vision blocks; other files come through as inline
+  // text or descriptors so the agent at least knows they exist.
+  const expandedMessages = (messages || []).map((m) => expandAttachments(m));
+
   const workingMessages = [
     ...(contextBlock ? [{ role: 'user', content: [{ type: 'text', text: contextBlock, cache_control: { type: 'ephemeral' } }] }] : []),
-    ...messages,
+    ...expandedMessages,
   ];
 
   try {
@@ -157,6 +162,38 @@ export default async function handler(req, res) {
     sseWrite(res, 'error', { message: String(err?.message || err) });
     res.end();
   }
+}
+
+// Map a client-side message with attachments into a Claude content-block array.
+// - Images → image block (base64 source) so the agent can actually see screenshots
+// - Text-y files (text/csv/json) → inline text block with the body
+// - Other binary → text descriptor so the agent at least knows it's there
+function expandAttachments(msg) {
+  if (!msg || msg.role !== 'user' || !Array.isArray(msg.attachments) || !msg.attachments.length) {
+    return msg;
+  }
+  const blocks = [];
+  for (const a of msg.attachments) {
+    if (!a || !a.body_b64) continue;
+    if (a.type === 'image' && a.mime?.startsWith('image/')) {
+      blocks.push({
+        type: 'image',
+        source: { type: 'base64', media_type: a.mime, data: a.body_b64 },
+      });
+      blocks.push({ type: 'text', text: `[Attached image: ${a.name}]` });
+      continue;
+    }
+    if (['text', 'csv', 'json'].includes(a.type)) {
+      const body = Buffer.from(a.body_b64, 'base64').toString('utf-8');
+      blocks.push({ type: 'text', text: `[Attached ${a.type} file: ${a.name}]\n\n${body.slice(0, 100_000)}${body.length > 100_000 ? '\n\n[truncated]' : ''}` });
+      continue;
+    }
+    // Binary fallback (pdf, other) — describe so the agent knows; agent can ask Cam to save it to KB if needed
+    const kb = Math.round((a.body_b64.length * 0.75) / 1024);
+    blocks.push({ type: 'text', text: `[Attached ${a.type} file: ${a.name} · ${a.mime} · ${kb}kb · only available this turn unless saved to knowledge bank]` });
+  }
+  if (msg.content && msg.content.trim()) blocks.push({ type: 'text', text: msg.content });
+  return { role: 'user', content: blocks };
 }
 
 function buildContextBlock({ strategy, notionLinks, supp, dateRange, priorSummaries, savedTranscripts, kbItems }) {

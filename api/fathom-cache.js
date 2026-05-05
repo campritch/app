@@ -2,7 +2,7 @@
 // Actions: list (metadata) | view (single transcript body) | delete (single) | clear (all) | rebuild (manifest)
 // Password-gated via STRATEGY_PASSWORD.
 
-import { listCachedDetailed, readCached, deleteCached, clearCached, rebuildManifest } from './_tools/fathom.js';
+import { listCachedDetailed, readCached, deleteCached, clearCached, rebuildManifest, enrichCached } from './_tools/fathom.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   if (!expected) return res.status(500).json({ error: 'STRATEGY_PASSWORD not configured' });
   if (!process.env.BLOB_READ_WRITE_TOKEN) return res.status(500).json({ error: 'BLOB_READ_WRITE_TOKEN not configured' });
 
-  const { password, action, id } = req.body || {};
+  const { password, action, id, enrichments } = req.body || {};
   if (password !== expected) return res.status(401).json({ error: 'bad password' });
 
   try {
@@ -23,6 +23,9 @@ export default async function handler(req, res) {
     }
     if (action === 'rebuild') {
       return res.status(200).json(await rebuildManifest());
+    }
+    if (action === 'enrich') {
+      return res.status(200).json(await enrichCached({ enrichments }));
     }
     if (action === 'view') {
       if (!id) return res.status(400).json({ error: 'id required' });

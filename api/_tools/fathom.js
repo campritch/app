@@ -39,7 +39,7 @@ async function fathomGet(path, params) {
 // Pagination uses cursor + next_cursor. Transcript lives at /recordings/{id}/transcript.
 // Meeting objects expose the recording id via recording.id (fallback to recording_id / id).
 
-const PAGE_CAP = 100; // 100 pages × Fathom's page size — covers multi-year history
+const PAGE_CAP = 500; // 500 pages × Fathom's page size — covers multi-year history at 10/page
 
 export async function listMeetings({ from_date, to_date, extra_exclude_patterns = [], include_standups = false }) {
   if (!from_date || !to_date) throw new Error('from_date and to_date required');
@@ -162,6 +162,50 @@ export async function deleteCached(id) {
   if (match) await mod.del(match.url);
   await removeFromManifest(id);
   return { deleted: !!match };
+}
+
+// Patch the cache manifest with title/date/attendees for items that are
+// missing them. Called by the UI after it has fresh meeting metadata to
+// fold into older cached entries that pre-date title-tracking.
+export async function enrichCached({ enrichments }) {
+  if (!Array.isArray(enrichments) || !enrichments.length) return { enriched: 0 };
+  const manifest = (await readBlob(MANIFEST_KEY)) || { items: [] };
+  const items = Array.isArray(manifest.items) ? manifest.items : [];
+  let enriched = 0;
+  for (const e of enrichments) {
+    if (!e || !e.id) continue;
+    const idx = items.findIndex((x) => String(x.id) === String(e.id));
+    if (idx < 0) continue;
+    const cur = items[idx];
+    let changed = false;
+    if (e.title && !cur.title) { cur.title = e.title; changed = true; }
+    if (e.date && !cur.date) { cur.date = e.date; changed = true; }
+    if (Array.isArray(e.attendees) && e.attendees.length && (!cur.attendees || !cur.attendees.length)) {
+      cur.attendees = e.attendees;
+      changed = true;
+    }
+    if (changed) {
+      items[idx] = cur;
+      enriched += 1;
+      // Also patch the underlying transcript blob so future reads have it too
+      try {
+        const record = await readBlob(`fathom/${e.id}.json`);
+        if (record) {
+          if (e.title && !record.title) record.title = e.title;
+          if (e.date && !record.date) record.date = e.date;
+          if (Array.isArray(e.attendees) && e.attendees.length && !record.attendees) record.attendees = e.attendees;
+          await writeBlob(`fathom/${e.id}.json`, record);
+        }
+      } catch (err) {
+        console.warn('enrich transcript blob failed', e.id, err);
+      }
+    }
+  }
+  if (enriched) {
+    items.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    await writeBlob(MANIFEST_KEY, { items, updated_at: new Date().toISOString() });
+  }
+  return { enriched };
 }
 
 export async function clearCached() {

@@ -124,6 +124,9 @@ input, textarea, select { font-family: inherit; }
 .tx-modal .tx-sel-bar { display: flex; gap: 4px; }
 .tx-modal .tx-sel-bar button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 5px 8px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border-radius: 2px; flex: 1; }
 .tx-modal .tx-sel-bar button:hover { color: var(--text); border-color: var(--accent); }
+.tx-modal .tx-search { width: 100%; background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 8px 12px; font-family: inherit; font-size: 12px; }
+.tx-modal .tx-search:focus { outline: none; border-color: var(--accent); }
+.tx-modal .tx-search::placeholder { color: var(--text-faint); }
 .tx-modal .tx-toggle { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; }
 .tx-modal .tx-toggle input { accent-color: var(--accent); cursor: pointer; width: 13px; height: 13px; }
 .tx-modal .tx-toggle:hover { color: var(--text); }
@@ -311,7 +314,24 @@ input, textarea, select { font-family: inherit; }
 
 /* ── Input dock ── */
 .dock { border-top: 1px solid var(--line); padding: 14px 32px 18px; background: var(--surface); }
-.dock .box { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; max-width: 880px; }
+.dock .box { display: grid; grid-template-columns: 36px 1fr auto; gap: 8px; align-items: end; max-width: 880px; }
+.dock .attach-btn { background: transparent; border: 1px solid var(--line); color: var(--text-dim); font-size: 16px; height: 44px; cursor: pointer; padding: 0; transition: border-color 0.1s, color 0.1s; }
+.dock .attach-btn:hover { color: var(--text); border-color: var(--accent); }
+.dock .attach-bar { display: flex; flex-wrap: wrap; gap: 6px; max-width: 880px; margin-bottom: 8px; }
+.dock .attach-bar:empty { display: none; }
+.dock .attach-chip { display: inline-flex; align-items: center; gap: 8px; background: var(--surface-2); border: 1px solid var(--line); padding: 4px 8px 4px 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text); border-radius: 2px; max-width: 280px; }
+.dock .attach-chip .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+.dock .attach-chip .typ { color: var(--text-faint); }
+.dock .attach-chip .save { display: inline-flex; align-items: center; gap: 4px; color: var(--text-dim); cursor: pointer; padding: 0 4px; }
+.dock .attach-chip .save input { accent-color: var(--accent); width: 11px; height: 11px; cursor: pointer; }
+.dock .attach-chip .save:hover { color: var(--text); }
+.dock .attach-chip .x { background: transparent; border: none; color: var(--text-faint); cursor: pointer; padding: 0 2px; font-size: 14px; line-height: 1; }
+.dock .attach-chip .x:hover { color: var(--bad); }
+
+/* Render attachments inside user messages */
+.msg.user .attachments { margin-bottom: 6px; display: flex; flex-wrap: wrap; gap: 6px; }
+.msg.user .attachments .a-img { max-width: 200px; max-height: 140px; display: block; border: 1px solid var(--line); border-radius: 2px; cursor: pointer; }
+.msg.user .attachments .a-file { display: inline-flex; align-items: center; gap: 6px; background: var(--surface-2); border: 1px solid var(--line); padding: 3px 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text); border-radius: 2px; }
 .dock textarea { background: var(--bg); color: var(--text); border: 1px solid var(--line); padding: 10px 14px; font-size: 14px; resize: none; min-height: 44px; max-height: 200px; font-family: inherit; line-height: 1.5; }
 .dock textarea:focus { outline: none; border-color: var(--accent); }
 .dock button { background: var(--accent); color: #fff; border: none; padding: 10px 18px; font-weight: 600; font-size: 13px; height: 44px; }
@@ -467,7 +487,10 @@ input, textarea, select { font-family: inherit; }
           <span class="pill" id="ctx-tx-pill">0 transcripts</span>
           <span>the agent sees every saved transcript by default · <a id="ctx-open-library">manage library</a></span>
         </div>
+        <div class="attach-bar" id="attach-bar"></div>
         <div class="box">
+          <button id="btn-attach" class="attach-btn" title="Attach a file or image (you can also paste images)">📎</button>
+          <input type="file" id="in-attach" multiple style="display:none">
           <textarea id="in-msg" placeholder="Ask the agent..." rows="1"></textarea>
           <button id="btn-send" class="send-btn">Send</button>
           <button id="btn-stop" class="stop-btn">Stop</button>
@@ -560,6 +583,7 @@ input, textarea, select { font-family: inherit; }
         <input type="date" id="tx-to" title="Custom to">
         <button id="btn-tx-custom">Apply</button>
       </div>
+      <input type="search" id="tx-search" class="tx-search" placeholder="Search by title or attendee (e.g. lex, mj@..., rella)" autocomplete="off">
       <div class="tx-sel-bar">
         <button id="btn-tx-sel-unsaved">Select all unsaved</button>
         <button id="btn-tx-sel-all">Select all</button>
@@ -1004,6 +1028,11 @@ function attachInputs() {
     txShowStandups = e.target.checked;
     loadTranscripts();
   });
+  document.getElementById('tx-search').addEventListener('input', (e) => {
+    txSearch = e.target.value.trim().toLowerCase();
+    txDisplayCount = 50; // reset pagination when search changes
+    renderTxList();
+  });
   document.getElementById('btn-tx-open').addEventListener('click', openTxDrawer);
   document.getElementById('tx-drawer-close').addEventListener('click', closeTxDrawer);
   document.getElementById('tx-modal-bg').addEventListener('click', (e) => { if (e.target.id === 'tx-modal-bg') closeTxDrawer(); });
@@ -1015,6 +1044,9 @@ function attachInputs() {
   attachKbDragDrop();
   document.getElementById('ctx-open-library').addEventListener('click', openTxDrawer);
   document.getElementById('btn-stop').addEventListener('click', stopGeneration);
+  document.getElementById('btn-attach').addEventListener('click', () => document.getElementById('in-attach').click());
+  document.getElementById('in-attach').addEventListener('change', onAttachPick);
+  document.getElementById('in-msg').addEventListener('paste', onPaste);
   document.getElementById('modal-close').addEventListener('click', closeModal);
   document.getElementById('modal-bg').addEventListener('click', (e) => { if (e.target.id === 'modal-bg') closeModal(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closePublishModal(); closePromptModal(); closeTxDrawer(); closeKbModal(); } });
@@ -1055,6 +1087,7 @@ function computeRangeDates(range) {
 let txCustomFrom = '';
 let txCustomTo = '';
 let txShowStandups = false;
+let txSearch = '';
 
 async function loadTranscripts() {
   if (txLoading || !password) return;
@@ -1095,11 +1128,47 @@ async function loadTranscripts() {
 
     txDisplayCount = 50;
     renderTxList();
+
+    // Backfill: any cached items missing title that match a freshly-fetched meeting
+    // get their title/date/attendees patched in. One-shot per load, fire-and-forget.
+    enrichMissingTitles(cacheItems, listData.meetings || []).catch((e) => console.warn('enrich failed', e));
   } catch (err) {
     document.getElementById('tx-list').innerHTML = `<div class="empty">Failed: ${escapeHtml(err.message)}</div>`;
     sum.textContent = 'error';
   } finally {
     txLoading = false;
+  }
+}
+
+async function enrichMissingTitles(cacheItems, meetings) {
+  if (!cacheItems?.length || !meetings?.length) return;
+  const meetingsById = new Map(meetings.map((m) => [String(m.id), m]));
+  const enrichments = [];
+  for (const it of cacheItems) {
+    const needsTitle = !it.title || String(it.title) === String(it.id);
+    const needsDate = !it.date;
+    const needsAtts = !it.attendees || !it.attendees.length;
+    if (!needsTitle && !needsDate && !needsAtts) continue;
+    const m = meetingsById.get(String(it.id));
+    if (!m) continue;
+    enrichments.push({
+      id: it.id,
+      title: needsTitle ? m.title : undefined,
+      date: needsDate ? m.date : undefined,
+      attendees: needsAtts ? m.attendees : undefined,
+    });
+  }
+  if (!enrichments.length) return;
+  const r = await fetch('/api/fathom-cache', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password, action: 'enrich', enrichments }),
+  });
+  if (!r.ok) return;
+  const data = await r.json();
+  if (data.enriched > 0) {
+    // Refresh the list to show the enriched titles
+    setTimeout(() => loadTranscripts(), 300);
   }
 }
 
@@ -1111,18 +1180,35 @@ function renderTxList() {
   const ctxPill = document.getElementById('ctx-tx-pill');
   const savedCount = [...txCachedById.keys()].length;
   const totalCount = txMeetings.length;
-  const summaryText = `${savedCount} of ${totalCount} saved`;
+
+  // Apply search filter
+  const filtered = txSearch
+    ? txMeetings.filter((m) => {
+        const hay = (
+          (m.title || '') + ' ' +
+          (m.attendees || []).join(' ') + ' ' +
+          (m.recorded_by || '')
+        ).toLowerCase();
+        return hay.includes(txSearch);
+      })
+    : txMeetings;
+
+  const summaryText = txSearch
+    ? `${filtered.length} matching · ${savedCount} of ${totalCount} saved`
+    : `${savedCount} of ${totalCount} saved`;
   sum.textContent = `${savedCount} saved`;
   if (drawerSum) drawerSum.textContent = summaryText;
   if (ctxPill) ctxPill.textContent = savedCount === 1 ? '1 transcript' : `${savedCount} transcripts`;
 
-  if (!totalCount) {
-    el.innerHTML = '<div class="empty">No calls in this range.</div>';
+  if (!filtered.length) {
+    el.innerHTML = txSearch
+      ? `<div class="empty">No calls match "${escapeHtml(txSearch)}". Clear the search to see everything.</div>`
+      : '<div class="empty">No calls in this range.</div>';
     foot.hidden = true;
     return;
   }
 
-  const visible = txMeetings.slice(0, txDisplayCount);
+  const visible = filtered.slice(0, txDisplayCount);
   const rows = visible.map((m) => {
     const id = String(m.id);
     const cached = txCachedById.get(id);
@@ -1166,8 +1252,8 @@ function renderTxList() {
   el.querySelectorAll('[data-del]').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); deleteTx(b.dataset.del); }));
 
   foot.hidden = false;
-  document.getElementById('btn-tx-more').hidden = txDisplayCount >= totalCount;
-  document.getElementById('btn-tx-more').textContent = `Show more (${Math.max(0, totalCount - txDisplayCount)} hidden)`;
+  document.getElementById('btn-tx-more').hidden = txDisplayCount >= filtered.length;
+  document.getElementById('btn-tx-more').textContent = `Show more (${Math.max(0, filtered.length - txDisplayCount)} hidden)`;
   updateGenButton();
 }
 
@@ -1764,7 +1850,30 @@ function renderMessage(m) {
   d.innerHTML = `<div class="who"><span class="tag">${who}</span></div><div class="body"></div>`;
   const body = d.querySelector('.body');
   if (m.role === 'user') {
-    body.textContent = m.content;
+    if (Array.isArray(m.attachments) && m.attachments.length) {
+      const wrap = document.createElement('div');
+      wrap.className = 'attachments';
+      for (const a of m.attachments) {
+        if (a.type === 'image' && a.thumb_b64) {
+          const img = document.createElement('img');
+          img.className = 'a-img';
+          img.src = `data:${a.mime || 'image/png'};base64,${a.thumb_b64}`;
+          img.title = a.name;
+          img.addEventListener('click', () => openModal(a.name, a.mime || 'image', ''));
+          wrap.appendChild(img);
+        } else {
+          const span = document.createElement('span');
+          span.className = 'a-file';
+          span.textContent = `📄 ${a.name}`;
+          wrap.appendChild(span);
+        }
+      }
+      body.appendChild(wrap);
+    }
+    const txt = document.createElement('div');
+    txt.style.whiteSpace = 'pre-wrap';
+    txt.textContent = m.content || '';
+    body.appendChild(txt);
   } else {
     body.innerHTML = mdToHtml(m.content);
   }
@@ -1885,6 +1994,86 @@ function mdToHtml(md) {
     .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
 }
 
+// ── Attachments ──────────────────────────────────────────────────────
+// Items live in JS memory only until send. Each: { name, mime, type, body_b64, save_to_kb }
+// On send: included in the user message payload; if save_to_kb, also POSTed to KB.
+let pendingAttachments = [];
+
+async function onAttachPick(e) {
+  const files = Array.from(e.target.files || []);
+  for (const f of files) await addAttachment(f);
+  e.target.value = '';
+}
+
+async function onPaste(e) {
+  const items = Array.from(e.clipboardData?.items || []);
+  for (const it of items) {
+    if (it.kind === 'file') {
+      const f = it.getAsFile();
+      if (f) await addAttachment(f);
+    }
+  }
+}
+
+async function addAttachment(file) {
+  if (!file) return;
+  if (file.size > 22 * 1024 * 1024) { alert(`"${file.name}" is over 22MB. Use the Knowledge bank to upload larger files.`); return; }
+  const body_b64 = await fileToBase64(file);
+  const mime = file.type || 'application/octet-stream';
+  const type = mime.startsWith('image/') ? 'image'
+    : (file.name.endsWith('.pdf') || mime === 'application/pdf') ? 'pdf'
+    : (file.name.endsWith('.csv') || mime === 'text/csv') ? 'csv'
+    : (file.name.endsWith('.json') || mime === 'application/json') ? 'json'
+    : (mime.startsWith('text/') || /\.(txt|md)$/i.test(file.name)) ? 'text'
+    : 'other';
+  pendingAttachments.push({
+    name: file.name || (type === 'image' ? 'screenshot.png' : 'file'),
+    mime,
+    type,
+    body_b64,
+    save_to_kb: type !== 'image', // images default OFF (user has to opt in); everything else ON
+  });
+  renderAttachBar();
+}
+
+async function persistAttachmentsToKb(attachments) {
+  const flagged = attachments.filter((a) => a.save_to_kb);
+  if (!flagged.length) return;
+  let savedCount = 0;
+  for (const a of flagged) {
+    try {
+      const r = await fetch('/api/kb-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password, name: a.name, mime: a.mime, body_b64: a.body_b64, notes: 'Attached in chat' }),
+      });
+      if (r.ok) savedCount += 1;
+    } catch (err) {
+      console.warn('kb-upload failed', a.name, err);
+    }
+  }
+  if (savedCount) loadKb();
+}
+
+function renderAttachBar() {
+  const bar = document.getElementById('attach-bar');
+  if (!pendingAttachments.length) { bar.innerHTML = ''; return; }
+  bar.innerHTML = pendingAttachments.map((a, i) => {
+    const kb = a.body_b64 ? `${Math.round((a.body_b64.length * 0.75) / 1024)}kb` : '';
+    return `<span class="attach-chip">
+      <span class="typ">${escapeHtml(a.type)}</span>
+      <span class="name" title="${escapeHtml(a.name)}">${escapeHtml(a.name)}</span>
+      <span class="typ">${kb}</span>
+      <label class="save" title="Save to knowledge bank after send so the agent can reuse it later">
+        <input type="checkbox" data-savekb="${i}" ${a.save_to_kb ? 'checked' : ''}> save
+      </label>
+      <button class="x" data-rm="${i}" title="Remove">×</button>
+    </span>`;
+  }).join('');
+  bar.querySelectorAll('[data-rm]').forEach((b) => b.addEventListener('click', () => { pendingAttachments.splice(Number(b.dataset.rm), 1); renderAttachBar(); }));
+  bar.querySelectorAll('[data-savekb]').forEach((cb) => cb.addEventListener('change', () => { pendingAttachments[Number(cb.dataset.savekb)].save_to_kb = cb.checked; }));
+}
+
 // ── Send ──────────────────────────────────────────────────────────────
 let currentAbort = null;
 
@@ -1899,12 +2088,24 @@ async function send() {
   if (streaming) return;
   const ta = document.getElementById('in-msg');
   const text = ta.value.trim();
-  if (!text) return;
+  if (!text && !pendingAttachments.length) return;
+
+  // Snapshot attachments for this turn (we'll persist in the user message + optionally KB)
+  const sendAttachments = pendingAttachments.slice();
+  pendingAttachments = [];
+  renderAttachBar();
+
+  // Build a thumbnail-only copy for storage in conversation history (full b64 never persisted)
+  const persistedAttachments = sendAttachments.map((a) => ({
+    name: a.name, mime: a.mime, type: a.type,
+    thumb_b64: a.type === 'image' ? a.body_b64.slice(0, 200_000) : null, // crude; images under 150kb keep their preview
+    bytes: Math.round(a.body_b64.length * 0.75),
+  }));
 
   const conv = ensureConversation();
-  conv.messages.push({ role: 'user', content: text });
+  conv.messages.push({ role: 'user', content: text, attachments: persistedAttachments });
   // Auto-title from first user message
-  if (conv.title === 'New conversation' || !conv.title) conv.title = text.slice(0, 80).replace(/\s+/g, ' ').trim();
+  if (conv.title === 'New conversation' || !conv.title) conv.title = (text || `[${sendAttachments.length} attachment${sendAttachments.length === 1 ? '' : 's'}]`).slice(0, 80).replace(/\s+/g, ' ').trim();
   conv.updatedAt = new Date().toISOString();
   saveState();
   renderHistory();
@@ -1943,6 +2144,18 @@ async function send() {
         };
       });
 
+    // Build wire messages: same as on-screen, but the latest user message gets
+    // the full base64 attachment payload (the persisted history only keeps thumbs).
+    const wireMessages = conv.messages
+      .filter((m, i) => i < conv.messages.length - 1) // exclude the empty pending assistant
+      .map((m, i, arr) => ({ role: m.role, content: m.content, _idx: i, _isLastUser: i === arr.length - 1 && m.role === 'user' }))
+      .map((m) => {
+        if (m._isLastUser && sendAttachments.length) {
+          return { role: 'user', content: m.content, attachments: sendAttachments };
+        }
+        return { role: m.role, content: m.content };
+      });
+
     const res = await fetch('/api/strategy-chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1954,9 +2167,7 @@ async function send() {
         supp: state.supp,
         dateRange: { from: state.dateFrom, to: state.dateTo },
         priorSummaries,
-        messages: conv.messages
-          .filter((m, i) => i < conv.messages.length - 1) // exclude the empty pending assistant
-          .map((m) => ({ role: m.role, content: m.content })),
+        messages: wireMessages,
       }),
     });
     if (!res.ok) {
@@ -2015,6 +2226,8 @@ async function send() {
     saveState();
     renderHistory();
     saveRemoteStateDebounced();
+    // After a successful turn: persist any "save to KB" attachments. Fire-and-forget.
+    persistAttachmentsToKb(sendAttachments).catch((e) => console.warn('kb persist failed', e));
   } catch (err) {
     const aborted = err.name === 'AbortError';
     pending.content = (pending.content || '') + (aborted ? '\n\n_Stopped by you._' : `\n\n_Error: ${err.message}_`);
