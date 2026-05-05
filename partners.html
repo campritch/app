@@ -1208,12 +1208,13 @@
   }
   .lane-stat { display: flex; flex-direction: column; }
   .lane-stat .fig {
-    font-size: clamp(28px, 3vw, 36px);
+    font-size: clamp(20px, 2vw, 26px);
     font-weight: 800;
     letter-spacing: -0.02em;
     color: var(--accent);
-    line-height: 1.05;
+    line-height: 1.1;
     margin-bottom: 6px;
+    white-space: nowrap;
   }
   .lane-stat .lab {
     font-size: 11px;
@@ -1317,6 +1318,55 @@
     color: var(--ink-soft);
     font-weight: 700;
   }
+  .calc-multi {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 14px 18px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    flex-wrap: wrap;
+  }
+  .calc-multi-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .calc-multi-pills {
+    display: flex;
+    gap: 4px;
+  }
+  .calc-multi-pill {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    width: 38px;
+    height: 32px;
+    border-radius: 100px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    font-variant-numeric: tabular-nums;
+  }
+  .calc-multi-pill:hover { color: var(--ink); }
+  .calc-multi-pill.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  @media (max-width: 480px) {
+    .calc-multi { padding: 12px 14px; }
+    .calc-multi-label { font-size: 10px; }
+  }
+
   .calc-payout {
     background: #fff;
     border: 1px solid var(--line);
@@ -1657,12 +1707,12 @@
         <p>Refer a brand into host-read across the shows their buyer already listens to. <strong>DTC, B2B SaaS, founder-led startups, scaling consumer brands.</strong> Host endorsement on a vertical show beats months of generic Meta or LinkedIn spend.</p>
         <div class="lane-stats">
           <div class="lane-stat">
-            <span class="fig">4.2x</span>
-            <span class="lab">Avg ROAS</span>
+            <span class="fig">$10K&ndash;$100K</span>
+            <span class="lab">Test campaign</span>
           </div>
           <div class="lane-stat">
-            <span class="fig">$80K&ndash;$250K</span>
-            <span class="lab">First-year spend</span>
+            <span class="fig">$250K+</span>
+            <span class="lab">Scale-up</span>
           </div>
         </div>
       </div>
@@ -1674,12 +1724,12 @@
         <p>Refer a local business into programmatic, targeted by zip, city, or DMA. <strong>Med spas, dentists, real estate teams, HVAC, regional restaurants, auto dealers.</strong> The targeting precision is closer to Google Local than to traditional radio.</p>
         <div class="lane-stats">
           <div class="lane-stat">
-            <span class="fig">$7K/mo</span>
+            <span class="fig">$500&ndash;$3K/mo</span>
             <span class="lab">Test campaign</span>
           </div>
           <div class="lane-stat">
-            <span class="fig">3 months</span>
-            <span class="lab">Minimum commit</span>
+            <span class="fig">$10K/mo</span>
+            <span class="lab">Scale-up</span>
           </div>
         </div>
       </div>
@@ -1704,42 +1754,52 @@
 
     <div class="calc">
       <div class="calc-presets">
-        <button class="calc-preset" type="button" data-spend="21000">Test &middot; $21K (3mo)</button>
-        <button class="calc-preset active" type="button" data-spend="120000">Mid-size &middot; $120K/yr</button>
-        <button class="calc-preset" type="button" data-spend="300000">Scaling &middot; $300K/yr</button>
-        <button class="calc-preset" type="button" data-spend="600000">Scaled &middot; $600K/yr</button>
+        <button class="calc-preset" type="button" data-spend="1500">Local test &middot; $1.5K/mo</button>
+        <button class="calc-preset" type="button" data-spend="5000">Host-read entry &middot; $5K/mo</button>
+        <button class="calc-preset active" type="button" data-spend="20000">Scale-up &middot; $20K/mo</button>
+        <button class="calc-preset" type="button" data-spend="80000">Scaled &middot; $80K/mo</button>
       </div>
 
       <div class="calc-slider-block">
         <div class="calc-slider-head">
-          <span class="calc-slider-label">Brand spend (annualized)</span>
-          <span class="calc-slider-value" id="calc-current">$120,000</span>
+          <span class="calc-slider-label">Brand monthly spend</span>
+          <span class="calc-slider-value" id="calc-current">$20,000/mo</span>
         </div>
-        <input type="range" class="calc-slider" id="calc-spend" min="21000" max="1500000" step="1000" value="120000" aria-label="Brand spend annualized">
+        <input type="range" class="calc-slider" id="calc-spend" min="500" max="125000" step="250" value="20000" aria-label="Brand monthly spend">
         <div class="calc-slider-foot">
-          <span>$21K min</span>
-          <span>$1.5M</span>
+          <span>$500/mo</span>
+          <span>$125K/mo</span>
+        </div>
+      </div>
+
+      <div class="calc-multi">
+        <span class="calc-multi-label">Brands you refer in year one</span>
+        <div class="calc-multi-pills" role="group" aria-label="Brands referred">
+          <button class="calc-multi-pill" type="button" data-brands="1">1</button>
+          <button class="calc-multi-pill active" type="button" data-brands="3">3</button>
+          <button class="calc-multi-pill" type="button" data-brands="5">5</button>
+          <button class="calc-multi-pill" type="button" data-brands="10">10</button>
         </div>
       </div>
 
       <div class="calc-payout">
         <div class="calc-payout-label">Your annual payout</div>
-        <div class="calc-payout-figure" id="calc-payout">$2,400</div>
-        <div class="calc-payout-sub" id="calc-monthly">Paid as <strong>$200/month</strong> for 12 months</div>
+        <div class="calc-payout-figure" id="calc-payout">$14,400</div>
+        <div class="calc-payout-sub" id="calc-monthly"><strong>$4,800</strong> per brand &times; 3 brands &middot; $1,200/month</div>
       </div>
 
       <div class="calc-cap">
         <div class="calc-cap-bar">
-          <div class="calc-cap-fill" id="calc-cap-fill" style="width: 9.6%;"></div>
+          <div class="calc-cap-fill" id="calc-cap-fill" style="width: 19.2%;"></div>
         </div>
         <div class="calc-cap-foot">
-          <span id="calc-cap-status">$22,600 of cap remaining</span>
-          <span class="calc-cap-max">$25K cap per brand</span>
+          <span id="calc-cap-status">$20,200 of cap remaining per brand</span>
+          <span class="calc-cap-max">$25K annual cap per brand</span>
         </div>
       </div>
 
       <div class="calc-formula">
-        SpotsNow net rev <strong id="calc-net">$12,000</strong> &middot; your payout = 20% of net rev
+        Annual brand spend <strong id="calc-net">$240,000</strong> &middot; your payout = 2% of brand spend (capped)
       </div>
     </div>
 
@@ -1788,37 +1848,52 @@
     const input = document.getElementById('calc-spend');
     if (!input) return;
     const presets = document.querySelectorAll('.calc-preset');
+    const multiPills = document.querySelectorAll('.calc-multi-pill');
     const fmt = (n) => '$' + Math.round(n).toLocaleString('en-US');
+    let brands = 3;
 
     const update = () => {
-      const spend = parseInt(input.value, 10);
-      const netRev = spend * 0.10;
+      const monthlySpend = parseInt(input.value, 10);
+      const annualSpend = monthlySpend * 12;
+      const netRev = annualSpend * 0.10;
       const rawPayout = netRev * 0.20;
-      const payout = Math.min(rawPayout, 25000);
+      const perBrand = Math.min(rawPayout, 25000);
       const capped = rawPayout >= 25000;
-      const monthly = payout / 12;
-      const capPct = Math.min((payout / 25000) * 100, 100);
-      const remaining = Math.max(25000 - payout, 0);
+      const total = perBrand * brands;
+      const totalMonthly = total / 12;
+      const capPct = Math.min((perBrand / 25000) * 100, 100);
+      const remaining = Math.max(25000 - perBrand, 0);
 
-      document.getElementById('calc-current').textContent = fmt(spend);
-      document.getElementById('calc-net').textContent = fmt(netRev);
-      document.getElementById('calc-payout').textContent = fmt(payout);
-      document.getElementById('calc-monthly').innerHTML = capped
-        ? '<strong>Capped at $25K</strong> &middot; paid as ' + fmt(monthly) + '/month'
-        : 'Paid as <strong>' + fmt(monthly) + '/month</strong> for 12 months';
+      document.getElementById('calc-current').textContent = fmt(monthlySpend) + '/mo';
+      document.getElementById('calc-net').textContent = fmt(annualSpend);
+      document.getElementById('calc-payout').textContent = fmt(total);
+
+      const brandLabel = brands === 1 ? '1 brand' : brands + ' brands';
+      const cappedNote = capped ? ' <em style="font-style:normal;color:var(--accent);font-weight:800;">(capped)</em>' : '';
+      document.getElementById('calc-monthly').innerHTML =
+        '<strong>' + fmt(perBrand) + '</strong> per brand' + cappedNote +
+        ' &times; ' + brandLabel + ' &middot; ' + fmt(totalMonthly) + '/month';
+
       document.getElementById('calc-cap-fill').style.width = capPct + '%';
       document.getElementById('calc-cap-status').textContent = capped
-        ? 'Annual cap reached for this brand'
-        : fmt(remaining) + ' of cap remaining';
+        ? 'Each brand maxed at the $25K annual cap'
+        : fmt(remaining) + ' of cap remaining per brand';
 
       presets.forEach(b => {
-        b.classList.toggle('active', parseInt(b.dataset.spend, 10) === spend);
+        b.classList.toggle('active', parseInt(b.dataset.spend, 10) === monthlySpend);
+      });
+      multiPills.forEach(p => {
+        p.classList.toggle('active', parseInt(p.dataset.brands, 10) === brands);
       });
     };
 
     input.addEventListener('input', update);
     presets.forEach(b => b.addEventListener('click', () => {
       input.value = b.dataset.spend;
+      update();
+    }));
+    multiPills.forEach(p => p.addEventListener('click', () => {
+      brands = parseInt(p.dataset.brands, 10);
       update();
     }));
     update();
@@ -1867,6 +1942,11 @@
     const triggers = document.querySelectorAll('[data-claim-trigger]');
     const closes = document.querySelectorAll('[data-claim-close]');
 
+    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    const API_URL = isLocal
+      ? 'http://localhost:3007/api/vc-claim'
+      : 'https://outreach.spotsnow.wiki/api/vc-claim';
+
     const showError = (msg) => { errorEl.textContent = msg; errorEl.hidden = false; };
     const clearError = () => { errorEl.hidden = true; errorEl.textContent = ''; };
     const reset = () => {
@@ -1894,25 +1974,48 @@
       e.preventDefault();
       clearError();
       const data = new FormData(form);
-      const payload = {
-        name: (data.get('name') || '').toString().trim(),
-        email: (data.get('email') || '').toString().trim(),
-        brand: (data.get('brand') || '').toString().trim(),
-        contact: (data.get('contact') || '').toString().trim(),
-        notes: (data.get('notes') || '').toString().trim(),
-      };
-      if (!payload.name || !payload.email || !payload.brand || !payload.contact) {
+      const name = (data.get('name') || '').toString().trim();
+      const email = (data.get('email') || '').toString().trim();
+      const brand = (data.get('brand') || '').toString().trim();
+      const contact = (data.get('contact') || '').toString().trim();
+      const notes = (data.get('notes') || '').toString().trim();
+      if (!name || !email || !brand || !contact) {
         showError('Name, email, brand, and contact are required.');
         return;
       }
+      const payload = {
+        source: 'partner-referral',
+        kind: 'partner-referral',
+        name,
+        email,
+        brand,
+        contact,
+        notes,
+        linkedinUrl: contact,
+        fund: brand,
+        arr: notes || 'Partner referral',
+      };
 
       submitBtn.disabled = true;
       submitBtn.textContent = 'Sending...';
-      // TODO: wire to HubSpot endpoint. For now, simulate success locally.
-      setTimeout(() => {
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          const text = await res.text().catch(() => '');
+          throw new Error('HTTP ' + res.status + (text ? ': ' + text : ''));
+        }
         formView.hidden = true;
         successView.hidden = false;
-      }, 400);
+      } catch (err) {
+        console.error('[partner-referral] submit failed:', err);
+        showError("Something went wrong. Email cam@spotsnow.io and we'll handle it.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send to SpotsNow';
+      }
     });
   })();
 </script>
