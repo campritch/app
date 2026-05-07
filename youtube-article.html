@@ -520,7 +520,7 @@
   <!-- Solid background -->
   <div id="thumb-bg" style="position:absolute;inset:0;background:#1A2832;"></div>
   <!-- Photo: background-image so html2canvas respects background-size:cover (img object-fit not supported) -->
-  <div id="thumb-photo-wrap" style="position:absolute;top:0;bottom:0;right:0;width:56%;background-image:url('/cutouts/cam1.png');background-size:cover;background-position:left center;"></div>
+  <div id="thumb-photo-wrap" style="position:absolute;top:0;bottom:0;right:0;width:56%;background-image:url('/cutouts/cam1.png');background-size:cover;background-position:left center;background-repeat:no-repeat;"></div>
   <!-- Gradient: fades photo into bg -->
   <div id="thumb-gradient" style="position:absolute;inset:0;background:linear-gradient(to right, #1A2832 36%, rgba(26,40,50,0.75) 58%, transparent 78%);"></div>
   <!-- Text: left 62%, centered vertically -->
@@ -538,7 +538,9 @@ const isLocal = window.location.hostname === 'localhost';
 const TRANSCRIPT_API = isLocal ? 'http://localhost:5055/generate' : '/api/transcript';
 const THUMB_API      = isLocal ? 'http://localhost:5055/thumbnail' : '/api/thumbnail';
 const CLAUDE_API     = 'https://api.anthropic.com/v1/messages';
-const PHOTOS = ['cam1','cam2','cam3','Cam'];
+const PHOTOS = ['cam1','cam2','cam_color'];
+// Where the face sits in each cutout image (background-position for cover)
+const PHOTO_POS = { cam1: 'left center', cam2: 'right center', cam_color: 'center top' };
 
 const IG_PROMPT = (transcript) => `You are creating Instagram carousel assets for SpotsNow using our exact brand guidelines.
 
@@ -556,6 +558,7 @@ CAROUSEL FORMAT — bold-statement style, 4 slides:
 RULES:
 - eyebrow: 3-5 words ALL CAPS — context label for the headline
 - headline: max 12 words, punchy. Wrap single most powerful word in *asterisks* (renders as #F06060 salmon)
+- NO em-dashes (— or –) anywhere. Use a period or rewrite the phrase instead.
 - body: 1-2 sentences max, omit if headline stands alone
 - Caption: hook → 3-4 lines insight → CTA that directs people to follow/DM Cam on LinkedIn (linkedin.com/in/campbellpritchard) → 3-5 hashtags. Conversational, not corporate. Written in Cam's voice (founder, direct, short sentences).
 
@@ -1028,7 +1031,7 @@ async function regenThumb() {
   const photoUrl = '/cutouts/' + photoName + '.png';
   photoWrap.style.backgroundImage = `url('${photoUrl}')`;
   photoWrap.style.backgroundSize = 'cover';
-  photoWrap.style.backgroundPosition = side === 'left' ? 'right center' : 'left center';
+  photoWrap.style.backgroundPosition = PHOTO_POS[photoName] || 'center center';
   document.getElementById('thumb-l1').textContent = line1;
   document.getElementById('thumb-l2').textContent = line2;
 
@@ -1236,6 +1239,7 @@ Bold-statement carousel (the format performing best right now). Each slide = one
 **Slide rules:**
 - eyebrow: 3-5 words, ALL CAPS — provides context for the headline
 - headline: max 12 words, punchy. Wrap the single most powerful word in *asterisks* — rendered as #F06060 salmon accent
+- NO em-dashes (— or –) anywhere in headlines, eyebrows, or body. Use a period or rewrite instead.
 - body: 1-2 sentences max, skip entirely if headline stands alone
 - bg values: "navy" / "salmon" / "navy" / "white"
 
