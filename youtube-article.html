@@ -227,6 +227,9 @@
       font-size: 64px; font-weight: 800; line-height: 0.9;
       letter-spacing: -0.04em; color: #F06060;
     }
+    .ig-slide--salmon .ig-slide__display-num,
+    .ig-slide--coral  .ig-slide__display-num { color: #17212B; }
+    .ig-slide--white  .ig-slide__display-num { color: #F06060; }
     .ig-slide__badge {
       display: flex; align-items: center; gap: 4px; padding-bottom: 4px;
     }
@@ -256,7 +259,7 @@
     .ig-slide--salmon .ig-slide__headline,
     .ig-slide--coral  .ig-slide__headline,
     .ig-slide--white  .ig-slide__headline {
-      text-transform: none; font-size: 25px; line-height: 1.09;
+      font-size: 25px; line-height: 1.09;
     }
     .ig-slide__headline em { font-style: normal; color: #F06060; }
     .ig-slide--salmon .ig-slide__headline em,
@@ -505,17 +508,15 @@
   <!-- Solid background -->
   <div id="thumb-bg" style="position:absolute;inset:0;background:#1A2832;"></div>
   <!-- Photo: background-image so html2canvas respects background-size:cover (img object-fit not supported) -->
-  <div id="thumb-photo-wrap" style="position:absolute;top:0;bottom:0;right:0;width:56%;background-image:url('/cutouts/cam1.png');background-size:cover;background-position:top center;"></div>
+  <div id="thumb-photo-wrap" style="position:absolute;top:0;bottom:0;right:0;width:56%;background-image:url('/cutouts/cam1.png');background-size:cover;background-position:center center;"></div>
   <!-- Gradient: fades photo into bg -->
   <div id="thumb-gradient" style="position:absolute;inset:0;background:linear-gradient(to right, #1A2832 36%, rgba(26,40,50,0.75) 58%, transparent 78%);"></div>
   <!-- Text: left 62%, centered vertically -->
   <div id="thumb-text" style="position:absolute;top:0;bottom:0;left:0;width:62%;display:flex;flex-direction:column;justify-content:center;padding:36px 40px;box-sizing:border-box;">
     <div id="thumb-l1" style="font-weight:800;font-size:34px;line-height:1.1;color:#ffffff;letter-spacing:-0.025em;margin-bottom:12px;text-transform:uppercase;"></div>
     <div id="thumb-l2-wrap" style="display:inline-flex;">
-      <span id="thumb-l2" style="background:#F06060;font-weight:800;font-size:42px;line-height:1.15;color:#ffffff;letter-spacing:-0.025em;padding:5px 14px 8px;display:inline-block;text-transform:uppercase;"></span>
+      <span id="thumb-l2" style="background:#F06060;font-weight:800;font-size:42px;line-height:1.15;color:#ffffff;letter-spacing:-0.025em;padding:5px 14px 8px;display:inline-block;text-transform:uppercase;border-radius:4px;"></span>
     </div>
-    <img src="/spotsnow-logo-white.png" crossorigin="anonymous"
-      style="margin-top:22px;height:15px;width:auto;max-width:120px;object-fit:contain;object-position:left center;display:block;" />
   </div>
 </div>
 
@@ -1083,19 +1084,14 @@ function buildSlide(slide, index) {
   const bgClass = `ig-slide--${bg}`;
   const isDark = bg === 'navy' || bg === 'dark' || bg === 'black';
 
-  // Dark slides: number + badge in one row; color/white slides: badge solo
-  const midHtml = isDark
-    ? `<div class="ig-slide__numrow">
-         <div class="ig-slide__display-num">${index + 1}</div>
-         <div class="ig-slide__badge">
-           <div class="ig-slide__badge-sq"></div>
-           <div class="ig-slide__badge-circ"></div>
-         </div>
-       </div>`
-    : `<div class="ig-slide__badge ig-slide__badge--solo">
+  // All slides: number + badge in one row
+  const midHtml = `<div class="ig-slide__numrow">
+       <div class="ig-slide__display-num">${index + 1}</div>
+       <div class="ig-slide__badge">
          <div class="ig-slide__badge-sq"></div>
          <div class="ig-slide__badge-circ"></div>
-       </div>`;
+       </div>
+     </div>`;
 
   return `
     <div class="ig-slide-wrap">
