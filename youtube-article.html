@@ -221,31 +221,25 @@
     /* ── Number row: large number + badge side-by-side (dark slides only) ── */
     .ig-slide__numrow {
       display: flex; align-items: flex-end; gap: 8px;
-      flex-shrink: 0; margin-bottom: 12px;
+      flex-shrink: 0; margin-bottom: 10px;
     }
     .ig-slide__display-num {
-      font-size: 72px; font-weight: 800; line-height: 0.9;
+      font-size: 64px; font-weight: 800; line-height: 0.9;
       letter-spacing: -0.04em; color: #F06060;
     }
-    /* Badge sits bottom-aligned next to number */
     .ig-slide__badge {
-      display: flex; align-items: center; gap: 4px;
-      padding-bottom: 6px; /* align to number baseline */
+      display: flex; align-items: center; gap: 4px; padding-bottom: 4px;
     }
-    .ig-slide__badge-sq   { width: 13px; height: 13px; background: #F06060; flex-shrink: 0; }
-    .ig-slide__badge-circ { width: 15px; height: 15px; border-radius: 50%; background: #fff; flex-shrink: 0; }
-    /* Badge variants on color/white slides (no numrow, badge standalone) */
-    .ig-slide__badge--solo { margin-bottom: 14px; flex-shrink: 0; }
+    .ig-slide__badge-sq   { width: 12px; height: 12px; background: #F06060; flex-shrink: 0; }
+    .ig-slide__badge-circ { width: 14px; height: 14px; border-radius: 50%; background: #fff; flex-shrink: 0; }
+    .ig-slide__badge--solo { margin-bottom: 12px; flex-shrink: 0; }
     .ig-slide--salmon .ig-slide__badge-sq   { background: rgba(255,255,255,0.9); }
     .ig-slide--salmon .ig-slide__badge-circ { background: #17212B; }
     .ig-slide--white  .ig-slide__badge-sq   { background: #F06060; }
     .ig-slide--white  .ig-slide__badge-circ { background: #17212B; }
 
-    /* ── Content: flows top-to-bottom, fills remaining space ── */
-    .ig-slide__content {
-      flex: 1; display: flex; flex-direction: column; justify-content: flex-start;
-      min-height: 0; overflow: hidden;
-    }
+    /* ── Content: fills remaining space, no clipping ── */
+    .ig-slide__content { flex: 1; display: flex; flex-direction: column; min-height: 0; }
     .ig-slide__eyebrow {
       font-size: 10px; font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.08em; color: #F06060; margin-bottom: 6px; flex-shrink: 0;
@@ -254,15 +248,15 @@
     .ig-slide--coral  .ig-slide__eyebrow { color: rgba(255,255,255,0.7); }
     .ig-slide--white  .ig-slide__eyebrow { color: #F06060; }
 
-    /* Headlines: uppercase on dark, mixed case on color/white */
+    /* Smaller sizes so even a 5-line headline fits without clipping */
     .ig-slide__headline {
-      font-size: 26px; font-weight: 800; line-height: 1.08;
-      letter-spacing: -0.025em; margin: 0; text-transform: uppercase; flex-shrink: 0;
+      font-size: 23px; font-weight: 800; line-height: 1.1;
+      letter-spacing: -0.02em; margin: 0; text-transform: uppercase; flex-shrink: 0;
     }
     .ig-slide--salmon .ig-slide__headline,
     .ig-slide--coral  .ig-slide__headline,
     .ig-slide--white  .ig-slide__headline {
-      text-transform: none; font-size: 28px; line-height: 1.07;
+      text-transform: none; font-size: 25px; line-height: 1.09;
     }
     .ig-slide__headline em { font-style: normal; color: #F06060; }
     .ig-slide--salmon .ig-slide__headline em,
@@ -270,21 +264,17 @@
     .ig-slide--white  .ig-slide__headline em { color: #F06060; }
 
     .ig-slide__sub {
-      margin-top: 10px; font-size: 12px; font-weight: 500;
+      margin-top: 9px; font-size: 11.5px; font-weight: 500;
       line-height: 1.5; opacity: 0.82; flex-shrink: 0;
     }
 
-    /* ── Spacer pushes footer to bottom ── */
-    .ig-slide__spacer { flex: 1; min-height: 8px; }
-
-    /* ── Footer: thin rule + url + arrow ── */
+    /* ── Footer: margin-top auto pushes it to bottom regardless of content height ── */
     .ig-slide__footer {
-      padding-top: 9px; border-top: 1px solid rgba(255,255,255,0.2); flex-shrink: 0;
+      margin-top: auto; padding-top: 9px;
+      border-top: 1px solid rgba(255,255,255,0.2); flex-shrink: 0;
     }
     .ig-slide--white .ig-slide__footer { border-top-color: rgba(0,0,0,0.12); }
-    .ig-slide__footer-row {
-      display: flex; justify-content: space-between; align-items: center;
-    }
+    .ig-slide__footer-row { display: flex; justify-content: space-between; align-items: center; }
     .ig-slide__url  { font-size: 9.5px; font-weight: 700; letter-spacing: 0.01em; }
     .ig-slide__fwd  { font-size: 13px; font-weight: 700; }
 
@@ -514,15 +504,12 @@
 <div id="thumb-render" style="position:fixed;left:-2000px;top:0;width:640px;height:360px;overflow:hidden;font-family:'Inter',sans-serif;box-sizing:border-box;">
   <!-- Solid background -->
   <div id="thumb-bg" style="position:absolute;inset:0;background:#1A2832;"></div>
-  <!-- Photo: fills right 55%, object-fit cover so it always fills -->
-  <div id="thumb-photo-wrap" style="position:absolute;top:0;bottom:0;right:0;width:55%;overflow:hidden;">
-    <img id="thumb-photo" src="/cutouts/cam1.png" crossorigin="anonymous"
-      style="width:100%;height:100%;object-fit:cover;object-position:top center;display:block;" />
-  </div>
-  <!-- Gradient: fades photo into background so text area is clean -->
-  <div id="thumb-gradient" style="position:absolute;inset:0;background:linear-gradient(to right, #1A2832 38%, rgba(26,40,50,0.7) 60%, transparent 80%);"></div>
-  <!-- Text: left 60%, centered vertically -->
-  <div id="thumb-text" style="position:absolute;top:0;bottom:0;left:0;width:60%;display:flex;flex-direction:column;justify-content:center;padding:36px 40px;box-sizing:border-box;">
+  <!-- Photo: background-image so html2canvas respects background-size:cover (img object-fit not supported) -->
+  <div id="thumb-photo-wrap" style="position:absolute;top:0;bottom:0;right:0;width:56%;background-image:url('/cutouts/cam1.png');background-size:cover;background-position:top center;"></div>
+  <!-- Gradient: fades photo into bg -->
+  <div id="thumb-gradient" style="position:absolute;inset:0;background:linear-gradient(to right, #1A2832 36%, rgba(26,40,50,0.75) 58%, transparent 78%);"></div>
+  <!-- Text: left 62%, centered vertically -->
+  <div id="thumb-text" style="position:absolute;top:0;bottom:0;left:0;width:62%;display:flex;flex-direction:column;justify-content:center;padding:36px 40px;box-sizing:border-box;">
     <div id="thumb-l1" style="font-weight:800;font-size:34px;line-height:1.1;color:#ffffff;letter-spacing:-0.025em;margin-bottom:12px;text-transform:uppercase;"></div>
     <div id="thumb-l2-wrap" style="display:inline-flex;">
       <span id="thumb-l2" style="background:#F06060;font-weight:800;font-size:42px;line-height:1.15;color:#ffffff;letter-spacing:-0.025em;padding:5px 14px 8px;display:inline-block;text-transform:uppercase;"></span>
@@ -634,6 +621,7 @@ async function getKey() {
       document.querySelectorAll('.photo-chip').forEach(c => c.classList.remove('active'));
       div.classList.add('active');
       thumbData.photo = i;
+      regenThumb(); // auto-regenerate on photo change
     };
     grid.appendChild(div);
   });
@@ -996,6 +984,7 @@ async function regenThumb() {
     gradientEl.style.background = `linear-gradient(to left, ${bgColor} 38%, ${bgColor}b0 60%, transparent 80%)`;
   }
 
+  // Position photo and text based on side
   const photoWrap = document.getElementById('thumb-photo-wrap');
   const textDiv   = document.getElementById('thumb-text');
   if (side === 'right') {
@@ -1005,17 +994,15 @@ async function regenThumb() {
     photoWrap.style.left = '0'; photoWrap.style.right = 'auto';
     textDiv.style.right = '0'; textDiv.style.left = 'auto';
   }
-  document.getElementById('thumb-photo').src = '/cutouts/' + photoName + '.png';
+  // background-image instead of <img> so html2canvas applies background-size:cover correctly
+  photoWrap.style.backgroundImage = `url('/cutouts/${photoName}.png')`;
+  photoWrap.style.backgroundSize = 'cover';
+  photoWrap.style.backgroundPosition = 'top center';
   document.getElementById('thumb-l1').textContent = line1;
   document.getElementById('thumb-l2').textContent = line2;
 
-  // Wait for photo to load
-  await new Promise(resolve => {
-    const img = document.getElementById('thumb-photo');
-    if (img.complete && img.naturalWidth) { resolve(); return; }
-    img.onload = resolve; img.onerror = resolve;
-    setTimeout(resolve, 2000);
-  });
+  // Small delay to let background-image paint before capture
+  await new Promise(resolve => setTimeout(resolve, 300));
 
   try {
     const canvas = await html2canvas(document.getElementById('thumb-render'), {
@@ -1125,10 +1112,7 @@ function buildSlide(slide, index) {
           ${slide.body ? `<p class="ig-slide__sub">${slide.body}</p>` : ''}
         </div>
 
-        <!-- Spacer pushes footer to bottom -->
-        <div class="ig-slide__spacer"></div>
-
-        <!-- Footer -->
+        <!-- Footer (margin-top:auto pushes it to bottom) -->
         <div class="ig-slide__footer">
           <div class="ig-slide__footer-row">
             <span class="ig-slide__url">www.spotsnow.io</span>
