@@ -994,15 +994,21 @@ async function regenThumb() {
     photoWrap.style.left = '0'; photoWrap.style.right = 'auto';
     textDiv.style.right = '0'; textDiv.style.left = 'auto';
   }
-  // background-image instead of <img> so html2canvas applies background-size:cover correctly
-  photoWrap.style.backgroundImage = `url('/cutouts/${photoName}.png')`;
+  // background-image instead of <img> — html2canvas supports background-size:cover, not object-fit
+  const photoUrl = '/cutouts/' + photoName + '.png';
+  photoWrap.style.backgroundImage = `url('${photoUrl}')`;
   photoWrap.style.backgroundSize = 'cover';
   photoWrap.style.backgroundPosition = 'top center';
   document.getElementById('thumb-l1').textContent = line1;
   document.getElementById('thumb-l2').textContent = line2;
 
-  // Small delay to let background-image paint before capture
-  await new Promise(resolve => setTimeout(resolve, 300));
+  // Preload the image so background-image is definitely painted before html2canvas captures
+  await new Promise(resolve => {
+    const probe = new Image();
+    probe.onload = probe.onerror = resolve;
+    probe.src = photoUrl;
+    setTimeout(resolve, 2000); // hard cap
+  });
 
   try {
     const canvas = await html2canvas(document.getElementById('thumb-render'), {
