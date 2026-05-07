@@ -520,7 +520,7 @@
   <!-- Solid background -->
   <div id="thumb-bg" style="position:absolute;inset:0;background:#1A2832;"></div>
   <!-- Photo: background-image so html2canvas respects background-size:cover (img object-fit not supported) -->
-  <div id="thumb-photo-wrap" style="position:absolute;top:0;bottom:0;right:0;width:56%;background-image:url('/cutouts/cam1.png');background-size:cover;background-position:left center;background-repeat:no-repeat;"></div>
+  <div id="thumb-photo-wrap" style="position:absolute;top:0;bottom:0;right:0;width:56%;background-image:url('/cutouts/p1.png');background-size:cover;background-position:center top;background-repeat:no-repeat;"></div>
   <!-- Gradient: fades photo into bg -->
   <div id="thumb-gradient" style="position:absolute;inset:0;background:linear-gradient(to right, #1A2832 36%, rgba(26,40,50,0.75) 58%, transparent 78%);"></div>
   <!-- Text: left 62%, centered vertically -->
@@ -538,9 +538,9 @@ const isLocal = window.location.hostname === 'localhost';
 const TRANSCRIPT_API = isLocal ? 'http://localhost:5055/generate' : '/api/transcript';
 const THUMB_API      = isLocal ? 'http://localhost:5055/thumbnail' : '/api/thumbnail';
 const CLAUDE_API     = 'https://api.anthropic.com/v1/messages';
-const PHOTOS = ['cam1','cam2','cam_color'];
-// Where the face sits in each cutout image (background-position for cover)
-const PHOTO_POS = { cam1: 'left center', cam2: 'right center', cam_color: 'center top' };
+const PHOTOS = ['p1','p2','p3','p4'];
+// All portrait shots — face centered near top
+const PHOTO_POS = { p1: 'center top', p2: 'center top', p3: 'center top', p4: 'center top' };
 
 const IG_PROMPT = (transcript) => `You are creating Instagram carousel assets for SpotsNow using our exact brand guidelines.
 
