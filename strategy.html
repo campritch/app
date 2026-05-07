@@ -183,6 +183,28 @@ input, textarea, select { font-family: inherit; }
 .tx-modal .kb-row .acts .d:hover { color: var(--bad); border-color: var(--bad); }
 .tx-modal .kb-empty { padding: 30px 16px; color: var(--text-faint); font-family: 'Fraunces', serif; font-style: italic; text-align: center; font-size: 13px; }
 
+/* Manual transcript modal */
+.manual-tx-body { padding: 18px 22px; overflow-y: auto; flex: 1; }
+.manual-tx-section { display: flex; flex-direction: column; gap: 10px; padding: 4px 0; }
+.manual-tx-section-h { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 4px; }
+.manual-tx-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+.manual-tx-body label { display: flex; flex-direction: column; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-dim); }
+.manual-tx-body label .req { color: var(--accent); margin-left: 2px; }
+.manual-tx-body label .hint { color: var(--text-faint); text-transform: none; letter-spacing: 0; font-size: 10px; font-weight: 400; margin-left: 6px; }
+.manual-tx-body input[type="text"], .manual-tx-body input[type="date"], .manual-tx-body textarea { background: var(--bg); border: 1px solid var(--line); color: var(--text); padding: 8px 10px; font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 13px; letter-spacing: 0; text-transform: none; font-weight: 400; }
+.manual-tx-body input[type="date"] { font-family: 'JetBrains Mono', monospace; }
+.manual-tx-body textarea { resize: vertical; min-height: 200px; line-height: 1.5; }
+.manual-tx-body input:focus, .manual-tx-body textarea:focus { outline: none; border-color: var(--accent); }
+.manual-tx-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+.manual-tx-actions button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 9px 16px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; cursor: pointer; border-radius: 2px; }
+.manual-tx-actions button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.manual-tx-actions button.primary:hover:not(:disabled) { filter: brightness(1.08); }
+.manual-tx-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+.manual-tx-divider { display: flex; align-items: center; gap: 12px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin: 18px 0 6px; }
+.manual-tx-divider::before, .manual-tx-divider::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.manual-tx-hint { font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: 12px; color: var(--text-dim); line-height: 1.5; margin: 0; }
+.manual-tx-body .kb-drop { padding: 22px 16px; }
+
 /* Dock hint showing what the agent is seeing */
 .dock .ctx-hint { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; max-width: 880px; margin: 0 auto 6px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .dock .ctx-hint .pill { color: var(--good); border: 1px solid var(--line-soft); padding: 2px 8px; border-radius: 2px; }
@@ -589,6 +611,7 @@ input, textarea, select { font-family: inherit; }
         <button id="btn-tx-sel-all">Select all</button>
         <button id="btn-tx-sel-clear">Clear</button>
         <button id="btn-tx-refresh">Refresh</button>
+        <button id="btn-tx-add-manual" title="Paste a transcript for a call that wasn't recorded in Fathom">+ Add manual</button>
       </div>
       <label class="tx-toggle">
         <input type="checkbox" id="tx-show-standups">
@@ -600,6 +623,52 @@ input, textarea, select { font-family: inherit; }
     <div class="tx-modal-foot" id="tx-foot" hidden>
       <button class="tx-more" id="btn-tx-more">Show more</button>
       <button class="tx-gen" id="btn-tx-gen" disabled>Run &amp; save 0</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="manual-tx-bg">
+  <div class="modal tx-modal">
+    <div class="modal-hdr">
+      <div>
+        <div class="t">Add transcripts manually</div>
+        <span class="m">For calls that didn't go through Fathom — paste one, or drop a batch of .txt files</span>
+      </div>
+      <button class="x" id="manual-tx-close">Close</button>
+    </div>
+    <div class="manual-tx-body">
+      <div class="manual-tx-section">
+        <div class="manual-tx-section-h">Single transcript</div>
+        <div class="manual-tx-grid">
+          <label>Title <span class="req">*</span><input type="text" id="mtx-title" placeholder="30 minutes between Cam Pritchard and Grant Durando"></label>
+          <label>Date<input type="date" id="mtx-date"></label>
+        </div>
+        <label>Attendees <span class="hint">comma or newline separated; emails or names</span>
+          <input type="text" id="mtx-attendees" placeholder="cam@spotsnow.io, grant.durando@adresults.com">
+        </label>
+        <label>Notes <span class="hint">optional context for the agent</span>
+          <input type="text" id="mtx-notes" placeholder="e.g. quick partnership scoping call">
+        </label>
+        <label>Transcript body <span class="req">*</span> <span class="hint">paste the full transcript; Speaker: line format works best</span>
+          <textarea id="mtx-body" rows="12" placeholder="Cam Pritchard: Hey there, thanks for jumping on...&#10;Grant Durando: No problem, glad to..."></textarea>
+        </label>
+        <div class="manual-tx-actions">
+          <button id="mtx-save" class="primary">Save transcript</button>
+        </div>
+      </div>
+
+      <div class="manual-tx-divider"><span>or upload in bulk</span></div>
+
+      <div class="manual-tx-section">
+        <div class="manual-tx-section-h">Bulk .txt upload</div>
+        <p class="manual-tx-hint">Each .txt file becomes one transcript. Title is taken from the filename (strip .txt). The file's last-modified date is used for the meeting date. You can edit attendees later by re-saving.</p>
+        <label class="kb-drop" id="mtx-drop">
+          <span id="mtx-drop-text">Drop .txt files here or click to upload (any number)</span>
+          <input type="file" id="mtx-files" multiple accept=".txt,text/plain">
+        </label>
+      </div>
+
+      <div class="tx-modal-status" id="mtx-status" hidden></div>
     </div>
   </div>
 </div>
@@ -1036,6 +1105,7 @@ function attachInputs() {
   document.getElementById('btn-tx-open').addEventListener('click', openTxDrawer);
   document.getElementById('tx-drawer-close').addEventListener('click', closeTxDrawer);
   document.getElementById('tx-modal-bg').addEventListener('click', (e) => { if (e.target.id === 'tx-modal-bg') closeTxDrawer(); });
+  attachManualTxHandlers();
   document.getElementById('btn-kb-open').addEventListener('click', openKbModal);
   document.getElementById('kb-modal-close').addEventListener('click', closeKbModal);
   document.getElementById('kb-modal-bg').addEventListener('click', (e) => { if (e.target.id === 'kb-modal-bg') closeKbModal(); });
@@ -1049,7 +1119,7 @@ function attachInputs() {
   document.getElementById('in-msg').addEventListener('paste', onPaste);
   document.getElementById('modal-close').addEventListener('click', closeModal);
   document.getElementById('modal-bg').addEventListener('click', (e) => { if (e.target.id === 'modal-bg') closeModal(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closePublishModal(); closePromptModal(); closeTxDrawer(); closeKbModal(); } });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closePublishModal(); closePromptModal(); closeTxDrawer(); closeKbModal(); closeManualTx(); } });
 
   // Publish-to-Notion modal
   document.getElementById('publish-close').addEventListener('click', closePublishModal);
@@ -1351,6 +1421,112 @@ function openTxDrawer() {
 }
 function closeTxDrawer() {
   document.getElementById('tx-modal-bg').classList.remove('open');
+}
+
+// ── Manual transcript add ────────────────────────────────────────────
+function openManualTx() {
+  // Default the date to today if empty
+  const d = document.getElementById('mtx-date');
+  if (!d.value) d.value = new Date().toISOString().slice(0, 10);
+  document.getElementById('manual-tx-bg').classList.add('open');
+  setTimeout(() => document.getElementById('mtx-title').focus(), 80);
+}
+function closeManualTx() {
+  document.getElementById('manual-tx-bg').classList.remove('open');
+}
+
+function setMtxStatus(state, text) {
+  const el = document.getElementById('mtx-status');
+  if (!el) return;
+  if (!state) { el.hidden = true; el.className = 'tx-modal-status'; el.innerHTML = ''; return; }
+  el.hidden = false;
+  el.className = 'tx-modal-status ' + state;
+  el.innerHTML = (state === 'running' ? '<span class="spin"></span>' : '') + escapeHtml(text);
+}
+
+async function postManualTranscript({ title, date, attendees, transcript, notes }) {
+  const r = await fetch('/api/fathom-cache', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password, action: 'add_manual', manual: { title, date, attendees, transcript, notes } }),
+  });
+  if (!r.ok) {
+    const e = await r.json().catch(() => ({}));
+    throw new Error(e.error || `HTTP ${r.status}`);
+  }
+  return await r.json();
+}
+
+async function saveManualSingle() {
+  const title = document.getElementById('mtx-title').value.trim();
+  const date = document.getElementById('mtx-date').value;
+  const attendees = document.getElementById('mtx-attendees').value;
+  const notes = document.getElementById('mtx-notes').value;
+  const transcript = document.getElementById('mtx-body').value.trim();
+  if (!title) { setMtxStatus('err', 'Title is required.'); return; }
+  if (!transcript) { setMtxStatus('err', 'Transcript body is required.'); return; }
+
+  const btn = document.getElementById('mtx-save');
+  btn.disabled = true;
+  setMtxStatus('running', 'Saving…');
+  try {
+    await postManualTranscript({ title, date, attendees, transcript, notes });
+    setMtxStatus('ok', 'Saved. The agent can reference it on your next message.');
+    // Clear the form for another entry
+    document.getElementById('mtx-title').value = '';
+    document.getElementById('mtx-attendees').value = '';
+    document.getElementById('mtx-notes').value = '';
+    document.getElementById('mtx-body').value = '';
+    // Refresh the transcript library list (if open) so the row appears
+    loadTranscripts();
+  } catch (err) {
+    setMtxStatus('err', `Save failed: ${err.message}`);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function bulkUploadTxtFiles(files) {
+  if (!files.length) return;
+  const txtFiles = files.filter((f) => /\.txt$/i.test(f.name) || f.type === 'text/plain');
+  if (!txtFiles.length) {
+    setMtxStatus('err', 'Only .txt files are accepted in bulk upload.');
+    return;
+  }
+  let ok = 0;
+  let err = 0;
+  setMtxStatus('running', `Uploading ${txtFiles.length} transcript${txtFiles.length === 1 ? '' : 's'}…`);
+  for (const file of txtFiles) {
+    try {
+      const transcript = await file.text();
+      if (!transcript.trim()) { err += 1; continue; }
+      const title = file.name.replace(/\.txt$/i, '').replace(/[_-]+/g, ' ').trim() || 'Untitled transcript';
+      const date = new Date(file.lastModified || Date.now()).toISOString().slice(0, 10);
+      await postManualTranscript({ title, date, attendees: '', transcript, notes: 'Bulk-imported from .txt' });
+      ok += 1;
+      setMtxStatus('running', `Uploading… ${ok}/${txtFiles.length} done`);
+    } catch (e) {
+      console.warn('bulk upload failed', file.name, e);
+      err += 1;
+    }
+  }
+  setMtxStatus(err && !ok ? 'err' : 'ok', `Saved ${ok} transcript${ok === 1 ? '' : 's'}${err ? ` · ${err} failed` : ''}`);
+  if (ok) loadTranscripts();
+}
+
+function attachManualTxHandlers() {
+  document.getElementById('btn-tx-add-manual').addEventListener('click', openManualTx);
+  document.getElementById('manual-tx-close').addEventListener('click', closeManualTx);
+  document.getElementById('manual-tx-bg').addEventListener('click', (e) => { if (e.target.id === 'manual-tx-bg') closeManualTx(); });
+  document.getElementById('mtx-save').addEventListener('click', saveManualSingle);
+  document.getElementById('mtx-files').addEventListener('change', (e) => {
+    bulkUploadTxtFiles(Array.from(e.target.files || []));
+    e.target.value = '';
+  });
+  const drop = document.getElementById('mtx-drop');
+  ['dragenter', 'dragover'].forEach((evt) => drop.addEventListener(evt, (e) => { e.preventDefault(); drop.classList.add('drag'); }));
+  ['dragleave', 'drop'].forEach((evt) => drop.addEventListener(evt, (e) => { e.preventDefault(); drop.classList.remove('drag'); }));
+  drop.addEventListener('drop', (e) => bulkUploadTxtFiles(Array.from(e.dataTransfer?.files || [])));
 }
 
 // ── Knowledge bank ───────────────────────────────────────────────────

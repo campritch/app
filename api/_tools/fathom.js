@@ -208,6 +208,55 @@ export async function enrichCached({ enrichments }) {
   return { enriched };
 }
 
+// Add a transcript that didn't come from Fathom. Creates the same blob/manifest
+// shape as ingestMeetings so the UI + agent treat it identically. Generates a
+// manual_<slug>_<timestamp> id so it's distinguishable from real Fathom ids.
+export async function addManualTranscript({ title, date, attendees, transcript, notes }) {
+  if (!title || !title.trim()) throw new Error('title required');
+  if (!transcript || !transcript.trim()) throw new Error('transcript required');
+  const mod = await getBlobClient();
+  if (!mod) throw new Error('BLOB_READ_WRITE_TOKEN required');
+
+  const slug = title.trim()
+    .toLowerCase()
+    .replace(/[^\w\s-]+/g, '')
+    .replace(/\s+/g, '_')
+    .slice(0, 60);
+  const id = `manual_${slug}_${Date.now().toString(36)}`;
+  const isoDate = date ? new Date(date).toISOString() : new Date().toISOString();
+
+  // Normalize attendees: accept array, comma-separated string, or newline-separated
+  let atts = [];
+  if (Array.isArray(attendees)) atts = attendees.map((a) => String(a).trim()).filter(Boolean);
+  else if (typeof attendees === 'string') atts = attendees.split(/[,\n]/).map((a) => a.trim()).filter(Boolean);
+
+  const record = {
+    id,
+    title: title.trim(),
+    date: isoDate,
+    attendees: atts,
+    recorded_by: null,
+    transcript: String(transcript).trim(),
+    fetched_at: new Date().toISOString(),
+    source: 'manual',
+    notes: notes ? String(notes).trim() : '',
+  };
+
+  await writeBlob(`fathom/${id}.json`, record);
+
+  const bytes = new TextEncoder().encode(JSON.stringify(record)).length;
+  await updateManifest({
+    id,
+    title: record.title,
+    date: record.date,
+    attendees: record.attendees,
+    bytes,
+    cached_at: record.fetched_at,
+  });
+
+  return { ok: true, item: record };
+}
+
 export async function clearCached() {
   const mod = await getBlobClient();
   if (!mod) throw new Error('BLOB_READ_WRITE_TOKEN required');
