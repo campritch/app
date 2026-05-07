@@ -1028,7 +1028,7 @@ async function regenThumb() {
   const photoUrl = '/cutouts/' + photoName + '.png';
   photoWrap.style.backgroundImage = `url('${photoUrl}')`;
   photoWrap.style.backgroundSize = 'cover';
-  photoWrap.style.backgroundPosition = 'left center';
+  photoWrap.style.backgroundPosition = side === 'left' ? 'right center' : 'left center';
   document.getElementById('thumb-l1').textContent = line1;
   document.getElementById('thumb-l2').textContent = line2;
 
@@ -1073,6 +1073,7 @@ function selectBg(el, name) {
 function selectSide(el, side) {
   document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active'); thumbData.side = side;
+  regenThumb();
 }
 
 // ── Instagram carousel ──────────────────────────────────────────────────────
