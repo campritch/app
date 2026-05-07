@@ -348,6 +348,7 @@
     <div class="mode-tabs">
       <button class="mode-tab active" id="tab-yt" onclick="switchMode('yt')">YouTube URL</button>
       <button class="mode-tab" id="tab-article" onclick="switchMode('article')">Paste article</button>
+      <button class="mode-tab" id="tab-transcript" onclick="switchMode('transcript')">Raw transcript</button>
     </div>
 
     <!-- YouTube mode -->
@@ -368,6 +369,17 @@
         <button class="btn-dark" id="article-btn" onclick="generateFromArticle()">
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M6.5 2l4.5 4.5-4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Generate slides
+        </button>
+      </div>
+    </div>
+
+    <!-- Raw transcript mode -->
+    <div id="mode-transcript" style="display:none;">
+      <textarea id="raw-transcript-paste" placeholder="Paste the raw transcript here…"></textarea>
+      <div style="margin-top:10px;">
+        <button class="btn-dark" id="transcript-btn" onclick="generateFromRawTranscript()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M6.5 2l4.5 4.5-4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Generate
         </button>
       </div>
     </div>
@@ -745,10 +757,27 @@ async function generateFromPaste() {
 
 // ── Mode switcher ────────────────────────────────────────────────────────────
 function switchMode(mode) {
-  document.getElementById('mode-yt').style.display      = mode === 'yt'      ? 'block' : 'none';
-  document.getElementById('mode-article').style.display = mode === 'article' ? 'block' : 'none';
-  document.getElementById('tab-yt').classList.toggle('active',      mode === 'yt');
-  document.getElementById('tab-article').classList.toggle('active', mode === 'article');
+  document.getElementById('mode-yt').style.display         = mode === 'yt'         ? 'block' : 'none';
+  document.getElementById('mode-article').style.display    = mode === 'article'    ? 'block' : 'none';
+  document.getElementById('mode-transcript').style.display = mode === 'transcript' ? 'block' : 'none';
+  document.getElementById('tab-yt').classList.toggle('active',         mode === 'yt');
+  document.getElementById('tab-article').classList.toggle('active',    mode === 'article');
+  document.getElementById('tab-transcript').classList.toggle('active', mode === 'transcript');
+}
+
+// ── Generate from raw transcript ─────────────────────────────────────────────
+async function generateFromRawTranscript() {
+  const transcript = document.getElementById('raw-transcript-paste').value.trim();
+  if (!transcript) { alert('Please paste a transcript first.'); return; }
+
+  const btn = document.getElementById('transcript-btn');
+  btn.disabled = true;
+  document.getElementById('ig-card').style.display = 'none';
+  document.getElementById('thumb-card').style.display = 'none';
+  document.getElementById('claude-card').style.display = 'none';
+
+  await runGeneration(transcript, 'transcript');
+  btn.disabled = false;
 }
 
 // ── Generate from pasted article (skips article rewrite, goes straight to slides) ──
