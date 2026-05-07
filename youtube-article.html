@@ -520,7 +520,7 @@
   <!-- Solid background -->
   <div id="thumb-bg" style="position:absolute;inset:0;background:#1A2832;"></div>
   <!-- Photo: background-image so html2canvas respects background-size:cover (img object-fit not supported) -->
-  <div id="thumb-photo-wrap" style="position:absolute;top:0;bottom:0;right:0;width:56%;background-image:url('/cutouts/cam1.png');background-size:cover;background-position:center center;"></div>
+  <div id="thumb-photo-wrap" style="position:absolute;top:0;bottom:0;right:0;width:56%;background-image:url('/cutouts/cam1.png');background-size:cover;background-position:left center;"></div>
   <!-- Gradient: fades photo into bg -->
   <div id="thumb-gradient" style="position:absolute;inset:0;background:linear-gradient(to right, #1A2832 36%, rgba(26,40,50,0.75) 58%, transparent 78%);"></div>
   <!-- Text: left 62%, centered vertically -->
@@ -1028,7 +1028,7 @@ async function regenThumb() {
   const photoUrl = '/cutouts/' + photoName + '.png';
   photoWrap.style.backgroundImage = `url('${photoUrl}')`;
   photoWrap.style.backgroundSize = 'cover';
-  photoWrap.style.backgroundPosition = 'top center';
+  photoWrap.style.backgroundPosition = 'left center';
   document.getElementById('thumb-l1').textContent = line1;
   document.getElementById('thumb-l2').textContent = line2;
 
