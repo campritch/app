@@ -285,6 +285,55 @@
     .ig-slide__tag { display: none; }
     .ig-slide__dot { display: none; }
 
+    /* ── Theme 2: white editorial ── */
+    .ig-t2 {
+      width: 360px; height: 450px;
+      background: #ffffff;
+      border-radius: 16px;
+      display: flex; flex-direction: column;
+      padding: 28px 28px 24px;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+      color: #000000;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #E8E8E8;
+    }
+    .ig-t2__top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 20px; flex-shrink: 0;
+    }
+    .ig-t2__logo { height: 18px; width: auto; display: block; }
+    .ig-t2__num {
+      font-size: 13px; font-weight: 700; color: #F06060;
+      font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+    }
+    .ig-t2__accent-bar {
+      width: 32px; height: 3px; background: #F06060;
+      border-radius: 2px; margin-bottom: 20px; flex-shrink: 0;
+    }
+    .ig-t2__eyebrow {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #F06060; margin-bottom: 10px; flex-shrink: 0;
+    }
+    .ig-t2__headline {
+      font-size: 26px; font-weight: 800; line-height: 1.12;
+      letter-spacing: -0.025em; color: #000000;
+      margin: 0; flex-shrink: 0;
+    }
+    .ig-t2__headline em { font-style: normal; color: #F06060; }
+    .ig-t2__body {
+      margin-top: 14px; font-size: 13px; font-weight: 400;
+      line-height: 1.55; color: #5C5C5C; flex-shrink: 0;
+    }
+    .ig-t2__footer {
+      margin-top: auto; padding-top: 16px;
+      border-top: 1px solid #E8E8E8; flex-shrink: 0;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .ig-t2__url { font-size: 9.5px; font-weight: 700; color: #000; letter-spacing: 0.01em; }
+    .ig-t2__fwd { font-size: 13px; font-weight: 700; color: #F06060; }
+
     /* Caption box */
     .ig-caption-box {
       background: var(--pill-bg); border-radius: 12px; padding: 20px 24px;
@@ -408,7 +457,11 @@
   <div class="card" id="ig-card" style="display:none;">
     <div class="card__header">
       <span class="card__label">Instagram Carousel</span>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div class="chip-row" style="margin:0;">
+          <button class="chip active" id="theme-btn-1" onclick="setTheme(1)">Theme 1</button>
+          <button class="chip" id="theme-btn-2" onclick="setTheme(2)">Theme 2</button>
+        </div>
         <button class="btn-outline" onclick="downloadAllSlides()">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 5l3 3 3-3M1 10h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Download all
@@ -524,7 +577,7 @@
   <!-- Gradient: fades photo into bg -->
   <div id="thumb-gradient" style="position:absolute;inset:0;background:linear-gradient(to right, #1A2832 36%, rgba(26,40,50,0.75) 58%, transparent 78%);"></div>
   <!-- Text: left 62%, centered vertically -->
-  <div id="thumb-text" style="position:absolute;top:0;bottom:0;left:0;width:62%;display:flex;flex-direction:column;justify-content:center;padding:36px 40px;box-sizing:border-box;">
+  <div id="thumb-text" style="position:absolute;top:0;bottom:0;left:0;width:62%;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:36px 40px;box-sizing:border-box;">
     <div id="thumb-l1" style="font-weight:800;font-size:34px;line-height:1.1;color:#ffffff;letter-spacing:-0.025em;margin-bottom:12px;text-transform:uppercase;"></div>
     <div id="thumb-l2-wrap" style="display:inline-flex;">
       <span id="thumb-l2" style="background:#F06060;font-weight:800;font-size:42px;line-height:1.15;color:#ffffff;letter-spacing:-0.025em;padding:5px 14px 8px;display:inline-block;text-transform:uppercase;border-radius:4px;"></span>
@@ -1160,9 +1213,51 @@ function buildSlide(slide, index) {
     </div>`;
 }
 
+// ── Theme 2 builder ──────────────────────────────────────────────────────────
+function buildSlideTheme2(slide, index) {
+  const labels = ['01', '02', '03', '04'];
+  return `
+    <div class="ig-slide-wrap">
+      <div class="ig-slide-lbl">Slide ${index + 1}</div>
+      <div class="ig-t2" id="ig-slide-${index}">
+
+        <div class="ig-t2__top">
+          <img src="/spotsnow-logo.png" alt="SpotsNow" class="ig-t2__logo" crossorigin="anonymous" />
+          <span class="ig-t2__num">${labels[index]}</span>
+        </div>
+
+        <div class="ig-t2__accent-bar"></div>
+
+        ${slide.eyebrow ? `<div class="ig-t2__eyebrow">${slide.eyebrow}</div>` : ''}
+        <p class="ig-t2__headline">${headlineHtml(slide.headline)}</p>
+        ${slide.body ? `<p class="ig-t2__body">${slide.body}</p>` : ''}
+
+        <div class="ig-t2__footer">
+          <span class="ig-t2__url">www.spotsnow.io</span>
+          <span class="ig-t2__fwd" style="color:#F06060;">&#8594;</span>
+        </div>
+
+      </div>
+      <button class="ig-dl-btn" onclick="downloadSlide(${index})">Download PNG</button>
+    </div>`;
+}
+
+// ── Theme switcher ────────────────────────────────────────────────────────────
+let activeTheme = 1;
+let lastIgData = null;
+
+function setTheme(n) {
+  activeTheme = n;
+  document.getElementById('theme-btn-1').classList.toggle('active', n === 1);
+  document.getElementById('theme-btn-2').classList.toggle('active', n === 2);
+  if (lastIgData) renderSlides(lastIgData);
+}
+
 function renderSlides(igData) {
+  lastIgData = igData;
   const row = document.getElementById('ig-slides-row');
-  row.innerHTML = igData.slides.map((s, i) => buildSlide(s, i)).join('');
+  const builder = activeTheme === 2 ? buildSlideTheme2 : buildSlide;
+  row.innerHTML = igData.slides.map((s, i) => builder(s, i)).join('');
   document.getElementById('ig-caption-text').textContent = igData.caption;
   document.getElementById('ig-card').style.display = 'block';
 }
@@ -1170,7 +1265,7 @@ function renderSlides(igData) {
 async function downloadSlide(index) {
   const el = document.getElementById(`ig-slide-${index}`);
   // Render at 3x = 1080px from 360px
-  const canvas = await html2canvas(el, { scale: 3, useCORS: true, backgroundColor: null });
+  const canvas = await html2canvas(el, { scale: 3, useCORS: true, backgroundColor: '#ffffff' });
   const a = document.createElement('a');
   a.download = `spotsnow-slide-${index + 1}.png`;
   a.href = canvas.toDataURL('image/png');
