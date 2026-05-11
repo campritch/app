@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotsNow Wiki</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #17212b;
+      --coral: #ff6267;
+      --grey-1: #8a95a3;
+      --text-primary: #17212b;
+      --text-secondary: #5a6472;
+      --border-light: #dee0e4;
+      --link: #1a4ea6;
+      --link-visited: #6b3aa0;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.55;
+      color: var(--text-primary); background: #ffffff;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* TOP BAR */
+    .top-bar {
+      position: sticky; top: 0; z-index: 200;
+      height: 64px; display: flex; align-items: center;
+      padding: 0 24px; background: #fff;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .top-bar__left { display: flex; align-items: center; gap: 12px; }
+    .top-bar__logo { display: flex; align-items: center; text-decoration: none; }
+    .top-bar__logo img { height: 24px; width: auto; }
+    .top-bar__divider { width: 1px; height: 18px; background: var(--border-light); }
+    .top-bar__title { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+
+    /* PAGE */
+    .page {
+      max-width: 920px; margin: 0 auto;
+      padding: 32px 24px 80px;
+    }
+    .page__intro {
+      margin: 0 0 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .page__intro h1 {
+      margin: 0 0 4px;
+      font-size: 22px; font-weight: 700; color: var(--text-primary);
+      letter-spacing: -0.3px;
+    }
+    .page__intro p {
+      margin: 0; font-size: 13px; color: var(--grey-1);
+    }
+
+    /* SECTIONS */
+    .section { margin-bottom: 26px; }
+    .section h2 {
+      margin: 0 0 8px;
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      color: var(--coral);
+    }
+    .section ul {
+      margin: 0; padding: 0;
+      list-style: none;
+      column-count: 2;
+      column-gap: 32px;
+    }
+    .section li {
+      break-inside: avoid;
+      padding: 4px 0;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .section a {
+      color: var(--link);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .section a:hover { text-decoration: underline; }
+    .section a:visited { color: var(--link-visited); }
+    .section .desc {
+      color: var(--grey-1);
+      font-size: 12px;
+      font-weight: 400;
+    }
+    .section .lock {
+      display: inline-block;
+      font-size: 9px; font-weight: 600;
+      background: #f3f4f6; color: var(--grey-1);
+      padding: 1px 5px; border-radius: 4px;
+      letter-spacing: 0.3px; text-transform: uppercase;
+      margin-left: 4px; vertical-align: 1px;
+    }
+
+    @media (max-width: 600px) {
+      .section ul { column-count: 1; }
+      .page { padding: 24px 16px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar__left">
+    <a class="top-bar__logo" href="/nav">
+      <img src="spotsnow-logo.png" alt="SpotsNow" />
+    </a>
+    <div class="top-bar__divider"></div>
+    <span class="top-bar__title">Wiki</span>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="page__intro">
+    <h1>SpotsNow Wiki</h1>
+    <p>Every page, tool, and draft in one place.</p>
+  </div>
+
+  <div class="section">
+    <h2>Advertiser tools</h2>
+    <ul>
+      <li><a href="/pixel-setup">Magellan Pixel Setup</a> &middot; <span class="desc">Install + configure attribution pixel</span></li>
+      <li><a href="/talking-points">Talking Points Generator</a> &middot; <span class="desc">Auto-draft host talking points from a campaign URL</span></li>
+      <li><a href="/submit-creative">Submit Creative</a> &middot; <span class="desc">Upload scripts + assets for an upcoming flight</span></li>
+      <li><a href="/ear-check">Ear Check</a> &middot; <span class="desc">Scan transcripts for brand mentions</span></li>
+      <li><a href="/youtube-article">YouTube to Article</a> &middot; <span class="desc">Turn a video into a publishable article</span></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Internal ops</h2>
+    <ul>
+      <li><a href="/ad-ops">Ad Ops</a> &middot; <span class="desc">Brand + flight manager</span></li>
+      <li><a href="/proposal">Proposal Builder</a> &middot; <span class="desc">Build new advertiser proposals</span></li>
+      <li><a href="/chat">SpotsNow Intelligence</a> &middot; <span class="desc">Chat with company data + context</span></li>
+      <li><a href="/bi">BI Dashboard</a><span class="lock">Locked</span> &middot; <span class="desc">GTM, revenue, pipeline metrics</span></li>
+      <li><a href="/media-plans.html">Media Plans</a> &middot; <span class="desc">Internal media plan tool</span></li>
+      <li><a href="/ceo-dashboard.html">CEO Dashboard</a> &middot; <span class="desc">Single-pane operating view</span></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Strategy &amp; fundraising</h2>
+    <ul>
+      <li><a href="/strategy">Strategy Agent</a><span class="lock">Locked</span> &middot; <span class="desc">Outreach call brain. Fathom + company context</span></li>
+      <li><a href="/investors">Investor Pitch Deck</a> &middot; <span class="desc">Latest seed deck</span></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Brand &amp; marketing</h2>
+    <ul>
+      <li><a href="/brand">Brand Guidelines</a> &middot; <span class="desc">Colors, type, hand-drawn accents</span></li>
+      <li><a href="/managed">Managed (Ad Ops as a Service)</a> &middot; <span class="desc">Public landing for SpotsNow Managed</span></li>
+      <li><a href="/partners">Partners</a> &middot; <span class="desc">Show partner program landing</span></li>
+      <li><a href="/titans">Titans of Advertising</a> &middot; <span class="desc">Long-form brand piece</span></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>VC &amp; founder programs</h2>
+    <ul>
+      <li><a href="/vcfounderprogram">VC Founder Program</a> &middot; <span class="desc">Original landing, a16z angle</span></li>
+      <li><a href="/vcoffer">VC Offer</a> &middot; <span class="desc">Carbon copy with a16z removed</span></li>
+      <li><a href="/vc-offer">VC Offer (legacy)</a> &middot; <span class="desc">Older /vc-offer route</span></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Homepage drafts</h2>
+    <ul>
+      <li><a href="/home.html">home.html</a></li>
+      <li><a href="/homepage.html">homepage.html</a></li>
+      <li><a href="/new-homepage.html">new-homepage.html</a></li>
+      <li><a href="/landing.html">landing.html</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Design references &amp; mocks</h2>
+    <ul>
+      <li><a href="/campaign.html">Campaign (design system base)</a> &middot; <span class="desc">Canonical SpotsNow component library</span></li>
+      <li><a href="/recent-episodes.html">Recent Episodes</a></li>
+      <li><a href="/empty-state.html">Empty State</a></li>
+      <li><a href="/profile-card-mock.html">Profile Card Mock</a></li>
+    </ul>
+  </div>
+
+</div>
+
+</body>
+</html>

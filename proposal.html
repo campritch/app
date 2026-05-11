@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotsNow — New Proposal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --dark: #0e1323;
+      --grey-1: #707481;
+      --text-primary: #252733;
+      --text-secondary: #5a5f6e;
+      --border: #dee0e4;
+      --border-light: #e8e8e8;
+      --white: #ffffff;
+      --coral: #ff6b6b;
+      --btn-dark: #111111;
+      --green-bg: #d6f0e0;
+      --green-text: #0d6832;
+      --pill-bg: #f3f4f6;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.5;
+      color: var(--dark); background: #f5f5f3;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font-family: inherit; cursor: pointer; }
+    input, textarea, select { font-family: inherit; }
+
+    /* ── TOP BAR ── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 200;
+      height: 56px; display: flex; align-items: center;
+      padding: 0 28px; background: var(--white);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .top-bar__logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 800; font-size: 15px; color: var(--dark);
+      text-decoration: none; flex-shrink: 0; letter-spacing: -0.3px;
+    }
+    .logo-mark {
+      width: 22px; height: 22px; border-radius: 6px;
+      background: var(--coral); display: flex; align-items: center; justify-content: center;
+    }
+    .logo-mark svg { display: block; }
+    .top-bar__center {
+      flex: 1; text-align: center; font-size: 14px; font-weight: 600; color: var(--text-primary);
+    }
+    .top-bar__actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .icon-btn {
+      position: relative; width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; border-radius: 8px; color: var(--dark);
+    }
+    .icon-btn:hover { background: var(--pill-bg); }
+    .avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--coral), #e55a5a);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 12px; font-weight: 700;
+    }
+    .notif-dot {
+      position: absolute; top: 6px; right: 6px; width: 8px; height: 8px;
+      border-radius: 50%; background: var(--coral); border: 2px solid white;
+    }
+
+    /* ── PAGE ── */
+    .page {
+      max-width: 1136px; margin: 0 auto; width: calc(100% - 48px);
+      padding: 24px 0 60px;
+    }
+
+    /* ── PROGRESS BAR ── */
+    .progress-bar {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0; margin-bottom: 28px; padding: 0 20px;
+    }
+    .progress-step {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; font-weight: 500; color: var(--grey-1);
+      transition: color 0.3s;
+    }
+    .progress-step.active { color: var(--text-primary); font-weight: 600; }
+    .progress-step.done { color: var(--green-text); }
+    .progress-step__num {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      background: var(--pill-bg); color: var(--grey-1);
+      transition: all 0.3s;
+    }
+    .progress-step.active .progress-step__num {
+      background: var(--btn-dark); color: white;
+    }
+    .progress-step.done .progress-step__num {
+      background: var(--green-bg); color: var(--green-text);
+    }
+    .progress-line {
+      flex: 0 0 60px; height: 2px; background: var(--border-light);
+      margin: 0 12px; transition: background 0.3s;
+    }
+    .progress-line.done { background: var(--green-bg); }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--white);
+      border-radius: 20px;
+      border: 1px solid var(--border-light);
+      padding: 40px;
+    }
+
+    /* ── STEP SECTIONS ── */
+    .step-section {
+      display: none;
+      animation: fadeIn 0.35s ease;
+    }
+    .step-section.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── STEP HEADER ── */
+    .step-header { margin-bottom: 28px; }
+    .step-header h2 {
+      margin: 0 0 4px; font-size: 22px; font-weight: 700; color: var(--text-primary);
+    }
+    .step-header p {
+      margin: 0; font-size: 14px; color: var(--text-secondary);
+    }
+
+    /* ── SEARCH INPUT ── */
+    .search-wrap {
+      position: relative; margin-bottom: 20px;
+    }
+    .search-wrap svg {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--grey-1);
+    }
+    .search-input {
+      width: 100%; height: 44px; padding: 0 16px 0 42px;
+      border: 1px solid var(--border); border-radius: 10px;
+      font-size: 14px; color: var(--text-primary);
+      outline: none; transition: border-color 0.2s;
+      background: var(--white);
+    }
+    .search-input:focus { border-color: var(--btn-dark); }
+    .search-input::placeholder { color: var(--grey-1); }
+
+    /* ── PLAN CARDS ── */
+    .plan-grid { display: flex; flex-direction: column; gap: 12px; }
+    .plan-card {
+      display: flex; align-items: center; gap: 20px;
+      padding: 20px 24px; border-radius: 14px;
+      border: 2px solid var(--border-light);
+      cursor: pointer; transition: all 0.2s;
+      background: var(--white);
+    }
+    .plan-card:hover { border-color: var(--border); background: #fafafa; }
+    .plan-card.selected { border-color: var(--coral); background: #fff8f8; }
+    .plan-card__radio {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2px solid var(--border); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .plan-card.selected .plan-card__radio {
+      border-color: var(--coral);
+    }
+    .plan-card__radio-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--coral); transform: scale(0);
+      transition: transform 0.2s;
+    }
+    .plan-card.selected .plan-card__radio-dot { transform: scale(1); }
+    .plan-card__info { flex: 1; min-width: 0; }
+    .plan-card__name {
+      font-size: 15px; font-weight: 700; color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+    .plan-card__meta {
+      display: flex; flex-wrap: wrap; gap: 6px 16px;
+      font-size: 12px; color: var(--text-secondary);
+    }
+    .plan-card__meta span { display: flex; align-items: center; gap: 4px; }
+    .plan-card__thumbs {
+      display: flex; gap: -4px; flex-shrink: 0;
+    }
+    .plan-card__thumb {
+      width: 36px; height: 36px; border-radius: 8px;
+      border: 2px solid white; margin-left: -6px;
+    }
+    .plan-card__thumb:first-child { margin-left: 0; }
+
+    /* ── BUTTONS ── */
+    .btn-row {
+      display: flex; justify-content: flex-end; gap: 12px;
+      margin-top: 32px; padding-top: 24px;
+      border-top: 1px solid var(--border-light);
+    }
+    .btn {
+      height: 44px; padding: 0 28px; border-radius: 8px;
+      font-size: 14px; font-weight: 600; border: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--coral); color: white;
+    }
+    .btn-primary:hover { background: #e55a5a; }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-secondary {
+      background: var(--pill-bg); color: var(--text-primary);
+    }
+    .btn-secondary:hover { background: var(--border-light); }
+    .btn-outline {
+      background: none; border: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+    .btn-outline:hover { background: var(--pill-bg); }
+    .btn-dark {
+      background: var(--btn-dark); color: white;
+    }
+    .btn-dark:hover { background: #222; }
+    .btn-green {
+      background: var(--green-text); color: white;
+    }
+    .btn-green:hover { background: #0b5a2b; }
+    .btn-lg { height: 50px; padding: 0 36px; font-size: 15px; border-radius: 10px; }
+
+    /* ── STEP 2: CUSTOMIZE ── */
+    .customize-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
+    }
+    .form-group { margin-bottom: 20px; }
+    .form-label {
+      display: block; font-size: 13px; font-weight: 600;
+      color: var(--text-primary); margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%; height: 42px; padding: 0 14px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 14px; color: var(--text-primary);
+      outline: none; transition: border-color 0.2s;
+      background: var(--white);
+    }
+    .form-input:focus { border-color: var(--btn-dark); }
+    .form-textarea {
+      width: 100%; padding: 12px 14px; min-height: 100px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 14px; color: var(--text-primary);
+      outline: none; resize: vertical; transition: border-color 0.2s;
+      background: var(--white); line-height: 1.5;
+    }
+    .form-textarea:focus { border-color: var(--btn-dark); }
+
+    /* Toggle */
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid var(--border-light);
+    }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-label { font-size: 14px; color: var(--text-primary); }
+    .toggle {
+      position: relative; width: 40px; height: 22px;
+      background: var(--pill-bg); border-radius: 11px;
+      cursor: pointer; transition: background 0.2s;
+      border: none; flex-shrink: 0;
+    }
+    .toggle.on { background: var(--green-text); }
+    .toggle-circle {
+      position: absolute; top: 2px; left: 2px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: white; transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+    .toggle.on .toggle-circle { transform: translateX(18px); }
+
+    /* Upload area */
+    .upload-area {
+      border: 2px dashed var(--border); border-radius: 10px;
+      padding: 24px; text-align: center; color: var(--grey-1);
+      font-size: 13px; cursor: pointer; transition: all 0.2s;
+    }
+    .upload-area:hover { border-color: var(--coral); color: var(--text-secondary); }
+    .upload-area svg { margin-bottom: 8px; }
+
+    /* Mini preview */
+    .mini-preview {
+      background: #fafafa; border: 1px solid var(--border-light);
+      border-radius: 14px; padding: 24px; position: sticky; top: 88px;
+    }
+    .mini-preview__header {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--grey-1); margin-bottom: 16px;
+    }
+    .mini-preview__title {
+      font-size: 16px; font-weight: 700; color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .mini-preview__sub {
+      font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;
+    }
+    .mini-preview__msg {
+      font-size: 12px; color: var(--text-secondary); line-height: 1.5;
+      margin-bottom: 16px; padding: 12px; background: white;
+      border-radius: 8px; border: 1px solid var(--border-light);
+    }
+    .mini-preview__stats {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .mini-stat {
+      padding: 10px 12px; background: white; border-radius: 8px;
+      border: 1px solid var(--border-light);
+    }
+    .mini-stat__val { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+    .mini-stat__label { font-size: 10px; color: var(--grey-1); margin-top: 2px; }
+    .mini-preview__badge {
+      display: flex; align-items: center; gap: 6px; margin-top: 12px;
+      font-size: 11px; color: var(--grey-1);
+    }
+    .mini-preview__badge-hidden { display: none; }
+
+    /* ── STEP 3: PROPOSAL PREVIEW ── */
+    .proposal {
+      max-width: 820px; margin: 0 auto;
+    }
+    .proposal-header {
+      text-align: center; margin-bottom: 40px; padding-bottom: 32px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .proposal-header__logo-area {
+      width: 60px; height: 60px; margin: 0 auto 16px;
+      border-radius: 12px; background: var(--pill-bg);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--grey-1); font-size: 11px; font-weight: 600;
+    }
+    .proposal-header__tag {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--coral); margin-bottom: 8px;
+    }
+    .proposal-header__title {
+      font-size: 26px; font-weight: 800; color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+    .proposal-header__sub {
+      font-size: 14px; color: var(--text-secondary);
+    }
+
+    .proposal-section { margin-bottom: 36px; }
+    .proposal-section__title {
+      font-size: 16px; font-weight: 700; color: var(--text-primary);
+      margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+    }
+    .proposal-intro {
+      font-size: 15px; color: var(--text-secondary); line-height: 1.7;
+      margin-bottom: 32px; padding: 20px 24px;
+      background: #fafafa; border-radius: 12px; border-left: 3px solid var(--coral);
+    }
+
+    /* Stats grid */
+    .stat-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    }
+    .stat-card {
+      padding: 20px; background: #fafafa; border-radius: 12px;
+      text-align: center;
+    }
+    .stat-card__val {
+      font-size: 22px; font-weight: 800; color: var(--text-primary);
+    }
+    .stat-card__label {
+      font-size: 12px; color: var(--text-secondary); margin-top: 4px;
+    }
+
+    /* Show cards */
+    .show-card {
+      display: flex; gap: 20px; padding: 24px;
+      border: 1px solid var(--border-light); border-radius: 14px;
+      margin-bottom: 12px; transition: all 0.2s;
+    }
+    .show-card:hover { border-color: var(--border); }
+    .show-card__art {
+      width: 72px; height: 72px; border-radius: 12px;
+      flex-shrink: 0;
+    }
+    .show-card__info { flex: 1; min-width: 0; }
+    .show-card__name {
+      font-size: 15px; font-weight: 700; color: var(--text-primary);
+      margin-bottom: 6px; display: flex; align-items: center; gap: 10px;
+    }
+    .match-badge {
+      font-size: 10px; font-weight: 700; padding: 3px 8px;
+      border-radius: 6px; background: var(--green-bg); color: var(--green-text);
+    }
+    .show-card__cats {
+      display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px;
+    }
+    .cat-pill {
+      font-size: 11px; font-weight: 500; padding: 3px 10px;
+      border-radius: 6px; background: var(--pill-bg); color: var(--text-secondary);
+    }
+    .show-card__stats {
+      display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px;
+      color: var(--text-secondary); margin-bottom: 8px;
+    }
+    .show-card__stats strong { color: var(--text-primary); font-weight: 600; }
+    .show-card__why {
+      font-size: 13px; color: var(--text-secondary); font-style: italic;
+      line-height: 1.5;
+    }
+
+    /* Budget table */
+    .budget-table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+    }
+    .budget-table th {
+      text-align: left; padding: 12px 16px; font-weight: 600;
+      color: var(--text-secondary); font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.5px; border-bottom: 2px solid var(--border-light);
+      background: #fafafa;
+    }
+    .budget-table th:first-child { border-radius: 8px 0 0 0; }
+    .budget-table th:last-child { border-radius: 0 8px 0 0; }
+    .budget-table td {
+      padding: 14px 16px; border-bottom: 1px solid var(--border-light);
+      color: var(--text-primary);
+    }
+    .budget-table tr:last-child td { border-bottom: none; }
+    .budget-table .total-row td {
+      font-weight: 700; border-top: 2px solid var(--border);
+      background: #fafafa;
+    }
+    .budget-table .total-row td:first-child { border-radius: 0 0 0 8px; }
+    .budget-table .total-row td:last-child { border-radius: 0 0 8px 0; }
+
+    /* ROAS / projections */
+    .estimate-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    }
+    .estimate-card {
+      padding: 20px; background: #fafafa; border-radius: 12px;
+      text-align: center;
+    }
+    .estimate-card__val {
+      font-size: 20px; font-weight: 800; color: var(--coral);
+    }
+    .estimate-card__label {
+      font-size: 12px; color: var(--text-secondary); margin-top: 4px;
+    }
+
+    /* Last-minute inventory */
+    .lmi-box {
+      padding: 24px; border-radius: 14px;
+      background: linear-gradient(135deg, #fff8f0, #fff3e6);
+      border: 1px solid #ffd9a0;
+    }
+    .lmi-box__title {
+      font-size: 14px; font-weight: 700; color: #b45309;
+      margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+    }
+    .lmi-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid rgba(180,83,9,0.1);
+    }
+    .lmi-item:last-child { border-bottom: none; }
+    .lmi-item__name { font-weight: 600; color: var(--text-primary); }
+    .lmi-item__detail { font-size: 12px; color: var(--text-secondary); }
+    .lmi-item__discount {
+      font-size: 13px; font-weight: 700; color: #b45309;
+      background: #fff0d4; padding: 4px 12px; border-radius: 6px;
+    }
+
+    .proposal-footer {
+      text-align: center; padding-top: 32px; margin-top: 40px;
+      border-top: 1px solid var(--border-light);
+      font-size: 12px; color: var(--grey-1);
+    }
+    .proposal-footer__brand {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    /* ── STEP 4: SEND ── */
+    .send-grid {
+      display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 32px;
+    }
+    .email-chips {
+      display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 12px;
+      border: 1px solid var(--border); border-radius: 8px;
+      min-height: 44px; align-items: center; cursor: text;
+      background: var(--white); transition: border-color 0.2s;
+    }
+    .email-chips:focus-within { border-color: var(--btn-dark); }
+    .email-chip {
+      display: flex; align-items: center; gap: 4px;
+      padding: 4px 10px; background: var(--pill-bg); border-radius: 6px;
+      font-size: 13px; color: var(--text-primary);
+    }
+    .email-chip__x {
+      cursor: pointer; font-size: 14px; color: var(--grey-1);
+      line-height: 1; margin-left: 2px; font-weight: 600;
+    }
+    .email-chip__x:hover { color: var(--coral); }
+    .email-input {
+      border: none; outline: none; font-size: 14px;
+      flex: 1; min-width: 180px; background: transparent;
+      color: var(--text-primary);
+    }
+    .email-input::placeholder { color: var(--grey-1); }
+
+    .send-summary {
+      background: #fafafa; border-radius: 14px; padding: 24px;
+      border: 1px solid var(--border-light);
+    }
+    .send-summary__title {
+      font-size: 13px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--grey-1); margin-bottom: 16px;
+    }
+    .send-summary__row {
+      display: flex; justify-content: space-between; padding: 10px 0;
+      border-bottom: 1px solid var(--border-light); font-size: 13px;
+    }
+    .send-summary__row:last-child { border-bottom: none; }
+    .send-summary__label { color: var(--text-secondary); }
+    .send-summary__val { font-weight: 600; color: var(--text-primary); }
+
+    /* Success state */
+    .success-state {
+      text-align: center; padding: 60px 40px;
+      display: none;
+    }
+    .success-state.visible { display: block; }
+    .success-check {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: var(--green-bg); margin: 0 auto 20px;
+      display: flex; align-items: center; justify-content: center;
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn {
+      0% { transform: scale(0); }
+      100% { transform: scale(1); }
+    }
+    .success-check svg { color: var(--green-text); }
+    .success-state h3 {
+      font-size: 22px; font-weight: 700; color: var(--text-primary);
+      margin: 0 0 8px;
+    }
+    .success-state p {
+      font-size: 14px; color: var(--text-secondary); margin: 0 0 28px;
+      max-width: 400px; margin-left: auto; margin-right: auto;
+    }
+    .success-actions {
+      display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    }
+
+    /* ── RECIPIENT VIEW ── */
+    .recipient-overlay {
+      display: none; position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+      overflow-y: auto;
+    }
+    .recipient-overlay.visible { display: block; }
+    .recipient-view {
+      max-width: 860px; margin: 40px auto; width: calc(100% - 48px);
+      background: var(--white); border-radius: 20px; padding: 48px;
+      position: relative;
+      animation: slideUp 0.4s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .recipient-close {
+      position: absolute; top: 16px; right: 16px;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--pill-bg); border: none;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: var(--text-secondary); cursor: pointer;
+    }
+    .recipient-close:hover { background: var(--border-light); }
+    .recipient-actions {
+      display: flex; gap: 12px; justify-content: center; margin-top: 36px;
+    }
+    .changes-textarea {
+      width: 100%; padding: 14px; border: 1px solid var(--border);
+      border-radius: 10px; font-size: 14px; min-height: 100px;
+      resize: vertical; outline: none; margin-top: 12px;
+      display: none;
+    }
+    .changes-textarea.visible { display: block; }
+
+    /* Confetti */
+    .confetti-wrap {
+      position: fixed; inset: 0; pointer-events: none; z-index: 600;
+      display: none;
+    }
+    .confetti-wrap.visible { display: block; }
+    .confetti-piece {
+      position: absolute; width: 10px; height: 10px;
+      border-radius: 2px;
+      animation: confettiFall 2.5s ease-out forwards;
+    }
+    @keyframes confettiFall {
+      0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* Approve success */
+    .approve-success {
+      text-align: center; padding: 40px; display: none;
+    }
+    .approve-success.visible { display: block; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .card { padding: 24px; }
+      .customize-grid { grid-template-columns: 1fr; }
+      .send-grid { grid-template-columns: 1fr; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .estimate-grid { grid-template-columns: 1fr; }
+      .progress-line { flex: 0 0 20px; margin: 0 4px; }
+      .progress-step { font-size: 11px; gap: 6px; }
+      .progress-step__num { width: 24px; height: 24px; font-size: 11px; }
+      .proposal-header__title { font-size: 20px; }
+      .show-card { flex-direction: column; gap: 12px; }
+      .recipient-view { padding: 28px; margin: 20px auto; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <a class="top-bar__logo" href="#">
+    <span class="logo-mark">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M2 12c0-3 2-6 5-7s6 0 8 2c2-2 5-3 8-2s5 4 5 7-2 6-5 8-6 1-8-1c-2 2-5 3-8 1S2 15 2 12z" fill="white" opacity=".9"/></svg>
+    </span>
+    SpotsNow
+  </a>
+  <div class="top-bar__center">New Proposal</div>
+  <div class="top-bar__actions">
+    <button class="icon-btn">
+      <span class="notif-dot"></span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </button>
+    <div class="avatar">CP</div>
+  </div>
+</div>
+
+<!-- PAGE -->
+<div class="page">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar">
+    <div class="progress-step active" data-step="1">
+      <span class="progress-step__num">1</span> Select Plan
+    </div>
+    <div class="progress-line" data-line="1"></div>
+    <div class="progress-step" data-step="2">
+      <span class="progress-step__num">2</span> Customize
+    </div>
+    <div class="progress-line" data-line="2"></div>
+    <div class="progress-step" data-step="3">
+      <span class="progress-step__num">3</span> Preview
+    </div>
+    <div class="progress-line" data-line="3"></div>
+    <div class="progress-step" data-step="4">
+      <span class="progress-step__num">4</span> Send
+    </div>
+  </div>
+
+  <!-- MAIN CARD -->
+  <div class="card">
+
+    <!-- STEP 1: SELECT PLAN -->
+    <div class="step-section active" id="step1">
+      <div class="step-header">
+        <h2>Select a Media Plan</h2>
+        <p>Choose an existing plan to generate your proposal</p>
+      </div>
+      <div class="search-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" class="search-input" id="planSearch" placeholder="Search media plans..." />
+      </div>
+      <div class="plan-grid" id="planGrid"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btnNext1" disabled onclick="goToStep(2)">
+          Next
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 2: CUSTOMIZE -->
+    <div class="step-section" id="step2">
+      <div class="step-header">
+        <h2>Customize Proposal</h2>
+        <p>Tailor the details before generating your proposal</p>
+      </div>
+      <div class="customize-grid">
+        <div>
+          <div class="form-group">
+            <label class="form-label">Campaign Name</label>
+            <input type="text" class="form-input" id="campaignName" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Client / Brand Name</label>
+            <input type="text" class="form-input" id="clientName" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contact Name</label>
+            <input type="text" class="form-input" id="contactName" placeholder="e.g. Sarah Chen" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Intro Message</label>
+            <textarea class="form-textarea" id="introMsg">We've put together a tailored podcast advertising campaign based on your brand goals and target audience. Here's what we recommend.</textarea>
+          </div>
+          <div style="margin-top: 24px;">
+            <div class="toggle-row">
+              <span class="toggle-label">Show ROAS estimates</span>
+              <button class="toggle on" id="toggleRoas" onclick="toggleSwitch(this)"><span class="toggle-circle"></span></button>
+            </div>
+            <div class="toggle-row">
+              <span class="toggle-label">Show potential sales projections</span>
+              <button class="toggle" id="toggleSales" onclick="toggleSwitch(this)"><span class="toggle-circle"></span></button>
+            </div>
+            <div class="toggle-row">
+              <span class="toggle-label">Show SpotsNow branding</span>
+              <button class="toggle on" id="toggleBrand" onclick="toggleSwitch(this)"><span class="toggle-circle"></span></button>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top: 20px;">
+            <label class="form-label">Client Logo (optional)</label>
+            <div class="upload-area" id="uploadArea">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <div>Drag & drop or click to upload</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="mini-preview" id="miniPreview">
+            <div class="mini-preview__header">Live Preview</div>
+            <div class="mini-preview__title" id="mpTitle">Campaign Proposal</div>
+            <div class="mini-preview__sub" id="mpSub">Prepared for &mdash;</div>
+            <div class="mini-preview__msg" id="mpMsg">We've put together a tailored podcast advertising campaign based on your brand goals and target audience. Here's what we recommend.</div>
+            <div class="mini-preview__stats" id="mpStats"></div>
+            <div class="mini-preview__badge" id="mpBrand">
+              <span class="logo-mark" style="width:14px;height:14px;border-radius:4px;">
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M2 12c0-3 2-6 5-7s6 0 8 2c2-2 5-3 8-2s5 4 5 7-2 6-5 8-6 1-8-1c-2 2-5 3-8 1S2 15 2 12z" fill="white" opacity=".9"/></svg>
+              </span>
+              Powered by SpotsNow
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="goToStep(1)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg>
+          Back
+        </button>
+        <button class="btn btn-primary" onclick="goToStep(3)">
+          Next
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 3: PREVIEW -->
+    <div class="step-section" id="step3">
+      <div class="step-header" style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <h2>Preview Proposal</h2>
+          <p>Review how your proposal will look to the recipient</p>
+        </div>
+        <button class="btn btn-outline" onclick="openRecipientView()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Preview as recipient
+        </button>
+      </div>
+      <div class="proposal" id="proposalContent"></div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="goToStep(2)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg>
+          Back
+        </button>
+        <button class="btn btn-primary btn-lg" onclick="goToStep(4)">
+          Send Proposal
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 4: SEND -->
+    <div class="step-section" id="step4">
+      <div id="sendForm">
+        <div class="step-header">
+          <h2>Send Proposal</h2>
+          <p>Add recipients and send your polished proposal</p>
+        </div>
+        <div class="send-grid">
+          <div>
+            <div class="form-group">
+              <label class="form-label">Recipient Email(s)</label>
+              <div class="email-chips" id="emailChips" onclick="document.getElementById('emailInput').focus()">
+                <input type="email" class="email-input" id="emailInput" placeholder="Type email and press Enter..." />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Personal Note (optional)</label>
+              <textarea class="form-textarea" id="personalNote" placeholder="Add a personal message that will appear at the top of the email..."></textarea>
+            </div>
+          </div>
+          <div>
+            <div class="send-summary">
+              <div class="send-summary__title">Proposal Summary</div>
+              <div class="send-summary__row">
+                <span class="send-summary__label">Campaign</span>
+                <span class="send-summary__val" id="sumCampaign">--</span>
+              </div>
+              <div class="send-summary__row">
+                <span class="send-summary__label">Client</span>
+                <span class="send-summary__val" id="sumClient">--</span>
+              </div>
+              <div class="send-summary__row">
+                <span class="send-summary__label">Shows</span>
+                <span class="send-summary__val" id="sumShows">--</span>
+              </div>
+              <div class="send-summary__row">
+                <span class="send-summary__label">Budget</span>
+                <span class="send-summary__val" id="sumBudget">--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="goToStep(3)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg>
+            Back
+          </button>
+          <button class="btn btn-primary btn-lg" onclick="sendProposal()">
+            Send Proposal
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="success-state" id="successState">
+        <div class="success-check">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3>Proposal sent successfully!</h3>
+        <p id="successMsg">A link has been sent. You'll be notified when they open it.</p>
+        <div class="success-actions">
+          <button class="btn btn-outline" onclick="openRecipientView()">View Proposal</button>
+          <button class="btn btn-primary" onclick="resetFlow()">Send Another</button>
+          <button class="btn btn-secondary" onclick="window.location.reload()">Back to Dashboard</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /card -->
+</div><!-- /page -->
+
+<!-- RECIPIENT VIEW OVERLAY -->
+<div class="recipient-overlay" id="recipientOverlay">
+  <div class="recipient-view">
+    <button class="recipient-close" onclick="closeRecipientView()">&times;</button>
+    <div id="recipientContent"></div>
+    <div class="recipient-actions" id="recipientActions">
+      <button class="btn btn-green btn-lg" onclick="approveProposal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Approve this plan
+      </button>
+      <button class="btn btn-outline btn-lg" onclick="requestChanges()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Request changes
+      </button>
+    </div>
+    <textarea class="changes-textarea" id="changesTextarea" placeholder="Describe the changes you'd like to see..."></textarea>
+    <div id="changesSubmitRow" style="display:none;margin-top:12px;text-align:center;">
+      <button class="btn btn-primary" onclick="submitChanges()">Submit Feedback</button>
+    </div>
+    <div class="approve-success" id="approveSuccess">
+      <div class="success-check">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h3 style="font-size:22px;font-weight:700;color:var(--text-primary);margin:0 0 8px;">Plan Approved!</h3>
+      <p style="font-size:14px;color:var(--text-secondary);">The campaign team has been notified. You're all set.</p>
+    </div>
+  </div>
+</div>
+
+<!-- CONFETTI -->
+<div class="confetti-wrap" id="confettiWrap"></div>
+
+<script>
+// ── DATA ──
+const plans = [
+  {
+    id: 'ag1-q1',
+    name: 'AG1 — Q1 Podcast Push',
+    brand: 'AG1',
+    shows: 3,
+    reach: '4.2M',
+    budget: 125000,
+    flight: 'Jan 15 – Mar 31, 2026',
+    colors: ['#2d6a4f','#40916c','#52b788'],
+    showData: [
+      { name: 'The Joe Rogan Experience', art: '#1a1a2e', cats: ['Comedy','MMA','Politics'], listeners: '14.5M', cpm: 50, impressions: '29M', why: 'Massive reach with health-curious male 25-44 demo', match: 94, episodes: 12, costPerEp: 4200 },
+      { name: 'Huberman Lab', art: '#0f4c75', cats: ['Health','Science','Neuroscience'], listeners: '4.2M', cpm: 35, impressions: '8.4M', why: 'Deep trust with supplement-aware audience', match: 97, episodes: 8, costPerEp: 4375 },
+      { name: 'The Diary of a CEO', art: '#3c1642', cats: ['Business','Self-improvement'], listeners: '3.8M', cpm: 28, impressions: '7.6M', why: 'Aspirational audience, high purchase intent', match: 91, episodes: 6, costPerEp: 4500 }
+    ]
+  },
+  {
+    id: 'ag-hw',
+    name: 'Athletic Greens — Health & Wellness',
+    brand: 'Athletic Greens',
+    shows: 5,
+    reach: '8.1M',
+    budget: 280000,
+    flight: 'Feb 1 – Apr 30, 2026',
+    colors: ['#006d77','#83c5be','#edf6f9','#ffddd2','#e29578'],
+    showData: [
+      { name: 'Huberman Lab', art: '#0f4c75', cats: ['Health','Science'], listeners: '4.2M', cpm: 35, impressions: '12.6M', why: 'Premier health-focused audience with high supplement affinity', match: 98, episodes: 12, costPerEp: 5000 },
+      { name: 'The Tim Ferriss Show', art: '#2b2d42', cats: ['Business','Health','Lifestyle'], listeners: '3.5M', cpm: 40, impressions: '10.5M', why: 'High-income biohacker audience, strong supplement conversion', match: 95, episodes: 10, costPerEp: 5600 },
+      { name: 'Feel Better, Live More', art: '#386641', cats: ['Health','Wellness'], listeners: '1.8M', cpm: 22, impressions: '5.4M', why: 'Engaged wellness community with strong brand trust', match: 92, episodes: 8, costPerEp: 4200 },
+      { name: 'Rich Roll Podcast', art: '#6b705c', cats: ['Health','Fitness','Plant-based'], listeners: '1.2M', cpm: 25, impressions: '3.6M', why: 'Health-conscious, plant-forward audience alignment', match: 90, episodes: 8, costPerEp: 3750 },
+      { name: 'The Model Health Show', art: '#a68a64', cats: ['Health','Nutrition','Fitness'], listeners: '900K', cpm: 18, impressions: '2.7M', why: 'Deep nutrition focus with loyal listener base', match: 88, episodes: 10, costPerEp: 3200 }
+    ]
+  },
+  {
+    id: 'bh-mh',
+    name: 'BetterHelp — Mental Health Awareness',
+    brand: 'BetterHelp',
+    shows: 4,
+    reach: '5.6M',
+    budget: 175000,
+    flight: 'Mar 1 – May 31, 2026',
+    colors: ['#4361ee','#3a0ca3','#7209b7','#f72585'],
+    showData: [
+      { name: 'Therapy for Black Girls', art: '#7b2cbf', cats: ['Mental Health','Culture'], listeners: '1.5M', cpm: 28, impressions: '4.5M', why: 'Deeply trusted voice in mental health, highly engaged community', match: 96, episodes: 12, costPerEp: 3500 },
+      { name: 'The Happiness Lab', art: '#3a86ff', cats: ['Psychology','Science','Self-help'], listeners: '2.1M', cpm: 30, impressions: '6.3M', why: 'Science-backed mental wellness audience', match: 94, episodes: 10, costPerEp: 4200 },
+      { name: 'On Purpose with Jay Shetty', art: '#fb8500', cats: ['Self-improvement','Mindfulness'], listeners: '3.2M', cpm: 35, impressions: '9.6M', why: 'Massive mindfulness audience with strong action intent', match: 92, episodes: 8, costPerEp: 4800 },
+      { name: 'Unlocking Us with Brene Brown', art: '#e63946', cats: ['Psychology','Vulnerability','Growth'], listeners: '2.8M', cpm: 38, impressions: '8.4M', why: 'Premium audience open to therapy and self-work', match: 91, episodes: 6, costPerEp: 5000 }
+    ]
+  },
+  {
+    id: 'evpn-tech',
+    name: 'ExpressVPN — Tech Audience',
+    brand: 'ExpressVPN',
+    shows: 2,
+    reach: '2.8M',
+    budget: 95000,
+    flight: 'Apr 1 – Jun 30, 2026',
+    colors: ['#da1e37','#1d3557'],
+    showData: [
+      { name: 'Darknet Diaries', art: '#161a30', cats: ['Technology','Cybersecurity','True Crime'], listeners: '1.8M', cpm: 32, impressions: '5.4M', why: 'Privacy-conscious tech audience, perfect VPN alignment', match: 99, episodes: 12, costPerEp: 3800 },
+      { name: 'Syntax — Tasty Web Dev Treats', art: '#f4a261', cats: ['Technology','Web Development'], listeners: '1.0M', cpm: 24, impressions: '3.0M', why: 'Tech-savvy developers who value online privacy tools', match: 93, episodes: 12, costPerEp: 4125 }
+    ]
+  }
+];
+
+let selectedPlan = null;
+let emails = [];
+let currentStep = 1;
+
+// ── INIT ──
+function init() {
+  renderPlans();
+  document.getElementById('planSearch').addEventListener('input', e => {
+    renderPlans(e.target.value);
+  });
+  document.getElementById('emailInput').addEventListener('keydown', handleEmailKey);
+  // Live preview listeners
+  ['campaignName','clientName','introMsg'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateMiniPreview);
+  });
+}
+
+function renderPlans(filter = '') {
+  const grid = document.getElementById('planGrid');
+  const q = filter.toLowerCase();
+  const filtered = plans.filter(p => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q));
+  grid.innerHTML = filtered.map(p => `
+    <div class="plan-card ${selectedPlan?.id === p.id ? 'selected' : ''}" onclick="selectPlan('${p.id}')">
+      <div class="plan-card__radio"><div class="plan-card__radio-dot"></div></div>
+      <div class="plan-card__info">
+        <div class="plan-card__name">${p.name}</div>
+        <div class="plan-card__meta">
+          <span><strong>${p.shows}</strong> shows</span>
+          <span>Est. Reach: <strong>${p.reach}</strong></span>
+          <span>Budget: <strong>$${p.budget.toLocaleString()}</strong></span>
+          <span>Flight: ${p.flight}</span>
+        </div>
+      </div>
+      <div class="plan-card__thumbs">
+        ${p.colors.slice(0, 3).map(c => `<div class="plan-card__thumb" style="background:${c}"></div>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectPlan(id) {
+  selectedPlan = plans.find(p => p.id === id);
+  renderPlans(document.getElementById('planSearch').value);
+  document.getElementById('btnNext1').disabled = false;
+}
+
+// ── STEP NAVIGATION ──
+function goToStep(step) {
+  // Populate fields when entering step 2
+  if (step === 2 && currentStep === 1 && selectedPlan) {
+    document.getElementById('campaignName').value = selectedPlan.name;
+    document.getElementById('clientName').value = selectedPlan.brand;
+    updateMiniPreview();
+  }
+  // Build preview when entering step 3
+  if (step === 3) {
+    buildProposal();
+  }
+  // Update send summary when entering step 4
+  if (step === 4) {
+    updateSendSummary();
+  }
+
+  document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + step).classList.add('active');
+
+  // Update progress bar
+  document.querySelectorAll('.progress-step').forEach(s => {
+    const n = parseInt(s.dataset.step);
+    s.classList.remove('active', 'done');
+    if (n === step) s.classList.add('active');
+    else if (n < step) s.classList.add('done');
+  });
+  document.querySelectorAll('.progress-line').forEach(l => {
+    const n = parseInt(l.dataset.line);
+    l.classList.toggle('done', n < step);
+  });
+
+  currentStep = step;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── TOGGLES ──
+function toggleSwitch(el) {
+  el.classList.toggle('on');
+  updateMiniPreview();
+}
+
+// ── MINI PREVIEW ──
+function updateMiniPreview() {
+  const name = document.getElementById('campaignName').value || 'Campaign Proposal';
+  const client = document.getElementById('clientName').value;
+  const msg = document.getElementById('introMsg').value;
+  const showBrand = document.getElementById('toggleBrand').classList.contains('on');
+
+  document.getElementById('mpTitle').textContent = name;
+  document.getElementById('mpSub').textContent = client ? `Prepared for ${client}` : 'Prepared for --';
+  document.getElementById('mpMsg').textContent = msg || 'No intro message';
+  document.getElementById('mpBrand').classList.toggle('mini-preview__badge-hidden', !showBrand);
+
+  if (selectedPlan) {
+    document.getElementById('mpStats').innerHTML = `
+      <div class="mini-stat"><div class="mini-stat__val">${selectedPlan.reach}</div><div class="mini-stat__label">Est. Reach</div></div>
+      <div class="mini-stat"><div class="mini-stat__val">$${(selectedPlan.budget/1000).toFixed(0)}K</div><div class="mini-stat__label">Budget</div></div>
+      <div class="mini-stat"><div class="mini-stat__val">${selectedPlan.shows}</div><div class="mini-stat__label">Shows</div></div>
+      <div class="mini-stat"><div class="mini-stat__val">${selectedPlan.flight.split('–')[0].trim()}</div><div class="mini-stat__label">Start Date</div></div>
+    `;
+  }
+}
+
+// ── BUILD PROPOSAL ──
+function buildProposal() {
+  if (!selectedPlan) return;
+  const p = selectedPlan;
+  const name = document.getElementById('campaignName').value || p.name;
+  const client = document.getElementById('clientName').value || p.brand;
+  const contact = document.getElementById('contactName').value || '';
+  const msg = document.getElementById('introMsg').value;
+  const showRoas = document.getElementById('toggleRoas').classList.contains('on');
+  const showSales = document.getElementById('toggleSales').classList.contains('on');
+  const showBrand = document.getElementById('toggleBrand').classList.contains('on');
+
+  const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const totalCost = p.showData.reduce((s, sh) => s + sh.episodes * sh.costPerEp, 0);
+
+  let html = `
+    <div class="proposal-header">
+      <div class="proposal-header__logo-area">LOGO</div>
+      <div class="proposal-header__tag">Campaign Proposal</div>
+      <div class="proposal-header__title">${name}</div>
+      <div class="proposal-header__sub">Prepared for ${client}${contact ? ' — ' + contact : ''} &middot; ${today}</div>
+    </div>
+
+    <div class="proposal-intro">${msg}</div>
+
+    <div class="proposal-section">
+      <div class="proposal-section__title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        Campaign Overview
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-card__val">${p.flight}</div><div class="stat-card__label">Flight Dates</div></div>
+        <div class="stat-card"><div class="stat-card__val">$${totalCost.toLocaleString()}</div><div class="stat-card__label">Total Budget</div></div>
+        <div class="stat-card"><div class="stat-card__val">${p.reach}</div><div class="stat-card__label">Estimated Reach</div></div>
+        <div class="stat-card"><div class="stat-card__val">${p.shows}</div><div class="stat-card__label">Shows</div></div>
+      </div>
+    </div>
+
+    <div class="proposal-section">
+      <div class="proposal-section__title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="2" stroke-linecap="round"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>
+        Recommended Shows
+      </div>
+      ${p.showData.map(sh => `
+        <div class="show-card">
+          <div class="show-card__art" style="background:${sh.art}; border-radius:12px;"></div>
+          <div class="show-card__info">
+            <div class="show-card__name">
+              ${sh.name}
+              <span class="match-badge">${sh.match}% match</span>
+            </div>
+            <div class="show-card__cats">${sh.cats.map(c => `<span class="cat-pill">${c}</span>`).join('')}</div>
+            <div class="show-card__stats">
+              <span><strong>${sh.listeners}</strong> avg listeners</span>
+              <span><strong>$${sh.cpm}</strong> CPM</span>
+              <span><strong>${sh.impressions}</strong> est. impressions</span>
+            </div>
+            <div class="show-card__why">"${sh.why}"</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="proposal-section">
+      <div class="proposal-section__title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Budget Breakdown
+      </div>
+      <table class="budget-table">
+        <thead><tr><th>Show</th><th>Episodes</th><th>Cost / Episode</th><th>Total</th><th>% of Budget</th></tr></thead>
+        <tbody>
+          ${p.showData.map(sh => {
+            const t = sh.episodes * sh.costPerEp;
+            const pct = ((t / totalCost) * 100).toFixed(1);
+            return `<tr><td>${sh.name}</td><td>${sh.episodes}</td><td>$${sh.costPerEp.toLocaleString()}</td><td>$${t.toLocaleString()}</td><td>${pct}%</td></tr>`;
+          }).join('')}
+          <tr class="total-row"><td>Total</td><td>${p.showData.reduce((s,sh)=>s+sh.episodes,0)}</td><td>--</td><td>$${totalCost.toLocaleString()}</td><td>100%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  if (showRoas) {
+    const roas = (2.5 + Math.random() * 2).toFixed(1);
+    const conversions = Math.round(totalCost / 12 * (Math.random() + 1));
+    const cpa = (totalCost / conversions).toFixed(2);
+    html += `
+      <div class="proposal-section">
+        <div class="proposal-section__title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          ROAS Estimates
+        </div>
+        <div class="estimate-grid">
+          <div class="estimate-card"><div class="estimate-card__val">${roas}x – ${(parseFloat(roas)+1.2).toFixed(1)}x</div><div class="estimate-card__label">Estimated ROAS Range</div></div>
+          <div class="estimate-card"><div class="estimate-card__val">${conversions.toLocaleString()}</div><div class="estimate-card__label">Projected Conversions</div></div>
+          <div class="estimate-card"><div class="estimate-card__val">$${cpa}</div><div class="estimate-card__label">Estimated CPA</div></div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (showSales) {
+    const lowSales = Math.round(totalCost * 2.2);
+    const highSales = Math.round(totalCost * 4.8);
+    html += `
+      <div class="proposal-section">
+        <div class="proposal-section__title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          Sales Projections
+        </div>
+        <div class="estimate-grid">
+          <div class="estimate-card"><div class="estimate-card__val">$${lowSales.toLocaleString()} – $${highSales.toLocaleString()}</div><div class="estimate-card__label">Projected Revenue Range</div></div>
+          <div class="estimate-card"><div class="estimate-card__val">${(lowSales/totalCost).toFixed(1)}x – ${(highSales/totalCost).toFixed(1)}x</div><div class="estimate-card__label">Revenue Multiple</div></div>
+          <div class="estimate-card"><div class="estimate-card__val">60 – 90 days</div><div class="estimate-card__label">Attribution Window</div></div>
+        </div>
+        <p style="font-size:12px;color:var(--grey-1);margin-top:12px;text-align:center;">* Projections based on industry benchmarks for podcast advertising in the ${p.showData[0].cats[0].toLowerCase()} vertical. Actual results may vary.</p>
+      </div>
+    `;
+  }
+
+  // Last-minute inventory
+  html += `
+    <div class="proposal-section">
+      <div class="lmi-box">
+        <div class="lmi-box__title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Last-Minute Inventory Available
+        </div>
+        <div class="lmi-item">
+          <div>
+            <div class="lmi-item__name">Call Her Daddy</div>
+            <div class="lmi-item__detail">2 mid-roll slots &middot; Apr 21 – May 5 &middot; 3.8M listeners</div>
+          </div>
+          <div class="lmi-item__discount">35% off</div>
+        </div>
+        <div class="lmi-item">
+          <div>
+            <div class="lmi-item__name">SmartLess</div>
+            <div class="lmi-item__detail">1 pre-roll slot &middot; May 1 – May 15 &middot; 2.9M listeners</div>
+          </div>
+          <div class="lmi-item__discount">25% off</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  if (showBrand) {
+    html += `
+      <div class="proposal-footer">
+        <div class="proposal-footer__brand">
+          <span class="logo-mark" style="width:16px;height:16px;border-radius:4px;">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M2 12c0-3 2-6 5-7s6 0 8 2c2-2 5-3 8-2s5 4 5 7-2 6-5 8-6 1-8-1c-2 2-5 3-8 1S2 15 2 12z" fill="white" opacity=".9"/></svg>
+          </span>
+          Powered by SpotsNow
+        </div>
+        <span>Podcast advertising, simplified.</span>
+      </div>
+    `;
+  }
+
+  document.getElementById('proposalContent').innerHTML = html;
+}
+
+// ── SEND SUMMARY ──
+function updateSendSummary() {
+  if (!selectedPlan) return;
+  document.getElementById('sumCampaign').textContent = document.getElementById('campaignName').value || selectedPlan.name;
+  document.getElementById('sumClient').textContent = document.getElementById('clientName').value || selectedPlan.brand;
+  document.getElementById('sumShows').textContent = selectedPlan.shows + ' shows';
+  document.getElementById('sumBudget').textContent = '$' + selectedPlan.budget.toLocaleString();
+}
+
+// ── EMAIL CHIPS ──
+function handleEmailKey(e) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const val = e.target.value.trim().replace(/,$/,'');
+    if (val && val.includes('@')) {
+      addEmailChip(val);
+      e.target.value = '';
+    }
+  }
+  if (e.key === 'Backspace' && !e.target.value && emails.length) {
+    removeEmailChip(emails.length - 1);
+  }
+}
+
+function addEmailChip(email) {
+  emails.push(email);
+  renderEmailChips();
+}
+
+function removeEmailChip(idx) {
+  emails.splice(idx, 1);
+  renderEmailChips();
+}
+
+function renderEmailChips() {
+  const container = document.getElementById('emailChips');
+  const input = document.getElementById('emailInput');
+  container.innerHTML = '';
+  emails.forEach((em, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'email-chip';
+    chip.innerHTML = `${em}<span class="email-chip__x" onclick="removeEmailChip(${i})">&times;</span>`;
+    container.appendChild(chip);
+  });
+  container.appendChild(input);
+}
+
+// ── SEND ──
+function sendProposal() {
+  if (!emails.length) {
+    document.getElementById('emailInput').focus();
+    document.getElementById('emailChips').style.borderColor = 'var(--coral)';
+    setTimeout(() => document.getElementById('emailChips').style.borderColor = '', 1500);
+    return;
+  }
+  document.getElementById('sendForm').style.display = 'none';
+  const ss = document.getElementById('successState');
+  ss.classList.add('visible');
+  document.getElementById('successMsg').textContent = `A link has been sent to ${emails.join(', ')}. You'll be notified when they open it.`;
+}
+
+function resetFlow() {
+  selectedPlan = null;
+  emails = [];
+  document.getElementById('sendForm').style.display = 'block';
+  document.getElementById('successState').classList.remove('visible');
+  document.getElementById('btnNext1').disabled = true;
+  document.getElementById('emailInput').value = '';
+  renderEmailChips();
+  renderPlans();
+  goToStep(1);
+}
+
+// ── RECIPIENT VIEW ──
+function openRecipientView() {
+  buildProposal();
+  const content = document.getElementById('proposalContent').innerHTML;
+  document.getElementById('recipientContent').innerHTML = content;
+  document.getElementById('recipientOverlay').classList.add('visible');
+  document.getElementById('recipientActions').style.display = 'flex';
+  document.getElementById('approveSuccess').classList.remove('visible');
+  document.getElementById('changesTextarea').classList.remove('visible');
+  document.getElementById('changesSubmitRow').style.display = 'none';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeRecipientView() {
+  document.getElementById('recipientOverlay').classList.remove('visible');
+  document.body.style.overflow = '';
+}
+
+function approveProposal() {
+  document.getElementById('recipientActions').style.display = 'none';
+  document.getElementById('changesTextarea').classList.remove('visible');
+  document.getElementById('changesSubmitRow').style.display = 'none';
+  document.getElementById('approveSuccess').classList.add('visible');
+  launchConfetti();
+}
+
+function requestChanges() {
+  const ta = document.getElementById('changesTextarea');
+  ta.classList.add('visible');
+  document.getElementById('changesSubmitRow').style.display = 'block';
+  ta.focus();
+}
+
+function submitChanges() {
+  const ta = document.getElementById('changesTextarea');
+  if (!ta.value.trim()) { ta.focus(); return; }
+  ta.classList.remove('visible');
+  document.getElementById('changesSubmitRow').style.display = 'none';
+  document.getElementById('recipientActions').style.display = 'none';
+  document.getElementById('approveSuccess').querySelector('h3').textContent = 'Feedback Submitted!';
+  document.getElementById('approveSuccess').querySelector('p').textContent = 'Your comments have been sent to the team. They\'ll get back to you shortly.';
+  document.getElementById('approveSuccess').classList.add('visible');
+}
+
+// ── CONFETTI ──
+function launchConfetti() {
+  const wrap = document.getElementById('confettiWrap');
+  wrap.innerHTML = '';
+  wrap.classList.add('visible');
+  const colors = ['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff6bdf','#ff9f43'];
+  for (let i = 0; i < 80; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = Math.random() * 0.8 + 's';
+    piece.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+    piece.style.width = (6 + Math.random() * 8) + 'px';
+    piece.style.height = (6 + Math.random() * 8) + 'px';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    wrap.appendChild(piece);
+  }
+  setTimeout(() => wrap.classList.remove('visible'), 3000);
+}
+
+// ── BOOT ──
+init();
+</script>
+</body>
+</html>

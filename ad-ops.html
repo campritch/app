@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotsNow — Ad Ops Campaign Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --dark: #0e1323;
+      --grey-1: #707481;
+      --text-primary: #252733;
+      --text-secondary: #5a5f6e;
+      --border: #C5CBD5;
+      --border-light: #e8e8e8;
+      --white: #ffffff;
+      --coral: #ff6b6b;
+      --btn-dark: #111111;
+      --green-bg: #d6f0e0;
+      --green-text: #0d6832;
+      --pill-bg: #f3f4f6;
+      --red-bg: #fff0f0;
+      --red-text: #d63031;
+      --blue-bg: #e8f4fd;
+      --blue-text: #1565c0;
+      --agent-bg: linear-gradient(135deg, #f0f4ff, #ede9fe);
+      --agent-border: #d4d0f7;
+      --agent-badge-bg: #ede9fe;
+      --agent-badge-text: #7c3aed;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.5;
+      color: var(--text-primary); background: var(--white);
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    input, select, textarea { font-family: inherit; font-size: 14px; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── TOP BAR ── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 300;
+      height: 56px; display: flex; align-items: center; gap: 20px;
+      padding: 0 28px; background: var(--white);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .top-bar__logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 800; font-size: 15px; color: var(--coral);
+      white-space: nowrap; margin-right: 12px;
+    }
+    .top-bar__logo svg { flex-shrink: 0; }
+    .top-bar__nav { display: flex; gap: 6px; flex: 1; }
+    .top-bar__nav a {
+      padding: 6px 14px; border-radius: 8px;
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      transition: background .15s, color .15s;
+    }
+    .top-bar__nav a:hover { background: var(--pill-bg); color: var(--text-primary); }
+    .top-bar__nav a.active { background: var(--pill-bg); color: var(--text-primary); font-weight: 600; }
+    .top-bar__actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+    .top-bar__search {
+      width: 200px; padding: 7px 12px 7px 32px; border-radius: 8px;
+      border: 1px solid var(--border-light); font-size: 13px; color: var(--text-primary);
+      background: var(--pill-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23707481' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") 10px center no-repeat;
+      outline: none; transition: border-color .15s;
+    }
+    .top-bar__search:focus { border-color: var(--border); }
+    .icon-btn {
+      width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+      border-radius: 8px; color: var(--text-secondary); transition: background .15s;
+      position: relative;
+    }
+    .icon-btn:hover { background: var(--pill-bg); }
+    .icon-btn .dot {
+      position: absolute; top: 6px; right: 6px;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--coral); border: 2px solid var(--white);
+    }
+    .avatar-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, #ff7043, #ff6b6b);
+      color: var(--white); font-weight: 700; font-size: 13px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── LAYOUT ── */
+    .page { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+    .page--wide { max-width: 1200px; }
+
+    /* ── STEPS BAR ── */
+    .steps-bar {
+      display: flex; align-items: center; justify-content: center; gap: 0;
+      padding: 20px 0 8px; max-width: 600px; margin: 0 auto;
+    }
+    .step-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 500; color: var(--grey-1);
+      white-space: nowrap;
+    }
+    .step-item.active { color: var(--text-primary); font-weight: 600; }
+    .step-item.done { color: var(--green-text); }
+    .step-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600;
+      border: 2px solid var(--border-light); color: var(--grey-1);
+      background: var(--white);
+    }
+    .step-item.active .step-num { border-color: var(--coral); color: var(--coral); background: #fff5f5; }
+    .step-item.done .step-num { border-color: var(--green-text); color: var(--white); background: var(--green-text); }
+    .step-line { width: 40px; height: 2px; background: var(--border-light); margin: 0 8px; flex-shrink: 0; }
+    .step-line.done { background: var(--green-text); }
+
+    /* ── BOTTOM BAR ── */
+    .bottom-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+      height: 64px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; background: var(--white);
+      border-top: 1px solid var(--border-light);
+      box-shadow: 0 -2px 8px rgba(0,0,0,.04);
+    }
+    .bottom-bar__price { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+    .bottom-bar__price span { font-size: 13px; font-weight: 400; color: var(--grey-1); margin-left: 4px; }
+    .bottom-bar__btns { display: flex; gap: 10px; }
+    .btn { padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 600; transition: all .15s; }
+    .btn--coral { background: var(--coral); color: var(--white); }
+    .btn--coral:hover { background: #ff5252; }
+    .btn--outline { border: 1px solid var(--border); color: var(--text-primary); background: var(--white); }
+    .btn--outline:hover { background: var(--pill-bg); }
+    .btn--dark { background: var(--btn-dark); color: var(--white); }
+    .btn--dark:hover { background: #222; }
+    .btn--sm { padding: 6px 14px; font-size: 13px; }
+    .btn--green { background: var(--green-bg); color: var(--green-text); }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--white); border: 1px solid var(--border-light);
+      border-radius: 14px; padding: 20px;
+    }
+    .card--flush { padding: 0; }
+
+    /* ── SHOW AVATAR ── */
+    .show-av {
+      width: 42px; height: 42px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--white); font-weight: 700; font-size: 14px;
+      flex-shrink: 0;
+    }
+    .show-av--sm { width: 32px; height: 32px; border-radius: 8px; font-size: 11px; }
+    .show-av--lg { width: 48px; height: 48px; border-radius: 12px; font-size: 16px; }
+    .show-av--ws { background: linear-gradient(135deg, #e040fb, #8e24aa); }
+    .show-av--dm { background: linear-gradient(135deg, #42a5f5, #1565c0); }
+    .show-av--el { background: linear-gradient(135deg, #66bb6a, #2e7d32); }
+    .show-av--bo { background: linear-gradient(135deg, #ff7043, #d84315); }
+
+    /* ── AGENT BADGE ── */
+    .agent-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: 100px;
+      background: var(--agent-badge-bg); color: var(--agent-badge-text);
+      font-size: 11px; font-weight: 600;
+    }
+
+    /* ── FORM ELEMENTS ── */
+    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .3px; }
+    .form-input {
+      width: 100%; padding: 10px 14px; border-radius: 8px;
+      border: 1px solid var(--border-light); font-size: 14px;
+      color: var(--text-primary); outline: none; transition: border-color .15s;
+      background: var(--white);
+    }
+    .form-input:focus { border-color: var(--border); }
+    .form-input--textarea { resize: vertical; min-height: 80px; }
+    .form-select {
+      width: 100%; padding: 10px 14px; border-radius: 8px;
+      border: 1px solid var(--border-light); font-size: 14px;
+      color: var(--text-primary); background: var(--white);
+      outline: none; cursor: pointer; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23707481' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
+    }
+
+    /* ── STEP CONTENT AREAS ── */
+    .step-content { display: none; padding-bottom: 80px; }
+    .step-content.active { display: block; }
+
+    /* ── STEP 1 ── */
+    .s1-layout { display: grid; grid-template-columns: 1fr 320px; gap: 24px; padding-top: 20px; }
+    .s1-header { margin-bottom: 20px; }
+    .s1-header h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .s1-header p { color: var(--text-secondary); font-size: 13px; }
+    .s1-field { margin-bottom: 16px; }
+    .s1-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .show-card { border: 1px solid var(--border-light); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+    .show-card__top { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
+    .show-card__info h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .show-card__info span { font-size: 12px; color: var(--grey-1); }
+    .show-card__fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .show-card__price { text-align: right; margin-left: auto; }
+    .show-card__price .original { text-decoration: line-through; color: var(--grey-1); font-size: 12px; }
+    .show-card__price .current { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+    .sidebar-summary { position: sticky; top: 80px; }
+    .sidebar-summary h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+    .summary-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px; }
+    .summary-row--border { border-top: 1px solid var(--border-light); }
+    .summary-row .label { color: var(--text-secondary); }
+    .summary-row .value { font-weight: 600; }
+    .summary-divider { height: 1px; background: var(--border-light); margin: 10px 0; }
+    .summary-show { padding: 10px 0; border-bottom: 1px solid var(--border-light); }
+    .summary-show:last-child { border-bottom: none; }
+    .summary-show h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .summary-show p { font-size: 12px; color: var(--grey-1); margin: 0; }
+    .impression-track { margin-top: 16px; padding: 14px; background: var(--pill-bg); border-radius: 10px; }
+    .impression-track h4 { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; color: var(--text-secondary); margin-bottom: 10px; }
+    .impression-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; }
+    .impression-row .val { font-weight: 600; }
+    .impression-row .val--pending { color: var(--grey-1); }
+
+    /* ── STEP 2: CREATIVE ── */
+    .s2-layout { max-width: 640px; margin: 0 auto; padding-top: 24px; }
+    .s2-header { text-align: center; margin-bottom: 28px; }
+    .s2-header h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .s2-header p { color: var(--text-secondary); font-size: 13px; }
+    .progress-bar { display: flex; gap: 4px; margin-bottom: 28px; }
+    .progress-bar__seg { flex: 1; height: 6px; border-radius: 3px; background: var(--border-light); transition: background .3s; }
+    .progress-bar__seg.done { background: var(--green-text); }
+    .task-card {
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 20px; border: 1px solid var(--border-light); border-radius: 12px;
+      margin-bottom: 10px; transition: border-color .15s;
+    }
+    .task-card:hover { border-color: var(--border); }
+    .task-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .task-icon--talk { background: #fef3c7; }
+    .task-icon--track { background: #dbeafe; }
+    .task-icon--host { background: #ede9fe; }
+    .task-info { flex: 1; }
+    .task-info h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .task-info p { font-size: 12px; color: var(--grey-1); margin: 0; }
+    .task-btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1px solid var(--border-light); color: var(--text-primary); background: var(--white); transition: all .2s; white-space: nowrap; }
+    .task-btn:hover { background: var(--pill-bg); }
+    .task-btn.done { background: var(--green-bg); color: var(--green-text); border-color: transparent; }
+
+    /* ── STEP 3: MESSAGE ── */
+    .s3-layout { max-width: 640px; margin: 0 auto; padding-top: 24px; }
+    .s3-header { margin-bottom: 24px; }
+    .s3-header h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .s3-header p { color: var(--text-secondary); font-size: 13px; }
+    .s3-tip { display: flex; gap: 8px; padding: 12px 16px; background: #fffbeb; border-radius: 10px; font-size: 13px; color: #92400e; margin-top: 12px; }
+
+    /* ── STEP 4: PAYMENT ── */
+    .s4-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; padding-top: 20px; }
+    .s4-header { margin-bottom: 20px; }
+    .s4-header h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .s4-header p { color: var(--text-secondary); font-size: 13px; }
+    .payment-schedule { display: flex; gap: 12px; padding: 16px; background: var(--pill-bg); border-radius: 12px; margin-bottom: 20px; }
+    .payment-schedule div { text-align: center; flex: 1; }
+    .payment-schedule .amt { font-size: 22px; font-weight: 700; }
+    .payment-schedule .lbl { font-size: 12px; color: var(--grey-1); }
+    .term-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .term-card {
+      padding: 14px 16px; border: 2px solid var(--border-light); border-radius: 12px;
+      cursor: pointer; transition: border-color .15s;
+    }
+    .term-card.selected { border-color: var(--coral); background: #fff5f5; }
+    .term-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .term-card p { font-size: 12px; color: var(--grey-1); margin: 0; }
+    .term-radio { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); margin-bottom: 8px; position: relative; }
+    .term-card.selected .term-radio { border-color: var(--coral); }
+    .term-card.selected .term-radio::after { content: ''; position: absolute; top: 3px; left: 3px; width: 6px; height: 6px; border-radius: 50%; background: var(--coral); }
+    .protection-box { display: flex; gap: 12px; padding: 16px; background: var(--green-bg); border-radius: 12px; margin-bottom: 20px; }
+    .protection-box__icon { width: 40px; height: 40px; border-radius: 10px; background: var(--white); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .protection-box h4 { font-size: 14px; font-weight: 600; color: var(--green-text); margin-bottom: 2px; }
+    .protection-box p { font-size: 12px; color: var(--green-text); margin: 0; opacity: .8; }
+    .payment-method { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--border-light); border-radius: 12px; margin-bottom: 20px; }
+    .payment-method__icon { width: 40px; height: 28px; background: #1a1f71; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 10px; font-weight: 700; }
+    .payment-method__info { flex: 1; }
+    .payment-method__info h4 { font-size: 14px; font-weight: 600; }
+    .payment-method__info p { font-size: 12px; color: var(--grey-1); margin: 0; }
+    .s4-sidebar { position: sticky; top: 80px; }
+    .s4-sidebar .card { margin-bottom: 12px; }
+    .coupon-field { display: flex; gap: 8px; margin-top: 10px; }
+    .coupon-field input { flex: 1; }
+
+    /* ── STEP 5: COMMAND CENTER ── */
+    .s5-layout { padding-top: 20px; padding-bottom: 20px; }
+    .s5-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .s5-header h2 { font-size: 20px; font-weight: 700; }
+    .s5-header .agent-badge { font-size: 12px; }
+
+    /* Control Panel */
+    .control-panel { margin-bottom: 28px; }
+    .control-group { margin-bottom: 16px; }
+    .control-group__header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .control-group__label { font-size: 13px; font-weight: 600; }
+    .control-group__badge {
+      padding: 2px 8px; border-radius: 100px; font-size: 11px; font-weight: 600;
+    }
+    .control-group--red .control-group__badge { background: var(--red-bg); color: var(--red-text); }
+    .control-group--blue .control-group__badge { background: var(--blue-bg); color: var(--blue-text); }
+    .control-group--green .control-group__badge { background: var(--green-bg); color: var(--green-text); }
+    .control-card {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 16px; border: 1px solid var(--border-light); border-radius: 12px;
+      margin-bottom: 8px; cursor: pointer; transition: all .15s;
+      border-left: 3px solid transparent;
+    }
+    .control-card:hover { background: var(--pill-bg); }
+    .control-group--red .control-card { border-left-color: var(--red-text); }
+    .control-group--blue .control-card { border-left-color: var(--blue-text); }
+    .control-group--green .control-card { border-left-color: var(--green-text); opacity: .7; }
+    .control-group--green .control-card:hover { opacity: 1; }
+    .control-card__body { flex: 1; }
+    .control-card__show { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+    .control-card__text { font-size: 13px; color: var(--text-secondary); }
+    .control-card__time { font-size: 11px; color: var(--grey-1); margin-top: 4px; }
+    .control-card__action { flex-shrink: 0; }
+    .mark-read-btn { font-size: 12px; color: var(--blue-text); font-weight: 500; cursor: pointer; margin-left: auto; }
+    .mark-read-btn:hover { text-decoration: underline; }
+
+    /* Inbox / Show Threads */
+    .inbox-layout { display: grid; grid-template-columns: 240px 1fr 300px; gap: 0; border: 1px solid var(--border-light); border-radius: 14px; overflow: hidden; min-height: 600px; }
+    .inbox-sidebar { border-right: 1px solid var(--border-light); background: #fafbfc; }
+    .inbox-sidebar__header { padding: 14px 16px; font-size: 13px; font-weight: 600; border-bottom: 1px solid var(--border-light); }
+    .inbox-show {
+      display: flex; gap: 10px; padding: 12px 16px; cursor: pointer;
+      border-bottom: 1px solid var(--border-light); transition: background .1s;
+      align-items: flex-start;
+    }
+    .inbox-show:hover { background: var(--white); }
+    .inbox-show.active { background: var(--white); border-left: 3px solid var(--coral); }
+    .inbox-show__info { flex: 1; min-width: 0; }
+    .inbox-show__name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .inbox-show__preview { font-size: 11px; color: var(--grey-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .inbox-show__status { margin-top: 4px; }
+    .status-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 100px; font-size: 10px; font-weight: 600; }
+    .status-pill--awaiting { background: #fef3c7; color: #92400e; }
+    .status-pill--approved { background: var(--green-bg); color: var(--green-text); }
+    .status-pill--declined { background: var(--red-bg); color: var(--red-text); }
+    .unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--coral); flex-shrink: 0; margin-top: 6px; }
+
+    /* Chat Thread */
+    .chat-panel { display: flex; flex-direction: column; }
+    .chat-header { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--border-light); }
+    .chat-header h3 { font-size: 14px; font-weight: 600; }
+    .chat-header span { font-size: 12px; color: var(--grey-1); }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+    .msg { max-width: 80%; }
+    .msg--sent { align-self: flex-end; }
+    .msg--received { align-self: flex-start; }
+    .msg--agent { align-self: center; max-width: 90%; }
+    .msg__bubble { padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.5; }
+    .msg--sent .msg__bubble { background: var(--pill-bg); color: var(--text-primary); border-bottom-right-radius: 4px; }
+    .msg--received .msg__bubble { background: var(--white); border: 1px solid var(--border-light); color: var(--text-primary); border-bottom-left-radius: 4px; }
+    .msg--agent .msg__bubble { background: var(--agent-bg); border: 1px solid var(--agent-border); color: var(--text-primary); }
+    .msg__meta { font-size: 11px; color: var(--grey-1); margin-top: 4px; }
+    .msg--sent .msg__meta { text-align: right; }
+    .msg--agent .msg__meta { text-align: center; }
+    .msg--agent .agent-badge { margin-bottom: 6px; }
+    .typing-indicator { display: flex; gap: 4px; align-items: center; padding: 10px 14px; }
+    .typing-indicator span { width: 6px; height: 6px; border-radius: 50%; background: var(--grey-1); animation: typing 1.2s infinite; }
+    .typing-indicator span:nth-child(2) { animation-delay: .2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: .4s; }
+    @keyframes typing { 0%,60%,100% { opacity: .3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-4px); } }
+    .chat-input { display: flex; gap: 8px; padding: 14px 18px; border-top: 1px solid var(--border-light); }
+    .chat-input input { flex: 1; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-light); outline: none; font-size: 13px; }
+    .chat-input input:focus { border-color: var(--border); }
+    .chat-send-btn { width: 40px; height: 40px; border-radius: 10px; background: var(--coral); color: var(--white); display: flex; align-items: center; justify-content: center; transition: background .15s; }
+    .chat-send-btn:hover { background: #ff5252; }
+
+    /* Detail Panel */
+    .detail-panel { border-left: 1px solid var(--border-light); overflow-y: auto; background: #fafbfc; }
+    .detail-section { padding: 16px 18px; border-bottom: 1px solid var(--border-light); }
+    .detail-section h4 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--grey-1); margin-bottom: 12px; }
+    .detail-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; }
+    .detail-row .label { color: var(--text-secondary); }
+    .detail-row .value { font-weight: 500; text-align: right; }
+    .impression-bar { width: 100%; height: 8px; border-radius: 4px; background: var(--border-light); margin: 8px 0; overflow: hidden; }
+    .impression-bar__fill { height: 100%; border-radius: 4px; background: var(--green-text); transition: width .5s; }
+    .impression-source { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--grey-1); }
+    .impression-source .check { color: var(--green-text); font-weight: 700; }
+    .last-checked { font-size: 11px; color: var(--grey-1); margin-top: 4px; }
+    .checklist-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 13px; }
+    .checklist-item .icon { width: 18px; text-align: center; font-size: 14px; }
+    .checklist-item.pending { color: var(--grey-1); }
+    .approval-timer { padding: 12px 16px; background: var(--red-bg); border-radius: 10px; text-align: center; }
+    .approval-timer h4 { font-size: 12px; font-weight: 600; color: var(--red-text); margin-bottom: 4px; }
+    .approval-timer .countdown { font-size: 18px; font-weight: 700; color: var(--red-text); font-variant-numeric: tabular-nums; }
+    .cancel-link { display: block; text-align: center; font-size: 12px; color: var(--red-text); margin-top: 12px; cursor: pointer; }
+    .cancel-link:hover { text-decoration: underline; }
+    .on-pace { color: var(--green-text); font-weight: 600; font-size: 11px; }
+    .behind-pace { color: var(--red-text); font-weight: 600; font-size: 11px; }
+
+    /* ── SETTINGS PANEL ── */
+    .settings-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.3); z-index: 400;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    .settings-overlay.open { opacity: 1; pointer-events: auto; }
+    .settings-panel {
+      position: fixed; top: 0; right: -480px; bottom: 0; width: 460px; z-index: 410;
+      background: var(--white); box-shadow: -4px 0 24px rgba(0,0,0,.08);
+      transition: right .3s ease; overflow-y: auto;
+    }
+    .settings-panel.open { right: 0; }
+    .settings-panel__header { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid var(--border-light); position: sticky; top: 0; background: var(--white); z-index: 1; }
+    .settings-panel__header h2 { font-size: 18px; font-weight: 700; }
+    .settings-section { padding: 20px 24px; border-bottom: 1px solid var(--border-light); }
+    .settings-section h3 { font-size: 14px; font-weight: 600; margin-bottom: 14px; }
+    .settings-field { margin-bottom: 14px; }
+    .settings-note { font-size: 12px; color: var(--grey-1); line-height: 1.5; padding: 10px 14px; background: var(--pill-bg); border-radius: 8px; }
+    .credential-group { padding: 14px; border: 1px solid var(--border-light); border-radius: 10px; margin-bottom: 10px; }
+    .credential-group h4 { font-size: 13px; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .credential-group .form-input { margin-bottom: 8px; }
+    .credential-group .form-input:last-child { margin-bottom: 0; }
+    .logo-upload { width: 64px; height: 64px; border: 2px dashed var(--border); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--grey-1); font-size: 22px; cursor: pointer; transition: border-color .15s; }
+    .logo-upload:hover { border-color: var(--coral); color: var(--coral); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .s1-layout { grid-template-columns: 1fr; }
+      .s4-layout { grid-template-columns: 1fr; }
+      .inbox-layout { grid-template-columns: 1fr; }
+      .inbox-sidebar { display: none; }
+      .detail-panel { display: none; }
+      .show-card__fields { grid-template-columns: 1fr 1fr; }
+      .term-cards { grid-template-columns: 1fr; }
+      .top-bar__nav { display: none; }
+      .top-bar__search { display: none; }
+      .steps-bar { gap: 0; }
+      .step-item span { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ====== TOP BAR ====== -->
+<div class="top-bar">
+  <div class="top-bar__logo">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#ff6b6b"/><circle cx="12" cy="12" r="4" fill="#fff"/></svg>
+    SpotsNow
+  </div>
+  <nav class="top-bar__nav">
+    <a href="#">Last Minute Spots</a>
+    <a href="#" class="active">Media Plans</a>
+    <a href="#">Inbox</a>
+  </nav>
+  <div class="top-bar__actions">
+    <input class="top-bar__search" type="text" placeholder="Search..." />
+    <button class="icon-btn" title="Notifications" aria-label="Notifications">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="dot"></span>
+    </button>
+    <button class="icon-btn" id="settingsToggle" title="Brand Settings" aria-label="Brand Settings">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+    <button class="avatar-btn" title="Account">F</button>
+  </div>
+</div>
+
+<!-- ====== SETTINGS SLIDE-OUT ====== -->
+<div class="settings-overlay" id="settingsOverlay"></div>
+<div class="settings-panel" id="settingsPanel">
+  <div class="settings-panel__header">
+    <h2>Brand Settings</h2>
+    <button class="icon-btn" id="settingsClose" aria-label="Close settings">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="settings-section">
+    <h3>Brand Identity</h3>
+    <div class="settings-field">
+      <label class="form-label">Logo</label>
+      <div class="logo-upload" title="Upload logo">+</div>
+    </div>
+    <div class="settings-field">
+      <label class="form-label">Brand Name</label>
+      <input class="form-input" type="text" value="Fanta" />
+    </div>
+    <div class="settings-field">
+      <label class="form-label">Website</label>
+      <input class="form-input" type="text" value="https://stationbrands.com" />
+    </div>
+    <div class="settings-field">
+      <label class="form-label">Brand Description</label>
+      <textarea class="form-input form-input--textarea" placeholder="Tell the agents about your brand...">Fanta is a bold, fruity soda brand by Coca-Cola. Known for vibrant flavors and a fun, youthful identity. Key selling points: bold fruit flavors, zero sugar options, perfect for summer.</textarea>
+    </div>
+  </div>
+  <div class="settings-section">
+    <h3>Product &amp; Shipping</h3>
+    <div class="settings-field">
+      <label class="form-label">Product Details</label>
+      <textarea class="form-input form-input--textarea" placeholder="What will you ship to hosts?">Fanta variety pack (6 flavors, 12 cans total). Branded cooler bag included.</textarea>
+    </div>
+    <div class="settings-field">
+      <label class="form-label">Shipping Address (From)</label>
+      <input class="form-input" type="text" value="100 Coca-Cola Plaza, Atlanta, GA 30313" />
+    </div>
+  </div>
+  <div class="settings-section">
+    <h3>Default Promo</h3>
+    <div class="settings-field">
+      <label class="form-label">Default Promo Code</label>
+      <input class="form-input" type="text" value="FANTA20" />
+    </div>
+    <div class="settings-field">
+      <label class="form-label">Vanity URL</label>
+      <input class="form-input" type="text" value="fanta.com/podcast" />
+    </div>
+  </div>
+  <div class="settings-section">
+    <h3>Impression Verification Accounts</h3>
+    <div class="credential-group">
+      <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Podscribe</h4>
+      <input class="form-input" type="email" placeholder="Email" value="ads@stationbrands.com" />
+      <input class="form-input" type="password" placeholder="Password" value="••••••••" />
+    </div>
+    <div class="credential-group">
+      <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Magellan AI</h4>
+      <input class="form-input" type="email" placeholder="Email" value="ads@stationbrands.com" />
+      <input class="form-input" type="password" placeholder="Password" value="••••••••" />
+    </div>
+    <div class="credential-group">
+      <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Chartable</h4>
+      <input class="form-input" type="email" placeholder="Email" value="ads@stationbrands.com" />
+      <input class="form-input" type="password" placeholder="Password" value="••••••••" />
+    </div>
+    <div class="settings-note">Agents use these to verify delivered impressions across platforms. Your credentials are encrypted and only used for automated verification.</div>
+  </div>
+</div>
+
+<!-- ====== MAIN CONTENT ====== -->
+<div class="page">
+
+  <!-- Steps Bar (steps 1-4) -->
+  <div class="steps-bar" id="stepsBar">
+    <div class="step-item active" data-step="1"><div class="step-num">1</div><span>Confirm</span></div>
+    <div class="step-line"></div>
+    <div class="step-item" data-step="2"><div class="step-num">2</div><span>Creative</span></div>
+    <div class="step-line"></div>
+    <div class="step-item" data-step="3"><div class="step-num">3</div><span>Message</span></div>
+    <div class="step-line"></div>
+    <div class="step-item" data-step="4"><div class="step-num">4</div><span>Payment</span></div>
+  </div>
+
+  <!-- ══════════ STEP 1: CONFIRM CAMPAIGN ══════════ -->
+  <div class="step-content active" id="step1">
+    <div class="s1-layout">
+      <div class="s1-main">
+        <div class="s1-header">
+          <h2>Confirm Campaign</h2>
+          <p>Review your campaign details before moving forward.</p>
+        </div>
+
+        <div class="s1-field">
+          <label class="form-label">Campaign Name</label>
+          <input class="form-input" type="text" value="Fanta — Q2 Podcast Push" />
+        </div>
+
+        <div class="s1-field-row s1-field">
+          <div>
+            <label class="form-label">Objective</label>
+            <select class="form-select">
+              <option>Direct Response</option>
+              <option>Brand Awareness</option>
+              <option>Product Launch</option>
+              <option>Custom</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Total Budget</label>
+            <div style="padding: 10px 14px; font-size: 22px; font-weight: 700;">$990.00</div>
+          </div>
+        </div>
+
+        <div class="s1-field-row s1-field">
+          <div>
+            <label class="form-label">Flight Start</label>
+            <input class="form-input" type="date" value="2026-04-28" />
+          </div>
+          <div>
+            <label class="form-label">Flight End</label>
+            <input class="form-input" type="date" value="2026-05-26" />
+          </div>
+        </div>
+
+        <div class="s1-field-row s1-field">
+          <div>
+            <label class="form-label">Promo Code</label>
+            <input class="form-input" type="text" value="FANTA20" />
+          </div>
+          <div>
+            <label class="form-label">Vanity URL</label>
+            <input class="form-input" type="text" value="fanta.com/podcast" />
+          </div>
+        </div>
+
+        <div class="s1-field">
+          <label class="form-label">Anything else the agents should know?</label>
+          <textarea class="form-input form-input--textarea" placeholder="E.g., seasonal messaging, host preferences, product restrictions..."></textarea>
+        </div>
+
+        <h3 style="font-size: 16px; font-weight: 700; margin: 24px 0 14px;">Shows in this campaign</h3>
+
+        <!-- Show Card: What We Said -->
+        <div class="show-card">
+          <div class="show-card__top">
+            <div class="show-av show-av--ws">WS</div>
+            <div class="show-card__info">
+              <h4>What We Said</h4>
+              <span>Comedy / Pop Culture</span>
+            </div>
+            <div class="show-card__price">
+              <div class="original">$500</div>
+              <div class="current">$360</div>
+            </div>
+          </div>
+          <div class="show-card__fields">
+            <div>
+              <label class="form-label">Quoted Impressions</label>
+              <input class="form-input" type="text" value="20,000" />
+            </div>
+            <div>
+              <label class="form-label">Start Week</label>
+              <input class="form-input" type="date" value="2026-04-28" />
+            </div>
+            <div>
+              <label class="form-label">End Week</label>
+              <input class="form-input" type="date" value="2026-05-12" />
+            </div>
+          </div>
+          <div style="margin-top: 10px;">
+            <label class="form-label">Episodes</label>
+            <input class="form-input" type="number" value="3" style="width: 80px;" />
+          </div>
+        </div>
+
+        <!-- Show Card: Dear Media -->
+        <div class="show-card">
+          <div class="show-card__top">
+            <div class="show-av show-av--dm">DM</div>
+            <div class="show-card__info">
+              <h4>Dear Media</h4>
+              <span>Lifestyle / Business</span>
+            </div>
+            <div class="show-card__price">
+              <div class="original">$875</div>
+              <div class="current">$630</div>
+            </div>
+          </div>
+          <div class="show-card__fields">
+            <div>
+              <label class="form-label">Quoted Impressions</label>
+              <input class="form-input" type="text" value="35,000" />
+            </div>
+            <div>
+              <label class="form-label">Start Week</label>
+              <input class="form-input" type="date" value="2026-05-01" />
+            </div>
+            <div>
+              <label class="form-label">End Week</label>
+              <input class="form-input" type="date" value="2026-05-26" />
+            </div>
+          </div>
+          <div style="margin-top: 10px;">
+            <label class="form-label">Episodes</label>
+            <input class="form-input" type="number" value="4" style="width: 80px;" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar Summary -->
+      <div>
+        <div class="card sidebar-summary">
+          <h3>Order Summary</h3>
+          <div class="summary-row">
+            <span class="label">Total Price</span>
+            <span class="value">$990.00</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Quoted Impressions</span>
+            <span class="value">55,000</span>
+          </div>
+          <div class="summary-divider"></div>
+
+          <div class="summary-show">
+            <h4>What We Said</h4>
+            <p>Apr 28 – May 12 &middot; 3 episodes</p>
+            <p style="font-weight: 600; margin-top: 2px;">$360.00</p>
+          </div>
+          <div class="summary-show">
+            <h4>Dear Media</h4>
+            <p>May 1 – May 26 &middot; 4 episodes</p>
+            <p style="font-weight: 600; margin-top: 2px;">$630.00</p>
+          </div>
+
+          <div class="impression-track">
+            <h4>Impression Tracking</h4>
+            <div class="impression-row"><span>Quoted</span><span class="val">55,000</span></div>
+            <div class="impression-row"><span>Delivered</span><span class="val val--pending">&mdash;</span></div>
+            <div class="impression-row"><span>Pacing</span><span class="val val--pending">&mdash;</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ STEP 2: CREATIVE & TRACKING ══════════ -->
+  <div class="step-content" id="step2">
+    <div class="s2-layout">
+      <div class="s2-header">
+        <h2>Creative &amp; Tracking</h2>
+        <p>Complete these onboarding tasks so the agents can manage your campaign.</p>
+      </div>
+
+      <div class="progress-bar" id="progressBar">
+        <div class="progress-bar__seg" data-task="1"></div>
+        <div class="progress-bar__seg" data-task="2"></div>
+        <div class="progress-bar__seg" data-task="3"></div>
+      </div>
+
+      <div class="task-card" data-task="1">
+        <div class="task-icon task-icon--talk">&#128172;</div>
+        <div class="task-info">
+          <h4>Submit talking points</h4>
+          <p>Give hosts key themes, product details, and any messaging guidelines.</p>
+        </div>
+        <button class="task-btn" data-task="1">Add talking points</button>
+      </div>
+
+      <div class="task-card" data-task="2">
+        <div class="task-icon task-icon--track">&#128206;</div>
+        <div class="task-info">
+          <h4>Add tracking</h4>
+          <p>Set up attribution links, pixels, or promo code tracking for this campaign.</p>
+        </div>
+        <button class="task-btn" data-task="2">Add tracking</button>
+      </div>
+
+      <div class="task-card" data-task="3">
+        <div class="task-icon task-icon--host">&#127908;</div>
+        <div class="task-info">
+          <h4>Prepare the host</h4>
+          <p>Upload product photos, brand guidelines, or anything the host needs to know.</p>
+        </div>
+        <button class="task-btn" data-task="3">Prepare the host</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ STEP 3: SEND MESSAGE ══════════ -->
+  <div class="step-content" id="step3">
+    <div class="s3-layout">
+      <div class="s3-header">
+        <h2>Send Message</h2>
+        <p>This personalized message will be sent to each show on your behalf.</p>
+      </div>
+
+      <div class="s1-field-row s1-field">
+        <div>
+          <label class="form-label">Brand Name</label>
+          <input class="form-input" type="text" value="Fanta" />
+        </div>
+        <div>
+          <label class="form-label">Website</label>
+          <input class="form-input" type="text" value="stationbrands.com" />
+        </div>
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <label class="form-label">Your Message</label>
+        <textarea class="form-input form-input--textarea" style="min-height: 180px;">Hey team,
+
+We're excited to partner with your show for a Fanta campaign this quarter. We love your energy and think your audience is a perfect fit for our bold, fruity flavors.
+
+Here's what we're thinking:
+- 60-second mid-roll reads
+- Host-read, conversational style — we'll send talking points but you can totally riff
+- We'll ship a variety pack so you can try everything before recording
+
+Looking forward to working together!
+
+Cam
+Fanta / Station Brands</textarea>
+      </div>
+
+      <div class="s3-tip">
+        <span>&#128161;</span>
+        <span>Tip: Keep it conversational. The agent will handle logistics, scheduling, and follow-ups automatically.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ STEP 4: AUTHORIZE PAYMENT ══════════ -->
+  <div class="step-content" id="step4">
+    <div class="s4-layout">
+      <div class="s4-main">
+        <div class="s4-header">
+          <h2>Authorize Payment</h2>
+          <p>No charge until the show approves. Choose your payment terms below.</p>
+        </div>
+
+        <div class="payment-schedule">
+          <div>
+            <div class="amt">$0</div>
+            <div class="lbl">Due now</div>
+          </div>
+          <div>
+            <div class="amt">$990</div>
+            <div class="lbl">On show approval</div>
+          </div>
+        </div>
+
+        <label class="form-label">Payment Terms</label>
+        <div class="term-cards" id="termCards">
+          <div class="term-card" data-term="net15">
+            <div class="term-radio"></div>
+            <h4>Net 15</h4>
+            <p>Payment due 15 days after show approval</p>
+          </div>
+          <div class="term-card selected" data-term="net30">
+            <div class="term-radio"></div>
+            <h4>Net 30</h4>
+            <p>Payment due 30 days after show approval</p>
+          </div>
+          <div class="term-card" data-term="net60">
+            <div class="term-radio"></div>
+            <h4>Net 60</h4>
+            <p>Payment due 60 days after show approval</p>
+          </div>
+          <div class="term-card" data-term="immediate">
+            <div class="term-radio"></div>
+            <h4>Pay on approval</h4>
+            <p>Charged immediately when show approves</p>
+          </div>
+        </div>
+
+        <div class="protection-box">
+          <div class="protection-box__icon">&#128737;</div>
+          <div>
+            <h4>Payment Protection Guarantee</h4>
+            <p>If a show doesn't deliver quoted impressions, you'll receive a pro-rata credit or full refund. No questions asked.</p>
+          </div>
+        </div>
+
+        <label class="form-label">Payment Method</label>
+        <div class="payment-method">
+          <div class="payment-method__icon">VISA</div>
+          <div class="payment-method__info">
+            <h4>Visa ending in 4242</h4>
+            <p>Expires 08/2028</p>
+          </div>
+          <button class="btn btn--outline btn--sm">Change</button>
+        </div>
+
+        <p style="font-size: 12px; color: var(--grey-1); line-height: 1.6;">By clicking "Confirm &amp; Authorize" you agree to the SpotsNow Campaign Terms of Service. Payment will only be processed after show approval under your selected terms. You can cancel at any time before show approval for a full refund.</p>
+      </div>
+
+      <!-- Payment Sidebar -->
+      <div>
+        <div class="card s4-sidebar">
+          <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 14px;">
+            <div class="show-av show-av--sm show-av--ws">WS</div>
+            <div>
+              <div style="font-size: 14px; font-weight: 600;">What We Said</div>
+              <div style="font-size: 12px; color: var(--grey-1);">20,000 impressions</div>
+            </div>
+          </div>
+          <div class="detail-row"><span class="label">Start</span><span class="value">Apr 28, 2026</span></div>
+          <div class="detail-row"><span class="label">CPM</span><span class="value">$18.00</span></div>
+          <div class="detail-row"><span class="label">Payment</span><span class="value">Net 30</span></div>
+          <div class="summary-divider"></div>
+          <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 14px;">
+            <div class="show-av show-av--sm show-av--dm">DM</div>
+            <div>
+              <div style="font-size: 14px; font-weight: 600;">Dear Media</div>
+              <div style="font-size: 12px; color: var(--grey-1);">35,000 impressions</div>
+            </div>
+          </div>
+          <div class="detail-row"><span class="label">Start</span><span class="value">May 1, 2026</span></div>
+          <div class="detail-row"><span class="label">CPM</span><span class="value">$18.00</span></div>
+          <div class="detail-row"><span class="label">Payment</span><span class="value">Net 30</span></div>
+          <div class="summary-divider"></div>
+          <div class="summary-row summary-row--border" style="font-size: 16px;">
+            <span class="label">Total</span>
+            <span class="value" style="font-size: 18px;">$990.00</span>
+          </div>
+          <div class="coupon-field">
+            <input class="form-input" type="text" placeholder="Coupon code" />
+            <button class="btn btn--outline btn--sm">Apply</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ STEP 5: COMMAND CENTER ══════════ -->
+  <div class="step-content" id="step5">
+    <div class="s5-layout page--wide">
+      <div class="s5-header">
+        <h2>Command Center <span style="font-size: 14px; font-weight: 400; color: var(--grey-1);">&mdash; Fanta Q2 Podcast Push</span></h2>
+        <span class="agent-badge">&#129302; Agents active</span>
+      </div>
+
+      <!-- ── CONTROL PANEL ── -->
+      <div class="control-panel">
+        <!-- Needs Attention -->
+        <div class="control-group control-group--red">
+          <div class="control-group__header">
+            <span class="control-group__label">Needs your attention</span>
+            <span class="control-group__badge">2</span>
+          </div>
+          <div class="control-card" data-show="ws" onclick="selectShow('ws'); scrollToInbox();">
+            <div class="show-av show-av--sm show-av--ws">WS</div>
+            <div class="control-card__body">
+              <div class="control-card__show">What We Said</div>
+              <div class="control-card__text">Show asked to move first episode to May 5th. Approve?</div>
+              <div class="control-card__time">2 hours ago</div>
+            </div>
+            <div class="control-card__action">
+              <button class="btn btn--coral btn--sm" style="margin-bottom: 4px;">Approve</button>
+              <button class="btn btn--outline btn--sm">Decline</button>
+            </div>
+          </div>
+          <div class="control-card" data-show="el" onclick="selectShow('el'); scrollToInbox();">
+            <div class="show-av show-av--sm show-av--el">EL</div>
+            <div class="control-card__body">
+              <div class="control-card__show">EntreLeadership</div>
+              <div class="control-card__text">Show wants to know if you can ship product to Nashville by May 1st</div>
+              <div class="control-card__time">5 hours ago</div>
+            </div>
+            <div class="control-card__action">
+              <button class="btn btn--coral btn--sm">Reply</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Updates -->
+        <div class="control-group control-group--blue">
+          <div class="control-group__header">
+            <span class="control-group__label">Updates</span>
+            <span class="control-group__badge">3</span>
+            <button class="mark-read-btn" onclick="this.parentElement.parentElement.style.display='none'">Mark all read</button>
+          </div>
+          <div class="control-card" data-show="ws" onclick="selectShow('ws'); scrollToInbox();">
+            <div class="show-av show-av--sm show-av--ws">WS</div>
+            <div class="control-card__body">
+              <div class="control-card__show">What We Said</div>
+              <div class="control-card__text"><span class="agent-badge" style="font-size: 10px;">&#129302; Agent</span> Product shipped via FedEx #7829301, ETA Apr 22. Show notified.</div>
+              <div class="control-card__time">Yesterday</div>
+            </div>
+          </div>
+          <div class="control-card" data-show="dm" onclick="selectShow('dm'); scrollToInbox();">
+            <div class="show-av show-av--sm show-av--dm">DM</div>
+            <div class="control-card__body">
+              <div class="control-card__show">Dear Media</div>
+              <div class="control-card__text"><span class="agent-badge" style="font-size: 10px;">&#129302; Agent</span> Show approved! First ep confirmed May 1st. Payment processes Net 30.</div>
+              <div class="control-card__time">Yesterday</div>
+            </div>
+          </div>
+          <div class="control-card" data-show="bo" onclick="selectShow('bo'); scrollToInbox();">
+            <div class="show-av show-av--sm show-av--bo">BO</div>
+            <div class="control-card__body">
+              <div class="control-card__show">The Best One Yet</div>
+              <div class="control-card__text"><span class="agent-badge" style="font-size: 10px;">&#129302; Agent</span> Show declined. Payment authorization released, no charge.</div>
+              <div class="control-card__time">2 days ago</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- On Track -->
+        <div class="control-group control-group--green">
+          <div class="control-group__header">
+            <span class="control-group__label">On track</span>
+            <span class="control-group__badge">1</span>
+          </div>
+          <div class="control-card" data-show="dm" onclick="selectShow('dm'); scrollToInbox();">
+            <div class="show-av show-av--sm show-av--dm">DM</div>
+            <div class="control-card__body">
+              <div class="control-card__show">Dear Media</div>
+              <div class="control-card__text">Approved. All tasks complete. First ep May 1. Delivery on pace.</div>
+              <div class="control-card__time">Ongoing</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── INBOX / SHOW THREADS ── -->
+      <div class="inbox-layout" id="inboxLayout">
+        <!-- Sidebar -->
+        <div class="inbox-sidebar">
+          <div class="inbox-sidebar__header">Shows</div>
+          <div class="inbox-show active" data-show="ws" onclick="selectShow('ws')">
+            <div class="show-av show-av--sm show-av--ws">WS</div>
+            <div class="inbox-show__info">
+              <div class="inbox-show__name">What We Said</div>
+              <div class="inbox-show__preview">Can you move first ep to May 5?</div>
+              <div class="inbox-show__status"><span class="status-pill status-pill--awaiting">&#9203; Awaiting approval</span></div>
+            </div>
+            <div class="unread-dot"></div>
+          </div>
+          <div class="inbox-show" data-show="dm" onclick="selectShow('dm')">
+            <div class="show-av show-av--sm show-av--dm">DM</div>
+            <div class="inbox-show__info">
+              <div class="inbox-show__name">Dear Media</div>
+              <div class="inbox-show__preview">Show approved! First ep May 1.</div>
+              <div class="inbox-show__status"><span class="status-pill status-pill--approved">&#9989; Approved</span></div>
+            </div>
+          </div>
+          <div class="inbox-show" data-show="el" onclick="selectShow('el')">
+            <div class="show-av show-av--sm show-av--el">EL</div>
+            <div class="inbox-show__info">
+              <div class="inbox-show__name">EntreLeadership</div>
+              <div class="inbox-show__preview">Can you ship product to Nashville?</div>
+              <div class="inbox-show__status"><span class="status-pill status-pill--awaiting">&#9203; Awaiting approval</span></div>
+            </div>
+            <div class="unread-dot"></div>
+          </div>
+          <div class="inbox-show" data-show="bo" onclick="selectShow('bo')">
+            <div class="show-av show-av--sm show-av--bo">BO</div>
+            <div class="inbox-show__info">
+              <div class="inbox-show__name">The Best One Yet</div>
+              <div class="inbox-show__preview">Show declined campaign.</div>
+              <div class="inbox-show__status"><span class="status-pill status-pill--declined">&#10007; Declined</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Panel -->
+        <div class="chat-panel" id="chatPanel">
+          <div class="chat-header" id="chatHeader">
+            <div class="show-av show-av--sm show-av--ws">WS</div>
+            <div>
+              <h3>What We Said</h3>
+              <span>Campaign proposal &middot; Fanta</span>
+            </div>
+          </div>
+          <div class="chat-messages" id="chatMessages">
+            <!-- Messages injected by JS -->
+          </div>
+          <div class="chat-input">
+            <input type="text" placeholder="Type a message..." id="chatInput" />
+            <button class="chat-send-btn" id="chatSend" aria-label="Send message">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Detail Panel -->
+        <div class="detail-panel" id="detailPanel">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== BOTTOM BAR (Steps 1-4) ====== -->
+<div class="bottom-bar" id="bottomBar">
+  <div class="bottom-bar__price">$990.00 <span>total</span></div>
+  <div class="bottom-bar__btns">
+    <button class="btn btn--outline" id="backBtn" style="display:none;">Back</button>
+    <button class="btn btn--coral" id="nextBtn">Continue to Creative</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  // ── STATE ──
+  let currentStep = 1;
+  const totalWizardSteps = 4;
+  const stepLabels = { 1: 'Continue to Creative', 2: 'Continue to Message', 3: 'Continue to Payment', 4: 'Confirm & Authorize' };
+  let tasksCompleted = new Set();
+  let activeShow = 'ws';
+
+  // ── SHOW DATA ──
+  const showData = {
+    ws: {
+      name: 'What We Said', initials: 'WS', cls: 'ws',
+      messages: [
+        { type: 'sent', text: "Hey What We Said team,\n\nWe're excited to run a campaign with you for Fanta this quarter. Your audience is a perfect fit for our bold, fruity flavors. We're thinking 3 mid-roll reads starting the week of April 28.\n\nLooking forward to it!\n\nCam", time: 'Apr 13, 10:02 AM' },
+        { type: 'agent', text: "I've sent the campaign request with:\n\n<strong>Brand:</strong> Fanta\n<strong>Dates:</strong> Apr 28 \u2013 May 12\n<strong>Episodes:</strong> 3\n<strong>Budget:</strong> $360\n\nI'll handle the back-and-forth from here.", time: 'Apr 13, 10:03 AM' },
+        { type: 'received', text: "Hey! Thanks for reaching out. Could you send product samples? Our host likes to try it first. Also, do you have talking points or is it freeform?", time: 'Apr 13, 11:45 AM' },
+        { type: 'agent', text: "Great question!\n\n\u2705 <strong>Product shipping:</strong> We'll ship a variety pack. Can you confirm the address?\n\u2705 <strong>Talking points:</strong> Submitted and ready. Key themes: bold fruit flavors, zero sugar. Host can riff naturally.", time: 'Apr 13, 11:46 AM' },
+        { type: 'received', text: "Perfect! Studio address is 1234 Vine St, Suite 200, LA 90028. Ship by April 24th?", time: 'Apr 13, 2:15 PM' },
+        { type: 'agent', text: "\ud83d\udce6 <strong>Product shipping confirmed</strong> \u2014 FedEx to 1234 Vine St, delivery by Apr 24.\n\n\ud83d\udcca <strong>Impression check:</strong> Podscribe shows 0 delivered (campaign not yet live). Will begin tracking once first episode airs.", time: 'Apr 13, 2:16 PM' },
+      ],
+      detail: {
+        brand: 'stationbrands.com', starts: '4/28/2026', ends: '5/12/2026', episodes: 3, terms: 'Net 30',
+        quoted: 20000, delivered: 4200, pacing: 21, onPace: true,
+        checklist: [
+          { label: 'Spot Requested', done: true },
+          { label: 'Payment Authorized', done: true },
+          { label: 'Talking Points Submitted', done: true },
+          { label: 'Tracking Submitted', done: true },
+          { label: 'Product Shipped', done: false },
+          { label: 'Show Approved', done: false },
+        ],
+        timerExpires: 'EXPIRES: 3d 23h 50m 42s',
+        timerDays: 4,
+      }
+    },
+    dm: {
+      name: 'Dear Media', initials: 'DM', cls: 'dm',
+      messages: [
+        { type: 'sent', text: "Hey Dear Media team,\n\nWe'd love to run a Fanta campaign with your shows this May. 4 episodes across your network. Let us know!", time: 'Apr 10, 9:30 AM' },
+        { type: 'agent', text: "Campaign request sent.\n\n<strong>Brand:</strong> Fanta\n<strong>Dates:</strong> May 1 \u2013 May 26\n<strong>Episodes:</strong> 4\n<strong>Budget:</strong> $630", time: 'Apr 10, 9:31 AM' },
+        { type: 'received', text: "Love this! We're in. Our team will have first read ready by May 1.", time: 'Apr 11, 3:00 PM' },
+        { type: 'agent', text: "\ud83c\udf89 <strong>Show approved!</strong>\n\nFirst episode confirmed for May 1. Payment will process under Net 30 terms.\n\nAll tasks are complete. I'll begin tracking impressions once episodes air.", time: 'Apr 11, 3:01 PM' },
+      ],
+      detail: {
+        brand: 'stationbrands.com', starts: '5/1/2026', ends: '5/26/2026', episodes: 4, terms: 'Net 30',
+        quoted: 35000, delivered: 8750, pacing: 25, onPace: true,
+        checklist: [
+          { label: 'Spot Requested', done: true },
+          { label: 'Payment Authorized', done: true },
+          { label: 'Talking Points Submitted', done: true },
+          { label: 'Tracking Submitted', done: true },
+          { label: 'Product Shipped', done: true },
+          { label: 'Show Approved', done: true },
+        ],
+        timerExpires: null,
+        timerDays: 0,
+      }
+    },
+    el: {
+      name: 'EntreLeadership', initials: 'EL', cls: 'el',
+      messages: [
+        { type: 'sent', text: "Hey EntreLeadership team,\n\nFanta here. We'd love to sponsor a few episodes. Your audience of business leaders is a great fit.", time: 'Apr 12, 8:00 AM' },
+        { type: 'agent', text: "Campaign request sent to EntreLeadership. Awaiting response.", time: 'Apr 12, 8:01 AM' },
+        { type: 'received', text: "Sounds great! Quick question \u2014 can you ship product to our Nashville studio by May 1st? Our host likes to try before he talks about it.", time: 'Apr 12, 4:30 PM' },
+      ],
+      detail: {
+        brand: 'stationbrands.com', starts: '5/5/2026', ends: '5/19/2026', episodes: 2, terms: 'Net 30',
+        quoted: 15000, delivered: 0, pacing: 0, onPace: true,
+        checklist: [
+          { label: 'Spot Requested', done: true },
+          { label: 'Payment Authorized', done: true },
+          { label: 'Talking Points Submitted', done: false },
+          { label: 'Tracking Submitted', done: false },
+          { label: 'Product Shipped', done: false },
+          { label: 'Show Approved', done: false },
+        ],
+        timerExpires: 'EXPIRES: 5d 12h 30m 00s',
+        timerDays: 6,
+      }
+    },
+    bo: {
+      name: 'The Best One Yet', initials: 'BO', cls: 'bo',
+      messages: [
+        { type: 'sent', text: "Hey Best One Yet team,\n\nWe're running a Fanta push this quarter and think your show would be a great fit. Interested?", time: 'Apr 9, 11:00 AM' },
+        { type: 'agent', text: "Campaign request sent. Awaiting response.", time: 'Apr 9, 11:01 AM' },
+        { type: 'received', text: "Appreciate the outreach! Unfortunately we're booked solid through Q2. Maybe next quarter?", time: 'Apr 10, 9:00 AM' },
+        { type: 'agent', text: "\u274c <strong>Show declined.</strong>\n\nPayment authorization has been released \u2014 no charge. I've noted this show for potential Q3 outreach.", time: 'Apr 10, 9:01 AM' },
+      ],
+      detail: {
+        brand: 'stationbrands.com', starts: '\u2014', ends: '\u2014', episodes: 0, terms: 'Net 30',
+        quoted: 0, delivered: 0, pacing: 0, onPace: true,
+        checklist: [
+          { label: 'Spot Requested', done: true },
+          { label: 'Payment Authorized', done: true },
+          { label: 'Talking Points Submitted', done: false },
+          { label: 'Tracking Submitted', done: false },
+          { label: 'Product Shipped', done: false },
+          { label: 'Show Approved', done: false },
+        ],
+        timerExpires: null,
+        timerDays: 0,
+      }
+    }
+  };
+
+  // ── AGENT RESPONSES ──
+  const agentResponses = [
+    { keywords: ['date', 'schedule', 'reschedule', 'move'], response: "I'll coordinate the date change with the show and get back to you once confirmed. If they can't accommodate, I'll suggest alternative dates." },
+    { keywords: ['product', 'ship', 'sample'], response: "I'll arrange product shipping to the show's studio. I'll confirm the address with their team and provide tracking once it's sent." },
+    { keywords: ['cancel', 'stop', 'pause'], response: "I can pause or cancel this campaign. Would you like to pause (keep the spot reserved) or fully cancel (release the authorization)? Let me know and I'll handle it." },
+    { keywords: ['talking', 'points', 'script', 'creative'], response: "Talking points are on file. Current themes: bold fruit flavors, zero sugar options, summer vibes. Want to update them? I can send revised points to the show." },
+    { keywords: ['status', 'update', 'progress'], response: "\ud83d\udcca <strong>Campaign Status</strong>\n\n<strong>What We Said:</strong> Awaiting approval. Product shipping in progress.\n<strong>Dear Media:</strong> Approved. First ep May 1. On pace.\n<strong>EntreLeadership:</strong> Awaiting response re: product shipping.\n<strong>The Best One Yet:</strong> Declined. No charge.\n\nTotal impressions delivered: 12,950 of 55,000 (23.5%)" },
+    { keywords: ['impressions', 'delivered', 'pacing'], response: "\ud83d\udcca <strong>Latest from Podscribe:</strong> 4,200 delivered of 20,000 quoted (21%). On pace for full delivery by May 12.\n\n<strong>Magellan AI cross-check:</strong> 4,180 (within 0.5% variance). Verification sources aligned." },
+  ];
+
+  // ── DOM REFS ──
+  const stepsBar = document.getElementById('stepsBar');
+  const bottomBar = document.getElementById('bottomBar');
+  const nextBtn = document.getElementById('nextBtn');
+  const backBtn = document.getElementById('backBtn');
+  const chatMessages = document.getElementById('chatMessages');
+  const chatInput = document.getElementById('chatInput');
+  const chatSend = document.getElementById('chatSend');
+  const chatHeader = document.getElementById('chatHeader');
+  const detailPanel = document.getElementById('detailPanel');
+
+  // ── STEP NAVIGATION ──
+  function goToStep(n) {
+    currentStep = n;
+    document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+
+    if (n <= totalWizardSteps) {
+      stepsBar.style.display = 'flex';
+      bottomBar.style.display = 'flex';
+      nextBtn.textContent = stepLabels[n];
+      backBtn.style.display = n > 1 ? 'inline-flex' : 'none';
+
+      document.querySelectorAll('.step-item').forEach(item => {
+        const s = parseInt(item.dataset.step);
+        item.classList.remove('active', 'done');
+        if (s === n) item.classList.add('active');
+        else if (s < n) item.classList.add('done');
+      });
+      document.querySelectorAll('.step-line').forEach((line, i) => {
+        line.classList.toggle('done', i < n - 1);
+      });
+    } else {
+      stepsBar.style.display = 'none';
+      bottomBar.style.display = 'none';
+      renderChat(activeShow);
+      renderDetail(activeShow);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  nextBtn.addEventListener('click', () => {
+    if (currentStep < 5) goToStep(currentStep + 1);
+  });
+  backBtn.addEventListener('click', () => {
+    if (currentStep > 1) goToStep(currentStep - 1);
+  });
+
+  // ── SETTINGS PANEL ──
+  const settingsToggle = document.getElementById('settingsToggle');
+  const settingsClose = document.getElementById('settingsClose');
+  const settingsOverlay = document.getElementById('settingsOverlay');
+  const settingsPanel = document.getElementById('settingsPanel');
+
+  function openSettings() { settingsOverlay.classList.add('open'); settingsPanel.classList.add('open'); }
+  function closeSettings() { settingsOverlay.classList.remove('open'); settingsPanel.classList.remove('open'); }
+  settingsToggle.addEventListener('click', openSettings);
+  settingsClose.addEventListener('click', closeSettings);
+  settingsOverlay.addEventListener('click', closeSettings);
+
+  // ── CREATIVE TASKS ──
+  document.querySelectorAll('.task-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.task;
+      if (tasksCompleted.has(id)) {
+        tasksCompleted.delete(id);
+        btn.classList.remove('done');
+        btn.textContent = ['Add talking points', 'Add tracking', 'Prepare the host'][id - 1];
+      } else {
+        tasksCompleted.add(id);
+        btn.classList.add('done');
+        btn.textContent = 'Submitted';
+      }
+      document.querySelectorAll('.progress-bar__seg').forEach(seg => {
+        seg.classList.toggle('done', tasksCompleted.has(seg.dataset.task));
+      });
+    });
+  });
+
+  // ── PAYMENT TERMS ──
+  document.querySelectorAll('.term-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.term-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+    });
+  });
+
+  // ── CHAT RENDERING ──
+  function renderChat(showId) {
+    const show = showData[showId];
+    if (!show) return;
+
+    chatHeader.innerHTML = `
+      <div class="show-av show-av--sm show-av--${show.cls}">${show.initials}</div>
+      <div>
+        <h3>${show.name}</h3>
+        <span>Campaign proposal &middot; Fanta</span>
+      </div>
+    `;
+
+    chatMessages.innerHTML = '';
+    show.messages.forEach(msg => {
+      chatMessages.appendChild(createMsgEl(msg));
+    });
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function createMsgEl(msg) {
+    const div = document.createElement('div');
+    div.className = `msg msg--${msg.type === 'sent' ? 'sent' : msg.type === 'received' ? 'received' : 'agent'}`;
+    let inner = '';
+    if (msg.type === 'agent') {
+      inner += '<div class="agent-badge">&#129302; SpotsNow Agent</div>';
+    }
+    inner += `<div class="msg__bubble">${msg.text.replace(/\n/g, '<br>')}</div>`;
+    inner += `<div class="msg__meta">${msg.time}</div>`;
+    div.innerHTML = inner;
+    return div;
+  }
+
+  // ── DETAIL PANEL ──
+  function renderDetail(showId) {
+    const show = showData[showId];
+    if (!show) return;
+    const d = show.detail;
+
+    let checklistHtml = d.checklist.map(item =>
+      `<div class="checklist-item ${item.done ? '' : 'pending'}">
+        <span class="icon">${item.done ? '\u2705' : '\u2b1c'}</span>
+        <span>${item.label}</span>
+      </div>`
+    ).join('');
+
+    let timerHtml = '';
+    if (d.timerExpires) {
+      timerHtml = `
+        <div class="detail-section">
+          <h4>Approval Timer</h4>
+          <div class="approval-timer">
+            <h4>Show must approve within ${d.timerDays} days</h4>
+            <div class="countdown" id="countdown">${d.timerExpires}</div>
+          </div>
+          <div class="cancel-link">Cancel Request</div>
+        </div>
+      `;
+    }
+
+    detailPanel.innerHTML = `
+      <div class="detail-section">
+        <h4>Campaign Details</h4>
+        <div class="detail-row"><span class="label">Brand</span><span class="value">${d.brand}</span></div>
+        <div class="detail-row"><span class="label">Starts</span><span class="value">${d.starts}</span></div>
+        <div class="detail-row"><span class="label">Ends</span><span class="value">${d.ends}</span></div>
+        <div class="detail-row"><span class="label">Episodes</span><span class="value">${d.episodes}</span></div>
+        <div class="detail-row"><span class="label">Payment terms</span><span class="value">${d.terms}</span></div>
+      </div>
+      <div class="detail-section">
+        <h4>Impression Verification</h4>
+        <div class="detail-row"><span class="label">Quoted</span><span class="value">${d.quoted.toLocaleString()}</span></div>
+        <div class="detail-row"><span class="label">Delivered</span><span class="value">${d.delivered.toLocaleString()} <span class="${d.onPace ? 'on-pace' : 'behind-pace'}">${d.delivered > 0 ? (d.onPace ? 'on pace' : 'behind') : ''}</span></span></div>
+        <div class="detail-row"><span class="label">Pacing</span><span class="value">${d.pacing}% of ${d.quoted.toLocaleString()}</span></div>
+        <div class="impression-bar"><div class="impression-bar__fill" style="width: ${d.pacing}%"></div></div>
+        <div class="impression-source"><span class="check">\u2713</span> Podscribe &nbsp; <span class="check">\u2713</span> Magellan</div>
+        <div class="last-checked">Last checked: 2 min ago</div>
+      </div>
+      <div class="detail-section">
+        <h4>Status Checklist</h4>
+        ${checklistHtml}
+      </div>
+      ${timerHtml}
+    `;
+  }
+
+  // ── SHOW SELECTION ──
+  window.selectShow = function(showId) {
+    activeShow = showId;
+    document.querySelectorAll('.inbox-show').forEach(el => {
+      el.classList.toggle('active', el.dataset.show === showId);
+    });
+    renderChat(showId);
+    renderDetail(showId);
+  };
+
+  window.scrollToInbox = function() {
+    document.getElementById('inboxLayout').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  // ── CHAT SEND ──
+  function sendMessage() {
+    const text = chatInput.value.trim();
+    if (!text) return;
+
+    const show = showData[activeShow];
+    const now = new Date();
+    const timeStr = now.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+
+    const userMsg = { type: 'sent', text: text, time: timeStr };
+    show.messages.push(userMsg);
+    chatMessages.appendChild(createMsgEl(userMsg));
+    chatInput.value = '';
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Typing indicator
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'msg msg--agent';
+    typingDiv.innerHTML = '<div class="agent-badge">&#129302; SpotsNow Agent</div><div class="typing-indicator"><span></span><span></span><span></span></div>';
+    chatMessages.appendChild(typingDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    setTimeout(() => {
+      chatMessages.removeChild(typingDiv);
+      const lower = text.toLowerCase();
+      let responseText = "Got it \u2014 I'll look into this and follow up with the show.";
+
+      for (const rule of agentResponses) {
+        if (rule.keywords.some(kw => lower.includes(kw))) {
+          responseText = rule.response;
+          break;
+        }
+      }
+
+      const agentMsg = { type: 'agent', text: responseText, time: timeStr };
+      show.messages.push(agentMsg);
+      chatMessages.appendChild(createMsgEl(agentMsg));
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }, 1500);
+  }
+
+  chatSend.addEventListener('click', sendMessage);
+  chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') sendMessage();
+  });
+
+  // ── COUNTDOWN TIMER ──
+  let countdownTarget = Date.now() + (3 * 24 + 23) * 3600000 + 50 * 60000 + 42000;
+  function updateCountdown() {
+    const el = document.getElementById('countdown');
+    if (!el) return;
+    const diff = Math.max(0, countdownTarget - Date.now());
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    el.textContent = `EXPIRES: ${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+  }
+  setInterval(updateCountdown, 1000);
+
+  // ── INIT ──
+  goToStep(1);
+})();
+</script>
+</body>
+</html>

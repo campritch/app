@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>SpotsNow · GTM Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e0e; --surface: #161616; --surface-2: #1e1e1e; --surface-3: #262626;
+  --line: #2a2a2a; --line-soft: #1f1f1f;
+  --text: #e8e6e1; --text-dim: #8a857c; --text-faint: #5c5952;
+  --accent: #e05a4e; --accent-soft: #3a1a17;
+  --good: #7fb069; --warn: #d4a857; --bad: #c94a3a;
+  --chat-width: 440px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter Tight', sans-serif; font-size: 13px; line-height: 1.5; overflow: hidden; }
+
+.layout { display: flex; height: 100vh; }
+.dashboard-col { flex: 1; overflow-y: auto; }
+.chat-col { width: var(--chat-width); min-width: var(--chat-width); border-left: 1px solid var(--line); background: var(--surface); display: flex; flex-direction: column; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 28px 36px 80px; }
+
+h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 500; letter-spacing: -0.02em; }
+
+.topbar { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 20px; border-bottom: 1px solid var(--line); margin-bottom: 24px; gap: 20px; flex-wrap: wrap; }
+.topbar h1 { font-size: 28px; font-weight: 600; line-height: 1; }
+.topbar h1 .accent { color: var(--accent); font-style: italic; font-weight: 400; }
+.topbar .sub { color: var(--text-dim); font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; margin-top: 6px; font-family: 'JetBrains Mono', monospace; }
+.topbar .sub .pulse { display: inline-block; width: 6px; height: 6px; background: var(--good); border-radius: 50%; margin-right: 6px; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.btn { background: var(--surface-2); border: 1px solid var(--line); color: var(--text); padding: 8px 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; border-radius: 2px; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn.primary:hover { background: #c54b40; }
+.btn.ghost { background: transparent; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn .spin { display: inline-block; width: 10px; height: 10px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.range-pills { display: inline-flex; background: var(--surface-2); border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
+.range-pills .btn { background: transparent; border: none; border-right: 1px solid var(--line); border-radius: 0; padding: 8px 12px; }
+.range-pills .btn:last-child { border-right: none; }
+.range-pills .btn.active { background: var(--accent); color: #fff; }
+
+.section { margin-bottom: 32px; }
+.section-hdr { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--line-soft); }
+.section-hdr h2 { font-size: 18px; font-weight: 600; }
+.section-hdr .tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.1em; }
+
+.verdict { background: linear-gradient(135deg, var(--accent-soft) 0%, var(--surface-2) 100%); border-left: 3px solid var(--accent); padding: 24px 28px; margin-bottom: 28px; }
+.verdict .label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+.verdict h2 { font-family: 'Fraunces', serif; font-size: 22px; line-height: 1.3; font-weight: 500; margin-bottom: 14px; color: var(--text); }
+.verdict p { color: var(--text-dim); font-size: 14px; line-height: 1.6; margin-bottom: 10px; }
+.verdict p:last-child { margin-bottom: 0; }
+.verdict strong { color: var(--text); font-weight: 600; }
+
+.stats { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 28px; }
+.stat { background: var(--surface); padding: 18px 20px; position: relative; }
+.stat.primary { background: linear-gradient(135deg, var(--accent-soft) 0%, var(--surface) 60%); }
+.stat.primary::before { content: 'Primary'; position: absolute; top: 10px; right: 12px; font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; font-weight: 600; }
+.stat .lbl { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); margin-bottom: 8px; }
+.stat.primary .lbl { color: var(--accent); }
+.stat .val { font-family: 'Fraunces', serif; font-size: 30px; font-weight: 600; line-height: 1; }
+.stat .val.large { font-size: 34px; }
+.stat .delta { font-family: 'JetBrains Mono', monospace; font-size: 10px; margin-top: 6px; color: var(--text-dim); }
+.stat .delta.bad { color: var(--bad); } .stat .delta.warn { color: var(--warn); } .stat .delta.good { color: var(--good); }
+
+.launch-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 16px; }
+.launch-col { background: var(--surface); padding: 20px 24px; }
+.launch-col .hdr { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-faint); margin-bottom: 14px; display: flex; justify-content: space-between; }
+.launch-col .hdr .date-tag { color: var(--text-dim); }
+.launch-col h3 { font-family: 'Fraunces', serif; font-size: 16px; margin-bottom: 12px; font-weight: 500; }
+.mini-row { display: grid; grid-template-columns: 1fr 70px 60px; gap: 10px; padding: 8px 0; font-size: 12px; border-bottom: 1px solid var(--line-soft); align-items: center; }
+.mini-row:last-child { border-bottom: none; }
+.mini-row.primary { background: var(--accent-soft); margin: 0 -24px; padding: 10px 24px; border-bottom: 1px solid rgba(224, 90, 78, 0.2); }
+.mini-row.primary span:first-child { color: var(--accent); font-weight: 600; }
+.mini-row .n { font-family: 'JetBrains Mono', monospace; text-align: right; }
+.mini-row .c { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); text-align: right; }
+.mini-row .c.bad { color: var(--bad); } .mini-row .c.good { color: var(--good); } .mini-row .c.warn { color: var(--warn); }
+
+.funnel { background: var(--surface); border: 1px solid var(--line); padding: 24px 28px; margin-bottom: 28px; }
+.funnel-row { display: grid; grid-template-columns: 200px 1fr 100px 140px; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line-soft); }
+.funnel-row:last-child { border-bottom: none; }
+.funnel-row.key { background: var(--accent-soft); margin: 0 -28px; padding: 14px 28px; border-left: 3px solid var(--accent); }
+.funnel-row .step { font-family: 'Fraunces', serif; font-weight: 500; font-size: 14px; }
+.funnel-row.key .step { color: var(--accent); font-weight: 600; }
+.funnel-row .step .sub { display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); font-weight: 400; margin-top: 2px; }
+.funnel-bar { height: 18px; background: var(--surface-3); border-radius: 1px; position: relative; overflow: hidden; }
+.funnel-bar .fill { height: 100%; background: linear-gradient(90deg, var(--accent) 0%, #b8453a 100%); transition: width 0.5s ease; }
+.funnel-row .num { font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: right; }
+.funnel-row.key .num { font-size: 16px; font-weight: 600; color: var(--accent); }
+.funnel-row .conv { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); text-align: right; }
+.funnel-row .conv.bad { color: var(--bad); } .funnel-row .conv.good { color: var(--good); } .funnel-row .conv.warn { color: var(--warn); }
+
+.channel-table { background: var(--surface); border: 1px solid var(--line); margin-bottom: 16px; }
+.channel-table table { width: 100%; border-collapse: collapse; }
+.channel-table th { text-align: left; padding: 12px 20px; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); font-weight: 600; border-bottom: 1px solid var(--line); background: var(--surface-2); }
+.channel-table td { padding: 14px 20px; border-bottom: 1px solid var(--line-soft); font-size: 13px; }
+.channel-table td.num { font-family: 'JetBrains Mono', monospace; text-align: right; }
+.channel-table td.name { font-family: 'Fraunces', serif; font-weight: 500; }
+.channel-table tr:last-child td { border-bottom: none; }
+.channel-table tr:hover td { background: var(--surface-2); }
+.signal-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.signal-dot.good { background: var(--good); } .signal-dot.warn { background: var(--warn); } .signal-dot.bad { background: var(--bad); } .signal-dot.na { background: var(--text-faint); }
+
+.insight { background: var(--surface); border: 1px solid var(--line); padding: 20px 22px; margin-bottom: 16px; }
+.insight .badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; padding: 3px 8px; border-radius: 2px; margin-bottom: 10px; }
+.insight .badge.urgent { background: var(--bad); color: #fff; }
+.insight .badge.caution { background: var(--warn); color: #2a1d05; }
+.insight .badge.positive { background: var(--good); color: #0a1803; }
+.insight .badge.info { background: var(--surface-3); color: var(--text-dim); }
+.insight h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+.insight p { color: var(--text-dim); font-size: 13px; line-height: 1.55; }
+.insight p + p { margin-top: 8px; }
+.insight strong { color: var(--text); font-weight: 600; }
+.insight code { background: var(--bg); color: var(--text); padding: 1px 6px; border-radius: 2px; font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+
+.last-updated { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; text-align: right; margin-top: 24px; }
+
+.state-banner { padding: 40px 24px; text-align: center; border: 1px dashed var(--line); background: var(--surface); margin-bottom: 28px; }
+.state-banner .title { font-family: 'Fraunces', serif; font-size: 18px; margin-bottom: 6px; }
+.state-banner .msg { color: var(--text-dim); font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+.state-banner.error .title { color: var(--bad); }
+
+/* Persistent chat column */
+.chat-hdr { padding: 18px 20px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+.chat-hdr h3 { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; }
+.chat-hdr .sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px; }
+.chat-hdr .reset { background: transparent; border: 1px solid var(--line); color: var(--text-dim); cursor: pointer; font-size: 10px; padding: 4px 10px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; border-radius: 2px; }
+.chat-hdr .reset:hover { color: var(--text); border-color: var(--accent); }
+.chat-body { flex: 1; overflow-y: auto; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+.chat-msg { display: flex; flex-direction: column; gap: 4px; }
+.chat-msg .who { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-faint); }
+.chat-msg.user .who { color: var(--accent); }
+.chat-msg .content { font-size: 13px; line-height: 1.55; color: var(--text); white-space: pre-wrap; word-wrap: break-word; }
+.chat-msg.user .content { background: var(--surface-2); border: 1px solid var(--line); padding: 10px 14px; border-radius: 2px; }
+.chat-msg .content code { background: var(--bg); color: var(--text); padding: 1px 6px; border-radius: 2px; font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+.chat-msg .content strong { color: var(--text); font-weight: 600; }
+.chat-footer { padding: 14px 20px; border-top: 1px solid var(--line); }
+.chat-input-wrap { display: flex; gap: 8px; align-items: flex-end; }
+.chat-input { flex: 1; background: var(--surface-2); border: 1px solid var(--line); color: var(--text); padding: 10px 14px; font-family: 'Inter Tight', sans-serif; font-size: 13px; border-radius: 2px; resize: none; min-height: 40px; max-height: 160px; line-height: 1.4; }
+.chat-input:focus { outline: none; border-color: var(--accent); }
+.chat-send { background: var(--accent); color: #fff; border: 0; padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; border-radius: 2px; cursor: pointer; }
+.chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
+.chat-empty { color: var(--text-dim); font-size: 12px; text-align: center; padding: 40px 20px; }
+.chat-empty .suggest { display: block; margin-top: 12px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; font-size: 10px; }
+.chat-empty .sug-btn { display: block; margin-top: 6px; background: var(--surface-2); border: 1px solid var(--line); color: var(--text); padding: 8px 12px; font-size: 11px; width: 100%; text-align: left; cursor: pointer; font-family: 'Inter Tight', sans-serif; border-radius: 2px; }
+.chat-empty .sug-btn:hover { border-color: var(--accent); }
+.chat-status { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); padding: 4px 10px; background: var(--surface-2); border: 1px solid var(--line-soft); border-radius: 2px; display: flex; align-items: center; gap: 8px; }
+.chat-status .status-dot { width: 6px; height: 6px; background: var(--warn); border-radius: 50%; animation: pulse 1.2s infinite; display: inline-block; }
+.chat-status .status-dot.good { background: var(--good); animation: none; }
+.chat-status .status-dot.bad { background: var(--bad); animation: none; }
+
+.toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--surface-2); border: 1px solid var(--line); padding: 10px 18px; border-radius: 2px; font-family: 'JetBrains Mono', monospace; font-size: 11px; z-index: 200; box-shadow: 0 6px 20px rgba(0,0,0,0.3); display: none; }
+.toast.show { display: block; }
+.toast.err { border-color: var(--bad); color: var(--bad); }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
+
+/* Mobile: stack, chat collapses to bottom drawer toggled by FAB */
+@media (max-width: 900px) {
+  body { overflow: auto; }
+  .layout { flex-direction: column; height: auto; min-height: 100vh; }
+  .dashboard-col { overflow: visible; }
+  .chat-col { width: 100%; min-width: 0; border-left: none; border-top: 1px solid var(--line); position: fixed; bottom: 0; left: 0; right: 0; height: 70vh; transform: translateY(100%); transition: transform 0.3s; z-index: 95; }
+  .chat-col.open { transform: translateY(0); }
+  .chat-fab-mobile { display: flex; position: fixed; bottom: 20px; right: 20px; background: var(--accent); color: #fff; border: none; border-radius: 50%; width: 52px; height: 52px; font-size: 20px; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,0.4); z-index: 90; align-items: center; justify-content: center; }
+  .wrap { padding: 20px 16px 120px; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .launch-compare { grid-template-columns: 1fr; }
+  .funnel-row { grid-template-columns: 1fr; gap: 4px; }
+  .topbar { flex-direction: column; align-items: flex-start; }
+}
+.chat-fab-mobile { display: none; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div class="dashboard-col">
+    <div class="wrap" id="app">
+      <div class="state-banner" id="loading">
+        <div class="title">Loading GTM data…</div>
+        <div class="msg">fetching /api/gtm-data</div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="chat-col" id="chatPanel">
+    <div class="chat-hdr">
+      <div>
+        <h3>Strategy chat</h3>
+        <div class="sub">Grounded in live dashboard</div>
+      </div>
+      <button class="reset" id="chatReset" title="Clear conversation">Reset</button>
+    </div>
+    <div class="chat-body" id="chatBody"></div>
+    <div class="chat-footer">
+      <div class="chat-input-wrap">
+        <textarea class="chat-input" id="chatInput" rows="1" placeholder="What should I pause? Why did generates drop?"></textarea>
+        <button class="chat-send" id="chatSend">Send</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<button class="chat-fab-mobile" id="chatFab" title="Open chat">💬</button>
+<div class="toast" id="toast"></div>
+
+<template id="tpl-dashboard">
+<div class="topbar">
+  <div>
+    <h1>GTM <span class="accent">Intelligence</span></h1>
+    <div class="sub"><span class="pulse"></span>SpotsNow · north star: generate campaign</div>
+  </div>
+  <div class="controls">
+    <div class="range-pills" id="rangePills">
+      <button class="btn" data-range="3">3d</button>
+      <button class="btn" data-range="7">7d</button>
+      <button class="btn active" data-range="14">14d</button>
+      <button class="btn" data-range="30">30d</button>
+      <button class="btn" data-range="90">90d</button>
+    </div>
+    <button class="btn primary" id="generateBtn">Generate</button>
+  </div>
+</div>
+
+<div class="verdict">
+  <div class="label" data-slot="verdict-label"></div>
+  <h2 data-slot="verdict-headline"></h2>
+  <p data-slot="verdict-windows"></p>
+  <p data-slot="verdict-core"></p>
+  <p data-slot="verdict-call"></p>
+</div>
+
+<section class="section">
+  <div class="section-hdr">
+    <h2>Since launch · pre vs post</h2>
+    <span class="tag">Comparing 10d before and 10d after ship</span>
+  </div>
+  <div class="launch-compare">
+    <div class="launch-col">
+      <div class="hdr"><span>Pre-launch</span><span class="date-tag" data-slot="pre-range"></span></div>
+      <h3>Baseline</h3>
+      <div class="mini-row"><span>Visitors</span><span class="n" data-slot="pre-v"></span><span class="c">100%</span></div>
+      <div class="mini-row primary"><span>Generates</span><span class="n" data-slot="pre-g"></span><span class="c" data-slot="pre-g-c"></span></div>
+      <div class="mini-row"><span>Signups</span><span class="n" data-slot="pre-s"></span><span class="c" data-slot="pre-s-c"></span></div>
+      <div class="mini-row"><span>Requests</span><span class="n" data-slot="pre-r"></span><span class="c" data-slot="pre-r-c"></span></div>
+    </div>
+    <div class="launch-col">
+      <div class="hdr"><span>Post-launch</span><span class="date-tag" data-slot="post-range"></span></div>
+      <h3>After ship</h3>
+      <div class="mini-row"><span>Visitors</span><span class="n" data-slot="post-v"></span><span class="c">100%</span></div>
+      <div class="mini-row primary"><span>Generates</span><span class="n" data-slot="post-g"></span><span class="c" data-slot="post-g-c"></span></div>
+      <div class="mini-row"><span>Signups</span><span class="n" data-slot="post-s"></span><span class="c" data-slot="post-s-c"></span></div>
+      <div class="mini-row"><span>Requests</span><span class="n" data-slot="post-r"></span><span class="c" data-slot="post-r-c"></span></div>
+    </div>
+  </div>
+  <div class="insight" data-slot="launch-insight"></div>
+</section>
+
+<div class="stats">
+  <div class="stat primary">
+    <div class="lbl">Generates (qualified leads)</div>
+    <div class="val large" data-slot="s-generates"></div>
+    <div class="delta" data-slot="s-generates-d"></div>
+  </div>
+  <div class="stat">
+    <div class="lbl">Visitors</div>
+    <div class="val" data-slot="s-visitors"></div>
+    <div class="delta" data-slot="s-visitors-d"></div>
+  </div>
+  <div class="stat">
+    <div class="lbl">Signups</div>
+    <div class="val" data-slot="s-signups"></div>
+    <div class="delta" data-slot="s-signups-d"></div>
+  </div>
+  <div class="stat">
+    <div class="lbl">Requests</div>
+    <div class="val" data-slot="s-requests"></div>
+    <div class="delta" data-slot="s-requests-d"></div>
+  </div>
+  <div class="stat">
+    <div class="lbl">Calls booked</div>
+    <div class="val" data-slot="s-calls"></div>
+    <div class="delta" data-slot="s-calls-d"></div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="section-hdr">
+    <h2>Full acquisition funnel</h2>
+    <span class="tag" data-slot="funnel-tag"></span>
+  </div>
+  <div class="funnel" data-slot="funnel"></div>
+</section>
+
+<section class="section">
+  <div class="section-hdr">
+    <h2>Channel performance · by generate rate</h2>
+    <span class="tag" data-slot="channel-tag"></span>
+  </div>
+  <div class="channel-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Source</th>
+          <th style="text-align:right">Visitors</th>
+          <th style="text-align:right">Generates</th>
+          <th style="text-align:right">Gen rate</th>
+          <th>Verdict</th>
+        </tr>
+      </thead>
+      <tbody data-slot="channels"></tbody>
+    </table>
+  </div>
+  <div data-slot="channel-insights"></div>
+</section>
+
+<section class="section" data-slot="seo-section" style="display: none;">
+  <div class="section-hdr">
+    <h2>Organic search · Ahrefs</h2>
+    <span class="tag" data-slot="seo-tag"></span>
+  </div>
+  <div class="channel-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Keyword</th>
+          <th style="text-align:right">Volume</th>
+          <th style="text-align:right">Position</th>
+          <th style="text-align:right">Est. traffic</th>
+        </tr>
+      </thead>
+      <tbody data-slot="seo-rows"></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-hdr">
+    <h2>Known limitations</h2>
+    <span class="tag">Read before acting</span>
+  </div>
+  <div class="insight">
+    <p style="line-height: 1.7;">
+      <strong>Sample size:</strong> generate counts per range are in the double digits at most. Directional signal, not statistical proof.<br><br>
+      <strong>Meta attribution:</strong> Meta strips UTMs into numeric ad-set IDs. Set URL parameters in Ads Manager to <code>utm_source=meta&amp;utm_campaign={{campaign.name}}&amp;utm_content={{ad.name}}</code> to split Meta into named ad sets.<br><br>
+      <strong>Direct is mixed:</strong> "direct" / "undefined" includes typed URLs, Slack/iMessage clicks, untagged emails, and true word of mouth.
+    </p>
+  </div>
+</section>
+
+<div class="last-updated" data-slot="last-updated"></div>
+</template>
+
+<script>
+let DATA = null;
+let AHREFS = null;
+let currentRange = 14;
+let chatHistory = [];
+const STRATEGY_PW_KEY = 'strategyPassword';
+
+const fmtInt = (n) => (n ?? 0).toLocaleString('en-US');
+const rateClass = (rate, warnBelow, goodAbove) => rate < warnBelow ? 'bad' : rate < goodAbove ? 'warn' : 'good';
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escInline(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/`([^`]+)`/g, '<code>$1</code>'); }
+function setText(slot, text) { const el = document.querySelector(`[data-slot="${slot}"]`); if (el) el.textContent = text; }
+function setHTML(slot, html) { const el = document.querySelector(`[data-slot="${slot}"]`); if (el) el.innerHTML = html; }
+function toast(msg, isErr) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.toggle('err', !!isErr); t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3500); }
+
+/* ---------- Initial data load ---------- */
+async function loadInitial() {
+  try {
+    let r = await fetch('/api/gtm-data', { cache: 'no-store' });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    DATA = await r.json();
+    AHREFS = DATA.ahrefs || null;
+    renderAll();
+  } catch (e) {
+    try {
+      const fb = await fetch('/data/gtm-latest.json', { cache: 'no-store' });
+      if (fb.ok) { DATA = await fb.json(); renderAll(); return; }
+    } catch (_) {}
+    const app = document.getElementById('app');
+    app.innerHTML = `<div class="state-banner error"><div class="title">Dashboard unavailable</div><div class="msg">${esc(String(e))}</div></div>`;
+  }
+}
+
+/* ---------- Live refresh ---------- */
+async function runGenerate() {
+  const btn = document.getElementById('generateBtn');
+  if (!btn) return;
+  btn.disabled = true;
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<span class="spin"></span> Generating';
+  try {
+    const r = await fetch(`/api/gtm-data?live=1&range=${currentRange}`, { cache: 'no-store' });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      throw new Error(err.detail || err.error || `HTTP ${r.status}`);
+    }
+    const fresh = await r.json();
+    mergeFresh(fresh);
+    renderForRange();
+    renderSEO();
+    toast(`Refreshed ${currentRange}d from Mixpanel`);
+  } catch (e) {
+    toast(`Refresh failed: ${e.message}`, true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = orig;
+  }
+}
+
+function mergeFresh(fresh) {
+  // fresh = { range, totals, channels, launch_windows, generated_at, source, primary_metric, ahrefs? }
+  if (!DATA) DATA = { ranges: {} };
+  DATA.ranges = DATA.ranges || {};
+  DATA.ranges[String(fresh.range)] = { totals: fresh.totals, channels: fresh.channels };
+  DATA.launch_windows = fresh.launch_windows;
+  DATA.generated_at = fresh.generated_at;
+  DATA.source = fresh.source;
+  DATA.primary_metric = fresh.primary_metric;
+  if (fresh.ahrefs) AHREFS = fresh.ahrefs;
+}
+
+/* ---------- Render ---------- */
+function renderAll() {
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  app.appendChild(document.getElementById('tpl-dashboard').content.cloneNode(true));
+  wireRangePills();
+  document.getElementById('generateBtn').addEventListener('click', runGenerate);
+  renderForRange();
+  renderSEO();
+}
+
+function wireRangePills() {
+  document.querySelectorAll('#rangePills .btn').forEach(btn => {
+    const r = parseInt(btn.dataset.range);
+    btn.classList.toggle('active', r === currentRange);
+    btn.addEventListener('click', () => {
+      currentRange = r;
+      document.querySelectorAll('#rangePills .btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.range) === currentRange));
+      renderForRange();
+    });
+  });
+}
+
+function renderForRange() {
+  const range = DATA.ranges[String(currentRange)];
+  if (!range) {
+    const app = document.getElementById('app');
+    const note = document.createElement('div');
+    note.className = 'state-banner';
+    note.innerHTML = `<div class="title">No data for ${currentRange}d yet</div><div class="msg">click Generate to pull fresh from Mixpanel</div>`;
+    document.querySelector('[data-slot="verdict-headline"]').textContent = `No ${currentRange}d data — click Generate`;
+    return;
+  }
+  renderVerdict(range);
+  renderLaunchCompare();
+  renderStats(range);
+  renderFunnel(range);
+  renderChannels(range);
+  const ts = DATA.generated_at ? new Date(DATA.generated_at).toISOString().replace('T', ' ').slice(0, 16) + ' UTC' : 'unknown';
+  setText('last-updated', `Data pulled ${ts} · ${currentRange}-day window · primary: ${DATA.primary_metric || 'landing_demographics_generate_click'} · source: ${DATA.source || 'mixpanel'}`);
+}
+
+function renderVerdict(range) {
+  const t = range.totals;
+  const genRate = t.visitors > 0 ? (t.generates / t.visitors * 100) : 0;
+  const pre = DATA.launch_windows?.pre;
+  const post = DATA.launch_windows?.post;
+  if (!pre || !post) {
+    setText('verdict-label', 'Loading');
+    setText('verdict-headline', 'Dashboard loading…');
+    return;
+  }
+  const preRate = pre.visitors > 0 ? (pre.generates / pre.visitors * 100) : 0;
+  const postRate = post.visitors > 0 ? (post.generates / post.visitors * 100) : 0;
+  const trafficMult = pre.visitors > 0 ? (post.visitors / pre.visitors).toFixed(1) : '—';
+  const absDelta = post.generates - pre.generates;
+
+  let label, headline, call;
+  if (preRate > 0 && postRate < preRate * 0.6 && post.visitors > pre.visitors * 1.5 && absDelta <= 0) {
+    label = 'The honest read · regression confirmed';
+    headline = 'Post-launch drop is real on the metric that matters, and paid traffic is the likely culprit.';
+    const channels = range.channels || [];
+    const culprit = channels.find(c => c.visits > t.visitors * 0.3 && (c.generates / Math.max(1, c.visits)) < 0.01);
+    call = culprit
+      ? `<strong>The call:</strong> pause <code>${esc(culprit.name)}</code> (${fmtInt(culprit.visits)} visits → ${culprit.generates} generates, ${(culprit.generates / Math.max(1, culprit.visits) * 100).toFixed(2)}% rate) for 72 hours. If generate rate rebounds toward ${preRate.toFixed(1)}%, dilution is confirmed.`
+      : `<strong>The call:</strong> identify the dominant low-rate channel below, pause it for 72h, watch the rate rebound.`;
+  } else if (postRate > preRate) {
+    label = 'The honest read · improvement';
+    headline = 'Post-launch is converting better than pre-launch.';
+    call = `<strong>The call:</strong> identify what shipped and protect it.`;
+  } else {
+    label = 'The honest read · stable';
+    headline = 'No clear dilution, no clear uplift.';
+    call = `<strong>The call:</strong> watch another 7 days before making big channel changes.`;
+  }
+  setText('verdict-label', label);
+  setText('verdict-headline', headline);
+  setHTML('verdict-windows', `Pre-launch: <strong>${fmtInt(pre.visitors)} visitors, ${fmtInt(pre.generates)} generates (${preRate.toFixed(2)}%)</strong>. Post-launch: <strong>${fmtInt(post.visitors)} visitors, ${fmtInt(post.generates)} generates (${postRate.toFixed(2)}%)</strong>. Traffic ${trafficMult}×. Generates ${absDelta >= 0 ? 'held or rose' : 'fell'} absolutely.`);
+  setHTML('verdict-core', `In the last ${currentRange} days your blended generate rate is <strong>${genRate.toFixed(2)}%</strong> of ${fmtInt(t.visitors)} visitors.`);
+  setHTML('verdict-call', call);
+}
+
+function renderLaunchCompare() {
+  const pre = DATA.launch_windows?.pre;
+  const post = DATA.launch_windows?.post;
+  if (!pre || !post) return;
+  setText('pre-range', `${pre.from} → ${pre.to}`);
+  setText('post-range', `${post.from} → ${post.to}`);
+  const cells = [['pre-v', pre.visitors], ['pre-g', pre.generates], ['pre-s', pre.signups], ['pre-r', pre.requests],
+                 ['post-v', post.visitors], ['post-g', post.generates], ['post-s', post.signups], ['post-r', post.requests]];
+  cells.forEach(([s, v]) => setText(s, fmtInt(v)));
+  const rate = (n, d) => d > 0 ? (n / d * 100) : 0;
+  const setRate = (slot, val, warn, good) => {
+    const el = document.querySelector(`[data-slot="${slot}"]`);
+    if (!el) return;
+    el.textContent = val.toFixed(2) + '%';
+    el.className = 'c ' + rateClass(val, warn, good);
+  };
+  setRate('pre-g-c', rate(pre.generates, pre.visitors), 2, 4);
+  setRate('pre-s-c', rate(pre.signups, pre.visitors), 1, 2);
+  setRate('pre-r-c', rate(pre.requests, pre.visitors), 0.5, 1);
+  setRate('post-g-c', rate(post.generates, post.visitors), 2, 4);
+  setRate('post-s-c', rate(post.signups, post.visitors), 1, 2);
+  setRate('post-r-c', rate(post.requests, post.visitors), 0.5, 1);
+
+  const preRate = rate(pre.generates, pre.visitors);
+  const postRate = rate(post.generates, post.visitors);
+  const relChange = preRate > 0 ? ((postRate - preRate) / preRate * 100) : 0;
+  const totalGens = pre.generates + post.generates;
+  const trafficMult = pre.visitors > 0 ? (post.visitors / pre.visitors) : 0;
+  const absDelta = post.generates - pre.generates;
+  let html;
+  if (totalGens < 10) html = `<div class="badge info">Too small to conclude</div><p>Only ${totalGens} generates across both windows.</p>`;
+  else if (trafficMult >= 2 && relChange < -30 && absDelta < 0) html = `<div class="badge urgent">Real regression on primary metric</div><p><strong>Generates fell from ${pre.generates} to ${post.generates} while traffic went up ${trafficMult.toFixed(1)}×.</strong> Rate dropped ${Math.abs(relChange).toFixed(0)}% relative.</p><p><strong>48h diagnostic:</strong> pause the dominant paid channel, watch 5 session replays from low-quality traffic vs 5 from high-quality.</p>`;
+  else if (trafficMult >= 2 && relChange < -30) html = `<div class="badge urgent">Dilution from traffic surge</div><p>Generate rate dropped ${Math.abs(relChange).toFixed(0)}% while traffic went up ${trafficMult.toFixed(1)}×.</p>`;
+  else if (Math.abs(relChange) < 20) html = `<div class="badge info">Essentially flat</div><p>${preRate.toFixed(2)}% → ${postRate.toFixed(2)}%.</p>`;
+  else if (relChange > 20) html = `<div class="badge positive">Improvement</div><p>${preRate.toFixed(2)}% → ${postRate.toFixed(2)}%, ${relChange.toFixed(0)}% lift.</p>`;
+  else html = `<div class="badge urgent">Regression</div><p>${preRate.toFixed(2)}% → ${postRate.toFixed(2)}%, ${Math.abs(relChange).toFixed(0)}% drop.</p>`;
+  setHTML('launch-insight', html);
+}
+
+function renderStats(range) {
+  const t = range.totals;
+  const genRate = t.visitors > 0 ? (t.generates / t.visitors * 100) : 0;
+  setText('s-generates', fmtInt(t.generates));
+  const ge = document.querySelector('[data-slot="s-generates-d"]');
+  ge.textContent = genRate.toFixed(2) + '% of visitors · last ' + currentRange + 'd';
+  ge.className = 'delta ' + rateClass(genRate, 2, 4);
+  setText('s-visitors', fmtInt(t.visitors));
+  setText('s-visitors-d', `Unique · last ${currentRange}d`);
+  setText('s-signups', fmtInt(t.signups));
+  const sRate = t.generates > 0 ? (t.signups / t.generates * 100) : 0;
+  const se = document.querySelector('[data-slot="s-signups-d"]');
+  se.textContent = sRate.toFixed(0) + '% of generates';
+  se.className = 'delta ' + rateClass(sRate, 30, 60);
+  setText('s-requests', fmtInt(t.requests));
+  const rRate = t.generates > 0 ? (t.requests / t.generates * 100) : 0;
+  setText('s-requests-d', `${rRate.toFixed(0)}% of generates`);
+  setText('s-calls', fmtInt(t.calls));
+  const cRate = t.generates > 0 ? (t.calls / t.generates * 100) : 0;
+  setText('s-calls-d', `${cRate.toFixed(0)}% of generates`);
+}
+
+function renderFunnel(range) {
+  const t = range.totals;
+  setText('funnel-tag', `Last ${currentRange} days · unique users`);
+  const steps = [
+    { label: 'Landing page view', event: 'landing_page_view', value: t.visitors, pctOf: null, pctLbl: '100%', key: false },
+    { label: 'Generate campaign', event: 'landing_demographics_generate_click', value: t.generates, pctOf: t.visitors, pctLbl: 'visitors', key: true },
+    { label: 'Account created', event: 'create_account_success', value: t.signups, pctOf: t.generates, pctLbl: 'generates', key: false },
+    { label: 'Request sent', event: 'campaign_planner_send_request_click', value: t.requests, pctOf: t.generates, pctLbl: 'generates', key: false },
+    { label: 'Call booked', event: 'book_a_call_success', value: t.calls, pctOf: t.generates, pctLbl: 'generates', key: false }
+  ];
+  const container = document.querySelector('[data-slot="funnel"]');
+  container.innerHTML = steps.map((s, idx) => {
+    const pctOfTop = t.visitors > 0 ? (s.value / t.visitors * 100) : 0;
+    const localPct = s.pctOf > 0 ? (s.value / s.pctOf * 100) : 0;
+    let convText, convCls;
+    if (idx === 0) { convText = '100%'; convCls = ''; }
+    else if (idx === 1) { convText = localPct.toFixed(2) + '% of ' + s.pctLbl; convCls = rateClass(localPct, 2, 4); }
+    else { convText = localPct.toFixed(0) + '% of ' + s.pctLbl; convCls = rateClass(localPct, 30, 60); }
+    return `<div class="funnel-row${s.key ? ' key' : ''}"><div class="step">${esc(s.label)}<span class="sub">${esc(s.event)}</span></div><div class="funnel-bar"><div class="fill" style="width: ${Math.max(pctOfTop, 0.4)}%"></div></div><div class="num">${fmtInt(s.value)}</div><div class="conv ${convCls}">${convText}</div></div>`;
+  }).join('');
+}
+
+function renderChannels(range) {
+  setText('channel-tag', `By utm_source · last ${currentRange}d`);
+  const channels = (range.channels || []).slice().sort((a, b) => {
+    const ra = a.visits > 0 ? a.generates / a.visits : 0;
+    const rb = b.visits > 0 ? b.generates / b.visits : 0;
+    return rb - ra;
+  });
+  const tbody = document.querySelector('[data-slot="channels"]');
+  tbody.innerHTML = channels.map(c => {
+    const rate = c.visits > 0 ? (c.generates / c.visits * 100) : 0;
+    let sig, sigText, rateColor;
+    if (c.generates >= 2 && rate >= 4) { sig = 'good'; sigText = 'Strong · lean in'; rateColor = 'var(--good)'; }
+    else if (c.generates >= 1 && rate >= 3) { sig = 'good'; sigText = 'Converting · monitor'; rateColor = 'var(--good)'; }
+    else if (c.visits >= 200 && rate < 1) { sig = 'bad'; sigText = 'Volume without conversion'; rateColor = 'var(--bad)'; }
+    else if (c.visits < 20) { sig = 'na'; sigText = 'Sample too small'; rateColor = 'var(--text-dim)'; }
+    else { sig = 'warn'; sigText = 'Underperforming'; rateColor = 'var(--warn)'; }
+    return `<tr><td class="name">${esc(c.name)}</td><td class="num">${fmtInt(c.visits)}</td><td class="num">${fmtInt(c.generates)}</td><td class="num" style="color: ${rateColor}">${rate.toFixed(2)}%</td><td><span class="signal-dot ${sig}"></span>${sigText}</td></tr>`;
+  }).join('');
+
+  const container = document.querySelector('[data-slot="channel-insights"]');
+  const totalV = channels.reduce((s, c) => s + c.visits, 0);
+  const totalG = channels.reduce((s, c) => s + c.generates, 0);
+  const insights = [];
+  const laggards = channels.filter(c => c.visits >= 200 && (c.generates / c.visits) < 0.01);
+  if (laggards.length) {
+    const worst = laggards[0];
+    const rate = worst.generates / worst.visits * 100;
+    insights.push(`<div class="insight"><div class="badge urgent">What's not working</div><h3>${esc(worst.name)} is ${((worst.visits / totalV) * 100).toFixed(0)}% of traffic and ${((worst.generates / Math.max(1, totalG)) * 100).toFixed(0)}% of generates</h3><p>${fmtInt(worst.visits)} visitors produced ${worst.generates} generates (${rate.toFixed(2)}%). Pulling blended rate down.</p><p><strong>Action:</strong> pause 72h, re-measure.</p></div>`);
+  }
+  const winners = channels.filter(c => c.generates >= 1 && (c.generates / Math.max(1, c.visits)) >= 0.03);
+  if (winners.length) {
+    const names = winners.slice(0, 3).map(c => esc(c.name)).join(', ');
+    insights.push(`<div class="insight"><div class="badge positive">What's working</div><h3>${names}</h3><p>These convert at business-needed rates. Scale the acquisition motion behind each.</p></div>`);
+  }
+  const direct = channels.find(c => c.name === 'Direct / untagged');
+  if (direct && direct.generates > 0) {
+    insights.push(`<div class="insight"><div class="badge caution">What's unknown</div><h3>Direct is ${((direct.visits / totalV) * 100).toFixed(0)}% visitors, ${((direct.generates / Math.max(1, totalG)) * 100).toFixed(0)}% generates — unattributed</h3><p><strong>Action:</strong> add UTMs to every link you personally share. Ask new generators how they heard about you.</p></div>`);
+  }
+  container.innerHTML = insights.join('');
+}
+
+function renderSEO() {
+  if (!AHREFS || !AHREFS.keywords || !AHREFS.keywords.length) return;
+  const section = document.querySelector('[data-slot="seo-section"]');
+  if (!section) return;
+  section.style.display = '';
+  setText('seo-tag', `${AHREFS.keyword_count} keywords · ${AHREFS.target}`);
+  const tbody = document.querySelector('[data-slot="seo-rows"]');
+  tbody.innerHTML = AHREFS.keywords.slice(0, 15).map(k => {
+    const pos = k.position ?? '—';
+    const posColor = pos === '—' ? 'var(--text-dim)' : pos <= 3 ? 'var(--good)' : pos <= 10 ? 'var(--warn)' : 'var(--text-dim)';
+    return `<tr><td class="name">${esc(k.keyword)}</td><td class="num">${fmtInt(k.volume)}</td><td class="num" style="color: ${posColor}">${pos}</td><td class="num">${fmtInt(k.traffic)}</td></tr>`;
+  }).join('');
+}
+
+/* ---------- Chat ---------- */
+const chatPanel = document.getElementById('chatPanel');
+const chatFab = document.getElementById('chatFab');
+const chatBody = document.getElementById('chatBody');
+const chatInput = document.getElementById('chatInput');
+const chatSend = document.getElementById('chatSend');
+const chatReset = document.getElementById('chatReset');
+
+chatFab.addEventListener('click', () => chatPanel.classList.toggle('open'));
+chatReset.addEventListener('click', () => { chatHistory = []; chatBody.innerHTML = ''; renderChatEmpty(); });
+chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } });
+chatInput.addEventListener('input', () => { chatInput.style.height = 'auto'; chatInput.style.height = Math.min(160, chatInput.scrollHeight) + 'px'; });
+chatSend.addEventListener('click', sendChat);
+renderChatEmpty();
+
+function renderChatEmpty() {
+  chatBody.innerHTML = `
+    <div class="chat-empty">
+      Ask anything. The agent pulls live from Mixpanel, HubSpot, Notion, Fathom and the burn sheet as needed.
+      <div class="suggest">Try</div>
+      <button class="sug-btn" data-q="What should I pause this week and why?">What should I pause this week and why?</button>
+      <button class="sug-btn" data-q="Cross-reference HubSpot deals with GTM data — where is the friction?">Cross-reference HubSpot deals with GTM data — where is the friction?</button>
+      <button class="sug-btn" data-q="Summarize my substantive Fathom calls from the last 7 days and what needs follow-up.">Summarize my substantive Fathom calls from the last 7 days and what needs follow-up.</button>
+      <button class="sug-btn" data-q="Looking at the burn vs pipeline, how much runway do I actually have?">Looking at the burn vs pipeline, how much runway do I actually have?</button>
+    </div>
+  `;
+  chatBody.querySelectorAll('.sug-btn').forEach(b => b.addEventListener('click', () => { chatInput.value = b.dataset.q; sendChat(); }));
+}
+
+function addMsg(who, initialContent = '') {
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-msg ' + who;
+  wrap.innerHTML = `<div class="who">${who === 'user' ? 'You' : 'Claude'}</div><div class="content"></div>`;
+  const content = wrap.querySelector('.content');
+  content.textContent = initialContent;
+  chatBody.appendChild(wrap);
+  chatBody.scrollTop = chatBody.scrollHeight;
+  return content;
+}
+
+function getStrategyPassword() {
+  let pw = sessionStorage.getItem(STRATEGY_PW_KEY);
+  if (!pw) {
+    pw = window.prompt('Strategy chat password (stored for this session only):');
+    if (!pw) return null;
+    sessionStorage.setItem(STRATEGY_PW_KEY, pw);
+  }
+  return pw;
+}
+
+function clearStrategyPassword() {
+  sessionStorage.removeItem(STRATEGY_PW_KEY);
+}
+
+function buildContextSupp() {
+  // Hand the agent a one-shot snapshot of the currently-selected range + Ahrefs
+  // so it doesn't have to round-trip through its bi tool for basic questions.
+  if (!DATA || !DATA.ranges) return '';
+  const range = DATA.ranges[String(currentRange)];
+  if (!range) return '';
+  const pre = DATA.launch_windows?.pre;
+  const post = DATA.launch_windows?.post;
+  const lines = [];
+  lines.push(`User is currently viewing the /bi dashboard · selected range: last ${currentRange} days`);
+  lines.push('');
+  lines.push(`Totals (${currentRange}d): visitors ${range.totals.visitors}, generates ${range.totals.generates}, signups ${range.totals.signups}, requests ${range.totals.requests}, calls ${range.totals.calls}.`);
+  if (range.channels?.length) {
+    lines.push('Channels:');
+    range.channels.slice().sort((a, b) => b.visits - a.visits).forEach(c => {
+      const rate = c.visits > 0 ? (c.generates / c.visits * 100).toFixed(2) : '0.00';
+      lines.push(`- ${c.name}: ${c.visits} visits, ${c.generates} generates (${rate}%)`);
+    });
+  }
+  if (pre && post) {
+    lines.push('');
+    lines.push(`Launch windows (fixed 10d each): pre ${pre.from}→${pre.to} = ${pre.visitors} visitors / ${pre.generates} generates; post ${post.from}→${post.to} = ${post.visitors} visitors / ${post.generates} generates.`);
+  }
+  if (AHREFS && AHREFS.keywords?.length) {
+    lines.push('');
+    lines.push(`Ahrefs top organic keywords for ${AHREFS.target}:`);
+    AHREFS.keywords.slice(0, 15).forEach(k => {
+      lines.push(`- "${k.keyword}" vol ${k.volume} pos ${k.position ?? '?'} traffic ${k.traffic}`);
+    });
+  }
+  return lines.join('\n');
+}
+
+function addStatusLine(text) {
+  const el = document.createElement('div');
+  el.className = 'chat-status';
+  el.innerHTML = `<span class="status-dot"></span>${esc(text)}`;
+  chatBody.appendChild(el);
+  chatBody.scrollTop = chatBody.scrollHeight;
+  return el;
+}
+
+async function sendChat() {
+  const text = chatInput.value.trim();
+  if (!text) return;
+
+  const password = getStrategyPassword();
+  if (!password) return;
+
+  chatInput.value = '';
+  chatInput.style.height = 'auto';
+  chatSend.disabled = true;
+  if (chatBody.querySelector('.chat-empty')) chatBody.innerHTML = '';
+  addMsg('user', text);
+  chatHistory.push({ role: 'user', content: text });
+
+  const assistantEl = addMsg('assistant', '');
+  let buf = '';
+  let pendingTools = new Map(); // id → status element
+
+  try {
+    const response = await fetch('/api/strategy-chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        password,
+        messages: chatHistory,
+        supp: buildContextSupp()
+      })
+    });
+
+    if (response.status === 401) {
+      clearStrategyPassword();
+      throw new Error('Wrong password. Click Send again to re-enter.');
+    }
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${response.status}`);
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let chunk = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunk += decoder.decode(value, { stream: true });
+
+      let idx;
+      while ((idx = chunk.indexOf('\n\n')) >= 0) {
+        const piece = chunk.slice(0, idx);
+        chunk = chunk.slice(idx + 2);
+        let evtName = 'message';
+        let dataStr = '';
+        for (const line of piece.split('\n')) {
+          if (line.startsWith('event: ')) evtName = line.slice(7).trim();
+          else if (line.startsWith('data: ')) dataStr += line.slice(6);
+        }
+        if (!dataStr) continue;
+        let data;
+        try { data = JSON.parse(dataStr); } catch (_) { continue; }
+
+        if (evtName === 'text') {
+          buf += data.delta || '';
+          assistantEl.innerHTML = escInline(buf);
+          chatBody.scrollTop = chatBody.scrollHeight;
+        } else if (evtName === 'tool_start') {
+          const status = addStatusLine(`Calling ${data.name}…`);
+          pendingTools.set(data.id, status);
+        } else if (evtName === 'tool_result') {
+          const status = pendingTools.get(data.id);
+          if (status) {
+            if (data.ok) status.innerHTML = `<span class="status-dot good"></span>${esc(data.name)} · ${fmtInt(data.bytes)} bytes`;
+            else status.innerHTML = `<span class="status-dot bad"></span>${esc(data.name)} failed: ${esc(data.error || '')}`;
+            pendingTools.delete(data.id);
+          }
+        } else if (evtName === 'iteration') {
+          // soft divider between iterations
+        } else if (evtName === 'done') {
+          // stream finished
+        } else if (evtName === 'error') {
+          assistantEl.innerHTML += `<div style="color: var(--bad); margin-top: 8px;">Agent error: ${esc(data.message)}</div>`;
+        }
+      }
+    }
+
+    if (buf) chatHistory.push({ role: 'assistant', content: buf });
+    else assistantEl.innerHTML = `<span style="color: var(--text-dim)">(no response)</span>`;
+  } catch (e) {
+    assistantEl.innerHTML = `<span style="color: var(--bad)">Error: ${esc(e.message)}</span>`;
+  } finally {
+    chatSend.disabled = false;
+    chatInput.focus();
+  }
+}
+
+/* Boot */
+loadInitial();
+</script>
+
+</body>
+</html>

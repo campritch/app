@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube → Article</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <style>
+    :root {
+      --dark: #1A2832;
+      --grey-1: #707481;
+      --text-primary: #252733;
+      --text-secondary: #5a5f6e;
+      --border: #dee0e4;
+      --border-light: #e8e8e8;
+      --white: #ffffff;
+      --coral: #FF6868;
+      --btn-dark: #111111;
+      --pill-bg: #f3f4f6;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.5;
+      color: var(--dark); background: #f5f5f3;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* ── Top bar ── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 200;
+      height: 56px; display: flex; align-items: center; gap: 16px;
+      padding: 0 28px; background: var(--white);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .top-bar__logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 800; font-size: 15px; color: var(--dark);
+      text-decoration: none; flex-shrink: 0; letter-spacing: -0.3px;
+    }
+    .logo-mark {
+      width: 22px; height: 22px; border-radius: 6px;
+      background: var(--coral); display: flex; align-items: center; justify-content: center;
+    }
+    .top-bar__title { flex: 1; font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+
+    /* ── Page ── */
+    .page { max-width: 900px; margin: 40px auto; padding: 0 24px 80px; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--white); border: 1px solid var(--border-light);
+      border-radius: 20px; margin-bottom: 24px;
+    }
+    .card__header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; border-bottom: 1px solid var(--border-light);
+    }
+    .card__label {
+      font-size: 12px; font-weight: 600; color: var(--grey-1);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .card__body { padding: 28px 32px; }
+
+    /* ── Input card ── */
+    .input-card { padding: 32px; }
+    .input-card h1 { margin: 0 0 6px; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    .input-card p { margin: 0 0 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+    .input-row { display: flex; gap: 10px; }
+    .url-input {
+      flex: 1; height: 42px; padding: 0 14px;
+      border: 1px solid var(--border); border-radius: 10px;
+      font-family: inherit; font-size: 13px; outline: none; transition: border-color 0.15s;
+    }
+    .url-input:focus { border-color: var(--dark); }
+    .url-input::placeholder { color: var(--grey-1); }
+
+
+    /* ── Buttons ── */
+    .btn-dark {
+      height: 42px; padding: 0 20px; background: var(--btn-dark); color: #fff;
+      border: none; border-radius: 10px; font-size: 13px; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 7px;
+      white-space: nowrap; transition: opacity 0.15s;
+    }
+    .btn-dark:hover { opacity: 0.85; }
+    .btn-dark:disabled { opacity: 0.45; cursor: default; }
+    .btn-outline {
+      height: 32px; padding: 0 14px; background: none;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 12px; font-weight: 600; color: var(--text-primary);
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-outline:hover { background: var(--pill-bg); }
+
+    /* ── Status ── */
+    .status {
+      margin-top: 14px; font-size: 13px;
+      display: flex; align-items: center; gap: 8px; color: var(--text-secondary);
+    }
+    .status--error { color: #c0392b; }
+    .spinner {
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 2px solid var(--border); border-top-color: var(--dark);
+      animation: spin 0.7s linear infinite; flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Article ── */
+    .article-body {
+      padding: 36px 40px; font-size: 15px; line-height: 1.75; color: var(--text-primary);
+      min-height: 80px;
+    }
+    .article-body h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.6px; color: var(--dark); margin: 0 0 20px; line-height: 1.2; }
+    .article-body h2 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; color: var(--dark); margin: 32px 0 12px; }
+    .article-body h3 { font-size: 15px; font-weight: 700; color: var(--dark); margin: 24px 0 8px; }
+    .article-body p { margin: 0 0 16px; }
+    .article-body ul, .article-body ol { margin: 0 0 16px; padding-left: 22px; }
+    .article-body li { margin-bottom: 6px; }
+    .article-body blockquote {
+      margin: 24px 0; padding: 14px 20px;
+      border-left: 3px solid var(--coral); background: #fff5f5;
+      border-radius: 0 8px 8px 0; font-style: italic; color: var(--text-secondary);
+    }
+    .article-body strong { font-weight: 700; color: var(--dark); }
+    .article-body code { background: var(--pill-bg); border-radius: 4px; padding: 2px 6px; font-size: 13px; }
+
+    /* Streaming cursor */
+    .cursor { display: inline-block; width: 2px; height: 1em; background: var(--coral); margin-left: 2px; animation: blink 0.8s step-end infinite; vertical-align: text-bottom; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── Thumbnail ── */
+    .thumb-layout { display: grid; grid-template-columns: 1fr 260px; gap: 24px; align-items: start; }
+    .thumb-preview {
+      border-radius: 12px; overflow: hidden; border: 1px solid var(--border-light);
+      aspect-ratio: 16/9; background: var(--pill-bg);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .thumb-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .controls { display: flex; flex-direction: column; gap: 18px; }
+    .control-group label { display: block; font-size: 11px; font-weight: 600; color: var(--grey-1); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px; }
+    .control-group input[type="text"] { width: 100%; height: 34px; padding: 0 10px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 12px; font-weight: 600; outline: none; }
+    .control-group input[type="text"]:focus { border-color: var(--dark); }
+    .slider-wrap { display: flex; align-items: center; gap: 8px; }
+    .slider-label { font-size: 11px; color: var(--grey-1); white-space: nowrap; }
+    input[type="range"] { flex: 1; -webkit-appearance: none; height: 4px; border-radius: 2px; background: var(--border); outline: none; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--dark); cursor: pointer; }
+    .slider-val { font-size: 11px; font-weight: 700; color: var(--dark); min-width: 28px; text-align: right; }
+    .chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .chip { height: 28px; padding: 0 12px; border: 1px solid var(--border); border-radius: 20px; font-size: 11px; font-weight: 600; color: var(--text-secondary); background: none; cursor: pointer; transition: all 0.1s; }
+    .chip.active { background: var(--dark); color: #fff; border-color: var(--dark); }
+    .swatch-row { display: flex; gap: 8px; }
+    .swatch { width: 28px; height: 28px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: border-color 0.1s; }
+    .swatch.active { border-color: var(--dark); outline: 2px solid var(--dark); outline-offset: 2px; }
+    .photo-grid { display: flex; gap: 6px; flex-wrap: wrap; }
+    .photo-chip { width: 42px; height: 42px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; overflow: hidden; background: var(--pill-bg); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: var(--grey-1); transition: border-color 0.1s; }
+    .photo-chip.active { border-color: var(--coral); }
+
+    /* ── Instagram slides ── */
+    .ig-slides-row {
+      display: flex; gap: 14px; overflow-x: auto; padding-bottom: 4px;
+    }
+    .ig-slides-row::-webkit-scrollbar { height: 4px; }
+    .ig-slides-row::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .ig-slide-wrap { flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; }
+    .ig-slide-lbl { font-size: 11px; font-weight: 600; color: var(--grey-1); text-align: center; }
+    .ig-dl-btn {
+      height: 26px; padding: 0 10px; font-size: 11px; font-weight: 600;
+      background: none; border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text-secondary); cursor: pointer; width: 100%;
+    }
+    .ig-dl-btn:hover { background: var(--pill-bg); }
+
+    /* ── Slide canvas — portrait 4:5, exports at 1080×1350 (3x scale) ── */
+    .ig-slide {
+      width: 360px; height: 450px;
+      border-radius: 10px; overflow: hidden;
+      display: flex; flex-direction: column;
+      padding: 24px; box-sizing: border-box;
+      position: relative;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+    }
+
+    /* ── Backgrounds — brand palette ── */
+    .ig-slide--navy   { background: #17212B; color: #fff; }
+    .ig-slide--dark   { background: #17212B; color: #fff; }
+    .ig-slide--salmon { background: #F06060; color: #fff; }
+    .ig-slide--coral  { background: #F06060; color: #fff; }
+    .ig-slide--white  { background: #fff;    color: #000; }
+    .ig-slide--black  { background: #000;    color: #fff; }
+
+    /* ── Top row: logo + dot grid ── */
+    .ig-slide__top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 8px; flex-shrink: 0;
+    }
+    .ig-slide__logo { height: 18px; width: auto; display: block; }
+    .ig-slide--white .ig-slide__logo { filter: invert(1) brightness(0); }
+
+    /* Dot grid — 3 col × 6 row, top-right corner */
+    .ig-slide__dot-grid {
+      width: 40px; height: 70px; flex-shrink: 0;
+      background-image: radial-gradient(circle, currentColor 2px, transparent 2px);
+      background-size: 13px 13px;
+    }
+    .ig-slide--navy .ig-slide__dot-grid,
+    .ig-slide--dark .ig-slide__dot-grid,
+    .ig-slide--black .ig-slide__dot-grid { color: rgba(255,255,255,0.35); }
+    .ig-slide--salmon .ig-slide__dot-grid,
+    .ig-slide--coral  .ig-slide__dot-grid { color: rgba(255,255,255,0.22); }
+    .ig-slide--white  .ig-slide__dot-grid { color: rgba(0,0,0,0.18); }
+
+    /* ── Number row: large number + badge side-by-side (dark slides only) ── */
+    .ig-slide__numrow {
+      display: flex; align-items: flex-end; gap: 8px;
+      flex-shrink: 0; margin-bottom: 10px;
+    }
+    .ig-slide__display-num {
+      font-size: 64px; font-weight: 800; line-height: 0.9;
+      letter-spacing: -0.04em; color: #F06060;
+    }
+    .ig-slide--salmon .ig-slide__display-num,
+    .ig-slide--coral  .ig-slide__display-num { color: #17212B; }
+    .ig-slide--white  .ig-slide__display-num { color: #F06060; }
+    .ig-slide__badge {
+      display: flex; align-items: center; gap: 4px; padding-bottom: 4px;
+    }
+    .ig-slide__badge-sq   { width: 12px; height: 12px; background: #F06060; flex-shrink: 0; }
+    .ig-slide__badge-circ { width: 14px; height: 14px; border-radius: 50%; background: #fff; flex-shrink: 0; }
+    .ig-slide__badge--solo { margin-bottom: 12px; flex-shrink: 0; }
+    .ig-slide--salmon .ig-slide__badge-sq   { background: rgba(255,255,255,0.9); }
+    .ig-slide--salmon .ig-slide__badge-circ { background: #17212B; }
+    .ig-slide--white  .ig-slide__badge-sq   { background: #F06060; }
+    .ig-slide--white  .ig-slide__badge-circ { background: #17212B; }
+
+    /* ── Content: fills remaining space, no clipping ── */
+    .ig-slide__content { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    .ig-slide__eyebrow {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #F06060; margin-bottom: 6px; flex-shrink: 0;
+    }
+    .ig-slide--salmon .ig-slide__eyebrow,
+    .ig-slide--coral  .ig-slide__eyebrow { color: rgba(255,255,255,0.7); }
+    .ig-slide--white  .ig-slide__eyebrow { color: #F06060; }
+
+    /* Smaller sizes so even a 5-line headline fits without clipping */
+    .ig-slide__headline {
+      font-size: 23px; font-weight: 800; line-height: 1.1;
+      letter-spacing: -0.02em; margin: 0; text-transform: uppercase; flex-shrink: 0;
+    }
+    .ig-slide--salmon .ig-slide__headline,
+    .ig-slide--coral  .ig-slide__headline,
+    .ig-slide--white  .ig-slide__headline {
+      font-size: 25px; line-height: 1.09;
+    }
+    .ig-slide__headline em { font-style: normal; color: #F06060; }
+    .ig-slide--salmon .ig-slide__headline em,
+    .ig-slide--coral  .ig-slide__headline em { color: #17212B; }
+    .ig-slide--white  .ig-slide__headline em { color: #F06060; }
+
+    .ig-slide__sub {
+      margin-top: 9px; font-size: 11.5px; font-weight: 500;
+      line-height: 1.5; opacity: 0.82; flex-shrink: 0;
+    }
+
+    /* ── Footer: margin-top auto pushes it to bottom regardless of content height ── */
+    .ig-slide__footer {
+      margin-top: auto; padding-top: 9px;
+      border-top: 1px solid rgba(255,255,255,0.2); flex-shrink: 0;
+    }
+    .ig-slide--white .ig-slide__footer { border-top-color: rgba(0,0,0,0.12); }
+    .ig-slide__footer-row { display: flex; justify-content: space-between; align-items: center; }
+    .ig-slide__url  { font-size: 9.5px; font-weight: 700; letter-spacing: 0.01em; }
+    .ig-slide__fwd  { font-size: 13px; font-weight: 700; }
+
+    /* legacy alias — keep hidden */
+    .ig-slide__tag { display: none; }
+    .ig-slide__dot { display: none; }
+
+    /* ── Theme 2: white editorial ── */
+    .ig-t2 {
+      width: 360px; height: 450px;
+      background: #ffffff;
+      border-radius: 16px;
+      display: flex; flex-direction: column;
+      padding: 28px 28px 24px;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+      color: #000000;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #E8E8E8;
+    }
+    .ig-t2__top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 20px; flex-shrink: 0;
+    }
+    .ig-t2__logo { height: 18px; width: auto; display: block; }
+    .ig-t2__num {
+      font-size: 13px; font-weight: 700; color: #F06060;
+      font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+    }
+    .ig-t2__accent-bar {
+      width: 32px; height: 3px; background: #F06060;
+      border-radius: 2px; margin-bottom: 20px; flex-shrink: 0;
+    }
+    .ig-t2__eyebrow {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #F06060; margin-bottom: 10px; flex-shrink: 0;
+    }
+    .ig-t2__headline {
+      font-size: 26px; font-weight: 800; line-height: 1.12;
+      letter-spacing: -0.025em; color: #000000;
+      margin: 0; flex-shrink: 0;
+    }
+    .ig-t2__headline em { font-style: normal; color: #F06060; }
+    .ig-t2__body {
+      margin-top: 14px; font-size: 13px; font-weight: 400;
+      line-height: 1.55; color: #5C5C5C; flex-shrink: 0;
+    }
+    .ig-t2__footer {
+      margin-top: auto; padding-top: 16px;
+      border-top: 1px solid #E8E8E8; flex-shrink: 0;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .ig-t2__url { font-size: 9.5px; font-weight: 700; color: #000; letter-spacing: 0.01em; }
+    .ig-t2__fwd { font-size: 13px; font-weight: 700; color: #F06060; }
+
+    /* Caption box */
+    .ig-caption-box {
+      background: var(--pill-bg); border-radius: 12px; padding: 20px 24px;
+    }
+    .ig-caption-box p {
+      margin: 0; font-size: 14px; line-height: 1.7; color: var(--text-primary);
+      white-space: pre-wrap;
+    }
+    .ig-caption-copy {
+      margin-top: 12px; height: 30px; padding: 0 12px;
+      background: none; border: 1px solid var(--border); border-radius: 7px;
+      font-size: 11px; font-weight: 600; color: var(--text-secondary); cursor: pointer;
+    }
+    .ig-caption-copy:hover { background: var(--white); }
+
+    /* ── Mode tabs ── */
+    .mode-tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+    .mode-tab {
+      height: 30px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--border);
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      background: none; cursor: pointer; transition: all 0.12s;
+    }
+    .mode-tab.active { background: var(--dark); color: #fff; border-color: var(--dark); }
+
+    /* ── Transcript paste fallback ── */
+    .paste-box { margin-top: 18px; display: none; }
+    .paste-box__hint {
+      font-size: 13px; color: var(--text-secondary); margin: 0 0 10px; line-height: 1.6;
+    }
+    .paste-box__hint strong { color: var(--text-primary); }
+    .paste-box__hint a { color: var(--coral); font-weight: 600; text-decoration: none; }
+    .paste-box__hint a:hover { text-decoration: underline; }
+    #transcript-paste, #article-paste, #raw-transcript-paste {
+      width: 100%; height: 140px; padding: 12px 14px;
+      border: 1px solid var(--border); border-radius: 10px;
+      font-family: inherit; font-size: 13px; line-height: 1.5; color: var(--text-primary);
+      resize: vertical; outline: none; transition: border-color 0.15s; box-sizing: border-box;
+    }
+    #transcript-paste:focus, #article-paste:focus, #raw-transcript-paste:focus { border-color: var(--dark); }
+    #transcript-paste::placeholder, #article-paste::placeholder, #raw-transcript-paste::placeholder { color: var(--grey-1); }
+  </style>
+</head>
+<body>
+
+<header class="top-bar">
+  <a href="/" class="top-bar__logo">
+    <div class="logo-mark"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" fill="white"/></svg></div>
+    SpotsNow
+  </a>
+  <span class="top-bar__title">YouTube → Article</span>
+</header>
+
+<main class="page">
+
+  <!-- Input -->
+  <div class="card input-card">
+    <h1>Content to Assets</h1>
+    <p>Turn a YouTube video or your own article into a polished article, branded Instagram carousel, and YouTube thumbnail.</p>
+
+    <!-- Mode tabs -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tab-yt" onclick="switchMode('yt')">YouTube URL</button>
+      <button class="mode-tab" id="tab-article" onclick="switchMode('article')">Paste article</button>
+      <button class="mode-tab" id="tab-transcript" onclick="switchMode('transcript')">Raw transcript</button>
+    </div>
+
+    <!-- YouTube mode -->
+    <div id="mode-yt">
+      <div class="input-row">
+        <input id="url-input" class="url-input" type="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" />
+        <button class="btn-dark" id="generate-btn" onclick="generate()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M6.5 2l4.5 4.5-4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Generate
+        </button>
+      </div>
+    </div>
+
+    <!-- Paste article mode -->
+    <div id="mode-article" style="display:none;">
+      <textarea id="article-paste" placeholder="Paste your article or LinkedIn post here…"></textarea>
+      <div style="margin-top:10px;">
+        <button class="btn-dark" id="article-btn" onclick="generateFromArticle()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M6.5 2l4.5 4.5-4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Generate slides
+        </button>
+      </div>
+    </div>
+
+    <!-- Raw transcript mode -->
+    <div id="mode-transcript" style="display:none;">
+      <textarea id="raw-transcript-paste" placeholder="Paste the raw transcript here…"></textarea>
+      <div style="margin-top:10px;">
+        <button class="btn-dark" id="transcript-btn" onclick="generateFromRawTranscript()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M6.5 2l4.5 4.5-4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Generate
+        </button>
+      </div>
+    </div>
+
+    <div class="status" id="status" style="display:none;"></div>
+
+    <!-- Shown only when auto-fetch fails -->
+    <div class="paste-box" id="paste-box">
+      <p class="paste-box__hint">
+        Couldn't fetch the transcript automatically (YouTube blocks automated requests).
+        Open the video, click <strong>···</strong> below it &rarr; <strong>Show transcript</strong>,
+        select all the text, and paste it here.
+        <a href="#" id="paste-yt-link" target="_blank">Open video &rarr;</a>
+      </p>
+      <textarea id="transcript-paste" placeholder="Paste transcript here…"></textarea>
+      <div style="margin-top:10px;">
+        <button class="btn-dark" onclick="generateFromPaste()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M6.5 2l4.5 4.5-4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Generate from transcript
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instagram Carousel -->
+  <div class="card" id="ig-card" style="display:none;">
+    <div class="card__header">
+      <span class="card__label">Instagram Carousel</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div class="chip-row" style="margin:0;">
+          <button class="chip active" id="theme-btn-1" onclick="setTheme(1)">Theme 1</button>
+          <button class="chip" id="theme-btn-2" onclick="setTheme(2)">Theme 2</button>
+        </div>
+        <button class="btn-outline" onclick="downloadAllSlides()">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 5l3 3 3-3M1 10h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download all
+        </button>
+      </div>
+    </div>
+    <div class="card__body" style="display:flex;flex-direction:column;gap:20px;">
+      <div class="ig-slides-row" id="ig-slides-row"></div>
+      <div>
+        <div style="font-size:11px;font-weight:600;color:var(--grey-1);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Caption</div>
+        <div class="ig-caption-box">
+          <p id="ig-caption-text"></p>
+          <button class="ig-caption-copy" onclick="copyCaption()">Copy caption</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Article -->
+  <div class="card" id="article-card" style="display:none;">
+    <div class="card__header">
+      <span class="card__label">Article</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-outline" onclick="copyMarkdown()">Copy markdown</button>
+        <button class="btn-outline" onclick="copyText()">Copy text</button>
+      </div>
+    </div>
+    <div class="article-body" id="article-body"></div>
+  </div>
+
+  <!-- Generate in Claude CTA -->
+  <div id="claude-card" style="display:none; margin-bottom:24px;">
+    <button id="claude-btn" onclick="openInClaude()" style="
+      width:100%; height:52px; background:#1A2832; color:#fff; border:none;
+      border-radius:16px; font-family:inherit; font-size:14px; font-weight:700;
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      cursor:pointer; letter-spacing:-0.2px; transition:opacity 0.15s;
+    ">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 2H14V4M14 2L8 8M7 3H3C2.45 3 2 3.45 2 4V13C2 13.55 2.45 14 3 14H12C12.55 14 13 13.55 13 13V9" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Generate Instagram + Thumbnail assets in Claude ↗
+    </button>
+  </div>
+
+  <!-- Thumbnail -->
+  <div class="card" id="thumb-card" style="display:none;">
+    <div class="card__header">
+      <span class="card__label">Thumbnail</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-outline" id="regen-btn" onclick="regenThumb()">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 6A4 4 0 112 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M10 3v3h-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Regenerate
+        </button>
+        <button class="btn-outline" onclick="downloadThumb()">Download</button>
+      </div>
+    </div>
+    <div class="card__body">
+      <div class="thumb-layout">
+        <div>
+          <div class="thumb-preview" id="thumb-preview"><div class="spinner"></div></div>
+        </div>
+        <div class="controls">
+          <div class="control-group">
+            <label>Line 1</label>
+            <input type="text" id="t-line1" placeholder="THE COST OF" />
+          </div>
+          <div class="control-group">
+            <label>Line 2 (highlight)</label>
+            <input type="text" id="t-line2" placeholder="PODCAST ADS" />
+          </div>
+          <div class="control-group">
+            <label>Complexity</label>
+            <div class="slider-wrap">
+              <span class="slider-label">Clean</span>
+              <input type="range" id="complexity" min="0" max="100" value="70"
+                oninput="document.getElementById('complexity-val').textContent=this.value+'%'" />
+              <span class="slider-val" id="complexity-val">70%</span>
+              <span class="slider-label">Elaborate</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label>Background</label>
+            <div class="swatch-row">
+              <div class="swatch active" onclick="selectBg(this,'dark')" style="background:#1A2832;" title="Dark"></div>
+              <div class="swatch" onclick="selectBg(this,'black')" style="background:#111111;" title="Black"></div>
+              <div class="swatch" onclick="selectBg(this,'coral')" style="background:#FF6868;" title="Coral"></div>
+              <div class="swatch" onclick="selectBg(this,'navy')" style="background:#0a0e28;" title="Deep navy"></div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label>Photo side</label>
+            <div class="chip-row">
+              <button class="chip active" onclick="selectSide(this,'right')">Right</button>
+              <button class="chip" onclick="selectSide(this,'left')">Left</button>
+            </div>
+          </div>
+          <div class="control-group">
+            <label>Photo</label>
+            <div class="photo-grid" id="photo-grid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Hidden thumbnail render div (640×360, off-screen) — exported at 2x = 1280×720 -->
+<div id="thumb-render" style="position:fixed;left:-2000px;top:0;width:640px;height:360px;overflow:hidden;font-family:'Inter',sans-serif;box-sizing:border-box;">
+  <!-- Solid background -->
+  <div id="thumb-bg" style="position:absolute;inset:0;background:#1A2832;"></div>
+  <!-- Photo: background-image so html2canvas respects background-size:cover (img object-fit not supported) -->
+  <div id="thumb-photo-wrap" style="position:absolute;top:0;bottom:0;right:0;width:56%;background-image:url('/cutouts/p1.png');background-size:cover;background-position:center top;background-repeat:no-repeat;"></div>
+  <!-- Gradient: fades photo into bg -->
+  <div id="thumb-gradient" style="position:absolute;inset:0;background:linear-gradient(to right, #1A2832 36%, rgba(26,40,50,0.75) 58%, transparent 78%);"></div>
+  <!-- Text: left 62%, centered vertically -->
+  <div id="thumb-text" style="position:absolute;top:0;bottom:0;left:0;width:62%;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:36px 40px;box-sizing:border-box;">
+    <div id="thumb-l1" style="font-weight:800;font-size:34px;line-height:1.1;color:#ffffff;letter-spacing:-0.025em;margin-bottom:12px;text-transform:uppercase;"></div>
+    <span id="thumb-l2" style="background:#F06060;font-weight:800;font-size:42px;line-height:1.15;color:#ffffff;letter-spacing:-0.025em;padding:5px 14px 8px;display:inline-block;text-transform:uppercase;border-radius:4px;align-self:flex-start;"></span>
+  </div>
+</div>
+
+<script>
+// ── Config ─────────────────────────────────────────────────────────────────
+const isLocal = window.location.hostname === 'localhost';
+const TRANSCRIPT_API = isLocal ? 'http://localhost:5055/generate' : '/api/transcript';
+const THUMB_API      = isLocal ? 'http://localhost:5055/thumbnail' : '/api/thumbnail';
+const CLAUDE_API     = 'https://api.anthropic.com/v1/messages';
+const PHOTOS = ['p1','p2','p3','p4'];
+// All portrait shots — face centered near top
+const PHOTO_POS = { p1: 'center top', p2: 'center top', p3: 'center top', p4: 'center top' };
+
+const IG_PROMPT = (transcript) => `You are creating Instagram carousel assets for SpotsNow using our exact brand guidelines.
+
+BRAND (spotsnow.wiki/brand):
+- Salmon accent: #F06060 | Navy dark bg: #17212B | Ink: #000000 | Paper: #FFFFFF
+- Font: Inter 800, tracking -0.025em for headlines | Inter 700 ALL CAPS for eyebrows
+- Voice: Direct. Bold. Founder energy. No fluff. Never corporate.
+
+CAROUSEL FORMAT — bold-statement style, 4 slides:
+- Slide 1 (navy): HOOK — provocative or counterintuitive claim that stops the scroll. Short.
+- Slide 2 (salmon): PROBLEM — key tension or pain point.
+- Slide 3 (navy): INSIGHT — most useful or surprising point.
+- Slide 4 (white): TAKEAWAY — what to do differently. End with "Save this."
+
+RULES:
+- eyebrow: 3-5 words ALL CAPS — context label for the headline
+- headline: max 12 words, punchy. Wrap single most powerful word in *asterisks* (renders as #F06060 salmon)
+- NO em-dashes (— or –) anywhere. Use a period or rewrite the phrase instead.
+- body: 1-2 sentences max, omit if headline stands alone
+- Caption: hook → 3-4 lines insight → CTA that directs people to follow/DM Cam on LinkedIn (linkedin.com/in/campbellpritchard) → 3-5 hashtags. Conversational, not corporate. Written in Cam's voice (founder, direct, short sentences).
+
+Return ONLY this JSON, no other text:
+{
+  "slides": [
+    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "navy" },
+    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "salmon" },
+    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "navy" },
+    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "white" }
+  ],
+  "caption": "...",
+  "thumbnail": { "line1": "3-6 WORD CONTEXT PHRASE", "line2": "2-4 WORD HOOK" }
+}
+
+Transcript:
+${transcript}`;
+
+const ARTICLE_PROMPT = (transcript) => `You are ghostwriting a first-person article for Cam Pritchard, co-founder of SpotsNow. Below is a transcript of Cam speaking.
+
+Turn it into a punchy, persuasive first-person article — written as if Cam authored it himself.
+
+Rules:
+- Write entirely in first person ("I", "we", "my"). Never say "in this video", "the speaker", "Cam says", or any third-person framing.
+- No meta-references to the transcript or video. Just the ideas, stated directly.
+- Voice: direct, founder energy, short sentences, no corporate hedging. Cam says what he means.
+- Structure: strong hook → clear argument with subheadings → concrete takeaways → punchy close
+- Headline should be bold and opinionated — not neutral
+- Lede should make a provocative or counterintuitive claim that pulls the reader in
+- Use "I" for personal experience, "you" to address the reader directly
+- Keep it tight — cut anything that doesn't add to the argument
+- End with a short CTA paragraph — direct readers to follow or DM Cam on LinkedIn: linkedin.com/in/campbellpritchard
+
+Author context:
+- Cam Pritchard, co-founder & CEO of SpotsNow (spotsnow.io)
+- Based in Nashville. Previously Thumbtack, Setter.
+- SpotsNow is the marketplace for host-read podcast advertising — brands book campaigns in minutes, not weeks.
+
+At the very end, after the article, output this exact block:
+---THUMBNAIL---
+LINE1: [3-5 word context phrase, e.g. "THE COST OF"]
+LINE2: [2-4 word punchy key phrase, e.g. "PODCAST ADS"]
+---END---
+
+Return the article in clean markdown, then the THUMBNAIL block.
+
+Transcript:
+${transcript}`;
+
+// ── State ───────────────────────────────────────────────────────────────────
+let rawMarkdown = '';
+let currentThumbB64 = '';
+let thumbData = { line1: '', line2: '', complexity: 70, bg: 'dark', side: 'right', photo: 0 };
+let renderTimer = null;
+
+// ── API key — fetched once from /api/config, cached for session ──────────────
+let _cachedKey = '';
+async function getKey() {
+  if (_cachedKey) return _cachedKey;
+  try {
+    const res = await fetch(isLocal ? 'http://localhost:5055/config' : '/api/config');
+    const data = await res.json();
+    _cachedKey = data.key || '';
+  } catch {}
+  return _cachedKey;
+}
+
+// ── Photo chips ─────────────────────────────────────────────────────────────
+(function() {
+  const grid = document.getElementById('photo-grid');
+  PHOTOS.forEach((name, i) => {
+    const div = document.createElement('div');
+    div.className = 'photo-chip' + (i === 0 ? ' active' : '');
+    div.textContent = name;
+    div.onclick = () => {
+      document.querySelectorAll('.photo-chip').forEach(c => c.classList.remove('active'));
+      div.classList.add('active');
+      thumbData.photo = i;
+      regenThumb(); // auto-regenerate on photo change
+    };
+    grid.appendChild(div);
+  });
+})();
+
+// ── Transcript (browser-side, avoids cloud IP blocks) ───────────────────────
+function extractVideoId(url) {
+  const m = url.match(/(?:v=|youtu\.be\/|embed\/|v\/|shorts\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+// CORS proxies — tried in order; first success wins
+const PROXIES = [
+  {
+    wrap: u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+    extract: async r => r.text(),
+  },
+  {
+    wrap: u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+    extract: async r => (await r.json()).contents,
+  },
+  {
+    wrap: u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+    extract: async r => r.text(),
+  },
+];
+
+async function proxyFetch(targetUrl) {
+  let lastErr = new Error('All proxies failed');
+  for (const p of PROXIES) {
+    try {
+      const res = await fetch(p.wrap(targetUrl));
+      if (!res.ok) { lastErr = new Error(`Proxy returned ${res.status}`); continue; }
+      const text = await p.extract(res);
+      if (!text) { lastErr = new Error('Empty response from proxy'); continue; }
+      return text;
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr;
+}
+
+function parseTranscriptXml(xml) {
+  const doc = new DOMParser().parseFromString(xml, 'text/xml');
+  const items = doc.getElementsByTagName('text');
+  if (!items.length) throw new Error('Empty transcript XML');
+  return Array.from(items)
+    .map(t => t.textContent
+      .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+      .replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/\n/g, ' '))
+    .join(' ');
+}
+
+async function fetchTranscript(videoId) {
+  // ── Strategy 1: YouTube timedtext REST API (simpler endpoint, less bot protection) ──
+  try {
+    const listXml = await proxyFetch(
+      `https://www.youtube.com/api/timedtext?type=list&v=${videoId}`
+    );
+    if (listXml && listXml.includes('<track')) {
+      const listDoc = new DOMParser().parseFromString(listXml, 'text/xml');
+      const tracks = Array.from(listDoc.querySelectorAll('track'));
+      const track = tracks.find(t => t.getAttribute('lang_code') === 'en') ||
+                    tracks.find(t => t.getAttribute('lang_code')?.startsWith('en')) ||
+                    tracks[0];
+      if (track) {
+        const lang = track.getAttribute('lang_code') || 'en';
+        const name = track.getAttribute('name') || '';
+        let captionUrl = `https://www.youtube.com/api/timedtext?v=${videoId}&lang=${lang}`;
+        if (name) captionUrl += `&name=${encodeURIComponent(name)}`;
+        const xml = await proxyFetch(captionUrl);
+        if (xml && xml.includes('<text')) return parseTranscriptXml(xml);
+      }
+    }
+  } catch (e) {
+    console.warn('Timedtext API strategy failed:', e.message);
+  }
+
+  // ── Strategy 2: Scrape watch page for caption URL ──
+  try {
+    const html = await proxyFetch(`https://www.youtube.com/watch?v=${videoId}`);
+    const jsonMatch = html.match(/ytInitialPlayerResponse\s*=\s*(\{.+?\})\s*;/s);
+    if (jsonMatch) {
+      const player = JSON.parse(jsonMatch[1]);
+      const tracks = player?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+      if (tracks?.length) {
+        const track = tracks.find(t => t.languageCode === 'en') ||
+                      tracks.find(t => t.languageCode?.startsWith('en')) ||
+                      tracks[0];
+        const xml = await proxyFetch(track.baseUrl);
+        if (xml && xml.includes('<text')) return parseTranscriptXml(xml);
+      }
+    }
+  } catch (e) {
+    console.warn('Page-scrape strategy failed:', e.message);
+  }
+
+  // Both strategies failed — caller shows the paste box
+  throw new Error('AUTO_FETCH_FAILED');
+}
+
+// ── Generate ────────────────────────────────────────────────────────────────
+function showPasteBox(videoId) {
+  const box = document.getElementById('paste-box');
+  box.style.display = 'block';
+  const link = document.getElementById('paste-yt-link');
+  if (videoId) link.href = `https://www.youtube.com/watch?v=${videoId}`;
+  document.getElementById('transcript-paste').focus();
+}
+
+async function generateFromPaste() {
+  const transcript = document.getElementById('transcript-paste').value.trim();
+  if (!transcript) { alert('Please paste the transcript first.'); return; }
+  const url = document.getElementById('url-input').value.trim();
+  const videoId = extractVideoId(url) || 'unknown';
+  document.getElementById('paste-box').style.display = 'none';
+  await runGeneration(transcript, videoId);
+}
+
+// ── Mode switcher ────────────────────────────────────────────────────────────
+function switchMode(mode) {
+  document.getElementById('mode-yt').style.display         = mode === 'yt'         ? 'block' : 'none';
+  document.getElementById('mode-article').style.display    = mode === 'article'    ? 'block' : 'none';
+  document.getElementById('mode-transcript').style.display = mode === 'transcript' ? 'block' : 'none';
+  document.getElementById('tab-yt').classList.toggle('active',         mode === 'yt');
+  document.getElementById('tab-article').classList.toggle('active',    mode === 'article');
+  document.getElementById('tab-transcript').classList.toggle('active', mode === 'transcript');
+}
+
+// ── Generate from raw transcript ─────────────────────────────────────────────
+async function generateFromRawTranscript() {
+  const transcript = document.getElementById('raw-transcript-paste').value.trim();
+  if (!transcript) { alert('Please paste a transcript first.'); return; }
+
+  const btn = document.getElementById('transcript-btn');
+  btn.disabled = true;
+  document.getElementById('ig-card').style.display = 'none';
+  document.getElementById('thumb-card').style.display = 'none';
+  document.getElementById('claude-card').style.display = 'none';
+
+  await runGeneration(transcript, 'transcript');
+  btn.disabled = false;
+}
+
+// ── Generate from pasted article (skips article rewrite, goes straight to slides) ──
+async function generateFromArticle() {
+  const articleText = document.getElementById('article-paste').value.trim();
+  if (!articleText) return;
+
+  const btn = document.getElementById('article-btn');
+  btn.disabled = true;
+  document.getElementById('ig-card').style.display = 'none';
+  document.getElementById('thumb-card').style.display = 'none';
+  document.getElementById('claude-card').style.display = 'none';
+
+  showStatus('loading', 'Generating slides…');
+
+  const key = await getKey();
+  if (!key) { showStatus('error', 'API key not found.'); btn.disabled = false; return; }
+
+  const igData = await generateInstagram(articleText, key);
+  if (!igData) { showStatus('error', 'Slide generation failed — try again.'); btn.disabled = false; return; }
+
+  renderSlides(igData);
+
+  // Pre-fill thumbnail from IG data if available
+  if (igData.thumbnail) {
+    const l1 = (igData.thumbnail.line1 || '').toUpperCase();
+    const l2 = (igData.thumbnail.line2 || '').toUpperCase();
+    thumbData.line1 = l1; thumbData.line2 = l2;
+    document.getElementById('t-line1').value = l1;
+    document.getElementById('t-line2').value = l2;
+    document.getElementById('thumb-card').style.display = 'block';
+    regenThumb();
+  }
+
+  // Store article for Claude button
+  rawMarkdown = articleText;
+  document.getElementById('claude-card').style.display = 'block';
+
+  showStatus('', '');
+  document.getElementById('status').style.display = 'none';
+  btn.disabled = false;
+}
+
+async function generate() {
+  const url = document.getElementById('url-input').value.trim();
+  if (!url) return;
+
+  const btn = document.getElementById('generate-btn');
+  btn.disabled = true;
+  document.getElementById('article-card').style.display = 'none';
+  document.getElementById('thumb-card').style.display = 'none';
+  document.getElementById('claude-card').style.display = 'none';
+  document.getElementById('paste-box').style.display = 'none';
+  rawMarkdown = '';
+
+  showStatus('loading', 'Fetching transcript…');
+
+  // Step 1: get transcript — try Supadata (server-side), then browser proxies, then paste
+  let transcript, videoId;
+  try {
+    videoId = extractVideoId(url);
+    if (!videoId) throw new Error('Could not parse a video ID from that URL');
+
+    // 1a. Supadata API (server-side — bypasses YouTube bot detection)
+    try {
+      const r = await fetch('/api/supadata', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoId }),
+      });
+      if (r.ok) {
+        const d = await r.json();
+        if (d.transcript) transcript = d.transcript;
+      }
+    } catch {}
+
+    // 1b. Browser-side proxy fallback
+    if (!transcript) transcript = await fetchTranscript(videoId);
+
+  } catch (e) {
+    if (e.message === 'AUTO_FETCH_FAILED') {
+      showStatus('error', 'YouTube blocked automatic transcript fetch — paste it manually below.');
+      showPasteBox(videoId);
+    } else {
+      showStatus('error', e.message || 'Transcript fetch failed');
+    }
+    btn.disabled = false;
+    return;
+  }
+
+  await runGeneration(transcript, videoId);
+}
+
+async function runGeneration(transcript, videoId) {
+  const btn = document.getElementById('generate-btn');
+  btn.disabled = true;
+  document.getElementById('article-card').style.display = 'none';
+  document.getElementById('thumb-card').style.display = 'none';
+  document.getElementById('claude-card').style.display = 'none';
+  rawMarkdown = '';
+
+  // Step 2: get API key and stream article from Claude directly
+  const key = await getKey();
+  if (!key) { showStatus('error', 'API key not found — check Vercel env vars.'); btn.disabled = false; return; }
+
+  showStatus('loading', 'Writing article…');
+  document.getElementById('article-card').style.display = 'block';
+  document.getElementById('article-body').innerHTML = '<span class="cursor"></span>';
+
+  try {
+    const res = await fetch(CLAUDE_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-6',
+        max_tokens: 4096,
+        stream: true,
+        messages: [{ role: 'user', content: ARTICLE_PROMPT(transcript) }],
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      showStatus('error', err.error?.message || 'Claude API error');
+      btn.disabled = false;
+      return;
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // keep incomplete line
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const payload = line.slice(6).trim();
+        if (payload === '[DONE]') continue;
+        try {
+          const evt = JSON.parse(payload);
+          if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
+            rawMarkdown += evt.delta.text;
+            scheduleRender();
+          }
+        } catch {}
+      }
+    }
+
+    // Final render
+    renderArticle(true);
+
+  } catch (e) {
+    showStatus('error', 'Streaming error: ' + e.message);
+    btn.disabled = false;
+    return;
+  }
+
+  // Step 3: parse thumbnail lines and generate
+  let line1 = '', line2 = '';
+  if (rawMarkdown.includes('---THUMBNAIL---') && rawMarkdown.includes('---END---')) {
+    const block = rawMarkdown.split('---THUMBNAIL---')[1].split('---END---')[0];
+    for (const row of block.trim().split('\n')) {
+      if (row.startsWith('LINE1:')) line1 = row.replace('LINE1:', '').trim();
+      if (row.startsWith('LINE2:')) line2 = row.replace('LINE2:', '').trim();
+    }
+    // Remove thumbnail block from displayed article
+    rawMarkdown = rawMarkdown.split('---THUMBNAIL---')[0].trim();
+    renderArticle(true);
+  }
+
+  thumbData.line1 = line1;
+  thumbData.line2 = line2;
+  document.getElementById('t-line1').value = line1;
+  document.getElementById('t-line2').value = line2;
+  document.getElementById('thumb-card').style.display = 'block';
+  document.getElementById('claude-card').style.display = 'block';
+  document.getElementById('status').style.display = 'none';
+  btn.disabled = false;
+
+  // Run thumbnail and Instagram generation in parallel
+  const [igData] = await Promise.all([
+    generateInstagram(transcript, key),
+    regenThumb(),
+  ]);
+
+  if (igData) renderSlides(igData);
+}
+
+// ── Render helpers ──────────────────────────────────────────────────────────
+function scheduleRender() {
+  clearTimeout(renderTimer);
+  renderTimer = setTimeout(() => renderArticle(false), 80);
+}
+
+function renderArticle(final) {
+  const body = document.getElementById('article-body');
+  // Strip thumbnail block if present
+  const text = rawMarkdown.includes('---THUMBNAIL---')
+    ? rawMarkdown.split('---THUMBNAIL---')[0]
+    : rawMarkdown;
+  body.innerHTML = marked.parse(text) + (final ? '' : '<span class="cursor"></span>');
+}
+
+// ── Thumbnail (browser-side html2canvas) ────────────────────────────────────
+async function regenThumb() {
+  const btn = document.getElementById('regen-btn');
+  if (btn) btn.disabled = true;
+  document.getElementById('thumb-preview').innerHTML = '<div class="spinner"></div>';
+
+  const line1 = document.getElementById('t-line1').value.trim();
+  const line2  = document.getElementById('t-line2').value.trim();
+  const photoName = PHOTOS[thumbData.photo] || 'cam1';
+  const side = thumbData.side || 'right';
+  const bgColors = { dark: '#1A2832', black: '#111111', coral: '#FF6868', navy: '#0a0e28' };
+  const bgColor = bgColors[thumbData.bg] || '#1A2832';
+
+  // Populate hidden render div
+  document.getElementById('thumb-bg').style.background = bgColor;
+
+  // Gradient fades photo into the bg color — update gradient to match bg
+  const gradientEl = document.getElementById('thumb-gradient');
+  if (side === 'right') {
+    gradientEl.style.background = `linear-gradient(to right, ${bgColor} 38%, ${bgColor}b0 60%, transparent 80%)`;
+  } else {
+    gradientEl.style.background = `linear-gradient(to left, ${bgColor} 38%, ${bgColor}b0 60%, transparent 80%)`;
+  }
+
+  // Position photo and text based on side
+  const photoWrap = document.getElementById('thumb-photo-wrap');
+  const textDiv   = document.getElementById('thumb-text');
+  if (side === 'right') {
+    photoWrap.style.right = '0'; photoWrap.style.left = 'auto';
+    textDiv.style.left = '0';   textDiv.style.right = 'auto';
+  } else {
+    photoWrap.style.left = '0'; photoWrap.style.right = 'auto';
+    textDiv.style.right = '0'; textDiv.style.left = 'auto';
+  }
+  // background-image instead of <img> — html2canvas supports background-size:cover, not object-fit
+  const photoUrl = '/cutouts/' + photoName + '.png';
+  photoWrap.style.backgroundImage = `url('${photoUrl}')`;
+  photoWrap.style.backgroundSize = 'cover';
+  photoWrap.style.backgroundPosition = PHOTO_POS[photoName] || 'center center';
+  document.getElementById('thumb-l1').textContent = line1;
+  document.getElementById('thumb-l2').textContent = line2;
+
+  // Preload the image so background-image is definitely painted before html2canvas captures
+  await new Promise(resolve => {
+    const probe = new Image();
+    probe.onload = probe.onerror = resolve;
+    probe.src = photoUrl;
+    setTimeout(resolve, 2000); // hard cap
+  });
+
+  try {
+    const canvas = await html2canvas(document.getElementById('thumb-render'), {
+      scale: 2, useCORS: true, backgroundColor: null, width: 640, height: 360,
+    });
+    const dataUrl = canvas.toDataURL('image/png');
+    currentThumbB64 = dataUrl.replace('data:image/png;base64,', '');
+    const img = document.createElement('img');
+    img.src = dataUrl;
+    document.getElementById('thumb-preview').innerHTML = '';
+    document.getElementById('thumb-preview').appendChild(img);
+  } catch (e) {
+    document.getElementById('thumb-preview').innerHTML =
+      `<span style="font-size:12px;color:#c0392b;padding:16px">Render failed: ${e.message}</span>`;
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function downloadThumb() {
+  if (!currentThumbB64) return;
+  const a = document.createElement('a');
+  a.download = (document.getElementById('t-line2').value || 'thumbnail').toLowerCase().replace(/\s+/g,'-') + '.png';
+  a.href = 'data:image/png;base64,' + currentThumbB64;
+  a.click();
+}
+
+function selectBg(el, name) {
+  document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active'); thumbData.bg = name;
+}
+function selectSide(el, side) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active'); thumbData.side = side;
+  regenThumb();
+}
+
+// ── Instagram carousel ──────────────────────────────────────────────────────
+async function generateInstagram(transcript, key) {
+  try {
+    const res = await fetch(CLAUDE_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-6',
+        max_tokens: 2048,
+        messages: [{ role: 'user', content: IG_PROMPT(transcript) }],
+      }),
+    });
+    const data = await res.json();
+    const raw = data.content?.[0]?.text || '';
+    // Strip markdown code fences if present
+    const json = raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+    return JSON.parse(json);
+  } catch (e) {
+    console.error('Instagram generation failed:', e);
+    return null;
+  }
+}
+
+function headlineHtml(text) {
+  // Convert *word* to <em>word</em>
+  return text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+}
+
+function buildSlide(slide, index) {
+  const bg = slide.bg || 'navy';
+  const bgClass = `ig-slide--${bg}`;
+  const isDark = bg === 'navy' || bg === 'dark' || bg === 'black';
+
+  // All slides: number + badge in one row
+  const midHtml = `<div class="ig-slide__numrow">
+       <div class="ig-slide__display-num">${index + 1}</div>
+       <div class="ig-slide__badge">
+         <div class="ig-slide__badge-sq"></div>
+         <div class="ig-slide__badge-circ"></div>
+       </div>
+     </div>`;
+
+  return `
+    <div class="ig-slide-wrap">
+      <div class="ig-slide-lbl">Slide ${index + 1}</div>
+      <div class="ig-slide ${bgClass}" id="ig-slide-${index}">
+
+        <!-- Logo + dot grid -->
+        <div class="ig-slide__top">
+          <img src="/spotsnow-logo-white.png" alt="SpotsNow" class="ig-slide__logo" />
+          <div class="ig-slide__dot-grid"></div>
+        </div>
+
+        <!-- Number row OR solo badge -->
+        ${midHtml}
+
+        <!-- Content: eyebrow → headline → body, top-aligned -->
+        <div class="ig-slide__content">
+          ${slide.eyebrow ? `<div class="ig-slide__eyebrow">${slide.eyebrow}</div>` : ''}
+          <p class="ig-slide__headline">${headlineHtml(slide.headline)}</p>
+          ${slide.body ? `<p class="ig-slide__sub">${slide.body}</p>` : ''}
+        </div>
+
+        <!-- Footer (margin-top:auto pushes it to bottom) -->
+        <div class="ig-slide__footer">
+          <div class="ig-slide__footer-row">
+            <span class="ig-slide__url">www.spotsnow.io</span>
+            <span class="ig-slide__fwd">&#8594;</span>
+          </div>
+        </div>
+
+      </div>
+      <button class="ig-dl-btn" onclick="downloadSlide(${index})">Download PNG</button>
+    </div>`;
+}
+
+// ── Theme 2 builder ──────────────────────────────────────────────────────────
+function buildSlideTheme2(slide, index) {
+  const labels = ['01', '02', '03', '04'];
+  return `
+    <div class="ig-slide-wrap">
+      <div class="ig-slide-lbl">Slide ${index + 1}</div>
+      <div class="ig-t2" id="ig-slide-${index}">
+
+        <div class="ig-t2__top">
+          <img src="/spotsnow-logo.png" alt="SpotsNow" class="ig-t2__logo" crossorigin="anonymous" />
+          <span class="ig-t2__num">${labels[index]}</span>
+        </div>
+
+        <div class="ig-t2__accent-bar"></div>
+
+        ${slide.eyebrow ? `<div class="ig-t2__eyebrow">${slide.eyebrow}</div>` : ''}
+        <p class="ig-t2__headline">${headlineHtml(slide.headline)}</p>
+        ${slide.body ? `<p class="ig-t2__body">${slide.body}</p>` : ''}
+
+        <div class="ig-t2__footer">
+          <span class="ig-t2__url">www.spotsnow.io</span>
+          <span class="ig-t2__fwd" style="color:#F06060;">&#8594;</span>
+        </div>
+
+      </div>
+      <button class="ig-dl-btn" onclick="downloadSlide(${index})">Download PNG</button>
+    </div>`;
+}
+
+// ── Theme switcher ────────────────────────────────────────────────────────────
+let activeTheme = 1;
+let lastIgData = null;
+
+function setTheme(n) {
+  activeTheme = n;
+  document.getElementById('theme-btn-1').classList.toggle('active', n === 1);
+  document.getElementById('theme-btn-2').classList.toggle('active', n === 2);
+  if (lastIgData) renderSlides(lastIgData);
+}
+
+function renderSlides(igData) {
+  lastIgData = igData;
+  const row = document.getElementById('ig-slides-row');
+  const builder = activeTheme === 2 ? buildSlideTheme2 : buildSlide;
+  row.innerHTML = igData.slides.map((s, i) => builder(s, i)).join('');
+  document.getElementById('ig-caption-text').textContent = igData.caption;
+  document.getElementById('ig-card').style.display = 'block';
+}
+
+async function downloadSlide(index) {
+  const el = document.getElementById(`ig-slide-${index}`);
+  // Render at 3x = 1080px from 360px
+  const canvas = await html2canvas(el, { scale: 3, useCORS: true, backgroundColor: '#ffffff' });
+  const a = document.createElement('a');
+  a.download = `spotsnow-slide-${index + 1}.png`;
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+
+async function downloadAllSlides() {
+  for (let i = 0; i < 4; i++) {
+    await downloadSlide(i);
+    await new Promise(r => setTimeout(r, 300));
+  }
+}
+
+function copyCaption() {
+  const text = document.getElementById('ig-caption-text').textContent;
+  navigator.clipboard.writeText(text).then(() => flash(event.target, 'Copied!'));
+}
+
+// ── Copy ────────────────────────────────────────────────────────────────────
+function copyMarkdown() {
+  navigator.clipboard.writeText(rawMarkdown).then(() => flash(event.target, 'Copied!'));
+}
+function copyText() {
+  navigator.clipboard.writeText(document.getElementById('article-body').innerText)
+    .then(() => flash(event.target, 'Copied!'));
+}
+function flash(el, msg) {
+  const btn = el.closest('button');
+  const orig = btn.innerText; btn.innerText = msg;
+  setTimeout(() => btn.innerText = orig, 1500);
+}
+
+// ── Open in Claude ───────────────────────────────────────────────────────────
+function buildClaudePrompt() {
+  const article = rawMarkdown.split('---THUMBNAIL---')[0].trim();
+  return `You are creating Instagram carousel assets for SpotsNow using our exact brand guidelines.
+
+## SpotsNow Brand Guidelines (spotsnow.wiki/brand)
+
+**Colors**
+- Salmon (primary accent): #F06060
+- Navy (dark background): #17212B
+- Ink (black): #000000
+- Paper (white): #FFFFFF
+
+**Typography — Inter only**
+- Headlines: Inter 800, tracking -0.025em, line-height 1.1
+- Eyebrow labels: Inter 700, 13px, ALL CAPS, salmon color, tracking 0.06em
+- Body: Inter 400, 15px, line-height 1.55
+
+**Voice**
+Direct. Bold. No fluff. Founder energy. Results-focused. Never corporate.
+
+---
+
+## Deliver
+
+### 1. Instagram Carousel — 4 slides
+Bold-statement carousel (the format performing best right now). Each slide = one standalone punchy statement.
+
+- Slide 1 (navy bg) — HOOK: Provocative or counterintuitive claim that stops the scroll. Short.
+- Slide 2 (salmon bg) — PROBLEM: Key tension or pain point from the article.
+- Slide 3 (navy bg) — INSIGHT: Most useful or surprising point.
+- Slide 4 (white bg) — TAKEAWAY: What to do or think differently. End with "Save this."
+
+**Slide rules:**
+- eyebrow: 3-5 words, ALL CAPS — provides context for the headline
+- headline: max 12 words, punchy. Wrap the single most powerful word in *asterisks* — rendered as #F06060 salmon accent
+- NO em-dashes (— or –) anywhere in headlines, eyebrows, or body. Use a period or rewrite instead.
+- body: 1-2 sentences max, skip entirely if headline stands alone
+- bg values: "navy" / "salmon" / "navy" / "white"
+
+### 2. Caption
+Strong hook line → 3-4 lines of insight → clear CTA → 3-5 relevant hashtags.
+Conversational founder voice. Not corporate.
+
+### 3. YouTube Thumbnail text
+- line1: 3-6 word context phrase, ALL CAPS (e.g. "THE REAL COST OF")
+- line2: 2-4 word punchy phrase, ALL CAPS (e.g. "PODCAST ADS") — displayed on salmon highlight box
+
+---
+
+## Output
+Return ONLY this JSON, no markdown, no other text:
+{
+  "slides": [
+    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "navy" },
+    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "salmon" },
+    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "navy" },
+    { "eyebrow": "...", "headline": "...", "body": "...", "bg": "white" }
+  ],
+  "caption": "...",
+  "thumbnail": { "line1": "...", "line2": "..." }
+}
+
+## Article
+${article}`;
+}
+
+function openInClaude() {
+  const prompt = buildClaudePrompt();
+  const btn = document.getElementById('claude-btn');
+  const orig = btn.innerHTML;
+  navigator.clipboard.writeText(prompt).then(() => {
+    window.open('https://claude.ai/new', '_blank');
+    btn.innerHTML = '✓ Prompt copied — paste with Cmd+V in Claude';
+    btn.style.background = '#2a7a4b';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.background = '#1A2832'; }, 7000);
+  }).catch(() => {
+    window.open('https://claude.ai/new', '_blank');
+    btn.innerHTML = 'Claude opened — copy the prompt manually';
+    setTimeout(() => { btn.innerHTML = orig; }, 4000);
+  });
+}
+
+// ── Status ──────────────────────────────────────────────────────────────────
+function showStatus(type, text) {
+  const el = document.getElementById('status');
+  el.style.display = 'flex';
+  el.className = 'status' + (type === 'error' ? ' status--error' : '');
+  el.innerHTML = type === 'loading' ? `<div class="spinner"></div> ${text}` : text;
+}
+
+document.getElementById('url-input').addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+// Warm up the key cache on load so first generate is instant
+getKey();
+</script>
+</body>
+</html>
+<!-- deploy Tue Apr 22 2026 — browser thumbnail + clipboard Claude button -->

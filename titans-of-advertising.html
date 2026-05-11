@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Titans of Advertising — A SpotsNow Podcast</title>
+  <meta name="description" content="Titans of Advertising — conversations with the operators, founders, and creators reshaping how brands buy media. Presented by SpotsNow." />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --dark: #0e1323;
+      --grey-1: #707481;
+      --text-primary: #252733;
+      --border: #dee0e4;
+      --border-light: #e8e8e8;
+      --white: #ffffff;
+      --coral: #ff6b6b;
+      --pill-bg: #f3f4f6;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.5;
+      color: var(--dark); background: #f5f5f3;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { font-family: inherit; }
+
+    /* ── PAGE ── */
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 20px 24px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: #000;
+      border-radius: 24px;
+      padding: 36px 44px;
+      color: white;
+      display: grid;
+      grid-template-columns: 0.85fr 1.5fr;
+      gap: 40px;
+      align-items: center;
+      width: 100%;
+    }
+    .hero__title {
+      font-size: clamp(40px, 5vw, 68px);
+      line-height: 0.95;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      margin: 0 0 14px;
+      text-transform: uppercase;
+    }
+    .hero__title .small {
+      display: block;
+      font-size: 0.5em; font-weight: 800;
+      letter-spacing: -0.01em; opacity: 0.85;
+      margin-top: 4px;
+    }
+    .hero__sub {
+      font-size: 15px; line-height: 1.5;
+      color: rgba(255,255,255,0.75);
+      margin: 0 0 20px;
+      max-width: 460px;
+    }
+
+    /* ── LISTEN PILLS ── */
+    .listen-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .listen-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      color: white;
+      font-size: 13px; font-weight: 600;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.14);
+      transition: background 0.12s;
+    }
+    .listen-pill:hover { background: rgba(255,255,255,0.16); }
+    .listen-pill svg { display: block; }
+
+    /* ── VIDEO ── */
+    .video-frame {
+      position: relative;
+      width: 100%;
+      padding-top: 75%;
+      background: #111;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+    }
+    .video-frame iframe {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      border: 0;
+    }
+
+    /* ── ABOUT (inline below hero, still above the fold) ── */
+    .about-card {
+      background: var(--white);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 18px 24px;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr 1fr;
+      gap: 20px;
+      align-items: center;
+    }
+    .about-copy {
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .about-eyebrow {
+      font-size: 10px; font-weight: 700; color: var(--grey-1);
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .about-title {
+      margin: 0; font-size: 15px; font-weight: 800;
+      color: var(--dark); letter-spacing: -0.01em;
+      line-height: 1.25;
+    }
+    .stat {
+      background: var(--pill-bg);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+    .stat__num {
+      font-size: 22px; font-weight: 900; letter-spacing: -0.03em;
+      color: var(--dark); line-height: 1;
+    }
+    .stat__label {
+      font-size: 11px; font-weight: 600; color: #5a5f6e;
+      margin-top: 4px;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 960px) {
+      .page { padding: 16px; min-height: 0; gap: 16px; }
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 28px 24px;
+        gap: 24px;
+      }
+      .about-card {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+      .about-copy {
+        grid-column: 1 / -1;
+      }
+    }
+    @media (max-width: 560px) {
+      .about-card { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<main class="page">
+  <section class="hero">
+    <div>
+      <h1 class="hero__title">
+        Titans
+        <span class="small">of Advertising</span>
+      </h1>
+      <p class="hero__sub">
+        Conversations with the operators, founders, and creators reshaping how brands buy media. A SpotsNow Original.
+      </p>
+      <div class="listen-row">
+        <a class="listen-pill" href="#" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.59 14.41a.75.75 0 01-1.03.25c-2.82-1.72-6.37-2.11-10.55-1.16a.75.75 0 11-.33-1.46c4.57-1.04 8.5-.59 11.66 1.34.36.22.47.69.25 1.03zm1.23-2.74a.94.94 0 01-1.29.31c-3.23-1.99-8.16-2.56-11.99-1.4a.94.94 0 01-.55-1.79c4.39-1.34 9.83-.7 13.53 1.59.44.27.58.85.3 1.29zm.11-2.86c-3.87-2.3-10.27-2.51-13.97-1.39a1.13 1.13 0 11-.66-2.16c4.26-1.29 11.34-1.04 15.81 1.61a1.13 1.13 0 01-1.18 1.94z"/></svg>
+          Spotify
+        </a>
+        <a class="listen-pill" href="#" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#A855F7"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4.5c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm-2.5 9.7c-.04-.31.13-.61.42-.74.65-.29 1.34-.46 2.08-.46s1.43.17 2.08.46c.29.13.46.43.42.74l-.34 2.51c-.07.55-.62.95-1.18.85a5.42 5.42 0 01-1.96 0c-.56.1-1.11-.3-1.18-.85l-.34-2.51z"/></svg>
+          Apple
+        </a>
+        <a class="listen-pill" href="#" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#FF0000"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          YouTube
+        </a>
+      </div>
+    </div>
+
+    <div class="video-frame">
+      <iframe
+        src="https://player.vimeo.com/video/1186723318?badge=0&autopause=0&player_id=0&app_id=58479"
+        allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        title="Titans of Advertising Sizzle"></iframe>
+    </div>
+  </section>
+
+  <section class="about-card">
+    <div class="about-copy">
+      <span class="about-eyebrow">About the show</span>
+      <h2 class="about-title">Run by SpotsNow, to highlight the leaders in the advertising industry.</h2>
+    </div>
+    <div class="stat">
+      <div class="stat__num">$32B</div>
+      <div class="stat__label">Host-read podcast ad market</div>
+    </div>
+    <div class="stat">
+      <div class="stat__num">100%</div>
+      <div class="stat__label">Operator-led conversations</div>
+    </div>
+    <div class="stat">
+      <div class="stat__num">Weekly</div>
+      <div class="stat__label">New episodes every Thursday</div>
+    </div>
+  </section>
+</main>
+
+<script src="https://player.vimeo.com/api/player.js"></script>
+</body>
+</html>
