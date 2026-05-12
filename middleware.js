@@ -16,6 +16,7 @@ const CEO_PATHS = new Set([
 const TEAM_PATHS = new Set([
   '/ad-ops', '/ad-ops.html',
   '/chat', '/chat-ui.html',
+  '/intelligence', '/intelligence.html',
   '/proposal', '/proposal.html',
   '/ear-check', '/ear-check.html',
   '/submit-creative', '/submit-creative.html',
@@ -36,6 +37,7 @@ export const config = {
     '/api/gtm-data',
     '/ad-ops', '/ad-ops.html',
     '/chat', '/chat-ui.html',
+    '/intelligence', '/intelligence.html',
     '/proposal', '/proposal.html',
     '/ear-check', '/ear-check.html',
     '/submit-creative', '/submit-creative.html',
