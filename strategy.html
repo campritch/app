@@ -1486,12 +1486,19 @@ async function saveManualSingle() {
 
   const btn = document.getElementById('mtx-save');
   btn.disabled = true;
-  setMtxStatus('running', 'Saving…');
+  const inputChars = transcript.length;
+  setMtxStatus('running', `Saving ${Math.round(inputChars / 1024)}kb…`);
   try {
     const result = await postManualTranscript({ title, date, attendees, transcript, notes });
     const savedTitle = result?.item?.title || title;
-    const bytes = transcript.length;
-    setMtxStatus('ok', `✓ Saved "${savedTitle}" (${Math.round(bytes / 1024)}kb). Refresh the library to see it under the ✓ saved badge — or keep adding more here.`);
+    const savedChars = result?.item?.transcript?.length ?? 0;
+    // Defensive: if the server-saved length doesn't match what we sent, surface
+    // it loudly rather than letting the user discover it later in View.
+    if (savedChars && Math.abs(savedChars - inputChars) > Math.max(50, inputChars * 0.01)) {
+      setMtxStatus('err', `⚠ Saved but TRUNCATED: you pasted ${inputChars.toLocaleString()} chars, server stored ${savedChars.toLocaleString()}. Try a smaller piece, or split into two transcripts.`);
+      return;
+    }
+    setMtxStatus('ok', `✓ Saved "${savedTitle}" (${savedChars.toLocaleString()} chars / ${Math.round(savedChars / 1024)}kb). Refresh the library to see it — or keep adding more here.`);
     // Clear the form for another entry
     document.getElementById('mtx-title').value = '';
     document.getElementById('mtx-attendees').value = '';

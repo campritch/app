@@ -50,4 +50,10 @@ export default async function handler(req, res) {
   }
 }
 
-export const config = { maxDuration: 60 };
+// Default Vercel bodyParser limit is 1MB — way too low for pasted multi-hour
+// transcripts (a 2hr call as text + JSON overhead can easily push 1MB+).
+// Bumped to 20MB which still leaves plenty of headroom.
+export const config = {
+  api: { bodyParser: { sizeLimit: '20mb' } },
+  maxDuration: 60,
+};
