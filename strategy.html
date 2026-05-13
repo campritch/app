@@ -158,6 +158,8 @@ input, textarea, select { font-family: inherit; }
 .tx-modal-status.ok { color: var(--good); }
 .tx-modal-status.err { color: var(--bad); }
 .tx-modal-status .spin { width: 12px; height: 12px; border: 2px solid var(--line); border-top-color: var(--warn); border-radius: 50%; animation: tx-spin 0.8s linear infinite; flex-shrink: 0; }
+.tx-modal-status .status-retry { margin-left: auto; background: var(--accent); color: #fff; border: none; padding: 5px 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; cursor: pointer; border-radius: 2px; }
+.tx-modal-status .status-retry:hover { filter: brightness(1.1); }
 @keyframes tx-spin { to { transform: rotate(360deg); } }
 .tx-modal-foot { padding: 14px 20px; border-top: 1px solid var(--line); display: flex; gap: 10px; flex-shrink: 0; background: var(--surface); }
 .tx-modal-foot button { flex: 1; background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; font-weight: 600; }
@@ -1338,7 +1340,7 @@ function updateGenButton() {
   btn.textContent = toRun.length === 0 ? 'Run & save' : `Run & save (${toRun.length})`;
 }
 
-function setTxStatus(state, text) {
+function setTxStatus(state, text, options = {}) {
   const el = document.getElementById('tx-status');
   if (!el) return;
   if (!state) {
@@ -1349,48 +1351,48 @@ function setTxStatus(state, text) {
   }
   el.hidden = false;
   el.className = 'tx-modal-status ' + state;
-  el.innerHTML = (state === 'running' ? '<span class="spin"></span>' : '') + escapeHtml(text);
+  let html = (state === 'running' ? '<span class="spin"></span>' : '') + escapeHtml(text);
+  if (options.retry) html += ' <button class="status-retry" id="tx-retry">Retry</button>';
+  el.innerHTML = html;
+  if (options.retry) document.getElementById('tx-retry').addEventListener('click', options.retry);
 }
 
 async function generateSelected() {
   const toRun = [...txSelectedIds].filter((id) => !txCachedById.has(id));
   if (!toRun.length) return;
+  await attemptRunAndSave(toRun);
+}
 
+async function attemptRunAndSave(ids) {
   const titleById = Object.fromEntries(txMeetings.map((m) => [String(m.id), m.title]));
   const btn = document.getElementById('btn-tx-gen');
   btn.disabled = true;
-  btn.textContent = `Running… ${toRun.length}`;
-  setTxStatus('running', `Saving ${toRun.length} full transcript${toRun.length === 1 ? '' : 's'} to your library… (~1–3s each, please don't close this)`);
-
+  btn.textContent = `Running… ${ids.length}`;
+  setTxStatus('running', `Saving ${ids.length} transcript${ids.length === 1 ? '' : 's'}…`);
   try {
     const res = await fetch('/api/fathom-ingest', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password, meeting_ids: toRun, titles: titleById }),
+      body: JSON.stringify({ password, meeting_ids: ids, titles: titleById }),
     });
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `HTTP ${res.status}`); }
     const data = await res.json();
-    const errs = data.errors || [];
-    if (errs.length && data.ingested === 0) {
-      const sample = errs.slice(0, 3).map((e) => `${e.title || e.id}: ${e.error}`).join(' · ');
-      setTxStatus('err', `Failed: ${sample}${errs.length > 3 ? ` · +${errs.length - 3} more` : ''}`);
-    } else {
-      const baseMsg = `Saved ${data.ingested} transcript${data.ingested === 1 ? '' : 's'}${data.cached_existing ? ` · ${data.cached_existing} already saved` : ''}`;
-      if (errs.length) {
-        // Surface WHICH ones failed and why so they don't sit stuck on "not saved"
-        const sample = errs.slice(0, 3).map((e) => `${e.title || e.id}: ${e.error}`).join(' · ');
-        setTxStatus('err', `${baseMsg} · ${errs.length} couldn't be saved → ${sample}${errs.length > 3 ? ` · +${errs.length - 3} more` : ''}`);
-      } else {
-        setTxStatus('ok', baseMsg);
-      }
-    }
+    const failedIds = (data.errors || []).map((e) => String(e.id)).filter(Boolean);
     txSelectedIds.clear();
     await loadTranscripts();
-    setTimeout(() => setTxStatus(null), errs.length ? 12000 : 6000);
+
+    if (failedIds.length === 0) {
+      setTxStatus('ok', `✓ Saved ${data.ingested} transcript${data.ingested === 1 ? '' : 's'}.`);
+      setTimeout(() => setTxStatus(null), 5000);
+    } else if (data.ingested > 0) {
+      setTxStatus('err', `Saved ${data.ingested}, but ${failedIds.length} didn't save.`, { retry: () => attemptRunAndSave(failedIds) });
+    } else {
+      setTxStatus('err', `None of the ${ids.length} saved.`, { retry: () => attemptRunAndSave(failedIds.length ? failedIds : ids) });
+    }
   } catch (err) {
-    setTxStatus('err', `Failed: ${err.message}`);
+    setTxStatus('err', `Didn't save — ${err.message}.`, { retry: () => attemptRunAndSave(ids) });
     btn.disabled = false;
-    btn.textContent = `Run & save (${toRun.length})`;
+    btn.textContent = `Run & save (${ids.length})`;
   }
 }
 
@@ -1453,13 +1455,16 @@ function closeManualTx() {
   document.getElementById('manual-tx-bg').classList.remove('open');
 }
 
-function setMtxStatus(state, text) {
+function setMtxStatus(state, text, options = {}) {
   const el = document.getElementById('mtx-status');
   if (!el) return;
   if (!state) { el.hidden = true; el.className = 'tx-modal-status'; el.innerHTML = ''; return; }
   el.hidden = false;
   el.className = 'tx-modal-status ' + state;
-  el.innerHTML = (state === 'running' ? '<span class="spin"></span>' : '') + escapeHtml(text);
+  let html = (state === 'running' ? '<span class="spin"></span>' : '') + escapeHtml(text);
+  if (options.retry) html += ' <button class="status-retry" id="mtx-retry">Retry</button>';
+  el.innerHTML = html;
+  if (options.retry) document.getElementById('mtx-retry').addEventListener('click', options.retry);
 }
 
 async function postManualTranscript({ title, date, attendees, transcript, notes }) {
@@ -1483,32 +1488,34 @@ async function saveManualSingle() {
   const transcript = document.getElementById('mtx-body').value.trim();
   if (!title) { setMtxStatus('err', 'Title is required.'); return; }
   if (!transcript) { setMtxStatus('err', 'Transcript body is required.'); return; }
+  await attemptManualSave({ title, date, attendees, notes, transcript });
+}
 
+// One save attempt. On any failure (network, server error, partial body) we
+// keep the form intact and show a Retry button that re-runs the exact same
+// payload. The user never has to know about chars or kilobytes — it either
+// works fully or there's a button to try again.
+async function attemptManualSave(payload) {
   const btn = document.getElementById('mtx-save');
   btn.disabled = true;
-  const inputChars = transcript.length;
-  setMtxStatus('running', `Saving ${Math.round(inputChars / 1024)}kb…`);
+  setMtxStatus('running', 'Saving…');
   try {
-    const result = await postManualTranscript({ title, date, attendees, transcript, notes });
-    const savedTitle = result?.item?.title || title;
+    const result = await postManualTranscript(payload);
     const savedChars = result?.item?.transcript?.length ?? 0;
-    // Defensive: if the server-saved length doesn't match what we sent, surface
-    // it loudly rather than letting the user discover it later in View.
-    if (savedChars && Math.abs(savedChars - inputChars) > Math.max(50, inputChars * 0.01)) {
-      setMtxStatus('err', `⚠ Saved but TRUNCATED: you pasted ${inputChars.toLocaleString()} chars, server stored ${savedChars.toLocaleString()}. Try a smaller piece, or split into two transcripts.`);
-      return;
+    const inputChars = payload.transcript.length;
+    // Strict integrity check: if anything less than 100% landed, treat as fail.
+    if (!savedChars || Math.abs(savedChars - inputChars) > Math.max(20, inputChars * 0.005)) {
+      throw new Error("server didn't accept the full transcript");
     }
-    setMtxStatus('ok', `✓ Saved "${savedTitle}" (${savedChars.toLocaleString()} chars / ${Math.round(savedChars / 1024)}kb). Refresh the library to see it — or keep adding more here.`);
-    // Clear the form for another entry
+    setMtxStatus('ok', '✓ Saved. Full transcript stored.');
     document.getElementById('mtx-title').value = '';
     document.getElementById('mtx-attendees').value = '';
     document.getElementById('mtx-notes').value = '';
     document.getElementById('mtx-body').value = '';
     document.getElementById('mtx-title').focus();
-    // Refresh the transcript library list (if open) so the row appears
     loadTranscripts();
   } catch (err) {
-    setMtxStatus('err', `Save failed: ${err.message}`);
+    setMtxStatus('err', `⚠ Didn't save — ${err.message}.`, { retry: () => attemptManualSave(payload) });
   } finally {
     btn.disabled = false;
   }
