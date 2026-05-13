@@ -142,7 +142,10 @@ export default async function handler(req, res) {
           try {
             const out = await executeTool(tu.name, tu.input);
             const serialized = typeof out === 'string' ? out : JSON.stringify(out);
-            const preview = serialized.length > 4000 ? serialized.slice(0, 4000) + `\n...[truncated from ${serialized.length} chars]` : serialized;
+            // 4k was way too aggressive for transcripts (avg 30-min call ≈ 30kb)
+            // and other rich tools. 200k keeps full transcripts intact while
+            // still guarding against catastrophic blobs.
+            const preview = serialized.length > 200_000 ? serialized.slice(0, 200_000) + `\n...[truncated from ${serialized.length} chars]` : serialized;
             sseWrite(res, 'tool_result', { id: tu.id, name: tu.name, ok: true, bytes: serialized.length });
             return { type: 'tool_result', tool_use_id: tu.id, content: preview };
           } catch (err) {

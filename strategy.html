@@ -1370,15 +1370,23 @@ async function generateSelected() {
     });
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `HTTP ${res.status}`); }
     const data = await res.json();
-    const errs = data.errors?.length || 0;
-    if (errs && data.ingested === 0) {
-      setTxStatus('err', `Failed: ${data.errors[0]?.error || 'unknown'}`);
+    const errs = data.errors || [];
+    if (errs.length && data.ingested === 0) {
+      const sample = errs.slice(0, 3).map((e) => `${e.title || e.id}: ${e.error}`).join(' · ');
+      setTxStatus('err', `Failed: ${sample}${errs.length > 3 ? ` · +${errs.length - 3} more` : ''}`);
     } else {
-      setTxStatus('ok', `Saved ${data.ingested} transcript${data.ingested === 1 ? '' : 's'}${data.cached_existing ? ` · ${data.cached_existing} already saved` : ''}${errs ? ` · ${errs} error${errs === 1 ? '' : 's'}` : ''}`);
+      const baseMsg = `Saved ${data.ingested} transcript${data.ingested === 1 ? '' : 's'}${data.cached_existing ? ` · ${data.cached_existing} already saved` : ''}`;
+      if (errs.length) {
+        // Surface WHICH ones failed and why so they don't sit stuck on "not saved"
+        const sample = errs.slice(0, 3).map((e) => `${e.title || e.id}: ${e.error}`).join(' · ');
+        setTxStatus('err', `${baseMsg} · ${errs.length} couldn't be saved → ${sample}${errs.length > 3 ? ` · +${errs.length - 3} more` : ''}`);
+      } else {
+        setTxStatus('ok', baseMsg);
+      }
     }
     txSelectedIds.clear();
     await loadTranscripts();
-    setTimeout(() => setTxStatus(null), 6000);
+    setTimeout(() => setTxStatus(null), errs.length ? 12000 : 6000);
   } catch (err) {
     setTxStatus('err', `Failed: ${err.message}`);
     btn.disabled = false;
@@ -1397,7 +1405,14 @@ async function viewTx(id) {
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const rec = await res.json();
-    document.getElementById('modal-body').textContent = rec.transcript || '(no transcript body)';
+    const body = rec.transcript || '';
+    const chars = body.length;
+    const turns = (body.match(/^[^:\n]{1,80}:/gm) || []).length;
+    const sizeNote = `${chars.toLocaleString()} chars · ~${Math.max(1, Math.round(chars / 1000))}k words · ${turns || 'no'} speaker turns detected`;
+    // Update the meta line with size + a quick scroll hint
+    const metaEl = document.getElementById('modal-meta');
+    if (metaEl) metaEl.textContent = `${meta.date ? new Date(meta.date).toLocaleString() : ''}${meta.attendees?.length ? ' · ' + meta.attendees.join(', ') : ''} · ${sizeNote}`;
+    document.getElementById('modal-body').textContent = body || '(no transcript body)';
   } catch (err) {
     document.getElementById('modal-body').textContent = `Failed: ${err.message}`;
   }
@@ -1473,13 +1488,16 @@ async function saveManualSingle() {
   btn.disabled = true;
   setMtxStatus('running', 'Saving…');
   try {
-    await postManualTranscript({ title, date, attendees, transcript, notes });
-    setMtxStatus('ok', 'Saved. The agent can reference it on your next message.');
+    const result = await postManualTranscript({ title, date, attendees, transcript, notes });
+    const savedTitle = result?.item?.title || title;
+    const bytes = transcript.length;
+    setMtxStatus('ok', `✓ Saved "${savedTitle}" (${Math.round(bytes / 1024)}kb). Refresh the library to see it under the ✓ saved badge — or keep adding more here.`);
     // Clear the form for another entry
     document.getElementById('mtx-title').value = '';
     document.getElementById('mtx-attendees').value = '';
     document.getElementById('mtx-notes').value = '';
     document.getElementById('mtx-body').value = '';
+    document.getElementById('mtx-title').focus();
     // Refresh the transcript library list (if open) so the row appears
     loadTranscripts();
   } catch (err) {

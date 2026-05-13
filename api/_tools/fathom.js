@@ -94,8 +94,7 @@ export async function getTranscript({ meeting_id }) {
   const cached = await readBlob(`fathom/${meeting_id}.json`);
   if (cached) return { ...cached, source: 'cache' };
 
-  const data = await fathomGet(`/recordings/${encodeURIComponent(meeting_id)}/transcript`);
-  const transcript = normalizeTranscript(data);
+  const transcript = await fetchFullTranscript(meeting_id);
 
   const record = {
     id: meeting_id,
@@ -105,6 +104,41 @@ export async function getTranscript({ meeting_id }) {
 
   await writeFathomRecord(meeting_id, record);
   return { ...record, source: 'fresh' };
+}
+
+// Walks Fathom's transcript pagination so long calls don't get truncated.
+// Different Fathom endpoints have used different pagination shapes over time:
+//   { transcript: [...], next_cursor }
+//   { results: [...], next_cursor }
+//   { items: [...], next_cursor }
+// We accumulate every page and normalize at the end.
+const TRANSCRIPT_PAGE_CAP = 50;
+async function fetchFullTranscript(meeting_id) {
+  let cursor;
+  let pages = 0;
+  let stringChunks = [];   // for endpoints that return raw string per page
+  let arrayChunks = [];    // for endpoints that return turn arrays
+  while (pages < TRANSCRIPT_PAGE_CAP) {
+    const data = await fathomGet(`/recordings/${encodeURIComponent(meeting_id)}/transcript`, cursor ? { cursor } : null);
+    pages += 1;
+    // String response: it's the whole thing in one shot
+    if (typeof data === 'string') { stringChunks.push(data); break; }
+    // Standard {transcript: ...} shape
+    if (data && Array.isArray(data.transcript)) {
+      arrayChunks.push(...data.transcript);
+    } else if (data && typeof data.transcript === 'string') {
+      stringChunks.push(data.transcript);
+    } else if (data && Array.isArray(data.results || data.items)) {
+      arrayChunks.push(...(data.results || data.items));
+    } else if (Array.isArray(data)) {
+      arrayChunks.push(...data);
+    }
+    cursor = data?.next_cursor || data?.next;
+    if (!cursor) break;
+  }
+  if (arrayChunks.length) return normalizeTranscript({ transcript: arrayChunks });
+  if (stringChunks.length) return stringChunks.join('\n');
+  return '';
 }
 
 export async function listCached() {
@@ -315,8 +349,7 @@ export async function ingestMeetings({ meeting_ids = [], titles = {} }) {
       const existing = await readBlob(`fathom/${id}.json`);
       if (existing?.transcript) { cached += 1; continue; }
 
-      const resp = await fathomGet(`/recordings/${encodeURIComponent(id)}/transcript`);
-      const transcript = normalizeTranscript(resp);
+      const transcript = await fetchFullTranscript(id);
 
       if (!transcript) { errors.push({ id, title: titles[id] || null, error: 'empty transcript' }); continue; }
 
@@ -373,12 +406,9 @@ export async function ingestRange({ from_date, to_date, cursor, max_pages = 5, e
       if (existing?.transcript) { cached += 1; continue; }
 
       try {
-        let transcript = m.transcript != null ? normalizeTranscript(m) : '';
-        // Fallback: pull separately if list response didn't bundle it
-        if (!transcript) {
-          const resp = await fathomGet(`/recordings/${encodeURIComponent(id)}/transcript`);
-          transcript = normalizeTranscript(resp);
-        }
+        // Always pull via the dedicated endpoint so we get pagination — the
+        // bundled transcript on the list response is often the first chunk only.
+        const transcript = await fetchFullTranscript(id);
         if (!transcript) { errors.push({ id, title, error: 'no transcript returned' }); continue; }
 
         const record = {
