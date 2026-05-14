@@ -573,13 +573,13 @@
   <!-- Solid background -->
   <div id="thumb-bg" style="position:absolute;inset:0;background:#1A2832;"></div>
   <!-- Photo: background-image so html2canvas respects background-size:cover (img object-fit not supported) -->
-  <div id="thumb-photo-wrap" style="position:absolute;top:0;bottom:0;right:0;width:56%;background-image:url('/cutouts/p1.png');background-size:cover;background-position:center top;background-repeat:no-repeat;"></div>
+  <div id="thumb-photo-wrap" style="position:absolute;top:0;bottom:0;right:0;width:48%;background-image:url('/cutouts/p1.png');background-size:cover;background-position:center top;background-repeat:no-repeat;"></div>
   <!-- Gradient: fades photo into bg -->
-  <div id="thumb-gradient" style="position:absolute;inset:0;background:linear-gradient(to right, #1A2832 36%, rgba(26,40,50,0.75) 58%, transparent 78%);"></div>
-  <!-- Text: left 62%, centered vertically -->
-  <div id="thumb-text" style="position:absolute;top:0;bottom:0;left:0;width:62%;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:36px 40px;box-sizing:border-box;">
+  <div id="thumb-gradient" style="position:absolute;inset:0;background:linear-gradient(to right, #1A2832 42%, rgba(26,40,50,0.85) 62%, transparent 82%);"></div>
+  <!-- Text: left 54%, centered vertically -->
+  <div id="thumb-text" style="position:absolute;top:0;bottom:0;left:0;width:54%;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:36px 36px;box-sizing:border-box;">
     <div id="thumb-l1" style="font-weight:800;font-size:34px;line-height:1.1;color:#ffffff;letter-spacing:-0.025em;margin-bottom:12px;text-transform:uppercase;"></div>
-    <span id="thumb-l2" style="background:#F06060;font-weight:800;font-size:42px;line-height:1.15;color:#ffffff;letter-spacing:-0.025em;padding:5px 14px 8px;display:inline-block;text-transform:uppercase;border-radius:4px;align-self:flex-start;"></span>
+    <span id="thumb-l2" style="background:#F06060;font-weight:800;font-size:42px;line-height:1.15;color:#ffffff;letter-spacing:-0.025em;padding:8px 12px;display:inline-block;text-transform:uppercase;border-radius:4px;align-self:flex-start;"></span>
   </div>
 </div>
 
@@ -1063,9 +1063,9 @@ async function regenThumb() {
   // Gradient fades photo into the bg color — update gradient to match bg
   const gradientEl = document.getElementById('thumb-gradient');
   if (side === 'right') {
-    gradientEl.style.background = `linear-gradient(to right, ${bgColor} 38%, ${bgColor}b0 60%, transparent 80%)`;
+    gradientEl.style.background = `linear-gradient(to right, ${bgColor} 42%, ${bgColor}d8 62%, transparent 82%)`;
   } else {
-    gradientEl.style.background = `linear-gradient(to left, ${bgColor} 38%, ${bgColor}b0 60%, transparent 80%)`;
+    gradientEl.style.background = `linear-gradient(to left, ${bgColor} 42%, ${bgColor}d8 62%, transparent 82%)`;
   }
 
   // Position photo and text based on side
