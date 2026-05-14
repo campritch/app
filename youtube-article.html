@@ -701,19 +701,19 @@ function waveSVG(x, y, opacity, col) {
 const PATTERNS = {
   none: () => '',
   mics: () => [
-    micSVG(574, 38,  60, 0.13,  18, '#ffffff'),
-    micSVG(505, 195, 38, 0.10, -14, '#F06060'),
-    micSVG(608, 295, 30, 0.12,  22, '#ffffff'),
-    micSVG(52,  28,  24, 0.08,  -6, '#ffffff'),
-    micSVG(455, 325, 48, 0.09,  10, '#F06060'),
-    micSVG(340, 18,  20, 0.06,   5, '#F06060'),
+    micSVG(574, 38,  60, 0.09,  18, '#ffffff'),
+    micSVG(505, 195, 38, 0.07, -14, '#F06060'),
+    micSVG(608, 295, 30, 0.08,  22, '#ffffff'),
+    micSVG(52,  28,  24, 0.06,  -6, '#ffffff'),
+    micSVG(455, 325, 48, 0.06,  10, '#F06060'),
+    micSVG(340, 18,  20, 0.04,   5, '#F06060'),
   ].join(''),
   waves: () => [
-    waveSVG(580,  10, 0.16, '#ffffff'),
-    waveSVG(555, 260, 0.11, '#F06060'),
-    waveSVG( 20, 280, 0.09, '#ffffff'),
-    waveSVG( 40,  20, 0.07, '#F06060'),
-    waveSVG(300, 295, 0.08, '#ffffff'),
+    waveSVG(580,  10, 0.11, '#ffffff'),
+    waveSVG(555, 260, 0.08, '#F06060'),
+    waveSVG( 20, 280, 0.06, '#ffffff'),
+    waveSVG( 40,  20, 0.05, '#F06060'),
+    waveSVG(300, 295, 0.06, '#ffffff'),
   ].join(''),
   dots: () => {
     const pts = [];
@@ -725,7 +725,7 @@ const PATTERNS = {
      [30,290],[30,320],[30,350],[70,320],[70,350],
      [580,250],[620,250],[580,290],[620,290],[580,330],[620,330]].forEach(([x,y],i) => {
       const col = i % 3 === 0 ? '#F06060' : '#ffffff';
-      const op  = (0.06 + (i % 4) * 0.025).toFixed(3);
+      const op  = (0.04 + (i % 4) * 0.018).toFixed(3);
       pts.push(`<circle cx="${x}" cy="${y}" r="2.5" fill="${col}" opacity="${op}"/>`);
     });
     return pts.join('');
