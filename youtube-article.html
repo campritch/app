@@ -733,9 +733,13 @@ const PATTERNS = {
 };
 
 function applyPattern(pattern) {
-  const svg = document.getElementById('thumb-deco');
-  if (!svg) return;
-  svg.innerHTML = PATTERNS[pattern] ? PATTERNS[pattern]() : '';
+  try {
+    const svg = document.getElementById('thumb-deco');
+    if (!svg) return;
+    svg.innerHTML = PATTERNS[pattern] ? PATTERNS[pattern]() : '';
+  } catch (e) {
+    console.warn('Pattern render failed:', e);
+  }
 }
 
 function selectPattern(el, pattern) {
@@ -1102,13 +1106,14 @@ async function runGeneration(transcript, videoId) {
   document.getElementById('status').style.display = 'none';
   btn.disabled = false;
 
-  // Run thumbnail and Instagram generation in parallel
+  // Run thumbnail and Instagram generation in parallel — isolated so neither blocks the other
   const [igData] = await Promise.all([
     generateInstagram(transcript, key),
-    regenThumb(),
+    regenThumb().catch(e => console.warn('Thumb regen failed:', e)),
   ]);
 
   if (igData) renderSlides(igData);
+  else showStatus('error', 'Slide generation failed — check console.');
 }
 
 // ── Render helpers ──────────────────────────────────────────────────────────
