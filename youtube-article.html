@@ -561,6 +561,15 @@
             <label>Photo</label>
             <div class="photo-grid" id="photo-grid"></div>
           </div>
+          <div class="control-group">
+            <label>Pattern</label>
+            <div class="chip-row" id="pattern-chips">
+              <button class="chip active" onclick="selectPattern(this,'none')">None</button>
+              <button class="chip" onclick="selectPattern(this,'mics')">Mics</button>
+              <button class="chip" onclick="selectPattern(this,'waves')">Waves</button>
+              <button class="chip" onclick="selectPattern(this,'dots')">Dots</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -572,6 +581,8 @@
 <div id="thumb-render" style="position:fixed;left:-2000px;top:0;width:640px;height:360px;overflow:hidden;font-family:'Inter',sans-serif;box-sizing:border-box;">
   <!-- Solid background -->
   <div id="thumb-bg" style="position:absolute;inset:0;background:#1A2832;"></div>
+  <!-- Pattern decoration layer (below photo + gradient) -->
+  <svg id="thumb-deco" style="position:absolute;inset:0;width:640px;height:360px;overflow:visible;" xmlns="http://www.w3.org/2000/svg"></svg>
   <!-- Photo: background-image so html2canvas respects background-size:cover (img object-fit not supported) -->
   <div id="thumb-photo-wrap" style="position:absolute;top:0;bottom:0;right:0;width:48%;background-image:url('/cutouts/p1.png');background-size:cover;background-position:center top;background-repeat:no-repeat;"></div>
   <!-- Gradient: fades photo into bg -->
@@ -662,7 +673,78 @@ ${transcript}`;
 // ── State ───────────────────────────────────────────────────────────────────
 let rawMarkdown = '';
 let currentThumbB64 = '';
-let thumbData = { line1: '', line2: '', complexity: 70, bg: 'dark', side: 'right', photo: 0 };
+let thumbData = { line1: '', line2: '', complexity: 70, bg: 'dark', side: 'right', photo: 0, pattern: 'none' };
+
+// ── Thumbnail patterns ────────────────────────────────────────────────────────
+function micSVG(x, y, size, opacity, rot, col) {
+  const s = size / 28;
+  return `<g transform="translate(${x},${y}) rotate(${rot}) scale(${s})"
+    stroke="${col}" stroke-linecap="round" stroke-linejoin="round"
+    fill="none" stroke-width="2.5" opacity="${opacity}">
+    <rect x="-8" y="-16" width="16" height="22" rx="8"/>
+    <path d="M-13,-4 Q-17,4 -13,11"/>
+    <path d="M13,-4 Q17,4 13,11"/>
+    <line x1="0" y1="6" x2="0" y2="15"/>
+    <line x1="-6" y1="15" x2="6" y2="15"/>
+  </g>`;
+}
+
+function waveSVG(x, y, opacity, col) {
+  return `<g transform="translate(${x},${y})" stroke="${col}" fill="none"
+    stroke-linecap="round" stroke-width="2.2" opacity="${opacity}">
+    <path d="M0,0 A14,14 0 0,1 14,14"/>
+    <path d="M0,0 A26,26 0 0,1 26,26"/>
+    <path d="M0,0 A38,38 0 0,1 38,38"/>
+  </g>`;
+}
+
+const PATTERNS = {
+  none: () => '',
+  mics: () => [
+    micSVG(574, 38,  60, 0.13,  18, '#ffffff'),
+    micSVG(505, 195, 38, 0.10, -14, '#F06060'),
+    micSVG(608, 295, 30, 0.12,  22, '#ffffff'),
+    micSVG(52,  28,  24, 0.08,  -6, '#ffffff'),
+    micSVG(455, 325, 48, 0.09,  10, '#F06060'),
+    micSVG(340, 18,  20, 0.06,   5, '#F06060'),
+  ].join(''),
+  waves: () => [
+    waveSVG(580,  10, 0.16, '#ffffff'),
+    waveSVG(555, 260, 0.11, '#F06060'),
+    waveSVG( 20, 280, 0.09, '#ffffff'),
+    waveSVG( 40,  20, 0.07, '#F06060'),
+    waveSVG(300, 295, 0.08, '#ffffff'),
+  ].join(''),
+  dots: () => {
+    const pts = [];
+    [[380,30],[420,30],[460,30],[500,30],[540,30],[580,30],[620,30],
+     [380,70],[420,70],[460,70],[500,70],[540,70],[580,70],[620,70],
+     [380,110],[420,110],[460,110],[500,110],[540,110],[580,110],
+     [380,150],[420,150],[460,150],[500,150],[540,150],
+     [540,190],[580,190],[620,190],
+     [30,290],[30,320],[30,350],[70,320],[70,350],
+     [580,250],[620,250],[580,290],[620,290],[580,330],[620,330]].forEach(([x,y],i) => {
+      const col = i % 3 === 0 ? '#F06060' : '#ffffff';
+      const op  = (0.06 + (i % 4) * 0.025).toFixed(3);
+      pts.push(`<circle cx="${x}" cy="${y}" r="2.5" fill="${col}" opacity="${op}"/>`);
+    });
+    return pts.join('');
+  },
+};
+
+function applyPattern(pattern) {
+  const svg = document.getElementById('thumb-deco');
+  if (!svg) return;
+  svg.innerHTML = PATTERNS[pattern] ? PATTERNS[pattern]() : '';
+}
+
+function selectPattern(el, pattern) {
+  document.querySelectorAll('#pattern-chips .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  thumbData.pattern = pattern;
+  applyPattern(pattern);
+  regenThumb();
+}
 let renderTimer = null;
 
 // ── API key — fetched once from /api/config, cached for session ──────────────
@@ -1059,6 +1141,7 @@ async function regenThumb() {
 
   // Populate hidden render div
   document.getElementById('thumb-bg').style.background = bgColor;
+  applyPattern(thumbData.pattern);
 
   // Gradient fades photo into the bg color — update gradient to match bg
   const gradientEl = document.getElementById('thumb-gradient');
