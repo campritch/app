@@ -1262,8 +1262,27 @@ function renderSlides(igData) {
 
 async function downloadSlide(index) {
   const el = document.getElementById(`ig-slide-${index}`);
-  // Render at 3x = 1080px from 360px
-  const canvas = await html2canvas(el, { scale: 3, useCORS: true, backgroundColor: '#ffffff' });
+
+  // Detect true bg color so export has no white-corner bleed from border-radius
+  let bgColor = '#17212B';
+  if (el.classList.contains('ig-slide--salmon') || el.classList.contains('ig-slide--coral')) bgColor = '#F06060';
+  else if (el.classList.contains('ig-slide--white')) bgColor = '#ffffff';
+  else if (el.classList.contains('ig-slide--black')) bgColor = '#111111';
+  else if (el.classList.contains('ig-t2')) bgColor = '#ffffff';
+
+  // Strip border-radius so export is full-bleed (IG handles its own corner masking)
+  const origRadius = el.style.borderRadius;
+  el.style.borderRadius = '0';
+
+  // Capture at exactly 360×450 CSS px × 3 = 1080×1350 (IG 4:5 portrait)
+  const canvas = await html2canvas(el, {
+    scale: 3, useCORS: true,
+    backgroundColor: bgColor,
+    width: 360, height: 450,
+  });
+
+  el.style.borderRadius = origRadius;
+
   const a = document.createElement('a');
   a.download = `spotsnow-slide-${index + 1}.png`;
   a.href = canvas.toDataURL('image/png');
