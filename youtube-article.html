@@ -480,6 +480,18 @@
     </div>
   </div>
 
+  <!-- Tweet -->
+  <div class="card" id="tweet-card" style="display:none;">
+    <div class="card__header">
+      <span class="card__label">Tweet</span>
+      <button class="btn-outline" onclick="copyTweet()">Copy</button>
+    </div>
+    <div class="card__body" style="padding:20px 28px;">
+      <p id="tweet-text" style="margin:0;font-size:15px;line-height:1.55;color:var(--text-primary);white-space:pre-wrap;"></p>
+      <div id="tweet-char-count" style="margin-top:10px;font-size:11px;font-weight:600;color:var(--grey-1);text-align:right;"></div>
+    </div>
+  </div>
+
   <!-- Article -->
   <div class="card" id="article-card" style="display:none;">
     <div class="card__header">
@@ -633,8 +645,18 @@ Return ONLY this JSON, no other text:
     { "eyebrow": "...", "headline": "...", "body": "...", "bg": "white" }
   ],
   "caption": "...",
+  "tweet": "...",
   "thumbnail": { "line1": "3-6 WORD CONTEXT PHRASE", "line2": "2-4 WORD HOOK" }
 }
+
+TWEET rules:
+- Max 240 characters (leave room for a link)
+- Hook-first — the first sentence must stop the scroll
+- Written in Cam's voice: short sentences, direct, no corporate language
+- State the single most counterintuitive or surprising insight from the content
+- NO em-dashes (— or –). Use a period instead.
+- No hashtags
+- End with a soft CTA like "Thread below." or nothing — do not ask people to follow
 
 Transcript:
 ${transcript}`;
@@ -918,6 +940,7 @@ async function generateFromRawTranscript() {
   const btn = document.getElementById('transcript-btn');
   btn.disabled = true;
   document.getElementById('ig-card').style.display = 'none';
+  document.getElementById('tweet-card').style.display = 'none';
   document.getElementById('thumb-card').style.display = 'none';
   document.getElementById('claude-card').style.display = 'none';
 
@@ -933,6 +956,7 @@ async function generateFromArticle() {
   const btn = document.getElementById('article-btn');
   btn.disabled = true;
   document.getElementById('ig-card').style.display = 'none';
+  document.getElementById('tweet-card').style.display = 'none';
   document.getElementById('thumb-card').style.display = 'none';
   document.getElementById('claude-card').style.display = 'none';
 
@@ -1351,6 +1375,17 @@ function renderSlides(igData) {
   row.innerHTML = igData.slides.map((s, i) => builder(s, i)).join('');
   document.getElementById('ig-caption-text').textContent = igData.caption;
   document.getElementById('ig-card').style.display = 'block';
+
+  // Tweet
+  if (igData.tweet) {
+    const tweetEl = document.getElementById('tweet-text');
+    const countEl = document.getElementById('tweet-char-count');
+    tweetEl.textContent = igData.tweet;
+    const len = igData.tweet.length;
+    countEl.textContent = `${len} / 280 chars`;
+    countEl.style.color = len > 280 ? '#F06060' : 'var(--grey-1)';
+    document.getElementById('tweet-card').style.display = 'block';
+  }
 }
 
 async function downloadSlide(index) {
@@ -1391,6 +1426,10 @@ async function downloadAllSlides() {
 
 function copyCaption() {
   const text = document.getElementById('ig-caption-text').textContent;
+  navigator.clipboard.writeText(text).then(() => flash(event.target, 'Copied!'));
+}
+function copyTweet() {
+  const text = document.getElementById('tweet-text').textContent;
   navigator.clipboard.writeText(text).then(() => flash(event.target, 'Copied!'));
 }
 
