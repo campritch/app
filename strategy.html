@@ -148,6 +148,7 @@ input, textarea, select { font-family: inherit; }
 .tx-row .badge { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 6px; border-radius: 2px; white-space: nowrap; }
 .tx-row .badge.ok { color: var(--good); border: 1px solid var(--good); }
 .tx-row .badge.none { color: var(--text-faint); border: 1px solid var(--line); }
+.tx-row .badge.fail { color: var(--bad); border: 1px solid var(--bad); cursor: help; }
 .tx-row .row-acts { display: flex; gap: 4px; }
 .tx-row .row-acts button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 2px 7px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border-radius: 2px; }
 .tx-row .row-acts .v:hover { color: var(--text); border-color: var(--accent); }
@@ -1145,6 +1146,7 @@ function attachInputs() {
 let txMeetings = [];             // from /api/fathom-list
 let txCachedById = new Map();    // id -> cached item (from /api/fathom-cache list)
 let txSelectedIds = new Set();   // user-selected ids to transcribe
+let txFailedById = new Map();    // id -> last save-error reason (cleared on next refresh)
 let txDisplayCount = 50;         // client-side pagination
 let txRange = '30';              // '7' | '30' | '90' | '180' | 'all'
 let txLoading = false;
@@ -1291,7 +1293,12 @@ function renderTxList() {
     const atts = (m.attendees || []).slice(0, 2).join(', ') + ((m.attendees || []).length > 2 ? ` +${m.attendees.length - 2}` : '');
     const title = m.title || '(untitled)';
     const sel = txSelectedIds.has(id) ? 'checked' : '';
-    const badge = cached ? `<span class="badge ok" title="Permanently saved to storage">✓ saved</span>` : `<span class="badge none">not saved</span>`;
+    const failReason = txFailedById.get(id);
+    const badge = cached
+      ? `<span class="badge ok" title="Permanently saved to storage">✓ saved</span>`
+      : failReason
+        ? `<span class="badge fail" title="Last save failed: ${escapeHtml(failReason)}">⚠ failed</span>`
+        : `<span class="badge none">not saved</span>`;
     const acts = cached ? `<div class="row-acts"><button class="v" data-view="${escapeHtml(id)}">View</button><button class="d" data-del="${escapeHtml(id)}">Del</button></div>` : '';
     const classes = ['tx-row'];
     if (cached) classes.push('cached');
@@ -1377,7 +1384,15 @@ async function attemptRunAndSave(ids) {
     });
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `HTTP ${res.status}`); }
     const data = await res.json();
-    const failedIds = (data.errors || []).map((e) => String(e.id)).filter(Boolean);
+    const errs = data.errors || [];
+    const failedIds = errs.map((e) => String(e.id)).filter(Boolean);
+
+    // Stamp each failed row with its specific error reason so the UI can show
+    // "⚠ failed" with a tooltip explaining why (e.g. "empty transcript", "404").
+    // Successful retries clear the failure marker for that id.
+    for (const e of errs) if (e.id) txFailedById.set(String(e.id), e.error || 'unknown error');
+    for (const id of ids) if (!failedIds.includes(String(id))) txFailedById.delete(String(id));
+
     txSelectedIds.clear();
     await loadTranscripts();
 
@@ -1385,9 +1400,9 @@ async function attemptRunAndSave(ids) {
       setTxStatus('ok', `✓ Saved ${data.ingested} transcript${data.ingested === 1 ? '' : 's'}.`);
       setTimeout(() => setTxStatus(null), 5000);
     } else if (data.ingested > 0) {
-      setTxStatus('err', `Saved ${data.ingested}, but ${failedIds.length} didn't save.`, { retry: () => attemptRunAndSave(failedIds) });
+      setTxStatus('err', `Saved ${data.ingested}, but ${failedIds.length} couldn't be saved — hover ⚠ failed on each row for the reason.`, { retry: () => attemptRunAndSave(failedIds) });
     } else {
-      setTxStatus('err', `None of the ${ids.length} saved.`, { retry: () => attemptRunAndSave(failedIds.length ? failedIds : ids) });
+      setTxStatus('err', `None of the ${ids.length} saved — hover ⚠ failed on each row for the reason.`, { retry: () => attemptRunAndSave(failedIds.length ? failedIds : ids) });
     }
   } catch (err) {
     setTxStatus('err', `Didn't save — ${err.message}.`, { retry: () => attemptRunAndSave(ids) });
