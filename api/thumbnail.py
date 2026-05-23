@@ -19,19 +19,23 @@ BG_OPTIONS = {
     "navy":  (10, 14, 40),
 }
 
-# Pre-cut photos live next to this file in cutouts/
+# Pre-cut photos and fonts live at the repo root (NOT under api/) so they
+# don't get bundled into every other Vercel function's lambda.
+# vercel.json must include cutouts/** and fonts/** in this function's includeFiles.
 HERE = os.path.dirname(__file__)
+ROOT = os.path.abspath(os.path.join(HERE, ".."))
 PHOTOS = [
-    os.path.join(HERE, "cutouts", "cam1.png"),
-    os.path.join(HERE, "cutouts", "cam2.png"),
-    os.path.join(HERE, "cutouts", "cam3.png"),
-    os.path.join(HERE, "cutouts", "cam_color.png"),
+    os.path.join(ROOT, "cutouts", "cam1.png"),
+    os.path.join(ROOT, "cutouts", "cam2.png"),
+    os.path.join(ROOT, "cutouts", "cam3.png"),
+    os.path.join(ROOT, "cutouts", "cam_color.png"),
 ]
 
 
 def _get_font(size, bold=True):
     candidates = [
-        "/var/task/api/fonts/Inter-Bold.ttf" if bold else "/var/task/api/fonts/Inter-Regular.ttf",
+        os.path.join(ROOT, "fonts", "Inter-Bold.ttf" if bold else "Inter-Regular.ttf"),
+        "/var/task/fonts/Inter-Bold.ttf" if bold else "/var/task/fonts/Inter-Regular.ttf",
         "/Library/Fonts/Arial Bold.ttf" if bold else "/Library/Fonts/Arial.ttf",
         "/System/Library/Fonts/HelveticaNeue.ttc",
         "/System/Library/Fonts/Helvetica.ttc",

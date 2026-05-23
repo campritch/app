@@ -14,4 +14,4 @@ cp *.jpeg dist/ 2>/dev/null || true
 cp favicon.svg dist/ 2>/dev/null || true
 cp robots.txt dist/ 2>/dev/null || true
 cp data/*.json dist/data/ 2>/dev/null || true
-cp api/cutouts/*.png dist/cutouts/ 2>/dev/null || true
+cp cutouts/*.png dist/cutouts/ 2>/dev/null || true

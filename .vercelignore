@@ -1,0 +1,23 @@
+# Files that should never be uploaded to Vercel:
+# node_modules (Vercel installs from package.json)
+node_modules/
+# Local Python venv from `vercel build`; Vercel installs from pyproject.toml/requirements.txt
+.vercel_python_packages/
+.venv/
+__pycache__/
+*.pyc
+# Local build output
+dist/
+# Editor / OS junk
+.DS_Store
+.claude/
+.idea/
+.vscode/
+# Local env (Vercel uses dashboard env vars in prod)
+.env
+.env.local
+*.local
+# Heavy decks / pdfs that are committed but not needed in function bundles.
+# These are still served as static if referenced from a deployed HTML page,
+# but won't bloat lambda bundles.
+*.pdf
