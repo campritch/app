@@ -203,14 +203,21 @@ export default async function handler(req, res) {
   }
 }
 
-// Detect Anthropic 429 / rate-limit / overloaded responses across error shapes.
+// Detect any Anthropic capacity / quota error worth falling back on.
+// Covers per-minute rate limits (429), overloads (529), AND monthly usage
+// caps which return 400 with an invalid_request_error like:
+//   "You have reached your specified API usage limits. You will regain
+//    access on 2026-06-01 at 00:00 UTC."
 function isAnthropicRateLimit(err) {
   if (!err) return false;
   const status = err.status || err.statusCode || err?.response?.status;
-  if (status === 429) return true;
-  if (status === 529) return true; // overloaded
+  if (status === 429 || status === 529) return true;
   const msg = String(err?.message || '').toLowerCase();
-  return msg.includes('rate limit') || msg.includes('overloaded') || msg.includes('too many requests');
+  if (msg.includes('rate limit') || msg.includes('overloaded') || msg.includes('too many requests')) return true;
+  // Monthly / total usage caps come back as 400 invalid_request_error.
+  // Don't catch all 400s — only the usage-related ones.
+  if (msg.includes('usage limit') || msg.includes('usage limits') || msg.includes('reached your specified api') || msg.includes('credit balance')) return true;
+  return false;
 }
 
 // Stream a single Gemini response back as SSE 'text' deltas, then 'done'.
