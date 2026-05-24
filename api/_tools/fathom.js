@@ -92,7 +92,26 @@ export async function getTranscript({ meeting_id }) {
   if (!meeting_id) throw new Error('meeting_id required (use recording id from listMeetings)');
 
   const cached = await readBlob(`fathom/${meeting_id}.json`);
-  if (cached) return { ...cached, source: 'cache' };
+  if (cached) {
+    // Self-heal: if the manifest doesn't know about this blob, stamp it now
+    // so future UI loads see "saved" instead of "not saved".
+    try {
+      const m = (await readBlob(MANIFEST_KEY)) || { items: [] };
+      const has = (m.items || []).some((x) => String(x.id) === String(meeting_id));
+      if (!has) {
+        const bytes = new TextEncoder().encode(JSON.stringify(cached)).length;
+        await updateManifest({
+          id: meeting_id,
+          title: cached.title || null,
+          date: cached.date || null,
+          attendees: cached.attendees || [],
+          bytes,
+          cached_at: cached.fetched_at || new Date().toISOString(),
+        });
+      }
+    } catch (e) { console.warn('manifest self-heal failed', e); }
+    return { ...cached, source: 'cache' };
+  }
 
   const transcript = await fetchFullTranscript(meeting_id);
 
@@ -314,9 +333,10 @@ async function writeFathomRecord(id, record) {
 }
 
 async function updateManifest(entry) {
+  if (!entry || entry.id == null) return;
   const manifest = (await readBlob(MANIFEST_KEY)) || { items: [] };
   const items = Array.isArray(manifest.items) ? manifest.items : [];
-  const idx = items.findIndex((x) => x.id === entry.id);
+  const idx = items.findIndex((x) => String(x.id) === String(entry.id));
   if (idx >= 0) items[idx] = entry;
   else items.push(entry);
   items.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
@@ -326,7 +346,7 @@ async function updateManifest(entry) {
 async function removeFromManifest(id) {
   const manifest = await readBlob(MANIFEST_KEY);
   if (!manifest || !Array.isArray(manifest.items)) return;
-  const items = manifest.items.filter((x) => x.id !== id);
+  const items = manifest.items.filter((x) => String(x.id) !== String(id));
   await writeBlob(MANIFEST_KEY, { items, updated_at: new Date().toISOString() });
 }
 
@@ -347,7 +367,21 @@ export async function ingestMeetings({ meeting_ids = [], titles = {} }) {
     if (!id) continue;
     try {
       const existing = await readBlob(`fathom/${id}.json`);
-      if (existing?.transcript) { cached += 1; continue; }
+      if (existing?.transcript) {
+        // The blob is there but the manifest may have drifted (orphan blob).
+        // Always re-stamp the manifest entry so the UI sees this as saved.
+        const bytes = new TextEncoder().encode(JSON.stringify(existing)).length;
+        await updateManifest({
+          id,
+          title: existing.title || titles[id] || null,
+          date: existing.date || null,
+          attendees: existing.attendees || [],
+          bytes,
+          cached_at: existing.fetched_at || new Date().toISOString(),
+        });
+        cached += 1;
+        continue;
+      }
 
       const transcript = await fetchFullTranscript(id);
 
@@ -403,7 +437,20 @@ export async function ingestRange({ from_date, to_date, cursor, max_pages = 5, e
       if (excludes.some((re) => re.test(title))) { excluded += 1; continue; }
 
       const existing = await readBlob(`fathom/${id}.json`);
-      if (existing?.transcript) { cached += 1; continue; }
+      if (existing?.transcript) {
+        // Manifest self-heal: blob is there, make sure the manifest entry is too.
+        const bytes = new TextEncoder().encode(JSON.stringify(existing)).length;
+        await updateManifest({
+          id,
+          title: existing.title || title,
+          date: existing.date || m.scheduled_start_time || m.created_at || m.recording_start_time || null,
+          attendees: existing.attendees || (m.calendar_invitees || m.invitees || m.attendees || []).map((a) => a.email || a.name).filter(Boolean),
+          bytes,
+          cached_at: existing.fetched_at || new Date().toISOString(),
+        });
+        cached += 1;
+        continue;
+      }
 
       try {
         // Always pull via the dedicated endpoint so we get pagination — the
