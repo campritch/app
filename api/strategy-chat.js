@@ -217,7 +217,10 @@ function isAnthropicRateLimit(err) {
 // No tool use — Gemini gets the full context block (saved transcripts, KB,
 // prior conversations, strategy) and answers from that. Pragmatic fallback;
 // not feature-equal to Claude but keeps Cam unblocked when Anthropic is throttled.
-const GEMINI_MODEL = 'gemini-2.5-pro';
+// Default to Flash — higher rate limits and ~4× faster than Pro, which is
+// what we actually want from a fallback. Override via GEMINI_MODEL env var
+// (e.g., gemini-2.5-pro for max quality, gemini-2.5-flash-lite for max speed).
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 async function streamGeminiFallback({ res, contextBlock, messages, reason }) {
   sseWrite(res, 'fallback', { provider: 'gemini', model: GEMINI_MODEL, reason });
 
