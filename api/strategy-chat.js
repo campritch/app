@@ -224,15 +224,20 @@ function isAnthropicRateLimit(err) {
 // No tool use — Gemini gets the full context block (saved transcripts, KB,
 // prior conversations, strategy) and answers from that. Pragmatic fallback;
 // not feature-equal to Claude but keeps Cam unblocked when Anthropic is throttled.
-// Default to Pro for maximum reasoning quality — volume is low here so the
-// higher latency / lower rate limit is an acceptable tradeoff. Override via
-// GEMINI_MODEL env var (gemini-2.5-flash for speed, gemini-2.5-flash-lite for cheapest).
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-pro';
-async function streamGeminiFallback({ res, contextBlock, messages, reason }) {
-  sseWrite(res, 'fallback', { provider: 'gemini', model: GEMINI_MODEL, reason });
+// Cascade through Gemini models — Pro first (highest quality), then Flash,
+// then Flash-Lite. Quota errors on one model drop to the next, so the user
+// always gets *an* answer. Override with GEMINI_MODEL_CHAIN (comma-sep) or
+// pin to a single one with GEMINI_MODEL.
+const GEMINI_MODEL_CHAIN = (process.env.GEMINI_MODEL_CHAIN || process.env.GEMINI_MODEL || 'gemini-2.5-pro,gemini-2.5-flash,gemini-2.5-flash-lite')
+  .split(',').map((s) => s.trim()).filter(Boolean);
 
-  // Translate Anthropic message shape → Gemini contents shape.
-  // Gemini expects { role: 'user'|'model', parts: [{ text } | { inlineData }] }
+function isGeminiQuotaError(err) {
+  const msg = String(err?.message || '').toLowerCase();
+  return msg.includes('429') || msg.includes('quota') || msg.includes('rate limit') || msg.includes('exceeded');
+}
+
+async function streamGeminiFallback({ res, contextBlock, messages, reason }) {
+  // Translate Anthropic message shape → Gemini contents shape (once).
   const contents = [];
   if (contextBlock) contents.push({ role: 'user', parts: [{ text: contextBlock }] });
   for (const m of messages) {
@@ -249,7 +254,30 @@ async function streamGeminiFallback({ res, contextBlock, messages, reason }) {
     if (parts.length) contents.push({ role, parts });
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:streamGenerateContent?alt=sse&key=${encodeURIComponent(process.env.GEMINI_API_KEY)}`;
+  const errs = [];
+  for (let i = 0; i < GEMINI_MODEL_CHAIN.length; i += 1) {
+    const model = GEMINI_MODEL_CHAIN[i];
+    // Tell the UI which model we're trying. If we cascade, the user sees a
+    // new notice for each attempt so it's obvious what happened.
+    sseWrite(res, 'fallback', {
+      provider: 'gemini',
+      model,
+      reason: i === 0 ? reason : `${GEMINI_MODEL_CHAIN[i - 1]} quota-capped → ${model}`,
+    });
+    try {
+      await streamGeminiAttempt({ res, model, contents });
+      return; // success
+    } catch (err) {
+      errs.push(`${model}: ${String(err?.message || err).slice(0, 140)}`);
+      if (!isGeminiQuotaError(err)) throw err; // anything else: bail
+      // quota-capped — try the next model in the chain
+    }
+  }
+  throw new Error(`All Gemini models quota-exhausted. ${errs.join(' · ')}`);
+}
+
+async function streamGeminiAttempt({ res, model, contents }) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(process.env.GEMINI_API_KEY)}`;
   const resp = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -264,7 +292,6 @@ async function streamGeminiFallback({ res, contextBlock, messages, reason }) {
     throw new Error(`Gemini ${resp.status}: ${body.slice(0, 300)}`);
   }
 
-  // Gemini SSE: each event is `data: {...}\n\n` with a candidates[0].content.parts.
   const reader = resp.body.getReader();
   const decoder = new TextDecoder();
   let buf = '';
@@ -294,7 +321,8 @@ async function streamGeminiFallback({ res, contextBlock, messages, reason }) {
       }
     }
   }
-  sseWrite(res, 'done', { usage: { output_tokens: Math.round(totalText / 4) }, provider: 'gemini' });
+  if (totalText === 0) throw new Error(`Gemini ${model} returned no text`);
+  sseWrite(res, 'done', { usage: { output_tokens: Math.round(totalText / 4) }, provider: `gemini · ${model}` });
   res.end();
 }
 
