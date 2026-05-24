@@ -233,7 +233,11 @@ const GEMINI_MODEL_CHAIN = (process.env.GEMINI_MODEL_CHAIN || process.env.GEMINI
 
 function isGeminiQuotaError(err) {
   const msg = String(err?.message || '').toLowerCase();
-  return msg.includes('429') || msg.includes('quota') || msg.includes('rate limit') || msg.includes('exceeded');
+  return msg.includes('429')
+    || msg.includes('quota')
+    || msg.includes('rate limit')
+    || msg.includes('exceeded')
+    || msg.includes('returned no text'); // model thought-itself-out — try the next
 }
 
 async function streamGeminiFallback({ res, contextBlock, messages, reason }) {
@@ -278,13 +282,25 @@ async function streamGeminiFallback({ res, contextBlock, messages, reason }) {
 
 async function streamGeminiAttempt({ res, model, contents }) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(process.env.GEMINI_API_KEY)}`;
+  // Gemini 2.5 Pro/Flash are reasoning models — they can spend the entire
+  // maxOutputTokens budget on internal thinking and emit no visible text.
+  // For a fallback path we want predictable immediate answers, so disable
+  // thinking on Pro (thinkingBudget: 0). Flash defaults to no thinking
+  // unless asked. Also bumping maxOutputTokens to 32k so longer answers
+  // aren't truncated.
   const resp = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
       contents,
-      generationConfig: { maxOutputTokens: MAX_TOKENS, temperature: 0.7 },
+      generationConfig: {
+        maxOutputTokens: 32000,
+        temperature: 0.7,
+        // thinkingBudget: 0 disables Pro's reasoning entirely; -1 is dynamic.
+        // For non-Pro models this field is ignored.
+        thinkingConfig: { thinkingBudget: 0 },
+      },
     }),
   });
   if (!resp.ok) {
