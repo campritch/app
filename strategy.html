@@ -1177,21 +1177,32 @@ async function loadTranscripts() {
 
   try {
     const { from_date, to_date } = computeRangeDates(txRange);
-    const [listRes, cacheRes] = await Promise.all([
-      fetch('/api/fathom-list', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password, from_date, to_date, include_standups: txShowStandups }) }),
-      fetch('/api/fathom-cache', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password, action: 'list' }) }),
+    // Fetch in parallel. Each side handled independently — Fathom going down
+    // shouldn't hide your saved library. listError/cacheError are surfaced
+    // separately below.
+    const [listSettled, cacheSettled] = await Promise.allSettled([
+      fetch('/api/fathom-list', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password, from_date, to_date, include_standups: txShowStandups }) }).then(async (r) => {
+        if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(simplifyError(e.error) || `fathom-list HTTP ${r.status}`); }
+        return r.json();
+      }),
+      fetch('/api/fathom-cache', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password, action: 'list' }) }).then(async (r) => {
+        if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(simplifyError(e.error) || `fathom-cache HTTP ${r.status}`); }
+        return r.json();
+      }),
     ]);
-    if (!listRes.ok) { const e = await listRes.json().catch(() => ({})); throw new Error(e.error || `fathom-list HTTP ${listRes.status}`); }
-    if (!cacheRes.ok) { const e = await cacheRes.json().catch(() => ({})); throw new Error(e.error || `fathom-cache HTTP ${cacheRes.status}`); }
-    const listData = await listRes.json();
-    const cacheData = await cacheRes.json();
 
-    txMeetings = listData.meetings || [];
-    const cacheItems = Array.isArray(cacheData.items) ? cacheData.items : [];
+    const listData = listSettled.status === 'fulfilled' ? listSettled.value : null;
+    const cacheData = cacheSettled.status === 'fulfilled' ? cacheSettled.value : null;
+    const listError = listSettled.status === 'rejected' ? simplifyError(listSettled.reason?.message || String(listSettled.reason)) : null;
+    const cacheError = cacheSettled.status === 'rejected' ? simplifyError(cacheSettled.reason?.message || String(cacheSettled.reason)) : null;
+
+    txMeetings = (listData?.meetings) || [];
+    const cacheItems = Array.isArray(cacheData?.items) ? cacheData.items : [];
     txCachedById = new Map(cacheItems.map((it) => [String(it.id), it]));
 
     // Merge in any cached transcripts that are OUTSIDE the fathom date window
-    // (so "All" doesn't hide your historical cache).
+    // (so "All" doesn't hide your historical cache). Also: if Fathom failed
+    // entirely, this means your saved library still renders.
     const listIds = new Set(txMeetings.map((m) => String(m.id)));
     const extras = cacheItems.filter((it) => !listIds.has(String(it.id))).map((it) => ({
       id: it.id,
@@ -1206,15 +1217,41 @@ async function loadTranscripts() {
     txDisplayCount = 50;
     renderTxList();
 
-    // Backfill: any cached items missing title that match a freshly-fetched meeting
-    // get their title/date/attendees patched in. One-shot per load, fire-and-forget.
-    enrichMissingTitles(cacheItems, listData.meetings || []).catch((e) => console.warn('enrich failed', e));
+    // Banner: if either side errored, tell the user what's broken and what
+    // still works. Cached library stays rendered behind it.
+    if (listError && cacheError) {
+      setTxStatus('err', `Couldn't reach Fathom OR load saved library: ${listError}`, { retry: loadTranscripts });
+    } else if (listError) {
+      setTxStatus('err', `Fathom is down (${listError}). Showing your ${cacheItems.length} saved transcript${cacheItems.length === 1 ? '' : 's'} only — new meetings will appear when Fathom recovers.`, { retry: loadTranscripts });
+    } else if (cacheError) {
+      setTxStatus('err', `Couldn't load saved library: ${cacheError}. Fathom meetings still shown.`, { retry: loadTranscripts });
+    }
+
+    // Backfill: any cached items missing title that match a freshly-fetched
+    // meeting get their title/date/attendees patched in. Skipped if Fathom is
+    // down (no fresh data to enrich from). Fire-and-forget.
+    if (listData && cacheItems.length) {
+      enrichMissingTitles(cacheItems, listData.meetings || []).catch((e) => console.warn('enrich failed', e));
+    }
   } catch (err) {
     document.getElementById('tx-list').innerHTML = `<div class="empty">Failed: ${escapeHtml(err.message)}</div>`;
     sum.textContent = 'error';
   } finally {
     txLoading = false;
   }
+}
+
+// Strip raw HTML error pages down to something readable. Fathom (and others)
+// occasionally return a full 502 HTML body which is unreadable in a banner.
+function simplifyError(msg) {
+  if (!msg) return msg;
+  const s = String(msg);
+  // Pull a quick descriptor out of common HTML error bodies
+  const titleMatch = s.match(/<title>([^<]+)<\/title>/i);
+  if (titleMatch) return titleMatch[1].trim();
+  // Strip remaining tags if it's HTML-ish
+  if (s.includes('<') && s.includes('>')) return s.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140);
+  return s.length > 200 ? s.slice(0, 200) + '…' : s;
 }
 
 async function enrichMissingTitles(cacheItems, meetings) {
