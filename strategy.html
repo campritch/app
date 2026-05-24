@@ -306,6 +306,7 @@ input, textarea, select { font-family: inherit; }
 .msg .body th, .msg .body td { border-bottom: 1px solid var(--line-soft); padding: 5px 8px; text-align: left; }
 .msg .body th { color: var(--text-dim); font-weight: 600; }
 
+.fallback-notice { background: rgba(212, 168, 87, 0.08); border-left: 2px solid var(--warn); padding: 8px 12px; margin: 8px 0; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--warn); letter-spacing: 0.04em; }
 .tool-log { background: var(--surface); border: 1px solid var(--line); margin: 10px 0; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
 .tool-log .tl-row { padding: 8px 14px; border-bottom: 1px solid var(--line-soft); display: flex; gap: 12px; align-items: center; }
 .tool-log .tl-row:last-child { border-bottom: none; }
@@ -343,9 +344,12 @@ input, textarea, select { font-family: inherit; }
 
 /* ── Input dock ── */
 .dock { border-top: 1px solid var(--line); padding: 14px 32px 18px; background: var(--surface); }
-.dock .box { display: grid; grid-template-columns: 36px 1fr auto; gap: 8px; align-items: end; max-width: 880px; }
+.dock .box { display: grid; grid-template-columns: 36px 1fr auto auto; gap: 8px; align-items: end; max-width: 880px; }
 .dock .attach-btn { background: transparent; border: 1px solid var(--line); color: var(--text-dim); font-size: 16px; height: 44px; cursor: pointer; padding: 0; transition: border-color 0.1s, color 0.1s; }
 .dock .attach-btn:hover { color: var(--text); border-color: var(--accent); }
+.dock .scope-btn { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 0 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; height: 44px; cursor: pointer; transition: color 0.1s, border-color 0.1s; }
+.dock .scope-btn:hover { color: var(--text); border-color: var(--accent); }
+.dock .scope-btn.narrowed { color: var(--accent); border-color: var(--accent); }
 .dock .attach-bar { display: flex; flex-wrap: wrap; gap: 6px; max-width: 880px; margin-bottom: 8px; }
 .dock .attach-bar:empty { display: none; }
 .dock .attach-chip { display: inline-flex; align-items: center; gap: 8px; background: var(--surface-2); border: 1px solid var(--line); padding: 4px 8px 4px 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text); border-radius: 2px; max-width: 280px; }
@@ -521,6 +525,7 @@ input, textarea, select { font-family: inherit; }
           <button id="btn-attach" class="attach-btn" title="Attach a file or image (you can also paste images)">📎</button>
           <input type="file" id="in-attach" multiple style="display:none">
           <textarea id="in-msg" placeholder="Ask the agent..." rows="1"></textarea>
+          <button id="btn-scope" class="scope-btn" title="Choose which saved transcripts the agent sees for this chat (default: all)">Scope · all</button>
           <button id="btn-send" class="send-btn">Send</button>
           <button id="btn-stop" class="stop-btn">Stop</button>
         </div>
@@ -630,6 +635,30 @@ input, textarea, select { font-family: inherit; }
     <div class="tx-modal-foot" id="tx-foot" hidden>
       <button class="tx-more" id="btn-tx-more">Show more</button>
       <button class="tx-gen" id="btn-tx-gen" disabled>Run &amp; save 0</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="scope-bg">
+  <div class="modal tx-modal">
+    <div class="modal-hdr">
+      <div>
+        <div class="t">Scope this chat</div>
+        <span class="m" id="scope-summary">Pick which saved transcripts the agent can see for this conversation. Default is everything.</span>
+      </div>
+      <button class="x" id="scope-close">Done</button>
+    </div>
+    <div class="tx-modal-controls">
+      <input type="search" id="scope-search" class="tx-search" placeholder="Filter by title or attendee" autocomplete="off">
+      <div class="tx-sel-bar">
+        <button id="btn-scope-all">All (default)</button>
+        <button id="btn-scope-none">None</button>
+        <button id="btn-scope-invert">Invert</button>
+      </div>
+    </div>
+    <div class="tx-modal-list" id="scope-list"></div>
+    <div class="tx-modal-foot">
+      <button class="tx-gen" id="btn-scope-apply">Apply</button>
     </div>
   </div>
 </div>
@@ -1068,6 +1097,7 @@ function hydrate() {
   loadRemoteState();
   loadTranscripts();
   loadKb();
+  updateScopeBtn();
 }
 
 function attachInputs() {
@@ -1088,6 +1118,23 @@ function attachInputs() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
   });
   document.getElementById('btn-send').addEventListener('click', send);
+  document.getElementById('btn-scope').addEventListener('click', openScope);
+  document.getElementById('scope-close').addEventListener('click', closeScope);
+  document.getElementById('scope-bg').addEventListener('click', (e) => { if (e.target.id === 'scope-bg') closeScope(); });
+  document.getElementById('btn-scope-apply').addEventListener('click', applyScope);
+  document.getElementById('btn-scope-all').addEventListener('click', () => { scopeDraft = null; renderScopeList(); });
+  document.getElementById('btn-scope-none').addEventListener('click', () => { scopeDraft = new Set(); renderScopeList(); });
+  document.getElementById('btn-scope-invert').addEventListener('click', () => {
+    const all = scopeCandidates();
+    if (scopeDraft === null) { scopeDraft = new Set(); }
+    else {
+      const next = new Set();
+      for (const it of all) if (!scopeDraft.has(String(it.id))) next.add(String(it.id));
+      scopeDraft = next;
+    }
+    renderScopeList();
+  });
+  document.getElementById('scope-search').addEventListener('input', (e) => { scopeSearch = e.target.value.trim().toLowerCase(); renderScopeList(); });
   document.getElementById('btn-new').addEventListener('click', newConv);
   document.getElementById('btn-new-conv').addEventListener('click', newConv);
   document.getElementById('btn-export').addEventListener('click', exportChat);
@@ -1126,7 +1173,7 @@ function attachInputs() {
   document.getElementById('in-msg').addEventListener('paste', onPaste);
   document.getElementById('modal-close').addEventListener('click', closeModal);
   document.getElementById('modal-bg').addEventListener('click', (e) => { if (e.target.id === 'modal-bg') closeModal(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closePublishModal(); closePromptModal(); closeTxDrawer(); closeKbModal(); closeManualTx(); } });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closePublishModal(); closePromptModal(); closeTxDrawer(); closeKbModal(); closeManualTx(); closeScope(); } });
 
   // Publish-to-Notion modal
   document.getElementById('publish-close').addEventListener('click', closePublishModal);
@@ -1530,6 +1577,124 @@ async function deleteTx(id) {
   } catch (err) {
     alert(`Delete failed: ${err.message}`);
   }
+}
+
+// ── Per-chat transcript scope ────────────────────────────────────────
+// Each conversation can narrow what the agent sees from the saved manifest.
+// conv.scopedTranscriptIds === undefined or null → all transcripts (default)
+// conv.scopedTranscriptIds === [] → none
+// conv.scopedTranscriptIds === [...ids] → only those ids
+// scopeDraft is the working copy while the modal is open.
+let scopeDraft = null;
+let scopeSearch = '';
+
+function scopeCandidates() {
+  // Sort cached items by date desc, just like the library list.
+  const items = [];
+  for (const [id, it] of txCachedById.entries()) items.push({ id, ...it });
+  items.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  return items;
+}
+
+function openScope() {
+  const conv = getCurrentConv();
+  scopeDraft = conv && Array.isArray(conv.scopedTranscriptIds)
+    ? new Set(conv.scopedTranscriptIds.map(String))
+    : null; // null = all
+  scopeSearch = '';
+  document.getElementById('scope-search').value = '';
+  // Need the library loaded so we have something to render. If it's empty, kick a load.
+  if (!txCachedById.size) loadTranscripts();
+  document.getElementById('scope-bg').classList.add('open');
+  renderScopeList();
+}
+
+function closeScope() {
+  document.getElementById('scope-bg').classList.remove('open');
+}
+
+function renderScopeList() {
+  const el = document.getElementById('scope-list');
+  const sum = document.getElementById('scope-summary');
+  const items = scopeCandidates();
+  const filtered = scopeSearch
+    ? items.filter((it) => ((it.title || '') + ' ' + (it.attendees || []).join(' ')).toLowerCase().includes(scopeSearch))
+    : items;
+  const selectedCount = scopeDraft === null ? items.length : scopeDraft.size;
+  sum.textContent = scopeDraft === null
+    ? `Default: all ${items.length} saved transcripts. Pick a subset to narrow.`
+    : `${selectedCount} of ${items.length} selected.`;
+  if (!items.length) {
+    el.innerHTML = '<div class="empty">No saved transcripts yet. Save some via the library first.</div>';
+    return;
+  }
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty">No matches for "${escapeHtml(scopeSearch)}".</div>`;
+    return;
+  }
+  el.innerHTML = filtered.map((it) => {
+    const id = String(it.id);
+    const checked = (scopeDraft === null || scopeDraft.has(id)) ? 'checked' : '';
+    const when = it.date ? new Date(it.date).toISOString().slice(5, 10).replace('-', '/') : '—';
+    const atts = (it.attendees || []).slice(0, 2).join(', ') + ((it.attendees || []).length > 2 ? ` +${it.attendees.length - 2}` : '');
+    return `<div class="tx-row" data-id="${escapeHtml(id)}">
+      <input type="checkbox" class="scope-cb" data-id="${escapeHtml(id)}" ${checked}>
+      <span class="dt">${escapeHtml(when)}</span>
+      <span class="ti">${escapeHtml(it.title || id)}<span class="meta">${escapeHtml(atts || '—')}</span></span>
+      <div class="status"></div>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.tx-row').forEach((row) => {
+    row.addEventListener('click', (e) => {
+      if (e.target.tagName === 'INPUT') return;
+      const id = row.dataset.id;
+      const cb = row.querySelector('.scope-cb');
+      cb.checked = !cb.checked;
+      toggleScopeDraft(id, cb.checked, items);
+    });
+  });
+  el.querySelectorAll('.scope-cb').forEach((cb) => {
+    cb.addEventListener('change', () => toggleScopeDraft(cb.dataset.id, cb.checked, items));
+  });
+}
+
+function toggleScopeDraft(id, on, allItems) {
+  // First mutation away from "all" — capture the full set then remove this one.
+  if (scopeDraft === null) {
+    scopeDraft = new Set(allItems.map((it) => String(it.id)));
+  }
+  if (on) scopeDraft.add(String(id));
+  else scopeDraft.delete(String(id));
+  // If they reselected everything, snap back to "null" so the UI calls it default again.
+  if (scopeDraft.size === allItems.length) scopeDraft = null;
+  renderScopeList();
+}
+
+function applyScope() {
+  const conv = ensureConversation();
+  if (scopeDraft === null) {
+    delete conv.scopedTranscriptIds;
+  } else {
+    conv.scopedTranscriptIds = [...scopeDraft];
+  }
+  conv.updatedAt = new Date().toISOString();
+  saveState();
+  saveRemoteStateDebounced();
+  updateScopeBtn();
+  closeScope();
+}
+
+function updateScopeBtn() {
+  const btn = document.getElementById('btn-scope');
+  if (!btn) return;
+  const conv = getCurrentConv();
+  if (!conv || !Array.isArray(conv.scopedTranscriptIds)) {
+    btn.textContent = 'Scope · all';
+    btn.classList.remove('narrowed');
+    return;
+  }
+  btn.textContent = `Scope · ${conv.scopedTranscriptIds.length}`;
+  btn.classList.add('narrowed');
 }
 
 function openTxDrawer() {
@@ -2171,6 +2336,7 @@ function switchConv(id) {
   saveRemoteStateDebounced();
   renderMessages();
   renderHistory();
+  updateScopeBtn();
 }
 
 function newConv() {
@@ -2181,6 +2347,7 @@ function newConv() {
   saveRemoteStateDebounced();
   renderMessages();
   renderHistory();
+  updateScopeBtn();
 }
 
 function deleteConv(id) {
@@ -2521,6 +2688,7 @@ async function send() {
         supp: state.supp,
         dateRange: { from: state.dateFrom, to: state.dateTo },
         priorSummaries,
+        scopedTranscriptIds: Array.isArray(conv.scopedTranscriptIds) ? conv.scopedTranscriptIds : null,
         messages: wireMessages,
       }),
     });
@@ -2567,8 +2735,16 @@ async function send() {
           renderToolLog(lastMsgEl, pending.toolCalls);
         } else if (evt === 'iteration') {
           document.getElementById('iter-info').textContent = `iter ${data.n}`;
+        } else if (evt === 'fallback') {
+          // Anthropic rate-limited; we switched to Gemini for this turn.
+          setStatus('thinking', `Anthropic limited — using ${data.model}`);
+          const fallbackNotice = document.createElement('div');
+          fallbackNotice.className = 'fallback-notice';
+          fallbackNotice.textContent = `⚠ Anthropic was rate-limited. Falling back to ${data.model} for this response (no tool calls available).`;
+          lastMsgEl.insertBefore(fallbackNotice, bodyEl);
         } else if (evt === 'done') {
-          setStatus('ok', `done · ${data.usage?.output_tokens || 0} out, ${data.usage?.input_tokens || 0} in`);
+          const providerSuffix = data.provider ? ` · ${data.provider}` : '';
+          setStatus('ok', `done · ${data.usage?.output_tokens || 0} out, ${data.usage?.input_tokens || 0} in${providerSuffix}`);
         } else if (evt === 'error') {
           throw new Error(data.message);
         }

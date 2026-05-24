@@ -52,7 +52,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'POST only' });
   }
 
-  const { password, messages, strategy, notionLinks, supp, dateRange, priorSummaries } = req.body || {};
+  const { password, messages, strategy, notionLinks, supp, dateRange, priorSummaries, scopedTranscriptIds } = req.body || {};
 
   // Password gate
   const expected = process.env.STRATEGY_PASSWORD;
@@ -86,13 +86,19 @@ export default async function handler(req, res) {
       date: it.date || null,
       attendees: it.attendees || [],
     }));
+    // Narrow to the chat's selected subset if Cam has scoped this conversation.
+    // null/undefined = use everything; explicit array = only those ids (even if empty).
+    if (Array.isArray(scopedTranscriptIds)) {
+      const keep = new Set(scopedTranscriptIds.map(String));
+      savedTranscripts = savedTranscripts.filter((t) => keep.has(String(t.id)));
+    }
     kbItems = kb || [];
   } catch (e) {
     console.warn('loading saved manifests for context failed', e);
   }
 
   // Build the context block from user inputs. Cached at block level so follow-ups are cheap.
-  const contextBlock = buildContextBlock({ strategy, notionLinks, supp, dateRange, priorSummaries, savedTranscripts, kbItems });
+  const contextBlock = buildContextBlock({ strategy, notionLinks, supp, dateRange, priorSummaries, savedTranscripts, kbItems, scoped: Array.isArray(scopedTranscriptIds) });
 
   // Convert any client-side attachments on user messages into Claude content
   // blocks. Images become vision blocks; other files come through as inline
@@ -110,20 +116,40 @@ export default async function handler(req, res) {
       iteration += 1;
       sseWrite(res, 'iteration', { n: iteration });
 
-      const stream = client.messages.stream({
-        model: MODEL,
-        max_tokens: MAX_TOKENS,
-        system: SYSTEM_PROMPT,
-        tools,
-        messages: workingMessages,
-      });
-
-      for await (const event of stream) {
-        if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
-          sseWrite(res, 'text', { delta: event.delta.text });
-        } else if (event.type === 'content_block_start' && event.content_block?.type === 'tool_use') {
-          sseWrite(res, 'tool_start', { name: event.content_block.name, id: event.content_block.id });
+      let stream;
+      try {
+        stream = client.messages.stream({
+          model: MODEL,
+          max_tokens: MAX_TOKENS,
+          system: SYSTEM_PROMPT,
+          tools,
+          messages: workingMessages,
+        });
+      } catch (err) {
+        if (isAnthropicRateLimit(err) && process.env.GEMINI_API_KEY) {
+          await streamGeminiFallback({ res, contextBlock, messages: expandedMessages, reason: err?.message || 'Anthropic rate limit' });
+          return;
         }
+        throw err;
+      }
+
+      try {
+        for await (const event of stream) {
+          if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
+            sseWrite(res, 'text', { delta: event.delta.text });
+          } else if (event.type === 'content_block_start' && event.content_block?.type === 'tool_use') {
+            sseWrite(res, 'tool_start', { name: event.content_block.name, id: event.content_block.id });
+          }
+        }
+      } catch (err) {
+        if (isAnthropicRateLimit(err) && process.env.GEMINI_API_KEY && iteration === 1) {
+          // Only fall back on iteration 1 — once we've started using tools, mid-stream
+          // recovery to Gemini would lose conversation state. The frontend can retry
+          // after a cooldown if it happens later.
+          await streamGeminiFallback({ res, contextBlock, messages: expandedMessages, reason: err?.message || 'Anthropic rate limit' });
+          return;
+        }
+        throw err;
       }
 
       const final = await stream.finalMessage();
@@ -162,9 +188,104 @@ export default async function handler(req, res) {
     sseWrite(res, 'error', { message: `Hit max iterations (${MAX_ITERATIONS})` });
     res.end();
   } catch (err) {
+    if (isAnthropicRateLimit(err) && process.env.GEMINI_API_KEY) {
+      try {
+        await streamGeminiFallback({ res, contextBlock, messages: expandedMessages, reason: err?.message || 'Anthropic rate limit' });
+        return;
+      } catch (fallbackErr) {
+        sseWrite(res, 'error', { message: `Both providers failed. Anthropic: ${err?.message}. Gemini: ${fallbackErr?.message}` });
+        res.end();
+        return;
+      }
+    }
     sseWrite(res, 'error', { message: String(err?.message || err) });
     res.end();
   }
+}
+
+// Detect Anthropic 429 / rate-limit / overloaded responses across error shapes.
+function isAnthropicRateLimit(err) {
+  if (!err) return false;
+  const status = err.status || err.statusCode || err?.response?.status;
+  if (status === 429) return true;
+  if (status === 529) return true; // overloaded
+  const msg = String(err?.message || '').toLowerCase();
+  return msg.includes('rate limit') || msg.includes('overloaded') || msg.includes('too many requests');
+}
+
+// Stream a single Gemini response back as SSE 'text' deltas, then 'done'.
+// No tool use — Gemini gets the full context block (saved transcripts, KB,
+// prior conversations, strategy) and answers from that. Pragmatic fallback;
+// not feature-equal to Claude but keeps Cam unblocked when Anthropic is throttled.
+const GEMINI_MODEL = 'gemini-2.5-pro';
+async function streamGeminiFallback({ res, contextBlock, messages, reason }) {
+  sseWrite(res, 'fallback', { provider: 'gemini', model: GEMINI_MODEL, reason });
+
+  // Translate Anthropic message shape → Gemini contents shape.
+  // Gemini expects { role: 'user'|'model', parts: [{ text } | { inlineData }] }
+  const contents = [];
+  if (contextBlock) contents.push({ role: 'user', parts: [{ text: contextBlock }] });
+  for (const m of messages) {
+    const role = m.role === 'assistant' ? 'model' : 'user';
+    const parts = [];
+    const blocks = Array.isArray(m.content) ? m.content : [{ type: 'text', text: m.content }];
+    for (const b of blocks) {
+      if (b.type === 'text') {
+        parts.push({ text: b.text });
+      } else if (b.type === 'image' && b.source?.type === 'base64') {
+        parts.push({ inlineData: { mimeType: b.source.media_type, data: b.source.data } });
+      }
+    }
+    if (parts.length) contents.push({ role, parts });
+  }
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:streamGenerateContent?alt=sse&key=${encodeURIComponent(process.env.GEMINI_API_KEY)}`;
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      contents,
+      generationConfig: { maxOutputTokens: MAX_TOKENS, temperature: 0.7 },
+    }),
+  });
+  if (!resp.ok) {
+    const body = await resp.text().catch(() => '');
+    throw new Error(`Gemini ${resp.status}: ${body.slice(0, 300)}`);
+  }
+
+  // Gemini SSE: each event is `data: {...}\n\n` with a candidates[0].content.parts.
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = '';
+  let totalText = 0;
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    const chunks = buf.split('\n\n');
+    buf = chunks.pop();
+    for (const chunk of chunks) {
+      const line = chunk.split('\n').find((l) => l.startsWith('data:'));
+      if (!line) continue;
+      const payload = line.slice(5).trim();
+      if (!payload || payload === '[DONE]') continue;
+      try {
+        const data = JSON.parse(payload);
+        const parts = data?.candidates?.[0]?.content?.parts || [];
+        for (const p of parts) {
+          if (p.text) {
+            sseWrite(res, 'text', { delta: p.text });
+            totalText += p.text.length;
+          }
+        }
+      } catch (e) {
+        console.warn('gemini chunk parse failed', e);
+      }
+    }
+  }
+  sseWrite(res, 'done', { usage: { output_tokens: Math.round(totalText / 4) }, provider: 'gemini' });
+  res.end();
 }
 
 // Map a client-side message with attachments into a Claude content-block array.
@@ -199,7 +320,7 @@ function expandAttachments(msg) {
   return { role: 'user', content: blocks };
 }
 
-function buildContextBlock({ strategy, notionLinks, supp, dateRange, priorSummaries, savedTranscripts, kbItems }) {
+function buildContextBlock({ strategy, notionLinks, supp, dateRange, priorSummaries, savedTranscripts, kbItems, scoped }) {
   const parts = [];
   if (Array.isArray(savedTranscripts) && savedTranscripts.length) {
     const lines = savedTranscripts.map((t) => {
@@ -207,7 +328,15 @@ function buildContextBlock({ strategy, notionLinks, supp, dateRange, priorSummar
       const who = (t.attendees || []).slice(0, 3).join(', ');
       return `- ${when} · ${t.title || '(no title)'} · id=${t.id}${who ? ` · with ${who}` : ''}`;
     });
-    parts.push(`## Saved transcripts (${savedTranscripts.length})\n\nThese transcripts are already cached and available. Call fathom_get_transcript with the id to read any of them. Assume Cam wants you to consider ALL of these unless he names specific ones.\n\n${lines.join('\n')}`);
+    const header = scoped
+      ? `## Saved transcripts (${savedTranscripts.length}) — Cam explicitly scoped this chat to ONLY these`
+      : `## Saved transcripts (${savedTranscripts.length})`;
+    const note = scoped
+      ? `These are the ONLY transcripts Cam wants in scope for this conversation. Do not reference or pull others even if you remember them from earlier chats.`
+      : `These transcripts are already cached and available. Call fathom_get_transcript with the id to read any of them. Assume Cam wants you to consider ALL of these unless he names specific ones.`;
+    parts.push(`${header}\n\n${note}\n\n${lines.join('\n')}`);
+  } else if (scoped) {
+    parts.push(`## Saved transcripts\n\nCam has scoped this conversation to NO transcripts. Answer from chat history and other sources only — do not pull any transcripts.`);
   }
   if (Array.isArray(kbItems) && kbItems.length) {
     const lines = kbItems.map((it) => {
