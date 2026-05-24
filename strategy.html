@@ -152,6 +152,7 @@ input, textarea, select { font-family: inherit; }
 .tx-row .row-acts { display: flex; gap: 4px; }
 .tx-row .row-acts button { background: transparent; border: 1px solid var(--line); color: var(--text-dim); padding: 2px 7px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border-radius: 2px; }
 .tx-row .row-acts .v:hover { color: var(--text); border-color: var(--accent); }
+.tx-row .row-acts .dl:hover { color: var(--good); border-color: var(--good); }
 .tx-row .row-acts .d:hover { color: var(--bad); border-color: var(--bad); }
 
 .tx-modal-status { padding: 12px 20px; border-top: 1px solid var(--line); background: var(--surface-2); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); display: flex; align-items: center; gap: 10px; }
@@ -1336,7 +1337,7 @@ function renderTxList() {
       : failReason
         ? `<span class="badge fail" title="Last save failed: ${escapeHtml(failReason)}">⚠ failed</span>`
         : `<span class="badge none">not saved</span>`;
-    const acts = cached ? `<div class="row-acts"><button class="v" data-view="${escapeHtml(id)}">View</button><button class="d" data-del="${escapeHtml(id)}">Del</button></div>` : '';
+    const acts = cached ? `<div class="row-acts"><button class="v" data-view="${escapeHtml(id)}">View</button><button class="dl" data-dl="${escapeHtml(id)}" title="Download as .txt">DL</button><button class="d" data-del="${escapeHtml(id)}">Del</button></div>` : '';
     const classes = ['tx-row'];
     if (cached) classes.push('cached');
     if (m.is_standup) classes.push('is-standup');
@@ -1368,6 +1369,7 @@ function renderTxList() {
     });
   });
   el.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); viewTx(b.dataset.view); }));
+  el.querySelectorAll('[data-dl]').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); downloadTx(b.dataset.dl); }));
   el.querySelectorAll('[data-del]').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); deleteTx(b.dataset.del); }));
 
   foot.hidden = false;
@@ -1469,6 +1471,48 @@ async function viewTx(id) {
     document.getElementById('modal-body').textContent = body || '(no transcript body)';
   } catch (err) {
     document.getElementById('modal-body').textContent = `Failed: ${err.message}`;
+  }
+}
+
+async function downloadTx(id) {
+  const meta = txCachedById.get(String(id)) || txMeetings.find((m) => String(m.id) === String(id)) || {};
+  try {
+    const res = await fetch('/api/fathom-cache', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password, action: 'view', id }),
+    });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `HTTP ${res.status}`); }
+    const rec = await res.json();
+    const body = rec.transcript || '';
+    if (!body) { alert('No transcript body to download.'); return; }
+    // Build a header so the file is useful on its own without the UI context.
+    const headerLines = [
+      `Title: ${rec.title || meta.title || id}`,
+      `Date: ${rec.date || meta.date || 'unknown'}`,
+      `Attendees: ${(rec.attendees || meta.attendees || []).join(', ') || '—'}`,
+      `Meeting ID: ${rec.id || id}`,
+      '',
+      '----',
+      '',
+    ];
+    const text = headerLines.join('\n') + body;
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const safeName = String(rec.title || meta.title || id)
+      .replace(/[^\w\s.-]+/g, '')
+      .replace(/\s+/g, '_')
+      .slice(0, 80) || `transcript_${id}`;
+    const date = (rec.date || meta.date || '').slice(0, 10) || 'undated';
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${date}_${safeName}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (err) {
+    alert(`Download failed: ${err.message}`);
   }
 }
 
