@@ -281,11 +281,11 @@ async function streamGeminiFallback({ res, contextBlock, messages, reason }) {
 }
 
 async function streamGeminiAttempt({ res, model, contents }) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(process.env.GEMINI_API_KEY)}`;
-  // Pro is reasoning-only — you can't pass thinkingBudget: 0 (it errors with
-  // "This model only works in thinking mode"). Let each model use its default
-  // and just give them enough output budget (32k) so thinking + answer both
-  // fit comfortably for normal chat queries.
+  // Use NON-streaming generateContent. Streaming parse was masking real
+  // failure modes (filtered responses, MAX_TOKENS with no text, etc.) as
+  // "no text". Non-streaming returns the full response so we can inspect
+  // candidates[].finishReason + parts and surface clear diagnostics.
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(process.env.GEMINI_API_KEY)}`;
   const resp = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -295,42 +295,45 @@ async function streamGeminiAttempt({ res, model, contents }) {
       generationConfig: { maxOutputTokens: 32000, temperature: 0.7 },
     }),
   });
-  if (!resp.ok) {
-    const body = await resp.text().catch(() => '');
-    throw new Error(`Gemini ${resp.status}: ${body.slice(0, 300)}`);
+  const rawBody = await resp.text();
+  if (!resp.ok) throw new Error(`Gemini ${resp.status}: ${rawBody.slice(0, 300)}`);
+
+  let data;
+  try { data = JSON.parse(rawBody); }
+  catch { throw new Error(`Gemini ${model}: malformed response (${rawBody.slice(0, 200)})`); }
+
+  const candidate = data?.candidates?.[0];
+  // Aggregate any visible text parts. Skip thought parts (which are reasoning).
+  const text = (candidate?.content?.parts || [])
+    .filter((p) => p && p.text && !p.thought)
+    .map((p) => p.text)
+    .join('');
+
+  if (!text) {
+    // Surface why. finishReason tells us a lot: MAX_TOKENS = thinking ate
+    // budget; SAFETY = filtered; OTHER/unknown = give Gemini-side context.
+    const reason = candidate?.finishReason || 'no candidate returned';
+    const safety = (candidate?.safetyRatings || []).filter((r) => r.blocked).map((r) => r.category).join(', ');
+    const used = data?.usageMetadata || {};
+    const detail = [
+      `finishReason=${reason}`,
+      safety ? `blocked=${safety}` : null,
+      used.totalTokenCount ? `tokens in:${used.promptTokenCount}/out:${used.candidatesTokenCount}/think:${used.thoughtsTokenCount || 0}/total:${used.totalTokenCount}` : null,
+    ].filter(Boolean).join(' · ');
+    throw new Error(`Gemini ${model} returned no text (${detail})`);
   }
 
-  const reader = resp.body.getReader();
-  const decoder = new TextDecoder();
-  let buf = '';
-  let totalText = 0;
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buf += decoder.decode(value, { stream: true });
-    const chunks = buf.split('\n\n');
-    buf = chunks.pop();
-    for (const chunk of chunks) {
-      const line = chunk.split('\n').find((l) => l.startsWith('data:'));
-      if (!line) continue;
-      const payload = line.slice(5).trim();
-      if (!payload || payload === '[DONE]') continue;
-      try {
-        const data = JSON.parse(payload);
-        const parts = data?.candidates?.[0]?.content?.parts || [];
-        for (const p of parts) {
-          if (p.text) {
-            sseWrite(res, 'text', { delta: p.text });
-            totalText += p.text.length;
-          }
-        }
-      } catch (e) {
-        console.warn('gemini chunk parse failed', e);
-      }
-    }
+  // Chunk the answer back to the frontend in small slices so the UI still
+  // streams visibly even though we used the non-streaming endpoint.
+  const CHUNK = 200;
+  for (let i = 0; i < text.length; i += CHUNK) {
+    sseWrite(res, 'text', { delta: text.slice(i, i + CHUNK) });
   }
-  if (totalText === 0) throw new Error(`Gemini ${model} returned no text`);
-  sseWrite(res, 'done', { usage: { output_tokens: Math.round(totalText / 4) }, provider: `gemini · ${model}` });
+  const usage = data?.usageMetadata || {};
+  sseWrite(res, 'done', {
+    usage: { output_tokens: usage.candidatesTokenCount || Math.round(text.length / 4), input_tokens: usage.promptTokenCount || 0 },
+    provider: `gemini · ${model}`,
+  });
   res.end();
 }
 
