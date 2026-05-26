@@ -282,25 +282,17 @@ async function streamGeminiFallback({ res, contextBlock, messages, reason }) {
 
 async function streamGeminiAttempt({ res, model, contents }) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(process.env.GEMINI_API_KEY)}`;
-  // Gemini 2.5 Pro/Flash are reasoning models — they can spend the entire
-  // maxOutputTokens budget on internal thinking and emit no visible text.
-  // For a fallback path we want predictable immediate answers, so disable
-  // thinking on Pro (thinkingBudget: 0). Flash defaults to no thinking
-  // unless asked. Also bumping maxOutputTokens to 32k so longer answers
-  // aren't truncated.
+  // Pro is reasoning-only — you can't pass thinkingBudget: 0 (it errors with
+  // "This model only works in thinking mode"). Let each model use its default
+  // and just give them enough output budget (32k) so thinking + answer both
+  // fit comfortably for normal chat queries.
   const resp = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
       contents,
-      generationConfig: {
-        maxOutputTokens: 32000,
-        temperature: 0.7,
-        // thinkingBudget: 0 disables Pro's reasoning entirely; -1 is dynamic.
-        // For non-Pro models this field is ignored.
-        thinkingConfig: { thinkingBudget: 0 },
-      },
+      generationConfig: { maxOutputTokens: 32000, temperature: 0.7 },
     }),
   });
   if (!resp.ok) {
