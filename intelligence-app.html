@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotsNow — Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      /* Aligned with packages/community-web marketplace design tokens */
+      --primary: #17212B;
+      --primary-hover: #282828;
+      --dark: #0E1323;
+      --grey-1: #707481;
+      --text-primary: #1D2027;
+      --text-secondary: #707481;
+      --tertiary: #DEE0E4;
+      --border: #DEE0E4;
+      --border-light: #E7E7E7;
+      --white: #ffffff;
+      --accent: #FF6267;
+      --secondary: #E4E6ED;
+      --secondary-lite: #F3F4F6;
+      --secondary-3: #F9FAFB;
+      --nav: #F3F4F6;
+      --nav-hover: #EBEDF2;
+      --green-text: #0E6832;
+      --green-bg: #D6F1E0;
+      --pill-bg: #F3F4F6;
+      --page-bg: #FAFAFA;
+      /* Standard radii */
+      --radius-btn: 6px;       /* rounded-md */
+      --radius-card: 12px;     /* rounded-xl */
+      --radius-pill: 999px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.4;
+      color: var(--dark); background: var(--page-bg);
+      -webkit-font-smoothing: antialiased;
+      height: 100vh; overflow: hidden;
+    }
+    button { font-family: inherit; cursor: pointer; }
+    img { display: block; }
+
+    /* ─── TOP BAR (marketplace style) ─── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px;
+      padding: 12px 16px; background: var(--white);
+      border-bottom: 1px solid var(--tertiary);
+    }
+    .top-bar__left {
+      display: flex; align-items: center; gap: 36px;
+      flex-shrink: 0;
+    }
+    .top-bar__logo {
+      display: flex; align-items: center;
+      text-decoration: none; flex-shrink: 0;
+    }
+    .top-bar__logo svg { display: block; height: 28px; width: auto; }
+    .top-bar__nav {
+      display: flex; align-items: center; gap: 24px;
+    }
+    .top-bar__nav-item {
+      padding: 0; font-size: 12px; font-weight: 600;
+      color: var(--text-primary); background: none; border: none;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .top-bar__nav-item:hover { opacity: 0.7; }
+    .top-bar__nav-item.active { color: var(--text-primary); }
+    .top-bar__actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .icon-btn {
+      width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; border-radius: var(--radius-btn); color: var(--text-primary);
+      transition: background 0.15s;
+    }
+    .icon-btn:hover { background: var(--nav-hover); }
+    .mcp-btn {
+      display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px;
+      background: var(--white); border: 1px solid var(--tertiary-3, #C5CBD5); border-radius: var(--radius-btn);
+      font-size: 12px; font-weight: 600; color: var(--text-primary);
+      transition: all 0.15s;
+    }
+    .mcp-btn:hover { background: var(--secondary); }
+    .mcp-btn svg { flex-shrink: 0; }
+    .entity-card {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--secondary); border-radius: 12px;
+      padding: 6px 6px 6px 12px;
+      max-width: 180px;
+    }
+    .entity-card__name {
+      font-size: 12px; font-weight: 600; color: var(--text-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .entity-card__chevron {
+      width: 26px; height: 26px; border-radius: 8px;
+      background: #D0D2D9; color: var(--text-secondary);
+      display: flex; align-items: center; justify-content: center;
+      border: none; cursor: pointer; transition: background 0.15s;
+    }
+    .entity-card__chevron:hover { background: #c5c8d0; }
+
+    /* ─── LAYOUT ─── */
+    .app-layout {
+      display: flex; height: calc(100vh - 56px);
+    }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar {
+      width: 260px; flex-shrink: 0;
+      background: var(--page-bg);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      padding: 18px 12px;
+    }
+    .sidebar__inner {
+      flex: 1; display: flex; flex-direction: column; min-height: 0;
+      background: var(--white); border: 1px solid var(--border-light);
+      border-radius: 18px;
+      padding: 16px 14px;
+    }
+    .sidebar__header {
+      padding: 4px 4px 12px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .new-chat-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 9px 16px; border-radius: var(--radius-btn);
+      background: var(--white); border: 1px solid var(--tertiary-3, #C5CBD5);
+      color: var(--text-primary); font-size: 13px; font-weight: 600;
+      transition: all 0.15s;
+      white-space: nowrap; width: 100%;
+    }
+    .new-chat-btn:hover { background: var(--secondary); }
+    .sidebar__chats {
+      flex: 1; overflow-y: auto; padding: 8px 2px;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .chat-item {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+      padding: 8px 8px; border-radius: 8px;
+      cursor: pointer; transition: background 0.12s;
+      border: none; background: none; width: 100%; text-align: left;
+    }
+    .chat-item:hover { background: var(--pill-bg); }
+    .chat-item__text {
+      flex: 1; min-width: 0;
+    }
+    .chat-item__name {
+      font-size: 13px; font-weight: 500; color: var(--text-primary);
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .chat-item__time {
+      font-size: 11px; color: var(--grey-1); flex-shrink: 0; padding-top: 2px;
+    }
+    .sidebar__footer {
+      padding: 12px 4px 4px; margin-top: 8px;
+      border-top: 1px solid var(--border-light);
+    }
+    .sidebar__user {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sidebar__avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--coral); display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: white;
+    }
+    .sidebar__user-info { flex: 1; min-width: 0; }
+    .sidebar__user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .sidebar__user-plan { font-size: 11px; color: var(--grey-1); }
+
+    /* ─── MAIN CHAT AREA ─── */
+    .chat-main {
+      flex: 1; display: flex; flex-direction: column;
+      min-width: 0; position: relative;
+    }
+
+    /* ─── CHAT HEADER WITH BACK ARROW ─── */
+    .chat-header {
+      display: none; align-items: center; gap: 12px;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border-light);
+      background: var(--white);
+    }
+    .chat-header.active { display: flex; }
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px 6px 8px;
+      background: var(--white); border: 1px solid var(--tertiary-3, #C5CBD5);
+      border-radius: var(--radius-btn);
+      font-size: 12px; font-weight: 600; color: var(--text-primary);
+      cursor: pointer; transition: background 0.15s;
+    }
+    .back-btn:hover { background: var(--secondary); }
+    .chat-header__title {
+      font-size: 13px; font-weight: 600; color: var(--text-primary);
+      flex: 1; min-width: 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* ─── WELCOME STATE ─── */
+    .welcome {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start;
+      padding: 72px 24px 40px;
+      max-width: 820px; margin: 0 auto; width: 100%;
+    }
+    .welcome.hidden { display: none; }
+    .welcome__title {
+      font-size: 38px; font-weight: 800; letter-spacing: -0.8px;
+      color: var(--dark); margin: 0 0 8px; text-align: center;
+    }
+    .welcome__sub {
+      font-size: 15px; color: var(--grey-1); margin: 0 0 28px; text-align: center;
+      line-height: 1.5;
+    }
+
+    /* ─── MODE TOGGLE ─── */
+    .mode-toggle {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 28px;
+    }
+    .mode-toggle__btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 16px; border-radius: var(--radius-btn);
+      font-size: 13px; font-weight: 600; color: var(--text-primary);
+      background: var(--white); border: 1px solid var(--tertiary-3, #C5CBD5);
+      transition: all 0.15s;
+    }
+    .mode-toggle__btn.active {
+      background: var(--primary); color: var(--white); border-color: var(--primary);
+    }
+    .mode-toggle__btn:hover:not(.active) { background: var(--secondary); }
+    .mode-toggle__btn svg { flex-shrink: 0; }
+
+    /* ─── WELCOME INPUT BAR ─── */
+    .welcome-input {
+      width: 100%; margin-bottom: 20px;
+    }
+    .welcome-input .input-bar {
+      padding: 14px 14px 14px 22px;
+      border-radius: var(--radius-card);
+      box-shadow: 0 1px 2px rgba(14,19,35,0.03);
+    }
+    .welcome-input .input-bar__input {
+      font-size: 15px; padding: 10px 0;
+    }
+
+    /* ─── SUGGESTION CARDS ─── */
+    .suggestions {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+      width: 100%;
+    }
+    .suggestion-card {
+      position: relative;
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 18px 20px; border-radius: var(--radius-card);
+      background: var(--white); border: 1px solid var(--tertiary);
+      cursor: pointer; transition: all 0.2s;
+      text-align: left;
+    }
+    .suggestion-card:hover {
+      border-color: var(--border);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+    .suggestion-card__icon {
+      width: 38px; height: 38px; border-radius: var(--radius-btn);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      background: var(--secondary-lite); color: var(--text-primary);
+    }
+    .suggestion-card__text { flex: 1; min-width: 0; padding-right: 70px; }
+    .suggestion-card__title {
+      font-size: 14px; font-weight: 700; color: var(--dark);
+      line-height: 1.35; margin-bottom: 4px;
+    }
+    .suggestion-card__desc {
+      font-size: 12px; color: var(--grey-1); line-height: 1.5;
+    }
+    .suggestion-card__tag {
+      position: absolute; top: 14px; right: 14px;
+      font-size: 11px; font-weight: 600;
+      padding: 3px 9px; border-radius: 4px;
+      background: var(--green-bg); color: var(--green-text);
+      letter-spacing: 0.1px;
+    }
+
+    /* ─── CHAT MESSAGES ─── */
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 32px 24px;
+      display: none; flex-direction: column; gap: 24px;
+      max-width: 780px; margin: 0 auto; width: 100%;
+    }
+    .chat-messages.active { display: flex; }
+    .message {
+      display: flex; gap: 14px; align-items: flex-start;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .message--user { flex-direction: row-reverse; }
+    .message__avatar {
+      width: 32px; height: 32px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 11px; font-weight: 700;
+    }
+    .message__avatar--ai {
+      background: var(--dark); color: white;
+    }
+    .message__avatar--user {
+      background: var(--coral); color: white;
+    }
+    .message__content {
+      max-width: 560px; min-width: 0;
+    }
+    .message--user .message__content {
+      display: flex; flex-direction: column; align-items: flex-end;
+    }
+    .message__bubble {
+      padding: 14px 18px; border-radius: 14px;
+      font-size: 13px; line-height: 1.6;
+    }
+    .message--ai .message__bubble {
+      background: var(--white); border: 1px solid var(--border-light);
+      color: var(--text-primary);
+    }
+    .message--user .message__bubble {
+      background: var(--dark); color: white;
+    }
+    .message__time {
+      font-size: 11px; color: var(--grey-1); margin-top: 6px;
+      padding: 0 4px;
+    }
+
+    /* AI response cards inside messages */
+    .ai-card-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      margin-top: 12px;
+    }
+    .ai-insight-card {
+      padding: 14px 16px; border-radius: 12px;
+      background: var(--pill-bg); border: 1px solid var(--border-light);
+      transition: all 0.15s; cursor: pointer;
+    }
+    .ai-insight-card:hover {
+      background: var(--white); border-color: var(--border);
+    }
+    .ai-insight-card__rank {
+      font-size: 9px; font-weight: 700; color: var(--grey-1);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
+    }
+    .ai-insight-card__name {
+      font-size: 13px; font-weight: 700; color: var(--dark); margin-bottom: 2px;
+    }
+    .ai-insight-card__meta {
+      font-size: 11px; color: var(--grey-1); line-height: 1.4;
+    }
+    .ai-insight-card__stat {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 11px; font-weight: 700; color: var(--green-text);
+      background: var(--green-bg); padding: 2px 7px; border-radius: 5px;
+      margin-top: 6px;
+    }
+
+    /* Follow-up suggestions */
+    .follow-ups {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px;
+    }
+    .follow-up-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px 14px; border-radius: 20px;
+      background: var(--white); border: 1px solid var(--border-light);
+      font-size: 12px; font-weight: 500; color: var(--text-primary);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .follow-up-chip:hover {
+      background: var(--pill-bg); border-color: var(--border);
+    }
+    .follow-up-chip svg { flex-shrink: 0; color: var(--grey-1); }
+
+    /* ─── TYPING INDICATOR ─── */
+    .typing-indicator {
+      display: none; gap: 14px; align-items: flex-start;
+      animation: fadeIn 0.3s ease;
+    }
+    .typing-indicator.active { display: flex; }
+    .typing-dots {
+      display: flex; align-items: center; gap: 4px;
+      padding: 16px 20px; border-radius: 14px;
+      background: var(--white); border: 1px solid var(--border-light);
+    }
+    .typing-dots span {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--grey-1);
+      animation: typingBounce 1.4s ease-in-out infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-4px); opacity: 1; }
+    }
+
+    /* ─── INPUT BAR ─── */
+    .input-bar-wrapper {
+      padding: 0 24px 24px;
+      max-width: 780px; margin: 0 auto; width: 100%;
+    }
+    .input-bar {
+      display: flex; align-items: flex-end; gap: 10px;
+      background: var(--white); border: 1px solid var(--tertiary);
+      border-radius: var(--radius-card); padding: 6px 6px 6px 18px;
+      transition: border-color 0.15s;
+    }
+    .input-bar:focus-within {
+      border-color: var(--primary);
+    }
+    .input-bar__input {
+      flex: 1; border: none; outline: none; resize: none;
+      font-family: inherit; font-size: 14px; line-height: 1.5;
+      color: var(--dark); background: none;
+      padding: 8px 0; min-height: 20px; max-height: 120px;
+    }
+    .input-bar__input::placeholder { color: #b0b4be; }
+    .input-bar__actions {
+      display: flex; align-items: center; gap: 4px; flex-shrink: 0;
+      padding-bottom: 2px;
+    }
+    .send-btn {
+      width: 38px; height: 38px; border-radius: var(--radius-btn);
+      background: var(--primary); border: none;
+      display: flex; align-items: center; justify-content: center;
+      color: white; transition: all 0.15s;
+    }
+    .send-btn:hover { background: var(--primary-hover); }
+    .send-btn:disabled { opacity: 0.35; cursor: default; }
+    .attach-btn {
+      width: 38px; height: 38px; border-radius: var(--radius-btn);
+      background: none; border: none;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-secondary); transition: all 0.15s;
+    }
+    .attach-btn:hover { background: var(--secondary-lite); color: var(--text-primary); }
+
+    .input-bar__disclaimer {
+      text-align: center; font-size: 11px; color: var(--grey-1);
+      margin-top: 10px; line-height: 1.4;
+    }
+
+    /* ─── MCP MODAL ─── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--white); border-radius: 20px;
+      width: 480px; max-width: calc(100% - 48px);
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+    .modal__header {
+      padding: 24px 28px 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal__title {
+      font-size: 18px; font-weight: 800; color: var(--dark);
+      letter-spacing: -0.3px;
+    }
+    .modal__close {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; color: var(--grey-1);
+      transition: all 0.15s;
+    }
+    .modal__close:hover { background: var(--pill-bg); color: var(--dark); }
+    .modal__body { padding: 20px 28px 28px; }
+    .modal__desc {
+      font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .connector-list {
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .connector-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px; border-radius: 12px;
+      background: var(--pill-bg); border: 1px solid transparent;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .connector-item:hover {
+      border-color: var(--border); background: var(--white);
+    }
+    .connector-item__icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .connector-item__icon--claude { background: #fdf0e8; }
+    .connector-item__icon--openai { background: #e8f5e9; }
+    .connector-item__icon--custom { background: #eef2ff; }
+    .connector-item__info { flex: 1; min-width: 0; }
+    .connector-item__name {
+      font-size: 13px; font-weight: 700; color: var(--dark);
+    }
+    .connector-item__desc {
+      font-size: 12px; color: var(--grey-1); margin-top: 1px;
+    }
+    .connector-item__badge {
+      font-size: 10px; font-weight: 700; padding: 3px 8px;
+      border-radius: 5px; text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .connector-item__badge--ready { background: var(--green-bg); color: var(--green-text); }
+    .connector-item__badge--soon { background: var(--pill-bg); color: var(--grey-1); }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--grey-1); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .top-bar { padding: 0 16px; }
+      .suggestions { grid-template-columns: 1fr; }
+      .welcome { padding: 24px 16px; }
+      .input-bar-wrapper { padding: 0 16px 16px; }
+      .chat-messages { padding: 24px 16px; }
+      .ai-card-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── TOP BAR (marketplace style) ─── -->
+  <div class="top-bar">
+    <div class="top-bar__left">
+      <a href="/" class="top-bar__logo" aria-label="SpotsNow">
+        <svg viewBox="0 0 331 74" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M78.078 1.79314L75.3917 22.0607C75.3043 22.6722 74.9112 23.1527 74.3434 23.3492C74.1686 23.4147 73.9939 23.4584 73.8192 23.4584C73.4042 23.4584 73.0111 23.3055 72.7272 23.0216L66.6994 17.3214L39.1154 47.1767C38.351 48.0066 37.2809 48.4652 36.2107 48.4652C35.5774 48.4652 34.944 48.3123 34.3543 48.0066L18.6514 39.7074C16.7076 38.6809 15.965 36.2785 16.9915 34.3347C18.018 32.391 20.3986 31.6484 22.3423 32.6749L35.359 39.5545L60.9336 11.8614L55.3207 6.55425C54.9058 6.13929 54.731 5.52778 54.9058 4.95994C55.0586 4.3921 55.5391 3.95529 56.1288 3.84609L76.2216 0.0240946C76.7239 -0.0632654 77.2262 0.0896158 77.5975 0.439056C77.9688 0.788496 78.1435 1.29082 78.078 1.79314ZM0.0218405 38.4188C0.0218405 57.5725 15.5501 73.1007 34.7038 73.1007C53.8574 73.1007 69.3857 57.5725 69.3857 38.4188C69.3857 33.7887 68.4684 29.3771 66.8304 25.3585L59.0772 33.7451C59.3611 35.252 59.514 36.8245 59.514 38.4188C59.514 52.1343 48.3974 63.2509 34.6819 63.2509C20.9664 63.2509 9.84984 52.1343 9.84984 38.4188C9.84984 24.7033 20.9664 13.5867 34.6819 13.5867C39.5959 13.5867 44.1823 15.0282 48.048 17.4961L54.8184 10.1579C49.14 6.09562 42.1949 3.71506 34.6819 3.71506C15.5282 3.71506 0 19.2433 0 38.397L0.0218405 38.4188Z" fill="#0E1323"/>
+          <path d="M105.618 56.3278C103.194 56.3278 101.01 55.891 99.1099 55.0174C97.188 54.1438 95.6155 52.9207 94.4143 51.3701C93.1912 49.8194 92.4268 48.0067 92.0992 45.9101L99.3283 44.4468C99.6996 46.3032 100.42 47.7446 101.49 48.793C102.561 49.8413 103.893 50.3654 105.422 50.3654C107.169 50.3654 108.523 49.9942 109.462 49.2516C110.401 48.4872 110.882 47.4389 110.882 46.1722C110.882 45.1238 110.554 44.2939 109.877 43.6387C109.244 43.0054 108.37 42.4594 107.256 42.0226C106.186 41.5858 105.007 41.1926 103.718 40.865C102.43 40.4938 101.141 40.1006 99.8306 39.642C98.5421 39.1615 97.3627 38.5718 96.2925 37.8293C95.2224 37.0867 94.3488 36.1476 93.6717 34.9901C93.0384 33.8544 92.7108 32.3693 92.7108 30.6003C92.7108 28.4381 93.2349 26.6035 94.2832 25.0966C95.3316 23.5459 96.773 22.3666 98.6294 21.5585C100.508 20.7504 102.692 20.3354 105.138 20.3354C107.3 20.3354 109.244 20.7286 110.991 21.493C112.782 22.2574 114.245 23.3494 115.381 24.7253C116.516 26.0794 117.215 27.63 117.455 29.3772L110.336 31.1899C110.03 29.6175 109.397 28.3726 108.414 27.499C107.475 26.6254 106.295 26.1886 104.876 26.1886C103.958 26.1886 103.128 26.3414 102.342 26.6472C101.6 26.953 101.01 27.4116 100.573 28.0013C100.136 28.6128 99.918 29.3554 99.918 30.2726C99.918 31.2773 100.246 32.1072 100.923 32.7406C101.6 33.3521 102.473 33.8762 103.543 34.313C104.614 34.728 105.793 35.0993 107.081 35.4706C108.392 35.7982 109.702 36.2131 110.969 36.6936C112.279 37.1741 113.481 37.7638 114.551 38.5063C115.665 39.2489 116.538 40.2098 117.172 41.3892C117.849 42.5249 118.176 43.9882 118.176 45.7354C118.176 47.5918 117.652 49.3171 116.604 50.9333C115.599 52.5494 114.136 53.838 112.258 54.8208C110.379 55.8036 108.152 56.2841 105.596 56.2841L105.618 56.3278ZM138.4 56.3278C136.216 56.3278 134.272 55.7599 132.591 54.6024C130.931 53.4667 129.751 51.8506 129.053 49.7976V69.3007H121.889V27.9794H129.053V34.0946C129.751 32.0635 130.931 30.491 132.591 29.3554C134.272 28.2197 136.216 27.63 138.4 27.63C140.868 27.63 143.03 28.2634 144.908 29.5082C146.83 30.7313 148.337 32.413 149.407 34.5533C150.478 36.7154 151.024 39.1834 151.024 41.9789C151.024 44.7744 150.478 47.2205 149.407 49.4045C148.337 51.5667 146.83 53.2702 144.908 54.515C143.03 55.7381 140.846 56.3278 138.4 56.3278ZM136.369 50.1252C137.657 50.1252 138.837 49.7976 139.951 49.1643C141.065 48.5309 141.96 47.5918 142.637 46.3906C143.336 45.1675 143.707 43.7042 143.707 42.0007C143.707 40.2972 143.358 38.7684 142.637 37.5454C141.96 36.3223 141.065 35.4269 139.951 34.8154C138.837 34.182 137.636 33.8544 136.369 33.8544C135.102 33.8544 133.901 34.182 132.787 34.8154C131.673 35.4269 130.756 36.3223 130.057 37.5454C129.38 38.7684 129.053 40.2317 129.053 42.0007C129.053 43.7698 129.38 45.1894 130.057 46.3906C130.756 47.6136 131.673 48.5309 132.787 49.1643C133.901 49.7976 135.102 50.1252 136.369 50.1252ZM166.639 56.3278C163.953 56.3278 161.529 55.7381 159.366 54.5587C157.248 53.3794 155.544 51.7195 154.256 49.5574C153.011 47.3952 152.378 44.8618 152.378 41.9352C152.378 39.0086 153.011 36.4752 154.3 34.3567C155.588 32.1946 157.313 30.5566 159.497 29.399C161.681 28.2197 164.128 27.63 166.814 27.63C169.5 27.63 171.924 28.2197 174.087 29.399C176.271 30.5347 178.018 32.1946 179.285 34.3567C180.573 36.4752 181.206 39.0086 181.206 41.9352C181.206 44.8618 180.551 47.4171 179.241 49.5574C177.952 51.7195 176.205 53.3794 173.977 54.5587C171.793 55.7381 169.325 56.3278 166.595 56.3278H166.639ZM166.639 50.1252C167.884 50.1252 169.063 49.8413 170.177 49.2734C171.291 48.6619 172.208 47.7665 172.907 46.5434C173.606 45.2986 173.977 43.7698 173.977 41.9352C173.977 40.1006 173.628 38.5937 172.907 37.3925C172.23 36.1695 171.335 35.2958 170.221 34.7062C169.151 34.0946 167.971 33.7889 166.727 33.7889C165.482 33.7889 164.324 34.0946 163.232 34.7062C162.184 35.274 161.332 36.1695 160.655 37.3925C159.978 38.6155 159.65 40.1225 159.65 41.9352C159.65 43.7479 159.978 45.2767 160.611 46.5434C161.245 47.7665 162.096 48.6619 163.145 49.2734C164.215 49.8413 165.394 50.1252 166.639 50.1252ZM194.594 56.3278C191.974 56.3278 189.877 55.5634 188.326 54.0127C186.819 52.4402 186.055 50.1907 186.055 47.286V33.7889H181.709V27.9794H199.443V33.7889H193.284V47.5263C193.284 48.3999 193.546 49.055 194.048 49.4918C194.551 49.9286 195.119 50.147 195.774 50.147C196.167 50.147 196.538 50.0815 196.888 49.9505C197.259 49.8195 197.608 49.6229 197.958 49.339L200.491 54.2311C199.618 54.93 198.7 55.4542 197.761 55.8036C196.822 56.153 195.774 56.3059 194.638 56.3059L194.594 56.3278ZM183.827 30.2071V27.9794C184.57 27.9794 185.138 27.761 185.553 27.3242C185.989 26.8874 186.208 26.2978 186.208 25.5552V21.0562H193.284V24.3977C193.284 24.9 193.153 25.4023 192.869 25.9046C192.629 26.407 192.301 26.8438 191.864 27.215C191.428 27.5863 190.903 27.8484 190.292 27.9794L183.827 30.2071ZM213.289 56.3278C211.258 56.3278 209.446 56.0002 207.829 55.3668C206.213 54.6898 204.859 53.7725 203.789 52.5931C202.719 51.4138 201.954 50.1034 201.518 48.6619L208.179 47.155C208.485 48.2688 209.096 49.1642 209.992 49.8413C210.909 50.4746 211.957 50.8023 213.18 50.8023C214.6 50.8023 215.648 50.5402 216.369 49.9942C217.111 49.4482 217.483 48.7711 217.483 47.963C217.483 47.155 217.09 46.4779 216.325 46.0411C215.583 45.5606 214.6 45.1894 213.399 44.9273C212.219 44.6215 210.953 44.2939 209.598 43.9663C208.244 43.595 206.978 43.1146 205.755 42.5467C204.532 41.9352 203.549 41.1271 202.784 40.1225C202.042 39.0742 201.671 37.6982 201.671 35.9729C201.671 34.4659 202.107 33.0682 202.981 31.7796C203.898 30.491 205.165 29.4864 206.825 28.7438C208.485 28.0013 210.45 27.63 212.743 27.63C214.731 27.63 216.478 27.9358 218.007 28.5473C219.514 29.1588 220.759 30.0324 221.742 31.1681C222.724 32.2819 223.401 33.5923 223.773 35.0993L217.308 36.8246C217.002 35.6453 216.456 34.7498 215.692 34.1383C214.949 33.505 213.901 33.1774 212.569 33.1774C211.236 33.1774 210.319 33.4394 209.642 33.9418C208.965 34.4222 208.637 35.0556 208.637 35.8637C208.637 36.6718 209.009 37.3706 209.751 37.8293C210.516 38.2661 211.499 38.6592 212.678 38.9868C213.901 39.2926 215.168 39.6202 216.522 39.9914C217.876 40.319 219.143 40.7995 220.3 41.411C221.523 42.0226 222.484 42.8525 223.227 43.879C223.991 44.9273 224.384 46.3032 224.384 48.0286C224.384 49.5355 223.925 50.9333 223.03 52.2218C222.113 53.4667 220.846 54.4714 219.186 55.1921C217.526 55.9128 215.583 56.3059 213.333 56.3059L213.289 56.3278ZM257.69 20.7067V55.9783H250.57L234.605 31.8888V55.9783H227.485V20.7067H234.605L250.57 44.8618V20.7067H257.69ZM274.66 56.3278C271.974 56.3278 269.549 55.7381 267.387 54.5587C265.269 53.3794 263.565 51.7195 262.277 49.5574C261.032 47.3952 260.398 44.8618 260.398 41.9352C260.398 39.0086 261.032 36.4752 262.32 34.3567C263.609 32.1946 265.334 30.5566 267.518 29.399C269.702 28.2197 272.148 27.63 274.835 27.63C277.521 27.63 279.945 28.2197 282.107 29.399C284.291 30.5347 286.038 32.1946 287.305 34.3567C288.594 36.4752 289.227 39.0086 289.227 41.9352C289.227 44.8618 288.572 47.4171 287.261 49.5574C285.973 51.7195 284.226 53.3794 281.998 54.5587C279.814 55.7381 277.346 56.3278 274.616 56.3278H274.66ZM274.66 50.1252C275.905 50.1252 277.084 49.8413 278.198 49.2734C279.312 48.6619 280.229 47.7665 280.928 46.5434C281.627 45.2986 281.998 43.7698 281.998 41.9352C281.998 40.1006 281.649 38.5937 280.928 37.3925C280.251 36.1695 279.355 35.2958 278.242 34.7062C277.171 34.0946 275.992 33.7889 274.747 33.7889C273.502 33.7889 272.345 34.0946 271.253 34.7062C270.204 35.274 269.353 36.1695 268.676 37.3925C267.999 38.6155 267.671 40.1225 267.671 41.9352C267.671 43.7479 267.999 45.2767 268.632 46.5434C269.265 47.7665 270.117 48.6619 271.165 49.2734C272.236 49.8413 273.415 50.1252 274.66 50.1252ZM288.812 27.9794H296.041L301.96 53.6851H299.841L306.306 27.9794H313.841L320.218 53.6851H318.1L323.953 27.9794H330.832L322.686 55.9783H314.911L308.796 32.2819H311.023L304.755 55.9783H297.024L288.834 27.9794H288.812Z" fill="#0E1323"/>
+        </svg>
+      </a>
+      <nav class="top-bar__nav">
+        <a href="#" class="top-bar__nav-item">Home</a>
+        <a href="#" class="top-bar__nav-item">Inbox</a>
+      </nav>
+    </div>
+    <div class="top-bar__actions">
+      <button class="mcp-btn" onclick="openMcpModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+        Connect MCP
+      </button>
+      <div class="entity-card">
+        <span class="entity-card__name">Dear Media</span>
+        <button class="entity-card__chevron" title="Switch entity" aria-label="Switch entity">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── LAYOUT ─── -->
+  <div class="app-layout">
+
+    <!-- ─── SIDEBAR ─── -->
+    <div class="sidebar">
+      <div class="sidebar__inner">
+        <div class="sidebar__header">
+          <button class="new-chat-btn" onclick="resetChat()">Start a new chat</button>
+        </div>
+        <div class="sidebar__chats">
+          <button class="chat-item">
+            <div class="chat-item__text">
+              <div class="chat-item__name">Health & wellness brands to target this quarter</div>
+            </div>
+            <div class="chat-item__time">2d</div>
+          </button>
+          <button class="chat-item">
+            <div class="chat-item__text">
+              <div class="chat-item__name">Competitor spend report on Athletic Greens</div>
+            </div>
+            <div class="chat-item__time">3d</div>
+          </button>
+          <button class="chat-item">
+            <div class="chat-item__text">
+              <div class="chat-item__name">New advertisers in business & finance last 90d</div>
+            </div>
+            <div class="chat-item__time">5d</div>
+          </button>
+          <button class="chat-item">
+            <div class="chat-item__text">
+              <div class="chat-item__name">Top shows for a BetterHelp test campaign</div>
+            </div>
+            <div class="chat-item__time">1w</div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── MAIN ─── -->
+    <div class="chat-main">
+
+      <!-- Chat header (only shown after a conversation starts) -->
+      <div class="chat-header" id="chatHeader">
+        <button class="back-btn" onclick="resetChat()" aria-label="Back">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Back
+        </button>
+        <div class="chat-header__title" id="chatHeaderTitle">New conversation</div>
+      </div>
+
+      <!-- Welcome state -->
+      <div class="welcome" id="welcome">
+        <h1 class="welcome__title">SpotsNow Intelligence</h1>
+        <p class="welcome__sub">Ask anything about podcast advertising.</p>
+
+        <!-- Mode toggle -->
+        <div class="mode-toggle">
+          <button class="mode-toggle__btn active" id="mode-advertiser" onclick="setMode('advertiser')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>
+            Advertiser Mode
+          </button>
+          <button class="mode-toggle__btn" id="mode-publisher" onclick="setMode('publisher')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+            Publisher Mode
+          </button>
+        </div>
+
+        <!-- Welcome input bar (above the cards) -->
+        <div class="welcome-input">
+          <div class="input-bar">
+            <textarea class="input-bar__input" id="welcomeInput" placeholder="Ask anything" rows="1" oninput="autoResizeWelcome(this)" onkeydown="handleWelcomeKey(event)"></textarea>
+            <div class="input-bar__actions">
+              <button class="attach-btn" title="Attach file">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+              </button>
+              <button class="send-btn" id="welcomeSendBtn" onclick="sendFromWelcome()" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Suggestion cards (Publisher mode) -->
+        <div class="suggestions" id="suggestions-publisher" style="display: none;">
+          <button class="suggestion-card" onclick="sendSuggestion('Find brands that fit my shows, ranked by audience overlap, category, and CPM fit.')">
+            <div class="suggestion-card__icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <div class="suggestion-card__text">
+              <div class="suggestion-card__title">Find brands that fit my shows</div>
+              <div class="suggestion-card__desc">Ranked by audience overlap, category, and CPM fit</div>
+            </div>
+            <span class="suggestion-card__tag">Matching</span>
+          </button>
+          <button class="suggestion-card" onclick="sendSuggestion('Build my sales target list — active spenders aligned to my inventory.')">
+            <div class="suggestion-card__icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            </div>
+            <div class="suggestion-card__text">
+              <div class="suggestion-card__title">Build my sales target list</div>
+              <div class="suggestion-card__desc">Active spenders aligned to your inventory</div>
+            </div>
+            <span class="suggestion-card__tag">Prospecting</span>
+          </button>
+          <button class="suggestion-card" onclick="sendSuggestion('Surface brands ready to scale — just passed test phase and expanding spend now.')">
+            <div class="suggestion-card__icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            <div class="suggestion-card__text">
+              <div class="suggestion-card__title">Surface brands ready to scale</div>
+              <div class="suggestion-card__desc">Just passed test phase, expanding spend now</div>
+            </div>
+            <span class="suggestion-card__tag">Pipeline</span>
+          </button>
+          <button class="suggestion-card" onclick="sendSuggestion('Fill my open inventory — match unsold windows to live demand.')">
+            <div class="suggestion-card__icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            </div>
+            <div class="suggestion-card__text">
+              <div class="suggestion-card__title">Fill my open inventory</div>
+              <div class="suggestion-card__desc">Match unsold windows to live demand</div>
+            </div>
+            <span class="suggestion-card__tag">Yield</span>
+          </button>
+        </div>
+
+        <!-- Suggestion cards (Advertiser mode) -->
+        <div class="suggestions" id="suggestions-advertiser">
+          <button class="suggestion-card" onclick="sendSuggestion('Find the top 20 performing shows in Health & Wellness for my brand. Rank by audience fit, engagement rate, and ROAS history.')">
+            <div class="suggestion-card__icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <div class="suggestion-card__text">
+              <div class="suggestion-card__title">Optimize my creative for 5x performance</div>
+              <div class="suggestion-card__desc">Ranked by audience fit, engagement, and ROAS</div>
+            </div>
+            <span class="suggestion-card__tag">Discovery</span>
+          </button>
+          <button class="suggestion-card" onclick="sendSuggestion('Do a competitive analysis on my top competitor — what shows are they spending on, how much, and where are the whitespace opportunities for me?')">
+            <div class="suggestion-card__icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+            </div>
+            <div class="suggestion-card__text">
+              <div class="suggestion-card__title">Competitor spend report & opportunities</div>
+              <div class="suggestion-card__desc">What they're buying and where you're missing</div>
+            </div>
+            <span class="suggestion-card__tag">Competitive</span>
+          </button>
+          <button class="suggestion-card" onclick="sendSuggestion('Take my ad creative and make it 5x more effective. Analyze the highest-converting repeat advertisers in similar industries and give me specific copy and delivery recommendations.')">
+            <div class="suggestion-card__icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/></svg>
+            </div>
+            <div class="suggestion-card__text">
+              <div class="suggestion-card__title">Optimize my creative for 5x performance</div>
+              <div class="suggestion-card__desc">Based on top-converting ads in your category</div>
+            </div>
+            <span class="suggestion-card__tag">Creative</span>
+          </button>
+          <button class="suggestion-card" onclick="sendSuggestion('Build me a full campaign plan — suggest shows, estimate reach and CPMs, forecast ROAS, and generate a media plan I can share with my team.')">
+            <div class="suggestion-card__icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="20"/><line x1="16" y1="16" x2="16" y2="20"/><path d="M12 11v4"/><circle cx="8" cy="15" r="2"/><circle cx="16" cy="15" r="2"/></svg>
+            </div>
+            <div class="suggestion-card__text">
+              <div class="suggestion-card__title">Build a full campaign plan</div>
+              <div class="suggestion-card__desc">Shows, reach, CPMs, ROAS forecast, and media plan</div>
+            </div>
+            <span class="suggestion-card__tag">Planning</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Chat messages -->
+      <div class="chat-messages" id="chatMessages"></div>
+
+      <!-- Typing indicator -->
+      <div class="typing-indicator" id="typingIndicator" style="max-width:780px;margin:0 auto;width:100%;padding:0 24px 12px;">
+        <div class="message__avatar message__avatar--ai">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div class="typing-dots">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <!-- Input bar (only shown once a conversation starts) -->
+      <div class="input-bar-wrapper" id="bottomInputWrapper" style="display: none;">
+        <div class="input-bar">
+          <textarea class="input-bar__input" id="chatInput" placeholder="Ask about shows, brands, campaigns, competitive intel..." rows="1" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+          <div class="input-bar__actions">
+            <button class="attach-btn" title="Attach file">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+            </button>
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="input-bar__disclaimer">SpotsNow Intelligence has access to 59,000+ shows and real-time ad-spend data</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── MCP MODAL ─── -->
+  <div class="modal-overlay" id="mcpModal" onclick="closeMcpModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal__header">
+        <span class="modal__title">Connect via MCP</span>
+        <button class="modal__close" onclick="closeMcpModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <p class="modal__desc">Connect SpotsNow Intelligence directly to your AI tools via Model Context Protocol. Query show data, ad spend, and campaign insights from any MCP-compatible client.</p>
+        <div class="connector-list">
+          <div class="connector-item">
+            <div class="connector-item__icon connector-item__icon--claude">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="#D97706" opacity="0.15"/><path d="M16 8l-4 8-4-8" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="connector-item__info">
+              <div class="connector-item__name">Claude Desktop</div>
+              <div class="connector-item__desc">Connect via claude_desktop_config.json</div>
+            </div>
+            <span class="connector-item__badge connector-item__badge--ready">Ready</span>
+          </div>
+          <div class="connector-item">
+            <div class="connector-item__icon connector-item__icon--custom">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5167fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <div class="connector-item__info">
+              <div class="connector-item__name">Claude Code</div>
+              <div class="connector-item__desc">Add as MCP server in your project</div>
+            </div>
+            <span class="connector-item__badge connector-item__badge--ready">Ready</span>
+          </div>
+          <div class="connector-item">
+            <div class="connector-item__icon connector-item__icon--openai">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0d6832" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+            </div>
+            <div class="connector-item__info">
+              <div class="connector-item__name">Custom Integration</div>
+              <div class="connector-item__desc">REST API + MCP server endpoint</div>
+            </div>
+            <span class="connector-item__badge connector-item__badge--soon">Coming soon</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─── State ───
+    let currentMode = 'advertiser';
+
+    // ─── Mode Toggle ───
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById('mode-publisher').classList.toggle('active', mode === 'publisher');
+      document.getElementById('mode-advertiser').classList.toggle('active', mode === 'advertiser');
+      document.getElementById('suggestions-publisher').style.display = mode === 'publisher' ? 'grid' : 'none';
+      document.getElementById('suggestions-advertiser').style.display = mode === 'advertiser' ? 'grid' : 'none';
+    }
+
+    // ─── Chat Logic ───
+    function sendSuggestion(text) {
+      addUserMessage(text);
+      simulateResponse(text);
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      input.style.height = 'auto';
+      document.getElementById('sendBtn').disabled = true;
+      addUserMessage(text);
+      simulateResponse(text);
+    }
+
+    function sendFromWelcome() {
+      const input = document.getElementById('welcomeInput');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      document.getElementById('welcomeSendBtn').disabled = true;
+      addUserMessage(text);
+      simulateResponse(text);
+    }
+
+    function handleKey(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+      setTimeout(() => {
+        document.getElementById('sendBtn').disabled = !document.getElementById('chatInput').value.trim();
+      }, 0);
+    }
+
+    function handleWelcomeKey(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendFromWelcome();
+      }
+      setTimeout(() => {
+        document.getElementById('welcomeSendBtn').disabled = !document.getElementById('welcomeInput').value.trim();
+      }, 0);
+    }
+
+    function autoResize(el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+      document.getElementById('sendBtn').disabled = !el.value.trim();
+    }
+
+    function autoResizeWelcome(el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+      document.getElementById('welcomeSendBtn').disabled = !el.value.trim();
+    }
+
+    function addUserMessage(text) {
+      document.getElementById('welcome').classList.add('hidden');
+      document.getElementById('bottomInputWrapper').style.display = '';
+      const header = document.getElementById('chatHeader');
+      const title = document.getElementById('chatHeaderTitle');
+      header.classList.add('active');
+      if (!title.dataset.set) {
+        title.textContent = text.length > 70 ? text.slice(0, 70) + '…' : text;
+        title.dataset.set = '1';
+      }
+      const chatEl = document.getElementById('chatMessages');
+      chatEl.classList.add('active');
+
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      const msg = document.createElement('div');
+      msg.className = 'message message--user';
+      msg.innerHTML = `
+        <div class="message__avatar message__avatar--user">C</div>
+        <div class="message__content">
+          <div class="message__bubble">${escapeHtml(text)}</div>
+          <div class="message__time">${time}</div>
+        </div>
+      `;
+      chatEl.appendChild(msg);
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
+    function simulateResponse(query) {
+      const typing = document.getElementById('typingIndicator');
+      typing.classList.add('active');
+      const chatEl = document.getElementById('chatMessages');
+      chatEl.scrollTop = chatEl.scrollHeight;
+
+      setTimeout(() => {
+        typing.classList.remove('active');
+        const response = generateResponse(query);
+        addAiMessage(response);
+      }, 1800 + Math.random() * 1200);
+    }
+
+    function addAiMessage(response) {
+      const chatEl = document.getElementById('chatMessages');
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      const msg = document.createElement('div');
+      msg.className = 'message message--ai';
+      msg.innerHTML = `
+        <div class="message__avatar message__avatar--ai">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div class="message__content">
+          <div class="message__bubble">${response.text}</div>
+          ${response.cards ? `<div class="ai-card-grid">${response.cards}</div>` : ''}
+          ${response.followUps ? `<div class="follow-ups">${response.followUps.map(f =>
+            `<button class="follow-up-chip" onclick="sendSuggestion('${escapeAttr(f)}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+              ${escapeHtml(f)}
+            </button>`
+          ).join('')}</div>` : ''}
+          <div class="message__time">${time}</div>
+        </div>
+      `;
+      chatEl.appendChild(msg);
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
+    // ─── Response Generator ───
+    function generateResponse(query) {
+      const q = query.toLowerCase();
+
+      if (q.includes('brands that fit my shows') || q.includes('cpm fit')) {
+        return {
+          text: `Ranked across <strong>59,000+ brands</strong> by audience overlap with your shows, category fit, and CPM compatibility. Top matches:`,
+          cards: `
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">#1 Fit</div><div class="ai-insight-card__name">Athletic Greens (AG1)</div><div class="ai-insight-card__meta">Health & Wellness &middot; 87% overlap &middot; $38 CPM target</div><div class="ai-insight-card__stat">Strong fit</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">#2 Fit</div><div class="ai-insight-card__name">BetterHelp</div><div class="ai-insight-card__meta">Mental Health &middot; 82% overlap &middot; $32 CPM target</div><div class="ai-insight-card__stat">Strong fit</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">#3 Fit</div><div class="ai-insight-card__name">Shopify</div><div class="ai-insight-card__meta">Business & Tech &middot; 79% overlap &middot; $35 CPM target</div><div class="ai-insight-card__stat">Strong fit</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">#4 Fit</div><div class="ai-insight-card__name">Liquid Death</div><div class="ai-insight-card__meta">Beverage &middot; 74% overlap &middot; $30 CPM target</div><div class="ai-insight-card__stat">Good fit</div></div>
+          `,
+          followUps: [
+            'Show me the full top-20 list',
+            'Which of these are already buying my competitors?',
+            'Draft outreach for the top 3'
+          ]
+        };
+      }
+
+      if (q.includes('sales target list') || q.includes('active spenders')) {
+        return {
+          text: `Built from active podcast spenders whose categories and audiences map to your inventory. Sorted by spend velocity and reachability:`,
+          cards: `
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Target</div><div class="ai-insight-card__name">Helix Sleep</div><div class="ai-insight-card__meta">Sleep &middot; $1.4M last 90d &middot; 14 active shows</div><div class="ai-insight-card__stat">Buying now</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Target</div><div class="ai-insight-card__name">Masterclass</div><div class="ai-insight-card__meta">Edu &middot; $980K last 90d &middot; 11 active shows</div><div class="ai-insight-card__stat">Buying now</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Target</div><div class="ai-insight-card__name">Notion</div><div class="ai-insight-card__meta">Productivity &middot; $620K last 90d &middot; 8 active shows</div><div class="ai-insight-card__stat">Buying now</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Target</div><div class="ai-insight-card__name">Oura Ring</div><div class="ai-insight-card__meta">Health Tech &middot; $510K last 90d &middot; 6 active shows</div><div class="ai-insight-card__stat">Buying now</div></div>
+          `,
+          followUps: [
+            'Pull contact info for these brands',
+            'Group by category',
+            'Export as CSV'
+          ]
+        };
+      }
+
+      if (q.includes('ready to scale') || q.includes('passed test phase') || q.includes('expanding spend')) {
+        return {
+          text: `Brands that just cleared the test phase (1-3 shows for 6+ weeks) and are now expanding spend. These are the highest-conversion windows:`,
+          cards: `
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Scaling</div><div class="ai-insight-card__name">Helix Sleep</div><div class="ai-insight-card__meta">2 shows &rarr; 14 shows in 6 months</div><div class="ai-insight-card__stat">7x growth</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Scaling</div><div class="ai-insight-card__name">Calm</div><div class="ai-insight-card__meta">1 show &rarr; 8 shows in 5 months</div><div class="ai-insight-card__stat">8x growth</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Scaling</div><div class="ai-insight-card__name">Masterclass</div><div class="ai-insight-card__meta">3 shows &rarr; 11 shows in 4 months</div><div class="ai-insight-card__stat">3.7x growth</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Scaling</div><div class="ai-insight-card__name">ZocDoc</div><div class="ai-insight-card__meta">2 shows &rarr; 7 shows in 3 months</div><div class="ai-insight-card__stat">3.5x growth</div></div>
+          `,
+          followUps: [
+            'Which of these match my audience?',
+            'Show their current ad creative',
+            'Draft a pitch to ride this wave'
+          ]
+        };
+      }
+
+      if (q.includes('open inventory') || q.includes('unsold windows') || q.includes('live demand')) {
+        return {
+          text: `Matched your unsold inventory windows against active brand briefs. Highest-yield fills first:`,
+          cards: `
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Match</div><div class="ai-insight-card__name">Show A &middot; May 19-23</div><div class="ai-insight-card__meta">3 open slots &middot; 2 brands in market</div><div class="ai-insight-card__stat">$14K potential</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Match</div><div class="ai-insight-card__name">Show B &middot; May 26-30</div><div class="ai-insight-card__meta">4 open slots &middot; 5 brands in market</div><div class="ai-insight-card__stat">$22K potential</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Match</div><div class="ai-insight-card__name">Show C &middot; Jun 2-6</div><div class="ai-insight-card__meta">2 open slots &middot; 3 brands in market</div><div class="ai-insight-card__stat">$9K potential</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Total</div><div class="ai-insight-card__name">Fill these 3 windows</div><div class="ai-insight-card__meta">9 open slots across 3 shows</div><div class="ai-insight-card__stat">$45K total</div></div>
+          `,
+          followUps: [
+            'Auto-draft pitches to these brands',
+            'Show me all open windows next 30 days',
+            'Sort by margin instead of revenue'
+          ]
+        };
+      }
+
+      if (q.includes('brands most likely') || q.includes('audience overlap')) {
+        return {
+          text: `Based on your show portfolio, I analyzed audience overlap, category adjacency, and active ad-spend signals across 59,000+ shows. Here are the <strong>top brands most likely to convert</strong> into placements with your network:`,
+          cards: `
+            <div class="ai-insight-card">
+              <div class="ai-insight-card__rank">#1 Match</div>
+              <div class="ai-insight-card__name">Athletic Greens (AG1)</div>
+              <div class="ai-insight-card__meta">Health & Wellness &middot; 87% audience overlap</div>
+              <div class="ai-insight-card__stat">+34% spend QoQ</div>
+            </div>
+            <div class="ai-insight-card">
+              <div class="ai-insight-card__rank">#2 Match</div>
+              <div class="ai-insight-card__name">BetterHelp</div>
+              <div class="ai-insight-card__meta">Mental Health &middot; 82% audience overlap</div>
+              <div class="ai-insight-card__stat">+28% spend QoQ</div>
+            </div>
+            <div class="ai-insight-card">
+              <div class="ai-insight-card__rank">#3 Match</div>
+              <div class="ai-insight-card__name">Shopify</div>
+              <div class="ai-insight-card__meta">Business & Tech &middot; 79% audience overlap</div>
+              <div class="ai-insight-card__stat">+41% spend QoQ</div>
+            </div>
+            <div class="ai-insight-card">
+              <div class="ai-insight-card__rank">#4 Match</div>
+              <div class="ai-insight-card__name">Liquid Death</div>
+              <div class="ai-insight-card__meta">Beverage &middot; 74% audience overlap</div>
+              <div class="ai-insight-card__stat">+56% spend QoQ</div>
+            </div>
+          `,
+          followUps: [
+            'Show me outreach templates for AG1',
+            'Which of these brands are new to my genre?',
+            'Pull the full top-20 list with CPMs'
+          ]
+        };
+      }
+
+      if (q.includes('new brands') && (q.includes('podcast') || q.includes('first'))) {
+        return {
+          text: `I found <strong>47 new brands</strong> that placed their first podcast ad in the last 90 days. Here are the highest-budget newcomers:`,
+          cards: `
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">New Entrant</div><div class="ai-insight-card__name">Huel</div><div class="ai-insight-card__meta">Nutrition &middot; First aired 38 days ago &middot; 12 shows</div><div class="ai-insight-card__stat">~$180K est. budget</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">New Entrant</div><div class="ai-insight-card__name">Notion</div><div class="ai-insight-card__meta">Productivity &middot; First aired 22 days ago &middot; 8 shows</div><div class="ai-insight-card__stat">~$140K est. budget</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">New Entrant</div><div class="ai-insight-card__name">Oura Ring</div><div class="ai-insight-card__meta">Health Tech &middot; First aired 51 days ago &middot; 6 shows</div><div class="ai-insight-card__stat">~$95K est. budget</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">New Entrant</div><div class="ai-insight-card__name">Perplexity AI</div><div class="ai-insight-card__meta">AI / Tech &middot; First aired 15 days ago &middot; 4 shows</div><div class="ai-insight-card__stat">~$75K est. budget</div></div>
+          `,
+          followUps: [
+            'Which of these overlap with my audience?',
+            'Show the full 47-brand list',
+            'Alert me when new brands enter my category'
+          ]
+        };
+      }
+
+      if (q.includes('scale') && (q.includes('mode') || q.includes('expanding') || q.includes('test'))) {
+        return {
+          text: `Found <strong>23 brands</strong> that started with test placements (1-3 shows) and are now actively scaling to 5+ shows. These are your best conversion targets:`,
+          cards: `
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Scaling Fast</div><div class="ai-insight-card__name">Helix Sleep</div><div class="ai-insight-card__meta">2 shows &rarr; 14 shows &middot; 6 months</div><div class="ai-insight-card__stat">7x placement growth</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Scaling Fast</div><div class="ai-insight-card__name">Masterclass</div><div class="ai-insight-card__meta">3 shows &rarr; 11 shows &middot; 4 months</div><div class="ai-insight-card__stat">3.7x placement growth</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Scaling</div><div class="ai-insight-card__name">Calm</div><div class="ai-insight-card__meta">1 show &rarr; 8 shows &middot; 5 months</div><div class="ai-insight-card__stat">8x placement growth</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Scaling</div><div class="ai-insight-card__name">ZocDoc</div><div class="ai-insight-card__meta">2 shows &rarr; 7 shows &middot; 3 months</div><div class="ai-insight-card__stat">3.5x placement growth</div></div>
+          `,
+          followUps: [
+            'Which scaling brands match my audience?',
+            'Show their ad creative and messaging',
+            'What categories are scaling fastest?'
+          ]
+        };
+      }
+
+      if (q.includes('top 20') && q.includes('health')) {
+        return {
+          text: `Here are the <strong>top 20 performing shows in Health & Wellness</strong>, ranked by a composite score of audience fit, engagement, and historical ROAS for brands in your category:`,
+          cards: `
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">#1</div><div class="ai-insight-card__name">Huberman Lab</div><div class="ai-insight-card__meta">3.2M listeners &middot; $42 CPM</div><div class="ai-insight-card__stat">4.8x avg ROAS</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">#2</div><div class="ai-insight-card__name">The Doctor's Farmacy</div><div class="ai-insight-card__meta">890K listeners &middot; $38 CPM</div><div class="ai-insight-card__stat">4.2x avg ROAS</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">#3</div><div class="ai-insight-card__name">On Purpose w/ Jay Shetty</div><div class="ai-insight-card__meta">2.1M listeners &middot; $35 CPM</div><div class="ai-insight-card__stat">3.9x avg ROAS</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">#4</div><div class="ai-insight-card__name">Feel Better, Live More</div><div class="ai-insight-card__meta">680K listeners &middot; $28 CPM</div><div class="ai-insight-card__stat">3.7x avg ROAS</div></div>
+          `,
+          followUps: [
+            'Show me the full top 20 list',
+            'Compare CPMs across these shows',
+            'Check availability for Q3 placements'
+          ]
+        };
+      }
+
+      if (q.includes('competitor') || q.includes('competitive')) {
+        return {
+          text: `I'll run a competitive intelligence report. Here's a sample breakdown of a <strong>competitor's podcast strategy</strong>:`,
+          cards: `
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Competitor Spend</div><div class="ai-insight-card__name">True Crime category</div><div class="ai-insight-card__meta">12 active shows &middot; $420K est. quarterly spend</div><div class="ai-insight-card__stat">Your gap: 8 shows</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Competitor Spend</div><div class="ai-insight-card__name">Business & Finance</div><div class="ai-insight-card__meta">8 active shows &middot; $310K est. quarterly spend</div><div class="ai-insight-card__stat">Your gap: 5 shows</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Whitespace</div><div class="ai-insight-card__name">Parenting & Family</div><div class="ai-insight-card__meta">Competitor: 0 shows &middot; High audience fit for you</div><div class="ai-insight-card__stat">Opportunity: $200K+</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Whitespace</div><div class="ai-insight-card__name">Sports & Fitness</div><div class="ai-insight-card__meta">Competitor: 1 show &middot; Growing category (+62% YoY)</div><div class="ai-insight-card__stat">Opportunity: $150K+</div></div>
+          `,
+          followUps: [
+            'Show me their actual ad creative',
+            'Which shows do we both advertise on?',
+            'Build a strategy to win in their weak spots'
+          ]
+        };
+      }
+
+      if (q.includes('creative') || q.includes('5x') || q.includes('converting')) {
+        return {
+          text: `I analyzed the <strong>top 100 highest-converting repeat advertisers</strong> in categories similar to yours. Here are specific recommendations to boost your creative performance:`,
+          cards: `
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Insight #1</div><div class="ai-insight-card__name">Lead with personal story</div><div class="ai-insight-card__meta">Top performers use host-read personal endorsements. Ads with personal anecdotes convert 3.2x higher than scripted reads.</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Insight #2</div><div class="ai-insight-card__name">60s mid-roll outperforms</div><div class="ai-insight-card__meta">60-second mid-roll placements show 2.8x higher conversion than pre-roll in your category.</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Insight #3</div><div class="ai-insight-card__name">Specific CTA with urgency</div><div class="ai-insight-card__meta">"Go to [brand].com/[show]" + time-limited offer drives 4.1x more conversions than generic CTAs.</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Insight #4</div><div class="ai-insight-card__name">Repeat exposure matters</div><div class="ai-insight-card__meta">Brands running 4+ episodes on the same show see 5.2x ROAS vs. single-episode placements.</div></div>
+          `,
+          followUps: [
+            'Rewrite my current ad script using these insights',
+            'Show me the best-performing ad transcripts',
+            'Which shows have the best host-read quality?'
+          ]
+        };
+      }
+
+      if (q.includes('campaign plan') || q.includes('media plan')) {
+        return {
+          text: `Here's a draft <strong>campaign plan</strong> built from your brand profile and current inventory:`,
+          cards: `
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Phase 1 &middot; Weeks 1-2</div><div class="ai-insight-card__name">Test &mdash; 5 shows</div><div class="ai-insight-card__meta">Est. reach: 1.2M &middot; Budget: $48K &middot; CPM: $32</div><div class="ai-insight-card__stat">Audience validation</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Phase 2 &middot; Weeks 3-6</div><div class="ai-insight-card__name">Scale &mdash; 12 shows</div><div class="ai-insight-card__meta">Est. reach: 4.8M &middot; Budget: $156K &middot; CPM: $28</div><div class="ai-insight-card__stat">Top performers</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Phase 3 &middot; Weeks 7-12</div><div class="ai-insight-card__name">Optimize &mdash; 8 shows</div><div class="ai-insight-card__meta">Est. reach: 6.2M &middot; Budget: $198K &middot; ROAS target: 4x+</div><div class="ai-insight-card__stat">Max ROAS</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Total</div><div class="ai-insight-card__name">12-week plan summary</div><div class="ai-insight-card__meta">Reach: 12.2M &middot; Budget: $402K &middot; ROAS: 3.8x</div><div class="ai-insight-card__stat">Revenue: $1.53M</div></div>
+          `,
+          followUps: [
+            'Export this as a shareable report',
+            'Adjust budget to $250K',
+            'Add more shows in True Crime category'
+          ]
+        };
+      }
+
+      if (q.includes('spending categories') || q.includes('top spending')) {
+        return {
+          text: `Here's the <strong>Q1 2026 category spend breakdown</strong> with quarter-over-quarter trends:`,
+          cards: `
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">#1 Category</div><div class="ai-insight-card__name">Health & Wellness</div><div class="ai-insight-card__meta">$18.4M total spend &middot; 342 active brands</div><div class="ai-insight-card__stat">+22% QoQ</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">#2 Category</div><div class="ai-insight-card__name">Technology & SaaS</div><div class="ai-insight-card__meta">$15.2M total spend &middot; 287 active brands</div><div class="ai-insight-card__stat">+38% QoQ</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">#3 Category</div><div class="ai-insight-card__name">Finance & Insurance</div><div class="ai-insight-card__meta">$12.8M total spend &middot; 198 active brands</div><div class="ai-insight-card__stat">+15% QoQ</div></div>
+            <div class="ai-insight-card"><div class="ai-insight-card__rank">Fastest Growing</div><div class="ai-insight-card__name">AI & Developer Tools</div><div class="ai-insight-card__meta">$4.1M total spend &middot; 64 active brands</div><div class="ai-insight-card__stat">+142% QoQ</div></div>
+          `,
+          followUps: [
+            'Which genres are getting the most spend?',
+            'Show me AI & Dev Tools brands expanding',
+            'Compare my category vs. last quarter'
+          ]
+        };
+      }
+
+      return {
+        text: `Great question. Let me pull that data from our database of <strong>59,000+ shows</strong> and real-time ad-spend signals.<br><br>I'm analyzing audience demographics, historical campaign performance, and current market trends to give you the most actionable insights.`,
+        followUps: [
+          'Show me the raw data behind this',
+          'Export this as a report',
+          'What else should I be looking at?'
+        ]
+      };
+    }
+
+    // ─── MCP Modal ───
+    function openMcpModal() {
+      document.getElementById('mcpModal').classList.add('active');
+    }
+    function closeMcpModal(e) {
+      if (!e || e.target === document.getElementById('mcpModal')) {
+        document.getElementById('mcpModal').classList.remove('active');
+      }
+    }
+
+    // ─── Reset ───
+    function resetChat() {
+      document.getElementById('chatMessages').innerHTML = '';
+      document.getElementById('chatMessages').classList.remove('active');
+      document.getElementById('welcome').classList.remove('hidden');
+      document.getElementById('bottomInputWrapper').style.display = 'none';
+      const header = document.getElementById('chatHeader');
+      const title = document.getElementById('chatHeaderTitle');
+      header.classList.remove('active');
+      title.textContent = 'New conversation';
+      delete title.dataset.set;
+      const w = document.getElementById('welcomeInput');
+      if (w) { w.value = ''; document.getElementById('welcomeSendBtn').disabled = true; }
+    }
+
+    // ─── Helpers ───
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+    function escapeAttr(str) {
+      return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>
