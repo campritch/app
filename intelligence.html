@@ -208,14 +208,7 @@
 
   /* show card list */
   .show-list{display:flex;flex-direction:column;gap:8px;margin:4px 0}
-  .show-card{display:flex;align-items:center;gap:11px;padding:9px;border:1px solid var(--line);border-radius:9px;background:rgba(255,255,255,.02)}
-  .show-card .sc-art{
-    width:34px;height:34px;border-radius:7px;flex-shrink:0;
-    display:grid;place-items:center;font-weight:700;font-size:13px;color:#fff;
-    background:linear-gradient(135deg,#E8472A,#FF7A4D);
-  }
-  .show-card .sc-art.b{background:linear-gradient(135deg,#3B7CFF,#7B5CFF)}
-  .show-card .sc-art.c{background:linear-gradient(135deg,#2BB36F,#7CD480)}
+  .show-card{display:flex;align-items:center;gap:11px;padding:10px 13px;border:1px solid var(--line);border-radius:9px;background:rgba(255,255,255,.02)}
   .show-card .sc-meta{flex:1;min-width:0}
   .show-card .sc-name{font-size:13px;color:#fff;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .show-card .sc-sub{font-size:11px;color:var(--mute-dkr);margin-top:1px}
@@ -278,9 +271,11 @@
   .stake h3{font-size:17px;font-weight:600;color:var(--text-dk);margin-bottom:6px}
   .stake p{font-size:13px;color:var(--mute-lt);line-height:1.55}
   .stat-card{background:var(--ink);border-radius:18px;padding:40px 34px;color:#fff;box-shadow:0 30px 60px -28px rgba(0,0,0,.5)}
-  .stat-card .big{font-family:var(--display);font-weight:600;font-size:84px;color:var(--coral);line-height:1;letter-spacing:-.02em}
+  .stat-card .big{font-family:var(--display);font-weight:600;font-size:84px;color:var(--coral);line-height:1;letter-spacing:-.02em;display:flex;align-items:flex-start}
+  .stat-card .big sup{font-size:.42em;line-height:1;font-weight:500;margin-left:4px;margin-top:.08em}
+  .stat-card .big-label{font-family:var(--body);font-weight:600;font-size:18px;color:#fff;margin-top:10px;letter-spacing:-.005em}
   .stat-card p{color:var(--mute-dk);font-size:13px;margin-top:18px;line-height:1.55}
-  .stat-card .tag{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute-dkr);margin-bottom:22px}
+  .stat-card .tag{font-family:var(--body);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute-dkr);margin-bottom:22px;font-weight:500}
 
   /* ---------- EXPLORER (light) ---------- */
   .explorer{
@@ -479,9 +474,10 @@
         <div class="stake reveal"><div class="no">03</div><div><h3>Get custom support</h3><p>Need an answer? Let us know and we'll prioritize the query you need.</p></div></div>
       </div>
       <div class="stat-card reveal">
-        <div class="tag">The access gap</div>
-        <div class="big">~80%</div>
-        <p>of the top podcast advertisers are agency-locked, the data behind their spend kept out of reach of the buyers who need it most.</p>
+        <div class="tag">What changes with SpotsNow</div>
+        <div class="big">61,000<sup>+</sup></div>
+        <div class="big-label">podcast shows tracked</div>
+        <p>Across 19 active categories — every sponsor, every ad read, and the spend behind them. The whole map of the industry, now answerable in a sentence.</p>
       </div>
     </div>
   </div>
@@ -640,7 +636,7 @@
     if(s.shows){
       html+='<div class="show-list">';
       s.shows.forEach(sh=>{
-        html+='<div class="show-card"><div class="sc-art '+sh.cls+'">'+sh.ini+'</div><div class="sc-meta"><div class="sc-name">'+sh.name+'</div><div class="sc-sub">'+sh.sub+'</div></div><div class="sc-cost">'+sh.cost+'</div></div>';
+        html+='<div class="show-card"><div class="sc-meta"><div class="sc-name">'+sh.name+'</div><div class="sc-sub">'+sh.sub+'</div></div><div class="sc-cost">'+sh.cost+'</div></div>';
       });
       html+='</div>';
       if(s.stats){
