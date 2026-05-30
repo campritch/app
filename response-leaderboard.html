@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Response Time Leaderboard · Ops</title>
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --dark: #0e1323;
+      --grey-1: #707481;
+      --text-primary: #252733;
+      --text-secondary: #5a5f6e;
+      --border: #dee0e4;
+      --border-light: #eceef1;
+      --white: #ffffff;
+      --coral: #ff6b6b;
+      --coral-light: #fff1f1;
+      --bg: #f5f5f3;
+      --card: #ffffff;
+      --green-bg: #d6f0e0;
+      --green-text: #0d6832;
+      --amber-bg: #fdecc8;
+      --amber-text: #8a5a00;
+      --red-bg: #fde2e1;
+      --red-text: #b3261e;
+      --blue: #4f6ef7;
+      --blue-light: #eef1ff;
+      --pill-bg: #f3f4f6;
+      --shadow: 0 1px 2px rgba(16,19,35,0.04), 0 4px 18px rgba(16,19,35,0.05);
+    }
+    * , *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--dark);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.45; -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 24px 80px; }
+
+    /* ── HEADER ── */
+    .head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 22px; }
+    .head__title { display: flex; align-items: center; gap: 12px; }
+    .logo-mark { width: 34px; height: 34px; border-radius: 9px; background: var(--coral); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(255,107,107,0.35); }
+    .logo-mark svg { width: 19px; height: 19px; }
+    h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.4px; margin: 0; }
+    .head__sub { font-size: 12.5px; color: var(--grey-1); margin-top: 2px; font-weight: 500; }
+    .head__meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 8px; background: var(--white); border: 1px solid var(--border); font-size: 11.5px; font-weight: 600; color: var(--text-secondary); }
+    .chip .dot { width: 7px; height: 7px; border-radius: 50%; }
+    .dot--live { background: #18b368; box-shadow: 0 0 0 3px rgba(24,179,104,0.18); }
+    .dot--seed { background: #e0a800; box-shadow: 0 0 0 3px rgba(224,168,0,0.18); }
+
+    /* ── SAMPLE BANNER ── */
+    .banner {
+      display: flex; gap: 12px; align-items: flex-start;
+      background: linear-gradient(135deg,#fff8e8 0%, #fffdf7 100%);
+      border: 1px solid #f0dba0; border-radius: 14px; padding: 13px 16px; margin-bottom: 22px;
+    }
+    .banner__icon { font-size: 18px; line-height: 1.2; }
+    .banner__txt { font-size: 12.5px; color: #6b5618; }
+    .banner__txt strong { color: #4d3f10; }
+
+    /* ── SECTION ── */
+    .section { margin-bottom: 30px; }
+    .section__head { display: flex; align-items: center; gap: 9px; margin: 0 2px 13px; }
+    .section__dot { width: 8px; height: 8px; border-radius: 50%; }
+    .section__title { font-size: 11.5px; font-weight: 800; letter-spacing: 0.9px; text-transform: uppercase; color: var(--text-secondary); }
+    .section__hint { font-size: 11.5px; color: var(--grey-1); font-weight: 500; margin-left: auto; }
+
+    /* ── TEAM CARDS ── */
+    .kpis { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+    .kpi { background: var(--card); border: 1px solid var(--border-light); border-radius: 16px; padding: 16px 18px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+    .kpi__label { font-size: 11px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: var(--grey-1); }
+    .kpi__value { font-size: 30px; font-weight: 800; letter-spacing: -1px; margin: 8px 0 2px; }
+    .kpi__value small { font-size: 15px; font-weight: 700; color: var(--text-secondary); margin-left: 2px; }
+    .kpi__foot { font-size: 11.5px; color: var(--text-secondary); font-weight: 500; }
+    .kpi__foot b { color: var(--green-text); }
+    .kpi__foot b.bad { color: var(--red-text); }
+    .kpi--hero { background: linear-gradient(150deg,#0e1323 0%, #1f2747 100%); color: #fff; }
+    .kpi--hero .kpi__label, .kpi--hero .kpi__foot { color: rgba(255,255,255,0.62); }
+    .kpi--hero .kpi__value small { color: rgba(255,255,255,0.7); }
+    .gradebadge { position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; }
+
+    /* ── LEADERBOARD ── */
+    .board { background: var(--card); border: 1px solid var(--border-light); border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; }
+    .lrow { display: grid; grid-template-columns: 52px 1.6fr 1fr 1fr 1fr 1.4fr; align-items: center; gap: 12px; padding: 15px 20px; border-top: 1px solid var(--border-light); }
+    .lrow--head { border-top: none; padding: 13px 20px; background: #fafbfc; }
+    .lrow--head span { font-size: 10.5px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; color: var(--grey-1); }
+    .lrow:hover:not(.lrow--head) { background: #fcfcfd; }
+    .rank { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 10px; font-weight: 900; font-size: 14px; background: var(--pill-bg); color: var(--text-secondary); }
+    .rank--1 { background: #fff4cf; color: #9a7400; }
+    .rank--2 { background: #eef0f3; color: #5c6470; }
+    .rank--3 { background: #fbe7d6; color: #9a5a23; }
+    .person { display: flex; align-items: center; gap: 11px; min-width: 0; }
+    .avatar { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; color: #fff; flex-shrink: 0; }
+    .person__name { font-weight: 700; font-size: 14px; }
+    .person__role { font-size: 11.5px; color: var(--grey-1); font-weight: 500; }
+    .metric { font-weight: 700; font-size: 15px; }
+    .metric small { font-size: 12px; color: var(--grey-1); font-weight: 600; }
+    .metric__sub { font-size: 11px; color: var(--grey-1); font-weight: 500; }
+    .bar { height: 7px; border-radius: 5px; background: #eef0f3; overflow: hidden; margin-top: 6px; }
+    .bar > i { display: block; height: 100%; border-radius: 5px; }
+    .grade { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 26px; padding: 0 8px; border-radius: 8px; font-weight: 800; font-size: 13px; }
+    .g-a { background: var(--green-bg); color: var(--green-text); }
+    .g-b { background: #d8eefb; color: #0b5e8a; }
+    .g-c { background: var(--amber-bg); color: var(--amber-text); }
+    .g-d { background: #fde0cf; color: #a8520a; }
+    .g-f { background: var(--red-bg); color: var(--red-text); }
+
+    /* ── SLOW REPLIES ── */
+    .slow { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .scard { background: var(--card); border: 1px solid var(--border-light); border-left-width: 4px; border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow); display: grid; grid-template-columns: 1fr auto; gap: 12px 18px; align-items: center; }
+    .scard__main { min-width: 0; }
+    .scard__top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 5px; }
+    .src { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; padding: 2px 8px; border-radius: 6px; }
+    .src--email { background: #eef1ff; color: #3a4fc4; }
+    .src--slack { background: #f3e8fb; color: #7c2fbe; }
+    .tag { font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: var(--pill-bg); color: var(--text-secondary); }
+    .scard__subj { font-weight: 700; font-size: 14px; margin: 1px 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .scard__subj a { text-decoration: none; }
+    .scard__subj a:hover { text-decoration: underline; color: var(--blue); }
+    .scard__meta { font-size: 12px; color: var(--text-secondary); }
+    .scard__meta b { color: var(--text-primary); }
+    .waiting { color: var(--red-text); font-weight: 700; }
+    .scard__fr { text-align: center; min-width: 124px; }
+    .fr__emoji { font-size: 26px; line-height: 1; }
+    .fr__score { font-weight: 900; font-size: 19px; margin-top: 4px; letter-spacing: -0.5px; }
+    .fr__label { font-size: 10px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 1px; }
+
+    /* ── CHANNEL GRID ── */
+    .chgrid { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 14px; }
+    .chcard { background: var(--card); border: 1px solid var(--border-light); border-radius: 14px; padding: 15px 16px; box-shadow: var(--shadow); }
+    .chcard__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .chcard__name { font-weight: 800; font-size: 15px; letter-spacing: -0.2px; }
+    .chcard__rows { display: flex; flex-direction: column; gap: 7px; }
+    .chrow { display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; }
+    .chrow span { color: var(--grey-1); font-weight: 500; }
+    .chrow b { font-weight: 700; }
+
+    /* ── METHODOLOGY ── */
+    .method { background: var(--card); border: 1px solid var(--border-light); border-radius: 16px; padding: 18px 20px; box-shadow: var(--shadow); }
+    .method h3 { font-size: 13px; font-weight: 800; margin: 0 0 4px; }
+    .method p { font-size: 12.5px; color: var(--text-secondary); margin: 0 0 14px; max-width: 760px; }
+    .scale { display: grid; grid-template-columns: repeat(auto-fill,minmax(180px,1fr)); gap: 10px; }
+    .scell { border: 1px solid var(--border-light); border-radius: 11px; padding: 10px 12px; display: flex; gap: 10px; align-items: center; }
+    .scell__e { font-size: 22px; }
+    .scell__t { font-size: 11.5px; }
+    .scell__t b { display: block; font-size: 12.5px; }
+    .scell__t span { color: var(--grey-1); }
+    .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 14px; font-size: 11.5px; color: var(--text-secondary); }
+    .legend b { color: var(--text-primary); }
+    .foot { text-align: center; font-size: 11.5px; color: var(--grey-1); margin-top: 30px; }
+
+    @media (max-width: 880px) {
+      .kpis { grid-template-columns: repeat(2,1fr); }
+      .lrow { grid-template-columns: 40px 1.6fr 1fr 1fr; }
+      .lrow .col-ontime, .lrow .col-grade-extra { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="app"></div>
+
+  <script>
+  /* ============================================================
+     RESPONSE TIME LEADERBOARD — Ops team
+     ------------------------------------------------------------
+     Measures how fast the ops team replies when partnership@spotsnow.io
+     or cam@spotsnow.io is copied on a thread that ALSO includes at least
+     one ops teammate (cam / aiza / wally / eli). Mirrors the same signal
+     across the active client conversations in Slack (Super, Bolster,
+     Rella, Amp).
+
+     DATA below is a grounded SNAPSHOT (real people / clients / channels,
+     representative timings) so the dashboard is fully functional offline.
+     To go live, replace `DATA` with the JSON produced by the collector
+     (see the methodology note at the bottom). Nothing else changes.
+     ============================================================ */
+
+  const DATA = {
+    generatedAt: "2026-05-30",
+    windowDays: 30,
+    cadenceDays: 3,
+    live: false,                 // flip to true when wired to live Gmail+Slack
+    sla: { targetHours: 4, warnHours: 12, criticalHours: 24, frustrationMaxHours: 48 },
+
+    team: {
+      avgHours: 3.1,
+      medianHours: 1.4,
+      slaHitRate: 71,            // % of replies within targetHours
+      repliesAnalyzed: 214,
+      threadsAnalyzed: 63,
+      openSlow: 4                // threads currently waiting past warnHours
+    },
+
+    // Leaderboard — the four ops addresses in the filter.
+    people: [
+      { name: "Cam Pritchard", handle: "cam@spotsnow.io",   role: "Founder / Ops", color: "#ff6b6b", avgHours: 1.6, medianHours: 0.6, replies: 88, onTimeRate: 84, fastest: 0.1, slowest: 19, trend: -0.4 },
+      { name: "Aiza",          handle: "aiza@spotsnow.io",  role: "Account / Media", color: "#4f6ef7", avgHours: 2.4, medianHours: 1.1, replies: 76, onTimeRate: 78, fastest: 0.1, slowest: 26, trend: -0.7 },
+      { name: "Wally",         handle: "wally@spotsnow.io", role: "Brand / Supply", color: "#18b368", avgHours: 3.3, medianHours: 1.9, replies: 41, onTimeRate: 66, fastest: 0.2, slowest: 31, trend: 0.3 },
+      { name: "Eli",           handle: "eli@spotsnow.io",   role: "Ops",            color: "#9a5ad6", avgHours: 6.8, medianHours: 4.2, replies: 9,  onTimeRate: 44, fastest: 0.5, slowest: 28, trend: 0.0 }
+    ],
+
+    // Slow / overdue threads — link, last touch, who we're waiting on, overdue.
+    slow: [
+      { source: "slack",  client: "Super",  channel: "#media-operations", subject: "Super.com — Hoopin' impressions discrepancy (115k vs 40k)", link: "https://stationpage.slack.com/archives/C09QQ09B0RY/p1775773000754729", lastTouchBy: "Aiza", waitingOn: "Cam", overdueHours: 41 },
+      { source: "email",  client: "Bolster", channel: "partnership@spotsnow.io", subject: "Bolster Built — kickoff availability & quotes", link: "#", lastTouchBy: "Bolster (client)", waitingOn: "Aiza", overdueHours: 28 },
+      { source: "slack",  client: "Rella",  channel: "#station-accounts", subject: "Rella — June invoice timing (post May 28 / HSR ep)", link: "https://stationpage.slack.com/archives/C099JM7JCMV/p1777651306804969", lastTouchBy: "Aiza", waitingOn: "Cam", overdueHours: 14 },
+      { source: "email",  client: "Amp",    channel: "cam@spotsnow.io", subject: "Amp / EnergyBits — IO + script back-and-forth", link: "#", lastTouchBy: "Amp (client)", waitingOn: "Wally", overdueHours: 9 },
+      { source: "slack",  client: "Super",  channel: "#media-operations", subject: "Super — credit talking points: tighten & run by brand", link: "https://stationpage.slack.com/archives/C09QQ09B0RY/p1777658001712179", lastTouchBy: "Aiza", waitingOn: "Wally", overdueHours: 6 }
+    ],
+
+    // Per-client view (the four tracked brands) + the email channel overall.
+    channels: [
+      { name: "Super",   source: "slack", avgHours: 2.1, open: 2, threads: 22 },
+      { name: "Bolster", source: "slack", avgHours: 3.0, open: 1, threads: 6 },
+      { name: "Rella",   source: "slack", avgHours: 2.7, open: 1, threads: 18 },
+      { name: "Amp",     source: "slack", avgHours: 4.4, open: 1, threads: 11 },
+      { name: "Partnership inbox", source: "email", avgHours: 4.9, open: 2, threads: 19 }
+    ]
+  };
+
+  /* ---------- grading helpers ---------- */
+  // Response-speed grade (lower hours = better)
+  function speedGrade(h){
+    if (h < 1)  return ["A+","g-a"];
+    if (h < 2)  return ["A","g-a"];
+    if (h < 4)  return ["B","g-b"];
+    if (h < 8)  return ["C","g-c"];
+    if (h < 24) return ["D","g-d"];
+    return ["F","g-f"];
+  }
+  // Customer Frustration Score (0–100) from hours a reply has been overdue.
+  function frustration(overdueHours){
+    const max = DATA.sla.frustrationMaxHours;
+    const score = Math.min(100, Math.round((overdueHours / max) * 100));
+    let emoji, label, cls;
+    if (score <= 15)      { emoji="😀"; label="Calm";     cls="g-a"; }
+    else if (score <= 35) { emoji="🙂"; label="Mild";     cls="g-b"; }
+    else if (score <= 60) { emoji="😐"; label="Elevated"; cls="g-c"; }
+    else if (score <= 80) { emoji="😟"; label="High";     cls="g-d"; }
+    else                  { emoji="🤬"; label="Critical"; cls="g-f"; }
+    return { score, emoji, label, cls };
+  }
+  function fmtH(h){
+    if (h < 1) return Math.round(h*60) + "m";
+    if (h < 24) return (Math.round(h*10)/10) + "h";
+    return (Math.round(h/24*10)/10) + "d";
+  }
+  function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  const barColor = cls => ({ 'g-a':'#18b368','g-b':'#3a8fd1','g-c':'#e0a800','g-d':'#e07b1a','g-f':'#e0463c' }[cls] || '#888');
+
+  /* ---------- render ---------- */
+  function render(){
+    const d = DATA;
+    const [teamG, teamGcls] = speedGrade(d.team.avgHours);
+    const ranked = [...d.people].sort((a,b)=> a.avgHours - b.avgHours);
+    const maxAvg = Math.max(...d.people.map(p=>p.avgHours));
+
+    const liveChip = d.live
+      ? '<span class="chip"><span class="dot dot--live"></span> Live data</span>'
+      : '<span class="chip"><span class="dot dot--seed"></span> Snapshot (seed data)</span>';
+
+    const html = `
+      <div class="head">
+        <div class="head__title">
+          <div class="logo-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" fill="#fff"/></svg></div>
+          <div>
+            <h1>Response Time Leaderboard</h1>
+            <div class="head__sub">Ops reply speed when <b>partnership@</b> / <b>cam@spotsnow.io</b> is copied & an ops teammate is on the thread · email + Slack</div>
+          </div>
+        </div>
+        <div class="head__meta">
+          ${liveChip}
+          <span class="chip">📅 ${esc(d.generatedAt)}</span>
+          <span class="chip">🪟 Last ${d.windowDays} days</span>
+          <span class="chip">🔁 Every ${d.cadenceDays} days</span>
+        </div>
+      </div>
+
+      ${d.live ? '' : `
+      <div class="banner">
+        <div class="banner__icon">🧪</div>
+        <div class="banner__txt"><strong>Local preview with a grounded snapshot.</strong>
+          People, clients (Super · Bolster · Rella · Amp) and Slack channels are real; the timing numbers are representative.
+          Wire the collector to live Gmail (<b>partnership@</b>/<b>cam@spotsnow.io</b>) + Slack and set <code>DATA.live = true</code> to populate real metrics. See methodology below.</div>
+      </div>`}
+
+      <!-- TEAM METRICS -->
+      <div class="section">
+        <div class="section__head">
+          <span class="section__dot" style="background:var(--coral)"></span>
+          <span class="section__title">Team — the metric that matters</span>
+          <span class="section__hint">${d.team.repliesAnalyzed} replies · ${d.team.threadsAnalyzed} threads</span>
+        </div>
+        <div class="kpis">
+          <div class="kpi kpi--hero">
+            <div class="gradebadge ${teamGcls}">${teamG}</div>
+            <div class="kpi__label">Team avg response</div>
+            <div class="kpi__value">${fmtH(d.team.avgHours)}</div>
+            <div class="kpi__foot">Median ${fmtH(d.team.medianHours)} · grade ${teamG}</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">SLA hit rate</div>
+            <div class="kpi__value">${d.team.slaHitRate}<small>%</small></div>
+            <div class="kpi__foot">replied within <b>${d.sla.targetHours}h</b> target</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">Open slow replies</div>
+            <div class="kpi__value">${d.team.openSlow}</div>
+            <div class="kpi__foot">waiting past <b class="bad">${d.sla.warnHours}h</b></div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">Replies analyzed</div>
+            <div class="kpi__value">${d.team.repliesAnalyzed}</div>
+            <div class="kpi__foot">across ${d.team.threadsAnalyzed} qualifying threads</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEADERBOARD -->
+      <div class="section">
+        <div class="section__head">
+          <span class="section__dot" style="background:var(--blue)"></span>
+          <span class="section__title">Leaderboard · fastest first</span>
+          <span class="section__hint">avg response time per person</span>
+        </div>
+        <div class="board">
+          <div class="lrow lrow--head">
+            <span>#</span><span>Person</span><span>Avg reply</span><span>Median</span>
+            <span class="col-ontime">On-time</span><span class="col-grade-extra">Speed</span>
+          </div>
+          ${ranked.map((p,i)=>{
+            const [g,gc] = speedGrade(p.avgHours);
+            const pct = Math.max(6, 100 - (p.avgHours/maxAvg*100));
+            const initials = p.name.split(' ').map(w=>w[0]).slice(0,2).join('');
+            const trend = p.trend < 0 ? `<span style="color:var(--green-text)">▼ ${fmtH(Math.abs(p.trend))} faster</span>`
+                        : p.trend > 0 ? `<span style="color:var(--red-text)">▲ ${fmtH(p.trend)} slower</span>`
+                        : `<span style="color:var(--grey-1)">— flat</span>`;
+            return `
+            <div class="lrow">
+              <div><div class="rank rank--${i+1}">${i+1}</div></div>
+              <div class="person">
+                <div class="avatar" style="background:${p.color}">${esc(initials)}</div>
+                <div>
+                  <div class="person__name">${esc(p.name)}</div>
+                  <div class="person__role">${esc(p.role)} · ${p.replies} replies</div>
+                </div>
+              </div>
+              <div>
+                <div class="metric">${fmtH(p.avgHours)} <span class="grade ${gc}">${g}</span></div>
+                <div class="bar"><i style="width:${pct}%;background:${barColor(gc)}"></i></div>
+              </div>
+              <div>
+                <div class="metric">${fmtH(p.medianHours)}</div>
+                <div class="metric__sub">${trend}</div>
+              </div>
+              <div class="col-ontime">
+                <div class="metric">${p.onTimeRate}<small>%</small></div>
+                <div class="metric__sub">range ${fmtH(p.fastest)}–${fmtH(p.slowest)}</div>
+              </div>
+              <div class="col-grade-extra"><span class="grade ${gc}" style="font-size:15px;min-width:42px;height:32px">${g}</span></div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- SLOW REPLIES -->
+      <div class="section">
+        <div class="section__head">
+          <span class="section__dot" style="background:#e0463c"></span>
+          <span class="section__title">Slow & overdue — needs a reply</span>
+          <span class="section__hint">sorted by frustration score</span>
+        </div>
+        <div class="slow">
+          ${[...d.slow].sort((a,b)=>b.overdueHours-a.overdueHours).map(s=>{
+            const fr = frustration(s.overdueHours);
+            const edge = barColor(fr.cls);
+            return `
+            <div class="scard" style="border-left-color:${edge}">
+              <div class="scard__main">
+                <div class="scard__top">
+                  <span class="src src--${s.source}">${s.source==='email'?'✉ Email':'💬 Slack'}</span>
+                  <span class="tag">${esc(s.client)}</span>
+                  <span class="tag">${esc(s.channel)}</span>
+                </div>
+                <div class="scard__subj"><a href="${esc(s.link)}" target="_blank" rel="noopener">${esc(s.subject)} ↗</a></div>
+                <div class="scard__meta">Last touch: <b>${esc(s.lastTouchBy)}</b> · waiting on <span class="waiting">${esc(s.waitingOn)}</span> · overdue <b>${fmtH(s.overdueHours)}</b></div>
+              </div>
+              <div class="scard__fr">
+                <div class="fr__emoji">${fr.emoji}</div>
+                <div class="fr__score">${fr.score}</div>
+                <div class="fr__label"><span class="grade ${fr.cls}" style="font-size:10px;height:18px;min-width:0;padding:0 7px">${fr.label}</span></div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- CLIENT CHANNELS -->
+      <div class="section">
+        <div class="section__head">
+          <span class="section__dot" style="background:#7c2fbe"></span>
+          <span class="section__title">By client & channel</span>
+          <span class="section__hint">Super · Bolster · Rella · Amp + partnership inbox</span>
+        </div>
+        <div class="chgrid">
+          ${d.channels.map(c=>{
+            const [g,gc] = speedGrade(c.avgHours);
+            return `
+            <div class="chcard">
+              <div class="chcard__top">
+                <div class="chcard__name">${esc(c.name)}</div>
+                <span class="grade ${gc}">${g}</span>
+              </div>
+              <div class="chcard__rows">
+                <div class="chrow"><span>${c.source==='email'?'✉ Email':'💬 Slack'}</span><b>${esc(c.source)}</b></div>
+                <div class="chrow"><span>Avg response</span><b>${fmtH(c.avgHours)}</b></div>
+                <div class="chrow"><span>Threads</span><b>${c.threads}</b></div>
+                <div class="chrow"><span>Open / waiting</span><b style="color:${c.open>0?'var(--red-text)':'var(--green-text)'}">${c.open}</b></div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- METHODOLOGY -->
+      <div class="section">
+        <div class="section__head">
+          <span class="section__dot" style="background:#18b368"></span>
+          <span class="section__title">Grading & methodology</span>
+        </div>
+        <div class="method">
+          <h3>Customer Frustration Score</h3>
+          <p>For every thread still waiting on us, we score how annoyed the customer likely is, scaled <b>0–100</b> against a
+            <b>${d.sla.frustrationMaxHours}h</b> ceiling: <code>score = min(100, round(overdueHours / ${d.sla.frustrationMaxHours} × 100))</code>.
+            Overdue = hours since the last inbound message that needs an ops reply.</p>
+          <div class="scale">
+            <div class="scell"><div class="scell__e">😀</div><div class="scell__t"><b>Calm · 0–15</b><span>Within ~7h</span></div></div>
+            <div class="scell"><div class="scell__e">🙂</div><div class="scell__t"><b>Mild · 16–35</b><span>~7–17h</span></div></div>
+            <div class="scell"><div class="scell__e">😐</div><div class="scell__t"><b>Elevated · 36–60</b><span>~17–29h</span></div></div>
+            <div class="scell"><div class="scell__e">😟</div><div class="scell__t"><b>High · 61–80</b><span>~29–38h</span></div></div>
+            <div class="scell"><div class="scell__e">🤬</div><div class="scell__t"><b>Critical · 81–100</b><span>38h+</span></div></div>
+          </div>
+          <div class="legend">
+            <div><b>Speed grade:</b> A+ &lt;1h · A &lt;2h · B &lt;4h · C &lt;8h · D &lt;24h · F ≥24h</div>
+            <div><b>SLA target:</b> ${d.sla.targetHours}h · <b>Warn:</b> ${d.sla.warnHours}h · <b>Critical:</b> ${d.sla.criticalHours}h</div>
+          </div>
+          <p style="margin-top:16px">
+            <b>Scope.</b> A thread qualifies only if <b>partnership@spotsnow.io</b> or <b>cam@spotsnow.io</b> is on it
+            <em>and</em> at least one ops teammate (cam / aiza / wally / eli) is a participant — so Cam's unrelated company email is excluded.
+            A "response" is the first ops reply after an external/inbound message; clock pauses on the latest ops message and resumes on the next inbound.
+            Slack mirrors the same logic across the active client conversations (Super, Bolster, Rella, Amp) in
+            <code>#media-operations</code>, <code>#station-accounts</code>, <code>#brand-leads</code> and <code>#general</code>.
+          </p>
+          <p>
+            <b>Live wiring (next step).</b> A small collector runs every ${d.cadenceDays} days: pulls qualifying Gmail threads + Slack threads,
+            computes per-reply gaps, and writes the same <code>DATA</code> shape this page already reads. Two notes from setup:
+            the currently-connected mailbox is <code>support@dropstation.io</code> (the <b>partnership@</b>/<b>cam@</b> mailbox must be connected for real email metrics),
+            and Super/Bolster/Rella/Amp are tracked as <em>clients across shared channels</em>, not dedicated channels.
+          </p>
+        </div>
+      </div>
+
+      <div class="foot">Generated ${esc(d.generatedAt)} · refreshes every ${d.cadenceDays} days · ops response-time leaderboard</div>
+    `;
+    document.getElementById('app').innerHTML = html;
+  }
+  render();
+  </script>
+</body>
+</html>
