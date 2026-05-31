@@ -165,6 +165,9 @@
 <body>
   <div class="wrap" id="app"></div>
 
+  <!-- Live data written by the collector (leaderboard/COLLECTOR.md). If absent,
+       the inline snapshot below is used so the page always renders offline. -->
+  <script src="response-leaderboard.data.js"></script>
   <script>
   /* ============================================================
      RESPONSE TIME LEADERBOARD — Ops team
@@ -181,7 +184,7 @@
      (see the methodology note at the bottom). Nothing else changes.
      ============================================================ */
 
-  const DATA = {
+  const DATA = window.LEADERBOARD_DATA || {
     generatedAt: "2026-05-30",
     windowDays: 60,
     cadenceDays: 3,
