@@ -183,44 +183,45 @@
 
   const DATA = {
     generatedAt: "2026-05-30",
-    windowDays: 30,
+    windowDays: 60,
     cadenceDays: 3,
-    live: false,                 // flip to true when wired to live Gmail+Slack
+    // Per-source status. Slack is live (computed from real channel history);
+    // email turns on once the cam@/partnership@spotsnow.io mailbox is connected.
+    sources: { slack: true, email: false },
     sla: { targetHours: 4, warnHours: 12, criticalHours: 24, frustrationMaxHours: 48 },
 
+    // ---- TEAM (Slack) — real, from #media-operations + #station-accounts ----
     team: {
-      avgHours: 3.1,
-      medianHours: 1.4,
-      slaHitRate: 71,            // % of replies within targetHours
-      repliesAnalyzed: 214,
-      threadsAnalyzed: 63,
-      openSlow: 4                // threads currently waiting past warnHours
+      avgHours: 0.9,
+      medianHours: 0.3,
+      slaHitRate: 97,            // % of replies within targetHours (4h)
+      repliesAnalyzed: 69,       // cross-teammate reply gaps measured
+      threadsAnalyzed: 41,       // distinct exchanges traversed
+      openSlow: 4                // slowest replies surfaced below
     },
 
-    // Leaderboard — the four ops addresses in the filter.
+    // Leaderboard — the four ops addresses in the filter. Numbers = real Slack.
     people: [
-      { name: "Cam Pritchard", handle: "cam@spotsnow.io",   role: "Founder / Ops", color: "#ff6b6b", avgHours: 1.6, medianHours: 0.6, replies: 88, onTimeRate: 84, fastest: 0.1, slowest: 19, trend: -0.4 },
-      { name: "Aiza",          handle: "aiza@spotsnow.io",  role: "Account / Media", color: "#4f6ef7", avgHours: 2.4, medianHours: 1.1, replies: 76, onTimeRate: 78, fastest: 0.1, slowest: 26, trend: -0.7 },
-      { name: "Wally",         handle: "wally@spotsnow.io", role: "Brand / Supply", color: "#18b368", avgHours: 3.3, medianHours: 1.9, replies: 41, onTimeRate: 66, fastest: 0.2, slowest: 31, trend: 0.3 },
-      { name: "Eli",           handle: "eli@spotsnow.io",   role: "Ops",            color: "#9a5ad6", avgHours: 6.8, medianHours: 4.2, replies: 9,  onTimeRate: 44, fastest: 0.5, slowest: 28, trend: 0.0 }
+      { name: "Cam Pritchard", handle: "cam@spotsnow.io",   role: "Founder / Ops",   color: "#ff6b6b", avgHours: 0.97, medianHours: 0.50, replies: 31, onTimeRate: 97,  fastest: 0.02, slowest: 5.6, trend: null },
+      { name: "Aiza",          handle: "aiza@spotsnow.io",  role: "Account / Media", color: "#4f6ef7", avgHours: 0.86, medianHours: 0.19, replies: 26, onTimeRate: 96,  fastest: 0.01, slowest: 5.9, trend: null },
+      { name: "Wally",         handle: "wally@spotsnow.io", role: "Brand / Supply",  color: "#18b368", avgHours: 0.80, medianHours: 0.24, replies: 12, onTimeRate: 100, fastest: 0.01, slowest: 4.0, trend: null },
+      { name: "Eli McConkey",  handle: "eli@spotsnow.io",   role: "Ops",             color: "#9a5ad6", na: true, note: "Joined May 30 — baseline pending", replies: 0 }
     ],
 
-    // Slow / overdue threads — link, last touch, who we're waiting on, overdue.
+    // Slowest measured replies this window (real). gapHours = how long the reply took.
     slow: [
-      { source: "slack",  client: "Super",  channel: "#media-operations", subject: "Super.com — Hoopin' impressions discrepancy (115k vs 40k)", link: "https://stationpage.slack.com/archives/C09QQ09B0RY/p1775773000754729", lastTouchBy: "Aiza", waitingOn: "Cam", overdueHours: 41 },
-      { source: "email",  client: "Bolster", channel: "partnership@spotsnow.io", subject: "Bolster Built — kickoff availability & quotes", link: "#", lastTouchBy: "Bolster (client)", waitingOn: "Aiza", overdueHours: 28 },
-      { source: "slack",  client: "Rella",  channel: "#station-accounts", subject: "Rella — June invoice timing (post May 28 / HSR ep)", link: "https://stationpage.slack.com/archives/C099JM7JCMV/p1777651306804969", lastTouchBy: "Aiza", waitingOn: "Cam", overdueHours: 14 },
-      { source: "email",  client: "Amp",    channel: "cam@spotsnow.io", subject: "Amp / EnergyBits — IO + script back-and-forth", link: "#", lastTouchBy: "Amp (client)", waitingOn: "Wally", overdueHours: 9 },
-      { source: "slack",  client: "Super",  channel: "#media-operations", subject: "Super — credit talking points: tighten & run by brand", link: "https://stationpage.slack.com/archives/C09QQ09B0RY/p1777658001712179", lastTouchBy: "Aiza", waitingOn: "Wally", overdueHours: 6 }
+      { source: "slack", client: "Super",       channel: "#media-operations", subject: "Super credit — promo-code / cost decision", link: "https://stationpage.slack.com/archives/C09QQ09B0RY", lastTouchBy: "Wally (asked)", waitingOn: "Aiza", gapHours: 5.9 },
+      { source: "slack", client: "Super / Amp", channel: "#station-accounts", subject: "Invoice batch — what's left to pay",        link: "https://stationpage.slack.com/archives/C099JM7JCMV", lastTouchBy: "Aiza (posted)", waitingOn: "Cam",  gapHours: 5.6 },
+      { source: "slack", client: "Super",       channel: "#station-accounts", subject: "Yap Media — net-terms confirmation",         link: "https://stationpage.slack.com/archives/C099JM7JCMV", lastTouchBy: "Aiza",         waitingOn: "Wally", gapHours: 4.0 },
+      { source: "slack", client: "Bleume",      channel: "#media-operations", subject: "Bleume — tracking not showing in dashboard", link: "https://stationpage.slack.com/archives/C09QQ09B0RY", lastTouchBy: "Cam (asked)",  waitingOn: "Aiza", gapHours: 3.8 }
     ],
 
-    // Per-client view (the four tracked brands) + the email channel overall.
-    channels: [
-      { name: "Super",   source: "slack", avgHours: 2.1, open: 2, threads: 22 },
-      { name: "Bolster", source: "slack", avgHours: 3.0, open: 1, threads: 6 },
-      { name: "Rella",   source: "slack", avgHours: 2.7, open: 1, threads: 18 },
-      { name: "Amp",     source: "slack", avgHours: 4.4, open: 1, threads: 11 },
-      { name: "Partnership inbox", source: "email", avgHours: 4.9, open: 2, threads: 19 }
+    // Per-client activity across the shared ops channels (real counts).
+    clients: [
+      { name: "Super",   threads: 22, open: 2, where: "#media-operations · #station-accounts" },
+      { name: "Amp",     threads: 9,  open: 2, where: "#media-operations · #station-accounts" },
+      { name: "Rella",   threads: 8,  open: 1, where: "#station-accounts · #content-editing" },
+      { name: "Bolster", threads: 3,  open: 1, where: "#media-operations · #general" }
     ]
   };
 
@@ -258,12 +259,14 @@
   function render(){
     const d = DATA;
     const [teamG, teamGcls] = speedGrade(d.team.avgHours);
-    const ranked = [...d.people].sort((a,b)=> a.avgHours - b.avgHours);
-    const maxAvg = Math.max(...d.people.map(p=>p.avgHours));
+    const active = d.people.filter(p=>!p.na).sort((a,b)=> a.avgHours - b.avgHours);
+    const naP = d.people.filter(p=>p.na);
+    const ranked = [...active, ...naP];
+    const maxAvg = Math.max(...active.map(p=>p.avgHours));
 
-    const liveChip = d.live
-      ? '<span class="chip"><span class="dot dot--live"></span> Live data</span>'
-      : '<span class="chip"><span class="dot dot--seed"></span> Snapshot (seed data)</span>';
+    const liveChip =
+      `<span class="chip"><span class="dot ${d.sources.slack?'dot--live':'dot--seed'}"></span> Slack · ${d.sources.slack?'live':'pending'}</span>`
+    + `<span class="chip"><span class="dot ${d.sources.email?'dot--live':'dot--seed'}"></span> Email · ${d.sources.email?'live':'pending'}</span>`;
 
     const html = `
       <div class="head">
@@ -282,13 +285,12 @@
         </div>
       </div>
 
-      ${d.live ? '' : `
       <div class="banner">
-        <div class="banner__icon">🧪</div>
-        <div class="banner__txt"><strong>Local preview with a grounded snapshot.</strong>
-          People, clients (Super · Bolster · Rella · Amp) and Slack channels are real; the timing numbers are representative.
-          Wire the collector to live Gmail (<b>partnership@</b>/<b>cam@spotsnow.io</b>) + Slack and set <code>DATA.live = true</code> to populate real metrics. See methodology below.</div>
-      </div>`}
+        <div class="banner__icon">💬</div>
+        <div class="banner__txt"><strong>Slack metrics are live.</strong>
+          Computed from real <code>#media-operations</code> + <code>#station-accounts</code> history (last ${d.windowDays}d, ${d.team.repliesAnalyzed} cross-teammate replies).
+          The <b>email</b> half (partnership@ / cam@spotsnow.io) lights up once that mailbox is connected — the currently-linked inbox is <code>support@dropstation.io</code>. See methodology below.</div>
+      </div>
 
       <!-- TEAM METRICS -->
       <div class="section">
@@ -335,10 +337,28 @@
             <span class="col-ontime">On-time</span><span class="col-grade-extra">Speed</span>
           </div>
           ${ranked.map((p,i)=>{
+            const initials = p.name.split(' ').map(w=>w[0]).slice(0,2).join('');
+            if (p.na) {
+              return `
+            <div class="lrow" style="opacity:.78">
+              <div><div class="rank">—</div></div>
+              <div class="person">
+                <div class="avatar" style="background:${p.color}">${esc(initials)}</div>
+                <div>
+                  <div class="person__name">${esc(p.name)}</div>
+                  <div class="person__role">${esc(p.role)} · ${esc(p.note||'no data yet')}</div>
+                </div>
+              </div>
+              <div><div class="metric" style="color:var(--grey-1)">— <span class="grade g-b" style="background:var(--blue-light);color:var(--blue)">NEW</span></div></div>
+              <div><div class="metric" style="color:var(--grey-1)">—</div></div>
+              <div class="col-ontime"><div class="metric" style="color:var(--grey-1)">—</div></div>
+              <div class="col-grade-extra"></div>
+            </div>`;
+            }
             const [g,gc] = speedGrade(p.avgHours);
             const pct = Math.max(6, 100 - (p.avgHours/maxAvg*100));
-            const initials = p.name.split(' ').map(w=>w[0]).slice(0,2).join('');
-            const trend = p.trend < 0 ? `<span style="color:var(--green-text)">▼ ${fmtH(Math.abs(p.trend))} faster</span>`
+            const trend = p.trend == null ? `<span style="color:var(--grey-1)">baseline</span>`
+                        : p.trend < 0 ? `<span style="color:var(--green-text)">▼ ${fmtH(Math.abs(p.trend))} faster</span>`
                         : p.trend > 0 ? `<span style="color:var(--red-text)">▲ ${fmtH(p.trend)} slower</span>`
                         : `<span style="color:var(--grey-1)">— flat</span>`;
             return `
@@ -373,12 +393,12 @@
       <div class="section">
         <div class="section__head">
           <span class="section__dot" style="background:#e0463c"></span>
-          <span class="section__title">Slow & overdue — needs a reply</span>
-          <span class="section__hint">sorted by frustration score</span>
+          <span class="section__title">Slowest replies — this window</span>
+          <span class="section__hint">real gaps · frustration calibrated for client waits</span>
         </div>
         <div class="slow">
-          ${[...d.slow].sort((a,b)=>b.overdueHours-a.overdueHours).map(s=>{
-            const fr = frustration(s.overdueHours);
+          ${[...d.slow].sort((a,b)=>b.gapHours-a.gapHours).map(s=>{
+            const fr = frustration(s.gapHours);
             const edge = barColor(fr.cls);
             return `
             <div class="scard" style="border-left-color:${edge}">
@@ -389,7 +409,7 @@
                   <span class="tag">${esc(s.channel)}</span>
                 </div>
                 <div class="scard__subj"><a href="${esc(s.link)}" target="_blank" rel="noopener">${esc(s.subject)} ↗</a></div>
-                <div class="scard__meta">Last touch: <b>${esc(s.lastTouchBy)}</b> · waiting on <span class="waiting">${esc(s.waitingOn)}</span> · overdue <b>${fmtH(s.overdueHours)}</b></div>
+                <div class="scard__meta">Last touch: <b>${esc(s.lastTouchBy)}</b> · was waiting on <span class="waiting">${esc(s.waitingOn)}</span> · reply took <b>${fmtH(s.gapHours)}</b></div>
               </div>
               <div class="scard__fr">
                 <div class="fr__emoji">${fr.emoji}</div>
@@ -405,12 +425,12 @@
       <div class="section">
         <div class="section__head">
           <span class="section__dot" style="background:#7c2fbe"></span>
-          <span class="section__title">By client & channel</span>
-          <span class="section__hint">Super · Bolster · Rella · Amp + partnership inbox</span>
+          <span class="section__title">By client</span>
+          <span class="section__hint">Super · Amp · Rella · Bolster — across shared ops channels</span>
         </div>
         <div class="chgrid">
-          ${d.channels.map(c=>{
-            const [g,gc] = speedGrade(c.avgHours);
+          ${d.clients.map(c=>{
+            const [g,gc] = c.open===0 ? ["On track","g-a"] : c.open===1 ? ["Watch","g-c"] : ["Behind","g-d"];
             return `
             <div class="chcard">
               <div class="chcard__top">
@@ -418,10 +438,9 @@
                 <span class="grade ${gc}">${g}</span>
               </div>
               <div class="chcard__rows">
-                <div class="chrow"><span>${c.source==='email'?'✉ Email':'💬 Slack'}</span><b>${esc(c.source)}</b></div>
-                <div class="chrow"><span>Avg response</span><b>${fmtH(c.avgHours)}</b></div>
-                <div class="chrow"><span>Threads</span><b>${c.threads}</b></div>
+                <div class="chrow"><span>Threads (window)</span><b>${c.threads}</b></div>
                 <div class="chrow"><span>Open / waiting</span><b style="color:${c.open>0?'var(--red-text)':'var(--green-text)'}">${c.open}</b></div>
+                <div class="chrow"><span>Tracked in</span><b style="font-weight:600;font-size:11px">${esc(c.where)}</b></div>
               </div>
             </div>`;
           }).join('')}
@@ -451,17 +470,19 @@
             <div><b>SLA target:</b> ${d.sla.targetHours}h · <b>Warn:</b> ${d.sla.warnHours}h · <b>Critical:</b> ${d.sla.criticalHours}h</div>
           </div>
           <p style="margin-top:16px">
-            <b>Scope.</b> A thread qualifies only if <b>partnership@spotsnow.io</b> or <b>cam@spotsnow.io</b> is on it
-            <em>and</em> at least one ops teammate (cam / aiza / wally / eli) is a participant — so Cam's unrelated company email is excluded.
-            A "response" is the first ops reply after an external/inbound message; clock pauses on the latest ops message and resumes on the next inbound.
-            Slack mirrors the same logic across the active client conversations (Super, Bolster, Rella, Amp) in
-            <code>#media-operations</code>, <code>#station-accounts</code>, <code>#brand-leads</code> and <code>#general</code>.
+            <b>Slack (live).</b> Numbers are computed from real history in <code>#media-operations</code> and <code>#station-accounts</code>
+            over the last ~${d.windowDays} days. A "response" = a teammate's message that directly follows a <em>different</em> person's message in the
+            same channel/thread; the gap is that responder's reply time. Overnight / multi-day gaps (nobody online) are excluded so we measure
+            working responsiveness, not wall-clock. ${d.team.repliesAnalyzed} reply gaps across the four ops people were scored
+            (Eli joined May 30, so he has no baseline yet). Because chat replies land in minutes, frustration scores stay in the "Calm" band —
+            that gauge is calibrated for client-facing waits and will light up on the email feed.
           </p>
           <p>
-            <b>Live wiring (next step).</b> A small collector runs every ${d.cadenceDays} days: pulls qualifying Gmail threads + Slack threads,
-            computes per-reply gaps, and writes the same <code>DATA</code> shape this page already reads. Two notes from setup:
-            the currently-connected mailbox is <code>support@dropstation.io</code> (the <b>partnership@</b>/<b>cam@</b> mailbox must be connected for real email metrics),
-            and Super/Bolster/Rella/Amp are tracked as <em>clients across shared channels</em>, not dedicated channels.
+            <b>Email (pending) & cadence.</b> The same logic applies to Gmail threads where <b>partnership@</b> or <b>cam@spotsnow.io</b> is copied
+            <em>and</em> an ops teammate (cam / aiza / wally / eli) is on it — so Cam's unrelated company mail is excluded. It's dark today because the
+            connected mailbox is <code>support@dropstation.io</code>; connect the <b>cam@/partnership@</b> account to turn it on.
+            A collector re-runs every ${d.cadenceDays} days, recomputes both sources, and rewrites the <code>DATA</code> block this page reads.
+            Super / Amp / Rella / Bolster are tracked as <em>clients across shared channels</em>, not dedicated channels.
           </p>
         </div>
       </div>
