@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>SpotsNow — Investor List</title>
+<link rel="icon" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#17212B; --navy-2:#1c2731; --navy-3:#222e3a;
+    --salmon:#F06060; --salmon-2:#f3756f;
+    --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
+    --text:#eef2f6; --mute:#9aa7b4; --mute-2:#6b7886;
+    --body:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--body);background:var(--navy);color:var(--text);
+    -webkit-font-smoothing:antialiased;min-height:100vh;line-height:1.5}
+  a{color:inherit;text-decoration:none}
+  svg{display:block}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+
+  /* gate */
+  #gate{position:fixed;inset:0;z-index:100;
+    background:radial-gradient(1200px 700px at 50% -10%, #1f2d3a, var(--navy));
+    display:flex;align-items:center;justify-content:center;padding:24px}
+  .gate-card{width:100%;max-width:400px;background:var(--navy-2);border:1px solid var(--line);
+    border-radius:16px;padding:38px 34px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+  .gate-card .logo{margin:0 auto 22px;height:28px}
+  .gate-card .logo svg{height:28px;width:auto;margin:0 auto}
+  .gate-card .logo svg path{fill:#fff !important}
+  .gate-card h1{font-size:19px;font-weight:800;margin-bottom:6px}
+  .gate-card p{color:var(--mute);font-size:13.5px;margin-bottom:22px}
+  .gate-form{display:flex;flex-direction:column;gap:11px}
+  .gate-form input{width:100%;padding:13px 15px;border-radius:11px;background:var(--navy-3);
+    border:1px solid var(--line-2);color:var(--text);font-size:15px;font-family:var(--body);outline:none}
+  .gate-form input:focus{border-color:var(--salmon)}
+  .gate-form button{width:100%;padding:13px 15px;border:none;border-radius:11px;cursor:pointer;
+    background:var(--salmon);color:#fff;font-size:15px;font-weight:700;font-family:var(--body)}
+  .gate-form button:hover{background:var(--salmon-2)}
+  .gate-form button:disabled{opacity:.6;cursor:default}
+  .gate-err{color:var(--salmon);font-size:13px;min-height:18px}
+
+  /* header */
+  header{position:sticky;top:0;z-index:10;background:rgba(23,33,43,.85);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .hdr{max-width:1080px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;
+    justify-content:space-between;gap:16px}
+  .hdr .left{display:flex;align-items:center;gap:14px;min-width:0}
+  .hdr .logo{height:22px;display:inline-flex}
+  .hdr .logo svg{height:22px;width:auto}
+  .hdr .logo svg path{fill:#fff !important}
+  .hdr .title{font-size:14px;font-weight:700;color:var(--mute)}
+  .hdr .right{display:flex;align-items:center;gap:14px}
+  .btn{font-size:13px;font-weight:600;color:var(--mute);background:none;border:1px solid var(--line-2);
+    border-radius:9px;padding:7px 13px;cursor:pointer;font-family:var(--body);transition:.15s}
+  .btn:hover{color:var(--text);border-color:var(--mute)}
+
+  main{padding:32px 0 80px;opacity:0;transition:opacity .3s}
+  main.shown{opacity:1}
+  .stats{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+  .stat{background:var(--navy-2);border:1px solid var(--line);border-radius:13px;padding:18px 22px;min-width:150px}
+  .stat .n{font-size:28px;font-weight:800;color:var(--salmon);line-height:1.1}
+  .stat .l{font-size:12.5px;color:var(--mute);margin-top:4px}
+
+  .toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .search{display:flex;align-items:center;gap:9px;background:var(--navy-2);border:1px solid var(--line-2);
+    border-radius:10px;padding:9px 13px;flex:1;max-width:320px}
+  .search input{background:none;border:none;outline:none;color:var(--text);font-family:var(--body);font-size:14px;width:100%}
+  .search input::placeholder{color:var(--mute-2)}
+  .updated{font-size:12.5px;color:var(--mute-2)}
+
+  .tablecard{background:var(--navy-2);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:14px 18px;font-size:14px}
+  thead th{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--mute-2);
+    border-bottom:1px solid var(--line);cursor:pointer;user-select:none;white-space:nowrap}
+  thead th .arrow{opacity:.5;font-size:10px;margin-left:4px}
+  tbody tr{border-bottom:1px solid var(--line)}
+  tbody tr:last-child{border-bottom:none}
+  tbody tr:hover{background:var(--navy-3)}
+  td.email{font-weight:600}
+  td.email a{color:var(--text)}
+  td.email a:hover{color:var(--salmon)}
+  td.num{font-weight:700}
+  td.dim{color:var(--mute)}
+  .opens-pill{display:inline-block;background:rgba(240,96,96,.14);color:var(--salmon);
+    border-radius:999px;padding:2px 10px;font-size:13px;font-weight:700}
+  .empty{padding:48px;text-align:center;color:var(--mute)}
+  @media (max-width:640px){
+    .hide-sm{display:none}
+    th,td{padding:12px 12px;font-size:13px}
+  }
+</style>
+</head>
+<body>
+
+<!-- password gate -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="logo" id="gateLogo"></div>
+    <h1>Investor list</h1>
+    <p>Enter the dashboard password.</p>
+    <form class="gate-form" id="gateForm" novalidate>
+      <input type="password" id="pw" placeholder="Password" autocomplete="current-password" required>
+      <button type="submit" id="gateBtn">Unlock</button>
+      <div class="gate-err" id="gateErr"></div>
+    </form>
+  </div>
+</div>
+
+<header>
+  <div class="hdr">
+    <div class="left">
+      <a class="logo" href="#" id="hdrLogo"></a>
+      <span class="title">Investor List</span>
+    </div>
+    <div class="right">
+      <button class="btn" id="refresh">Refresh</button>
+      <button class="btn" id="export">Export CSV</button>
+      <button class="btn" id="lock">Lock</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><div class="n" id="sTotal">0</div><div class="l">Unique investors</div></div>
+      <div class="stat"><div class="n" id="sOpens">0</div><div class="l">Total opens</div></div>
+      <div class="stat"><div class="n" id="sToday">0</div><div class="l">Opened today</div></div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--mute-2)"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="q" placeholder="Search email...">
+      </div>
+      <span class="updated" id="updated"></span>
+    </div>
+
+    <div class="tablecard">
+      <table>
+        <thead>
+          <tr>
+            <th data-sort="email">Email <span class="arrow"></span></th>
+            <th data-sort="firstOpened">First opened <span class="arrow"></span></th>
+            <th data-sort="lastOpened">Last opened <span class="arrow">▼</span></th>
+            <th data-sort="opens">Opens <span class="arrow"></span></th>
+            <th class="hide-sm" data-sort="ref">Referrer <span class="arrow"></span></th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div class="empty" id="empty" style="display:none">No investors have opened the portal yet.</div>
+    </div>
+  </div>
+</main>
+
+<script>
+const $ = (id)=>document.getElementById(id);
+const PW_KEY = "sn_dash_pw";
+let LEADS = [];
+let sortKey = "lastOpened", sortDir = -1;
+
+async function injectLogo(){
+  let svg=""; try{ svg = await (await fetch("/spotsnow-logo.svg")).text(); }catch(e){}
+  document.querySelectorAll("#gateLogo,#hdrLogo").forEach(el=>el.innerHTML=svg);
+}
+
+function fmt(iso){
+  if(!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleString(undefined,{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+}
+function isToday(iso){
+  if(!iso) return false;
+  const d=new Date(iso), n=new Date();
+  return d.getFullYear()===n.getFullYear() && d.getMonth()===n.getMonth() && d.getDate()===n.getDate();
+}
+function esc(s){ return (s||"").toString().replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function render(){
+  const q = $("q").value.trim().toLowerCase();
+  let rows = LEADS.filter(l => !q || l.email.toLowerCase().includes(q));
+  rows.sort((a,b)=>{
+    let av=a[sortKey], bv=b[sortKey];
+    if(sortKey==="opens"){ av=av||0; bv=bv||0; return (av-bv)*sortDir; }
+    if(sortKey==="firstOpened"||sortKey==="lastOpened"){ return (new Date(av||0)-new Date(bv||0))*sortDir; }
+    return (""+av).localeCompare(""+bv)*sortDir;
+  });
+
+  $("sTotal").textContent = LEADS.length;
+  $("sOpens").textContent = LEADS.reduce((s,l)=>s+(l.opens||0),0);
+  $("sToday").textContent = LEADS.filter(l=>isToday(l.lastOpened)).length;
+
+  $("rows").innerHTML = rows.map(l=>`
+    <tr>
+      <td class="email"><a href="mailto:${esc(l.email)}">${esc(l.email)}</a></td>
+      <td class="dim">${fmt(l.firstOpened)}</td>
+      <td>${fmt(l.lastOpened)}</td>
+      <td class="num"><span class="opens-pill">${l.opens||1}</span></td>
+      <td class="hide-sm dim">${esc(l.ref==="direct"?"Direct":(l.ref||"—"))}</td>
+    </tr>`).join("");
+  $("empty").style.display = rows.length ? "none" : "block";
+
+  document.querySelectorAll("thead th").forEach(th=>{
+    const a = th.querySelector(".arrow");
+    if(a) a.textContent = th.dataset.sort===sortKey ? (sortDir<0?"▼":"▲") : "";
+  });
+}
+
+async function load(){
+  const pw = sessionStorage.getItem(PW_KEY);
+  const r = await fetch("/api/investor-leads", { headers:{ "x-investor-password": pw } });
+  if(r.status===401){ sessionStorage.removeItem(PW_KEY); showGate("Wrong password."); return; }
+  if(!r.ok){ const e=await r.json().catch(()=>({})); showGate(e.error||("Error "+r.status)); return; }
+  const data = await r.json();
+  LEADS = data.leads||[];
+  $("updated").textContent = data.updated_at ? ("Updated "+fmt(data.updated_at)) : "";
+  $("gate").style.display="none";
+  $("main").classList.add("shown");
+  render();
+}
+
+function showGate(msg){
+  $("gate").style.display="flex";
+  $("main").classList.remove("shown");
+  $("gateErr").textContent = msg||"";
+  $("gateBtn").disabled=false; $("gateBtn").textContent="Unlock";
+}
+
+$("gateForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const pw = $("pw").value;
+  if(!pw){ $("gateErr").textContent="Enter a password."; return; }
+  sessionStorage.setItem(PW_KEY, pw);
+  $("gateBtn").disabled=true; $("gateBtn").textContent="Unlocking...";
+  await load();
+});
+
+$("q").addEventListener("input", render);
+$("refresh").addEventListener("click", load);
+$("lock").addEventListener("click", ()=>{ sessionStorage.removeItem(PW_KEY); $("pw").value=""; showGate(""); });
+document.querySelectorAll("thead th").forEach(th=>th.addEventListener("click",()=>{
+  const k=th.dataset.sort; if(!k) return;
+  if(sortKey===k){ sortDir*=-1; } else { sortKey=k; sortDir = (k==="email"||k==="ref")?1:-1; }
+  render();
+}));
+$("export").addEventListener("click", ()=>{
+  const head=["email","first_opened","last_opened","opens","referrer"];
+  const lines=[head.join(",")].concat(LEADS.map(l=>[
+    l.email, l.firstOpened||"", l.lastOpened||"", l.opens||1, (l.ref||"").replace(/,/g," ")
+  ].map(v=>`"${(""+v).replace(/"/g,'""')}"`).join(",")));
+  const blob=new Blob([lines.join("\n")],{type:"text/csv"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="investor-list.csv"; a.click(); URL.revokeObjectURL(a.href);
+});
+
+injectLogo();
+if(sessionStorage.getItem(PW_KEY)) load(); else showGate("");
+</script>
+</body>
+</html>
