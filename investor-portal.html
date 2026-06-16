@@ -228,6 +228,14 @@ const CONTENT = {
   }
   .video-soon .play svg{width:22px;height:22px;margin-left:3px}
   .video-soon span{color:var(--mute);font-size:14px;font-weight:600}
+  .video-facade{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;
+    cursor:pointer;background:#0e1721;display:block}
+  .video-facade img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .video-facade .play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:66px;height:66px;border-radius:999px;background:rgba(240,96,96,.92);
+    display:flex;align-items:center;justify-content:center;color:#fff;transition:.15s}
+  .video-facade:hover .play{background:var(--salmon);transform:translate(-50%,-50%) scale(1.07)}
+  .video-facade .play svg{width:24px;height:24px;margin-left:3px}
   .vidcap{margin-top:16px}
   .vidcap b{font-size:15px;font-weight:700;display:block}
   .vidcap small{color:var(--mute);font-size:13.5px}
@@ -415,12 +423,33 @@ const cell = (v)=> isTodo(v) ? TODO_HTML : v;
 
 const PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
 
+function ytId(url){
+  const m = (url || "").match(/youtube(?:-nocookie)?\.com\/embed\/([A-Za-z0-9_-]+)/);
+  return m ? m[1] : null;
+}
 function videoEl(cfg){
   if (cfg.url && cfg.url.trim()){
+    const id = ytId(cfg.url);
+    if (id){
+      // Clean on-brand poster, no YouTube title / "Watch on YouTube" until played.
+      return `<button class="video-facade" data-yt="${id}" aria-label="Play ${cfg.caption||'video'}">` +
+        `<img src="https://img.youtube.com/vi/${id}/maxresdefault.jpg" ` +
+        `onerror="this.src='https://img.youtube.com/vi/${id}/hqdefault.jpg'" alt="">` +
+        `<span class="play">${PLAY}</span></button>`;
+    }
     return `<iframe src="${cfg.url}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
   }
   return `<div class="video-soon"><div class="play">${PLAY}</div><span>${cfg.soonLabel}</span></div>`;
 }
+// Swap the facade for an autoplaying player on click.
+document.addEventListener("click", (e)=>{
+  const f = e.target.closest && e.target.closest(".video-facade");
+  if (!f) return;
+  const id = f.dataset.yt;
+  f.parentElement.innerHTML =
+    `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1" ` +
+    `allow="autoplay; encrypted-media; picture-in-picture; web-share; fullscreen" allowfullscreen></iframe>`;
+});
 function vidCap(cfg){ return `<b>${cfg.caption}</b><small>${cfg.sub}</small>`; }
 
 function docButton(d, primary){
