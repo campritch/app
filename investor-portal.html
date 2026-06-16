@@ -39,7 +39,6 @@ const CONTENT = {
     deck:   { label: "View deck",     url: "/investors" },       // spotsnow.wiki/investors
     memo:   { label: "View memo",     url: "" },             // Open Q — add link
     letter: { label: "Founder letter", url: "https://dropstation.notion.site/SpotsNow-Founder-Letter-308bb6074fe3801e92abefd97d30abfb" },
-    model:  { label: "Model",         url: "", soon: true }, // optional, shown disabled
   },
 
   // ---- Videos (any iframe embed URL; empty => graceful "coming soon") ----
@@ -457,8 +456,7 @@ function render(){
   $("docbtns").innerHTML =
     docButton(c.docs.deck, true) +
     docButton(c.docs.memo, false) +
-    docButton(c.docs.letter, false) +
-    docButton(c.docs.model, false);
+    docButton(c.docs.letter, false);
 
   // videos
   $("founderVideo").innerHTML = videoEl(c.founderVideo);
