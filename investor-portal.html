@@ -48,7 +48,8 @@ const CONTENT = {
     soonLabel: "Founder pitch coming this week",
   },
   investorVideo: {
-    url: "",                                  // recorded day of call, URL TBD
+    url: "https://www.youtube.com/embed/yUuwxEfx-E8",  // https://youtube.com/shorts/yUuwxEfx-E8
+    portrait: true,                           // vertical Short — render 9:16
     caption: "Why we're in",
     sub: "Sebastian Moftakhar & Nicole",
     soonLabel: "Investor video coming soon",
@@ -216,6 +217,7 @@ const CONTENT = {
 
   /* video */
   .video{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:16/9;background:#0e1721}
+  .video.portrait{aspect-ratio:9/16;max-width:300px;margin:0 auto}
   .video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
   .video-soon{
     position:absolute;inset:0;display:flex;flex-direction:column;
@@ -379,8 +381,8 @@ const CONTENT = {
     <!-- INVESTOR VIDEO -->
     <h2 class="sectiontitle">Why we are backing this</h2>
     <div class="sectionsub">Straight from the investors leading the round.</div>
-    <div style="max-width:640px">
-      <section class="card">
+    <div style="max-width:380px">
+      <section class="card" style="text-align:center">
         <div class="video" id="investorVideo"></div>
         <div class="vidcap" id="investorCap"></div>
       </section>
@@ -483,6 +485,7 @@ function render(){
   // videos
   $("founderVideo").innerHTML = videoEl(c.founderVideo);
   $("founderCap").innerHTML = vidCap(c.founderVideo);
+  $("investorVideo").className = "video" + (c.investorVideo.portrait ? " portrait" : "");
   $("investorVideo").innerHTML = videoEl(c.investorVideo);
   $("investorCap").innerHTML = vidCap(c.investorVideo);
 
