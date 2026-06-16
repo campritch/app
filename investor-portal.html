@@ -37,7 +37,6 @@ const CONTENT = {
   // ---- Document buttons (open in new tab if url set; else show a quiet "Soon") ----
   docs: {
     deck:   { label: "View deck",     url: "/investors" },       // spotsnow.wiki/investors
-    memo:   { label: "View memo",     url: "" },             // Open Q — add link
     letter: { label: "Founder letter", url: "https://dropstation.notion.site/SpotsNow-Founder-Letter-308bb6074fe3801e92abefd97d30abfb" },
   },
 
@@ -450,7 +449,6 @@ function render(){
   // doc buttons (deck primary, rest ghost)
   $("docbtns").innerHTML =
     docButton(c.docs.deck, true) +
-    docButton(c.docs.memo, false) +
     docButton(c.docs.letter, false);
 
   // videos
