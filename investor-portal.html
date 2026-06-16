@@ -31,13 +31,8 @@ const CONTENT = {
   overview:
     "There's $32B in long-form media inventory and half of it goes unsold. SpotsNow gives brands " +
     "direct access to host-read inventory across 59,000+ shows, searchable, priceable, buyable, and " +
-    "measurable for the first time. No agency, no cold emails, no guesswork. AI builds the media plan " +
-    "in minutes, ads go live in 12 hours, and pixel attribution is 7x more accurate than promo codes. " +
-    "Next stop: YouTube, then short-form.",
-  // Brands + networks confirmed in the seed deck.
-  partners:
-    "Brands run on SpotsNow include Perplexity, TurboTax, Toyota, Peloton and Liquid IV. Inventory " +
-    "spans 20+ networks, including iHeart, SiriusXM, Wondery, BBC and NYT, with 6 agencies subscribed.",
+    "measurable for the first time.",
+  partners: "",
 
   // ---- Document buttons (open in new tab if url set; else show a quiet "Soon") ----
   docs: {
@@ -452,7 +447,11 @@ function render(){
   $("company").textContent = c.company;
   $("tagline").textContent = c.tagline;
   $("overview").textContent = c.overview;
-  $("partners").textContent = c.partners;
+  if (c.partners && c.partners.trim()) {
+    $("partners").textContent = c.partners;
+  } else {
+    $("partners").style.display = "none";
+  }
 
   // doc buttons (deck primary, rest ghost)
   $("docbtns").innerHTML =
