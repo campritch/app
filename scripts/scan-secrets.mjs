@@ -20,22 +20,44 @@ const SKIP_DIRS = new Set([
 ]);
 const SCAN_EXT = new Set(['.html', '.js', '.mjs', '.cjs', '.ts', '.jsx', '.tsx', '.py']);
 
+// Matches a secret-style env var NAME (e.g. OPENAI_API_KEY, NOTION_API_KEY,
+// SESSION_SECRET, HUBSPOT_PRIVATE_APP_TOKEN, BLOB_READ_WRITE_TOKEN). Specific
+// secret suffixes only — deliberately does NOT match benign constants like
+// LS_KEY / STORAGE_KEY / YOUR_TOKEN, nor the plain word "password" in UI copy.
+const SECRET_ENV = /\b[A-Z][A-Z0-9_]*(_API_KEY|_API_TOKEN|_PRIVATE_APP_TOKEN|_ACCESS_TOKEN|_READ_WRITE_TOKEN|_CLIENT_SECRET|_SERVICE_SECRET|_SECRET|_PASSWORD)\b/;
+
 // Each rule: (relPath, line) -> message | null
 const RULES = [
   {
     id: 'hardcoded-key',
-    test: (_p, line) => /sk-ant-[A-Za-z0-9_-]{16,}/.test(line),
-    msg: 'Hardcoded Anthropic API key. Keys belong in env vars, never in source.',
+    // Anthropic (sk-ant-), OpenAI (sk-proj- / bare sk-...48), Google/Gemini (AIza...).
+    test: (_p, line) =>
+      /sk-ant-[A-Za-z0-9_-]{16,}/.test(line) ||
+      /sk-proj-[A-Za-z0-9_-]{16,}/.test(line) ||
+      /\bsk-[A-Za-z0-9]{32,}\b/.test(line) ||
+      /\bAIza[0-9A-Za-z_-]{30,}\b/.test(line),
+    msg: 'Hardcoded API key (Anthropic / OpenAI / Google). Keys belong in env vars, never in source.',
   },
   {
     id: 'browser-key-header',
     test: (p, line) => p.endsWith('.html') && /x-api-key/i.test(line),
-    msg: 'Anthropic key used in browser code (x-api-key in an .html file). Call a server-side proxy instead.',
+    msg: 'API key used in browser code (x-api-key in an .html file). Call a server-side proxy instead.',
   },
   {
     id: 'direct-browser-access',
     test: (_p, line) => /anthropic-dangerous-direct-browser-access/.test(line),
     msg: 'Direct browser access to Anthropic. This exposes the key to every visitor. Proxy server-side.',
+  },
+  {
+    id: 'browser-openai-call',
+    test: (p, line) => p.endsWith('.html') && /api\.openai\.com/i.test(line),
+    msg: 'Direct browser call to OpenAI (api.openai.com in an .html file). Call a server-side proxy instead.',
+  },
+  {
+    id: 'browser-bearer-key',
+    // How OpenAI (and most APIs) send a key: Authorization: Bearer sk-...
+    test: (p, line) => p.endsWith('.html') && /Authorization/i.test(line) && /\bBearer\b/.test(line),
+    msg: 'API key sent from the browser (Authorization: Bearer in an .html file). Call a server-side proxy instead.',
   },
 ];
 
@@ -43,11 +65,11 @@ const RULES = [
 // `key:` field — the exact shape of the deleted config.py leak.
 function fileLevelKeyReturn(relPath, content, lines) {
   if (!relPath.startsWith('api/')) return null;
-  if (!/(ANTHROPIC|GEMINI|OPENAI|OPENROUTER)_API_KEY/.test(content)) return null;
+  if (!SECRET_ENV.test(content)) return null;
   const idx = lines.findIndex(l => /["']key["']\s*:/.test(l) && !l.includes('secrets-scan-ok'));
   if (idx === -1) return null;
   return { id: 'key-returning-endpoint', line: idx + 1,
-    msg: 'Endpoint appears to return an API key to the client (reads *_API_KEY and emits a "key" field). Never send keys to the frontend.' };
+    msg: 'Endpoint appears to return a secret to the client (reads a secret env var and emits a "key" field). Never send secrets to the frontend.' };
 }
 
 function walk(dir, out) {
