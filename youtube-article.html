@@ -611,7 +611,19 @@
 const isLocal = window.location.hostname === 'localhost';
 const TRANSCRIPT_API = isLocal ? 'http://localhost:5055/generate' : '/api/transcript';
 const THUMB_API      = isLocal ? 'http://localhost:5055/thumbnail' : '/api/thumbnail';
-const CLAUDE_API     = 'https://api.anthropic.com/v1/messages';
+// Server-side proxy — the API key stays on the server (never sent to the browser).
+const CLAUDE_API     = '/api/youtube-generate';
+
+// ── Access gate — password stored locally, sent with every proxy call ────────
+function getPassword() {
+  let pw = localStorage.getItem('yt_pass') || '';
+  if (!pw) {
+    pw = (window.prompt('Enter access password') || '').trim();
+    if (pw) localStorage.setItem('yt_pass', pw);
+  }
+  return pw;
+}
+function clearPassword() { localStorage.removeItem('yt_pass'); }
 const PHOTOS = ['p1','p2','p3','p4'];
 // All portrait shots — face centered near top
 const PHOTO_POS = { p1: 'center top', p2: 'center top', p3: 'center top', p4: 'center top' };
@@ -777,18 +789,6 @@ function selectPattern(el, pattern) {
   regenThumb();
 }
 let renderTimer = null;
-
-// ── API key — fetched once from /api/config, cached for session ──────────────
-let _cachedKey = '';
-async function getKey() {
-  if (_cachedKey) return _cachedKey;
-  try {
-    const res = await fetch(isLocal ? 'http://localhost:5055/config' : '/api/config');
-    const data = await res.json();
-    _cachedKey = data.key || '';
-  } catch {}
-  return _cachedKey;
-}
 
 // ── Photo chips ─────────────────────────────────────────────────────────────
 (function() {
@@ -962,10 +962,7 @@ async function generateFromArticle() {
 
   showStatus('loading', 'Generating slides…');
 
-  const key = await getKey();
-  if (!key) { showStatus('error', 'API key not found.'); btn.disabled = false; return; }
-
-  const igData = await generateInstagram(articleText, key);
+  const igData = await generateInstagram(articleText);
   if (!igData) { showStatus('error', 'Slide generation failed — try again.'); btn.disabled = false; return; }
 
   renderSlides(igData);
@@ -1048,9 +1045,9 @@ async function runGeneration(transcript, videoId) {
   document.getElementById('claude-card').style.display = 'none';
   rawMarkdown = '';
 
-  // Step 2: get API key and stream article from Claude directly
-  const key = await getKey();
-  if (!key) { showStatus('error', 'API key not found — check Vercel env vars.'); btn.disabled = false; return; }
+  // Step 2: stream article from Claude via the server-side proxy
+  const password = getPassword();
+  if (!password) { showStatus('error', 'Password required.'); btn.disabled = false; return; }
 
   showStatus('loading', 'Writing article…');
   document.getElementById('article-card').style.display = 'block';
@@ -1059,20 +1056,21 @@ async function runGeneration(transcript, videoId) {
   try {
     const res = await fetch(CLAUDE_API, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-opus-4-6',
+        password,
         max_tokens: 4096,
         stream: true,
         messages: [{ role: 'user', content: ARTICLE_PROMPT(transcript) }],
       }),
     });
 
+    if (res.status === 401) {
+      clearPassword();
+      showStatus('error', 'Wrong password — click Generate to try again.');
+      btn.disabled = false;
+      return;
+    }
     if (!res.ok) {
       const err = await res.json();
       showStatus('error', err.error?.message || 'Claude API error');
@@ -1137,7 +1135,7 @@ async function runGeneration(transcript, videoId) {
 
   // Run thumbnail and Instagram generation in parallel — isolated so neither blocks the other
   const [igData] = await Promise.all([
-    generateInstagram(transcript, key),
+    generateInstagram(transcript),
     regenThumb().catch(e => console.warn('Thumb regen failed:', e)),
   ]);
 
@@ -1248,22 +1246,18 @@ function selectSide(el, side) {
 }
 
 // ── Instagram carousel ──────────────────────────────────────────────────────
-async function generateInstagram(transcript, key) {
+async function generateInstagram(transcript) {
   try {
     const res = await fetch(CLAUDE_API, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-opus-4-6',
+        password: getPassword(),
         max_tokens: 2048,
         messages: [{ role: 'user', content: IG_PROMPT(transcript) }],
       }),
     });
+    if (res.status === 401) { clearPassword(); console.error('Instagram generation: bad password'); return null; }
     const data = await res.json();
     const raw = data.content?.[0]?.text || '';
     // Strip markdown code fences if present
@@ -1539,8 +1533,6 @@ function showStatus(type, text) {
 }
 
 document.getElementById('url-input').addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
-// Warm up the key cache on load so first generate is instant
-getKey();
 </script>
 </body>
 </html>
