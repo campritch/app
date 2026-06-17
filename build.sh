@@ -4,6 +4,11 @@
 
 set -e
 
+# Security guardrail: fail the build if any secret-leaking pattern reaches
+# client code (see scripts/scan-secrets.mjs). Stops the 2026-06 key-leak class
+# of bug from ever shipping again.
+node scripts/scan-secrets.mjs
+
 mkdir -p dist dist/data dist/api dist/cutouts
 
 cp *.html dist/

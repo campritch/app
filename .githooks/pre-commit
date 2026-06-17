@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Block commits that leak a secret into client code.
+# Mirrors the build-time check in build.sh / scripts/scan-secrets.mjs.
+# Bypass intentionally with `git commit --no-verify` (don't, unless you're sure).
+
+if command -v node >/dev/null 2>&1; then
+  node scripts/scan-secrets.mjs || {
+    echo ""
+    echo "Commit blocked by the secret-leak guardrail (see above)."
+    echo "Keep API keys on the server. To allow a false positive, append a 'secrets-scan-ok' comment."
+    exit 1
+  }
+else
+  echo "pre-commit: node not found, skipping secrets scan" >&2
+fi
