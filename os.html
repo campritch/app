@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotsNow OS — Network Dashboard</title>
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #17212B;
+      --dark: #0E1323;
+      --text-primary: #1D2027;
+      --text-secondary: #4D525B;
+      --text-tertiary: #6B7079;
+      --border: #E4E6ED;
+      --border-light: #EDEEF1;
+      --white: #ffffff;
+      --accent: #FF6267;
+      --accent-soft: #FFEDED;
+      --secondary-lite: #F3F4F6;
+      --page-bg: #FAFAFA;
+      --green-text: #0E6832;
+      --green-bg: #D6F1E0;
+      --purple-text: #5B36C9;
+      --purple-bg: #ECE6FB;
+      --amber-text: #92590B;
+      --amber-bg: #FBEFD3;
+      --radius-card: 16px;
+      --radius-pill: 999px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: var(--page-bg);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.45;
+    }
+
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 28px 80px; }
+
+    /* ─── TOP BAR ─── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 34px;
+    }
+    .brand { display: flex; align-items: center; gap: 13px; }
+    .brand__mark {
+      width: 44px; height: 44px; border-radius: 11px;
+      background: var(--accent); color: #fff;
+      display: grid; place-items: center;
+      box-shadow: 0 6px 18px rgba(255,98,103,.32);
+    }
+    .brand__name { font-size: 21px; font-weight: 600; letter-spacing: -.02em; }
+    .brand__name span { color: var(--accent); }
+    .topbar__right { display: flex; align-items: center; gap: 12px; }
+    .net-switch {
+      display: flex; align-items: center; gap: 9px;
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius-pill); padding: 7px 14px 7px 9px;
+      font-weight: 600; font-size: 14px;
+    }
+    .net-switch__logo {
+      width: 26px; height: 26px; border-radius: 7px;
+      background: linear-gradient(135deg,#2B3A67,#5B36C9);
+      color:#fff; display:grid; place-items:center; font-size:13px; font-weight:600;
+    }
+    .net-switch svg { color: var(--text-tertiary); }
+    .avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: #2B3A67; color: #fff; display: grid; place-items: center;
+      font-weight: 600; font-size: 14px;
+    }
+
+    /* ─── PAGE HEADING ─── */
+    .head { margin-bottom: 22px; }
+    .head h1 { font-size: 28px; font-weight: 600; letter-spacing: -.03em; }
+    .head p { color: var(--text-secondary); font-size: 15px; margin-top: 4px; }
+    .live-dot {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-size: 12.5px; font-weight: 600; color: var(--green-text);
+      background: var(--green-bg); padding: 5px 11px; border-radius: var(--radius-pill);
+      vertical-align: middle; margin-left: 10px;
+    }
+    .live-dot::before {
+      content:""; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green-text); box-shadow: 0 0 0 0 rgba(14,104,50,.5);
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(14,104,50,.5);} 70%{box-shadow:0 0 0 7px rgba(14,104,50,0);} 100%{box-shadow:0 0 0 0 rgba(14,104,50,0);} }
+
+    /* ─── BIG STAT HERO ─── */
+    .stats {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 0; background: var(--white);
+      border: 1px solid var(--border); border-radius: var(--radius-card);
+      overflow: hidden; box-shadow: 0 1px 2px rgba(16,19,35,.04);
+    }
+    .stat { padding: 26px 24px; border-right: 1px solid var(--border-light); }
+    .stat:last-child { border-right: none; }
+    .stat__label {
+      font-size: 11px; font-weight: 600; letter-spacing: .07em;
+      text-transform: uppercase; color: var(--text-tertiary);
+    }
+    .stat__value {
+      font-size: clamp(34px, 4vw, 52px); font-weight: 600;
+      letter-spacing: -.035em; line-height: 1.02; margin-top: 12px;
+      color: #3F4550;
+    }
+    .stat__value.accent { color: #3F4550; }
+    .stat__value.purple { color: #3F4550; }
+    .stat__value.green { color: #3F4550; }
+    .stat__sub { font-size: 12.5px; color: var(--text-secondary); margin-top: 9px; font-weight: 500; }
+    .stat__sub b { color: var(--green-text); font-weight: 500; }
+
+    .section-title {
+      display:flex; align-items:center; gap:10px;
+      font-size: 17px; font-weight: 600; letter-spacing: -.02em;
+      margin: 40px 0 16px;
+    }
+    .section-title .count {
+      background: var(--accent); color:#fff; font-size: 12.5px; font-weight: 600;
+      min-width: 22px; height: 22px; padding: 0 7px; border-radius: var(--radius-pill);
+      display: inline-flex; align-items:center; justify-content:center;
+    }
+    .section-title .muted { color: var(--text-secondary); font-weight: 500; font-size: 13.5px; margin-left: auto; }
+
+    /* ─── APPROVAL QUEUE ─── */
+    .approvals { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+    .approval {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius-card); padding: 18px 18px 16px;
+      display: flex; flex-direction: column;
+    }
+    .approval__top { display:flex; align-items:center; gap:8px; margin-bottom: 11px; }
+    .approval__by {
+      font-size: 11.5px; font-weight: 600; color: var(--text-secondary);
+      display:flex; align-items:center; gap:6px;
+    }
+    .approval__by .ic { width:18px; height:18px; border-radius:5px; display:grid; place-items:center; color:#fff; }
+    .approval__title { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+    .approval__meta { font-size: 13px; color: var(--text-secondary); margin-top: 5px; flex: 1; }
+    .approval__meta b { color: var(--text-primary); font-weight: 500; }
+    .approval__actions { display:flex; gap:8px; margin-top: 14px; }
+    .btn {
+      flex:1; border: none; border-radius: 9px; padding: 9px 12px;
+      font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer;
+    }
+    .btn--primary { background: #111111; color:#fff; }
+    .btn--ghost { background: var(--secondary-lite); color: var(--text-primary); }
+
+    /* ─── AGENT GRID ─── */
+    .agents { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    .agent {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius-card); padding: 20px;
+      transition: box-shadow .15s, transform .15s;
+    }
+    .agent:hover { box-shadow: 0 10px 30px rgba(16,19,35,.08); transform: translateY(-2px); }
+    .agent__head { display:flex; align-items:center; gap: 13px; }
+    .agent__icon { width: 42px; height: 42px; border-radius: 11px; display:grid; place-items:center; flex-shrink:0; color:#fff; }
+    .agent__photo { width: 54px; height: 54px; border-radius: 12px; object-fit: cover; flex-shrink:0; }
+    .agent__name { font-size: 16px; font-weight: 600; letter-spacing: -.02em; }
+    .agent__role { font-size: 12.5px; color: var(--text-secondary); margin-top: 2px; }
+    .agent__status {
+      margin-left:auto; font-size: 11px; font-weight: 600; padding: 4px 9px;
+      border-radius: var(--radius-pill); white-space: nowrap;
+    }
+    .st-working { background: var(--green-bg); color: var(--green-text); }
+    .st-approval { background: var(--accent-soft); color: var(--accent); }
+    .st-idle { background: var(--secondary-lite); color: var(--text-secondary); }
+    .agent__desc { font-size: 13.5px; color: var(--text-secondary); line-height: 1.5; min-height: 40px; }
+    .agent__stat {
+      display:flex; align-items:baseline; gap: 8px; margin-top: 16px;
+      padding-top: 14px; border-top: 1px solid var(--border-light);
+    }
+    .agent__stat b { font-size: 26px; font-weight: 600; letter-spacing: -.03em; }
+    .agent__stat span { font-size: 12.5px; color: var(--text-secondary); font-weight: 500; }
+
+    .footnote { text-align:center; color: var(--text-tertiary); font-size: 12px; margin-top: 44px; }
+
+    /* ─── REVIEW DRAWER ─── */
+    .drawer-overlay {
+      position: fixed; inset: 0; background: rgba(14,19,35,.34);
+      opacity: 0; pointer-events: none; transition: opacity .22s ease; z-index: 40;
+    }
+    .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+    .drawer {
+      position: fixed; top: 0; right: 0; height: 100%; width: 560px; max-width: 94vw;
+      background: var(--page-bg); border-left: 1px solid var(--border);
+      box-shadow: -16px 0 48px rgba(14,19,35,.16);
+      transform: translateX(100%); transition: transform .26s cubic-bezier(.4,0,.2,1);
+      z-index: 41; display: flex; flex-direction: column;
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer__head {
+      display: flex; align-items: center; gap: 13px;
+      padding: 18px 22px; border-bottom: 1px solid var(--border); background: var(--white);
+    }
+    .drawer__avatar { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+    .drawer__who { line-height: 1.3; }
+    .drawer__name { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+    .drawer__role { font-size: 12.5px; color: var(--text-secondary); }
+    .drawer__close {
+      margin-left: auto; width: 34px; height: 34px; border-radius: 9px; border: none;
+      background: var(--secondary-lite); color: var(--text-secondary); display: grid; place-items: center;
+      font-family: inherit;
+    }
+    .drawer__body { overflow-y: auto; padding: 18px 22px 40px; display: flex; flex-direction: column; gap: 14px; }
+
+    .panel {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px 18px;
+    }
+    .panel__head { display: flex; align-items: center; margin-bottom: 10px; }
+    .panel__title { font-size: 14px; font-weight: 600; letter-spacing: -.01em; }
+    .panel__regen {
+      margin-left: auto; font-size: 12.5px; font-weight: 600; color: var(--text-secondary);
+      background: none; border: none; font-family: inherit; padding: 0;
+    }
+    .panel__regen:hover { color: var(--accent); }
+    .panel__text { font-size: 13.5px; color: var(--text-secondary); line-height: 1.55; }
+    .panel__tag { display: block; font-size: 11.5px; color: var(--text-tertiary); margin-top: 9px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .panel__count { font-size: 11.5px; color: var(--text-tertiary); margin-top: 7px; }
+
+    .field {
+      width: 100%; border: 1px solid var(--border); border-radius: 9px;
+      padding: 11px 13px; font-family: inherit; font-size: 13.5px; color: var(--text-primary);
+      line-height: 1.55; resize: vertical; background: var(--white);
+    }
+    .field:focus { outline: none; border-color: var(--accent); }
+    .field--mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; }
+    .field + .field { margin-top: 9px; }
+
+    .action-block {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px;
+    }
+    .action-block__label { font-size: 13px; font-weight: 600; margin-bottom: 11px; }
+    .action-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .action-row .divider { width: 1px; align-self: stretch; background: var(--border); margin: 0 2px; }
+    .abtn {
+      font-family: inherit; font-size: 12.5px; font-weight: 600;
+      border: 1px solid var(--border); background: var(--white); color: var(--text-primary);
+      padding: 8px 12px; border-radius: 8px; cursor: pointer; white-space: nowrap;
+    }
+    .abtn:hover { background: var(--secondary-lite); }
+    .abtn--dark { background: #111111; color: #fff; border-color: #111111; }
+    .abtn--muted { background: var(--secondary-lite); color: var(--text-tertiary); border-color: var(--secondary-lite); }
+
+    @media (max-width: 920px) {
+      .stats { grid-template-columns: repeat(2,1fr); }
+      .stat { border-bottom: 1px solid var(--border-light); }
+      .approvals, .agents { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- PAGE HEADING -->
+    <div class="head">
+      <h1>Network HQ <span class="live-dot">Agents live</span></h1>
+    </div>
+
+    <!-- BIG STAT HERO -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat__label">Total Pipeline</div>
+        <div class="stat__value">$123.4K</div>
+        <div class="stat__sub">17 deals &middot; avg $7.26K</div>
+      </div>
+      <div class="stat">
+        <div class="stat__label">Weighted Pipeline</div>
+        <div class="stat__value purple">$65K</div>
+        <div class="stat__sub">probability-adjusted</div>
+      </div>
+      <div class="stat">
+        <div class="stat__label">Open Deals</div>
+        <div class="stat__value">10</div>
+        <div class="stat__sub">avg $5.91K each</div>
+      </div>
+      <div class="stat">
+        <div class="stat__label">Avg Time to Respond</div>
+        <div class="stat__value green">4 min</div>
+        <div class="stat__sub"><b>&darr; from 2 days</b> manual</div>
+      </div>
+      <div class="stat">
+        <div class="stat__label">RFP Completion Time</div>
+        <div class="stat__value accent">1.3d</div>
+        <div class="stat__sub"><b>&darr; from 3 weeks</b></div>
+      </div>
+    </div>
+
+    <!-- APPROVAL QUEUE -->
+    <div class="section-title">
+      Needs your approval <span class="count">2</span>
+    </div>
+    <div class="approvals">
+      <div class="approval">
+        <div class="approval__title">RFP response — BetterHelp</div>
+        <div class="approval__meta">Full media plan + pricing drafted across <b>6 shows</b>. Proposed value <b>$48K</b>.</div>
+        <div class="approval__actions">
+          <button class="btn btn--primary">Approve &amp; send</button>
+          <button class="btn btn--ghost" onclick="openReview()">Review</button>
+        </div>
+      </div>
+      <div class="approval">
+        <div class="approval__title">Outreach sequence — 120 brands</div>
+        <div class="approval__meta">Personalized pitches to brands matched to open inventory. <b>Ready to launch.</b></div>
+        <div class="approval__actions">
+          <button class="btn btn--primary">Approve &amp; send</button>
+          <button class="btn btn--ghost" onclick="openReview()">Review</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AGENT SHOWCASE -->
+    <div class="section-title">
+      Your agents <span class="muted">3 agents running your network &middot; always on</span>
+    </div>
+    <div class="agents">
+
+      <div class="agent">
+        <div class="agent__head">
+          <img class="agent__photo" src="/os-agent-rfp.png" alt="RFP Agent" />
+          <div>
+            <div class="agent__name">RFP Agent</div>
+            <div class="agent__role">Inbound response</div>
+          </div>
+          <span class="agent__status st-working">Running</span>
+        </div>
+      </div>
+
+      <div class="agent">
+        <div class="agent__head">
+          <img class="agent__photo" src="/os-agent-outbound.png" alt="Outbound Agent" />
+          <div>
+            <div class="agent__name">Outbound Agent</div>
+            <div class="agent__role">Prospecting</div>
+          </div>
+          <span class="agent__status st-working">Running</span>
+        </div>
+      </div>
+
+      <div class="agent">
+        <div class="agent__head">
+          <img class="agent__photo" src="/os-agent-vetting.png" alt="Vetting Agent" />
+          <div>
+            <div class="agent__name">Vetting Agent</div>
+            <div class="agent__role">Brand safety</div>
+          </div>
+          <span class="agent__status st-working">Running</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ─── REVIEW DRAWER ─── -->
+  <div class="drawer-overlay" id="overlay" onclick="closeReview()"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer__head">
+      <img class="drawer__avatar" src="/os-agent-outbound.png" alt="" />
+      <div class="drawer__who">
+        <div class="drawer__name">Sloane Carter &middot; AG1</div>
+        <div class="drawer__role">Drafted by Outbound Agent</div>
+      </div>
+      <button class="drawer__close" onclick="closeReview()" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="drawer__body">
+
+      <!-- PRE-DRAFTED MESSAGES -->
+      <div class="panel">
+        <div class="panel__head"><span class="panel__title">Grading</span></div>
+        <div class="panel__text">AG1 is one of the most active host-read advertisers in wellness, with proven spend across health and self-improvement shows. Armchair Expert's audience is exactly their core buyer: curious, health-conscious listeners who trust Dax and Monica's recommendations. Ritual held the supplement category on the show as a huge repeat buyer, but their exclusivity just lapsed, which opens a July 10th host-read window. Strong moment to put AG1 in front of that audience.</div>
+        <span class="panel__tag">person_fit: direct_buyer &middot; show: Armchair Expert &middot; category just opened</span>
+      </div>
+
+      <div class="panel">
+        <div class="panel__head"><span class="panel__title">Hook</span><button class="panel__regen">Regenerate</button></div>
+        <textarea class="field" rows="4">Ritual ran on Armchair Expert as a repeat buyer for a while, but their category exclusivity just lapsed, so the supplement slot is finally open. AG1 was the first brand we thought of. There's a host-read window on July 10th. Worth grabbing it before another wellness brand does?</textarea>
+        <span class="panel__tag">confidence: high</span>
+      </div>
+
+      <div class="panel">
+        <div class="panel__head"><span class="panel__title">LinkedIn note</span><button class="panel__regen">Regenerate</button></div>
+        <textarea class="field" rows="5">Hey Sloane, we make podcast ads easy. Armchair Expert could be huge for AG1. Ritual was a big repeat buyer on the show, but their category exclusivity just lapsed, so the supplement slot is open for the first time in a while. Dax and Monica's audience is exactly your buyer: curious, health-minded, and they actually act on host recommendations. We've got a host-read opening July 10th. Want me to spin up a quick plan before another brand grabs it?</textarea>
+        <div class="panel__count">438 / 600</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel__head"><span class="panel__title">Email</span><button class="panel__regen">Regenerate</button></div>
+        <input class="field" value="Armchair Expert host-read for AG1 — opening July 10th" />
+        <textarea class="field field--mono" rows="13">Hey Sloane,
+
+Cam, our CEO, wanted me to reach out. We've got a host-read opening on Armchair Expert for July 10th and AG1 was the first brand that came to mind.
+
+Quick context: Ritual was a huge repeat buyer on the show and held the supplement category for a while. Their exclusivity recently lapsed, so this is the first open wellness window we've had in a while.
+
+Why it's a fit: Dax and Monica's audience is curious, health-conscious, and genuinely trusts what they recommend. That's exactly the buyer AG1 converts on other shows, just earlier in the funnel and at real scale.
+
+Slots like this tend to move fast once the category opens up. Want me to put together a quick plan and pricing before it goes?</textarea>
+      </div>
+
+      <!-- ACTION BUTTONS AT BOTTOM -->
+      <div class="action-block">
+        <div class="action-block__label">Outreach</div>
+        <div class="action-row">
+          <button class="abtn">Copy note &amp; open LinkedIn</button>
+          <button class="abtn">Mark LinkedIn sent</button>
+          <span class="divider"></span>
+          <button class="abtn">Queue Gmail draft</button>
+          <button class="abtn abtn--dark">Send email</button>
+        </div>
+      </div>
+
+      <div class="action-block">
+        <div class="action-block__label">State</div>
+        <div class="action-row">
+          <button class="abtn abtn--dark">Mark done</button>
+          <button class="abtn">Mark not relevant</button>
+          <button class="abtn">Auto follow-up off</button>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <script>
+    function openReview() {
+      document.getElementById('overlay').classList.add('open');
+      document.getElementById('drawer').classList.add('open');
+      document.getElementById('drawer').setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeReview() {
+      document.getElementById('overlay').classList.remove('open');
+      document.getElementById('drawer').classList.remove('open');
+      document.getElementById('drawer').setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeReview(); });
+  </script>
+</body>
+</html>

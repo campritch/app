@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpotsNow Webinar — How To Get Your Network Sellers AI Ready</title>
+<link rel="icon" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0a1830;
+    --navy-2:#0e2444;
+    --navy-3:#123057;
+    --teal:#5ed3cf;
+    --teal-soft:rgba(94,211,207,.4);
+    --coral:#FF6267;
+    --coral-hover:#FF4D52;
+    --ink:#0a1830;
+    --mute:#4b5563;
+    --mute-2:#6b7280;
+    --white:#FFFFFF;
+    --line:#e6e8ec;
+    --body:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    --maxw:1180px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--body);
+    background:var(--white);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    display:flex;flex-direction:column;
+  }
+  a{color:inherit;text-decoration:none}
+  img{display:block}
+
+  /* ---------- NAV ---------- */
+  .header{position:sticky;top:0;z-index:100}
+  .promo{
+    background:#0a0a0a;color:#fff;min-height:48px;
+    display:flex;align-items:center;justify-content:center;gap:14px;
+    padding:8px 56px;font-size:13.5px;font-weight:600;position:relative;
+  }
+  .promo__tag{
+    display:inline-flex;align-items:center;gap:7px;
+    font-weight:700;letter-spacing:.02em;
+  }
+  .promo__tag svg{width:16px;height:16px;color:var(--teal)}
+  .promo__tag b{font-weight:800;color:var(--teal)}
+  .promo__cta{
+    display:inline-flex;align-items:center;gap:6px;
+    background:var(--coral);color:#fff;font-weight:700;font-size:12.5px;
+    padding:7px 15px;border-radius:.4rem;transition:background .2s;
+  }
+  .promo__cta:hover{background:var(--coral-hover)}
+  .promo__x{
+    position:absolute;right:18px;top:50%;transform:translateY(-50%);
+    color:rgba(255,255,255,.55);display:inline-flex;cursor:pointer;
+  }
+  .promo__x svg{width:18px;height:18px}
+  nav{background:#fff;border-bottom:1px solid var(--line)}
+  .nav-inner{
+    max-width:1280px;margin:0 auto;
+    padding:0 28px;min-height:73px;
+    display:flex;align-items:center;gap:22px;
+  }
+  .logo{display:inline-flex;align-items:center;color:var(--ink);flex:0 0 auto}
+  .logo svg{display:block;height:28px;width:auto;color:currentColor}
+  .nav-search{
+    flex:1;max-width:420px;
+    display:flex;align-items:center;gap:10px;
+    background:#f3f4f6;border:1px solid var(--line);border-radius:.5rem;
+    padding:10px 14px;
+  }
+  .nav-search svg{width:18px;height:18px;color:var(--mute-2);flex:0 0 auto}
+  .nav-search input{
+    border:none;background:transparent;outline:none;width:100%;
+    font-family:var(--body);font-size:14px;color:var(--ink);
+  }
+  .nav-search input::placeholder{color:var(--mute-2)}
+  .nav-links{display:flex;align-items:center;gap:20px;margin-left:auto;flex:0 0 auto}
+  .nav-links a{font-size:14px;font-weight:600;color:var(--ink)}
+  .nav-links a.muted{color:var(--mute-2)}
+  .nav-links a.muted:hover{color:var(--ink)}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-weight:700;font-size:14px;letter-spacing:-.01em;
+    padding:11px 20px;border-radius:.4rem;cursor:pointer;border:none;
+    transition:transform .12s,background .2s,box-shadow .2s;
+  }
+  .nav-links a.btn-outline{
+    border:1px solid var(--line);color:var(--ink);background:#fff;
+    font-size:13px;padding:9px 16px;
+  }
+  .nav-links a.btn-outline:hover{border-color:#c7ccd4;transform:translateY(-1px)}
+  .nav-cart{position:relative;display:inline-flex;color:var(--ink)}
+  .nav-cart svg{width:22px;height:22px}
+  .nav-burger{display:inline-flex;color:var(--ink);cursor:pointer}
+  .nav-burger svg{width:24px;height:24px}
+
+  /* ---------- PAGE ---------- */
+  main{
+    flex:1;
+    display:flex;align-items:center;justify-content:center;
+    padding:64px 28px 80px;
+  }
+  .grid{
+    width:100%;max-width:var(--maxw);
+    display:grid;grid-template-columns:1fr .82fr;
+    gap:clamp(32px,4vw,60px);align-items:center;
+  }
+
+  /* ---------- LEFT COPY ---------- */
+  .copy{display:flex;flex-direction:column;align-items:flex-start}
+  .eyebrow{
+    font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--coral);margin-bottom:18px;
+  }
+  .copy h1{
+    font-weight:900;letter-spacing:-.03em;line-height:1.02;
+    font-size:clamp(38px,4.6vw,60px);color:var(--ink);
+    white-space:nowrap;
+  }
+  .copy .sub{
+    font-size:clamp(15px,1.5vw,18px);line-height:1.6;color:var(--mute);
+    margin:20px 0 32px;max-width:440px;
+  }
+  .cta-btn{
+    display:inline-flex;align-items:center;gap:10px;
+    background:var(--coral);color:#fff;font-weight:800;
+    font-size:17px;letter-spacing:-.01em;
+    padding:16px 34px;border-radius:.5rem;
+    transition:transform .12s,background .2s,box-shadow .2s;
+    box-shadow:0 12px 30px rgba(255,98,103,.28);
+  }
+  .cta-btn:hover{background:var(--coral-hover);transform:translateY(-2px);box-shadow:0 16px 38px rgba(255,98,103,.4)}
+  .cta-btn svg{width:20px;height:20px}
+  .cta-note{font-size:14px;color:var(--mute-2);margin-top:16px}
+
+  /* ---------- BANNER (right image) ---------- */
+  .banner{
+    position:relative;overflow:hidden;display:block;
+    border-radius:20px;
+    border:1px solid rgba(255,255,255,.1);
+    background:
+      radial-gradient(120% 90% at 100% 0%, rgba(94,211,207,.16) 0%, rgba(94,211,207,0) 42%),
+      linear-gradient(135deg, #0a1830 0%, #0e2444 48%, #123057 100%);
+    box-shadow:0 30px 80px rgba(10,24,48,.35);
+    min-height:clamp(340px,30vw,420px);
+    padding:clamp(22px,2.6vw,38px) clamp(20px,3vw,42px);
+    color:var(--white);
+    display:flex;flex-direction:column;
+    transition:transform .18s ease,box-shadow .18s ease;
+  }
+  .banner:hover{transform:translateY(-3px);box-shadow:0 38px 90px rgba(10,24,48,.45)}
+  .banner__nodes{
+    position:absolute;top:0;right:0;width:46%;height:100%;
+    opacity:.5;pointer-events:none;
+  }
+  .banner__dots{
+    position:absolute;right:6%;bottom:14%;
+    width:120px;height:80px;
+    background-image:radial-gradient(rgba(94,211,207,.55) 1.3px, transparent 1.3px);
+    background-size:16px 16px;opacity:.5;pointer-events:none;
+  }
+  .live-pill{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:6px 12px;border-radius:8px;
+    border:1px solid var(--teal-soft);
+    font-size:clamp(10px,.9vw,12px);font-weight:700;letter-spacing:.18em;
+    color:#dff7f5;align-self:flex-start;
+    position:relative;z-index:2;
+  }
+  .live-pill .dot{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 0 var(--teal);animation:pulse 2s infinite}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(94,211,207,.6)}
+    70%{box-shadow:0 0 0 8px rgba(94,211,207,0)}
+    100%{box-shadow:0 0 0 0 rgba(94,211,207,0)}
+  }
+  .banner__center{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;position:relative;z-index:2;
+    gap:clamp(6px,1vw,12px);
+  }
+  .banner__center h2{
+    font-weight:900;letter-spacing:-.02em;line-height:1.04;
+    font-size:clamp(26px,3.4vw,46px);color:#fff;
+  }
+  .underline-accent{
+    width:clamp(100px,11vw,150px);height:4px;border-radius:3px;
+    background:var(--teal);margin:2px 0 4px;
+  }
+  .hosted{font-size:clamp(14px,1.4vw,20px);font-weight:400}
+  .hosted i{font-style:italic;color:#d7e2f2}
+  .hosted b{font-weight:800}
+  .when{font-size:clamp(15px,1.6vw,22px);font-weight:800;letter-spacing:-.01em}
+
+  .info-row{
+    display:flex;align-items:stretch;justify-content:center;
+    gap:clamp(12px,2vw,26px);
+    margin-top:clamp(10px,1.6vw,20px);
+    position:relative;z-index:2;flex-wrap:wrap;
+  }
+  .info{display:flex;align-items:center;gap:10px;text-align:left}
+  .info:not(:last-child){padding-right:clamp(12px,2vw,26px);border-right:1px solid rgba(255,255,255,.14)}
+  .info__icon{flex:0 0 auto;color:var(--teal);display:inline-flex;align-items:center;justify-content:center}
+  .info__icon svg{width:clamp(18px,1.8vw,24px);height:clamp(18px,1.8vw,24px)}
+  .info__label{font-size:clamp(10px,.9vw,12px);font-weight:800;letter-spacing:.1em;color:#fff}
+  .info__sub{font-size:clamp(10px,.9vw,12px);color:#aebdd4;margin-top:2px}
+
+  .strip{
+    margin-top:clamp(12px,1.8vw,22px);
+    display:flex;align-items:center;justify-content:center;gap:12px;
+    padding:clamp(10px,1.2vw,14px) clamp(16px,2.4vw,28px);
+    border:1px solid var(--teal-soft);border-radius:12px;
+    position:relative;z-index:2;
+  }
+  .strip svg{width:clamp(18px,1.8vw,24px);height:clamp(18px,1.8vw,24px);color:var(--teal);flex:0 0 auto}
+  .strip p{font-size:clamp(11px,1.1vw,14px);font-weight:600;letter-spacing:.06em;color:#eaf1fb}
+  .strip p b{color:var(--teal)}
+
+  @media(max-width:860px){
+    .grid{grid-template-columns:1fr;gap:40px}
+    .copy{align-items:center;text-align:center}
+    .copy h1{white-space:normal}
+    .copy .sub{max-width:520px}
+  }
+  @media(max-width:860px){
+    .nav-search{display:none}
+  }
+  @media(max-width:560px){
+    .nav-links a.muted,.nav-links a.btn-outline{display:none}
+    .promo__cta{display:none}
+    .banner{padding:26px 22px}
+    .info:not(:last-child){border-right:none;padding-right:0}
+    .info-row{gap:16px}
+    .banner__nodes,.banner__dots{display:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- SpotsNow wordmark symbol -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="logo-spotsnow" viewBox="0 0 331 74">
+      <path fill="currentColor" d="M78.078 1.79314L75.3917 22.0607C75.3043 22.6722 74.9112 23.1527 74.3434 23.3492C74.1686 23.4147 73.9939 23.4584 73.8192 23.4584C73.4042 23.4584 73.0111 23.3055 72.7272 23.0216L66.6994 17.3214L39.1154 47.1767C38.351 48.0066 37.2809 48.4652 36.2107 48.4652C35.5774 48.4652 34.944 48.3123 34.3543 48.0066L18.6514 39.7074C16.7076 38.6809 15.965 36.2785 16.9915 34.3347C18.018 32.391 20.3986 31.6484 22.3423 32.6749L35.359 39.5545L60.9336 11.8614L55.3207 6.55425C54.9058 6.13929 54.731 5.52778 54.9058 4.95994C55.0586 4.3921 55.5391 3.95529 56.1288 3.84609L76.2216 0.0240946C76.7239 -0.0632654 77.2262 0.0896158 77.5975 0.439056C77.9688 0.788496 78.1435 1.29082 78.078 1.79314ZM0.0218405 38.4188C0.0218405 57.5725 15.5501 73.1007 34.7038 73.1007C53.8574 73.1007 69.3857 57.5725 69.3857 38.4188C69.3857 33.7887 68.4684 29.3771 66.8304 25.3585L59.0772 33.7451C59.3611 35.252 59.514 36.8245 59.514 38.4188C59.514 52.1343 48.3974 63.2509 34.6819 63.2509C20.9664 63.2509 9.84984 52.1343 9.84984 38.4188C9.84984 24.7033 20.9664 13.5867 34.6819 13.5867C39.5959 13.5867 44.1823 15.0282 48.048 17.4961L54.8184 10.1579C49.14 6.09562 42.1949 3.71506 34.6819 3.71506C15.5282 3.71506 0 19.2433 0 38.397L0.0218405 38.4188Z"/>
+      <path fill="currentColor" d="M105.618 56.3278C103.194 56.3278 101.01 55.891 99.1099 55.0174C97.188 54.1438 95.6155 52.9207 94.4143 51.3701C93.1912 49.8194 92.4268 48.0067 92.0992 45.9101L99.3283 44.4468C99.6996 46.3032 100.42 47.7446 101.49 48.793C102.561 49.8413 103.893 50.3654 105.422 50.3654C107.169 50.3654 108.523 49.9942 109.462 49.2516C110.401 48.4872 110.882 47.4389 110.882 46.1722C110.882 45.1238 110.554 44.2939 109.877 43.6387C109.244 43.0054 108.37 42.4594 107.256 42.0226C106.186 41.5858 105.007 41.1926 103.718 40.865C102.43 40.4938 101.141 40.1006 99.8306 39.642C98.5421 39.1615 97.3627 38.5718 96.2925 37.8293C95.2224 37.0867 94.3488 36.1476 93.6717 34.9901C93.0384 33.8544 92.7108 32.3693 92.7108 30.6003C92.7108 28.4381 93.2349 26.6035 94.2832 25.0966C95.3316 23.5459 96.773 22.3666 98.6294 21.5585C100.508 20.7504 102.692 20.3354 105.138 20.3354C107.3 20.3354 109.244 20.7286 110.991 21.493C112.782 22.2574 114.245 23.3494 115.381 24.7253C116.516 26.0794 117.215 27.63 117.455 29.3772L110.336 31.1899C110.03 29.6175 109.397 28.3726 108.414 27.499C107.475 26.6254 106.295 26.1886 104.876 26.1886C103.958 26.1886 103.128 26.3414 102.342 26.6472C101.6 26.953 101.01 27.4116 100.573 28.0013C100.136 28.6128 99.918 29.3554 99.918 30.2726C99.918 31.2773 100.246 32.1072 100.923 32.7406C101.6 33.3521 102.473 33.8762 103.543 34.313C104.614 34.728 105.793 35.0993 107.081 35.4706C108.392 35.7982 109.702 36.2131 110.969 36.6936C112.279 37.1741 113.481 37.7638 114.551 38.5063C115.665 39.2489 116.538 40.2098 117.172 41.3892C117.849 42.5249 118.176 43.9882 118.176 45.7354C118.176 47.5918 117.652 49.3171 116.604 50.9333C115.599 52.5494 114.136 53.838 112.258 54.8208C110.379 55.8036 108.152 56.2841 105.596 56.2841L105.618 56.3278ZM138.4 56.3278C136.216 56.3278 134.272 55.7599 132.591 54.6024C130.931 53.4667 129.751 51.8506 129.053 49.7976V69.3007H121.889V27.9794H129.053V34.0946C129.751 32.0635 130.931 30.491 132.591 29.3554C134.272 28.2197 136.216 27.63 138.4 27.63C140.868 27.63 143.03 28.2634 144.908 29.5082C146.83 30.7313 148.337 32.413 149.407 34.5533C150.478 36.7154 151.024 39.1834 151.024 41.9789C151.024 44.7744 150.478 47.2205 149.407 49.4045C148.337 51.5667 146.83 53.2702 144.908 54.515C143.03 55.7381 140.846 56.3278 138.4 56.3278ZM136.369 50.1252C137.657 50.1252 138.837 49.7976 139.951 49.1643C141.065 48.5309 141.96 47.5918 142.637 46.3906C143.336 45.1675 143.707 43.7042 143.707 42.0007C143.707 40.2972 143.358 38.7684 142.637 37.5454C141.96 36.3223 141.065 35.4269 139.951 34.8154C138.837 34.182 137.636 33.8544 136.369 33.8544C135.102 33.8544 133.901 34.182 132.787 34.8154C131.673 35.4269 130.756 36.3223 130.057 37.5454C129.38 38.7684 129.053 40.2317 129.053 42.0007C129.053 43.7698 129.38 45.1894 130.057 46.3906C130.756 47.6136 131.673 48.5309 132.787 49.1643C133.901 49.7976 135.102 50.1252 136.369 50.1252ZM166.639 56.3278C163.953 56.3278 161.529 55.7381 159.366 54.5587C157.248 53.3794 155.544 51.7195 154.256 49.5574C153.011 47.3952 152.378 44.8618 152.378 41.9352C152.378 39.0086 153.011 36.4752 154.3 34.3567C155.588 32.1946 157.313 30.5566 159.497 29.399C161.681 28.2197 164.128 27.63 166.814 27.63C169.5 27.63 171.924 28.2197 174.087 29.399C176.271 30.5347 178.018 32.1946 179.285 34.3567C180.573 36.4752 181.206 39.0086 181.206 41.9352C181.206 44.8618 180.551 47.4171 179.241 49.5574C177.952 51.7195 176.205 53.3794 173.977 54.5587C171.793 55.7381 169.325 56.3278 166.595 56.3278H166.639ZM166.639 50.1252C167.884 50.1252 169.063 49.8413 170.177 49.2734C171.291 48.6619 172.208 47.7665 172.907 46.5434C173.606 45.2986 173.977 43.7698 173.977 41.9352C173.977 40.1006 173.628 38.5937 172.907 37.3925C172.23 36.1695 171.335 35.2958 170.221 34.7062C169.151 34.0946 167.971 33.7889 166.727 33.7889C165.482 33.7889 164.324 34.0946 163.232 34.7062C162.184 35.274 161.332 36.1695 160.655 37.3925C159.978 38.6155 159.65 40.1225 159.65 41.9352C159.65 43.7479 159.978 45.2767 160.611 46.5434C161.245 47.7665 162.096 48.6619 163.145 49.2734C164.215 49.8413 165.394 50.1252 166.639 50.1252ZM194.594 56.3278C191.974 56.3278 189.877 55.5634 188.326 54.0127C186.819 52.4402 186.055 50.1907 186.055 47.286V33.7889H181.709V27.9794H199.443V33.7889H193.284V47.5263C193.284 48.3999 193.546 49.055 194.048 49.4918C194.551 49.9286 195.119 50.147 195.774 50.147C196.167 50.147 196.538 50.0815 196.888 49.9505C197.259 49.8195 197.608 49.6229 197.958 49.339L200.491 54.2311C199.618 54.93 198.7 55.4542 197.761 55.8036C196.822 56.153 195.774 56.3059 194.638 56.3059L194.594 56.3278ZM183.827 30.2071V27.9794C184.57 27.9794 185.138 27.761 185.553 27.3242C185.989 26.8874 186.208 26.2978 186.208 25.5552V21.0562H193.284V24.3977C193.284 24.9 193.153 25.4023 192.869 25.9046C192.629 26.407 192.301 26.8438 191.864 27.215C191.428 27.5863 190.903 27.8484 190.292 27.9794L183.827 30.2071ZM213.289 56.3278C211.258 56.3278 209.446 56.0002 207.829 55.3668C206.213 54.6898 204.859 53.7725 203.789 52.5931C202.719 51.4138 201.954 50.1034 201.518 48.6619L208.179 47.155C208.485 48.2688 209.096 49.1642 209.992 49.8413C210.909 50.4746 211.957 50.8023 213.18 50.8023C214.6 50.8023 215.648 50.5402 216.369 49.9942C217.111 49.4482 217.483 48.7711 217.483 47.963C217.483 47.155 217.09 46.4779 216.325 46.0411C215.583 45.5606 214.6 45.1894 213.399 44.9273C212.219 44.6215 210.953 44.2939 209.598 43.9663C208.244 43.595 206.978 43.1146 205.755 42.5467C204.532 41.9352 203.549 41.1271 202.784 40.1225C202.042 39.0742 201.671 37.6982 201.671 35.9729C201.671 34.4659 202.107 33.0682 202.981 31.7796C203.898 30.491 205.165 29.4864 206.825 28.7438C208.485 28.0013 210.45 27.63 212.743 27.63C214.731 27.63 216.478 27.9358 218.007 28.5473C219.514 29.1588 220.759 30.0324 221.742 31.1681C222.724 32.2819 223.401 33.5923 223.773 35.0993L217.308 36.8246C217.002 35.6453 216.456 34.7498 215.692 34.1383C214.949 33.505 213.901 33.1774 212.569 33.1774C211.236 33.1774 210.319 33.4394 209.642 33.9418C208.965 34.4222 208.637 35.0556 208.637 35.8637C208.637 36.6718 209.009 37.3706 209.751 37.8293C210.516 38.2661 211.499 38.6592 212.678 38.9868C213.901 39.2926 215.168 39.6202 216.522 39.9914C217.876 40.319 219.143 40.7995 220.3 41.411C221.523 42.0226 222.484 42.8525 223.227 43.879C223.991 44.9273 224.384 46.3032 224.384 48.0286C224.384 49.5355 223.925 50.9333 223.03 52.2218C222.113 53.4667 220.846 54.4714 219.186 55.1921C217.526 55.9128 215.583 56.3059 213.333 56.3059L213.289 56.3278ZM257.69 20.7067V55.9783H250.57L234.605 31.8888V55.9783H227.485V20.7067H234.605L250.57 44.8618V20.7067H257.69ZM274.66 56.3278C271.974 56.3278 269.549 55.7381 267.387 54.5587C265.269 53.3794 263.565 51.7195 262.277 49.5574C261.032 47.3952 260.398 44.8618 260.398 41.9352C260.398 39.0086 261.032 36.4752 262.32 34.3567C263.609 32.1946 265.334 30.5566 267.518 29.399C269.702 28.2197 272.148 27.63 274.835 27.63C277.521 27.63 279.945 28.2197 282.107 29.399C284.291 30.5347 286.038 32.1946 287.305 34.3567C288.594 36.4752 289.227 39.0086 289.227 41.9352C289.227 44.8618 288.572 47.4171 287.261 49.5574C285.973 51.7195 284.226 53.3794 281.998 54.5587C279.814 55.7381 277.346 56.3278 274.616 56.3278H274.66ZM274.66 50.1252C275.905 50.1252 277.084 49.8413 278.198 49.2734C279.312 48.6619 280.229 47.7665 280.928 46.5434C281.627 45.2986 281.998 43.7698 281.998 41.9352C281.998 40.1006 281.649 38.5937 280.928 37.3925C280.251 36.1695 279.355 35.2958 278.242 34.7062C277.171 34.0946 275.992 33.7889 274.747 33.7889C273.502 33.7889 272.345 34.0946 271.253 34.7062C270.204 35.274 269.353 36.1695 268.676 37.3925C267.999 38.6155 267.671 40.1225 267.671 41.9352C267.671 43.7479 267.999 45.2767 268.632 46.5434C269.265 47.7665 270.117 48.6619 271.165 49.2734C272.236 49.8413 273.415 50.1252 274.66 50.1252ZM288.812 27.9794H296.041L301.96 53.6851H299.841L306.306 27.9794H313.841L320.218 53.6851H318.1L323.953 27.9794H330.832L322.686 55.9783H314.911L308.796 32.2819H311.023L304.755 55.9783H297.024L288.834 27.9794H288.812Z"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="header">
+  <div class="promo">
+    <span class="promo__tag">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 5.6L20 8l-4 4 1 6-5-2.8L7 18l1-6-4-4 5.6-.4z"/></svg>
+      For Networks · <b>New AI Agents</b>
+    </span>
+    <a href="https://spotsnow.io" class="promo__cta">Get Started</a>
+    <span class="promo__x" aria-label="Dismiss">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </span>
+  </div>
+  <nav>
+    <div class="nav-inner">
+      <a href="https://spotsnow.io" class="logo" aria-label="SpotsNow">
+        <svg viewBox="0 0 331 74" aria-hidden="true"><use href="#logo-spotsnow"/></svg>
+      </a>
+      <div class="nav-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" placeholder="Search shows, brands or industries" aria-label="Search">
+      </div>
+      <div class="nav-links">
+        <a href="https://spotsnow.io" class="muted">Discounted Spots</a>
+        <a href="https://spotsnow.io" class="btn btn-outline">Book a demo</a>
+        <a href="https://spotsnow.io" class="nav-cart" aria-label="Cart">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        </a>
+        <span class="nav-burger" aria-label="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </span>
+      </div>
+    </div>
+  </nav>
+</div>
+
+<main>
+  <div class="grid">
+
+    <!-- LEFT — copy + CTA -->
+    <div class="copy">
+      <span class="eyebrow">Live Webinar</span>
+      <h1>Join the webinar</h1>
+      <p class="sub">How To Get Your Network Sellers AI Ready. Join SpotsNow live on June 18th at 2pm EST to empower your network, leverage AI, and drive results.</p>
+      <a href="https://www.linkedin.com/events/7468723291189440514/" target="_blank" rel="noopener" class="cta-btn">
+        Join the webinar on LinkedIn
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <span class="cta-note">Free · Live on LinkedIn · June 18th at 2pm EST</span>
+    </div>
+
+    <!-- RIGHT — webinar image (clickable) -->
+    <a href="https://www.linkedin.com/events/7468723291189440514/" target="_blank" rel="noopener" class="banner" aria-label="Join the webinar on LinkedIn">
+      <svg class="banner__nodes" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+        <g stroke="#5ed3cf" stroke-width="1" opacity="0.55">
+          <line x1="330" y1="60" x2="380" y2="120"/>
+          <line x1="380" y1="120" x2="320" y2="180"/>
+          <line x1="320" y1="180" x2="370" y2="240"/>
+          <line x1="330" y1="60" x2="280" y2="110"/>
+          <line x1="280" y1="110" x2="320" y2="180"/>
+          <line x1="370" y1="300" x2="320" y2="180"/>
+          <line x1="370" y1="240" x2="370" y2="300"/>
+        </g>
+        <g fill="#5ed3cf">
+          <circle cx="330" cy="60" r="3.5"/>
+          <circle cx="380" cy="120" r="3"/>
+          <circle cx="320" cy="180" r="4"/>
+          <circle cx="370" cy="240" r="3"/>
+          <circle cx="280" cy="110" r="3"/>
+          <circle cx="370" cy="300" r="3.5"/>
+        </g>
+      </svg>
+      <span class="banner__dots"></span>
+
+      <span class="live-pill"><span class="dot"></span>LIVE</span>
+
+      <div class="banner__center">
+        <h2>How To Get Your<br>Network Sellers AI Ready</h2>
+        <span class="underline-accent"></span>
+        <div class="hosted"><i>Hosted by</i> <b>SpotsNow</b></div>
+        <div class="when">June 18th at 2pm EST</div>
+
+        <div class="info-row">
+          <div class="info">
+            <span class="info__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            </span>
+            <div>
+              <div class="info__label">LIVE EVENT</div>
+              <div class="info__sub">Join us on LinkedIn</div>
+            </div>
+          </div>
+          <div class="info">
+            <span class="info__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            </span>
+            <div>
+              <div class="info__label">DATE &amp; TIME</div>
+              <div class="info__sub">June 18th at 2pm EST</div>
+            </div>
+          </div>
+          <div class="info">
+            <span class="info__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.5"/><path d="M7.5 7.5a6 6 0 0 0 0 9M16.5 7.5a6 6 0 0 1 0 9M4.5 4.5a10 10 0 0 0 0 15M19.5 4.5a10 10 0 0 1 0 15"/></svg>
+            </span>
+            <div>
+              <div class="info__label">INTERACTIVE Q&amp;A</div>
+              <div class="info__sub">Ask. Learn. Connect.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="strip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3a3 3 0 0 0-3 3 3 3 0 0 0-1.5 5.5A3 3 0 0 0 6.5 17 3 3 0 0 0 12 18.5V3.5A2.5 2.5 0 0 0 9.5 3zM14.5 3a3 3 0 0 1 3 3 3 3 0 0 1 1.5 5.5A3 3 0 0 1 17.5 17 3 3 0 0 1 12 18.5"/></svg>
+          <p>EMPOWER YOUR NETWORK. LEVERAGE <b>AI</b>. DRIVE RESULTS.</p>
+        </div>
+      </div>
+    </a>
+
+  </div>
+</main>
+
+</body>
+</html>

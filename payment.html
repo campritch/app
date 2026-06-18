@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotsNow — Checkout</title>
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --dark: #0e1323;
+      --grey-1: #707481;
+      --text-primary: #252733;
+      --text-secondary: #5a5f6e;
+      --border: #dee0e4;
+      --border-light: #e8e8e8;
+      --white: #ffffff;
+      --coral: #ff6b6b;
+      --btn-dark: #111111;
+      --green-bg: #d6f0e0;
+      --green-text: #0d6832;
+      --pill-bg: #f3f4f6;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.4;
+      color: var(--dark); background: #f5f5f3;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font-family: inherit; cursor: pointer; }
+    img { display: block; }
+    a { color: inherit; }
+
+    /* Top bar */
+    .top-bar {
+      position: sticky; top: 0; z-index: 200;
+      height: 56px; display: flex; align-items: center; gap: 16px;
+      padding: 0 28px; background: var(--white);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .top-bar__logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 800; font-size: 15px; color: var(--dark);
+      text-decoration: none; flex-shrink: 0; letter-spacing: -0.3px;
+    }
+    .logo-mark {
+      width: 22px; height: 22px; border-radius: 6px;
+      background: var(--coral); display: flex; align-items: center; justify-content: center;
+    }
+    .top-bar__breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--grey-1);
+    }
+    .top-bar__breadcrumb a { color: var(--text-secondary); text-decoration: none; font-weight: 600; }
+    .top-bar__breadcrumb a:hover { color: var(--dark); }
+    .top-bar__breadcrumb svg { color: var(--grey-1); }
+    .top-bar__breadcrumb b { color: var(--dark); font-weight: 700; }
+    .top-bar__spacer { flex: 1; }
+    .secure-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 32px; padding: 0 12px;
+      background: var(--green-bg); color: var(--green-text);
+      border-radius: 999px;
+      font-size: 12px; font-weight: 700;
+    }
+
+    /* Layout */
+    .page {
+      max-width: 1136px; margin: 32px auto;
+      padding: 0 24px 80px;
+      display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px;
+    }
+
+    /* Card */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .card__header {
+      padding: 24px 28px 16px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .card__eyebrow {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.8px;
+      text-transform: uppercase; color: var(--grey-1); margin-bottom: 4px;
+    }
+    .card__title {
+      margin: 0; font-size: 20px; font-weight: 800;
+      letter-spacing: -0.4px; color: var(--dark);
+    }
+    .card__body { padding: 24px 28px 28px; }
+
+    /* Form */
+    .field-group { display: flex; flex-direction: column; gap: 16px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field-label {
+      font-size: 11px; font-weight: 700; color: var(--text-secondary);
+      letter-spacing: 0.3px; text-transform: uppercase;
+    }
+    .field-input {
+      height: 44px; padding: 0 14px;
+      background: var(--white); border: 1.5px solid var(--border-light);
+      border-radius: 10px;
+      font-size: 14px; font-family: inherit; color: var(--text-primary);
+      outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .field-input:focus { border-color: var(--dark); box-shadow: 0 0 0 3px rgba(14,19,35,0.06); }
+    .field-input::placeholder { color: #b0b4be; }
+    .field-input--card {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='18' viewBox='0 0 28 18'><rect width='28' height='18' rx='3' fill='%230e1323'/><rect y='4' width='28' height='3' fill='%23ff6b6b'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 50px;
+    }
+
+    /* Section header inside card */
+    .card-section { display: flex; flex-direction: column; gap: 16px; }
+    .card-section__title {
+      margin: 0; font-size: 14px; font-weight: 700; color: var(--dark);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-section__divider {
+      border: none; border-top: 1px solid var(--border-light); margin: 24px 0 0;
+    }
+
+    /* Payment method tabs */
+    .pay-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .pay-tab {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 14px 10px;
+      background: var(--white); border: 1.5px solid var(--border-light);
+      border-radius: 12px;
+      font-size: 12px; font-weight: 700; color: var(--text-primary);
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .pay-tab.is-active {
+      border-color: var(--dark);
+      box-shadow: 0 0 0 3px rgba(14,19,35,0.06);
+    }
+    .pay-tab__icon {
+      width: 36px; height: 24px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--pill-bg);
+    }
+    .pay-tab.is-active .pay-tab__icon { background: var(--dark); color: white; }
+
+    /* Order summary */
+    .summary-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0;
+      font-size: 13px; color: var(--text-secondary);
+    }
+    .summary-row + .summary-row { border-top: 1px dashed var(--border-light); }
+    .summary-row b { color: var(--dark); font-weight: 700; }
+    .summary-total {
+      margin-top: 12px; padding-top: 14px;
+      border-top: 1.5px solid var(--border);
+      display: flex; align-items: baseline; justify-content: space-between;
+    }
+    .summary-total__label { font-size: 12px; font-weight: 700; color: var(--grey-1); letter-spacing: 0.4px; text-transform: uppercase; }
+    .summary-total__value { font-size: 28px; font-weight: 800; color: var(--dark); letter-spacing: -0.6px; }
+
+    .summary-credits {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px;
+      background: var(--pill-bg); border-radius: 12px;
+      margin-bottom: 18px;
+    }
+    .summary-credits__count {
+      font-size: 32px; font-weight: 800; color: var(--dark);
+      letter-spacing: -0.8px; line-height: 1;
+    }
+    .summary-credits__sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .summary-credits__per {
+      margin-left: auto;
+      display: inline-flex; align-items: center;
+      padding: 4px 10px;
+      background: var(--green-bg); color: var(--green-text);
+      border-radius: 999px;
+      font-size: 11px; font-weight: 800;
+    }
+
+    /* CTA */
+    .pay-btn {
+      width: 100%; height: 52px;
+      background: var(--coral); border: none; border-radius: 12px;
+      color: white; font-size: 15px; font-weight: 800;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      margin-top: 18px;
+      transition: opacity .15s;
+    }
+    .pay-btn:hover { opacity: 0.92; }
+    .pay-btn:disabled { background: var(--border); color: var(--grey-1); cursor: not-allowed; }
+    .pay-btn.is-loading {
+      background: var(--dark); pointer-events: none;
+    }
+
+    .trust-row {
+      display: flex; flex-wrap: wrap; gap: 14px;
+      margin-top: 16px;
+      font-size: 11px; color: var(--text-secondary);
+    }
+    .trust-row span { display: inline-flex; align-items: center; gap: 6px; }
+    .trust-row svg { color: var(--green-text); }
+
+    /* Success state */
+    .success-state { text-align: center; padding: 40px 24px; }
+    .success-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--green-bg); color: var(--green-text);
+      display: inline-flex; align-items: center; justify-content: center;
+      margin: 0 auto 18px;
+    }
+    .success-title { margin: 0 0 6px; font-size: 22px; font-weight: 800; letter-spacing: -0.4px; color: var(--dark); }
+    .success-sub { margin: 0; font-size: 13px; color: var(--text-secondary); }
+    .success-cta {
+      margin-top: 22px;
+      height: 44px; padding: 0 22px;
+      background: var(--dark); color: white;
+      border: none; border-radius: 10px;
+      font-size: 13px; font-weight: 700;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .success-cta:hover { opacity: 0.88; }
+
+    /* Spinner */
+    .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white; border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Sticky summary */
+    .summary-card { position: sticky; top: 80px; align-self: start; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .page { grid-template-columns: 1fr; }
+      .summary-card { position: static; }
+    }
+    @media (max-width: 600px) {
+      .top-bar { padding: 0 16px; gap: 8px; }
+      .top-bar__breadcrumb { display: none; }
+      .secure-pill { display: none; }
+      .field-row { grid-template-columns: 1fr; }
+      .pay-tabs { grid-template-columns: 1fr; }
+      .card__header, .card__body { padding-left: 20px; padding-right: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Top Bar ─────────────────────────────────── -->
+<header class="top-bar">
+  <a href="/marketplace" class="top-bar__logo">
+    <div class="logo-mark">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="5"/></svg>
+    </div>
+    SpotsNow
+  </a>
+  <div class="top-bar__breadcrumb">
+    <a href="/marketplace">Marketplace</a>
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+    <b>Checkout</b>
+  </div>
+  <div class="top-bar__spacer"></div>
+  <span class="secure-pill">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    Secure checkout
+  </span>
+</header>
+
+<!-- ── Page ────────────────────────────────────── -->
+<main class="page" id="page">
+
+  <!-- Left: Form -->
+  <section class="card" id="formCard">
+    <div class="card__header">
+      <div class="card__eyebrow">Step 2 of 2</div>
+      <h1 class="card__title">Payment details</h1>
+    </div>
+    <div class="card__body">
+      <div class="card-section">
+        <h3 class="card-section__title">Payment method</h3>
+        <div class="pay-tabs" role="tablist">
+          <button class="pay-tab is-active" data-method="card" type="button">
+            <span class="pay-tab__icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            </span>
+            Card
+          </button>
+          <button class="pay-tab" data-method="apple" type="button">
+            <span class="pay-tab__icon">
+              <svg width="14" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+            </span>
+            Apple Pay
+          </button>
+          <button class="pay-tab" data-method="bank" type="button">
+            <span class="pay-tab__icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V10M19 21V10M3 10l9-6 9 6M9 21V14M15 21V14"/></svg>
+            </span>
+            Bank
+          </button>
+        </div>
+
+        <hr class="card-section__divider" />
+
+        <h3 class="card-section__title">Card details</h3>
+        <div class="field-group">
+          <div class="field">
+            <label class="field-label" for="cardName">Name on card</label>
+            <input id="cardName" class="field-input" type="text" placeholder="Cam Pritchard" autocomplete="cc-name" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="cardNumber">Card number</label>
+            <input id="cardNumber" class="field-input field-input--card" type="text" placeholder="1234 1234 1234 1234" inputmode="numeric" autocomplete="cc-number" maxlength="19" />
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label" for="cardExp">Expiry</label>
+              <input id="cardExp" class="field-input" type="text" placeholder="MM / YY" inputmode="numeric" autocomplete="cc-exp" maxlength="7" />
+            </div>
+            <div class="field">
+              <label class="field-label" for="cardCvc">CVC</label>
+              <input id="cardCvc" class="field-input" type="text" placeholder="CVC" inputmode="numeric" autocomplete="cc-csc" maxlength="4" />
+            </div>
+          </div>
+
+          <hr class="card-section__divider" />
+
+          <h3 class="card-section__title">Billing</h3>
+          <div class="field">
+            <label class="field-label" for="billEmail">Email (receipt)</label>
+            <input id="billEmail" class="field-input" type="email" placeholder="you@company.com" autocomplete="email" />
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label" for="billCountry">Country</label>
+              <input id="billCountry" class="field-input" type="text" value="United States" autocomplete="country-name" />
+            </div>
+            <div class="field">
+              <label class="field-label" for="billPostal">Postal code</label>
+              <input id="billPostal" class="field-input" type="text" placeholder="37203" autocomplete="postal-code" />
+            </div>
+          </div>
+        </div>
+
+        <button class="pay-btn" id="payBtn" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Pay <span id="payAmount">$59</span>
+        </button>
+
+        <div class="trust-row">
+          <span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            256-bit encryption
+          </span>
+          <span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Refundable within 14 days
+          </span>
+          <span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Demo mode &middot; no charge
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Right: Summary -->
+  <aside class="card summary-card">
+    <div class="card__header">
+      <div class="card__eyebrow">Order summary</div>
+      <h2 class="card__title" id="summaryTitle">Pro pack</h2>
+    </div>
+    <div class="card__body">
+      <div class="summary-credits">
+        <div>
+          <div class="summary-credits__count" id="summaryCredits">100</div>
+          <div class="summary-credits__sub">search credits</div>
+        </div>
+        <span class="summary-credits__per" id="summaryPer">$0.59 / search</span>
+      </div>
+
+      <div class="summary-row">
+        <span>Credit pack</span>
+        <b id="rowName">Pro</b>
+      </div>
+      <div class="summary-row">
+        <span>Credits</span>
+        <b id="rowCredits">100</b>
+      </div>
+      <div class="summary-row" id="rowDiscountWrap">
+        <span>Volume discount</span>
+        <b id="rowDiscount" style="color: var(--green-text);">-$17</b>
+      </div>
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <b id="rowSubtotal">$59</b>
+      </div>
+      <div class="summary-row">
+        <span>Tax (demo)</span>
+        <b>$0</b>
+      </div>
+
+      <div class="summary-total">
+        <span class="summary-total__label">Total today</span>
+        <span class="summary-total__value" id="rowTotal">$59</span>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<script>
+  const TIERS = {
+    starter: { id: "starter", name: "Starter", credits: 25,  price: 19,  oldPrice: null },
+    pro:     { id: "pro",     name: "Pro",     credits: 100, price: 59,  oldPrice: 76  },
+    scale:   { id: "scale",   name: "Scale",   credits: 500, price: 199, oldPrice: 380 },
+  };
+
+  const $ = (sel) => document.querySelector(sel);
+
+  function getTier() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("tier") || localStorage.getItem("spotsnow.credits.tier.v1") || "pro";
+    return TIERS[id] || TIERS.pro;
+  }
+
+  function renderSummary() {
+    const t = getTier();
+    const perCredit = (t.price / t.credits).toFixed(2);
+    $("#summaryTitle").textContent = `${t.name} pack`;
+    $("#summaryCredits").textContent = t.credits;
+    $("#summaryPer").textContent = `$${perCredit} / search`;
+    $("#rowName").textContent = t.name;
+    $("#rowCredits").textContent = t.credits;
+    $("#rowSubtotal").textContent = `$${t.price}`;
+    $("#rowTotal").textContent = `$${t.price}`;
+    $("#payAmount").textContent = `$${t.price}`;
+
+    const discountWrap = $("#rowDiscountWrap");
+    if (t.oldPrice) {
+      discountWrap.style.display = "";
+      $("#rowDiscount").textContent = `-$${t.oldPrice - t.price}`;
+    } else {
+      discountWrap.style.display = "none";
+    }
+  }
+
+  function bindPayMethodTabs() {
+    document.querySelectorAll(".pay-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".pay-tab").forEach((t) => t.classList.remove("is-active"));
+        tab.classList.add("is-active");
+      });
+    });
+  }
+
+  // Card number formatter — groups of 4
+  function bindCardFormatting() {
+    const num = $("#cardNumber");
+    num.addEventListener("input", (e) => {
+      const digits = e.target.value.replace(/\D/g, "").slice(0, 16);
+      e.target.value = digits.replace(/(.{4})/g, "$1 ").trim();
+    });
+    const exp = $("#cardExp");
+    exp.addEventListener("input", (e) => {
+      const digits = e.target.value.replace(/\D/g, "").slice(0, 4);
+      if (digits.length <= 2) e.target.value = digits;
+      else e.target.value = digits.slice(0, 2) + " / " + digits.slice(2);
+    });
+    const cvc = $("#cardCvc");
+    cvc.addEventListener("input", (e) => {
+      e.target.value = e.target.value.replace(/\D/g, "").slice(0, 4);
+    });
+  }
+
+  function bindPay() {
+    $("#payBtn").addEventListener("click", () => {
+      const t = getTier();
+      const btn = $("#payBtn");
+      btn.classList.add("is-loading");
+      btn.innerHTML = '<span class="spinner"></span> Processing payment…';
+      btn.disabled = true;
+
+      // Demo: simulate processing then redirect with credits granted
+      setTimeout(() => {
+        showSuccess(t);
+      }, 1400);
+    });
+  }
+
+  function showSuccess(t) {
+    const page = $("#page");
+    page.style.gridTemplateColumns = "1fr";
+    page.innerHTML = `
+      <section class="card" style="max-width: 540px; margin: 0 auto; width: 100%;">
+        <div class="card__body">
+          <div class="success-state">
+            <div class="success-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <h2 class="success-title">Payment successful</h2>
+            <p class="success-sub">${t.credits} credits added to your account. Heading back to the marketplace…</p>
+            <button class="success-cta" id="returnBtn">
+              Continue searching
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>`;
+    const params = new URLSearchParams(window.location.search);
+    const ret = params.get("return");
+    const base = ret && ret.startsWith("/") ? ret : "/marketplace";
+    const sep = base.includes("?") ? "&" : "?";
+    const goBack = () => { window.location.href = `${base}${sep}topup=${t.id}`; };
+    document.getElementById("returnBtn").addEventListener("click", goBack);
+    setTimeout(goBack, 1600);
+  }
+
+  function init() {
+    renderSummary();
+    bindPayMethodTabs();
+    bindCardFormatting();
+    bindPay();
+  }
+  init();
+</script>
+</body>
+</html>
