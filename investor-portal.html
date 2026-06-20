@@ -69,7 +69,6 @@ const CONTENT = {
     { label: "POST-MONEY VALUATION", value: "$9.5M" },
     { label: "ALLOCATION",           value: "$500K" },
   ],
-  closing: { label: "CLOSING", value: TODO },                 // hard date for scarcity
 
   // ---- Exit scenarios ----
   exit: {
@@ -374,10 +373,6 @@ const CONTENT = {
         <section class="card">
           <div class="eyebrow">DEAL TERMS</div>
           <div class="terms" id="terms"></div>
-          <div class="closing">
-            <span class="k" id="closingK"></span>
-            <span class="v" id="closingV"></span>
-          </div>
         </section>
       </div>
 
@@ -501,8 +496,6 @@ function render(){
   $("terms").innerHTML = c.terms.map(t=>`
     <div class="term"><div class="k">${t.label}</div><div class="v">${cell(t.value)}</div></div>
   `).join("");
-  $("closingK").textContent = c.closing.label;
-  $("closingV").innerHTML = cell(c.closing.value);
 
   // exit
   $("exitEyebrow").textContent = c.exit.eyebrow;
