@@ -65,24 +65,10 @@ const CONTENT = {
 
   // ---- Deal terms (RAISE + RUNWAY confirmed in deck; rest TODO; CLOSING is the scarcity lever) ----
   terms: [
-    { label: "STRUCTURE",            value: "SAFE" },
+    { label: "STRUCTURE",            value: "SAFE Note" },
     { label: "POST-MONEY VALUATION", value: "$9.5M" },
     { label: "ALLOCATION",           value: "$500K" },
   ],
-
-  // ---- Exit scenarios ----
-  exit: {
-    eyebrow: "WHERE THIS COULD GO",
-    framing:
-      "The goal is an IPO. The floor is a deep bench of strategic acquirers already making " +
-      "media land grabs. This is a category being consolidated, not a bet on a single outcome.",
-    acquirers: ["Meta", "Google", "Spotify", "iHeartMedia", "SiriusXM", "Amazon"],
-    comps: [
-      { name: "LTK", note: "Raised $300M on this model for short-form" },
-      { name: "SiriusXM", note: "Public-market comp, liquidity in audio" },
-      // Open Q7 — Cam to add the rest from his exit slide
-    ],
-  },
 
   // ---- Footer ----
   contact: "cam@spotsnow.io",
@@ -383,14 +369,6 @@ const CONTENT = {
       </section>
     </div>
 
-    <!-- EXIT SCENARIOS -->
-    <h2 class="sectiontitle" id="exitEyebrow"></h2>
-    <div class="exit">
-      <div class="framing" id="exitFraming"></div>
-      <div class="acq" id="acquirers"></div>
-      <div class="comps" id="comps"></div>
-    </div>
-
   </div>
 </main>
 
@@ -496,12 +474,6 @@ function render(){
   $("terms").innerHTML = c.terms.map(t=>`
     <div class="term"><div class="k">${t.label}</div><div class="v">${cell(t.value)}</div></div>
   `).join("");
-
-  // exit
-  $("exitEyebrow").textContent = c.exit.eyebrow;
-  $("exitFraming").textContent = c.exit.framing;
-  $("acquirers").innerHTML = c.exit.acquirers.map(a=>`<div class="chip">${a}</div>`).join("");
-  $("comps").innerHTML = c.exit.comps.map(x=>`<span class="comp"><b>${x.name}</b> &middot; ${x.note}</span>`).join("");
 
   // footer
   $("year").textContent = "2026";
