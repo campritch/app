@@ -6,7 +6,7 @@
 <title>SpotsNow Intelligence — Access the brain of the industry</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#0E1116;
@@ -29,7 +29,7 @@
     --mute-lt:#707481;
     --line-lt:#E4E0D8;
     --white:#FFFFFF;
-    --display:'Fraunces', Georgia, serif;
+    --display:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --body:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --mono:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --maxw:1180px;
@@ -57,29 +57,46 @@
     font-size:12px;letter-spacing:.22em;text-transform:uppercase;
     color:var(--coral);font-weight:500;
   }
-  .display{font-family:var(--display);font-weight:600;line-height:1.02;letter-spacing:-.01em}
+  .display{font-family:var(--display);font-weight:800;line-height:1.02;letter-spacing:-.01em}
 
   /* ---------- NAV ---------- */
   nav{
     position:fixed;top:0;left:0;right:0;z-index:100;
-    backdrop-filter:blur(14px);
-    background:rgba(14,17,22,.72);
-    border-bottom:1px solid transparent;
-    transition:border-color .3s, background .3s;
+    background:#fff;
+    border-bottom:1px solid #DEE0E4;
   }
-  nav.scrolled{border-bottom:1px solid var(--line);background:rgba(14,17,22,.9)}
-  .nav-inner{max-width:var(--maxw);margin:0 auto;padding:14px 28px 14px 20px;display:flex;align-items:center;gap:24px}
-  .nav-inner .logo{margin-right:auto;padding-left:0}
+  .nav-inner{max-width:2560px;margin:0;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:73px}
   /* logo */
-  .logo{display:inline-flex;align-items:center;color:#fff;text-decoration:none}
+  .logo{display:inline-flex;align-items:center;color:#fff;text-decoration:none;flex:0 0 auto}
   .logo svg{display:block;height:24px;width:auto;color:currentColor}
-  nav .logo svg{height:34px}
+  nav .logo{color:#FF6B6B}
+  nav .logo svg{height:32px}
   footer .logo svg{height:22px}
   .light .logo,.logo.is-dark{color:var(--brand-dark)}
 
-  .nav-links{display:flex;align-items:center;gap:30px;font-size:14px;color:var(--mute-dk);font-weight:500}
-  .nav-links a{transition:color .2s}
-  .nav-links a:hover{color:#fff}
+  /* left cluster: logo + search (max-w-xl) */
+  .nav-lead{display:flex;align-items:center;gap:48px;flex:1 1 auto;min-width:0;max-width:576px}
+  .nav-search{position:relative;width:100%;min-width:0}
+  .nav-search input{width:100%;height:40px;border-radius:9999px;background:#F4F4F4;border:0;padding:8px 48px 8px 32px;font-family:var(--body);font-size:14px;color:var(--text-dk);outline:none}
+  .nav-search input::placeholder{color:#707481}
+  .nav-search-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:9999px;background:var(--coral);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:6px;transition:opacity .2s}
+  .nav-search-btn:hover{opacity:.9}
+  .nav-search-btn svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2}
+
+  /* right cluster */
+  .nav-right{display:flex;align-items:center;gap:24px;flex:0 0 auto}
+  .nav-link{font-size:12px;font-weight:500;color:var(--text-dk);transition:color .2s}
+  .nav-link:hover{color:#282828}
+  .nav-cart{position:relative;color:var(--text-dk);display:inline-flex;align-items:center}
+  .nav-cart svg{width:20px;height:20px;stroke:currentColor;fill:none}
+  .nav-btn{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;border-radius:8px;font-family:var(--body);font-weight:600;font-size:12px;line-height:1;padding:6px 12px;transition:background .2s,color .2s,border-color .2s;cursor:pointer;text-decoration:none}
+  .nav-btn-secondary{background:#fff;color:var(--text-dk);border:1px solid #C5CBD5}
+  .nav-btn-secondary:hover{background:#E4E6ED;color:#000}
+  .nav-btn-primary{background:#17212B;color:#fff;border:1px solid #17212B}
+  .nav-btn-primary:hover{background:#282828;border-color:#282828}
+  .nav-menu{display:inline-flex;align-items:center;justify-content:center;padding:4px;color:var(--text-dk);background:none;border:none;cursor:pointer;border-radius:8px}
+  .nav-menu svg{width:24px;height:24px;stroke:currentColor;fill:none}
+  .nav-menu:hover{background:#F6F6F6}
   .btn{
     display:inline-flex;align-items:center;justify-content:center;gap:8px;
     font-family:var(--body);font-weight:700;font-size:14px;letter-spacing:-.01em;
@@ -128,7 +145,7 @@
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
   .hero .wrap{position:relative;z-index:2}
   h1.hero-title{
-    font-family:var(--display);font-weight:600;
+    font-family:var(--display);font-weight:800;
     font-size:clamp(44px,6vw,78px);line-height:.98;letter-spacing:-.02em;margin:22px 0 24px;
     color:#fff;
   }
@@ -259,10 +276,11 @@
   .light{background:var(--cream);color:var(--text-dk)}
   .light .eyebrow{color:var(--coral)}
   .sec-head{max-width:760px;margin-bottom:54px}
-  .sec-head h2{font-family:var(--display);font-weight:600;font-size:clamp(30px,3.6vw,46px);line-height:1.04;letter-spacing:-.015em;margin:16px 0 0}
+  .sec-head h2{font-family:var(--display);font-weight:800;font-size:clamp(30px,3.6vw,46px);line-height:1.04;letter-spacing:-.015em;margin:16px 0 0}
   .light .sec-head h2{color:var(--text-dk)}
 
   /* ---------- STAKES ---------- */
+  #stakes{background:#fff}
   .stakes{display:grid;grid-template-columns:1.4fr 1fr;gap:48px;align-items:center}
   .stake-list{display:flex;flex-direction:column;gap:4px}
   .stake{border-top:1px solid var(--line-lt);padding:26px 0;display:grid;grid-template-columns:46px 1fr;gap:18px}
@@ -271,7 +289,7 @@
   .stake h3{font-size:17px;font-weight:600;color:var(--text-dk);margin-bottom:6px}
   .stake p{font-size:13px;color:var(--mute-lt);line-height:1.55}
   .stat-card{background:var(--ink);border-radius:18px;padding:40px 34px;color:#fff;box-shadow:0 30px 60px -28px rgba(0,0,0,.5)}
-  .stat-card .big{font-family:var(--display);font-weight:600;font-size:84px;color:var(--coral);line-height:1;letter-spacing:-.02em;display:flex;align-items:flex-start}
+  .stat-card .big{font-family:var(--display);font-weight:800;font-size:84px;color:var(--coral);line-height:1;letter-spacing:-.02em;display:flex;align-items:flex-start}
   .stat-card .big sup{font-size:.42em;line-height:1;font-weight:500;margin-left:4px;margin-top:.08em}
   .stat-card .big-label{font-family:var(--body);font-weight:600;font-size:18px;color:#fff;margin-top:10px;letter-spacing:-.005em}
   .stat-card p{color:var(--mute-dk);font-size:13px;margin-top:18px;line-height:1.55}
@@ -299,7 +317,7 @@
   .ex-tab.active .t-desc{color:var(--mute-lt)}
   .ex-panel{padding:34px 36px;min-height:430px;display:flex;flex-direction:column;background:var(--white)}
   .ex-panel .pn-label{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--coral);margin-bottom:10px}
-  .ex-panel h3{font-family:var(--display);font-weight:600;font-size:25px;color:var(--text-dk);line-height:1.1;margin-bottom:8px}
+  .ex-panel h3{font-family:var(--display);font-weight:800;font-size:25px;color:var(--text-dk);line-height:1.1;margin-bottom:8px}
   .ex-panel .pn-sub{font-size:13px;color:var(--mute-lt);margin-bottom:24px;max-width:560px;line-height:1.55}
   .prompts{display:flex;flex-direction:column;gap:11px}
   .prompt{
@@ -324,7 +342,7 @@
   .price.ind .ptier{color:var(--mute-lt)}
   .price.team .ptier{color:var(--coral)}
   .price .scale{position:absolute;right:32px;top:36px;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;background:var(--coral);color:#fff;padding:5px 13px;border-radius:20px;font-weight:600}
-  .price .amt{font-family:var(--display);font-weight:600;line-height:1;margin:18px 0 14px;letter-spacing:-.02em}
+  .price .amt{font-family:var(--display);font-weight:800;line-height:1;margin:18px 0 14px;letter-spacing:-.02em}
   .price.ind .amt{font-size:60px;color:var(--text-dk)}
   .price.ind .amt span{font-size:20px;color:var(--mute-lt);font-family:var(--body);font-weight:400}
   .price.team .amt{font-size:48px;color:#fff}
@@ -339,12 +357,127 @@
   .price .btn{width:100%;justify-content:center}
   .price.team .btn-ghost{border-color:var(--line)}
 
+  /* ---------- STANDARD (product) SECTIONS — Inter, not Fraunces ---------- */
+  .std{background:#F7F8FA;color:var(--text-dk)}
+  .std.white{background:#fff}
+  .std-eyebrow{font-family:var(--body);font-weight:700;font-size:14px;color:var(--coral);letter-spacing:-.01em;margin-bottom:12px}
+  .std .std-h2{font-family:var(--body);font-weight:800;font-size:clamp(28px,3.4vw,40px);line-height:1.05;letter-spacing:-.025em;color:var(--text-dk)}
+  .std-sub{font-size:15px;color:var(--mute-lt);margin-top:14px;max-width:560px;line-height:1.55}
+
+  /* shared checklist */
+  .checks{list-style:none;display:flex;flex-direction:column;gap:15px}
+  .checks li{display:flex;gap:11px;align-items:flex-start;font-size:13.5px;line-height:1.52;color:var(--text-dk)}
+  .checks li::before{content:"✓";color:var(--coral);font-weight:800;flex:0 0 auto;margin-top:1px}
+  .checks code{font-family:ui-monospace,'JetBrains Mono',Menlo,monospace;color:var(--coral);font-size:12.5px;overflow-wrap:anywhere}
+
+  /* ---------- SETUP (Add to your AI assistant) ---------- */
+  .setup-grid{display:grid;grid-template-columns:1fr 1.55fr;gap:60px;align-items:start}
+  .setup-copy .std-h2{margin-top:4px}
+  .setup-copy p{font-size:15px;color:var(--mute-lt);line-height:1.6;margin-top:18px;max-width:430px}
+  .setup-note{display:inline-block;margin-top:42px;font-size:13.5px;font-weight:600;color:var(--text-dk);transition:color .2s}
+  .setup-note:hover{color:var(--coral)}
+  .setup-cards{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .setup-card{background:#fff;border:1px solid #ECEAE4;border-radius:16px;padding:26px 24px;box-shadow:0 1px 2px rgba(16,19,35,.04)}
+  .sc-brand{display:flex;align-items:center;justify-content:center;gap:9px;font-family:var(--display);font-size:22px;font-weight:600;color:var(--text-dk);margin-bottom:20px}
+  .sc-brand svg{width:24px;height:24px}
+  .sc-brand .lg-claude{color:#D97757}
+  .sc-brand.gpt{font-family:var(--body);font-weight:800;letter-spacing:-.02em}
+  .connector{border-radius:11px;padding:13px 14px;margin-bottom:20px}
+  .connector .c-top{font-size:12px;font-weight:600;margin-bottom:10px}
+  .connector .c-top b{font-weight:600}
+  .connector .c-row{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;font-size:12.5px;font-weight:500}
+  .connector .c-row .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+  .connector .c-row .conn-ok{margin-left:auto;color:#3FB984;font-weight:600;font-size:11.5px}
+  .connector.dark{background:#16181D}
+  .connector.dark .c-top{color:#9BA2AD}
+  .connector.dark .c-top b{color:#fff}
+  .connector.dark .c-row{background:#23262C;color:#E6E9ED}
+  .connector.dark .c-row .dot{background:var(--coral)}
+  .connector.light{background:#fff;border:1px solid #ECEAE4}
+  .connector.light .c-top{color:var(--mute-lt)}
+  .connector.light .c-top b{color:var(--text-dk)}
+  .connector.light .c-row{background:#F6F6F7;border:1px solid #EDECEA;color:var(--text-dk)}
+  .connector.light .c-row .dot{background:#16181D}
+  .sc-lead{font-size:13.5px;color:var(--text-dk);font-weight:500;margin-bottom:20px;line-height:1.45}
+
+  /* ---------- COMPLIANCE (Data & compliance) ---------- */
+  .comp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+  .comp-card{background:#fff;border:1px solid #ECEAE4;border-radius:16px;padding:30px 28px}
+  .comp-ico{color:var(--text-dk);margin-bottom:26px}
+  .comp-ico svg{width:30px;height:30px}
+  .comp-label{font-size:13px;font-weight:700;color:var(--coral);margin-bottom:9px}
+  .comp-card h3{font-family:var(--body);font-weight:800;font-size:20px;letter-spacing:-.02em;color:var(--text-dk);margin-bottom:22px}
+
+  @media(max-width:920px){
+    .setup-grid{grid-template-columns:1fr;gap:36px}
+    .setup-cards{grid-template-columns:1fr}
+    .comp-grid{grid-template-columns:1fr}
+  }
+
+  /* ---------- PROMPT LIBRARY ---------- */
+  .pl-controls{display:flex;align-items:center;gap:16px;margin-bottom:28px;flex-wrap:wrap}
+  .pl-search{flex:1;min-width:280px;display:flex;align-items:center;gap:11px;background:#fff;border:1px solid var(--line-lt);border-radius:30px;padding:13px 20px}
+  .pl-search svg{width:18px;height:18px;stroke:var(--mute-lt);fill:none;flex:0 0 auto}
+  .pl-search input{border:none;outline:none;background:transparent;font-family:var(--body);font-size:14px;color:var(--text-dk);width:100%}
+  .pl-search input::placeholder{color:var(--mute-lt)}
+  .pl-filters{display:flex;gap:9px;flex-wrap:wrap}
+  .pl-pill{font-family:var(--body);font-size:13px;font-weight:600;color:var(--text-dk);background:#fff;border:1px solid var(--line-lt);border-radius:24px;padding:9px 16px;cursor:pointer;transition:background .15s,color .15s,border-color .15s;white-space:nowrap}
+  .pl-pill:hover{border-color:var(--mute-lt)}
+  .pl-pill.active{background:var(--coral);border-color:var(--coral);color:#fff}
+  .pl-pill .ct{opacity:.6;margin-left:4px;font-weight:500}
+  .pl-pill.active .ct{opacity:.85}
+  .pl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .pl-card{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line-lt);border-radius:16px;padding:24px;transition:border-color .2s,box-shadow .2s,transform .2s}
+  .pl-card:hover{border-color:#D8D3CA;box-shadow:0 14px 30px -20px rgba(20,26,34,.25);transform:translateY(-2px)}
+  .pl-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
+  .pl-card-top h3{font-family:var(--body);font-size:15px;font-weight:700;color:var(--text-dk);letter-spacing:-.01em;line-height:1.25}
+  .pl-tag{flex:0 0 auto;font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.03em;color:var(--coral);background:rgba(255,98,103,.08);border:1px solid rgba(255,98,103,.2);border-radius:20px;padding:3px 10px;white-space:nowrap}
+  .pl-q{font-size:14px;font-style:italic;color:var(--text-dk);line-height:1.5;opacity:.92}
+  .pl-card-foot{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:20px;padding-top:16px;border-top:1px solid var(--line-lt)}
+  .pl-src{font-family:var(--mono);font-size:11.5px;color:var(--mute-lt);letter-spacing:.02em}
+  .pl-copy{display:inline-flex;align-items:center;gap:7px;font-family:var(--body);font-size:12.5px;font-weight:600;color:var(--text-dk);background:#F3F1EC;border:1px solid var(--line-lt);border-radius:8px;padding:7px 12px;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+  .pl-copy:hover{background:#EAE7E0}
+  .pl-copy svg{width:13px;height:13px;stroke:currentColor;fill:none;flex:0 0 auto}
+  .pl-copy.done{color:#fff;background:var(--coral);border-color:var(--coral)}
+  .pl-empty{text-align:center;color:var(--mute-lt);font-size:14px;padding:46px 0}
+  .pl-more-wrap{display:flex;justify-content:center;margin-top:34px}
+  .pl-more{font-family:var(--body);font-size:14px;font-weight:600;color:var(--text-dk);background:#fff;border:1px solid var(--line-lt);border-radius:30px;padding:12px 28px;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+  .pl-more:hover{border-color:var(--text-dk);background:rgba(0,0,0,.02)}
+  .pl-more[hidden]{display:none}
+
+  /* ---------- SETUP VIDEO ---------- */
+  .video-ph{position:relative;width:100%;aspect-ratio:16/9;border-radius:20px;overflow:hidden;background:radial-gradient(130% 120% at 50% -10%, #232B36 0%, #10141B 62%);border:1px solid var(--line-lt);box-shadow:0 36px 80px -40px rgba(14,19,35,.5);display:flex;align-items:center;justify-content:center}
+  .video-grid{position:absolute;inset:0;opacity:.5;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:46px 46px;-webkit-mask-image:radial-gradient(circle at 50% 40%,#000,transparent 75%);mask-image:radial-gradient(circle at 50% 40%,#000,transparent 75%)}
+  .video-play{position:relative;z-index:1;width:86px;height:86px;border-radius:9999px;background:var(--coral);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;box-shadow:0 16px 40px -10px rgba(255,98,103,.65);transition:transform .2s}
+  .video-play:hover{transform:scale(1.06)}
+  .video-play svg{width:36px;height:36px;margin-left:5px}
+  .video-meta{position:absolute;left:24px;bottom:20px;z-index:1;font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.7);letter-spacing:.03em;display:flex;align-items:center;gap:10px}
+  .video-badge{font-family:var(--body);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--coral);background:rgba(255,98,103,.14);border:1px solid rgba(255,98,103,.32);border-radius:20px;padding:3px 9px}
+
+  /* ---------- WALKTHROUGH SIDE MODAL (matches platform side-modal) ---------- */
+  .sidemodal-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);opacity:0;transition:opacity .3s;display:flex;justify-content:flex-end}
+  .sidemodal-overlay.open{opacity:1}
+  .sidemodal-overlay[hidden]{display:none}
+  .sidemodal{position:relative;height:100%;width:100%;max-width:850px;background:#fff;border-left:1px solid #DEE0E4;transform:translateX(100%);transition:transform .34s cubic-bezier(.2,.8,.2,1);overflow-y:auto;display:flex;flex-direction:column}
+  .sidemodal-overlay.open .sidemodal{transform:translateX(0)}
+  .sidemodal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:30px 34px 0}
+  .sidemodal-title{font-family:var(--body);font-weight:800;font-size:26px;letter-spacing:-.02em;line-height:1.1;color:var(--text-dk);margin-top:6px}
+  .sidemodal-close{flex:0 0 auto;width:38px;height:38px;border-radius:9999px;border:1px solid var(--line-lt);background:#fff;color:var(--text-dk);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s}
+  .sidemodal-close:hover{background:#F3F4F6}
+  .sidemodal-close svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+  .sidemodal-body{padding:24px 34px 38px;display:flex;flex-direction:column;gap:22px}
+  .sidemodal-copy{font-size:14.5px;color:var(--mute-lt);line-height:1.6}
+  .sidemodal-cta{display:flex;gap:12px;flex-wrap:wrap}
+  @media(max-width:560px){.sidemodal-head{padding:24px 22px 0}.sidemodal-body{padding:20px 22px 30px}}
+  @media(max-width:980px){.pl-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:640px){.pl-grid{grid-template-columns:1fr}.pl-controls{flex-direction:column;align-items:stretch}}
+
   /* ---------- FINAL CTA ---------- */
   .final{position:relative;text-align:center;padding:120px 0;overflow:hidden}
   .final-glow{position:absolute;width:900px;height:600px;left:50%;top:50%;transform:translate(-50%,-50%);
     background:radial-gradient(ellipse, rgba(232,71,42,.18), transparent 60%);filter:blur(10px);pointer-events:none}
   .final .wrap{position:relative;z-index:2}
-  .final h2{font-family:var(--display);font-weight:600;font-size:clamp(34px,5vw,62px);line-height:1.02;letter-spacing:-.02em;max-width:780px;margin:0 auto 22px;color:#fff}
+  .final h2{font-family:var(--display);font-weight:800;font-size:clamp(34px,5vw,62px);line-height:1.02;letter-spacing:-.02em;max-width:780px;margin:0 auto 22px;color:#fff}
   .final p{font-size:15px;color:var(--mute-dk);max-width:520px;margin:0 auto 36px;line-height:1.55}
   .final .hero-cta{justify-content:center}
 
@@ -366,7 +499,7 @@
     .ex-tab{flex:0 0 230px;border-bottom:none;border-right:1px solid var(--line-lt)}
     .ex-tab.active::before{top:auto;bottom:0;left:0;right:0;width:auto;height:3px}
     .price-grid{grid-template-columns:1fr}
-    .nav-links a:not(.btn){display:none}
+    .nav-search,.nav-link,.nav-demo{display:none}
   }
   @media(max-width:560px){
     .wrap{padding:0 20px}
@@ -398,14 +531,27 @@
 
 <nav id="nav">
   <div class="nav-inner">
-    <a href="#top" class="logo" aria-label="SpotsNow">
-      <svg viewBox="0 0 331 74" aria-hidden="true"><use href="#logo-spotsnow"/></svg>
-    </a>
-    <div class="nav-links">
-      <a href="#stakes">Why</a>
-      <a href="#explore">Intelligence</a>
-      <a href="#pricing">Pricing</a>
-      <a href="#pricing" class="btn btn-primary-inv">Get access</a>
+    <div class="nav-lead">
+      <a href="https://spotsnow.io" class="logo" aria-label="SpotsNow">
+        <svg viewBox="0 0 331 74" aria-hidden="true"><use href="#logo-spotsnow"/></svg>
+      </a>
+      <form class="nav-search" action="https://spotsnow.io/browse" method="get" role="search">
+        <input type="text" name="search" placeholder="Search shows, brands or industries" aria-label="Search shows, brands or industries">
+        <button type="submit" class="nav-search-btn" aria-label="Search">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        </button>
+      </form>
+    </div>
+    <div class="nav-right">
+      <a href="https://spotsnow.io/browse" class="nav-link">Marketplace</a>
+      <a href="https://spotsnow.io/confirm-spot?step=ADD_TO_CAMPAIGN" class="nav-cart" aria-label="Cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121 0 2.1-.715 2.45-1.778l1.106-3.32a.75.75 0 0 0-.71-.987H6.4M7.5 14.25 5.106 5.272"/><circle cx="8.25" cy="20.25" r=".75"/><circle cx="18.75" cy="20.25" r=".75"/></svg>
+      </a>
+      <a href="https://cal.com/spotsnow-partnerships-fzfmgm/spotsnow-demo-call" class="nav-btn nav-btn-secondary nav-demo" target="_blank" rel="noopener">Book a demo call</a>
+      <a href="#setup" class="nav-btn nav-btn-primary">Sign up</a>
+      <button type="button" class="nav-menu" aria-label="Open menu">
+        <svg viewBox="0 0 20 20" stroke="currentColor" aria-hidden="true"><path d="M2.8 10H12.4M2.8 5.2H17.2M2.8 14.8H17.2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
     </div>
   </div>
 </nav>
@@ -421,7 +567,7 @@
         <h1 class="hero-title reveal">Access the <em>brain</em><br>of the industry.</h1>
         <p class="hero-sub reveal">Every brand, every show, every dollar in podcast advertising. Now answerable in plain language, right inside Claude and ChatGPT.</p>
         <div class="hero-cta reveal">
-          <a href="#pricing" class="btn btn-primary-inv">Start for $249/mo →</a>
+          <a href="#setup" class="btn btn-primary-inv open-walkthrough">Start free →</a>
           <a href="#explore" class="btn btn-ghost">See what you can ask</a>
         </div>
 
@@ -483,52 +629,140 @@
   </div>
 </section>
 
-<!-- EXPLORER (now light) -->
-<section class="pad light" id="explore">
+<!-- PROMPT LIBRARY -->
+<section class="pad std" id="explore">
   <div class="wrap">
-    <div class="sec-head reveal">
-      <div class="eyebrow">What you can ask</div>
-      <h2>Five lines of intelligence. One conversation.</h2>
+    <div class="sec-head reveal" style="max-width:640px;margin-bottom:36px">
+      <div class="std-eyebrow">What you can ask</div>
+      <h2 class="std-h2">A prompt for every play.</h2>
+      <p class="std-sub">Pick your role, search, and copy a ready-to-run prompt straight into Claude or ChatGPT.</p>
     </div>
-    <div class="explorer reveal">
-      <div class="ex-tabs" id="exTabs"></div>
-      <div class="ex-panel" id="exPanel"></div>
+    <div class="pl-controls reveal">
+      <div class="pl-search">
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input id="plSearch" type="text" placeholder="Search prompts (e.g. Huberman, CPM, Shopify)..." aria-label="Search prompts">
+      </div>
+      <div class="pl-filters" id="plFilters"></div>
+    </div>
+    <div class="pl-grid" id="plGrid"></div>
+    <div class="pl-empty" id="plEmpty" hidden>No prompts match that search.</div>
+    <div class="pl-more-wrap"><button id="plMore" class="pl-more" type="button" hidden>See more</button></div>
+  </div>
+</section>
+
+<!-- SETUP — Add to your AI assistant -->
+<section class="pad std" id="setup">
+  <div class="wrap">
+    <div class="setup-grid">
+      <div class="setup-copy reveal">
+        <div class="std-eyebrow">Setup</div>
+        <h2 class="std-h2">Add to your AI assistant</h2>
+        <p>Connect and start using SpotsNow Intelligence MCP directly within your preferred AI assistant like Claude or ChatGPT.</p>
+        <p>Before you start, you'll need a SpotsNow account. Sign in or create one when you connect through OAuth.</p>
+        <a href="#pricing" class="setup-note">Pricing plans after July 22nd →</a>
+      </div>
+      <div class="setup-cards">
+        <!-- Claude -->
+        <div class="setup-card reveal">
+          <div class="sc-brand">
+            <svg class="lg-claude" aria-hidden="true"><use href="#ico-claude"/></svg>
+            Claude
+          </div>
+          <div class="connector dark">
+            <div class="c-top">Settings → <b>Connectors</b></div>
+            <div class="c-row"><span class="dot"></span>SpotsNow Intelligence<span class="conn-ok">Connected</span></div>
+          </div>
+          <p class="sc-lead">Add SpotsNow as a custom connector in Claude settings.</p>
+          <ul class="checks">
+            <li>In Claude, go to Settings → Connectors and add a custom connector.</li>
+            <li>Set the MCP Server URL to <code>https://backend.spotsnow.io/mcp-pro</code> and Authentication to OAuth.</li>
+            <li>Click Connect, sign in to SpotsNow or create an account, and complete authorization.</li>
+          </ul>
+        </div>
+        <!-- ChatGPT -->
+        <div class="setup-card reveal">
+          <div class="sc-brand gpt">
+            <svg class="lg-gpt" aria-hidden="true"><use href="#ico-openai"/></svg>
+            ChatGPT
+          </div>
+          <div class="connector light">
+            <div class="c-top">Settings → <b>Connectors</b></div>
+            <div class="c-row"><span class="dot"></span>SpotsNow Intelligence<span class="conn-ok">Connected</span></div>
+          </div>
+          <p class="sc-lead">Enable Developer Mode, then add the MCP connector.</p>
+          <ul class="checks">
+            <li>Go to Settings → Connectors → Advanced and enable Developer Mode, then add a new connector.</li>
+            <li>Set the MCP Server URL to <code>https://backend.spotsnow.io/mcp-pro</code> and Authentication to OAuth.</li>
+            <li>Click Connect, sign in to SpotsNow or create an account, and complete authorization.</li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- PRICING -->
-<section class="pad light" id="pricing">
+<!-- SETUP VIDEO -->
+<section class="pad std white" id="setup-video">
   <div class="wrap">
-    <div class="sec-head reveal" style="text-align:center;margin:0 auto 50px">
-      <div class="eyebrow">Pricing</div>
-      <h2>Priced to put the brain in everyone's hands.</h2>
+    <div class="sec-head reveal" style="max-width:640px;margin-bottom:34px">
+      <div class="std-eyebrow">Walkthrough</div>
+      <h2 class="std-h2">Up and running in two minutes.</h2>
+      <p class="std-sub">Watch the full setup, from connector to first answer, then copy a prompt and go.</p>
     </div>
-    <div class="price-grid">
-      <div class="price ind reveal">
-        <div class="ptier">Individual</div>
-        <div class="amt">$249<span> /mo</span></div>
-        <p class="blurb">For the operator, buyer, or strategist who wants the whole brain on their own desk.</p>
-        <ul class="feats">
-          <li><span class="ck">✓</span>Full access to all five intelligence lines</li>
-          <li><span class="ck">✓</span>Claude and ChatGPT MCP connection</li>
-          <li><span class="ck">✓</span>Ad-clip playback and lookalike search</li>
-          <li><span class="ck">✓</span>Media plans and conflict analysis</li>
+    <!-- TODO: swap this placeholder for the real video embed (a <video> tag, or a YouTube/Loom <iframe>). Keep the .video-ph wrapper for the 16:9 frame. -->
+    <div class="video-ph reveal" role="img" aria-label="Setup walkthrough video — placeholder">
+      <span class="video-grid" aria-hidden="true"></span>
+      <button class="video-play" type="button" aria-label="Play setup walkthrough">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+      </button>
+      <div class="video-meta"><span class="video-badge">Placeholder</span>Setup walkthrough · ~2 min</div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPLIANCE — Data & compliance -->
+<section class="pad std white" id="compliance">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="std-eyebrow">Compliance</div>
+      <h2 class="std-h2">Data &amp; compliance</h2>
+      <p class="std-sub">How SpotsNow MCP handles data, connections, and compliance.</p>
+    </div>
+    <div class="comp-grid">
+      <div class="comp-card reveal">
+        <div class="comp-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.4-3 8.2-7 9-4-.8-7-4.6-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <div class="comp-label">Your data</div>
+        <h3>Data handling practices</h3>
+        <ul class="checks">
+          <li>The connection is read-only and one-way: your AI assistant pulls podcast advertising intelligence from SpotsNow. SpotsNow never accesses, stores, or trains on your proprietary data, and your spend, fill rates, and internal files stay on your side.</li>
+          <li>Access is controlled through OAuth. Permissions are scoped to what you authorize during setup, and you decide who on your team can connect and what they can query.</li>
+          <li>You can revoke access at any time from your MCP client or your SpotsNow account. Disconnecting immediately stops all data access.</li>
         </ul>
-        <a href="#" class="btn btn-primary">Start for $249/mo</a>
       </div>
-      <div class="price team reveal">
-        <div class="scale">SCALE</div>
-        <div class="ptier">Team</div>
-        <div class="amt">Contact us</div>
-        <p class="blurb">For agencies, networks, and brand teams running intelligence across seats.</p>
-        <ul class="feats">
-          <li><span class="ck">✓</span>Everything in Individual, across your team</li>
-          <li><span class="ck">✓</span>Shared seats and centralized billing</li>
-          <li><span class="ck">✓</span>Priority support and onboarding</li>
-          <li><span class="ck">✓</span>Volume pricing built around your use</li>
+      <div class="comp-card reveal">
+        <div class="comp-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h13M14 5l3 3-3 3M20 16H7M10 13l-3 3 3 3"/></svg>
+        </div>
+        <div class="comp-label">Integrations</div>
+        <h3>Third-party connections</h3>
+        <ul class="checks">
+          <li>The SpotsNow MCP server connects only to the MCP clients you explicitly authorize: Claude, ChatGPT, Cursor, or any other MCP-compatible assistant.</li>
+          <li>Your prompts and conversations are handled by your AI assistant under its own terms. SpotsNow only receives the tool-call parameters needed to answer a query, for example a show name, brand domain, or category, and returns results from our dataset.</li>
+          <li>SpotsNow does not sell or share your queries or account information with any other third parties.</li>
         </ul>
-        <a href="#" class="btn btn-ghost">Talk to us about Team</a>
+      </div>
+      <div class="comp-card reveal">
+        <div class="comp-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-9.2-8.5C1.3 8.6 2.6 5.5 5.6 5c1.9-.3 3.5.8 4.4 2.2C10.9 5.8 12.5 4.7 14.4 5c3 .5 4.3 3.6 2.8 6.5C19 15.6 12 20 12 20z"/></svg>
+        </div>
+        <div class="comp-label">Health data</div>
+        <h3>Health data access</h3>
+        <ul class="checks">
+          <li>SpotsNow does not access, collect, or process personal health data. No PHI or HIPAA-covered data is involved at any point.</li>
+          <li>References to "Health &amp; Wellness" in our tools and results are podcast content categories: genre labels used to classify shows and advertisers, not data about individuals or their health.</li>
+        </ul>
       </div>
     </div>
   </div>
@@ -541,8 +775,8 @@
     <h2 class="reveal">The whole industry,<br>one question away.</h2>
     <p class="reveal">Connect SpotsNow to Claude or ChatGPT and ask your first question today.</p>
     <div class="hero-cta reveal">
-      <a href="#pricing" class="btn btn-primary-inv">Start for $249/mo →</a>
-      <a href="#pricing" class="btn btn-ghost">Talk to us about Team</a>
+      <a href="#setup" class="btn btn-primary-inv open-walkthrough">Start free →</a>
+      <a href="https://cal.com/spotsnow-partnerships-fzfmgm/spotsnow-demo-call" class="btn btn-ghost" target="_blank" rel="noopener">Talk to us about Team</a>
     </div>
   </div>
 </section>
@@ -555,6 +789,35 @@
     <span>spotsnow.io · The brain of the podcast advertising industry</span>
   </div>
 </footer>
+
+<!-- WALKTHROUGH SIDE MODAL -->
+<div class="sidemodal-overlay" id="walkthroughModal" hidden>
+  <aside class="sidemodal" role="dialog" aria-modal="true" aria-label="Setup walkthrough">
+    <div class="sidemodal-head">
+      <div>
+        <div class="std-eyebrow">Walkthrough</div>
+        <h2 class="sidemodal-title">Get set up in two minutes.</h2>
+      </div>
+      <button class="sidemodal-close" type="button" aria-label="Close">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="sidemodal-body">
+      <!-- TODO: swap this placeholder for the real walkthrough video (a <video> tag or a YouTube/Loom <iframe>). Keep the .video-ph wrapper for the 16:9 frame. -->
+      <div class="video-ph" role="img" aria-label="Setup walkthrough video — placeholder">
+        <span class="video-grid" aria-hidden="true"></span>
+        <button class="video-play" type="button" aria-label="Play setup walkthrough">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+        </button>
+        <div class="video-meta"><span class="video-badge">Placeholder</span>Setup walkthrough · ~2 min</div>
+      </div>
+      <p class="sidemodal-copy">Connect SpotsNow to Claude or ChatGPT, then copy a prompt and ask your first question. The whole thing takes about two minutes.</p>
+      <div class="sidemodal-cta">
+        <a href="https://spotsnow.io" class="btn btn-primary-inv">Create your account →</a>
+      </div>
+    </div>
+  </aside>
+</div>
 
 <script>
   // nav shadow on scroll
@@ -672,55 +935,87 @@
   }
   (async function loop(){let i=0;while(true){await runScene(scenes[i%scenes.length]);i++}})();
 
-  // ---- EXPLORER ----
-  const SVG={
-    mic:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></svg>',
-    bldg:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/></svg>',
-    chart:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18M7 14l4-4 3 3 5-6"/></svg>',
-    head:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></svg>',
-    chess:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M9 21c0-3 1-4 1-4H8l1-3 4-2-1-2 2-2-2-2c-3 0-5 2-5 5l1 2-2 2 2 2s-1 1-1 5"/></svg>'
-  };
-  const lines=[
-    {ico:SVG.mic,title:'Podcast & Show Insights',desc:'Sponsors, ad clips, lookalikes',
-     h:'Know who sponsors a show, hear what aired, and find its twins.',
-     sub:'Pull the full sponsor list on any show, hear the actual host-read placements, and find the shows most like it for expansion.',
-     prompts:['What are the top brands advertising on SmartLess?','Find lookalike shows for The Daily.','Play me some recent host-read ads from Huberman Lab.','What brands on Conan O\'Brien Needs a Friend might conflict with Squarespace?'],
-     note:'Surface real host-read ad clips, not just metadata, so you hear the placement before you buy it.'},
-    {ico:SVG.bldg,title:'Brand & Advertiser Intel',desc:'Where brands spend, by category',
-     h:'Track where any brand spends and the categories it keeps buying.',
-     sub:'Follow a single domain to every show it sponsors, the categories it returns to, and a full quarterly audit of its activity.',
-     prompts:['Where is drinkag1.com spending the most money on podcast ads?','What are the top podcasts sponsored by betterhelp.com?','What podcast categories does casper.com repeatedly buy?','Run a Q1 2026 audit for athleticgreens.com.'],
-     note:'Reverse-engineer a competitor\'s entire podcast strategy from a single domain.'},
-    {ico:SVG.chart,title:'Industry & Market Trends',desc:'Macro spend and emerging brands',
-     h:'Get the macro view: spend, top performers, and emerging brands.',
-     sub:'Size up a whole vertical, see who leads it, and catch the new advertisers ramping their spend before they are obvious.',
-     prompts:['Give me an overview of podcast advertising in the Health and Fitness industry.','What new brands started testing podcast ads recently and are now scaling up their spend?','Show me a list of all podcast categories and their sizes.'],
-     note:'Spot brands scaling their spend early, while inventory and rates are still negotiable.'},
-    {ico:SVG.head,title:'Publisher & Network Tools',desc:'Inventory, prospecting, recruiting',
-     h:'Read your inventory, find prospects, and recruit the right shows.',
-     sub:'For networks and publishers: see which brands you should be pitching, where your inventory is soft, and which shows to bring on.',
-     prompts:['Which brands target the same industries as our sponsors but haven\'t bought ads with us yet?','Find True Crime podcasts with a low ad fill rate I could recruit to my network.','Give me an inventory health overview for the Wondery network.'],
-     note:'Turn the same intelligence advertisers use into a sales prospecting and recruitment engine.'},
-    {ico:SVG.chess,title:'Advanced Planning & Strategy',desc:'Data-backed plans on demand',
-     h:'Turn the data into a finished plan, not just a chart.',
-     sub:'Hand the assistant a budget and a goal; it composes across every line above into a media plan or conflict check you can act on.',
-     prompts:['Build a $50,000 brand awareness media plan for ritual.com.','Run a competitor conflict analysis for squarespace.com on How I Built This.'],
-     note:'The assistant composes across every line above to deliver a plan you can act on the same day.'}
+  // ---- PROMPT LIBRARY ----
+  const PROMPTS=[
+    {title:"Health & Fitness Vertical Overview",role:"Advertisers",q:"Give me an overview of podcast advertising in Health and Fitness."},
+    {title:"Huberman Lab Sponsor Audit",role:"Advertisers",q:"Who are the primary recurring sponsors on Huberman Lab over the last 6 months?"},
+    {title:"Fintech Competitor Spend",role:"Advertisers",q:"Show me the podcast ad spend breakdown for Wealthfront vs Betterment in Q1."},
+    {title:"$100k True Crime Test Plan",role:"Advertisers",q:"Build a $100k test budget for a DTC home security brand on True Crime shows."},
+    {title:"DTC Mattress Competitors",role:"Advertisers",q:"Which mattress brands have sponsored top 50 Comedy shows since January?"},
+    {title:"SmartLess Sponsor Roster",role:"Advertisers",q:"Pull the full list of brands advertising on SmartLess during Q2."},
+    {title:"AG1 Spend Map",role:"Advertisers",q:"Where is drinkag1.com spending the most on podcast ads?"},
+    {title:"Lookalikes for The Daily",role:"Advertisers",q:"Find lookalike shows for The Daily."},
+    {title:"Hear Huberman Host-Reads",role:"Advertisers",q:"Play me some recent host-read ads from Huberman Lab."},
+    {title:"$50k Awareness Plan",role:"Agencies",q:"Build a $50,000 brand awareness media plan for ritual.com."},
+    {title:"Squarespace Conflict Check",role:"Agencies",q:"Run a competitor conflict analysis for squarespace.com on How I Built This."},
+    {title:"BetterHelp Top Shows",role:"Agencies",q:"What are the top podcasts sponsored by betterhelp.com?"},
+    {title:"Casper Category Buys",role:"Agencies",q:"What podcast categories does casper.com repeatedly buy?"},
+    {title:"Q1 Brand Audit",role:"Agencies",q:"Run a Q1 2026 audit of athleticgreens.com's podcast activity."},
+    {title:"Prospect Gap Finder",role:"Networks",q:"Which brands target our sponsors' industries but haven't bought ads with us yet?"},
+    {title:"Recruit True Crime Shows",role:"Networks",q:"Find True Crime podcasts with a low ad fill rate I could recruit to my network."},
+    {title:"Network Inventory Health",role:"Networks",q:"Give me an inventory health overview for my podcast network."},
+    {title:"Emerging Advertisers",role:"Networks",q:"What new brands started testing podcast ads recently and are now scaling up spend?"},
+    {title:"Conflict Watch: Squarespace",role:"Ad Sellers",q:"What brands on Conan O'Brien Needs a Friend might conflict with Squarespace?"},
+    {title:"Category Size Map",role:"Ad Sellers",q:"Show me a list of all podcast categories and their sizes."},
+    {title:"Pitch-Ready Brand List",role:"Ad Sellers",q:"Which brands should I be pitching for my show this quarter?"}
   ];
-  const tabs=document.getElementById('exTabs');
-  const panel=document.getElementById('exPanel');
-  lines.forEach((l,i)=>{
-    const t=el('div','ex-tab'+(i===0?' active':''),'<div class="ico">'+l.ico+'</div><div><div class="t-title">'+l.title+'</div><div class="t-desc">'+l.desc+'</div></div>');
-    t.addEventListener('click',()=>{document.querySelectorAll('.ex-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');render(i)});
-    tabs.appendChild(t);
-  });
-  function render(i){
-    const l=lines[i];
-    let p='';
-    l.prompts.forEach(q=>{p+='<div class="prompt"><span class="pmark">&gt;</span><span class="q">'+q+'</span><span class="arrow">ask →</span></div>'});
-    panel.innerHTML='<div class="pn-label">Line '+(i+1)+' / 5</div><h3>'+l.h+'</h3><p class="pn-sub">'+l.sub+'</p><div class="prompts">'+p+'</div><div class="pn-note"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E8472A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 16px;margin-top:2px"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10c.5.5 1 1.2 1 2h6c0-.8.5-1.5 1-2a6 6 0 0 0-4-10z"/></svg><span><b>'+l.note+'</b></span></div>';
+  const ROLES=["All Roles","Advertisers","Networks","Ad Sellers","Agencies"];
+  const COPY_SVG='<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+  const plGrid=document.getElementById('plGrid');
+  const plFilters=document.getElementById('plFilters');
+  const plSearch=document.getElementById('plSearch');
+  const plEmpty=document.getElementById('plEmpty');
+  let activeRole="All Roles", query="", expanded=false;
+  const PAGE=6;
+  const plMore=document.getElementById('plMore');
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  function renderFilters(){
+    plFilters.innerHTML='';
+    ROLES.forEach(r=>{
+      const b=document.createElement('button');
+      b.className='pl-pill'+(r===activeRole?' active':'');
+      b.innerHTML=r+(r==="All Roles"?' <span class="ct">('+PROMPTS.length+')</span>':'');
+      b.addEventListener('click',()=>{activeRole=r;expanded=false;renderFilters();renderGrid()});
+      plFilters.appendChild(b);
+    });
   }
-  render(0);
+  function currentItems(){
+    const ql=query.trim().toLowerCase();
+    return PROMPTS.filter(p=>(activeRole==="All Roles"||p.role===activeRole)&&(!ql||(p.title+' '+p.q+' '+p.role).toLowerCase().includes(ql)));
+  }
+  function renderGrid(){
+    const items=currentItems();
+    const shown=expanded?items:items.slice(0,PAGE);
+    plEmpty.hidden=items.length>0;
+    plGrid.innerHTML=shown.map(p=>
+      '<div class="pl-card reveal in">'
+      +'<div class="pl-card-top"><h3>'+esc(p.title)+'</h3><span class="pl-tag">'+esc(p.role)+'</span></div>'
+      +'<p class="pl-q">&ldquo;'+esc(p.q)+'&rdquo;</p>'
+      +'<div class="pl-card-foot">'
+      +'<button class="pl-copy" type="button" data-q="'+esc(p.q).replace(/"/g,'&quot;')+'">'+COPY_SVG+'Copy Prompt</button></div>'
+      +'</div>'
+    ).join('');
+    if(items.length>PAGE){plMore.hidden=false;plMore.textContent=expanded?'See less':'See more ('+(items.length-PAGE)+')';}
+    else{plMore.hidden=true;}
+  }
+  plGrid.addEventListener('click',e=>{
+    const btn=e.target.closest('.pl-copy'); if(!btn)return;
+    const text=btn.getAttribute('data-q');
+    if(navigator.clipboard){navigator.clipboard.writeText(text).catch(()=>{})}
+    btn.classList.add('done'); btn.innerHTML='✓ Copied';
+    setTimeout(()=>{btn.classList.remove('done');btn.innerHTML=COPY_SVG+'Copy Prompt'},1400);
+  });
+  plMore.addEventListener('click',()=>{expanded=!expanded;renderGrid()});
+  plSearch.addEventListener('input',e=>{query=e.target.value;expanded=false;renderGrid()});
+  renderFilters(); renderGrid();
+
+  // ---- WALKTHROUGH SIDE MODAL ----
+  const wm=document.getElementById('walkthroughModal');
+  function openWM(){wm.hidden=false;requestAnimationFrame(()=>wm.classList.add('open'));document.body.style.overflow='hidden';}
+  function closeWM(){wm.classList.remove('open');document.body.style.overflow='';setTimeout(()=>{wm.hidden=true},340);}
+  document.querySelectorAll('.open-walkthrough').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();openWM();}));
+  wm.addEventListener('click',e=>{if(e.target===wm||e.target.closest('.sidemodal-close'))closeWM();});
+  addEventListener('keydown',e=>{if(e.key==='Escape'&&!wm.hidden)closeWM();});
 </script>
 </body>
 </html>
