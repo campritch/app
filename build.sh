@@ -12,6 +12,10 @@ node scripts/scan-secrets.mjs
 mkdir -p dist dist/data dist/api dist/cutouts
 
 cp *.html dist/
+# NDA: never publish the AdLarge vetting demo to the live site.
+rm -f dist/vetting-demo.html dist/acme-vetting.html
+# Pulled offline: Magellan pixel-setup flow (tracking-pixel pages). Keep source, never publish.
+rm -f dist/pixel-setup.html dist/submit-creative.html
 cp styles.css script.js dist/ 2>/dev/null || true
 cp *.png dist/ 2>/dev/null || true
 cp *.jpg dist/ 2>/dev/null || true
