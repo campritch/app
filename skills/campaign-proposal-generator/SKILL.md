@@ -58,9 +58,13 @@ If SpotsNow / Apollo / Notion / Superhuman tools are not loaded, load them with 
 
 ---
 
-## Step 1 — Train on the hub (always do this first)
+## Step 1 — Train on the playbook + hub (always do this first)
 
-Everything lives in one Notion hub: **AI Campaign Proposals** (page id
+**First, read `references/playbook.md`.** It is distilled from our real proposals — the actual
+pricing bands, the per-category show rosters, the tier multipliers, the house voice, the displacement
+logic. This is the baked-in training and it applies to every build; anchor to it.
+
+Then ground in the live hub. Everything lives in one Notion hub: **AI Campaign Proposals** (page id
 `3a2bb6074fe3817cb2fdc003df546259`), which holds two databases — **Training Library** (the brain)
 and **AI Proposals** (the history). Read `references/training.md` for the full method.
 
@@ -190,7 +194,8 @@ Report to the user:
 | Voice | plain, direct, confident; no em dashes; American spelling; let numbers + proof brands carry it |
 
 ## Reference files
-- `references/training.md` — how to train on past proposals, transcripts, emails before building.
+- `references/playbook.md` — **read first.** Distilled patterns from real proposals: pricing bands, per-category show rosters, tier multipliers, house voice, displacement logic.
+- `references/training.md` — how to train on the Notion hub (Training Library + AI Proposals) before building.
 - `references/apollo-sizing.md` — revenue → test-budget mapping, worked examples.
 - `references/general-mode.md` — whole-market tiered proposal: discovery, fixed rates, tiers, Notion template + image fix.
 - `references/remnant-mode.md` — live-inventory bundle: discovery, delivery, Notion "Host-Read Remnant Advantage" template.
