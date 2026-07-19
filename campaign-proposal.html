@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI Campaign Proposals — SpotsNow</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" href="/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --navy:#17212b; --coral:#ff6267; --grey:#5a6472; --bg:#f6f7f9;
+    --border:#e2e5ea; --border-2:#d6dae1; --white:#fff; --ink-soft:#7a8494;
+    --ok:#12805c; --ok-bg:#e7f6ef; --warn:#8a5b00; --warn-bg:#fdf3e0;
+    --radius:14px; --radius-sm:10px; --shadow:0 2px 20px rgba(14,19,35,.05);
+  }
+  * , *::before, *::after { box-sizing:border-box; }
+  html,body { margin:0; padding:0; }
+  body {
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    color:var(--navy); background:var(--bg); -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  a { color:inherit; }
+  .wrap { max-width:920px; margin:0 auto; padding:28px 22px 80px; }
+
+  /* ---- top bar ---- */
+  .top { display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+  .logo { width:34px; height:34px; border-radius:9px; background:var(--coral);
+    display:flex; align-items:center; justify-content:center; flex:none; }
+  .top h1 { font-size:19px; font-weight:800; letter-spacing:-.3px; margin:0; }
+  .top .sub { font-size:12.5px; color:var(--ink-soft); margin-top:1px; }
+  .who { margin-left:auto; font-size:12px; color:var(--ink-soft); }
+
+  .lede { font-size:13.5px; color:var(--grey); margin:14px 0 20px; max-width:680px; }
+  .lede b { color:var(--navy); font-weight:600; }
+
+  /* ---- gate ---- */
+  .gate { max-width:400px; margin:14vh auto 0; background:var(--white);
+    border:1px solid var(--border); border-radius:var(--radius);
+    padding:34px 30px; box-shadow:var(--shadow); text-align:center; }
+  .gate .logo { margin:0 auto 16px; width:44px; height:44px; border-radius:12px; }
+  .gate h2 { font-size:18px; margin:0 0 4px; font-weight:700; }
+  .gate p { font-size:13px; color:var(--grey); margin:0 0 18px; }
+  .gate input { width:100%; }
+  .gate .err { color:var(--coral); font-size:12.5px; min-height:18px; margin-top:8px; }
+
+  /* ---- tabs ---- */
+  .tabs { display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:22px; }
+  .tab { appearance:none; border:none; background:none; cursor:pointer;
+    font-family:inherit; font-size:13.5px; font-weight:600; color:var(--ink-soft);
+    padding:10px 14px; border-bottom:2px solid transparent; margin-bottom:-1px; }
+  .tab:hover { color:var(--navy); }
+  .tab.active { color:var(--navy); border-bottom-color:var(--coral); }
+
+  /* ---- cards / forms ---- */
+  .card { background:var(--white); border:1px solid var(--border);
+    border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); margin-bottom:18px; }
+  .card h3 { font-size:14px; font-weight:700; margin:0 0 3px; }
+  .card .hint { font-size:12.5px; color:var(--ink-soft); margin:0 0 16px; }
+
+  label { display:block; font-size:12.5px; font-weight:600; color:var(--grey); margin:0 0 5px; }
+  .req { color:var(--coral); }
+  input[type=text], input[type=password], textarea, select {
+    width:100%; font-family:inherit; font-size:14px; color:var(--navy);
+    background:var(--white); border:1px solid var(--border-2); border-radius:var(--radius-sm);
+    padding:9px 11px; outline:none; transition:border-color .12s, box-shadow .12s; }
+  input:focus, textarea:focus, select:focus { border-color:var(--coral);
+    box-shadow:0 0 0 3px rgba(255,98,103,.12); }
+  textarea { resize:vertical; min-height:76px; line-height:1.5; }
+  select { appearance:none; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a8494' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat:no-repeat; background-position:right 11px center; padding-right:30px; }
+  .field { margin-bottom:15px; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .sub-hint { font-size:11.5px; color:var(--ink-soft); margin-top:5px; }
+
+  .check { display:flex; gap:10px; align-items:flex-start; padding:12px 13px;
+    border:1px solid var(--border); border-radius:var(--radius-sm); background:#fbfbfc; cursor:pointer; }
+  .check input { margin-top:2px; width:16px; height:16px; accent-color:var(--coral); flex:none; }
+  .check .lbl { font-size:13px; font-weight:600; color:var(--navy); }
+  .check .desc { font-size:12px; color:var(--ink-soft); margin-top:2px; font-weight:400; }
+
+  .reveal { margin-top:13px; padding-top:14px; border-top:1px dashed var(--border-2); }
+  .reveal[hidden] { display:none; }
+
+  .btn { appearance:none; font-family:inherit; font-weight:600; font-size:14px;
+    border-radius:var(--radius-sm); padding:10px 18px; cursor:pointer; border:1px solid transparent; }
+  .btn-primary { background:var(--navy); color:var(--white); }
+  .btn-primary:hover { background:#0e1626; }
+  .btn-ghost { background:var(--white); color:var(--navy); border-color:var(--border-2); }
+  .btn-ghost:hover { border-color:var(--ink-soft); }
+  .btn-sm { font-size:12.5px; padding:6px 12px; }
+  .btn:disabled { opacity:.55; cursor:not-allowed; }
+  .btn-row { display:flex; gap:10px; align-items:center; margin-top:6px; }
+
+  /* ---- launch panel ---- */
+  .launch { border:1px solid var(--ok); background:var(--ok-bg); border-radius:var(--radius);
+    padding:18px 20px; margin-bottom:18px; }
+  .launch h3 { margin:0 0 8px; font-size:14px; color:var(--ok); }
+  .launch p { font-size:13px; color:var(--navy); margin:0 0 12px; }
+  .prompt-box { position:relative; }
+  .prompt-box pre { background:var(--navy); color:#e8ecf1; font-size:12.5px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace; border-radius:var(--radius-sm);
+    padding:14px 15px; margin:0; white-space:pre-wrap; word-break:break-word; line-height:1.55; }
+  .copy-btn { position:absolute; top:9px; right:9px; }
+
+  /* ---- lists ---- */
+  .item { display:flex; gap:12px; align-items:flex-start; padding:13px 0; border-top:1px solid var(--border); }
+  .item:first-child { border-top:none; }
+  .item .meta { flex:1; min-width:0; }
+  .item .t { font-size:13.5px; font-weight:600; }
+  .item .d { font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  .item .d code { background:#eef0f3; border-radius:4px; padding:1px 5px; font-size:11px; }
+  .pill { display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.03em;
+    text-transform:uppercase; padding:2px 8px; border-radius:20px; vertical-align:middle; }
+  .pill-general { background:#e8eefb; color:#2c4b91; }
+  .pill-remnant { background:#fdf0e4; color:#8a5b00; }
+  .pill-queued { background:#eef0f3; color:#5a6472; }
+  .pill-generated { background:var(--ok-bg); color:var(--ok); }
+  .empty { font-size:13px; color:var(--ink-soft); padding:16px 0; text-align:center; }
+  .link { color:#2c4b91; font-weight:600; text-decoration:none; }
+  .link:hover { text-decoration:underline; }
+
+  .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%);
+    background:var(--navy); color:#fff; font-size:13px; font-weight:500; padding:10px 18px;
+    border-radius:10px; box-shadow:0 6px 24px rgba(0,0,0,.2); opacity:0; pointer-events:none;
+    transition:opacity .2s, transform .2s; z-index:50; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(-4px); }
+  .drop { border:1.5px dashed var(--border-2); border-radius:var(--radius-sm); padding:18px;
+    text-align:center; font-size:13px; color:var(--ink-soft); cursor:pointer; transition:border-color .12s, background .12s; }
+  .drop:hover, .drop.over { border-color:var(--coral); background:#fff7f7; }
+  .hide { display:none !important; }
+  @media (max-width:640px){ .row{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<!-- ===== Password gate ===== -->
+<div id="gate" class="gate">
+  <div class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M13 2L4.5 13.5H12l-1 8.5L19.5 10H12l1-8z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg></div>
+  <h2>AI Campaign Proposals</h2>
+  <p>Enter the team password to continue.</p>
+  <input type="password" id="gate-pass" placeholder="Password" autocomplete="current-password" autofocus />
+  <div class="err" id="gate-err"></div>
+  <button class="btn btn-primary" id="gate-btn" style="width:100%;margin-top:4px;">Unlock</button>
+</div>
+
+<!-- ===== App ===== -->
+<div id="app" class="wrap hide">
+  <div class="top">
+    <div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M13 2L4.5 13.5H12l-1 8.5L19.5 10H12l1-8z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg></div>
+    <div>
+      <h1>AI Campaign Proposals</h1>
+      <div class="sub">spotsnow.wiki / campaign-proposal</div>
+    </div>
+    <div class="who" id="who"></div>
+  </div>
+
+  <p class="lede">
+    Capture a proposal request, and the trained <b>campaign-proposal-generator</b> skill turns it into a
+    finished Notion proposal — pulling best-fit shows from the <b>SpotsNow MCP</b>, sizing spend from the brand's
+    <b>Apollo</b>-estimated revenue, and grounding it in every past proposal, transcript, and email you've trained it on.
+    Two modes: a <b>General landscape</b> proposal across the whole podcast market, or a <b>Last-minute remnant</b>
+    bundle built from live SpotsNow inventory.
+  </p>
+
+  <div class="tabs">
+    <button class="tab active" data-view="new">New proposal</button>
+    <button class="tab" data-view="train">Training corpus</button>
+    <button class="tab" data-view="history">AI proposals</button>
+  </div>
+
+  <!-- ---------- NEW PROPOSAL ---------- -->
+  <section id="view-new">
+    <div id="launch" class="launch hide">
+      <h3>✓ Proposal job saved</h3>
+      <p id="launch-summary"></p>
+      <div class="prompt-box">
+        <pre id="launch-prompt"></pre>
+        <button class="btn btn-ghost btn-sm copy-btn" onclick="copyPrompt()">Copy</button>
+      </div>
+      <div class="btn-row" style="margin-top:12px;">
+        <button class="btn btn-ghost btn-sm" onclick="resetForm()">New proposal</button>
+        <button class="btn btn-ghost btn-sm" onclick="switchView('history')">View AI proposals →</button>
+      </div>
+    </div>
+
+    <div class="card" id="new-card">
+      <h3>Build a proposal</h3>
+      <p class="hint">Fill in what you know. The skill fills the rest from SpotsNow, Apollo, and your training corpus.</p>
+
+      <div class="row">
+        <div class="field">
+          <label>Brand name <span class="req">*</span></label>
+          <input type="text" id="brand_name" placeholder="e.g. Rebel" />
+        </div>
+        <div class="field">
+          <label>Brand domain</label>
+          <input type="text" id="brand_domain" placeholder="e.g. rebel.com" />
+          <div class="sub-hint">Used for Apollo revenue enrichment + SpotsNow brand match.</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>Proposal type <span class="req">*</span></label>
+          <select id="proposal_type">
+            <option value="general">General landscape — best campaign across the whole market</option>
+            <option value="remnant">Last-minute remnant — bundle of live SpotsNow inventory</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Target budget</label>
+          <input type="text" id="budget" placeholder="e.g. $50k/mo — or leave blank" />
+          <div class="sub-hint">Leave blank to let Apollo-estimated revenue size the spend.</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Target market / audience <span class="req" id="tm-req">*</span></label>
+        <textarea id="target_market" placeholder="Who are we reaching? Demo, interests, geography, category. e.g. women 30–55, wellness / ancestral real-food, US"></textarea>
+      </div>
+
+      <div class="field">
+        <label>SpotsNow campaign link <span style="font-weight:400;color:var(--ink-soft);">(optional)</span></label>
+        <input type="text" id="campaign_url" placeholder="https://app.spotsnow.com/c/… — seeds shows; live MCP is source of truth" />
+      </div>
+
+      <!-- competitor displacement -->
+      <div class="field">
+        <label class="check">
+          <input type="checkbox" id="competitor_displacement" onchange="toggleCompetitor()" />
+          <span>
+            <span class="lbl">Competitor-displacement proposal</span>
+            <span class="desc">Build the plan from shows a competitor <b>used to</b> advertise on but no longer does (e.g. the Rebel/Quince case).</span>
+          </span>
+        </label>
+        <div class="reveal" id="competitor-reveal" hidden>
+          <div class="row">
+            <div class="field" style="margin-bottom:0;">
+              <label>Competitor brand</label>
+              <input type="text" id="competitor_brand" placeholder="e.g. Quince" />
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label>Competitor domain</label>
+              <input type="text" id="competitor_domain" placeholder="e.g. quince.com" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- maximize budget -->
+      <div class="field">
+        <label class="check">
+          <input type="checkbox" id="maximize_budget" />
+          <span>
+            <span class="lbl">Maximize budget — source beyond SpotsNow inventory</span>
+            <span class="desc">If the bundle doesn't reach the target budget, add outside options we can go source to close the gap.</span>
+          </span>
+        </label>
+      </div>
+
+      <div class="field">
+        <label>Correspondence & context <span style="font-weight:400;color:var(--ink-soft);">(optional)</span></label>
+        <textarea id="notes" placeholder="Paste the key context from calls or emails leading up to this — the strategy discussed, constraints, what the brand cares about. This shapes how the proposal is framed."></textarea>
+        <div class="sub-hint">Longer transcripts/emails belong in <a href="#" class="link" onclick="switchView('train');return false;">Training corpus</a> so every future proposal learns from them too.</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="save-job" onclick="saveJob()">Save proposal job →</button>
+        <span class="sub-hint" id="save-status"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- TRAINING ---------- -->
+  <section id="view-train" class="hide">
+    <div class="card">
+      <h3>Train the generator</h3>
+      <p class="hint">Upload past proposals and the transcripts / emails that led to them. Everything here becomes persistent context the skill reads on every future proposal — so it learns how you pitch a Walmart vs. a SerpAPI.</p>
+
+      <div class="drop" id="drop">
+        <b>Drop files here</b> or click to browse<br />
+        <span style="font-size:12px;">PDF, DOCX, TXT, MD, CSV, images — proposals, transcripts, email threads</span>
+        <input type="file" id="file-input" multiple class="hide" />
+      </div>
+
+      <div class="field" style="margin-top:16px;">
+        <label>…or paste a transcript / email thread</label>
+        <textarea id="paste-body" placeholder="Paste raw text here" style="min-height:100px;"></textarea>
+        <div class="row" style="margin-top:10px;">
+          <div class="field" style="margin-bottom:0;">
+            <label>Name it</label>
+            <input type="text" id="paste-name" placeholder="e.g. Rebel — discovery call 2026-07" />
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label>Note <span style="font-weight:400;color:var(--ink-soft);">(optional)</span></label>
+            <input type="text" id="paste-note" placeholder="e.g. led to the Rebel general proposal" />
+          </div>
+        </div>
+        <div class="btn-row"><button class="btn btn-ghost btn-sm" onclick="savePaste()">Save to corpus</button><span class="sub-hint" id="paste-status"></span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Corpus <span id="corpus-count" style="color:var(--ink-soft);font-weight:400;"></span></h3>
+      <p class="hint">Training material the generator will reference.</p>
+      <div id="corpus-list"><div class="empty">Loading…</div></div>
+    </div>
+  </section>
+
+  <!-- ---------- HISTORY ---------- -->
+  <section id="view-history" class="hide">
+    <div class="card">
+      <h3>AI proposals</h3>
+      <p class="hint">Every proposal job you've created. Run one in Claude, then paste the Notion link back with “Mark generated”. Published proposals also live in the Notion <b>AI Proposals</b> index.</p>
+      <div id="history-list"><div class="empty">Loading…</div></div>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PW_KEY = 'sn_cp_pw';
+const TRAIN_COLLECTION = 'proposal-training';
+let password = '';
+
+/* ---------- helpers ---------- */
+function $(id){ return document.getElementById(id); }
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._to); t._to=setTimeout(()=>t.classList.remove('show'),2200); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmtDate(iso){ if(!iso) return '—'; try{ return new Date(iso).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); }catch{ return iso; } }
+function kb(bytes){ if(!bytes) return ''; return bytes<1024?bytes+'b':Math.round(bytes/1024)+'kb'; }
+
+async function api(path, body){
+  const res = await fetch(path, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password, ...body }) });
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data.error || ('HTTP '+res.status));
+  return data;
+}
+
+/* ---------- gate ---------- */
+async function tryUnlock(pw){
+  // Verify against the jobs endpoint — 401 means wrong password, anything else means accepted.
+  const res = await fetch('/api/proposal-jobs', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: pw, action:'list' }) });
+  if(res.status === 401) return false;
+  return true; // 200, or a 500 (misconfig) still means the password itself was accepted
+}
+async function unlock(){
+  const pw = $('gate-pass').value.trim();
+  if(!pw){ $('gate-err').textContent='Enter the password.'; return; }
+  $('gate-btn').disabled = true; $('gate-err').textContent='';
+  try {
+    const ok = await tryUnlock(pw);
+    if(!ok){ $('gate-err').textContent='Wrong password.'; $('gate-btn').disabled=false; return; }
+    password = pw;
+    try { localStorage.setItem(PW_KEY, pw); } catch {}
+    openApp();
+  } catch(e){ $('gate-err').textContent = e.message || 'Something went wrong.'; $('gate-btn').disabled=false; }
+}
+function openApp(){
+  $('gate').classList.add('hide');
+  $('app').classList.remove('hide');
+  loadHistory(); loadCorpus();
+}
+$('gate-btn').addEventListener('click', unlock);
+$('gate-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') unlock(); });
+
+/* ---------- tabs ---------- */
+function switchView(v){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.view===v));
+  $('view-new').classList.toggle('hide', v!=='new');
+  $('view-train').classList.toggle('hide', v!=='train');
+  $('view-history').classList.toggle('hide', v!=='history');
+  if(v==='history') loadHistory();
+  if(v==='train') loadCorpus();
+}
+document.querySelectorAll('.tab').forEach(t=> t.addEventListener('click', ()=>switchView(t.dataset.view)));
+
+/* ---------- new proposal ---------- */
+function toggleCompetitor(){ $('competitor-reveal').hidden = !$('competitor_displacement').checked; }
+// target market is only strictly required for a general proposal
+$('proposal_type').addEventListener('change', ()=>{
+  $('tm-req').style.display = $('proposal_type').value==='general' ? '' : 'none';
+});
+
+function collectJob(){
+  return {
+    brand_name: $('brand_name').value.trim(),
+    brand_domain: $('brand_domain').value.trim(),
+    proposal_type: $('proposal_type').value,
+    budget: $('budget').value.trim(),
+    target_market: $('target_market').value.trim(),
+    campaign_url: $('campaign_url').value.trim(),
+    competitor_displacement: $('competitor_displacement').checked,
+    competitor_brand: $('competitor_brand').value.trim(),
+    competitor_domain: $('competitor_domain').value.trim(),
+    maximize_budget: $('maximize_budget').checked,
+    notes: $('notes').value.trim(),
+  };
+}
+
+async function saveJob(){
+  const job = collectJob();
+  if(!job.brand_name){ toast('Brand name is required.'); $('brand_name').focus(); return; }
+  if(job.proposal_type==='general' && !job.target_market){ toast('Target market is required for a general proposal.'); $('target_market').focus(); return; }
+  $('save-job').disabled = true; $('save-status').textContent = 'Saving…';
+  try {
+    const item = await api('/api/proposal-jobs', { action:'create', job });
+    showLaunch(item);
+    loadHistory();
+    $('save-status').textContent = '';
+  } catch(e){
+    $('save-status').textContent = e.message || 'Failed to save.';
+  } finally { $('save-job').disabled = false; }
+}
+
+// The run prompt carries the FULL spec inline so the skill needs no read-back
+// from the password-gated job store. The job id is for reference + manual
+// write-back ("Mark generated") only.
+function buildRunPrompt(item){
+  const L = [];
+  L.push('Run the campaign-proposal-generator skill with this spec:');
+  L.push('');
+  L.push('Job: ' + item.id);
+  L.push('Mode: ' + (item.proposal_type==='remnant' ? 'Last-minute remnant (live SpotsNow inventory)' : 'General landscape (whole podcast market)'));
+  L.push('Brand: ' + item.brand_name + (item.brand_domain ? ' (' + item.brand_domain + ')' : ''));
+  if(item.target_market) L.push('Target market: ' + item.target_market);
+  L.push('Target budget: ' + (item.budget ? item.budget : 'not set — size it from Apollo-estimated revenue'));
+  if(item.competitor_displacement && item.competitor_brand){
+    L.push('Competitor displacement: ' + item.competitor_brand + (item.competitor_domain ? ' (' + item.competitor_domain + ')' : '') +
+      ' — build the plan from shows this competitor has STOPPED advertising on (recently_stopped).');
+  }
+  if(item.maximize_budget) L.push('Maximize budget: yes — if the bundle underfills the target, add outside-SpotsNow options to source.');
+  if(item.campaign_url) L.push('SpotsNow campaign link (seed only): ' + item.campaign_url);
+  if(item.notes){ L.push(''); L.push('Correspondence & context:'); L.push(item.notes); }
+  L.push('');
+  L.push('When done, give me the Notion proposal link and the Superhuman confirmation-email draft.');
+  return L.join('\n');
+}
+
+function showLaunch(item){
+  const typeLabel = item.proposal_type==='remnant' ? 'Last-minute remnant' : 'General landscape';
+  const bits = [typeLabel + ' proposal for ' + item.brand_name];
+  if(item.competitor_displacement && item.competitor_brand) bits.push('displacing ' + item.competitor_brand);
+  if(item.budget) bits.push('target ' + item.budget);
+  $('launch-summary').innerHTML = esc(bits.join(' · ')) +
+    '.<br>In Claude (with your SpotsNow, Apollo, Notion &amp; Superhuman connectors), run:';
+  $('launch-prompt').textContent = buildRunPrompt(item);
+  $('launch').classList.remove('hide');
+  $('new-card').classList.add('hide');
+  $('launch').scrollIntoView({ behavior:'smooth', block:'center' });
+}
+function copyPrompt(){ navigator.clipboard.writeText($('launch-prompt').textContent).then(()=>toast('Copied')); }
+function resetForm(){
+  ['brand_name','brand_domain','budget','target_market','campaign_url','competitor_brand','competitor_domain','notes'].forEach(id=>$(id).value='');
+  $('proposal_type').value='general'; $('tm-req').style.display='';
+  $('competitor_displacement').checked=false; $('maximize_budget').checked=false; toggleCompetitor();
+  $('launch').classList.add('hide'); $('new-card').classList.remove('hide');
+  $('brand_name').focus();
+}
+
+/* ---------- history ---------- */
+let jobsById = {};
+async function loadHistory(){
+  const box = $('history-list');
+  try {
+    const { items } = await api('/api/proposal-jobs', { action:'list' });
+    jobsById = {}; (items||[]).forEach(it=> jobsById[it.id]=it);
+    if(!items || !items.length){ box.innerHTML = '<div class="empty">No proposals yet. Build one on the New proposal tab.</div>'; return; }
+    box.innerHTML = items.map(renderJob).join('');
+  } catch(e){ box.innerHTML = '<div class="empty">'+esc(e.message||'Failed to load')+'</div>'; }
+}
+function renderJob(it){
+  const typePill = it.proposal_type==='remnant'
+    ? '<span class="pill pill-remnant">Remnant</span>' : '<span class="pill pill-general">General</span>';
+  const statePill = it.status==='generated'
+    ? '<span class="pill pill-generated">Generated</span>' : '<span class="pill pill-queued">Queued</span>';
+  const d = [];
+  if(it.brand_domain) d.push(esc(it.brand_domain));
+  if(it.budget) d.push(esc(it.budget));
+  if(it.competitor_displacement && it.competitor_brand) d.push('displaces '+esc(it.competitor_brand));
+  if(it.maximize_budget) d.push('max-budget');
+  d.push(fmtDate(it.created_at));
+  const notion = it.notion_url ? ' · <a class="link" href="'+esc(it.notion_url)+'" target="_blank" rel="noopener">Notion ↗</a>' : '';
+  return '<div class="item">'
+    + '<div class="meta">'
+      + '<div class="t">'+esc(it.brand_name)+' &nbsp;'+typePill+' '+statePill+'</div>'
+      + '<div class="d">'+d.join(' · ')+notion+' · <code>'+esc(it.id)+'</code></div>'
+    + '</div>'
+    + '<div style="display:flex;gap:6px;flex:none;">'
+      + '<button class="btn btn-ghost btn-sm" onclick="copyJobPrompt(\''+it.id+'\')">Copy run</button>'
+      + '<button class="btn btn-ghost btn-sm" onclick="markGenerated(\''+it.id+'\')">Mark generated</button>'
+      + '<button class="btn btn-ghost btn-sm" onclick="delJob(\''+it.id+'\')">✕</button>'
+    + '</div>'
+  + '</div>';
+}
+function copyJobPrompt(id){
+  const item = jobsById[id];
+  const text = item ? buildRunPrompt(item) : ('Run the campaign-proposal-generator skill for job '+id+'.');
+  navigator.clipboard.writeText(text).then(()=>toast('Run prompt copied'));
+}
+async function markGenerated(id){
+  const url = prompt('Paste the Notion proposal URL (optional):') || '';
+  try { await api('/api/proposal-jobs', { action:'update', id, patch:{ status:'generated', notion_url:url.trim() } }); toast('Updated'); loadHistory(); }
+  catch(e){ toast(e.message||'Failed'); }
+}
+async function delJob(id){
+  if(!confirm('Delete this proposal job?')) return;
+  try { await api('/api/proposal-jobs', { action:'delete', id }); loadHistory(); }
+  catch(e){ toast(e.message||'Failed'); }
+}
+
+/* ---------- training corpus ---------- */
+async function loadCorpus(){
+  const box = $('corpus-list');
+  try {
+    const { items, count } = await api('/api/kb-manage', { action:'list', collection: TRAIN_COLLECTION });
+    $('corpus-count').textContent = count ? '· '+count+' file'+(count===1?'':'s') : '';
+    if(!items || !items.length){ box.innerHTML = '<div class="empty">Nothing yet. Upload past proposals + the transcripts and emails behind them.</div>'; return; }
+    box.innerHTML = items.map(renderCorpus).join('');
+  } catch(e){ box.innerHTML = '<div class="empty">'+esc(e.message||'Failed to load')+'</div>'; }
+}
+function renderCorpus(it){
+  const d = [it.type];
+  if(it.bytes) d.push(kb(it.bytes));
+  if(it.notes) d.push(esc(it.notes));
+  d.push(fmtDate(it.uploaded_at));
+  return '<div class="item"><div class="meta"><div class="t">'+esc(it.name)+'</div>'
+    + '<div class="d">'+d.join(' · ')+'</div></div>'
+    + '<button class="btn btn-ghost btn-sm" style="flex:none;" onclick="delCorpus(\''+it.id+'\')">✕</button></div>';
+}
+async function delCorpus(id){
+  if(!confirm('Remove this from the training corpus?')) return;
+  try { await api('/api/kb-manage', { action:'delete', id }); loadCorpus(); }
+  catch(e){ toast(e.message||'Failed'); }
+}
+
+function fileToB64(file){
+  return new Promise((resolve,reject)=>{
+    const r = new FileReader();
+    r.onload = ()=> resolve(String(r.result).split(',')[1] || '');
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+async function uploadFiles(files){
+  for(const file of files){
+    if(file.size > 22*1024*1024){ toast(file.name+' is too large (max ~22MB)'); continue; }
+    toast('Uploading '+file.name+'…');
+    try {
+      const body_b64 = await fileToB64(file);
+      await api('/api/kb-upload', { name:file.name, mime:file.type, body_b64, collection: TRAIN_COLLECTION });
+    } catch(e){ toast('Failed: '+file.name+' — '+(e.message||'')); }
+  }
+  toast('Uploaded'); loadCorpus();
+}
+const drop = $('drop'), fileInput = $('file-input');
+drop.addEventListener('click', ()=> fileInput.click());
+fileInput.addEventListener('change', ()=>{ if(fileInput.files.length) uploadFiles([...fileInput.files]); fileInput.value=''; });
+['dragenter','dragover'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e=>{ if(e.dataTransfer?.files?.length) uploadFiles([...e.dataTransfer.files]); });
+
+async function savePaste(){
+  const body = $('paste-body').value.trim();
+  const name = $('paste-name').value.trim();
+  if(!body){ toast('Paste some text first.'); return; }
+  if(!name){ toast('Give it a name.'); $('paste-name').focus(); return; }
+  $('paste-status').textContent = 'Saving…';
+  try {
+    const body_b64 = btoa(unescape(encodeURIComponent(body)));
+    await api('/api/kb-upload', { name: name.endsWith('.txt')?name:name+'.txt', mime:'text/plain', body_b64, notes:$('paste-note').value.trim(), collection: TRAIN_COLLECTION });
+    $('paste-body').value=''; $('paste-name').value=''; $('paste-note').value='';
+    $('paste-status').textContent=''; toast('Saved to corpus'); loadCorpus();
+  } catch(e){ $('paste-status').textContent = e.message||'Failed.'; }
+}
+
+/* ---------- boot ---------- */
+(function boot(){
+  let saved=''; try { saved = localStorage.getItem(PW_KEY) || ''; } catch {}
+  if(saved){ password = saved; tryUnlock(saved).then(ok=>{ if(ok) openApp(); else { password=''; } }); }
+})();
+</script>
+</body>
+</html>

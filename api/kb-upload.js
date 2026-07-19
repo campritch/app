@@ -14,13 +14,13 @@ export default async function handler(req, res) {
   if (!expected) return res.status(500).json({ error: 'STRATEGY_PASSWORD not configured' });
   if (!process.env.BLOB_READ_WRITE_TOKEN) return res.status(500).json({ error: 'BLOB_READ_WRITE_TOKEN not configured' });
 
-  const { password, name, mime, body_b64, notes } = req.body || {};
+  const { password, name, mime, body_b64, notes, collection } = req.body || {};
   if (password !== expected) return res.status(401).json({ error: 'bad password' });
   if (!name || !body_b64) return res.status(400).json({ error: 'name and body_b64 required' });
   if (body_b64.length > 30_000_000) return res.status(413).json({ error: 'file too large (>~22MB raw)' });
 
   try {
-    const item = await uploadKb({ name, mime, body_b64, notes });
+    const item = await uploadKb({ name, mime, body_b64, notes, collection });
     return res.status(200).json(item);
   } catch (err) {
     return res.status(500).json({ error: String(err?.message || err) });

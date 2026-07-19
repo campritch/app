@@ -25,7 +25,8 @@ const TEAM_PATHS = new Set([
   '/homepage', '/homepage.html',
   '/landing', '/landing.html',
   '/media-plans', '/media-plans.html',
-  '/new-homepage', '/new-homepage.html'
+  '/new-homepage', '/new-homepage.html',
+  '/campaign-proposal', '/campaign-proposal.html'
 ]);
 
 export const config = {
@@ -46,7 +47,8 @@ export const config = {
     '/homepage', '/homepage.html',
     '/landing', '/landing.html',
     '/media-plans', '/media-plans.html',
-    '/new-homepage', '/new-homepage.html'
+    '/new-homepage', '/new-homepage.html',
+    '/campaign-proposal', '/campaign-proposal.html'
   ]
 };
 
