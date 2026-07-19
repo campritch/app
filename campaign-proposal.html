@@ -20,24 +20,22 @@
   html,body { margin:0; padding:0; }
   body {
     font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
-    color:var(--navy); background:var(--bg); -webkit-font-smoothing:antialiased;
-    line-height:1.5;
+    color:var(--navy); background:var(--bg); -webkit-font-smoothing:antialiased; line-height:1.5;
   }
   a { color:inherit; }
   .wrap { max-width:920px; margin:0 auto; padding:28px 22px 80px; }
 
-  /* ---- top bar ---- */
   .top { display:flex; align-items:center; gap:12px; margin-bottom:6px; }
   .logo { width:34px; height:34px; border-radius:9px; background:var(--coral);
     display:flex; align-items:center; justify-content:center; flex:none; }
   .top h1 { font-size:19px; font-weight:800; letter-spacing:-.3px; margin:0; }
   .top .sub { font-size:12.5px; color:var(--ink-soft); margin-top:1px; }
-  .who { margin-left:auto; font-size:12px; color:var(--ink-soft); }
+  .who { margin-left:auto; font-size:12px; color:var(--ink-soft); text-align:right; }
+  .who a { color:#2c4b91; font-weight:600; text-decoration:none; }
 
-  .lede { font-size:13.5px; color:var(--grey); margin:14px 0 20px; max-width:680px; }
+  .lede { font-size:13.5px; color:var(--grey); margin:14px 0 20px; max-width:700px; }
   .lede b { color:var(--navy); font-weight:600; }
 
-  /* ---- gate ---- */
   .gate { max-width:400px; margin:14vh auto 0; background:var(--white);
     border:1px solid var(--border); border-radius:var(--radius);
     padding:34px 30px; box-shadow:var(--shadow); text-align:center; }
@@ -47,7 +45,6 @@
   .gate input { width:100%; }
   .gate .err { color:var(--coral); font-size:12.5px; min-height:18px; margin-top:8px; }
 
-  /* ---- tabs ---- */
   .tabs { display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:22px; }
   .tab { appearance:none; border:none; background:none; cursor:pointer;
     font-family:inherit; font-size:13.5px; font-weight:600; color:var(--ink-soft);
@@ -55,7 +52,6 @@
   .tab:hover { color:var(--navy); }
   .tab.active { color:var(--navy); border-bottom-color:var(--coral); }
 
-  /* ---- cards / forms ---- */
   .card { background:var(--white); border:1px solid var(--border);
     border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); margin-bottom:18px; }
   .card h3 { font-size:14px; font-weight:700; margin:0 0 3px; }
@@ -67,13 +63,13 @@
     width:100%; font-family:inherit; font-size:14px; color:var(--navy);
     background:var(--white); border:1px solid var(--border-2); border-radius:var(--radius-sm);
     padding:9px 11px; outline:none; transition:border-color .12s, box-shadow .12s; }
-  input:focus, textarea:focus, select:focus { border-color:var(--coral);
-    box-shadow:0 0 0 3px rgba(255,98,103,.12); }
+  input:focus, textarea:focus, select:focus { border-color:var(--coral); box-shadow:0 0 0 3px rgba(255,98,103,.12); }
   textarea { resize:vertical; min-height:76px; line-height:1.5; }
   select { appearance:none; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a8494' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
     background-repeat:no-repeat; background-position:right 11px center; padding-right:30px; }
   .field { margin-bottom:15px; }
   .row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
   .sub-hint { font-size:11.5px; color:var(--ink-soft); margin-top:5px; }
 
   .check { display:flex; gap:10px; align-items:flex-start; padding:12px 13px;
@@ -81,7 +77,6 @@
   .check input { margin-top:2px; width:16px; height:16px; accent-color:var(--coral); flex:none; }
   .check .lbl { font-size:13px; font-weight:600; color:var(--navy); }
   .check .desc { font-size:12px; color:var(--ink-soft); margin-top:2px; font-weight:400; }
-
   .reveal { margin-top:13px; padding-top:14px; border-top:1px dashed var(--border-2); }
   .reveal[hidden] { display:none; }
 
@@ -93,9 +88,8 @@
   .btn-ghost:hover { border-color:var(--ink-soft); }
   .btn-sm { font-size:12.5px; padding:6px 12px; }
   .btn:disabled { opacity:.55; cursor:not-allowed; }
-  .btn-row { display:flex; gap:10px; align-items:center; margin-top:6px; }
+  .btn-row { display:flex; gap:10px; align-items:center; margin-top:6px; flex-wrap:wrap; }
 
-  /* ---- launch panel ---- */
   .launch { border:1px solid var(--ok); background:var(--ok-bg); border-radius:var(--radius);
     padding:18px 20px; margin-bottom:18px; }
   .launch h3 { margin:0 0 8px; font-size:14px; color:var(--ok); }
@@ -106,7 +100,6 @@
     padding:14px 15px; margin:0; white-space:pre-wrap; word-break:break-word; line-height:1.55; }
   .copy-btn { position:absolute; top:9px; right:9px; }
 
-  /* ---- lists ---- */
   .item { display:flex; gap:12px; align-items:flex-start; padding:13px 0; border-top:1px solid var(--border); }
   .item:first-child { border-top:none; }
   .item .meta { flex:1; min-width:0; }
@@ -117,22 +110,26 @@
     text-transform:uppercase; padding:2px 8px; border-radius:20px; vertical-align:middle; }
   .pill-general { background:#e8eefb; color:#2c4b91; }
   .pill-remnant { background:#fdf0e4; color:#8a5b00; }
-  .pill-queued { background:#eef0f3; color:#5a6472; }
-  .pill-generated { background:var(--ok-bg); color:var(--ok); }
+  .pill-context { background:#eef0f3; color:#5a6472; }
+  .pill-status { background:#eef0f3; color:#5a6472; }
+  .pill-generated,.pill-won { background:var(--ok-bg); color:var(--ok); }
+  .pill-lost { background:#fde8e8; color:#b3261e; }
   .empty { font-size:13px; color:var(--ink-soft); padding:16px 0; text-align:center; }
   .link { color:#2c4b91; font-weight:600; text-decoration:none; }
   .link:hover { text-decoration:underline; }
+  .setup { border:1px solid var(--warn); background:var(--warn-bg); color:var(--warn);
+    font-size:12.5px; border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:16px; }
 
   .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%);
     background:var(--navy); color:#fff; font-size:13px; font-weight:500; padding:10px 18px;
     border-radius:10px; box-shadow:0 6px 24px rgba(0,0,0,.2); opacity:0; pointer-events:none;
     transition:opacity .2s, transform .2s; z-index:50; }
   .toast.show { opacity:1; transform:translateX(-50%) translateY(-4px); }
-  .drop { border:1.5px dashed var(--border-2); border-radius:var(--radius-sm); padding:18px;
-    text-align:center; font-size:13px; color:var(--ink-soft); cursor:pointer; transition:border-color .12s, background .12s; }
+  .drop { border:1.5px dashed var(--border-2); border-radius:var(--radius-sm); padding:16px;
+    text-align:center; font-size:12.5px; color:var(--ink-soft); cursor:pointer; transition:border-color .12s, background .12s; }
   .drop:hover, .drop.over { border-color:var(--coral); background:#fff7f7; }
   .hide { display:none !important; }
-  @media (max-width:640px){ .row{ grid-template-columns:1fr; } }
+  @media (max-width:640px){ .row, .row-3{ grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -155,27 +152,26 @@
       <h1>AI Campaign Proposals</h1>
       <div class="sub">spotsnow.wiki / campaign-proposal</div>
     </div>
-    <div class="who" id="who"></div>
+    <div class="who"><a id="hub-link" href="#" target="_blank" rel="noopener">Open hub in Notion ↗</a></div>
   </div>
 
   <p class="lede">
-    Capture a proposal request, and the trained <b>campaign-proposal-generator</b> skill turns it into a
-    finished Notion proposal — pulling best-fit shows from the <b>SpotsNow MCP</b>, sizing spend from the brand's
-    <b>Apollo</b>-estimated revenue, and grounding it in every past proposal, transcript, and email you've trained it on.
-    Two modes: a <b>General landscape</b> proposal across the whole podcast market, or a <b>Last-minute remnant</b>
-    bundle built from live SpotsNow inventory.
+    Capture a request, and the trained <b>campaign-proposal-generator</b> skill turns it into a finished
+    Notion proposal — pulling best-fit shows from <b>SpotsNow</b>, sizing spend from <b>Apollo</b>-estimated
+    revenue, and grounding it in the <b>Training Library</b> of past deals. Everything lives in one Notion hub:
+    the Training Library is the brain, AI Proposals is the history.
   </p>
 
   <div class="tabs">
     <button class="tab active" data-view="new">New proposal</button>
-    <button class="tab" data-view="train">Training corpus</button>
-    <button class="tab" data-view="history">AI proposals</button>
+    <button class="tab" data-view="train">Training Library</button>
+    <button class="tab" data-view="history">AI Proposals</button>
   </div>
 
   <!-- ---------- NEW PROPOSAL ---------- -->
   <section id="view-new">
     <div id="launch" class="launch hide">
-      <h3>✓ Proposal job saved</h3>
+      <h3>✓ Ready to generate</h3>
       <p id="launch-summary"></p>
       <div class="prompt-box">
         <pre id="launch-prompt"></pre>
@@ -183,13 +179,13 @@
       </div>
       <div class="btn-row" style="margin-top:12px;">
         <button class="btn btn-ghost btn-sm" onclick="resetForm()">New proposal</button>
-        <button class="btn btn-ghost btn-sm" onclick="switchView('history')">View AI proposals →</button>
+        <button class="btn btn-ghost btn-sm" onclick="switchView('history')">View AI Proposals →</button>
       </div>
     </div>
 
     <div class="card" id="new-card">
       <h3>Build a proposal</h3>
-      <p class="hint">Fill in what you know. The skill fills the rest from SpotsNow, Apollo, and your training corpus.</p>
+      <p class="hint">Fill in what you know. Running the prompt in Claude generates the proposal, logs it in AI Proposals, and adds it back to the Training Library.</p>
 
       <div class="row">
         <div class="field">
@@ -228,13 +224,12 @@
         <input type="text" id="campaign_url" placeholder="https://app.spotsnow.com/c/… — seeds shows; live MCP is source of truth" />
       </div>
 
-      <!-- competitor displacement -->
       <div class="field">
         <label class="check">
           <input type="checkbox" id="competitor_displacement" onchange="toggleCompetitor()" />
           <span>
             <span class="lbl">Competitor-displacement proposal</span>
-            <span class="desc">Build the plan from shows a competitor <b>used to</b> advertise on but no longer does (e.g. the Rebel/Quince case).</span>
+            <span class="desc">Build from shows a competitor <b>used to</b> advertise on but no longer does (e.g. the Rebel/Quince case).</span>
           </span>
         </label>
         <div class="reveal" id="competitor-reveal" hidden>
@@ -251,7 +246,6 @@
         </div>
       </div>
 
-      <!-- maximize budget -->
       <div class="field">
         <label class="check">
           <input type="checkbox" id="maximize_budget" />
@@ -264,58 +258,90 @@
 
       <div class="field">
         <label>Correspondence & context <span style="font-weight:400;color:var(--ink-soft);">(optional)</span></label>
-        <textarea id="notes" placeholder="Paste the key context from calls or emails leading up to this — the strategy discussed, constraints, what the brand cares about. This shapes how the proposal is framed."></textarea>
-        <div class="sub-hint">Longer transcripts/emails belong in <a href="#" class="link" onclick="switchView('train');return false;">Training corpus</a> so every future proposal learns from them too.</div>
+        <textarea id="notes" placeholder="Paste the key context from calls or emails leading up to this — the strategy discussed, constraints, what the brand cares about."></textarea>
+        <div class="sub-hint">Full transcripts / emails belong in the <a href="#" class="link" onclick="switchView('train');return false;">Training Library</a> so every future proposal learns from them too.</div>
       </div>
 
       <div class="btn-row">
-        <button class="btn btn-primary" id="save-job" onclick="saveJob()">Save proposal job →</button>
-        <span class="sub-hint" id="save-status"></span>
+        <button class="btn btn-primary" onclick="buildLaunch()">Build run prompt →</button>
       </div>
     </div>
   </section>
 
   <!-- ---------- TRAINING ---------- -->
   <section id="view-train" class="hide">
+    <div id="train-setup" class="setup hide"></div>
     <div class="card">
-      <h3>Train the generator</h3>
-      <p class="hint">Upload past proposals and the transcripts / emails that led to them. Everything here becomes persistent context the skill reads on every future proposal — so it learns how you pitch a Walmart vs. a SerpAPI.</p>
+      <h3>Add to the Training Library</h3>
+      <p class="hint">One entry per past deal: the finished proposal plus the transcripts / emails / context that led to it. This is the brain the skill reads before every build — stored right in Notion so it actually learns from it.</p>
 
-      <div class="drop" id="drop">
-        <b>Drop files here</b> or click to browse<br />
-        <span style="font-size:12px;">PDF, DOCX, TXT, MD, CSV, images — proposals, transcripts, email threads</span>
-        <input type="file" id="file-input" multiple class="hide" />
-      </div>
-
-      <div class="field" style="margin-top:16px;">
-        <label>…or paste a transcript / email thread</label>
-        <textarea id="paste-body" placeholder="Paste raw text here" style="min-height:100px;"></textarea>
-        <div class="row" style="margin-top:10px;">
-          <div class="field" style="margin-bottom:0;">
-            <label>Name it</label>
-            <input type="text" id="paste-name" placeholder="e.g. Rebel — discovery call 2026-07" />
-          </div>
-          <div class="field" style="margin-bottom:0;">
-            <label>Note <span style="font-weight:400;color:var(--ink-soft);">(optional)</span></label>
-            <input type="text" id="paste-note" placeholder="e.g. led to the Rebel general proposal" />
-          </div>
+      <div class="row">
+        <div class="field">
+          <label>Name it <span class="req">*</span></label>
+          <input type="text" id="tr-name" placeholder="e.g. Xero Shoes — general proposal (won)" />
         </div>
-        <div class="btn-row"><button class="btn btn-ghost btn-sm" onclick="savePaste()">Save to corpus</button><span class="sub-hint" id="paste-status"></span></div>
+        <div class="field">
+          <label>Brand</label>
+          <input type="text" id="tr-brand" placeholder="e.g. Xero Shoes" />
+        </div>
+      </div>
+      <div class="row-3">
+        <div class="field">
+          <label>Category</label>
+          <input type="text" id="tr-category" placeholder="e.g. footwear / outdoor" />
+        </div>
+        <div class="field">
+          <label>Mode</label>
+          <select id="tr-mode">
+            <option value="">—</option>
+            <option value="General">General</option>
+            <option value="Remnant">Remnant</option>
+            <option value="Context">Context (call / email)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Outcome</label>
+          <select id="tr-outcome">
+            <option value="">—</option>
+            <option value="Won">Won</option>
+            <option value="Lost">Lost</option>
+            <option value="Pending">Pending</option>
+            <option value="Reference">Reference</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Source links <span style="font-weight:400;color:var(--ink-soft);">(optional)</span></label>
+        <input type="text" id="tr-links" placeholder="Fathom call, Superhuman thread, or the Notion proposal URL" />
+      </div>
+      <div class="field">
+        <label>Content <span class="req">*</span></label>
+        <textarea id="tr-body" placeholder="Paste the proposal text, the transcript, or the email thread. Or drop a text file below." style="min-height:130px;"></textarea>
+        <div class="drop" id="drop" style="margin-top:10px;">
+          <b>Drop a text file</b> (.txt, .md, .csv) to load it into Content, or click to browse
+          <input type="file" id="file-input" accept=".txt,.md,.csv,text/*" class="hide" />
+        </div>
+        <div class="sub-hint">For PDFs / Word docs, paste the text (or link the source above) — the entry has to be readable text for the skill to train on it.</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveTraining()">Add to Training Library</button>
+        <span class="sub-hint" id="tr-status"></span>
       </div>
     </div>
 
     <div class="card">
-      <h3>Corpus <span id="corpus-count" style="color:var(--ink-soft);font-weight:400;"></span></h3>
-      <p class="hint">Training material the generator will reference.</p>
-      <div id="corpus-list"><div class="empty">Loading…</div></div>
+      <h3>Library <span id="train-count" style="color:var(--ink-soft);font-weight:400;"></span></h3>
+      <p class="hint">What the generator trains on.</p>
+      <div id="train-list"><div class="empty">Loading…</div></div>
     </div>
   </section>
 
   <!-- ---------- HISTORY ---------- -->
   <section id="view-history" class="hide">
+    <div id="hist-setup" class="setup hide"></div>
     <div class="card">
-      <h3>AI proposals</h3>
-      <p class="hint">Every proposal job you've created. Run one in Claude, then paste the Notion link back with “Mark generated”. Published proposals also live in the Notion <b>AI Proposals</b> index.</p>
+      <h3>AI Proposals</h3>
+      <p class="hint">Every proposal the generator has produced, logged in Notion. The skill writes here automatically when it runs.</p>
       <div id="history-list"><div class="empty">Loading…</div></div>
     </div>
   </section>
@@ -325,46 +351,49 @@
 
 <script>
 const PW_KEY = 'sn_cp_pw';
-const TRAIN_COLLECTION = 'proposal-training';
 let password = '';
+let hubReady = false;
 
-/* ---------- helpers ---------- */
 function $(id){ return document.getElementById(id); }
-function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._to); t._to=setTimeout(()=>t.classList.remove('show'),2200); }
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._to); t._to=setTimeout(()=>t.classList.remove('show'),2400); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function fmtDate(iso){ if(!iso) return '—'; try{ return new Date(iso).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); }catch{ return iso; } }
-function kb(bytes){ if(!bytes) return ''; return bytes<1024?bytes+'b':Math.round(bytes/1024)+'kb'; }
 
-async function api(path, body){
-  const res = await fetch(path, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password, ...body }) });
+async function api(body){
+  const res = await fetch('/api/proposal-hub', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password, ...body }) });
   const data = await res.json().catch(()=>({}));
-  if(!res.ok) throw new Error(data.error || ('HTTP '+res.status));
+  if(!res.ok){ const e = new Error(data.error || ('HTTP '+res.status)); e.status = res.status; throw e; }
   return data;
 }
 
 /* ---------- gate ---------- */
-async function tryUnlock(pw){
-  // Verify against the jobs endpoint — 401 means wrong password, anything else means accepted.
-  const res = await fetch('/api/proposal-jobs', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: pw, action:'list' }) });
-  if(res.status === 401) return false;
-  return true; // 200, or a 500 (misconfig) still means the password itself was accepted
+async function verify(pw){
+  const res = await fetch('/api/proposal-hub', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: pw, action:'config' }) });
+  if(res.status === 401) return { ok:false };
+  const data = await res.json().catch(()=>({}));
+  return { ok:true, data, status:res.status };
 }
 async function unlock(){
   const pw = $('gate-pass').value.trim();
   if(!pw){ $('gate-err').textContent='Enter the password.'; return; }
   $('gate-btn').disabled = true; $('gate-err').textContent='';
   try {
-    const ok = await tryUnlock(pw);
-    if(!ok){ $('gate-err').textContent='Wrong password.'; $('gate-btn').disabled=false; return; }
-    password = pw;
-    try { localStorage.setItem(PW_KEY, pw); } catch {}
-    openApp();
+    const r = await verify(pw);
+    if(!r.ok){ $('gate-err').textContent='Wrong password.'; $('gate-btn').disabled=false; return; }
+    password = pw; try { localStorage.setItem(PW_KEY, pw); } catch {}
+    openApp(r.data);
   } catch(e){ $('gate-err').textContent = e.message || 'Something went wrong.'; $('gate-btn').disabled=false; }
 }
-function openApp(){
-  $('gate').classList.add('hide');
-  $('app').classList.remove('hide');
-  loadHistory(); loadCorpus();
+function openApp(config){
+  $('gate').classList.add('hide'); $('app').classList.remove('hide');
+  applyConfig(config);
+  loadHistory(); loadTraining();
+}
+function applyConfig(config){
+  hubReady = !!(config && config.ok);
+  if(config && config.hub_url) $('hub-link').href = config.hub_url;
+  const setupMsg = hubReady ? '' : 'Notion hub not reachable yet — check that NOTION_API_KEY is configured and the internal integration is connected to the AI Campaign Proposals hub page. History and Library will populate once it is.';
+  ['hist-setup','train-setup'].forEach(id=>{ const el=$(id); if(!el) return; if(setupMsg){ el.textContent=setupMsg; el.classList.remove('hide'); } else el.classList.add('hide'); });
 }
 $('gate-btn').addEventListener('click', unlock);
 $('gate-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') unlock(); });
@@ -376,82 +405,54 @@ function switchView(v){
   $('view-train').classList.toggle('hide', v!=='train');
   $('view-history').classList.toggle('hide', v!=='history');
   if(v==='history') loadHistory();
-  if(v==='train') loadCorpus();
+  if(v==='train') loadTraining();
 }
 document.querySelectorAll('.tab').forEach(t=> t.addEventListener('click', ()=>switchView(t.dataset.view)));
 
 /* ---------- new proposal ---------- */
 function toggleCompetitor(){ $('competitor-reveal').hidden = !$('competitor_displacement').checked; }
-// target market is only strictly required for a general proposal
-$('proposal_type').addEventListener('change', ()=>{
-  $('tm-req').style.display = $('proposal_type').value==='general' ? '' : 'none';
-});
+$('proposal_type').addEventListener('change', ()=>{ $('tm-req').style.display = $('proposal_type').value==='general' ? '' : 'none'; });
 
-function collectJob(){
-  return {
-    brand_name: $('brand_name').value.trim(),
-    brand_domain: $('brand_domain').value.trim(),
-    proposal_type: $('proposal_type').value,
-    budget: $('budget').value.trim(),
-    target_market: $('target_market').value.trim(),
-    campaign_url: $('campaign_url').value.trim(),
-    competitor_displacement: $('competitor_displacement').checked,
-    competitor_brand: $('competitor_brand').value.trim(),
-    competitor_domain: $('competitor_domain').value.trim(),
-    maximize_budget: $('maximize_budget').checked,
-    notes: $('notes').value.trim(),
-  };
-}
-
-async function saveJob(){
-  const job = collectJob();
-  if(!job.brand_name){ toast('Brand name is required.'); $('brand_name').focus(); return; }
-  if(job.proposal_type==='general' && !job.target_market){ toast('Target market is required for a general proposal.'); $('target_market').focus(); return; }
-  $('save-job').disabled = true; $('save-status').textContent = 'Saving…';
-  try {
-    const item = await api('/api/proposal-jobs', { action:'create', job });
-    showLaunch(item);
-    loadHistory();
-    $('save-status').textContent = '';
-  } catch(e){
-    $('save-status').textContent = e.message || 'Failed to save.';
-  } finally { $('save-job').disabled = false; }
-}
-
-// The run prompt carries the FULL spec inline so the skill needs no read-back
-// from the password-gated job store. The job id is for reference + manual
-// write-back ("Mark generated") only.
-function buildRunPrompt(item){
+function buildRunPrompt(job){
   const L = [];
   L.push('Run the campaign-proposal-generator skill with this spec:');
   L.push('');
-  L.push('Job: ' + item.id);
-  L.push('Mode: ' + (item.proposal_type==='remnant' ? 'Last-minute remnant (live SpotsNow inventory)' : 'General landscape (whole podcast market)'));
-  L.push('Brand: ' + item.brand_name + (item.brand_domain ? ' (' + item.brand_domain + ')' : ''));
-  if(item.target_market) L.push('Target market: ' + item.target_market);
-  L.push('Target budget: ' + (item.budget ? item.budget : 'not set — size it from Apollo-estimated revenue'));
-  if(item.competitor_displacement && item.competitor_brand){
-    L.push('Competitor displacement: ' + item.competitor_brand + (item.competitor_domain ? ' (' + item.competitor_domain + ')' : '') +
+  L.push('Mode: ' + (job.proposal_type==='remnant' ? 'Last-minute remnant (live SpotsNow inventory)' : 'General landscape (whole podcast market)'));
+  L.push('Brand: ' + job.brand_name + (job.brand_domain ? ' (' + job.brand_domain + ')' : ''));
+  if(job.target_market) L.push('Target market: ' + job.target_market);
+  L.push('Target budget: ' + (job.budget ? job.budget : 'not set — size it from Apollo-estimated revenue'));
+  if(job.competitor_displacement && job.competitor_brand){
+    L.push('Competitor displacement: ' + job.competitor_brand + (job.competitor_domain ? ' (' + job.competitor_domain + ')' : '') +
       ' — build the plan from shows this competitor has STOPPED advertising on (recently_stopped).');
   }
-  if(item.maximize_budget) L.push('Maximize budget: yes — if the bundle underfills the target, add outside-SpotsNow options to source.');
-  if(item.campaign_url) L.push('SpotsNow campaign link (seed only): ' + item.campaign_url);
-  if(item.notes){ L.push(''); L.push('Correspondence & context:'); L.push(item.notes); }
+  if(job.maximize_budget) L.push('Maximize budget: yes — if the bundle underfills the target, add outside-SpotsNow options to source.');
+  if(job.campaign_url) L.push('SpotsNow campaign link (seed only): ' + job.campaign_url);
+  if(job.notes){ L.push(''); L.push('Correspondence & context:'); L.push(job.notes); }
   L.push('');
-  L.push('When done, give me the Notion proposal link and the Superhuman confirmation-email draft.');
+  L.push('Train on the Training Library first, log the result in AI Proposals, and give me the Notion link + the Superhuman confirmation-email draft.');
   return L.join('\n');
 }
-
-function showLaunch(item){
-  const typeLabel = item.proposal_type==='remnant' ? 'Last-minute remnant' : 'General landscape';
-  const bits = [typeLabel + ' proposal for ' + item.brand_name];
-  if(item.competitor_displacement && item.competitor_brand) bits.push('displacing ' + item.competitor_brand);
-  if(item.budget) bits.push('target ' + item.budget);
-  $('launch-summary').innerHTML = esc(bits.join(' · ')) +
-    '.<br>In Claude (with your SpotsNow, Apollo, Notion &amp; Superhuman connectors), run:';
-  $('launch-prompt').textContent = buildRunPrompt(item);
-  $('launch').classList.remove('hide');
-  $('new-card').classList.add('hide');
+function collectJob(){
+  return {
+    brand_name: $('brand_name').value.trim(), brand_domain: $('brand_domain').value.trim(),
+    proposal_type: $('proposal_type').value, budget: $('budget').value.trim(),
+    target_market: $('target_market').value.trim(), campaign_url: $('campaign_url').value.trim(),
+    competitor_displacement: $('competitor_displacement').checked,
+    competitor_brand: $('competitor_brand').value.trim(), competitor_domain: $('competitor_domain').value.trim(),
+    maximize_budget: $('maximize_budget').checked, notes: $('notes').value.trim(),
+  };
+}
+function buildLaunch(){
+  const job = collectJob();
+  if(!job.brand_name){ toast('Brand name is required.'); $('brand_name').focus(); return; }
+  if(job.proposal_type==='general' && !job.target_market){ toast('Target market is required for a general proposal.'); $('target_market').focus(); return; }
+  const typeLabel = job.proposal_type==='remnant' ? 'Last-minute remnant' : 'General landscape';
+  const bits = [typeLabel + ' proposal for ' + job.brand_name];
+  if(job.competitor_displacement && job.competitor_brand) bits.push('displacing ' + job.competitor_brand);
+  if(job.budget) bits.push('target ' + job.budget);
+  $('launch-summary').innerHTML = esc(bits.join(' · ')) + '.<br>In Claude (with your SpotsNow, Apollo, Notion &amp; Superhuman connectors), run:';
+  $('launch-prompt').textContent = buildRunPrompt(job);
+  $('launch').classList.remove('hide'); $('new-card').classList.add('hide');
   $('launch').scrollIntoView({ behavior:'smooth', block:'center' });
 }
 function copyPrompt(){ navigator.clipboard.writeText($('launch-prompt').textContent).then(()=>toast('Copied')); }
@@ -459,130 +460,101 @@ function resetForm(){
   ['brand_name','brand_domain','budget','target_market','campaign_url','competitor_brand','competitor_domain','notes'].forEach(id=>$(id).value='');
   $('proposal_type').value='general'; $('tm-req').style.display='';
   $('competitor_displacement').checked=false; $('maximize_budget').checked=false; toggleCompetitor();
-  $('launch').classList.add('hide'); $('new-card').classList.remove('hide');
-  $('brand_name').focus();
+  $('launch').classList.add('hide'); $('new-card').classList.remove('hide'); $('brand_name').focus();
 }
 
-/* ---------- history ---------- */
-let jobsById = {};
+/* ---------- history (AI Proposals DB) ---------- */
 async function loadHistory(){
   const box = $('history-list');
   try {
-    const { items } = await api('/api/proposal-jobs', { action:'list' });
-    jobsById = {}; (items||[]).forEach(it=> jobsById[it.id]=it);
-    if(!items || !items.length){ box.innerHTML = '<div class="empty">No proposals yet. Build one on the New proposal tab.</div>'; return; }
-    box.innerHTML = items.map(renderJob).join('');
+    const { items } = await api({ action:'list_proposals' });
+    if(!items || !items.length){ box.innerHTML = '<div class="empty">No proposals yet. Build one on the New proposal tab, run it in Claude, and it appears here.</div>'; return; }
+    box.innerHTML = items.map(renderProposal).join('');
   } catch(e){ box.innerHTML = '<div class="empty">'+esc(e.message||'Failed to load')+'</div>'; }
 }
-function renderJob(it){
-  const typePill = it.proposal_type==='remnant'
-    ? '<span class="pill pill-remnant">Remnant</span>' : '<span class="pill pill-general">General</span>';
-  const statePill = it.status==='generated'
-    ? '<span class="pill pill-generated">Generated</span>' : '<span class="pill pill-queued">Queued</span>';
+function modePill(m){
+  if(m==='Remnant') return '<span class="pill pill-remnant">Remnant</span>';
+  if(m==='General') return '<span class="pill pill-general">General</span>';
+  return '';
+}
+function statusPill(s){
+  if(!s) return '';
+  const cls = s==='Generated'||s==='Won' ? 'pill-generated' : s==='Lost' ? 'pill-lost' : 'pill-status';
+  return '<span class="pill '+cls+'">'+esc(s)+'</span>';
+}
+function renderProposal(it){
+  const p = it.props || {};
+  const title = p.Name || p.Brand || '(untitled)';
   const d = [];
-  if(it.brand_domain) d.push(esc(it.brand_domain));
-  if(it.budget) d.push(esc(it.budget));
-  if(it.competitor_displacement && it.competitor_brand) d.push('displaces '+esc(it.competitor_brand));
-  if(it.maximize_budget) d.push('max-budget');
-  d.push(fmtDate(it.created_at));
-  const notion = it.notion_url ? ' · <a class="link" href="'+esc(it.notion_url)+'" target="_blank" rel="noopener">Notion ↗</a>' : '';
-  return '<div class="item">'
-    + '<div class="meta">'
-      + '<div class="t">'+esc(it.brand_name)+' &nbsp;'+typePill+' '+statePill+'</div>'
-      + '<div class="d">'+d.join(' · ')+notion+' · <code>'+esc(it.id)+'</code></div>'
-    + '</div>'
-    + '<div style="display:flex;gap:6px;flex:none;">'
-      + '<button class="btn btn-ghost btn-sm" onclick="copyJobPrompt(\''+it.id+'\')">Copy run</button>'
-      + '<button class="btn btn-ghost btn-sm" onclick="markGenerated(\''+it.id+'\')">Mark generated</button>'
-      + '<button class="btn btn-ghost btn-sm" onclick="delJob(\''+it.id+'\')">✕</button>'
-    + '</div>'
-  + '</div>';
-}
-function copyJobPrompt(id){
-  const item = jobsById[id];
-  const text = item ? buildRunPrompt(item) : ('Run the campaign-proposal-generator skill for job '+id+'.');
-  navigator.clipboard.writeText(text).then(()=>toast('Run prompt copied'));
-}
-async function markGenerated(id){
-  const url = prompt('Paste the Notion proposal URL (optional):') || '';
-  try { await api('/api/proposal-jobs', { action:'update', id, patch:{ status:'generated', notion_url:url.trim() } }); toast('Updated'); loadHistory(); }
-  catch(e){ toast(e.message||'Failed'); }
-}
-async function delJob(id){
-  if(!confirm('Delete this proposal job?')) return;
-  try { await api('/api/proposal-jobs', { action:'delete', id }); loadHistory(); }
-  catch(e){ toast(e.message||'Failed'); }
+  if(p.Brand && p.Brand!==title) d.push(esc(p.Brand));
+  if(p.Budget) d.push(esc(p.Budget));
+  if(p.Competitor) d.push('displaces '+esc(p.Competitor));
+  d.push(fmtDate(p.Created));
+  const url = p.Proposal || it.url;
+  const linkTxt = p.Proposal ? 'Proposal ↗' : 'Open ↗';
+  return '<div class="item"><div class="meta">'
+    + '<div class="t">'+esc(title)+' &nbsp;'+modePill(p.Mode)+' '+statusPill(p.Status)+'</div>'
+    + '<div class="d">'+d.join(' · ')+(url?(' · <a class="link" href="'+esc(url)+'" target="_blank" rel="noopener">'+linkTxt+'</a>'):'')+'</div>'
+    + '</div></div>';
 }
 
-/* ---------- training corpus ---------- */
-async function loadCorpus(){
-  const box = $('corpus-list');
+/* ---------- training (Training Library DB) ---------- */
+async function loadTraining(){
+  const box = $('train-list');
   try {
-    const { items, count } = await api('/api/kb-manage', { action:'list', collection: TRAIN_COLLECTION });
-    $('corpus-count').textContent = count ? '· '+count+' file'+(count===1?'':'s') : '';
-    if(!items || !items.length){ box.innerHTML = '<div class="empty">Nothing yet. Upload past proposals + the transcripts and emails behind them.</div>'; return; }
-    box.innerHTML = items.map(renderCorpus).join('');
+    const { items } = await api({ action:'list_training' });
+    $('train-count').textContent = items && items.length ? '· '+items.length+' entr'+(items.length===1?'y':'ies') : '';
+    if(!items || !items.length){ box.innerHTML = '<div class="empty">Nothing yet. Add past proposals + the transcripts and emails behind them.</div>'; return; }
+    box.innerHTML = items.map(renderTraining).join('');
   } catch(e){ box.innerHTML = '<div class="empty">'+esc(e.message||'Failed to load')+'</div>'; }
 }
-function renderCorpus(it){
-  const d = [it.type];
-  if(it.bytes) d.push(kb(it.bytes));
-  if(it.notes) d.push(esc(it.notes));
-  d.push(fmtDate(it.uploaded_at));
-  return '<div class="item"><div class="meta"><div class="t">'+esc(it.name)+'</div>'
-    + '<div class="d">'+d.join(' · ')+'</div></div>'
-    + '<button class="btn btn-ghost btn-sm" style="flex:none;" onclick="delCorpus(\''+it.id+'\')">✕</button></div>';
+function renderTraining(it){
+  const p = it.props || {};
+  const title = p.Name || '(untitled)';
+  const d = [];
+  if(p.Brand) d.push(esc(p.Brand));
+  if(p.Category) d.push(esc(p.Category));
+  if(p.Mode) d.push(esc(p.Mode));
+  if(p.Outcome) d.push(esc(p.Outcome));
+  d.push(fmtDate(p.Added));
+  return '<div class="item"><div class="meta"><div class="t">'+esc(title)+'</div>'
+    + '<div class="d">'+d.join(' · ')+(it.url?(' · <a class="link" href="'+esc(it.url)+'" target="_blank" rel="noopener">Open ↗</a>'):'')+'</div></div></div>';
 }
-async function delCorpus(id){
-  if(!confirm('Remove this from the training corpus?')) return;
-  try { await api('/api/kb-manage', { action:'delete', id }); loadCorpus(); }
-  catch(e){ toast(e.message||'Failed'); }
+async function saveTraining(){
+  const entry = {
+    name: $('tr-name').value.trim(), brand: $('tr-brand').value.trim(),
+    category: $('tr-category').value.trim(), mode: $('tr-mode').value,
+    outcome: $('tr-outcome').value, source_links: $('tr-links').value.trim(),
+    body: $('tr-body').value.trim(),
+  };
+  if(!entry.name){ toast('Name it first.'); $('tr-name').focus(); return; }
+  if(!entry.body){ toast('Add the content (paste text or drop a file).'); $('tr-body').focus(); return; }
+  $('tr-status').textContent = 'Saving…';
+  try {
+    const r = await api({ action:'add_training', entry });
+    ['tr-name','tr-brand','tr-category','tr-links','tr-body'].forEach(id=>$(id).value='');
+    $('tr-mode').value=''; $('tr-outcome').value='';
+    $('tr-status').textContent=''; toast('Added to Training Library'); loadTraining();
+  } catch(e){ $('tr-status').textContent = e.message || 'Failed.'; }
 }
-
-function fileToB64(file){
-  return new Promise((resolve,reject)=>{
-    const r = new FileReader();
-    r.onload = ()=> resolve(String(r.result).split(',')[1] || '');
-    r.onerror = reject;
-    r.readAsDataURL(file);
-  });
-}
-async function uploadFiles(files){
-  for(const file of files){
-    if(file.size > 22*1024*1024){ toast(file.name+' is too large (max ~22MB)'); continue; }
-    toast('Uploading '+file.name+'…');
-    try {
-      const body_b64 = await fileToB64(file);
-      await api('/api/kb-upload', { name:file.name, mime:file.type, body_b64, collection: TRAIN_COLLECTION });
-    } catch(e){ toast('Failed: '+file.name+' — '+(e.message||'')); }
-  }
-  toast('Uploaded'); loadCorpus();
-}
+// text-file drop → load into the Content box
 const drop = $('drop'), fileInput = $('file-input');
+function loadTextFile(file){
+  if(file.size > 5*1024*1024){ toast('Keep text files under 5MB.'); return; }
+  const r = new FileReader();
+  r.onload = ()=>{ $('tr-body').value = String(r.result||''); if(!$('tr-name').value) $('tr-name').value = file.name.replace(/\.[^.]+$/,''); toast('Loaded '+file.name); };
+  r.readAsText(file);
+}
 drop.addEventListener('click', ()=> fileInput.click());
-fileInput.addEventListener('change', ()=>{ if(fileInput.files.length) uploadFiles([...fileInput.files]); fileInput.value=''; });
+fileInput.addEventListener('change', ()=>{ if(fileInput.files[0]) loadTextFile(fileInput.files[0]); fileInput.value=''; });
 ['dragenter','dragover'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add('over'); }));
 ['dragleave','drop'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.remove('over'); }));
-drop.addEventListener('drop', e=>{ if(e.dataTransfer?.files?.length) uploadFiles([...e.dataTransfer.files]); });
-
-async function savePaste(){
-  const body = $('paste-body').value.trim();
-  const name = $('paste-name').value.trim();
-  if(!body){ toast('Paste some text first.'); return; }
-  if(!name){ toast('Give it a name.'); $('paste-name').focus(); return; }
-  $('paste-status').textContent = 'Saving…';
-  try {
-    const body_b64 = btoa(unescape(encodeURIComponent(body)));
-    await api('/api/kb-upload', { name: name.endsWith('.txt')?name:name+'.txt', mime:'text/plain', body_b64, notes:$('paste-note').value.trim(), collection: TRAIN_COLLECTION });
-    $('paste-body').value=''; $('paste-name').value=''; $('paste-note').value='';
-    $('paste-status').textContent=''; toast('Saved to corpus'); loadCorpus();
-  } catch(e){ $('paste-status').textContent = e.message||'Failed.'; }
-}
+drop.addEventListener('drop', e=>{ if(e.dataTransfer?.files?.[0]) loadTextFile(e.dataTransfer.files[0]); });
 
 /* ---------- boot ---------- */
 (function boot(){
   let saved=''; try { saved = localStorage.getItem(PW_KEY) || ''; } catch {}
-  if(saved){ password = saved; tryUnlock(saved).then(ok=>{ if(ok) openApp(); else { password=''; } }); }
+  if(saved){ verify(saved).then(r=>{ if(r.ok){ password = saved; openApp(r.data); } }).catch(()=>{}); }
 })();
 </script>
 </body>

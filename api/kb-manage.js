@@ -12,11 +12,11 @@ export default async function handler(req, res) {
   if (!expected) return res.status(500).json({ error: 'STRATEGY_PASSWORD not configured' });
   if (!process.env.BLOB_READ_WRITE_TOKEN) return res.status(500).json({ error: 'BLOB_READ_WRITE_TOKEN not configured' });
 
-  const { password, action, id, collection } = req.body || {};
+  const { password, action, id } = req.body || {};
   if (password !== expected) return res.status(401).json({ error: 'bad password' });
 
   try {
-    if (action === 'list') return res.status(200).json(await listKb({ collection }));
+    if (action === 'list') return res.status(200).json(await listKb());
     if (action === 'view') {
       if (!id) return res.status(400).json({ error: 'id required' });
       return res.status(200).json(await readKbItem({ id }));

@@ -154,3 +154,153 @@ function textRuns(text) {
   for (let i = 0; i < text.length; i += 2000) chunks.push(text.slice(i, i + 2000));
   return chunks.map((c) => ({ type: 'text', text: { content: c } }));
 }
+
+// ── AI Campaign Proposals hub ──────────────────────────────────────────
+// The single source of truth the campaign-proposal-generator skill trains on.
+// Two databases live under one hub page: "AI Proposals" (history) and
+// "Training Library" (the brain). Both the web front-door and the skill
+// find-or-create these, so whoever runs first initializes them.
+
+export const HUB_PAGE_ID = (process.env.CAMPAIGN_PROPOSALS_HUB || '3a2bb6074fe3817cb2fdc003df546259').replace(/-/g, '');
+const AI_PROPOSALS_TITLE = 'AI Proposals';
+const TRAINING_LIBRARY_TITLE = 'Training Library';
+
+const AI_PROPOSALS_PROPS = {
+  Name: { title: {} },
+  Brand: { rich_text: {} },
+  Domain: { rich_text: {} },
+  Mode: { select: { options: [{ name: 'General', color: 'blue' }, { name: 'Remnant', color: 'orange' }] } },
+  Budget: { rich_text: {} },
+  Status: { select: { options: [
+    { name: 'Draft', color: 'gray' }, { name: 'Generated', color: 'green' },
+    { name: 'Sent', color: 'blue' }, { name: 'Won', color: 'purple' }, { name: 'Lost', color: 'red' },
+  ] } },
+  Competitor: { rich_text: {} },
+  Proposal: { url: {} },
+  Job: { rich_text: {} },
+  Created: { created_time: {} },
+};
+
+const TRAINING_LIBRARY_PROPS = {
+  Name: { title: {} },
+  Brand: { rich_text: {} },
+  Category: { rich_text: {} },
+  'Budget band': { select: { options: [
+    { name: '<$10k', color: 'gray' }, { name: '$10-25k', color: 'blue' }, { name: '$25-60k', color: 'green' },
+    { name: '$60-120k', color: 'orange' }, { name: '$120k+', color: 'purple' },
+  ] } },
+  Mode: { select: { options: [{ name: 'General', color: 'blue' }, { name: 'Remnant', color: 'orange' }, { name: 'Context', color: 'gray' }] } },
+  Outcome: { select: { options: [
+    { name: 'Won', color: 'green' }, { name: 'Lost', color: 'red' },
+    { name: 'Pending', color: 'yellow' }, { name: 'Reference', color: 'gray' },
+  ] } },
+  'Source links': { rich_text: {} },
+  Proposal: { url: {} },
+  Added: { created_time: {} },
+};
+
+async function findChildDatabases(parentPageId) {
+  const out = [];
+  let cursor;
+  while (true) {
+    const qs = cursor ? `?start_cursor=${encodeURIComponent(cursor)}` : '';
+    const res = await notionReq(`/blocks/${parentPageId}/children${qs}`);
+    for (const b of res.results || []) {
+      if (b.type === 'child_database') out.push({ id: b.id, title: b.child_database?.title || '' });
+    }
+    if (!res.has_more) break;
+    cursor = res.next_cursor;
+  }
+  return out;
+}
+
+async function createDatabase(parentPageId, title, properties) {
+  const db = await notionReq('/databases', {
+    method: 'POST',
+    body: {
+      parent: { type: 'page_id', page_id: parentPageId },
+      title: [{ type: 'text', text: { content: title } }],
+      properties,
+    },
+  });
+  return db.id;
+}
+
+// Find-or-create both hub databases. Returns { aiProposals, trainingLibrary }.
+export async function ensureHubDatabases({ hub } = {}) {
+  const hubId = (hub || HUB_PAGE_ID).replace(/-/g, '');
+  const existing = await findChildDatabases(hubId);
+  const find = (t) => existing.find((d) => (d.title || '').trim().toLowerCase() === t.toLowerCase());
+  let ai = find(AI_PROPOSALS_TITLE);
+  let tl = find(TRAINING_LIBRARY_TITLE);
+  const aiId = ai ? ai.id : await createDatabase(hubId, AI_PROPOSALS_TITLE, AI_PROPOSALS_PROPS);
+  const tlId = tl ? tl.id : await createDatabase(hubId, TRAINING_LIBRARY_TITLE, TRAINING_LIBRARY_PROPS);
+  return { hub: hubId, aiProposals: aiId, trainingLibrary: tlId };
+}
+
+function plain(rt) { return (rt || []).map((t) => t.plain_text ?? t.text?.content ?? '').join(''); }
+
+function simplifyRow(page) {
+  const p = page.properties || {};
+  const val = (name) => {
+    const v = p[name];
+    if (!v) return '';
+    switch (v.type) {
+      case 'title': return plain(v.title);
+      case 'rich_text': return plain(v.rich_text);
+      case 'select': return v.select?.name || '';
+      case 'url': return v.url || '';
+      case 'created_time': return v.created_time || '';
+      case 'date': return v.date?.start || '';
+      default: return '';
+    }
+  };
+  return { id: page.id, url: page.url, props: Object.fromEntries(Object.keys(p).map((k) => [k, val(k)])) };
+}
+
+async function queryRows(databaseId, { page_size = 100 } = {}) {
+  const res = await notionReq(`/databases/${databaseId.replace(/-/g, '')}/query`, {
+    method: 'POST',
+    body: { page_size, sorts: [{ timestamp: 'created_time', direction: 'descending' }] },
+  });
+  return (res.results || []).map(simplifyRow);
+}
+
+export async function listProposals() {
+  const { aiProposals } = await ensureHubDatabases();
+  return { items: await queryRows(aiProposals) };
+}
+
+export async function listTraining() {
+  const { trainingLibrary } = await ensureHubDatabases();
+  return { items: await queryRows(trainingLibrary) };
+}
+
+// Create a Training Library entry (used by the web front-door). `body` becomes
+// the page content — the readable context the skill trains on.
+export async function addTraining({ name, brand, category, mode, outcome, source_links, proposal_url, body }) {
+  if (!name) throw new Error('name required');
+  const { trainingLibrary } = await ensureHubDatabases();
+  const props = { Name: { title: [{ text: { content: String(name).slice(0, 200) } }] } };
+  if (brand) props.Brand = { rich_text: textRuns(String(brand).slice(0, 2000)) };
+  if (category) props.Category = { rich_text: textRuns(String(category).slice(0, 2000)) };
+  if (mode) props.Mode = { select: { name: mode } };
+  if (outcome) props.Outcome = { select: { name: outcome } };
+  if (source_links) props['Source links'] = { rich_text: textRuns(String(source_links).slice(0, 2000)) };
+  if (proposal_url) props.Proposal = { url: String(proposal_url).slice(0, 2000) };
+  const children = body ? markdownToBlocks(String(body)) : [];
+  const page = await notionReq('/pages', {
+    method: 'POST',
+    body: {
+      parent: { database_id: trainingLibrary.replace(/-/g, '') },
+      properties: props,
+      children: children.slice(0, 100),
+    },
+  });
+  if (children.length > 100) {
+    for (let i = 100; i < children.length; i += 100) {
+      await notionReq(`/blocks/${page.id}/children`, { method: 'PATCH', body: { children: children.slice(i, i + 100) } });
+    }
+  }
+  return { id: page.id, url: page.url };
+}

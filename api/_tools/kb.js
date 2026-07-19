@@ -84,19 +84,12 @@ export async function listManifest() {
   return Array.isArray(m?.items) ? m.items : [];
 }
 
-export async function listKb({ collection } = {}) {
-  let items = await listManifest();
-  // Filter by collection when asked. 'proposal-training' returns only the
-  // proposal corpus; passing no collection returns everything (unchanged
-  // behavior for the strategy tool).
-  if (typeof collection === 'string' && collection.trim()) {
-    const want = collection.trim();
-    items = items.filter((it) => (it.collection || '') === want);
-  }
+export async function listKb() {
+  const items = await listManifest();
   return { count: items.length, items };
 }
 
-export async function uploadKb({ name, mime, body_b64, notes, collection }) {
+export async function uploadKb({ name, mime, body_b64, notes }) {
   if (!name || !body_b64) throw new Error('name and body_b64 required');
   const buf = Buffer.from(body_b64, 'base64');
   const id = newId();
@@ -113,10 +106,6 @@ export async function uploadKb({ name, mime, body_b64, notes, collection }) {
     bytes: buf.length,
     blob_key: blobKey,
     notes: notes || '',
-    // Optional grouping tag. Items with no collection belong to the default
-    // strategy KB; the campaign-proposal trainer tags its uploads
-    // 'proposal-training' so it can list just its own corpus.
-    collection: (typeof collection === 'string' ? collection.trim().slice(0, 80) : '') || '',
     uploaded_at: new Date().toISOString(),
   };
 

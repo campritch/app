@@ -7,13 +7,14 @@ description: >
   the whole podcast market, tiered A/B/C) and a LAST-MINUTE REMNANT proposal (a graded, priced
   bundle of live SpotsNow inventory). Sizes spend from the brand's Apollo-estimated revenue,
   supports COMPETITOR-DISPLACEMENT plans (build from shows a competitor has stopped advertising
-  on), and can source beyond SpotsNow inventory when a bundle underfills the budget. Publishes to
-  the Notion "AI Proposals" index and drafts a confirmation email with a Superhuman link.
+  on), and can source beyond SpotsNow inventory when a bundle underfills the budget. Logs every
+  proposal in a Notion hub (Training Library + AI Proposals databases) it trains on and compounds,
+  and drafts a confirmation email with a Superhuman link.
   Use whenever the user wants to create, generate, or build an advertiser campaign proposal or a
   last-minute / remnant spot bundle, or pastes a run spec from spotsnow.wiki/campaign-proposal
   ("Run the campaign-proposal-generator skill with this spec…"). Triggers on "make a proposal for
-  [brand]", "build a campaign for [brand]", "find last-minute spots for [brand]", "build a plan
-  from the shows [competitor] stopped running on", or a saved proposal job id (prop_…).
+  [brand]", "build a campaign for [brand]", "find last-minute spots for [brand]", or "build a plan
+  from the shows [competitor] stopped running on".
   This supersedes and unifies proposal-generator (general) and remnant-proposals (remnant); prefer
   it over either for advertiser proposals. Do NOT use for network/agency agent proposals
   (network-proposal-builder) or post-campaign reports (campaign-report-generator).
@@ -57,23 +58,29 @@ If SpotsNow / Apollo / Notion / Superhuman tools are not loaded, load them with 
 
 ---
 
-## Step 1 — Train on the history (always do this first)
+## Step 1 — Train on the hub (always do this first)
 
-Before building anything, ground yourself in how we've pitched brands like this one. Read
-`references/training.md` for the full method. In short, pull in priority order and stop when you
-have enough signal:
+Everything lives in one Notion hub: **AI Campaign Proposals** (page id
+`3a2bb6074fe3817cb2fdc003df546259`), which holds two databases — **Training Library** (the brain)
+and **AI Proposals** (the history). Read `references/training.md` for the full method.
 
-1. **Past proposals** — search the Notion **AI Proposals** index and the Sales Proposals workspace
-   for the 2–4 most similar proposals (same category, similar budget, same mode). These define
-   structure, tone, pricing shape, and the tier logic. Reference examples are in
-   `references/general-mode.md` and `references/remnant-mode.md`.
+First, **ensure the hub exists**: fetch the hub page and find the two databases under it. If either
+is missing, create it (the web front-door creates them too, so usually they're already there — the
+exact schema is in `references/training.md`). Then pull, in priority order, stopping when you have
+enough signal:
+
+1. **Training Library** — query it for the 2–4 entries most like this brand: same category, similar
+   budget band, same mode. Read them. These are the paired records (past proposal + the context that
+   produced it) and are the single best signal for how to shape this one.
 2. **The conversation** — if a transcript or email thread led to this, read it (Fathom for calls,
    Superhuman/Gmail for email; or the "Correspondence & context" block in the spec). The proposal
    must reflect what was actually discussed: the strategy, the constraints, the objection.
-3. **The brand** — if unfamiliar, `web_fetch` the domain for positioning before you grade.
+3. **Wider past proposals** — if the Training Library is thin, fall back to the Sales Proposals
+   workspace and the reference examples in `references/general-mode.md` / `references/remnant-mode.md`.
+4. **The brand** — if unfamiliar, `web_fetch` the domain for positioning before you grade.
 
-Name, in one line to the user, which past proposals and calls you're anchoring to. If nothing
-comparable exists yet, say so and lean on the templates.
+Name, in one line to the user, which Training Library entries and calls you're anchoring to. If the
+library is empty, say so, lean on the templates, and note this proposal will seed it.
 
 ---
 
@@ -126,21 +133,23 @@ totals. Never pad the live bundle with unavailable inventory silently.
 
 ---
 
-## Step 4 — Publish to Notion (AI Proposals index)
+## Step 4 — Publish to Notion + log in the hub
 
-Write the proposal as a Notion page, and index it.
+Write the proposal, log it in the history, and write it back into the training brain. All three land
+in the one hub.
 
-1. **Find or create the index.** Search Notion for a page titled **"AI Proposals"** (the subpage
-   under Campaign Proposals / Sales Proposals). If it doesn't exist yet, create it under the Sales
-   Proposals parent `195bb6074fe38071b40fdcc56fe149aa` with a short intro line and a running list.
-2. **Create the proposal page** under that AI Proposals page (so every generated proposal lives in
-   one place). Title: `[Prefix] / [Brand] — [Mode] Campaign Proposal` (Prefix defaults to Station).
-   Body follows the mode's template in the references. Use **real newlines**, never literal `\n`.
-   For general mode, run the image-fix pass from `references/general-mode.md` (Step: image
-   rendering) so artwork fills columns uniformly.
-3. **Add it to the index list** — append a line to the AI Proposals page:
-   `[date] · [Brand] · [Mode] · [budget] · [link to the new page]`. This is the running history the
-   team browses.
+1. **Create the proposal page.** Put the full proposal somewhere sensible — under the Sales
+   Proposals workspace (`195bb6074fe38071b40fdcc56fe149aa`) is fine, matching where past proposals
+   live. Title: `[Prefix] / [Brand] — [Mode] Campaign Proposal` (Prefix defaults to Station). Body
+   follows the mode's template in the references. Use **real newlines**, never literal `\n`. For
+   general mode, run the image-fix pass from `references/general-mode.md` so artwork fills columns.
+2. **Log a row in the AI Proposals database** (under the hub): set Name (`[Brand] — [Mode]`), Brand,
+   Domain, Mode (General/Remnant), Budget, Status = `Generated`, Competitor (if displacement),
+   Proposal = the page URL. This is the running history the web front-door shows.
+3. **Write a Training Library entry back** (under the hub) so the system compounds: Name, Brand,
+   Category, Budget band, Mode, Outcome = `Pending`, Source links (the call/email you used), Proposal
+   = the page URL, and a page body that captures *why this proposal was shaped this way* — the
+   context, the strategy, what you kept or cut. That body is what the next run trains on.
 
 ---
 
@@ -159,11 +168,11 @@ auto-send.
 
 Report to the user:
 - Brand, mode, and the budget you landed on (with the Apollo reasoning if you sized it).
-- The 2–4 past proposals / calls you trained on.
+- The Training Library entries / calls you trained on.
 - Show count and headline numbers (tier totals for general; blended CPM + reach for remnant).
 - The **Notion proposal link** and the **Superhuman email draft link**.
-- If this came from a job id: remind them to open `spotsnow.wiki/campaign-proposal`, find the job,
-  click **Mark generated**, and paste the Notion link (the skill can't write to the gated store).
+- Confirm you logged it: a row in **AI Proposals** and a new **Training Library** entry (so the web
+  front-door history and the brain both stay current automatically).
 
 ---
 
@@ -171,8 +180,9 @@ Report to the user:
 
 | Constant | Value |
 |---|---|
-| Sales Proposals parent page | `195bb6074fe38071b40fdcc56fe149aa` |
-| AI Proposals index | subpage under Sales Proposals titled "AI Proposals" (find or create) |
+| AI Campaign Proposals hub page | `3a2bb6074fe3817cb2fdc003df546259` |
+| Hub databases | "Training Library" (brain) + "AI Proposals" (history), under the hub page |
+| Sales Proposals parent page | `195bb6074fe38071b40fdcc56fe149aa` (where the full proposal pages live) |
 | Station fee (general mode) | 15% of ad spend |
 | Remnant price shown | live `discountedCpm`, with `originalCpm` in parentheses, no markup |
 | Default prefix | Station |

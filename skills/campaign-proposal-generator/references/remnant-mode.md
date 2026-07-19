@@ -41,8 +41,9 @@ fit-rubric.md.) Exclude any not-live show from totals.
 Lead with a one/two-line recommendation of the core bundle plus any reach extension, and flag timing
 items (closing windows, requested spots, not-live shows).
 
-Create the Notion page under the **AI Proposals** index (see SKILL Step 4). Title:
-`SpotsNow × [Brand] · Get the Host-Read Remnant Advantage`. Use real newlines, never literal `\n`.
+Create the proposal page, then log it in the hub and write a Training Library entry back — see SKILL
+Step 4. Title: `SpotsNow × [Brand] · Get the Host-Read Remnant Advantage`. Use real newlines, never
+literal `\n`.
 Structure:
 
 ```

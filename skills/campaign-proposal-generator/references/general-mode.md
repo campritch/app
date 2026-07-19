@@ -58,7 +58,8 @@ before writing Notion.
 
 ## Step 4 — Notion page
 
-Create under the **AI Proposals** index (see SKILL Step 4). Title:
+Create the proposal page (Sales Proposals workspace is fine), then log it in the hub and write a
+Training Library entry back — see SKILL Step 4. Title:
 `[Prefix] / [Brand] — General Campaign Proposal`. Use real newlines, never literal `\n`.
 
 Template (fill the brackets):

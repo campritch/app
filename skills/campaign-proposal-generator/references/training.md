@@ -1,22 +1,42 @@
-# Training: ground the proposal in history before you build
+# Training: ground the proposal in the hub before you build
 
 A proposal is an argument shaped by the conversation that led to it. Two brands with the same budget
 get very different proposals (a Walmart reads nothing like a SerpAPI). The way you learn the shape
 for *this* brand is to read what we've done for brands like it, and what was actually said.
 
-Pull in this order. Stop when you have enough signal — this is a read-time budget, not a
+Everything lives in one Notion hub — **AI Campaign Proposals**, page
+`3a2bb6074fe3817cb2fdc003df546259` — with two databases under it:
+
+- **Training Library** — the brain. One entry per past deal: the finished proposal plus the context
+  that produced it. Properties: Name, Brand, Category, Budget band (`<$10k` / `$10-25k` / `$25-60k`
+  / `$60-120k` / `$120k+`), Mode (`General` / `Remnant` / `Context`), Outcome (`Won` / `Lost` /
+  `Pending` / `Reference`), Source links, Proposal (URL), Added. The page **body** holds the readable
+  context you train on.
+- **AI Proposals** — the history. Properties: Name, Brand, Domain, Mode, Budget, Status (`Draft` /
+  `Generated` / `Sent` / `Won` / `Lost`), Competitor, Proposal (URL), Job, Created.
+
+**Ensure the hub exists first.** Fetch the hub page; find the two child databases by title. If one
+is missing, create it with the schema above (the web front-door also creates them, so they usually
+exist). Then pull in this order — stop when you have enough signal; this is a read-time budget, not a
 completeness contest.
 
-## 1. Past proposals (style + structure + pricing shape)
+## 1. Training Library (the primary signal)
 
-- Search Notion for the **AI Proposals** index and the **Sales Proposals** workspace.
-- Find the 2–4 most similar prior proposals: same category, similar budget band, same mode
-  (general vs remnant). Read them.
+- Query the Training Library for the 2–4 entries most like this brand: same Category, similar Budget
+  band, same Mode. Read their bodies.
 - Extract: how tiers were framed, per-show rate ranges, which shows recur for this category, the
-  objectives language, and the close. Mirror the patterns that worked; don't reinvent format.
-- Known-good reference proposals (general mode): Rella `2fbbb6074fe380fc9f79c28c49ff9d17`,
-  Xero Shoes `2cdbb6074fe38055ad53c9b2f4942b73`, Kane Footwear `32cbb6074fe3803a9060d64f812f5c23`,
-  Matt Mahan `32cbb6074fe381f7bf09f4a581ec1bc1`.
+  objectives language, the close, and anything noted about what worked or lost. Mirror the patterns
+  that worked; don't reinvent format.
+- If the library is thin, fall back to the **Sales Proposals** workspace
+  (`195bb6074fe38071b40fdcc56fe149aa`). Known-good reference proposals (general mode): Rella
+  `2fbbb6074fe380fc9f79c28c49ff9d17`, Xero Shoes `2cdbb6074fe38055ad53c9b2f4942b73`, Kane Footwear
+  `32cbb6074fe3803a9060d64f812f5c23`, Matt Mahan `32cbb6074fe381f7bf09f4a581ec1bc1`.
+
+## Write back after every build (this is what makes it compound)
+
+When the proposal is done, add a **Training Library** entry for it (Outcome `Pending`) with a body
+that captures why it was shaped this way, and log a row in **AI Proposals**. The next run reads what
+this one wrote. Update Outcome to `Won`/`Lost` later when you know.
 
 ## 2. The conversation (what was actually discussed)
 
@@ -41,9 +61,9 @@ Before building, tell the user in one line what you anchored to, e.g.
 "Anchoring to the Xero Shoes and Kane general proposals, and the July 9 Rebel discovery call."
 If nothing comparable exists, say so and note this proposal becomes training for the next one.
 
-## Note on the web-front-door corpus
+## The web front-door writes to the same hub
 
-Files uploaded on `spotsnow.wiki/campaign-proposal` (Training corpus tab) are stored server-side and
-are not directly readable from here. Treat Notion (past proposals), Fathom (calls), and Superhuman /
-Gmail (emails) as the live corpus you read via connectors. If the user wants a specific uploaded doc
-considered, ask them to paste it or its key points into the chat.
+Training added on `spotsnow.wiki/campaign-proposal` (Training Library tab) is written straight into
+the Notion Training Library — the same database you read here. So anything the team adds there is
+immediately part of your training corpus, no extra step. Fathom (calls) and Superhuman / Gmail
+(emails) remain live sources you can pull via connectors when an entry links to them.
