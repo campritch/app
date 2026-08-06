@@ -83,9 +83,13 @@
     @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(63,184,124,.5);} 70%{box-shadow:0 0 0 5px rgba(63,184,124,0);} 100%{box-shadow:0 0 0 0 rgba(63,184,124,0);} }
 
     .sb-foot { margin-top: auto; padding-top: 12px; }
-    .sb-powered { display: flex; align-items: center; gap: 8px; padding: 8px 10px 14px; font-size: 11px; font-weight: 600; color: var(--text-tertiary); }
-    .sb-powered .smark { width: 18px; height: 18px; border-radius: 5px; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 10px; font-weight: 800; }
+    .sb-powered { display: flex; align-items: center; gap: 8px; padding: 8px 10px; margin-bottom: 4px; font-size: 11px; font-weight: 600; color: var(--text-tertiary); width: 100%; border: none; background: none; font-family: inherit; text-align: left; border-radius: 9px; cursor: pointer; transition: background .12s; }
+    .sb-powered:hover { background: var(--nav-hover); color: var(--text-secondary); }
+    .sb-powered.active { background: var(--nav-current); color: var(--text-secondary); }
+    .sb-powered .smark { width: 18px; height: 18px; border-radius: 5px; background: var(--primary); color: #fff; display: grid; place-items: center; font-size: 10px; font-weight: 800; flex-shrink: 0; }
     .sb-powered b { color: var(--text-secondary); font-weight: 700; }
+    /* SpotsNow pitch screen */
+    .sn-mark { width: 38px; height: 38px; border-radius: 10px; background: var(--primary); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 16px; flex-shrink: 0; }
     .sb-user { display: flex; align-items: center; gap: 10px; padding: 12px 8px 2px; border-top: 1px solid var(--border-light); }
     .sb-user__av { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 12px; flex-shrink: 0; }
     .sb-user__name { color: var(--text-primary); font-size: 12.5px; font-weight: 700; line-height: 1.2; }
@@ -202,6 +206,68 @@
     .footnote { text-align: center; color: var(--text-tertiary); font-size: 12px; margin-top: 46px; font-weight: 500; }
     .footnote b { color: var(--text-secondary); font-weight: 700; }
 
+    /* ─── OUTBOUND RUN / INPUT ─── */
+    .run { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: 20px 22px; margin-top: 22px; }
+    .run__head { margin-bottom: 15px; }
+    .run__title { font-size: 15px; font-weight: 700; letter-spacing: -.02em; display: flex; align-items: center; gap: 9px; }
+    .run__title .k { font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 3px 8px; border-radius: 6px; }
+    .run__hint { font-size: 12.5px; color: var(--text-secondary); margin-top: 4px; font-weight: 500; }
+    .run__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .run__row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; align-items: start; }
+    .run__foot { display: flex; align-items: center; gap: 14px; margin-top: 17px; }
+    .run__note { font-size: 12px; color: var(--text-tertiary); font-weight: 500; max-width: 60%; line-height: 1.45; }
+    .run__cta { margin-left: auto; border: none; background: var(--primary); color: #fff; border-radius: var(--radius-btn); padding: 11px 20px; font-size: 13.5px; font-weight: 700; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+    .run__cta:hover { background: var(--primary-hover); }
+    .run__cta:disabled { opacity: .55; cursor: default; }
+    .fld { display: flex; flex-direction: column; gap: 6px; }
+    .fld__label { font-size: 11px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--text-tertiary); }
+    .fld__in { width: 100%; border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px; font-family: inherit; font-size: 13px; color: var(--text-primary); line-height: 1.5; resize: vertical; background: var(--white); }
+    .fld__in:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .roles { display: flex; flex-wrap: wrap; gap: 7px; }
+    .role { border: 1px solid var(--border-strong); background: var(--white); color: var(--text-secondary); border-radius: 999px; padding: 7px 13px; font-size: 12.5px; font-weight: 600; font-family: inherit; display: inline-flex; align-items: center; gap: 7px; }
+    .role::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--border-strong); }
+    .role.on { border-color: var(--primary); color: var(--text-primary); background: var(--accent-soft); }
+    .role.on::before { background: #3FB87C; }
+
+    /* ─── PIPELINE ─── */
+    .pipe { display: none; margin-top: 18px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: 20px 14px 16px; }
+    .pipe.show { display: block; }
+    .pipe__track { display: flex; align-items: flex-start; }
+    .pipe__step { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 4px; position: relative; }
+    .pipe__step::after { content: ""; position: absolute; top: 18px; left: 50%; width: 100%; height: 2px; background: var(--border-light); z-index: 0; }
+    .pipe__step:last-child::after { display: none; }
+    .pipe__dot { width: 38px; height: 38px; border-radius: 50%; background: var(--secondary-lite); border: 1px solid var(--border); color: var(--text-tertiary); display: grid; place-items: center; position: relative; z-index: 1; transition: background .25s, border-color .25s, color .25s; }
+    .pipe__dot svg { width: 17px; height: 17px; }
+    .pipe__step.run .pipe__dot { background: var(--accent-soft); border-color: var(--primary); color: var(--primary); animation: pulse2 1.4s infinite; }
+    .pipe__step.done .pipe__dot { background: var(--green-bg); border-color: var(--green-text); color: var(--green-text); }
+    .pipe__step.done::after { background: var(--green-text); opacity: .3; }
+    .pipe__label { font-size: 11.5px; font-weight: 700; letter-spacing: -.01em; margin-top: 10px; color: var(--text-secondary); }
+    .pipe__step.done .pipe__label, .pipe__step.run .pipe__label { color: var(--text-primary); }
+    .pipe__meta { font-size: 10.5px; color: var(--text-tertiary); margin-top: 3px; font-weight: 500; min-height: 13px; line-height: 1.3; }
+
+    /* ─── outbound contact / email cells ─── */
+    .ob-person { font-weight: 700; font-size: 13.5px; letter-spacing: -.02em; display: flex; align-items: center; gap: 7px; }
+    .ob-in { width: 16px; height: 16px; border-radius: 3px; background: #0A66C2; color: #fff; display: inline-grid; place-items: center; font-size: 9px; font-weight: 800; flex-shrink: 0; text-decoration: none; }
+    .ob-in:hover { opacity: .85; }
+    .ob-title { font-size: 11.5px; color: var(--text-secondary); font-weight: 600; margin-top: 2px; }
+    .ob-email { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--text-primary); }
+    .ob-email__badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; color: var(--green-text); background: var(--green-bg); padding: 2px 7px; border-radius: 999px; margin-top: 5px; }
+    .ob-email__badge i { width: 4px; height: 4px; border-radius: 50%; background: var(--green-text); }
+    .ob-matched { font-weight: 700; font-size: 12.5px; letter-spacing: -.01em; }
+
+    /* ─── drawer contact panel ─── */
+    .c-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--border-light); }
+    .c-row:first-of-type { border-top: none; padding-top: 2px; }
+    .c-row__k { font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-tertiary); width: 70px; flex-shrink: 0; }
+    .c-row__v { font-size: 13px; font-weight: 600; color: var(--text-primary); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .c-row__v.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; font-weight: 500; }
+    .c-mini { font-family: inherit; font-size: 11.5px; font-weight: 700; border: 1px solid var(--border-strong); background: var(--white); color: var(--text-primary); padding: 5px 10px; border-radius: 7px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; }
+    .c-mini:hover { background: var(--secondary-lite); }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: var(--text-secondary); background: var(--secondary-lite); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; }
+    .chip i { width: 5px; height: 5px; border-radius: 50%; background: #3FB87C; }
+    .ob-role-tag { display: inline-flex; font-size: 11px; font-weight: 700; color: var(--text-secondary); background: var(--secondary-lite); border: 1px solid var(--border); padding: 3px 9px; border-radius: 999px; }
+
     /* ─── DRAWER (outbound review) ─── */
     .drawer-overlay { position: fixed; inset: 0; background: rgba(14,19,35,.34); opacity: 0; pointer-events: none; transition: opacity .22s ease; z-index: 40; }
     .drawer-overlay.open { opacity: 1; pointer-events: auto; }
@@ -291,7 +357,7 @@
     </div>
 
     <div class="sb-foot">
-      <div class="sb-powered"><span class="smark">S</span>Powered by <b>SpotsNow</b></div>
+      <button class="sb-powered" data-view="spotsnow" onclick="switchView('spotsnow')"><span class="smark">S</span>Powered by <b>SpotsNow</b></button>
       <div class="sb-user">
         <div class="sb-user__av">CP</div>
         <div>
@@ -372,9 +438,9 @@
               </div>
               <span class="agent__status st-working">Running</span>
             </div>
-            <div class="agent__desc">Matches brands to your open inventory off real buying signals, then drafts the LinkedIn note and email for you to send.</div>
+            <div class="agent__desc">You give it brands and the context. It finds the buyers, pulls their emails from Apollo, and drafts every LinkedIn note, email and one-pager.</div>
             <div class="agent__foot">
-              <div class="agent__stat"><b>120</b><span>brands matched</span></div>
+              <div class="agent__stat"><b>8</b><span>buyers drafted</span></div>
               <span class="agent__open">Open <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
             </div>
           </div>
@@ -407,8 +473,8 @@
           </div>
           <div class="approval">
             <div class="approval__by"><i></i>Outbound Agent</div>
-            <div class="approval__title">Outreach sequence — 120 brands</div>
-            <div class="approval__meta">Personalized pitches to brands matched to open inventory. <b>Ready to launch.</b></div>
+            <div class="approval__title">Outreach batch — 8 buyers, 6 brands</div>
+            <div class="approval__meta">People found, emails pulled from Apollo, LinkedIn note + email + one-pager drafted per buyer. <b>2 ready, awaiting your approval.</b></div>
             <div class="approval__actions">
               <button class="btn btn--accent">Approve &amp; send</button>
               <button class="btn btn--ghost" onclick="switchView('outbound')">Review</button>
@@ -426,7 +492,7 @@
         <div class="pagebar">
           <div>
             <div class="view-title">Outbound <span class="live-dot">Agent live</span></div>
-            <div class="view-sub">Brands matched to your open inventory off real buying signals. The agent drafts, you approve and send.</div>
+            <div class="view-sub">Drop in the brands and why you're reaching out. The agent finds the buyers, gets their emails and drafts every message.</div>
           </div>
           <div class="pagebar__right">
             <div class="date-pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>July 2026 cycle</div>
@@ -435,12 +501,94 @@
           </div>
         </div>
 
+        <!-- INPUT / RUN -->
+        <div class="run">
+          <div class="run__head">
+            <div class="run__title"><span class="k">Step 1</span>What are we reaching out about?</div>
+            <div class="run__hint">List brands by name or domain, or describe an initiative and the agent will source the brand list for you.</div>
+          </div>
+          <div class="run__grid">
+            <label class="fld">
+              <span class="fld__label">Brands or initiative</span>
+              <textarea id="in-brands" class="fld__in" rows="4">AG1, Liquid Death, Rocket Money, Thrive Cosmetics, Factor, Raycon
+
++ source lookalikes activating around our July sports slate</textarea>
+            </label>
+            <label class="fld">
+              <span class="fld__label">Context &amp; intent — what you're pitching and why</span>
+              <textarea id="in-context" class="fld__in" rows="4">We just opened premium host-read windows across our top sports and wellness shows for July/August. Want to get in front of brands who already buy podcast and index on our audience before a competitor takes the slot. Lead with the show fit and the open window.</textarea>
+            </label>
+          </div>
+          <div class="run__row">
+            <label class="fld">
+              <span class="fld__label">Brand domain(s)</span>
+              <input id="in-domains" class="fld__in" value="ag1.com, liquiddeath.com, rocketmoney.com, thrivecausemetics.com, factor75.com, rayconglobal.com" />
+            </label>
+            <div class="fld">
+              <span class="fld__label">Target roles — who to find at each brand</span>
+              <div class="roles" id="roles">
+                <button type="button" class="role on" onclick="this.classList.toggle('on')">Marketing</button>
+                <button type="button" class="role on" onclick="this.classList.toggle('on')">Brand</button>
+                <button type="button" class="role on" onclick="this.classList.toggle('on')">Media Investment</button>
+                <button type="button" class="role on" onclick="this.classList.toggle('on')">Content</button>
+                <button type="button" class="role" onclick="this.classList.toggle('on')">Digital</button>
+                <button type="button" class="role" onclick="this.classList.toggle('on')">Partnerships</button>
+              </div>
+            </div>
+          </div>
+          <div class="run__foot">
+            <div class="run__note">Every message waits for your approval before it sends. No unsubscribe footer, always comes from your inbox.</div>
+            <button class="run__cta" id="runBtn" onclick="runAgent()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 3 14 9-14 9z"/></svg>
+              Run Outbound Agent
+            </button>
+          </div>
+        </div>
+
+        <!-- PIPELINE -->
+        <div class="pipe" id="pipe">
+          <div class="pipe__track">
+            <div class="pipe__step" data-step="0">
+              <div class="pipe__dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6"/></svg></div>
+              <div class="pipe__label">Input &amp; intent</div>
+              <div class="pipe__meta"></div>
+            </div>
+            <div class="pipe__step" data-step="1">
+              <div class="pipe__dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13A4 4 0 0 1 16 11"/></svg></div>
+              <div class="pipe__label">Find people</div>
+              <div class="pipe__meta"></div>
+            </div>
+            <div class="pipe__step" data-step="2">
+              <div class="pipe__dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg></div>
+              <div class="pipe__label">Get emails · Apollo</div>
+              <div class="pipe__meta"></div>
+            </div>
+            <div class="pipe__step" data-step="3">
+              <div class="pipe__dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/><path d="M12 8v4l3 2"/></svg></div>
+              <div class="pipe__label">Grade fit</div>
+              <div class="pipe__meta"></div>
+            </div>
+            <div class="pipe__step" data-step="4">
+              <div class="pipe__dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg></div>
+              <div class="pipe__label">Draft messages</div>
+              <div class="pipe__meta"></div>
+            </div>
+            <div class="pipe__step" data-step="5">
+              <div class="pipe__dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></svg></div>
+              <div class="pipe__label">One-pager · Canva</div>
+              <div class="pipe__meta"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESULTS -->
+        <div class="section-title" id="ob-heading">Ready to send <span class="muted" id="ob-runline">Last run 8 min ago · 6 brands · 8 buyers found</span></div>
         <div class="ob-toolbar">
-          <div class="seg">
-            <button class="on">All 120</button>
-            <button>Drafted 38</button>
-            <button>Ready 64</button>
-            <button>Sent 18</button>
+          <div class="seg" id="ob-seg">
+            <button class="on" data-f="all">All <span id="c-all">8</span></button>
+            <button data-f="draft">Drafted <span id="c-draft">4</span></button>
+            <button data-f="ready">Ready <span id="c-ready">2</span></button>
+            <button data-f="sent">Sent <span id="c-sent">2</span></button>
           </div>
           <div style="margin-left:auto;font-size:12.5px;font-weight:600;color:var(--text-secondary)">Sorted by match strength</div>
         </div>
@@ -448,13 +596,96 @@
         <div class="ob-card">
           <table class="ob">
             <thead>
-              <tr><th>Brand</th><th>Matched show</th><th>Buying signal</th><th>Est. value</th><th>Status</th><th></th></tr>
+              <tr><th>Contact</th><th>Email</th><th>Matched show &amp; signal</th><th>Est. value</th><th>Status</th><th></th></tr>
             </thead>
             <tbody id="ob-rows"></tbody>
           </table>
         </div>
 
         <div class="footnote">Acme Network OS · Outbound Agent · seeded mock data, in-memory · powered by <b>SpotsNow</b></div>
+      </div>
+    </section>
+
+    <!-- SPOTSNOW PITCH SCREEN -->
+    <section class="view view--scroll" id="view-spotsnow">
+      <div class="inner">
+        <div class="pagebar">
+          <div style="display:flex;align-items:center;gap:13px">
+            <div class="sn-mark">S</div>
+            <div>
+              <div class="view-title">SpotsNow OS</div>
+              <div class="view-sub">The operating system that runs a podcast network — inventory, vetting and outbound, on autopilot.</div>
+            </div>
+          </div>
+          <div class="pagebar__right">
+            <div class="date-pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>July 2026 cycle</div>
+            <button class="sf-btn" title="Synced with your CRM"><span class="dot"></span>CRM connected</button>
+            <div class="topav">CP</div>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><div class="stat__label">Total Pipeline</div><div class="stat__value">$123.4K</div><div class="stat__sub">17 deals · avg $7.26K</div></div>
+          <div class="stat"><div class="stat__label">Weighted Pipeline</div><div class="stat__value">$65K</div><div class="stat__sub">probability-adjusted</div></div>
+          <div class="stat"><div class="stat__label">Open Deals</div><div class="stat__value">10</div><div class="stat__sub">avg $5.91K each</div></div>
+          <div class="stat"><div class="stat__label">Avg Time to Respond</div><div class="stat__value">4 min</div><div class="stat__sub"><b>↓ from 2 days</b> manual</div></div>
+          <div class="stat"><div class="stat__label">RFP Completion</div><div class="stat__value">1.3d</div><div class="stat__sub"><b>↓ from 3 weeks</b></div></div>
+        </div>
+
+        <div class="section-title">What SpotsNow runs for you <span class="muted">3 agents working the network · always on</span></div>
+        <div class="agents">
+
+          <div class="agent" onclick="switchView('inventory')">
+            <div class="agent__head">
+              <div class="agent__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></div>
+              <div>
+                <div class="agent__name">Inventory</div>
+                <div class="agent__role">Availability &amp; pricing</div>
+              </div>
+              <span class="agent__status st-working">Running</span>
+            </div>
+            <div class="agent__desc">Live grid of every show, slot and flight across the network. Sells super units and a-la-carte, tracks holds.</div>
+            <div class="agent__foot">
+              <div class="agent__stat"><b>84%</b><span>avg available</span></div>
+              <span class="agent__open">Open <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </div>
+          </div>
+
+          <div class="agent" onclick="switchView('vetting')">
+            <div class="agent__head">
+              <div class="agent__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
+              <div>
+                <div class="agent__name">Vetting Agent</div>
+                <div class="agent__role">RFP response &amp; brand safety</div>
+              </div>
+              <span class="agent__status st-working">Running</span>
+            </div>
+            <div class="agent__desc">Turns any agency RFP into a priced media plan, vets brand fit and category exclusivity, returns it in their template.</div>
+            <div class="agent__foot">
+              <div class="agent__stat"><b>1.3d</b><span>RFP turnaround</span></div>
+              <span class="agent__open">Open <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </div>
+          </div>
+
+          <div class="agent" onclick="switchView('outbound')">
+            <div class="agent__head">
+              <div class="agent__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></div>
+              <div>
+                <div class="agent__name">Outbound</div>
+                <div class="agent__role">Prospecting &amp; outreach</div>
+              </div>
+              <span class="agent__status st-working">Running</span>
+            </div>
+            <div class="agent__desc">You give it brands and the context. It finds the buyers, pulls their emails from Apollo, and drafts every LinkedIn note, email and one-pager.</div>
+            <div class="agent__foot">
+              <div class="agent__stat"><b>8</b><span>buyers drafted</span></div>
+              <span class="agent__open">Open <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="footnote">SpotsNow OS · seeded demo data · the operating system for podcast networks</div>
       </div>
     </section>
 
@@ -479,24 +710,36 @@
     </div>
     <div class="drawer__body">
       <div class="panel">
+        <div class="panel__head"><span class="panel__title">Contact</span><span class="ob-role-tag" id="dwRoleTag">Brand</span></div>
+        <div class="c-row"><div class="c-row__k">Person</div><div class="c-row__v" id="dwPerson">Sloane Carter</div></div>
+        <div class="c-row"><div class="c-row__k">Title</div><div class="c-row__v" id="dwTitle">VP, Brand Marketing · AG1</div></div>
+        <div class="c-row"><div class="c-row__k">Email</div><div class="c-row__v mono" id="dwEmail">scarter@ag1.com</div><button class="c-mini" onclick="copyFrom('dwEmail',this)">Copy</button></div>
+        <div class="c-row"><div class="c-row__k">LinkedIn</div><div class="c-row__v" id="dwLi">/in/sloane-carter</div><a class="c-mini" id="dwLiBtn" href="https://www.linkedin.com/" target="_blank" rel="noopener">Open</a></div>
+        <div class="chips">
+          <span class="chip"><i></i>Email verified · Apollo</span>
+          <span class="chip"><i></i>Profile · LinkedIn</span>
+          <span class="chip" id="dwRoleChip"><i></i>Role match: Brand</span>
+        </div>
+      </div>
+      <div class="panel">
         <div class="panel__head"><span class="panel__title">Grading</span></div>
-        <div class="panel__text">AG1 is one of the most active host-read advertisers in wellness, with proven spend across health and self-improvement shows. Armchair Expert's audience is exactly their core buyer: curious, health-conscious listeners who trust Dax and Monica's recommendations. Ritual held the supplement category on the show as a huge repeat buyer, but their exclusivity just lapsed, which opens a July 10th host-read window. Strong moment to put AG1 in front of that audience.</div>
-        <span class="panel__tag">person_fit: direct_buyer · show: Armchair Expert · category just opened</span>
+        <div class="panel__text" id="dwGrading">AG1 is one of the most active host-read advertisers in wellness, with proven spend across health and self-improvement shows. Armchair Expert's audience is exactly their core buyer: curious, health-conscious listeners who trust Dax and Monica's recommendations. Ritual held the supplement category on the show as a huge repeat buyer, but their exclusivity just lapsed, which opens a July 10th host-read window. Strong moment to put AG1 in front of that audience.</div>
+        <span class="panel__tag" id="dwGradeTag">person_fit: direct_buyer · show: Armchair Expert · category just opened</span>
       </div>
       <div class="panel">
         <div class="panel__head"><span class="panel__title">Hook</span><button class="panel__regen">Regenerate</button></div>
-        <textarea class="field" rows="4">Ritual ran on Armchair Expert as a repeat buyer for a while, but their category exclusivity just lapsed, so the supplement slot is finally open. AG1 was the first brand we thought of. There's a host-read window on July 10th. Worth grabbing it before another wellness brand does?</textarea>
-        <span class="panel__tag">confidence: high</span>
+        <textarea class="field" id="dwHook" rows="4">Ritual ran on Armchair Expert as a repeat buyer for a while, but their category exclusivity just lapsed, so the supplement slot is finally open. AG1 was the first brand we thought of. There's a host-read window on July 10th. Worth grabbing it before another wellness brand does?</textarea>
+        <span class="panel__tag">confidence: high · built from your intent + brand research</span>
       </div>
       <div class="panel">
         <div class="panel__head"><span class="panel__title">LinkedIn note</span><button class="panel__regen">Regenerate</button></div>
-        <textarea class="field" rows="5">Hey Sloane, we make podcast ads easy. Armchair Expert could be huge for AG1. Ritual was a big repeat buyer on the show, but their category exclusivity just lapsed, so the supplement slot is open for the first time in a while. Dax and Monica's audience is exactly your buyer: curious, health-minded, and they actually act on host recommendations. We've got a host-read opening July 10th. Want me to spin up a quick plan before another brand grabs it?</textarea>
-        <div class="panel__count">438 / 600</div>
+        <textarea class="field" id="dwLinkedin" rows="5">Hey Sloane, we make podcast ads easy. Armchair Expert could be huge for AG1. Ritual was a big repeat buyer on the show, but their category exclusivity just lapsed, so the supplement slot is open for the first time in a while. Dax and Monica's audience is exactly your buyer: curious, health-minded, and they actually act on host recommendations. We've got a host-read opening July 10th. Want me to spin up a quick plan before another brand grabs it?</textarea>
+        <div class="panel__count" id="dwLiCount">438 / 600</div>
       </div>
       <div class="panel">
         <div class="panel__head"><span class="panel__title">Email</span><button class="panel__regen">Regenerate</button></div>
-        <input class="field" value="Armchair Expert host-read for AG1 — opening July 10th" />
-        <textarea class="field field--mono" rows="13">Hey Sloane,
+        <input class="field" id="dwSubject" value="Armchair Expert host-read for AG1 — opening July 10th" />
+        <textarea class="field field--mono" id="dwBody" rows="13">Hey Sloane,
 
 Cam, our CEO, wanted me to reach out. We've got a host-read opening on Armchair Expert for July 10th and AG1 was the first brand that came to mind.
 
@@ -507,12 +750,12 @@ Why it's a fit: Dax and Monica's audience is curious, health-conscious, and genu
 Slots like this tend to move fast once the category opens up. Want me to put together a quick plan and pricing before it goes?</textarea>
       </div>
       <div class="action-block">
-        <div class="action-block__label">Attachment</div>
+        <div class="action-block__label">One-pager</div>
         <div class="attach">
           <div class="attach__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></svg></div>
           <div class="attach__meta">
-            <div class="attach__name">AG1 × Armchair Expert — one-pager</div>
-            <div class="attach__sub">Auto-generated · trained on the brand-fit grading + Acme's one-pager template</div>
+            <div class="attach__name" id="dwAttachName">AG1 × Armchair Expert — one-pager</div>
+            <div class="attach__sub">Auto-generated · your Canva template, logo and hook dropped in per brand</div>
           </div>
           <a class="abtn" href="https://www.canva.com/" target="_blank" rel="noopener">Open in Canva</a>
           <a class="abtn" href="https://docs.google.com/presentation/u/0/create" target="_blank" rel="noopener">Google Slides</a>
@@ -520,12 +763,12 @@ Slots like this tend to move fast once the category opens up. Want me to put tog
       </div>
 
       <div class="action-block">
-        <div class="action-block__label">Outreach</div>
+        <div class="action-block__label">Send it</div>
         <div class="action-row">
-          <button class="abtn">Copy note &amp; open LinkedIn</button>
+          <button class="abtn" onclick="openLinkedIn()">Copy note &amp; open LinkedIn</button>
           <button class="abtn">Mark LinkedIn sent</button>
           <span class="divider"></span>
-          <button class="abtn">Queue Gmail draft</button>
+          <button class="abtn">Queue draft in Outlook</button>
           <button class="abtn abtn--accent">Send email</button>
         </div>
       </div>
@@ -534,7 +777,7 @@ Slots like this tend to move fast once the category opens up. Want me to put tog
         <div class="action-row">
           <button class="abtn abtn--dark">Mark done</button>
           <button class="abtn">Mark not relevant</button>
-          <button class="abtn">Auto follow-up off</button>
+          <button class="abtn">Auto follow-up on</button>
         </div>
       </div>
     </div>
@@ -548,41 +791,203 @@ Slots like this tend to move fast once the category opens up. Want me to put tog
       view.classList.add('active');
       const ifr = view.querySelector('iframe[data-src]');
       if (ifr && !ifr.src) ifr.src = ifr.getAttribute('data-src');
-      document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.view===name));
+      document.querySelectorAll('[data-view]').forEach(n=>n.classList.toggle('active', n.dataset.view===name));
       if (view.classList.contains('view--scroll')) view.scrollTop = 0;
     }
 
-    /* ─── outbound prospect rows ─── */
-    const PROSPECTS = [
-      { brand:"AG1", logo:"AG", cat:"Supplements", show:"Armchair Expert", signal:"Ritual's category exclusivity just lapsed — supplement host-read slot open July 10th.", val:"$42K", status:"ready" },
-      { brand:"Liquid Death", logo:"LD", cat:"Beverage", show:"The Joe Rogan Experience", signal:"Heavy spender in comedy/long-form. Two mid-roll super units open in August.", val:"$88K", status:"ready" },
-      { brand:"Rocket Money", logo:"RM", cat:"Fintech", show:"The Mel Robbins Podcast", signal:"Self-improvement audience overlap. Ran on 4 lookalike shows last quarter.", val:"$31K", status:"draft" },
-      { brand:"Thrive Cosmetics", logo:"TC", cat:"Beauty", show:"Call Her Daddy", signal:"Female-skewing pop-culture audience. No beauty brand currently holds the slot.", val:"$54K", status:"draft" },
-      { brand:"BetterHelp", logo:"BH", cat:"Wellness", show:"Huberman Lab", signal:"Active RFP in flight. Health/neuroscience fit is direct, premium pre-roll open.", val:"$48K", status:"sent" },
-      { brand:"Factor", logo:"FA", cat:"Meal Kit", show:"SmartLess", signal:"Meal-kit category open. Comedy-interview audience indexes high on convenience buys.", val:"$26K", status:"draft" },
-      { brand:"Raycon", logo:"RY", cat:"Consumer Tech", show:"The Oprah Podcast", signal:"Lapsed sponsor re-entering podcast. Conversations audience fits gifting push.", val:"$19K", status:"ready" },
-      { brand:"HelloFresh", logo:"HF", cat:"Meal Kit", show:"The Joe Rogan Experience", signal:"Reupping Q3 budget. Mid-roll pos #2 opens week of July 21st.", val:"$61K", status:"sent" },
+    /* ─── outbound contacts: one buyer per row, fully drafted ─── */
+    const CONTACTS = [
+      { id:"ag1", brand:"AG1", logo:"AG", cat:"Supplements", domain:"ag1.com",
+        person:"Sloane Carter", title:"VP, Brand Marketing", role:"Brand", email:"scarter@ag1.com", li:"/in/sloane-carter",
+        show:"Armchair Expert", signal:"Ritual's category exclusivity just lapsed — supplement host-read slot open July 10th.", val:"$42K", status:"ready",
+        grading:"AG1 is one of the most active host-read advertisers in wellness, with proven spend across health and self-improvement shows. Armchair Expert's audience is exactly their core buyer: curious, health-conscious listeners who trust Dax and Monica's recommendations. Ritual held the supplement category on the show as a huge repeat buyer, but their exclusivity just lapsed, which opens a July 10th host-read window. Strong moment to put AG1 in front of that audience.",
+        gradeTag:"person_fit: direct_buyer · show: Armchair Expert · category just opened",
+        hook:"Ritual ran on Armchair Expert as a repeat buyer for a while, but their category exclusivity just lapsed, so the supplement slot is finally open. AG1 was the first brand we thought of. There's a host-read window on July 10th. Worth grabbing it before another wellness brand does?",
+        linkedin:"Hey Sloane, we make podcast ads easy. Armchair Expert could be huge for AG1. Ritual was a big repeat buyer on the show, but their category exclusivity just lapsed, so the supplement slot is open for the first time in a while. Dax and Monica's audience is exactly your buyer: curious, health-minded, and they actually act on host recommendations. We've got a host-read opening July 10th. Want me to spin up a quick plan before another brand grabs it?",
+        subject:"Armchair Expert host-read for AG1 — opening July 10th",
+        body:"Hey Sloane,\n\nWe've got a host-read opening on Armchair Expert for July 10th and AG1 was the first brand that came to mind.\n\nQuick context: Ritual was a huge repeat buyer on the show and held the supplement category for a while. Their exclusivity recently lapsed, so this is the first open wellness window we've had in a while.\n\nWhy it's a fit: Dax and Monica's audience is curious, health-conscious, and genuinely trusts what they recommend. That's exactly the buyer AG1 converts on other shows, just earlier in the funnel and at real scale.\n\nSlots like this move fast once the category opens up. Want me to put together a quick plan and pricing before it goes?" },
+
+      { id:"liquiddeath", brand:"Liquid Death", logo:"LD", cat:"Beverage", domain:"liquiddeath.com",
+        person:"Dana Cross", title:"Head of Brand Partnerships", role:"Partnerships", email:"dcross@liquiddeath.com", li:"/in/dana-cross",
+        show:"The Joe Rogan Experience", signal:"Heavy comedy/long-form spender. Two mid-roll super units open in August.", val:"$88K", status:"ready",
+        grading:"Liquid Death is one of the most aggressive brand-building advertisers in the space and already leans hard into comedy and long-form audio. They've run on lookalike shows and their whole brand voice is built for host-read. Two mid-roll super units on JRE open in August, which is a rare high-reach window for a brand that thrives on irreverent, male-skewing audiences.",
+        gradeTag:"person_fit: partnerships_lead · show: JRE · 2 super units open Aug",
+        hook:"Two mid-roll super units on Joe Rogan open up in August. Liquid Death's brand voice is basically built for that audience, and you've already run on shows just like it. Felt like a slot worth grabbing before it's gone.",
+        linkedin:"Hey Dana, we make podcast ads easy. We've got two mid-roll super units on The Joe Rogan Experience opening in August. Liquid Death is exactly the brand that audience reacts to, and you've already proven it on lookalike shows. These slots don't come up often. Want me to hold one and send pricing?",
+        subject:"Two JRE super units open in August — holding one for Liquid Death?",
+        body:"Hey Dana,\n\nTwo mid-roll super units on The Joe Rogan Experience free up in August and Liquid Death was the first brand I thought of.\n\nYou've already run on shows in this lane, and JRE's audience is about as on-brand as it gets for Liquid Death: irreverent, loyal, and huge reach in one placement.\n\nThese super units don't open often. Want me to put a hold on one and send you the plan and pricing?" },
+
+      { id:"rocketmoney", brand:"Rocket Money", logo:"RM", cat:"Fintech", domain:"rocketmoney.com",
+        person:"Priya Nair", title:"Director of Media Investment", role:"Media Investment", email:"pnair@rocketmoney.com", li:"/in/priya-nair",
+        show:"The Mel Robbins Podcast", signal:"Ran 4 lookalike self-improvement shows last quarter. Pre-roll open for Q3.", val:"$31K", status:"draft",
+        grading:"Rocket Money buys heavily against self-improvement and personal-finance-adjacent audiences. They ran four lookalike shows last quarter and convert well when the host frames money as part of getting your life together. Mel Robbins' audience over-indexes on exactly that mindset, and a pre-roll is open for Q3.",
+        gradeTag:"person_fit: investment_lead · show: Mel Robbins · 4 lookalikes last Q",
+        hook:"You ran four shows just like Mel Robbins last quarter. Her audience is all about getting your life in order, which is the exact headspace Rocket Money converts in. Pre-roll's open for Q3.",
+        linkedin:"Hey Priya, we make podcast ads easy. You ran four self-improvement shows last quarter that look a lot like The Mel Robbins Podcast. Her audience is squarely in the get-my-life-together mindset where Rocket Money does well. We've got a Q3 pre-roll open. Want me to send a quick plan?",
+        subject:"Mel Robbins pre-roll open for Q3 — fits your last-quarter buys",
+        body:"Hey Priya,\n\nNoticed Rocket Money ran a handful of self-improvement shows last quarter. The Mel Robbins Podcast is a close lookalike and we've got a pre-roll open for Q3.\n\nHer audience over-indexes on the exact get-my-life-together mindset where Rocket Money converts, so this should map cleanly to what's already working for you.\n\nWant me to pull together a quick plan and pricing?" },
+
+      { id:"thrive", brand:"Thrive Cosmetics", logo:"TC", cat:"Beauty", domain:"thrivecausemetics.com",
+        person:"Jordan Blake", title:"Senior Marketing Manager", role:"Marketing", email:"jblake@thrivecausemetics.com", li:"/in/jordan-blake",
+        show:"Call Her Daddy", signal:"Female-skewing pop-culture audience. No beauty brand currently holds the slot.", val:"$54K", status:"draft",
+        grading:"Thrive skews to a female, socially-driven buyer and leans into cause-led storytelling. Call Her Daddy's audience is one of the strongest female-skewing pop-culture audiences in podcasting, and no beauty brand currently holds the category on the show. Clean opening to own beauty on a marquee title.",
+        gradeTag:"person_fit: marketing_lead · show: Call Her Daddy · beauty category open",
+        hook:"No beauty brand currently owns the category on Call Her Daddy. Given Thrive's audience and the show's female-skewing reach, felt like a slot worth putting in front of you before someone else claims it.",
+        linkedin:"Hey Jordan, we make podcast ads easy. Call Her Daddy has one of the biggest female-skewing audiences in podcasting and no beauty brand currently holds the category. Thrive would be a natural fit. Want me to send over the details before another brand grabs it?",
+        subject:"Beauty category open on Call Her Daddy — a fit for Thrive",
+        body:"Hey Jordan,\n\nThe beauty category is currently open on Call Her Daddy, which is rare for a show that size.\n\nIt's one of the strongest female-skewing pop-culture audiences in podcasting, and Thrive's brand and buyer map to it almost exactly.\n\nHappy to send a quick plan and pricing. Want me to hold the slot while you take a look?" },
+
+      { id:"factor", brand:"Factor", logo:"FA", cat:"Meal Kit", domain:"factor75.com",
+        person:"Marcus Lee", title:"Digital Media Lead", role:"Digital", email:"mlee@factor75.com", li:"/in/marcus-lee",
+        show:"SmartLess", signal:"Meal-kit category open. Comedy-interview audience indexes high on convenience buys.", val:"$26K", status:"draft",
+        grading:"Factor sells convenience to time-poor, higher-income listeners, and comedy-interview audiences like SmartLess index high on ready-to-eat and subscription convenience. The meal-kit category is currently open on the show. Reliable performer for a direct-response brand like Factor.",
+        gradeTag:"person_fit: digital_lead · show: SmartLess · meal-kit open",
+        hook:"The meal-kit category is open on SmartLess right now. Its audience skews higher-income and time-poor, which is exactly who converts on Factor. Straightforward one to test.",
+        linkedin:"Hey Marcus, we make podcast ads easy. The meal-kit slot on SmartLess is open. That audience over-indexes on convenience buys and higher income, which lines up well with Factor. Want me to send a quick plan to test it?",
+        subject:"Meal-kit slot open on SmartLess — worth a test for Factor",
+        body:"Hey Marcus,\n\nThe meal-kit category is open on SmartLess and it looked like a clean fit for Factor.\n\nThe audience skews higher-income and time-poor, which is exactly the convenience buyer Factor converts on. Good show to run a direct-response test on.\n\nWant me to put together a quick plan and pricing?" },
+
+      { id:"raycon", brand:"Raycon", logo:"RY", cat:"Consumer Tech", domain:"rayconglobal.com",
+        person:"Alyssa Kim", title:"Brand Manager", role:"Brand", email:"akim@rayconglobal.com", li:"/in/alyssa-kim",
+        show:"The Oprah Podcast", signal:"Lapsed podcast sponsor re-entering. Conversations audience fits a gifting push.", val:"$19K", status:"ready",
+        grading:"Raycon is a proven podcast sponsor that recently went quiet and looks to be re-entering. The Oprah Podcast's audience is broad, aspirational and gift-driven, which fits a Q4 gifting push well. Warm re-entry rather than a cold start.",
+        gradeTag:"person_fit: brand_manager · show: The Oprah Podcast · gifting angle",
+        hook:"Raycon's been quiet on podcast lately, but you were a strong sponsor before. The Oprah Podcast's audience is aspirational and gift-driven, which lines up nicely with a Q4 gifting push.",
+        linkedin:"Hey Alyssa, we make podcast ads easy. Raycon ran well on podcast before and it looks like you're re-entering. The Oprah Podcast has a broad, gift-driven audience that fits a Q4 push for Raycon. Want me to send a quick plan to get you back in?",
+        subject:"Raycon re-entry — The Oprah Podcast for a Q4 gifting push",
+        body:"Hey Alyssa,\n\nRaycon ran well on podcast before and it looks like you're stepping back in.\n\nThe Oprah Podcast has a broad, aspirational, gift-driven audience that fits a Q4 gifting push nicely, so it could be a strong re-entry show.\n\nWant me to send a quick plan and pricing to get Raycon back in front of that audience?" },
+
+      { id:"hellofresh", brand:"HelloFresh", logo:"HF", cat:"Meal Kit", domain:"hellofresh.com",
+        person:"Tom Reyes", title:"Associate Director of Investment", role:"Media Investment", email:"treyes@hellofresh.com", li:"/in/tom-reyes",
+        show:"The Joe Rogan Experience", signal:"Reupping Q3 budget. Mid-roll position #2 opens week of July 21st.", val:"$61K", status:"sent",
+        grading:"HelloFresh is a category-defining podcast spender and is reupping its Q3 budget. A JRE mid-roll in position #2 opens the week of July 21st, which is premium reach at scale for a brand that already knows the channel works. Low-friction, high-value placement.",
+        gradeTag:"person_fit: investment_lead · show: JRE · mid-roll #2 opens Jul 21",
+        hook:"You're reupping Q3 and a JRE mid-roll in position #2 opens the week of July 21st. Given how well HelloFresh already runs on podcast, felt worth flagging before it fills.",
+        linkedin:"Hey Tom, we make podcast ads easy. A JRE mid-roll in position #2 opens the week of July 21st, right as you're reupping Q3. HelloFresh already performs on podcast, so this is premium reach with low risk. Want me to hold it and send pricing?",
+        subject:"JRE mid-roll #2 opens July 21 — reserving for HelloFresh?",
+        body:"Hey Tom,\n\nA mid-roll in position #2 on The Joe Rogan Experience opens the week of July 21st, right as you're reupping Q3.\n\nHelloFresh already performs on podcast, so this is premium reach at scale with very little risk on your side.\n\nWant me to put a hold on it and send pricing before it fills?" },
+
+      { id:"betterhelp", brand:"BetterHelp", logo:"BH", cat:"Wellness", domain:"betterhelp.com",
+        person:"Nina Alvarez", title:"Content &amp; Media Manager", role:"Content", email:"nalvarez@betterhelp.com", li:"/in/nina-alvarez",
+        show:"Huberman Lab", signal:"Active RFP in flight. Health/neuroscience fit is direct, premium pre-roll open.", val:"$48K", status:"sent",
+        grading:"BetterHelp is a top wellness spender and already has an RFP in flight with us. Huberman Lab's health and neuroscience audience is a direct fit for mental-health messaging, and a premium pre-roll is open. This is the warmest lead in the batch given the live RFP.",
+        gradeTag:"person_fit: content_lead · show: Huberman Lab · RFP already live",
+        hook:"With the RFP already in flight, wanted to flag that a premium pre-roll on Huberman Lab is open. The health and neuroscience audience is about as direct a fit as it gets for BetterHelp.",
+        linkedin:"Hey Nina, we make podcast ads easy. Since we've already got an RFP moving, wanted to flag a premium pre-roll open on Huberman Lab. The health and neuroscience audience is a direct fit for BetterHelp. Want me to fold it into the plan?",
+        subject:"Huberman Lab pre-roll open — adding to the BetterHelp RFP",
+        body:"Hey Nina,\n\nSince we've already got the RFP in flight, wanted to flag that a premium pre-roll on Huberman Lab just opened.\n\nThe health and neuroscience audience is one of the most direct fits for BetterHelp's messaging, so it's a natural add to what we're already scoping.\n\nWant me to fold it into the plan and send updated pricing?" },
     ];
+
     const STPILL = { draft:["pill--draft","Drafted"], ready:["pill--ready","Ready to send"], sent:["pill--sent","Sent"] };
+    let obFilter = "all";
+
     function renderProspects(){
       const tb = document.getElementById('ob-rows');
-      tb.innerHTML = PROSPECTS.map(p=>{
-        const [pc,pl] = STPILL[p.status];
+      const rows = CONTACTS.filter(c => obFilter==="all" || c.status===obFilter);
+      tb.innerHTML = rows.map(c=>{
+        const [pc,pl] = STPILL[c.status];
         return `<tr>
-          <td><div class="ob-brand"><div class="ob-brand__logo">${p.logo}</div><div><div class="ob-brand__name">${p.brand}</div><div class="ob-brand__cat">${p.cat}</div></div></div></td>
-          <td class="ob-show">${p.show}</td>
-          <td class="ob-signal">${p.signal}</td>
-          <td class="ob-val">${p.val}</td>
+          <td><div class="ob-brand">
+            <div class="ob-brand__logo">${c.logo}</div>
+            <div>
+              <div class="ob-person">${c.person} <a class="ob-in" href="https://www.linkedin.com${c.li}" target="_blank" rel="noopener" title="Open LinkedIn">in</a></div>
+              <div class="ob-title">${c.title} · ${c.brand}</div>
+            </div>
+          </div></td>
+          <td><div class="ob-email">${c.email}</div><span class="ob-email__badge"><i></i>Verified · Apollo</span></td>
+          <td class="ob-signal"><div class="ob-matched">${c.show}</div>${c.signal}</td>
+          <td class="ob-val">${c.val}</td>
           <td><span class="pill ${pc}">${pl}</span></td>
-          <td style="text-align:right"><button class="ob-review" onclick="openReview('${p.brand.replace(/'/g,"")}')">Review</button></td>
+          <td style="text-align:right"><button class="ob-review" onclick="openReview('${c.id}')">Review</button></td>
         </tr>`;
       }).join('');
+      // counts
+      const n = s => CONTACTS.filter(c=>c.status===s).length;
+      document.getElementById('c-all').textContent = CONTACTS.length;
+      document.getElementById('c-draft').textContent = n('draft');
+      document.getElementById('c-ready').textContent = n('ready');
+      document.getElementById('c-sent').textContent = n('sent');
     }
     renderProspects();
 
+    // filter segments
+    document.querySelectorAll('#ob-seg button').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        document.querySelectorAll('#ob-seg button').forEach(x=>x.classList.remove('on'));
+        b.classList.add('on');
+        obFilter = b.dataset.f;
+        renderProspects();
+      });
+    });
+
+    /* ─── run pipeline animation ─── */
+    function runAgent(){
+      const btn = document.getElementById('runBtn');
+      const pipe = document.getElementById('pipe');
+      const roles = [...document.querySelectorAll('#roles .role.on')].map(r=>r.textContent.trim());
+      const brands = document.getElementById('in-domains').value.split(',').map(s=>s.trim()).filter(Boolean).length || 6;
+      const steps = [
+        `${brands} brands · intent captured`,
+        `${brands*6} people · ${roles.length} role filters`,
+        `${brands*6 - 5} verified emails`,
+        `matched to open inventory`,
+        `LinkedIn + email · ${brands} brands`,
+        `Canva one-pagers ready`,
+      ];
+      const nodes = [...document.querySelectorAll('#pipe .pipe__step')];
+      nodes.forEach(n=>{ n.classList.remove('run','done'); n.querySelector('.pipe__meta').textContent=''; });
+      pipe.classList.add('show');
+      btn.disabled = true;
+      btn.querySelector('svg').style.display='none';
+      btn.lastChild.textContent = ' Running…';
+      pipe.scrollIntoView({behavior:'smooth', block:'nearest'});
+
+      let i = 0;
+      const tick = ()=>{
+        if (i>0) { nodes[i-1].classList.remove('run'); nodes[i-1].classList.add('done'); nodes[i-1].querySelector('.pipe__meta').textContent = steps[i-1]; }
+        if (i < nodes.length){
+          nodes[i].classList.add('run');
+          nodes[i].querySelector('.pipe__meta').textContent = 'working…';
+          i++;
+          setTimeout(tick, 720);
+        } else {
+          btn.disabled = false;
+          btn.querySelector('svg').style.display='';
+          btn.lastChild.textContent = ' Run Outbound Agent';
+          document.getElementById('ob-runline').textContent = `Just now · ${brands} brands · ${CONTACTS.length} buyers found`;
+          obFilter="all";
+          document.querySelectorAll('#ob-seg button').forEach(x=>x.classList.remove('on'));
+          document.querySelector('#ob-seg button[data-f="all"]').classList.add('on');
+          renderProspects();
+        }
+      };
+      tick();
+    }
+
     /* ─── drawer ─── */
-    function openReview(brand){
-      if (brand) document.getElementById('dwName').textContent = (brand==="AG1" ? "Sloane Carter · AG1" : "Buyer · "+brand);
+    function setText(id,v){ document.getElementById(id).textContent = v; }
+    function setVal(id,v){ document.getElementById(id).value = v; }
+    let currentContact = null;
+
+    function openReview(id){
+      const c = CONTACTS.find(x=>x.id===id) || CONTACTS[0];
+      currentContact = c;
+      setText('dwName', `${c.person} · ${c.brand}`);
+      setText('dwRoleTag', c.role);
+      setText('dwPerson', c.person);
+      document.getElementById('dwTitle').innerHTML = `${c.title} · ${c.brand}`;
+      setText('dwEmail', c.email);
+      setText('dwLi', c.li);
+      document.getElementById('dwLiBtn').href = 'https://www.linkedin.com'+c.li;
+      document.getElementById('dwRoleChip').innerHTML = `<i></i>Role match: ${c.role}`;
+      setText('dwGrading', c.grading);
+      setText('dwGradeTag', c.gradeTag);
+      setVal('dwHook', c.hook);
+      setVal('dwLinkedin', c.linkedin);
+      setText('dwLiCount', `${c.linkedin.length} / 600`);
+      setVal('dwSubject', c.subject);
+      setVal('dwBody', c.body);
+      setText('dwAttachName', `${c.brand} × ${c.show} — one-pager`);
       document.getElementById('overlay').classList.add('open');
       document.getElementById('drawer').classList.add('open');
       document.getElementById('drawer').setAttribute('aria-hidden','false');
@@ -591,6 +996,17 @@ Slots like this tend to move fast once the category opens up. Want me to put tog
       document.getElementById('overlay').classList.remove('open');
       document.getElementById('drawer').classList.remove('open');
       document.getElementById('drawer').setAttribute('aria-hidden','true');
+    }
+    function copyFrom(id, btn){
+      const t = document.getElementById(id).textContent;
+      navigator.clipboard && navigator.clipboard.writeText(t);
+      const old = btn.textContent; btn.textContent = 'Copied'; setTimeout(()=>btn.textContent=old, 1200);
+    }
+    function openLinkedIn(){
+      if (currentContact){
+        navigator.clipboard && navigator.clipboard.writeText(document.getElementById('dwLinkedin').value);
+        window.open('https://www.linkedin.com'+currentContact.li, '_blank', 'noopener');
+      }
     }
     document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeReview(); });
   </script>
