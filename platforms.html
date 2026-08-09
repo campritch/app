@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SpotsNow Intelligence — Access the brain of the industry</title>
+<title>SpotsNow for Platforms — Sell podcast ads across your advertiser base</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -152,7 +152,7 @@
     font-size:clamp(44px,6vw,78px);line-height:.98;letter-spacing:-.02em;margin:22px 0 24px;
     color:#fff;
   }
-  h1.hero-title em{font-style:italic;color:var(--coral-soft);font-weight:500}
+  h1.hero-title em{font-style:normal;color:var(--coral)}
   .hero-sub{font-size:16px;color:var(--mute-dk);max-width:520px;line-height:1.55;margin-bottom:34px}
   .hero-cta{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
 
@@ -532,26 +532,87 @@
   </defs>
 </svg>
 
+<!-- ============ PLATFORMS-PAGE COMPONENT CSS ============ -->
+<style>
+  /* API panel (hero right) */
+  .api{background:linear-gradient(180deg,var(--panel),var(--ink-2));border:1px solid var(--line);border-radius:18px;box-shadow:0 40px 80px -30px rgba(0,0,0,.7);overflow:hidden;align-self:stretch}
+  .api-bar{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.015)}
+  .api-bar .tl{width:11px;height:11px;border-radius:50%;background:#2C3540}
+  .api-bar .ep{margin-left:10px;font-family:ui-monospace,'JetBrains Mono',Menlo,monospace;font-size:12px;color:var(--mute-dk);letter-spacing:.02em}
+  .api-bar .ep b{color:#fff;font-weight:600}
+  .api-bar .ok{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:#5BD295;border:1px solid rgba(91,210,149,.35);padding:3px 9px;border-radius:20px;letter-spacing:.08em}
+  .api-body{padding:20px;font-family:ui-monospace,'JetBrains Mono',Menlo,monospace;font-size:12.5px;line-height:1.62;color:var(--mute-dk)}
+  .api-body .cmt{color:var(--mute-dkr)}
+  .api-body .req{color:#fff;margin-bottom:14px}
+  .api-body .req .verb{color:#5BD295;font-weight:700}
+  .api-body .k{color:#9FD0FF}
+  .api-body .s{color:var(--coral-soft)}
+  .api-body .n{color:#FFC48A}
+  .api-inv{display:flex;flex-direction:column;gap:8px;margin:14px 0 4px}
+  .api-card{display:flex;align-items:center;gap:11px;padding:10px 13px;border:1px solid var(--line);border-radius:9px;background:rgba(255,255,255,.02)}
+  .api-card .nm{flex:1;min-width:0;font-family:var(--body)}
+  .api-card .nm b{display:block;font-size:13px;color:#fff;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .api-card .nm span{font-size:11px;color:var(--mute-dkr)}
+  .api-card .pr{font-family:var(--body);font-size:12.5px;color:var(--coral-soft);font-weight:600;text-align:right;flex-shrink:0}
+  .api-card .pr small{display:block;color:#5BD295;font-size:10.5px;font-weight:600}
+  .api-foot{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-family:var(--body);font-size:12px;color:var(--mute-dk)}
+  .api-foot b{color:#fff;font-weight:600}
+  .cursor{display:inline-block;width:7px;height:14px;background:var(--coral);margin-left:2px;vertical-align:-2px;animation:blink 1.1s step-end infinite}
+
+  /* feature grid (the package) */
+  .pkg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .pkg{background:#fff;border:1px solid #ECEAE4;border-radius:16px;padding:28px 26px;display:flex;flex-direction:column;transition:border-color .2s,box-shadow .2s,transform .2s}
+  .pkg:hover{border-color:#D8D3CA;box-shadow:0 16px 34px -22px rgba(20,26,34,.28);transform:translateY(-2px)}
+  .pkg .pnum{font-family:var(--display);font-size:32px;font-weight:800;letter-spacing:-.02em;color:var(--coral);line-height:1;margin-bottom:16px}
+  .pkg .pnum.lbl{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px}
+  .pkg h3{font-family:var(--body);font-weight:800;font-size:18px;letter-spacing:-.02em;color:var(--text-dk);margin-bottom:10px;line-height:1.2}
+  .pkg p{font-size:13.5px;color:var(--mute-lt);line-height:1.55}
+  @media(max-width:920px){.pkg-grid{grid-template-columns:1fr}}
+
+  /* channels strip (sell podcast like Meta/X) */
+  .channels{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:8px}
+  .chan{display:inline-flex;align-items:center;gap:9px;padding:11px 18px;border-radius:12px;border:1px solid var(--line-lt);background:#fff;font-size:14px;font-weight:600;color:var(--text-dk)}
+  .chan.have{opacity:.9}
+  .chan.new{background:var(--ink);color:#fff;border-color:var(--ink);box-shadow:0 20px 40px -24px rgba(0,0,0,.55)}
+  .chan .clogo{width:19px;height:19px;flex:0 0 auto;display:block}
+  .chan .plus{font-family:var(--mono);font-size:16px;color:var(--mute-lt);margin:0 2px}
+  .chan.new .tagn{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--coral);margin-left:4px;border:1px solid rgba(255,98,103,.4);padding:2px 7px;border-radius:20px}
+
+  /* how it works — steps */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;counter-reset:st}
+  .step{position:relative;padding-top:26px;border-top:2px solid var(--line);}
+  .step::before{counter-increment:st;content:counter(st,decimal-leading-zero);position:absolute;top:-2px;left:0;padding:0 10px 0 0;background:transparent;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--coral);transform:translateY(-140%)}
+  .step h3{font-family:var(--body);font-weight:800;font-size:16px;letter-spacing:-.01em;color:var(--text-dk);margin-bottom:8px}
+  .step p{font-size:13px;color:var(--mute-lt);line-height:1.55}
+  @media(max-width:820px){.steps{grid-template-columns:1fr 1fr}}
+  @media(max-width:480px){.steps{grid-template-columns:1fr}}
+
+  /* model / rev-share callout */
+  .model{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+  .model-card{background:var(--ink);border-radius:20px;padding:44px 40px;color:#fff;box-shadow:0 30px 70px -30px rgba(0,0,0,.6)}
+  .model-card .tag{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--coral);margin-bottom:20px}
+  .model-card .big{font-family:var(--display);font-weight:800;font-size:60px;line-height:1;letter-spacing:-.02em;color:var(--coral)}
+  .model-card .big-label{font-weight:600;font-size:17px;margin-top:12px}
+  .model-card p{color:var(--mute-dk);font-size:13.5px;margin-top:18px;line-height:1.6}
+  .model-list{list-style:none;display:flex;flex-direction:column;gap:16px}
+  .model-list li{display:flex;gap:12px;align-items:flex-start;font-size:14.5px;color:var(--text-dk);line-height:1.5}
+  .model-list li::before{content:"✓";color:var(--coral);font-weight:800;flex:0 0 auto;margin-top:1px}
+  @media(max-width:820px){.model{grid-template-columns:1fr;gap:30px}}
+</style>
+
 <nav id="nav">
   <div class="nav-inner">
     <div class="nav-lead">
       <a href="https://spotsnow.io" class="logo" aria-label="SpotsNow">
         <svg viewBox="0 0 331 74" aria-hidden="true"><use href="#logo-spotsnow"/></svg>
       </a>
-      <form class="nav-search" action="https://spotsnow.io/browse" method="get" role="search">
-        <input type="text" name="search" placeholder="Search shows, brands or industries" aria-label="Search shows, brands or industries">
-        <button type="submit" class="nav-search-btn" aria-label="Search">
-          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        </button>
-      </form>
     </div>
     <div class="nav-right">
-      <a href="https://spotsnow.io/browse" class="nav-link">Marketplace</a>
-      <a href="https://spotsnow.io/confirm-spot?step=ADD_TO_CAMPAIGN" class="nav-cart" aria-label="Cart">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121 0 2.1-.715 2.45-1.778l1.106-3.32a.75.75 0 0 0-.71-.987H6.4M7.5 14.25 5.106 5.272"/><circle cx="8.25" cy="20.25" r=".75"/><circle cx="18.75" cy="20.25" r=".75"/></svg>
-      </a>
-      <a href="https://cal.com/spotsnow-partnerships-fzfmgm/spotsnow-demo-call" class="nav-btn nav-btn-secondary nav-demo" target="_blank" rel="noopener">Book a demo call</a>
-      <a href="#setup" class="nav-btn nav-btn-primary">Sign up</a>
+      <a href="#package" class="nav-link">What you get</a>
+      <a href="#how" class="nav-link">How it works</a>
+      <a href="#model" class="nav-link">Model</a>
+      <a href="https://cal.com/spotsnow-partnerships-fzfmgm/spotsnow-demo-call" class="nav-btn nav-btn-secondary nav-demo" target="_blank" rel="noopener">Book a partnership call</a>
+      <a href="#final" class="nav-btn nav-btn-primary">Partner with us</a>
       <button type="button" class="nav-menu" aria-label="Open menu">
         <svg viewBox="0 0 20 20" stroke="currentColor" aria-hidden="true"><path d="M2.8 10H12.4M2.8 5.2H17.2M2.8 14.8H17.2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
@@ -566,41 +627,43 @@
   <div class="wrap">
     <div class="hero-grid">
       <div>
-        <div class="eyebrow reveal">SpotsNow Intelligence · MCP</div>
-        <h1 class="hero-title reveal">Access the <em>brain</em><br>of the industry.</h1>
-        <p class="hero-sub reveal">Every brand, every show, every dollar in podcast advertising. Now answerable in plain language, right inside Claude and ChatGPT.</p>
+        <div class="eyebrow reveal">SpotsNow for Platforms · Partnerships</div>
+        <h1 class="hero-title reveal">Sell podcast ads <em>through your platform</em>.</h1>
+        <p class="hero-sub reveal">Add host-read podcast inventory to your platform through one integration. Pricing, audiences, booking, and measurement across 30+ networks, so your advertisers can buy creator-read at scale. No network relationships to build.</p>
         <div class="hero-cta reveal">
-          <a href="#setup" class="btn btn-primary-inv open-walkthrough">Start free →</a>
-          <a href="#explore" class="btn btn-ghost">See what you can ask</a>
+          <a href="https://cal.com/spotsnow-partnerships-fzfmgm/spotsnow-demo-call" class="btn btn-primary-inv" target="_blank" rel="noopener">Book a partnership call →</a>
+          <a href="#package" class="btn btn-ghost">See what's in the package</a>
         </div>
 
         <div class="integrations reveal">
-          <span class="int-label">Works in</span>
+          <span class="int-label">Powers</span>
           <div class="int-chips">
-            <span class="int-chip">
-              <svg class="lg-claude" width="18" height="18" aria-hidden="true"><use href="#ico-claude"/></svg>
-              Claude
-            </span>
-            <span class="int-chip">
-              <svg class="lg-gpt" width="18" height="18" aria-hidden="true"><use href="#ico-openai"/></svg>
-              ChatGPT
-            </span>
-            <span class="int-chip" style="color:var(--mute-dk)">Connects in ~1 min</span>
+            <span class="int-chip">Marketplaces</span>
+            <span class="int-chip">Creator platforms</span>
+            <span class="int-chip">Ad networks</span>
           </div>
         </div>
       </div>
 
-      <!-- live chat demo -->
-      <div class="chat reveal" id="chatDemo" style="align-self:stretch">
-        <div class="chat-bar">
+      <!-- API panel -->
+      <div class="api reveal">
+        <div class="api-bar">
           <span class="tl"></span><span class="tl"></span><span class="tl"></span>
-          <span class="chatname">
-            <svg width="14" height="14" aria-hidden="true"><use href="#ico-claude"/></svg>
-            claude · spotsnow-mcp
-          </span>
-          <span class="badge">LIVE</span>
+          <span class="ep"><b>POST</b> api.spotsnow.io/v1/inventory</span>
+          <span class="ok">200 OK</span>
         </div>
-        <div class="chat-body" id="chatBody"></div>
+        <div class="api-body">
+          <div class="req"><span class="cmt"># match inventory to your advertiser</span><br>
+          <span class="verb">POST</span> /v1/inventory/match<br>
+          { <span class="k">"advertiser"</span>: <span class="s">"ritual.com"</span>, <span class="k">"budget"</span>: <span class="n">50000</span>, <span class="k">"goal"</span>: <span class="s">"awareness"</span> }</div>
+          <div class="cmt"># 9 shows matched · sorted by ICP overlap</div>
+          <div class="api-inv">
+            <div class="api-card"><div class="nm"><b>Armchair Expert</b><span>Comedy · 2.4M avg downloads</span></div><div class="pr">$14,500<small>-18% network rate</small></div></div>
+            <div class="api-card"><div class="nm"><b>Call Her Daddy</b><span>Society · 1.8M avg downloads</span></div><div class="pr">$11,200<small>-12% network rate</small></div></div>
+            <div class="api-card"><div class="nm"><b>On Purpose</b><span>Self-help · 1.1M avg downloads</span></div><div class="pr">$7,800<small>discounted</small></div></div>
+          </div>
+          <div class="api-foot"><span>Est. impressions <b>3.1M</b> · blended CPM <b>$24</b></span><span>book · <b>message</b> · pixel<span class="cursor"></span></span></div>
+        </div>
       </div>
     </div>
   </div>
@@ -609,177 +672,142 @@
   </a>
 </header>
 
-<!-- STAKES -->
+<!-- STAKES / OPPORTUNITY -->
 <section class="pad light" id="stakes">
   <div class="wrap">
     <div class="sec-head reveal">
-      <div class="eyebrow">Get the advantage</div>
-      <h2>Get the data and insights you never could.</h2>
+      <div class="eyebrow">The opportunity</div>
+      <h2>Your advertisers want podcasts. The ecosystem is in the way.</h2>
     </div>
     <div class="stakes">
       <div class="stake-list">
-        <div class="stake reveal"><div class="no">01</div><div><h3>See the full picture</h3><p>Built for networks and agencies, get insights from the industry nuances that grow your business at record speed.</p></div></div>
-        <div class="stake reveal"><div class="no">02</div><div><h3>Save thousands</h3><p>Legacy intelligence platforms start in the five figures a year, gatekeeping the exact brands and shows you need to plan against.</p></div></div>
-        <div class="stake reveal"><div class="no">03</div><div><h3>Get custom support</h3><p>Need an answer? Let us know and we'll prioritize the query you need.</p></div></div>
+        <div class="stake reveal"><div class="no">01</div><div><h3>The inventory is fragmented</h3><p>Thirty-plus networks, each with its own rates, formats, and relationships. There is no single place to buy, and rates move constantly.</p></div></div>
+        <div class="stake reveal"><div class="no">02</div><div><h3>The nuance is brutal</h3><p>Host-read pricing, audience fit, brand-safety, and measurement do not behave like programmatic. Getting it wrong burns advertiser trust.</p></div></div>
+        <div class="stake reveal"><div class="no">03</div><div><h3>Building it yourself takes years</h3><p>A sales team, network deals, an ops layer, and a measurement stack, all before you sell a single spot. Most platforms never get there.</p></div></div>
       </div>
       <div class="stat-card reveal">
-        <div class="tag">What changes with SpotsNow</div>
-        <div class="big">61,000<sup>+</sup></div>
-        <div class="big-label">podcast shows tracked</div>
-        <p>Across 19 active categories — every sponsor, every ad read, and the spend behind them. The whole map of the industry, now answerable in a sentence.</p>
+        <div class="tag">The market you're missing</div>
+        <div class="big">$32<sup>B</sup></div>
+        <div class="big-label">host-read podcast advertising</div>
+        <p>The fastest-growing corner of creator advertising, and the one your advertiser base can't buy through you today. SpotsNow is the layer that lets them.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- PROMPT LIBRARY -->
-<section class="pad std" id="explore">
+<!-- PACKAGE — What you get -->
+<section class="pad std" id="package">
   <div class="wrap">
-    <div class="sec-head reveal" style="max-width:640px;margin-bottom:36px">
-      <div class="std-eyebrow">What you can ask</div>
-      <h2 class="std-h2">A prompt for every play.</h2>
-      <p class="std-sub">Pick your role, search, and copy a ready-to-run prompt straight into Claude or ChatGPT.</p>
+    <div class="sec-head reveal" style="max-width:680px;margin-bottom:44px">
+      <div class="std-eyebrow">What you get</div>
+      <h2 class="std-h2">One integration. The entire podcast stack.</h2>
+      <p class="std-sub">Everything you need to sell podcast ads inside your own product, delivered as clean APIs and always-current data.</p>
     </div>
-    <div class="pl-controls reveal">
-      <div class="pl-search">
-        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input id="plSearch" type="text" placeholder="Search prompts (e.g. Huberman, CPM, Shopify)..." aria-label="Search prompts">
+    <div class="pkg-grid">
+      <div class="pkg reveal">
+        <div class="pnum">01</div>
+        <h3>Pricing recommendations</h3>
+        <p>Always-current CPMs and rate guidance on what's worth buying, per show and per format. Your advertisers see fair, live pricing, not a stale rate card.</p>
       </div>
-      <div class="pl-filters" id="plFilters"></div>
-    </div>
-    <div class="pl-grid" id="plGrid"></div>
-    <div class="pl-empty" id="plEmpty" hidden>No prompts match that search.</div>
-    <div class="pl-more-wrap"><button id="plMore" class="pl-more" type="button" hidden>See more</button></div>
-  </div>
-</section>
-
-<!-- SETUP — Add to your AI assistant -->
-<section class="pad std" id="setup">
-  <div class="wrap">
-    <div class="setup-grid">
-      <div class="setup-copy reveal">
-        <div class="std-eyebrow">Setup</div>
-        <h2 class="std-h2">Add to your AI assistant</h2>
-        <p>Connect and start using SpotsNow Intelligence MCP directly within your preferred AI assistant like Claude or ChatGPT.</p>
-        <p>Before you start, you'll need a SpotsNow account. Sign in or create one when you connect through OAuth.</p>
-        <a href="#pricing" class="setup-note">Pricing plans after July 22nd →</a>
+      <div class="pkg reveal">
+        <div class="pnum">02</div>
+        <h3>In-depth audience profiles</h3>
+        <p>Demographics, psychographics, and brand affinity for every show, so your advertisers can match a podcast to their ICP and buy with confidence.</p>
       </div>
-      <div class="setup-cards">
-        <!-- Claude -->
-        <div class="setup-card reveal">
-          <div class="sc-brand">
-            <svg class="lg-claude" aria-hidden="true"><use href="#ico-claude"/></svg>
-            Claude
-          </div>
-          <div class="connector dark">
-            <div class="c-top">Settings → <b>Connectors</b></div>
-            <div class="c-row"><span class="dot"></span>SpotsNow Intelligence<span class="conn-ok">Connected</span></div>
-          </div>
-          <p class="sc-lead">Add SpotsNow as a custom connector in Claude settings.</p>
-          <ul class="checks">
-            <li>In Claude, go to Settings → Connectors and add a custom connector.</li>
-            <li>Set the MCP Server URL to <code>https://backend.spotsnow.io/mcp-pro</code> and Authentication to OAuth.</li>
-            <li>Click Connect, sign in to SpotsNow or create an account, and complete authorization.</li>
-          </ul>
-        </div>
-        <!-- ChatGPT -->
-        <div class="setup-card reveal">
-          <div class="sc-brand gpt">
-            <svg class="lg-gpt" aria-hidden="true"><use href="#ico-openai"/></svg>
-            ChatGPT
-          </div>
-          <div class="connector light">
-            <div class="c-top">Settings → <b>Connectors</b></div>
-            <div class="c-row"><span class="dot"></span>SpotsNow Intelligence<span class="conn-ok">Connected</span></div>
-          </div>
-          <p class="sc-lead">Enable Developer Mode, then add the MCP connector.</p>
-          <ul class="checks">
-            <li>Go to Settings → Connectors → Advanced and enable Developer Mode, then add a new connector.</li>
-            <li>Set the MCP Server URL to <code>https://backend.spotsnow.io/mcp-pro</code> and Authentication to OAuth.</li>
-            <li>Click Connect, sign in to SpotsNow or create an account, and complete authorization.</li>
-          </ul>
-        </div>
+      <div class="pkg reveal">
+        <div class="pnum">03</div>
+        <h3>Booking &amp; messaging APIs</h3>
+        <p>Place orders and talk to networks programmatically, right from your platform. No email threads, no manual insertion orders, no back-office.</p>
+      </div>
+      <div class="pkg reveal">
+        <div class="pnum">04</div>
+        <h3>Discounted inventory</h3>
+        <p>A live pool of discounted and remnant spots you can surface to your advertisers, giving them value they can't get direct and giving you margin.</p>
+      </div>
+      <div class="pkg reveal">
+        <div class="pnum">05</div>
+        <h3>Pixels &amp; dashboard APIs</h3>
+        <p>Drop-in attribution pixels and reporting endpoints, so campaign performance renders natively inside your platform and your advertisers see the impact.</p>
+      </div>
+      <div class="pkg reveal" style="background:var(--ink);border-color:var(--ink)">
+        <div class="pnum lbl">Bundled</div>
+        <h3 style="color:#fff">Sourcing on demand</h3>
+        <p style="color:var(--mute-dk)">We work with 30+ networks to find up-to-date inventory, and source additional inventory to match your advertisers' specific demand.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- SETUP VIDEO -->
-<section class="pad std white" id="setup-video">
+<!-- POSITIONING — like Meta/X -->
+<section class="pad std white" id="positioning">
   <div class="wrap">
-    <div class="sec-head reveal" style="max-width:640px;margin-bottom:34px">
-      <div class="std-eyebrow">Walkthrough</div>
-      <h2 class="std-h2">Up and running in two minutes.</h2>
-      <p class="std-sub">Watch the full setup, from connector to first answer, then copy a prompt and go.</p>
+    <div class="sec-head reveal" style="max-width:720px">
+      <div class="std-eyebrow">The motion you already know</div>
+      <h2 class="std-h2">Just another channel in your platform.</h2>
+      <p class="std-sub">Your advertisers already buy Meta, X, TikTok, and LinkedIn through you. Podcasts become one more line item, bought the same way, with the same speed, at creator scale.</p>
     </div>
-    <!-- TODO: swap this placeholder for the real video embed (a <video> tag, or a YouTube/Loom <iframe>). Keep the .video-ph wrapper for the 16:9 frame. -->
-    <div class="video-ph reveal" role="img" aria-label="Setup walkthrough video — placeholder">
-      <span class="video-grid" aria-hidden="true"></span>
-      <button class="video-play" type="button" aria-label="Play setup walkthrough">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
-      </button>
-      <div class="video-meta"><span class="video-badge">Placeholder</span>Setup walkthrough · ~2 min</div>
+    <div class="channels reveal">
+      <span class="chan have"><svg class="clogo" viewBox="0 0 24 24" fill="#0866FF" aria-hidden="true"><path d="M6.915 4.03c-1.968 0-3.683 1.28-4.871 3.113C.704 9.208 0 11.883 0 14.449c0 .706.07 1.369.21 1.973a6.624 6.624 0 0 0 .265.86 5.297 5.297 0 0 0 .371.761c.696 1.159 1.818 1.927 3.593 1.927 1.497 0 2.633-.671 3.965-2.444.76-1.012 1.144-1.626 2.663-4.32l.756-1.339.186-.325c.061.1.121.196.183.3l2.152 3.595c.724 1.21 1.665 2.556 2.47 3.314 1.046.987 1.992 1.22 3.06 1.22 1.075 0 1.876-.355 2.455-.843a3.743 3.743 0 0 0 .81-.973c.542-.939.861-2.127.861-3.745 0-2.72-.681-5.357-2.084-7.45-1.282-1.912-2.957-2.93-4.716-2.93-1.047 0-2.088.467-3.053 1.308-.652.57-1.257 1.29-1.82 2.05-.69-.875-1.335-1.547-1.958-2.056-1.182-.966-2.315-1.303-3.454-1.303zm10.16 2.053c1.147 0 2.188.758 2.992 1.999 1.132 1.748 1.647 4.195 1.647 6.4 0 1.548-.368 2.9-1.839 2.9-.58 0-1.027-.23-1.664-1.004-.496-.601-1.343-1.878-2.732-4.156l-.842-1.4-.189-.312c.399-.599.804-1.163 1.223-1.68.973-1.202 1.907-1.747 2.987-1.747zm-10.19.11c.869 0 1.635.317 2.428.923.652.499 1.336 1.24 2.057 2.192l-.826 1.462-.196.35c-.66 1.176-1.196 2.15-1.687 2.928-.79 1.257-1.394 1.752-2.183 1.752-.807 0-1.373-.354-1.727-.9-.354-.545-.532-1.32-.532-2.226 0-1.888.539-3.836 1.443-5.212.539-.82 1.222-1.322 1.951-1.44z"/></svg>Meta</span>
+      <span class="chan have"><svg class="clogo" viewBox="0 0 24 24" fill="#0F1419" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>X</span>
+      <span class="chan have"><svg class="clogo" viewBox="0 0 24 24" fill="#0F1419" aria-hidden="true"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.08-.14 1.62.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>TikTok</span>
+      <span class="chan have"><svg class="clogo" viewBox="0 0 24 24" fill="#0A66C2" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>LinkedIn</span>
+      <span class="plus">+</span>
+      <span class="chan new"><svg class="clogo" viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/></svg>Podcasts<span class="tagn">via SpotsNow</span></span>
+    </div>
+    <p class="std-sub reveal" style="margin-top:26px;max-width:640px">No relationships with every network. No ecosystem nuance to learn. You bring the advertiser demand, we handle the supply, the pricing, and the plumbing underneath.</p>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="pad std" id="how">
+  <div class="wrap">
+    <div class="sec-head reveal" style="max-width:640px;margin-bottom:48px">
+      <div class="std-eyebrow">How it works</div>
+      <h2 class="std-h2">Live in weeks, not years.</h2>
+      <p class="std-sub">Integrate once. From there, every step your advertiser takes runs through the SpotsNow API.</p>
+    </div>
+    <div class="steps reveal">
+      <div class="step"><h3>You bring demand</h3><p>Your advertisers browse and buy podcast inventory inside your existing platform, with your branding and your workflow.</p></div>
+      <div class="step"><h3>We source supply</h3><p>SpotsNow matches their brief to live inventory across 30+ networks, and sources more to fit demand we don't already hold.</p></div>
+      <div class="step"><h3>Book &amp; measure via API</h3><p>Orders, messaging, pixels, and reporting all flow through clean endpoints. It looks and feels native to you.</p></div>
+      <div class="step"><h3>Everyone gets paid</h3><p>Campaigns run, performance reports back into your dashboard, and revenue is split on a simple rev share.</p></div>
     </div>
   </div>
 </section>
 
-<!-- COMPLIANCE — Data & compliance -->
-<section class="pad std white" id="compliance">
+<!-- MODEL / REV SHARE -->
+<section class="pad std white" id="model">
   <div class="wrap">
-    <div class="sec-head reveal">
-      <div class="std-eyebrow">Compliance</div>
-      <h2 class="std-h2">Data &amp; compliance</h2>
-      <p class="std-sub">How SpotsNow MCP handles data, connections, and compliance.</p>
+    <div class="sec-head reveal" style="max-width:640px">
+      <div class="std-eyebrow">The model</div>
+      <h2 class="std-h2">A simple rev share. Nothing upfront.</h2>
     </div>
-    <div class="comp-grid">
-      <div class="comp-card reveal">
-        <div class="comp-ico">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.4-3 8.2-7 9-4-.8-7-4.6-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
-        </div>
-        <div class="comp-label">Your data</div>
-        <h3>Data handling practices</h3>
-        <ul class="checks">
-          <li>The connection is read-only and one-way: your AI assistant pulls podcast advertising intelligence from SpotsNow. SpotsNow never accesses, stores, or trains on your proprietary data, and your spend, fill rates, and internal files stay on your side.</li>
-          <li>Access is controlled through OAuth. Permissions are scoped to what you authorize during setup, and you decide who on your team can connect and what they can query.</li>
-          <li>You can revoke access at any time from your MCP client or your SpotsNow account. Disconnecting immediately stops all data access.</li>
-        </ul>
+    <div class="model">
+      <div class="model-card reveal">
+        <div class="tag">How we partner</div>
+        <div class="big">Rev share</div>
+        <div class="big-label">only when your advertisers buy</div>
+        <p>No license fees, no platform minimums, no integration cost. We make money when you do, which means our incentive is to keep your advertisers buying and coming back.</p>
       </div>
-      <div class="comp-card reveal">
-        <div class="comp-ico">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h13M14 5l3 3-3 3M20 16H7M10 13l-3 3 3 3"/></svg>
-        </div>
-        <div class="comp-label">Integrations</div>
-        <h3>Third-party connections</h3>
-        <ul class="checks">
-          <li>The SpotsNow MCP server connects only to the MCP clients you explicitly authorize: Claude, ChatGPT, Cursor, or any other MCP-compatible assistant.</li>
-          <li>Your prompts and conversations are handled by your AI assistant under its own terms. SpotsNow only receives the tool-call parameters needed to answer a query, for example a show name, brand domain, or category, and returns results from our dataset.</li>
-          <li>SpotsNow does not sell or share your queries or account information with any other third parties.</li>
-        </ul>
-      </div>
-      <div class="comp-card reveal">
-        <div class="comp-ico">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-9.2-8.5C1.3 8.6 2.6 5.5 5.6 5c1.9-.3 3.5.8 4.4 2.2C10.9 5.8 12.5 4.7 14.4 5c3 .5 4.3 3.6 2.8 6.5C19 15.6 12 20 12 20z"/></svg>
-        </div>
-        <div class="comp-label">Health data</div>
-        <h3>Health data access</h3>
-        <ul class="checks">
-          <li>SpotsNow does not access, collect, or process personal health data. No PHI or HIPAA-covered data is involved at any point.</li>
-          <li>References to "Health &amp; Wellness" in our tools and results are podcast content categories: genre labels used to classify shows and advertisers, not data about individuals or their health.</li>
-        </ul>
-      </div>
+      <ul class="model-list reveal">
+        <li>You keep the advertiser relationship, the branding, and the data. We stay the supply layer underneath.</li>
+        <li>New margin on inventory you couldn't offer before, with none of the network overhead.</li>
+        <li>Discounted and remnant inventory gives your advertisers value they can't get direct.</li>
+        <li>One integration replaces a sales team, network deals, ops, and a measurement stack.</li>
+      </ul>
     </div>
   </div>
 </section>
 
 <!-- FINAL -->
-<section class="final">
+<section class="final" id="final">
   <div class="final-glow"></div>
   <div class="wrap">
-    <h2 class="reveal">The whole industry,<br>one question away.</h2>
-    <p class="reveal">Connect SpotsNow to Claude or ChatGPT and ask your first question today.</p>
+    <h2 class="reveal">Add the podcast layer<br>to your platform.</h2>
+    <p class="reveal">One integration to sell host-read podcast ads across your advertiser base, the same way you sell Meta and X. Let's talk about fit.</p>
     <div class="hero-cta reveal">
-      <a href="#setup" class="btn btn-primary-inv open-walkthrough">Start free →</a>
-      <a href="https://cal.com/spotsnow-partnerships-fzfmgm/spotsnow-demo-call" class="btn btn-ghost" target="_blank" rel="noopener">Talk to us about Team</a>
+      <a href="https://cal.com/spotsnow-partnerships-fzfmgm/spotsnow-demo-call" class="btn btn-primary-inv" target="_blank" rel="noopener">Book a partnership call →</a>
+      <a href="mailto:cam@spotsnow.io?subject=Podcast%20inventory%20partnership" class="btn btn-ghost">Email the team</a>
     </div>
   </div>
 </section>
@@ -789,38 +817,9 @@
     <a href="#top" class="logo" aria-label="SpotsNow">
       <svg viewBox="0 0 331 74" aria-hidden="true"><use href="#logo-spotsnow"/></svg>
     </a>
-    <span>spotsnow.io · The brain of the podcast advertising industry</span>
+    <span>spotsnow.io · The podcast advertising layer for platforms</span>
   </div>
 </footer>
-
-<!-- WALKTHROUGH SIDE MODAL -->
-<div class="sidemodal-overlay" id="walkthroughModal" hidden>
-  <aside class="sidemodal" role="dialog" aria-modal="true" aria-label="Setup walkthrough">
-    <div class="sidemodal-head">
-      <div>
-        <div class="std-eyebrow">Walkthrough</div>
-        <h2 class="sidemodal-title">Get set up in two minutes.</h2>
-      </div>
-      <button class="sidemodal-close" type="button" aria-label="Close">
-        <svg viewBox="0 0 24 24" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
-      </button>
-    </div>
-    <div class="sidemodal-body">
-      <!-- TODO: swap this placeholder for the real walkthrough video (a <video> tag or a YouTube/Loom <iframe>). Keep the .video-ph wrapper for the 16:9 frame. -->
-      <div class="video-ph" role="img" aria-label="Setup walkthrough video — placeholder">
-        <span class="video-grid" aria-hidden="true"></span>
-        <button class="video-play" type="button" aria-label="Play setup walkthrough">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
-        </button>
-        <div class="video-meta"><span class="video-badge">Placeholder</span>Setup walkthrough · ~2 min</div>
-      </div>
-      <p class="sidemodal-copy">Connect SpotsNow to Claude or ChatGPT, then copy a prompt and ask your first question. The whole thing takes about two minutes.</p>
-      <div class="sidemodal-cta">
-        <a href="https://spotsnow.io" class="btn btn-primary-inv">Create your account →</a>
-      </div>
-    </div>
-  </aside>
-</div>
 
 <script>
   // nav shadow on scroll
@@ -830,195 +829,6 @@
   // reveal on scroll
   const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.14});
   document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(Math.min(i%6,5)*0.05)+'s';io.observe(el)});
-
-  // ---- HERO CHAT DEMO (rich, agentic) ----
-  const body=document.getElementById('chatBody');
-  const scenes=[
-    {
-      q:'What are the top brands advertising on SmartLess?',
-      tool:'get_podcast_top_brands(<code>SmartLess</code>)',
-      intro:'<strong>SmartLess</strong> ran <b>47 sponsors</b> in the last 90 days. Here are the top 6 by placement count:',
-      sponsors:[
-        {name:'BetterHelp', tag:'host-read · weekly', count:'12 reads'},
-        {name:'Squarespace', tag:'host-read',         count:'9 reads'},
-        {name:'ZipRecruiter', tag:'spot + host-read', count:'7 reads'},
-        {name:'LinkedIn Jobs', tag:'host-read',       count:'6 reads'},
-      ],
-      summary:'<b>BetterHelp</b> is the dominant sponsor, running weekly host-reads since Q3 2025. <b>3 categories</b> account for 78% of spend on the show.',
-      followups:['Find lookalike shows','Play a recent BetterHelp ad','Who conflicts with Squarespace?']
-    },
-    {
-      q:'Where is drinkag1.com spending the most on podcast ads?',
-      tool:'get_brand_top_podcasts_by_spend(<code>drinkag1.com</code>)',
-      intro:'<strong>drinkag1.com</strong> has spent an est. <b>$1.42M</b> across <b>38 shows</b> in Q1 2026. By category:',
-      bars:[
-        {label:'Health & Fitness', pct:41, val:'$582K'},
-        {label:'Business',         pct:22, val:'$312K'},
-        {label:'News & Politics',  pct:18, val:'$256K'},
-        {label:'Education',        pct:11, val:'$156K'},
-      ],
-      summary:'Top show: <b>Huberman Lab</b> ($186K). Spend is up <b>+34% QoQ</b> — health vertical compounding fastest.',
-      followups:['Show all 38 shows','Q4 2025 comparison','Lookalikes to Huberman']
-    },
-    {
-      q:'Build a $50,000 brand awareness plan for ritual.com.',
-      tool:'build_media_plan(<code>ritual.com</code>, $50K, awareness)',
-      intro:'Composed across <b>9 shows</b> with strong Ritual ICP overlap (women 25-44, wellness-curious). Top 3 picks:',
-      shows:[
-        {ini:'A', cls:'',  name:'Armchair Expert', sub:'Comedy · 2.4M avg downloads', cost:'$14,500'},
-        {ini:'C', cls:'b', name:'Call Her Daddy',  sub:'Society · 1.8M avg downloads',cost:'$11,200'},
-        {ini:'O', cls:'c', name:'On Purpose',      sub:'Self-help · 1.1M downloads', cost:'$7,800'},
-      ],
-      stats:[['Est. impressions','3.1M'],['Blended CPM','$24'],['Flight','6 weeks']],
-      summary:'Full plan ready. <b>Zero conflicts</b> with existing Ritual placements. Export to CSV or send to your buying team.',
-      followups:['Run conflict check','Swap in podcast #4','Export plan as CSV']
-    }
-  ];
-  function el(t,c,h){const e=document.createElement('div');if(c)e.className=c;if(h)e.innerHTML=h;return e}
-  function clear(){body.innerHTML=''}
-  async function wait(ms){return new Promise(r=>setTimeout(r,ms))}
-
-  function renderScene(s){
-    let html='';
-    // tool-call trace
-    html+='<div class="toolcall"><span class="tc-spin"></span><span class="tc-ok">✓</span><span class="tc-mark">✻</span><span>Calling <code>'+s.tool+'</code></span></div>';
-    // intro
-    html+='<div style="margin-bottom:10px">'+s.intro+'</div>';
-    // body — sponsors / bars / shows
-    if(s.sponsors){
-      html+='<div class="spon-list">';
-      s.sponsors.forEach(sp=>{
-        html+='<div class="spon"><span class="sp-dot"></span><span class="sp-name">'+sp.name+'</span><span class="sp-tag">'+sp.tag+'</span><span class="sp-count">'+sp.count+'</span></div>';
-      });
-      html+='</div>';
-    }
-    if(s.bars){
-      html+='<div class="bar-list">';
-      s.bars.forEach(b=>{
-        html+='<div class="bar-row"><div class="br-top"><span>'+b.label+'</span><span class="v">'+b.val+' · '+b.pct+'%</span></div><div class="bar"><i data-pct="'+b.pct+'"></i></div></div>';
-      });
-      html+='</div>';
-    }
-    if(s.shows){
-      html+='<div class="show-list">';
-      s.shows.forEach(sh=>{
-        html+='<div class="show-card"><div class="sc-meta"><div class="sc-name">'+sh.name+'</div><div class="sc-sub">'+sh.sub+'</div></div><div class="sc-cost">'+sh.cost+'</div></div>';
-      });
-      html+='</div>';
-      if(s.stats){
-        html+='<div style="display:flex;gap:14px;margin-top:8px;font-size:11.5px;color:var(--mute-dkr);flex-wrap:wrap">';
-        s.stats.forEach(([k,v])=>{html+='<span><span style="color:var(--mute-dk)">'+k+'</span> <b style="color:#fff;font-weight:600">'+v+'</b></span>'});
-        html+='</div>';
-      }
-    }
-    // summary callout
-    html+='<div class="ai-summary">'+s.summary+'</div>';
-    // follow-up suggestions
-    html+='<div class="followups">';
-    s.followups.forEach(f=>{html+='<span class="fu"><span class="fu-arrow">↳</span>'+f+'</span>'});
-    html+='</div>';
-    return html;
-  }
-
-  async function runScene(s){
-    clear();
-    const u=el('div','msg user','<div class="av">You</div><div class="bubble">'+s.q+'</div>');
-    body.appendChild(u);
-    await wait(650);
-    const a=el('div','msg ai','<div class="av"><svg aria-hidden="true"><use href="#ico-claude"/></svg></div><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>');
-    body.appendChild(a);
-    await wait(900);
-    a.querySelector('.bubble').innerHTML=renderScene(s);
-    // animate bars + flip tool-call to done
-    await wait(150);
-    a.querySelectorAll('.bar i').forEach(i=>{i.style.width=i.dataset.pct+'%'});
-    await wait(700);
-    a.querySelector('.toolcall').classList.add('done');
-    await wait(5200);
-  }
-  (async function loop(){let i=0;while(true){await runScene(scenes[i%scenes.length]);i++}})();
-
-  // ---- PROMPT LIBRARY ----
-  const PROMPTS=[
-    {title:"Health & Fitness Vertical Overview",role:"Advertisers",q:"Give me an overview of podcast advertising in Health and Fitness."},
-    {title:"Huberman Lab Sponsor Audit",role:"Advertisers",q:"Who are the primary recurring sponsors on Huberman Lab over the last 6 months?"},
-    {title:"Fintech Competitor Spend",role:"Advertisers",q:"Show me the podcast ad spend breakdown for Wealthfront vs Betterment in Q1."},
-    {title:"$100k True Crime Test Plan",role:"Advertisers",q:"Build a $100k test budget for a DTC home security brand on True Crime shows."},
-    {title:"DTC Mattress Competitors",role:"Advertisers",q:"Which mattress brands have sponsored top 50 Comedy shows since January?"},
-    {title:"SmartLess Sponsor Roster",role:"Advertisers",q:"Pull the full list of brands advertising on SmartLess during Q2."},
-    {title:"AG1 Spend Map",role:"Advertisers",q:"Where is drinkag1.com spending the most on podcast ads?"},
-    {title:"Lookalikes for The Daily",role:"Advertisers",q:"Find lookalike shows for The Daily."},
-    {title:"Hear Huberman Host-Reads",role:"Advertisers",q:"Play me some recent host-read ads from Huberman Lab."},
-    {title:"$50k Awareness Plan",role:"Agencies",q:"Build a $50,000 brand awareness media plan for ritual.com."},
-    {title:"Squarespace Conflict Check",role:"Agencies",q:"Run a competitor conflict analysis for squarespace.com on How I Built This."},
-    {title:"BetterHelp Top Shows",role:"Agencies",q:"What are the top podcasts sponsored by betterhelp.com?"},
-    {title:"Casper Category Buys",role:"Agencies",q:"What podcast categories does casper.com repeatedly buy?"},
-    {title:"Q1 Brand Audit",role:"Agencies",q:"Run a Q1 2026 audit of athleticgreens.com's podcast activity."},
-    {title:"Prospect Gap Finder",role:"Networks",q:"Which brands target our sponsors' industries but haven't bought ads with us yet?"},
-    {title:"Recruit True Crime Shows",role:"Networks",q:"Find True Crime podcasts with a low ad fill rate I could recruit to my network."},
-    {title:"Network Inventory Health",role:"Networks",q:"Give me an inventory health overview for my podcast network."},
-    {title:"Emerging Advertisers",role:"Networks",q:"What new brands started testing podcast ads recently and are now scaling up spend?"},
-    {title:"Conflict Watch: Squarespace",role:"Ad Sellers",q:"What brands on Conan O'Brien Needs a Friend might conflict with Squarespace?"},
-    {title:"Category Size Map",role:"Ad Sellers",q:"Show me a list of all podcast categories and their sizes."},
-    {title:"Pitch-Ready Brand List",role:"Ad Sellers",q:"Which brands should I be pitching for my show this quarter?"}
-  ];
-  const ROLES=["All Roles","Advertisers","Networks","Ad Sellers","Agencies"];
-  const COPY_SVG='<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
-  const plGrid=document.getElementById('plGrid');
-  const plFilters=document.getElementById('plFilters');
-  const plSearch=document.getElementById('plSearch');
-  const plEmpty=document.getElementById('plEmpty');
-  let activeRole="All Roles", query="", expanded=false;
-  const PAGE=6;
-  const plMore=document.getElementById('plMore');
-  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  function renderFilters(){
-    plFilters.innerHTML='';
-    ROLES.forEach(r=>{
-      const b=document.createElement('button');
-      b.className='pl-pill'+(r===activeRole?' active':'');
-      b.innerHTML=r+(r==="All Roles"?' <span class="ct">('+PROMPTS.length+')</span>':'');
-      b.addEventListener('click',()=>{activeRole=r;expanded=false;renderFilters();renderGrid()});
-      plFilters.appendChild(b);
-    });
-  }
-  function currentItems(){
-    const ql=query.trim().toLowerCase();
-    return PROMPTS.filter(p=>(activeRole==="All Roles"||p.role===activeRole)&&(!ql||(p.title+' '+p.q+' '+p.role).toLowerCase().includes(ql)));
-  }
-  function renderGrid(){
-    const items=currentItems();
-    const shown=expanded?items:items.slice(0,PAGE);
-    plEmpty.hidden=items.length>0;
-    plGrid.innerHTML=shown.map(p=>
-      '<div class="pl-card reveal in">'
-      +'<div class="pl-card-top"><h3>'+esc(p.title)+'</h3><span class="pl-tag">'+esc(p.role)+'</span></div>'
-      +'<p class="pl-q">&ldquo;'+esc(p.q)+'&rdquo;</p>'
-      +'<div class="pl-card-foot">'
-      +'<button class="pl-copy" type="button" data-q="'+esc(p.q).replace(/"/g,'&quot;')+'">'+COPY_SVG+'Copy Prompt</button></div>'
-      +'</div>'
-    ).join('');
-    if(items.length>PAGE){plMore.hidden=false;plMore.textContent=expanded?'See less':'See more ('+(items.length-PAGE)+')';}
-    else{plMore.hidden=true;}
-  }
-  plGrid.addEventListener('click',e=>{
-    const btn=e.target.closest('.pl-copy'); if(!btn)return;
-    const text=btn.getAttribute('data-q');
-    if(navigator.clipboard){navigator.clipboard.writeText(text).catch(()=>{})}
-    btn.classList.add('done'); btn.innerHTML='✓ Copied';
-    setTimeout(()=>{btn.classList.remove('done');btn.innerHTML=COPY_SVG+'Copy Prompt'},1400);
-  });
-  plMore.addEventListener('click',()=>{expanded=!expanded;renderGrid()});
-  plSearch.addEventListener('input',e=>{query=e.target.value;expanded=false;renderGrid()});
-  renderFilters(); renderGrid();
-
-  // ---- WALKTHROUGH SIDE MODAL ----
-  const wm=document.getElementById('walkthroughModal');
-  function openWM(){wm.hidden=false;requestAnimationFrame(()=>wm.classList.add('open'));document.body.style.overflow='hidden';}
-  function closeWM(){wm.classList.remove('open');document.body.style.overflow='';setTimeout(()=>{wm.hidden=true},340);}
-  document.querySelectorAll('.open-walkthrough').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();openWM();}));
-  wm.addEventListener('click',e=>{if(e.target===wm||e.target.closest('.sidemodal-close'))closeWM();});
-  addEventListener('keydown',e=>{if(e.key==='Escape'&&!wm.hidden)closeWM();});
 </script>
 </body>
 </html>

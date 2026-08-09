@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acme Network · Outbound Agent</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2317212B'/%3E%3Ctext x='16' y='22' font-family='Helvetica,Arial,sans-serif' font-size='15' font-weight='700' fill='%23ffffff' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ───────── SpotsNow design tokens (from community-web / marketplace) ───────── */
+    :root {
+      --primary: #17212B;
+      --primary-hover: #282828;
+      --accent: #17212B;
+      --accent-hover: #282828;
+      --accent-soft: #F3F4F6;
+      --text-primary: #1D2027;
+      --text-secondary: #707481;
+      --text-tertiary: #9CA3AF;
+      --border: #E4E6ED;
+      --border-light: #EDEEF1;
+      --border-strong: #C5CBD5;
+      --white: #ffffff;
+      --secondary-lite: #F3F4F6;
+      --nav: #F3F4F6;
+      --nav-current: #E4E6ED;
+      --nav-hover: #EBEDF2;
+      --page-bg: #F9FAFB;
+      /* SpotsNow tag system */
+      --green-text: #0E6832; --green-bg: #D6F1E0;
+      --blue-text: #1435C0; --blue-bg: #C7E0FF;
+      --orange-text: #C2410C; --orange-bg: #FFEDD5;
+      /* soft shadows */
+      --shadow-post: 0 0 2px 0 rgba(166,175,195,.40);
+      --shadow-btn: 0 1px 3px 0 rgba(166,175,195,.20);
+      --shadow-card: 0 1px 2px rgba(166,175,195,.18);
+      --shadow-hover: 0 12px 34px rgba(120,130,150,.18);
+      --radius-card: 14px;
+      --radius-btn: 9px;
+      --radius-pill: 999px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: var(--page-bg); color: var(--text-primary);
+      -webkit-font-smoothing: antialiased; line-height: 1.45; letter-spacing: -.01em;
+      display: flex; height: 100vh; overflow: hidden;
+    }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* ─── SIDEBAR (light, SpotsNow) ─── */
+    .sidebar {
+      width: 246px; flex-shrink: 0; height: 100vh;
+      background: var(--white); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; padding: 18px 14px 14px;
+    }
+    .sb-brand { display: flex; align-items: center; gap: 11px; padding: 4px 8px 20px; }
+    .sb-brand__mark {
+      width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+      background: var(--primary); color: #fff; display: grid; place-items: center;
+      font-weight: 800; font-size: 13px; letter-spacing: -.02em;
+    }
+    .sb-brand__name { line-height: 1.08; }
+    .sb-brand__name b { display: block; color: var(--text-primary); font-size: 15px; font-weight: 800; letter-spacing: -.02em; }
+    .sb-brand__name span { display: block; color: var(--text-tertiary); font-size: 10px; font-weight: 700; letter-spacing: .14em; margin-top: 1px; }
+
+    .sb-group { margin-top: 12px; }
+    .sb-group__label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-tertiary); padding: 8px 10px 6px; }
+    .nav-item {
+      width: 100%; display: flex; align-items: center; gap: 11px;
+      padding: 9px 11px; border: none; background: none; border-radius: 9px;
+      color: var(--text-secondary); font-size: 13.5px; font-weight: 600; text-align: left;
+      transition: background .12s, color .12s; position: relative;
+    }
+    .nav-item svg { width: 17px; height: 17px; flex-shrink: 0; opacity: .85; }
+    .nav-item:hover { background: var(--nav-hover); color: var(--text-primary); }
+    .nav-item.active { background: var(--nav-current); color: var(--text-primary); }
+    .nav-item.active svg { opacity: 1; }
+    .nav-item .dot { width: 6px; height: 6px; border-radius: 50%; background: #3FB87C; margin-left: auto; box-shadow: 0 0 0 0 rgba(63,184,124,.6); animation: pulse 2.2s infinite; }
+    @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(63,184,124,.5);} 70%{box-shadow:0 0 0 5px rgba(63,184,124,0);} 100%{box-shadow:0 0 0 0 rgba(63,184,124,0);} }
+
+    .sb-foot { margin-top: auto; padding-top: 12px; }
+    .sb-powered { display: flex; align-items: center; gap: 8px; padding: 8px 10px; margin-bottom: 4px; font-size: 11px; font-weight: 600; color: var(--text-tertiary); width: 100%; border: none; background: none; font-family: inherit; text-align: left; border-radius: 9px; cursor: pointer; transition: background .12s; }
+    .sb-powered:hover { background: var(--nav-hover); color: var(--text-secondary); }
+    .sb-powered.active { background: var(--nav-current); color: var(--text-secondary); }
+    .sb-powered .smark { width: 18px; height: 18px; border-radius: 5px; background: var(--primary); color: #fff; display: grid; place-items: center; font-size: 10px; font-weight: 800; flex-shrink: 0; }
+    .sb-powered b { color: var(--text-secondary); font-weight: 700; }
+    /* SpotsNow pitch screen */
+    .sn-mark { width: 38px; height: 38px; border-radius: 10px; background: var(--primary); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 16px; flex-shrink: 0; }
+    .sb-user { display: flex; align-items: center; gap: 10px; padding: 12px 8px 2px; border-top: 1px solid var(--border-light); }
+    .sb-user__av { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 12px; flex-shrink: 0; }
+    .sb-user__name { color: var(--text-primary); font-size: 12.5px; font-weight: 700; line-height: 1.2; }
+    .sb-user__sub { color: var(--text-tertiary); font-size: 11px; font-weight: 500; }
+
+    /* ─── MAIN ─── */
+    .main { flex: 1; height: 100vh; position: relative; overflow: hidden; }
+    .view { display: none; height: 100%; }
+    .view.active { display: block; }
+    .view--scroll { overflow-y: auto; }
+    .view--scroll .inner { max-width: 1200px; margin: 0 auto; padding: 28px 36px 80px; }
+    iframe { width: 100%; height: 100%; border: none; display: block; }
+
+    /* native page topbar */
+    .pagebar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; }
+    .view-title { font-size: 20px; font-weight: 700; letter-spacing: -.03em; display: flex; align-items: center; gap: 11px; }
+    .view-sub { font-size: 13px; color: var(--text-secondary); margin-top: 3px; font-weight: 500; }
+    .pagebar__right { display: flex; align-items: center; gap: 11px; }
+    .date-pill { display: inline-flex; align-items: center; gap: 8px; background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 8px 13px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); box-shadow: var(--shadow-btn); }
+    .date-pill svg { color: var(--text-tertiary); }
+    .sf-btn { display: inline-flex; align-items: center; gap: 7px; background: var(--white); border: 1px solid var(--border); color: var(--text-secondary); border-radius: 9px; padding: 8px 13px; font-size: 12.5px; font-weight: 600; cursor: default; box-shadow: var(--shadow-btn); }
+    .sf-btn .dot { width: 7px; height: 7px; border-radius: 50%; background: #3FB87C; box-shadow: 0 0 0 0 rgba(63,184,124,.6); animation: pulse 2.4s infinite; }
+    .topav { width: 37px; height: 37px; border-radius: 50%; background: var(--primary); color: #fff; display: grid; place-items: center; font-weight: 600; font-size: 13px; }
+
+    /* heading */
+    .head h1 { font-size: 29px; font-weight: 700; letter-spacing: -.04em; display: flex; align-items: center; gap: 12px; }
+    .head p { color: var(--text-secondary); font-size: 14.5px; margin-top: 5px; font-weight: 500; }
+    .live-dot { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; color: var(--green-text); background: var(--green-bg); padding: 5px 11px; border-radius: var(--radius-pill); }
+    .live-dot::before { content:""; width: 7px; height: 7px; border-radius: 50%; background: var(--green-text); animation: pulse2 1.8s infinite; }
+    @keyframes pulse2 { 0%{box-shadow:0 0 0 0 rgba(14,104,50,.5);} 70%{box-shadow:0 0 0 7px rgba(14,104,50,0);} 100%{box-shadow:0 0 0 0 rgba(14,104,50,0);} }
+
+    /* stats hero */
+    .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); overflow: hidden; box-shadow: var(--shadow-card); margin-top: 24px; }
+    .stats--4 { grid-template-columns: repeat(4, 1fr); }
+    .stat { padding: 22px 22px; border-right: 1px solid var(--border-light); }
+    .stat:last-child { border-right: none; }
+    .stat__label { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-tertiary); }
+    .stat__value { font-size: clamp(27px, 3vw, 34px); font-weight: 700; letter-spacing: -.045em; line-height: 1.04; margin-top: 11px; color: var(--text-primary); }
+    .stat__sub { font-size: 12px; color: var(--text-secondary); margin-top: 8px; font-weight: 500; }
+    .stat__sub b { color: var(--green-text); font-weight: 700; }
+
+    .section-title { display:flex; align-items:center; gap:10px; font-size: 16px; font-weight: 700; letter-spacing: -.03em; margin: 36px 0 15px; }
+    .section-title .count { background: var(--accent); color:#fff; font-size: 12px; font-weight: 700; min-width: 21px; height: 21px; padding: 0 7px; border-radius: var(--radius-pill); display: inline-flex; align-items:center; justify-content:center; }
+    .section-title .muted { color: var(--text-secondary); font-weight: 500; font-size: 13px; margin-left: auto; letter-spacing: -.01em; }
+
+    /* add-on / agent cards */
+    .agents { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    .agent { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 19px; display: flex; flex-direction: column; box-shadow: var(--shadow-card); transition: box-shadow .16s, transform .16s, border-color .16s; cursor: pointer; }
+    .agent:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); border-color: var(--border-strong); }
+    .agent__head { display:flex; align-items:center; gap: 12px; }
+    .agent__icon { width: 44px; height: 44px; border-radius: 12px; display:grid; place-items:center; flex-shrink:0; color: var(--accent); background: var(--accent-soft); }
+    .agent__name { font-size: 16px; font-weight: 700; letter-spacing: -.03em; }
+    .agent__role { font-size: 12px; color: var(--text-secondary); margin-top: 1px; font-weight: 500; }
+    .agent__status { margin-left:auto; font-size: 10.5px; font-weight: 700; padding: 4px 9px; border-radius: var(--radius-pill); white-space: nowrap; }
+    .st-working { background: var(--green-bg); color: var(--green-text); }
+    .agent__desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-top: 14px; min-height: 38px; font-weight: 500; }
+    .agent__foot { display:flex; align-items:flex-end; justify-content:space-between; margin-top: 15px; padding-top: 14px; border-top: 1px solid var(--border-light); }
+    .agent__stat b { font-size: 23px; font-weight: 700; letter-spacing: -.04em; }
+    .agent__stat span { font-size: 12px; color: var(--text-secondary); font-weight: 500; display:block; margin-top:-1px; }
+    .agent__open { font-size: 12.5px; font-weight: 700; color: var(--accent); display: inline-flex; align-items: center; gap: 5px; }
+
+    /* upsell strip */
+    .upsell { display: flex; align-items: center; gap: 16px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 16px 20px; box-shadow: var(--shadow-card); margin-top: 16px; }
+    .upsell__icon { width: 42px; height: 42px; border-radius: 12px; border: 1.5px dashed var(--border-strong); color: var(--text-tertiary); display: grid; place-items: center; flex-shrink: 0; font-size: 22px; line-height: 1; }
+    .upsell__title { font-size: 15px; font-weight: 700; letter-spacing: -.02em; }
+    .upsell__sub { font-size: 12.5px; color: var(--text-secondary); margin-top: 2px; font-weight: 500; }
+    .upsell__addons { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+    .upsell__chip { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); background: var(--secondary-lite); border: 1px solid var(--border); border-radius: 999px; padding: 7px 13px; }
+    .upsell__chip i { width: 6px; height: 6px; border-radius: 50%; background: var(--text-tertiary); flex-shrink: 0; }
+    .upsell__cta { border: none; background: var(--primary); color: #fff; border-radius: var(--radius-btn); padding: 9px 15px; font-size: 13px; font-weight: 700; font-family: inherit; white-space: nowrap; }
+    .upsell__cta:hover { background: var(--primary-hover); }
+
+    /* approval queue */
+    .approvals { display: grid; grid-template-columns: repeat(2,1fr); gap: 15px; }
+    .approval { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 18px 19px 17px; display: flex; flex-direction: column; box-shadow: var(--shadow-card); }
+    .approval__by { font-size: 11px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--text-tertiary); display:flex; align-items:center; gap:7px; margin-bottom: 9px; }
+    .approval__by i { width: 8px; height: 8px; border-radius: 3px; background: var(--accent); }
+    .approval__title { font-size: 15.5px; font-weight: 700; letter-spacing: -.02em; }
+    .approval__meta { font-size: 13px; color: var(--text-secondary); margin-top: 5px; flex: 1; line-height: 1.5; font-weight: 500; }
+    .approval__meta b { color: var(--text-primary); font-weight: 700; }
+    .approval__actions { display:flex; gap:8px; margin-top: 15px; }
+    .btn { border: none; border-radius: var(--radius-btn); padding: 9px 15px; font-size: 13px; font-weight: 700; font-family: inherit; transition: background .14s, opacity .14s; }
+    .btn--accent { background: var(--accent); color:#fff; }
+    .btn--accent:hover { background: var(--accent-hover); }
+    .btn--primary { background: var(--primary); color:#fff; }
+    .btn--primary:hover { background: var(--primary-hover); }
+    .btn--ghost { background: var(--secondary-lite); color: var(--text-primary); }
+    .btn--ghost:hover { background: var(--nav-current); }
+
+    /* ─── OUTBOUND TABLE ─── */
+    .ob-toolbar { display: flex; align-items: center; gap: 10px; margin: 22px 0 16px; flex-wrap: wrap; }
+    .seg { display: inline-flex; background: var(--secondary-lite); border-radius: 10px; padding: 3px; gap: 2px; }
+    .seg button { border: none; background: none; padding: 7px 13px; border-radius: 8px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+    .seg button.on { background: var(--white); color: var(--text-primary); box-shadow: var(--shadow-btn); }
+    .ob-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); overflow: hidden; box-shadow: var(--shadow-card); }
+    table.ob { width: 100%; border-collapse: collapse; }
+    table.ob th, table.ob td { text-align: left; padding: 14px 18px; border-bottom: 1px solid var(--border-light); font-size: 13px; vertical-align: middle; }
+    table.ob thead th { font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-tertiary); background: #FCFCFD; }
+    table.ob tbody tr:last-child td { border-bottom: none; }
+    table.ob tbody tr:hover { background: #FCFCFD; }
+    .ob-brand { display: flex; align-items: center; gap: 11px; }
+    .ob-brand__logo { width: 34px; height: 34px; border-radius: 9px; background: var(--primary); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 700; flex-shrink: 0; letter-spacing: -.03em; }
+    .ob-brand__name { font-weight: 700; font-size: 13.5px; letter-spacing: -.02em; }
+    .ob-brand__cat { font-size: 11.5px; color: var(--text-tertiary); font-weight: 600; }
+    .ob-show { font-weight: 600; }
+    .ob-signal { color: var(--text-secondary); max-width: 320px; line-height: 1.45; font-weight: 500; }
+    .ob-val { font-weight: 700; letter-spacing: -.02em; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+    .pill--draft { background: var(--secondary-lite); color: var(--text-secondary); }
+    .pill--ready { background: var(--green-bg); color: var(--green-text); }
+    .pill--sent { background: var(--blue-bg); color: var(--blue-text); }
+    .ob-review { border: 1px solid var(--border-strong); background: var(--white); border-radius: 8px; padding: 7px 14px; font-size: 12.5px; font-weight: 700; color: var(--text-primary); box-shadow: var(--shadow-btn); }
+    .ob-review:hover { background: var(--secondary-lite); }
+
+    .footnote { text-align: center; color: var(--text-tertiary); font-size: 12px; margin-top: 46px; font-weight: 500; }
+    .footnote b { color: var(--text-secondary); font-weight: 700; }
+
+    /* ─── OUTBOUND RUN / INPUT ─── */
+    .run { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: 20px 22px; margin-top: 22px; }
+    .run__head { margin-bottom: 15px; }
+    .run__title { font-size: 15px; font-weight: 700; letter-spacing: -.02em; display: flex; align-items: center; gap: 9px; }
+    .run__title .k { font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 3px 8px; border-radius: 6px; }
+    .run__hint { font-size: 12.5px; color: var(--text-secondary); margin-top: 4px; font-weight: 500; }
+    .run__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .run__row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; align-items: start; }
+    .run__foot { display: flex; align-items: center; gap: 14px; margin-top: 17px; }
+    .run__note { font-size: 12px; color: var(--text-tertiary); font-weight: 500; max-width: 60%; line-height: 1.45; }
+    .run__cta { margin-left: auto; border: none; background: var(--primary); color: #fff; border-radius: var(--radius-btn); padding: 11px 20px; font-size: 13.5px; font-weight: 700; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+    .run__cta:hover { background: var(--primary-hover); }
+    .run__cta:disabled { opacity: .55; cursor: default; }
+    .fld { display: flex; flex-direction: column; gap: 6px; }
+    .fld__label { font-size: 11px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--text-tertiary); }
+    .fld__in { width: 100%; border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px; font-family: inherit; font-size: 13px; color: var(--text-primary); line-height: 1.5; resize: vertical; background: var(--white); }
+    .fld__in:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .roles { display: flex; flex-wrap: wrap; gap: 7px; }
+    .role { border: 1px solid var(--border-strong); background: var(--white); color: var(--text-secondary); border-radius: 999px; padding: 7px 13px; font-size: 12.5px; font-weight: 600; font-family: inherit; display: inline-flex; align-items: center; gap: 7px; }
+    .role::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--border-strong); }
+    .role.on { border-color: var(--primary); color: var(--text-primary); background: var(--accent-soft); }
+    .role.on::before { background: #3FB87C; }
+
+    /* ─── PIPELINE ─── */
+    .pipe { display: none; margin-top: 18px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: 20px 14px 16px; }
+    .pipe.show { display: block; }
+    .pipe__track { display: flex; align-items: flex-start; }
+    .pipe__step { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 4px; position: relative; }
+    .pipe__step::after { content: ""; position: absolute; top: 18px; left: 50%; width: 100%; height: 2px; background: var(--border-light); z-index: 0; }
+    .pipe__step:last-child::after { display: none; }
+    .pipe__dot { width: 38px; height: 38px; border-radius: 50%; background: var(--secondary-lite); border: 1px solid var(--border); color: var(--text-tertiary); display: grid; place-items: center; position: relative; z-index: 1; transition: background .25s, border-color .25s, color .25s; }
+    .pipe__dot svg { width: 17px; height: 17px; }
+    .pipe__step.run .pipe__dot { background: var(--accent-soft); border-color: var(--primary); color: var(--primary); animation: pulse2 1.4s infinite; }
+    .pipe__step.done .pipe__dot { background: var(--green-bg); border-color: var(--green-text); color: var(--green-text); }
+    .pipe__step.done::after { background: var(--green-text); opacity: .3; }
+    .pipe__label { font-size: 11.5px; font-weight: 700; letter-spacing: -.01em; margin-top: 10px; color: var(--text-secondary); }
+    .pipe__step.done .pipe__label, .pipe__step.run .pipe__label { color: var(--text-primary); }
+    .pipe__meta { font-size: 10.5px; color: var(--text-tertiary); margin-top: 3px; font-weight: 500; min-height: 13px; line-height: 1.3; }
+
+    /* ─── outbound contact / email cells ─── */
+    .ob-person { font-weight: 700; font-size: 13.5px; letter-spacing: -.02em; display: flex; align-items: center; gap: 7px; }
+    .ob-in { width: 16px; height: 16px; border-radius: 3px; background: #0A66C2; color: #fff; display: inline-grid; place-items: center; font-size: 9px; font-weight: 800; flex-shrink: 0; text-decoration: none; }
+    .ob-in:hover { opacity: .85; }
+    .ob-title { font-size: 11.5px; color: var(--text-secondary); font-weight: 600; margin-top: 2px; }
+    .ob-email { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--text-primary); }
+    .ob-email__badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; color: var(--green-text); background: var(--green-bg); padding: 2px 7px; border-radius: 999px; margin-top: 5px; }
+    .ob-email__badge i { width: 4px; height: 4px; border-radius: 50%; background: var(--green-text); }
+    .ob-matched { font-weight: 700; font-size: 12.5px; letter-spacing: -.01em; }
+    .ob-fit { font-size: 16px; font-weight: 800; letter-spacing: -.03em; }
+    .ob-fit--hi { color: var(--green-text); }
+    .ob-fit--mid { color: #C2410C; }
+    .ob-buyers { font-weight: 700; color: var(--text-secondary); }
+
+    /* ─── drawer contact panel ─── */
+    .c-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--border-light); }
+    .c-row:first-of-type { border-top: none; padding-top: 2px; }
+    .c-row__k { font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-tertiary); width: 70px; flex-shrink: 0; }
+    .c-row__v { font-size: 13px; font-weight: 600; color: var(--text-primary); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .c-row__v.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; font-weight: 500; }
+    .c-mini { font-family: inherit; font-size: 11.5px; font-weight: 700; border: 1px solid var(--border-strong); background: var(--white); color: var(--text-primary); padding: 5px 10px; border-radius: 7px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; }
+    .c-mini:hover { background: var(--secondary-lite); }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: var(--text-secondary); background: var(--secondary-lite); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; }
+    .chip i { width: 5px; height: 5px; border-radius: 50%; background: #3FB87C; }
+    .ob-role-tag { display: inline-flex; font-size: 11px; font-weight: 700; color: var(--text-secondary); background: var(--secondary-lite); border: 1px solid var(--border); padding: 3px 9px; border-radius: 999px; }
+
+    /* ─── SIGNAL BANNER ─── */
+    .signal { display: flex; align-items: center; gap: 13px; background: linear-gradient(90deg, #F0FAF4, var(--white)); border: 1px solid #BFE6CF; border-radius: var(--radius-card); padding: 14px 18px; box-shadow: var(--shadow-card); margin-top: 16px; }
+    .signal__dot { width: 34px; height: 34px; border-radius: 10px; background: var(--green-bg); color: var(--green-text); display: grid; place-items: center; flex-shrink: 0; }
+    .signal__txt { font-size: 13px; color: var(--text-primary); font-weight: 600; line-height: 1.45; }
+    .signal__txt b { font-weight: 800; }
+    .signal__txt span { color: var(--text-secondary); font-weight: 500; }
+    .signal__cta { margin-left: auto; border: none; background: var(--green-text); color: #fff; border-radius: var(--radius-btn); padding: 9px 15px; font-size: 12.5px; font-weight: 700; font-family: inherit; white-space: nowrap; }
+    .signal__cta:hover { filter: brightness(1.06); }
+
+    /* ─── PLAYS GRID ─── */
+    .plays { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .play-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 19px; display: flex; flex-direction: column; box-shadow: var(--shadow-card); transition: box-shadow .16s, transform .16s, border-color .16s; cursor: pointer; text-align: left; font-family: inherit; }
+    .play-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); border-color: var(--border-strong); }
+    .play-card__top { display: flex; align-items: center; gap: 11px; }
+    .play-card__icon { width: 42px; height: 42px; border-radius: 11px; display: grid; place-items: center; flex-shrink: 0; color: var(--accent); background: var(--accent-soft); }
+    .play-card__name { font-size: 15.5px; font-weight: 700; letter-spacing: -.03em; }
+    .play-card__kind { font-size: 11px; color: var(--text-tertiary); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; margin-top: 1px; }
+    .play-card__status { margin-left: auto; font-size: 10.5px; font-weight: 700; padding: 4px 9px; border-radius: var(--radius-pill); white-space: nowrap; }
+    .play-card__angle { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-top: 14px; font-weight: 500; min-height: 58px; }
+    .play-card__inv { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--text-secondary); font-weight: 600; margin-top: 4px; }
+    .play-card__inv svg { color: var(--text-tertiary); flex-shrink: 0; }
+    .play-card__foot { display: flex; align-items: center; gap: 16px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-light); }
+    .play-card__stat b { font-size: 20px; font-weight: 700; letter-spacing: -.04em; }
+    .play-card__stat span { font-size: 11.5px; color: var(--text-secondary); font-weight: 500; display: block; margin-top: -2px; }
+    .play-card__open { margin-left: auto; font-size: 12.5px; font-weight: 700; color: var(--accent); display: inline-flex; align-items: center; gap: 5px; }
+    .play-card--new { border-style: dashed; align-items: center; justify-content: center; color: var(--text-tertiary); min-height: 220px; gap: 8px; text-align: center; }
+    .play-card--new:hover { color: var(--accent); border-color: var(--accent); }
+    .play-card--new .plus { width: 42px; height: 42px; border-radius: 12px; border: 1.5px dashed var(--border-strong); display: grid; place-items: center; font-size: 22px; line-height: 1; }
+
+    /* ─── PLAY DETAIL ─── */
+    .backlink { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; color: var(--text-secondary); background: none; border: none; font-family: inherit; padding: 0; margin-bottom: 14px; }
+    .backlink:hover { color: var(--text-primary); }
+    .play-head { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: 20px 22px; }
+    .play-head__top { display: flex; align-items: flex-start; gap: 13px; }
+    .play-head__icon { width: 46px; height: 46px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex-shrink: 0; }
+    .play-head__name { font-size: 19px; font-weight: 700; letter-spacing: -.03em; }
+    .play-head__angle { font-size: 13px; color: var(--text-secondary); font-weight: 500; margin-top: 3px; line-height: 1.5; max-width: 640px; }
+    .play-head__rerun { margin-left: auto; border: 1px solid var(--border-strong); background: var(--white); color: var(--text-primary); border-radius: var(--radius-btn); padding: 9px 15px; font-size: 12.5px; font-weight: 700; font-family: inherit; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; box-shadow: var(--shadow-btn); }
+    .play-head__rerun:hover { background: var(--secondary-lite); }
+    .pchips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+    .pchip { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; color: var(--text-secondary); background: var(--secondary-lite); border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px; }
+    .pchip svg { color: var(--text-tertiary); }
+    .pchip b { color: var(--text-primary); font-weight: 700; }
+
+    /* ─── BRAND CARD DECK ─── */
+    .deck { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .bcard { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: 18px 19px 16px; display: flex; flex-direction: column; transition: box-shadow .16s, border-color .16s; }
+    .bcard:hover { box-shadow: var(--shadow-hover); border-color: var(--border-strong); }
+    .bcard__top { display: flex; align-items: center; gap: 12px; }
+    .bcard__logo { width: 40px; height: 40px; border-radius: 10px; background: var(--primary); color: #fff; display: grid; place-items: center; font-size: 13px; font-weight: 700; flex-shrink: 0; letter-spacing: -.03em; }
+    .bcard__name { font-size: 16px; font-weight: 700; letter-spacing: -.03em; }
+    .bcard__cat { font-size: 11.5px; color: var(--text-tertiary); font-weight: 600; }
+    .score { margin-left: auto; text-align: center; flex-shrink: 0; }
+    .score__num { font-size: 22px; font-weight: 800; letter-spacing: -.04em; line-height: 1; }
+    .score__lbl { font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-tertiary); margin-top: 3px; }
+    .score--hi .score__num { color: var(--green-text); }
+    .score--mid .score__num { color: #C2410C; }
+    .bcard__why { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin-top: 13px; font-weight: 500; }
+    .bcard__why b { color: var(--text-primary); font-weight: 700; }
+    .bcard__hook { position: relative; background: var(--accent-soft); border: 1px solid var(--border-light); border-radius: 10px; padding: 12px 13px 12px 14px; margin-top: 13px; }
+    .bcard__hook::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; border-radius: 3px; background: var(--accent); }
+    .bcard__hook-l { font-size: 10px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--accent); }
+    .bcard__hook-t { font-size: 12.5px; color: var(--text-primary); line-height: 1.5; margin-top: 5px; font-weight: 500; }
+    .bcard__mid { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+    .avstack { display: flex; }
+    .av { width: 27px; height: 27px; border-radius: 50%; background: var(--primary); color: #fff; display: grid; place-items: center; font-size: 9.5px; font-weight: 700; border: 2px solid var(--white); margin-left: -7px; }
+    .av:first-child { margin-left: 0; }
+    .av--more { background: var(--secondary-lite); color: var(--text-secondary); }
+    .bcard__ppl { font-size: 11.5px; color: var(--text-secondary); font-weight: 600; line-height: 1.3; }
+    .bcard__ppl b { color: var(--text-primary); font-weight: 700; }
+    .bcard__sheet { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700; color: var(--text-secondary); background: var(--secondary-lite); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; }
+    .bcard__sheet svg { color: var(--accent); }
+    .bcard__foot { display: flex; align-items: center; gap: 10px; margin-top: 15px; padding-top: 14px; border-top: 1px solid var(--border-light); }
+    .bcard__val { font-size: 15px; font-weight: 700; letter-spacing: -.03em; }
+    .bcard__val span { font-size: 11px; color: var(--text-tertiary); font-weight: 600; display: block; margin-top: -2px; }
+    .bcard__cta { margin-left: auto; border: none; background: var(--primary); color: #fff; border-radius: var(--radius-btn); padding: 9px 15px; font-size: 12.5px; font-weight: 700; font-family: inherit; }
+    .bcard__cta:hover { background: var(--primary-hover); }
+    .bcard__cta--ready { background: var(--green-text); }
+    .bcard__cta--sent { background: var(--secondary-lite); color: var(--text-secondary); border: 1px solid var(--border); }
+
+    /* ─── drawer contact list (brand-level) ─── */
+    .clist { display: flex; flex-direction: column; }
+    .cl-row { display: flex; align-items: center; gap: 11px; padding: 10px 0; border-top: 1px solid var(--border-light); }
+    .cl-row:first-child { border-top: none; padding-top: 2px; }
+    .cl-av { width: 30px; height: 30px; border-radius: 50%; background: var(--primary); color: #fff; display: grid; place-items: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+    .cl-who { min-width: 0; flex: 1; }
+    .cl-name { font-size: 13px; font-weight: 700; letter-spacing: -.01em; display: flex; align-items: center; gap: 6px; }
+    .cl-sub { font-size: 11.5px; color: var(--text-secondary); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cl-sub .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .cl-act { display: flex; gap: 6px; flex-shrink: 0; }
+
+    /* ─── DRAWER (outbound review) ─── */
+    .drawer-overlay { position: fixed; inset: 0; background: rgba(14,19,35,.34); opacity: 0; pointer-events: none; transition: opacity .22s ease; z-index: 40; }
+    .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+    .drawer { position: fixed; top: 0; right: 0; height: 100%; width: 560px; max-width: 94vw; background: var(--page-bg); border-left: 1px solid var(--border); box-shadow: -16px 0 48px rgba(14,19,35,.16); transform: translateX(100%); transition: transform .26s cubic-bezier(.4,0,.2,1); z-index: 41; display: flex; flex-direction: column; }
+    .drawer.open { transform: translateX(0); }
+    .drawer__head { display: flex; align-items: center; gap: 13px; padding: 18px 22px; border-bottom: 1px solid var(--border); background: var(--white); }
+    .drawer__icon { width: 40px; height: 40px; border-radius: 11px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex-shrink: 0; }
+    .drawer__who { line-height: 1.3; }
+    .drawer__name { font-size: 15px; font-weight: 700; letter-spacing: -.02em; }
+    .drawer__role { font-size: 12.5px; color: var(--text-secondary); }
+    .drawer__close { margin-left: auto; width: 34px; height: 34px; border-radius: 9px; border: none; background: var(--secondary-lite); color: var(--text-secondary); display: grid; place-items: center; font-family: inherit; }
+    .drawer__body { overflow-y: auto; padding: 18px 22px 40px; display: flex; flex-direction: column; gap: 14px; }
+    .panel { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow-post); }
+    .panel__head { display: flex; align-items: center; margin-bottom: 10px; }
+    .panel__title { font-size: 14px; font-weight: 700; letter-spacing: -.02em; }
+    .panel__regen { margin-left: auto; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); background: none; border: none; font-family: inherit; padding: 0; }
+    .panel__regen:hover { color: var(--accent); }
+    .panel__text { font-size: 13.5px; color: var(--text-secondary); line-height: 1.55; font-weight: 500; }
+    .panel__tag { display: block; font-size: 11.5px; color: var(--text-tertiary); margin-top: 9px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .panel__count { font-size: 11.5px; color: var(--text-tertiary); margin-top: 7px; }
+    .field { width: 100%; border: 1px solid var(--border); border-radius: 9px; padding: 11px 13px; font-family: inherit; font-size: 13.5px; color: var(--text-primary); line-height: 1.55; resize: vertical; background: var(--white); }
+    .field:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .field--mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; }
+    .field + .field { margin-top: 9px; }
+    .action-block { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow-post); }
+    .action-block__label { font-size: 13px; font-weight: 700; margin-bottom: 11px; }
+    .action-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .action-row .divider { width: 1px; align-self: stretch; background: var(--border); margin: 0 2px; }
+    .abtn { font-family: inherit; font-size: 12.5px; font-weight: 600; border: 1px solid var(--border-strong); background: var(--white); color: var(--text-primary); padding: 8px 12px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+    .abtn:hover { background: var(--secondary-lite); }
+    .abtn--dark { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .abtn--accent { background: var(--accent); color: #fff; border-color: var(--accent); }
+    /* generated attachment */
+    .attach { display: flex; align-items: center; gap: 12px; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: var(--secondary-lite); }
+    .attach__icon { width: 40px; height: 40px; border-radius: 9px; background: var(--white); border: 1px solid var(--border); display: grid; place-items: center; flex-shrink: 0; color: var(--accent); }
+    .attach__meta { flex: 1; min-width: 0; }
+    .attach__name { font-size: 13px; font-weight: 700; letter-spacing: -.01em; }
+    .attach__sub { font-size: 11.5px; color: var(--text-tertiary); margin-top: 2px; font-weight: 500; line-height: 1.4; }
+    .attach .abtn { text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+
+    @media (max-width: 1080px) {
+      .stats { grid-template-columns: repeat(2,1fr); }
+      .agents { grid-template-columns: 1fr; }
+      .approvals { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ───────── SIDEBAR ───────── -->
+  <nav class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand__mark">AN</div>
+      <div class="sb-brand__name"><b>Acme Network</b><span>Outbound</span></div>
+    </div>
+
+    <div class="sb-group">
+      <div class="sb-group__label">Outbound Agent</div>
+      <button class="nav-item active" data-view="outbound" onclick="switchView('outbound')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+        Plays <span class="dot"></span>
+      </button>
+      <button class="nav-item" onclick="return false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        Runs &amp; history
+      </button>
+      <button class="nav-item" onclick="return false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+        Sent &amp; follow-ups
+      </button>
+    </div>
+
+    <div class="sb-group">
+      <div class="sb-group__label">Workspace</div>
+      <button class="nav-item" onclick="return false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H5.17L4 17.17z"/></svg>
+        Connections
+      </button>
+      <button class="nav-item" onclick="return false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+    </div>
+
+    <div class="sb-foot">
+      <button class="sb-powered" onclick="return false"><span class="smark">S</span>Powered by <b>SpotsNow</b></button>
+      <div class="sb-user">
+        <div class="sb-user__av">CP</div>
+        <div>
+          <div class="sb-user__name">Cam Pritchard</div>
+          <div class="sb-user__sub">Acme Network</div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ───────── MAIN ───────── -->
+  <main class="main">
+
+    <!-- OUTBOUND -->
+    <section class="view view--scroll active" id="view-outbound">
+      <div class="inner">
+        <div class="pagebar">
+          <div>
+            <div class="view-title">Outbound Agent <span class="live-dot">Agent live</span></div>
+            <div class="view-sub">Pick a play. The agent ranks the brands, finds the buyers and drafts every hook, message and one-pager.</div>
+          </div>
+          <div class="pagebar__right">
+            <div class="date-pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>July 2026 cycle</div>
+            <button class="sf-btn" title="Synced with your CRM"><span class="dot"></span>CRM connected</button>
+            <div class="topav">CP</div>
+          </div>
+        </div>
+
+        <!-- ══ SCREEN: PLAYS HOME ══ -->
+        <div id="screen-plays">
+          <div class="stats stats--4">
+            <div class="stat"><div class="stat__label">Active plays</div><div class="stat__value">5</div><div class="stat__sub">running your slate</div></div>
+            <div class="stat"><div class="stat__label">Brands ranked</div><div class="stat__value">214</div><div class="stat__sub"><b>graded on your inventory</b></div></div>
+            <div class="stat"><div class="stat__label">Ready to send</div><div class="stat__value">31</div><div class="stat__sub">awaiting approval</div></div>
+            <div class="stat"><div class="stat__label">Time per brand</div><div class="stat__value">5 min</div><div class="stat__sub"><b>↓ from 40 min</b> manual</div></div>
+          </div>
+
+          <div class="signal">
+            <div class="signal__dot"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3 8 4-16 3 8h6"/></svg></div>
+            <div class="signal__txt"><b>3 new sports spenders</b> hit your data this week that fit <b>NFL Pre-Season</b>. <span>DoorDash, Prize Picks and Dr Pepper just ramped podcast spend.</span></div>
+            <button class="signal__cta" onclick="openPlay('nfl')">Review drafts</button>
+          </div>
+
+          <div class="section-title">Your plays <span class="muted">Pick one and the agent runs the whole funnel for it</span></div>
+          <div class="plays" id="plays-grid"></div>
+
+          <div class="footnote">Acme Network · Outbound Agent · seeded demo data, in-memory · powered by <b>SpotsNow</b></div>
+        </div>
+
+        <!-- ══ SCREEN: PLAY DETAIL ══ -->
+        <div id="screen-play" style="display:none">
+          <button class="backlink" onclick="showPlays()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>All plays</button>
+
+          <div class="play-head">
+            <div class="play-head__top">
+              <div class="play-head__icon" id="ph-icon"></div>
+              <div>
+                <div class="play-head__name" id="ph-name">NFL Pre-Season</div>
+                <div class="play-head__angle" id="ph-angle"></div>
+              </div>
+              <button class="play-head__rerun" id="rerunBtn" onclick="runAgent()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+                Re-run agent
+              </button>
+            </div>
+            <div class="pchips" id="ph-chips"></div>
+          </div>
+
+          <!-- PIPELINE -->
+          <div class="pipe" id="pipe">
+            <div class="pipe__track">
+              <div class="pipe__step" data-step="0">
+                <div class="pipe__dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3 8 4-16 3 8h6"/></svg></div>
+                <div class="pipe__label">Source &amp; rank brands</div>
+                <div class="pipe__meta"></div>
+              </div>
+              <div class="pipe__step" data-step="1">
+                <div class="pipe__dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/><path d="M12 8v4l3 2"/></svg></div>
+                <div class="pipe__label">Grade on your inventory</div>
+                <div class="pipe__meta"></div>
+              </div>
+              <div class="pipe__step" data-step="2">
+                <div class="pipe__dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13A4 4 0 0 1 16 11"/></svg></div>
+                <div class="pipe__label">Find buyers &amp; emails</div>
+                <div class="pipe__meta"></div>
+              </div>
+              <div class="pipe__step" data-step="3">
+                <div class="pipe__dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg></div>
+                <div class="pipe__label">Write hook &amp; messages</div>
+                <div class="pipe__meta"></div>
+              </div>
+              <div class="pipe__step" data-step="4">
+                <div class="pipe__dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></svg></div>
+                <div class="pipe__label">Build one-pager · Canva</div>
+                <div class="pipe__meta"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-title">Ranked brands <span class="count" id="deck-count">5</span><span class="muted" id="deck-runline">Ranked on Acme inventory · highest fit first</span></div>
+          <div class="ob-toolbar">
+            <div class="seg" id="ob-seg">
+              <button class="on" data-f="all">All <span id="c-all">5</span></button>
+              <button data-f="draft">Drafted <span id="c-draft">2</span></button>
+              <button data-f="ready">Ready <span id="c-ready">2</span></button>
+              <button data-f="sent">Sent <span id="c-sent">1</span></button>
+            </div>
+            <div style="margin-left:auto;font-size:12.5px;font-weight:600;color:var(--text-secondary)">Sorted by fit score</div>
+          </div>
+
+          <div class="ob-card">
+            <table class="ob">
+              <thead>
+                <tr><th>Brand</th><th>Fit</th><th>Why now</th><th>Buyers</th><th>Est. value</th><th>Status</th><th></th></tr>
+              </thead>
+              <tbody id="deck"></tbody>
+            </table>
+          </div>
+
+          <div class="footnote">Acme Network · Outbound Agent · seeded demo data, in-memory · powered by <b>SpotsNow</b></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ───────── OUTBOUND REVIEW DRAWER ───────── -->
+  <div class="drawer-overlay" id="overlay" onclick="closeReview()"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer__head">
+      <div class="drawer__icon" id="dwLogo" style="background:var(--primary);color:#fff;font-weight:700;font-size:13px">AG</div>
+      <div class="drawer__who">
+        <div class="drawer__name" id="dwName">AG1</div>
+        <div class="drawer__role" id="dwSub">Ranked brand · drafted by Outbound Agent</div>
+      </div>
+      <button class="drawer__close" onclick="closeReview()" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="drawer__body">
+      <div class="panel">
+        <div class="panel__head"><span class="panel__title">Why this brand, why now</span><span class="ob-role-tag" id="dwScore">Fit 92</span></div>
+        <div class="panel__text" id="dwGrading"></div>
+        <span class="panel__tag" id="dwGradeTag"></span>
+      </div>
+
+      <div class="panel">
+        <div class="panel__head"><span class="panel__title">Hook</span><button class="panel__regen">Regenerate</button></div>
+        <textarea class="field" id="dwHook" rows="4"></textarea>
+        <span class="panel__tag">The part you spend most time on, drafted from your inventory + brand research</span>
+      </div>
+
+      <div class="action-block">
+        <div class="action-block__label">One-pager, looks like Acme, not a generic AI flyer</div>
+        <div class="attach">
+          <div class="attach__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></svg></div>
+          <div class="attach__meta">
+            <div class="attach__name" id="dwAttachName">AG1 one-pager</div>
+            <div class="attach__sub">Your Canva template with the brand logo and hook dropped in. Human eyes before it sends.</div>
+          </div>
+          <a class="abtn" href="https://www.canva.com/" target="_blank" rel="noopener">Open in Canva</a>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel__head"><span class="panel__title">Email</span><button class="panel__regen">Regenerate</button></div>
+        <input class="field" id="dwSubject" />
+        <textarea class="field field--mono" id="dwBody" rows="12"></textarea>
+      </div>
+
+      <div class="panel">
+        <div class="panel__head"><span class="panel__title">LinkedIn note</span><button class="panel__regen">Regenerate</button></div>
+        <textarea class="field" id="dwLinkedin" rows="4"></textarea>
+        <div class="panel__count" id="dwLiCount">0 / 600</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel__head"><span class="panel__title">Buyers <span id="dwPplCount" style="color:var(--text-tertiary);font-weight:600"></span></span><span class="ob-role-tag">emails verified · Apollo</span></div>
+        <div class="clist" id="dwContacts"></div>
+      </div>
+
+      <div class="action-block">
+        <div class="action-block__label">Send the batch</div>
+        <div class="action-row">
+          <button class="abtn">Queue all drafts in Outlook</button>
+          <button class="abtn abtn--accent">Approve &amp; send batch</button>
+        </div>
+      </div>
+      <div class="action-block">
+        <div class="action-block__label">State</div>
+        <div class="action-row">
+          <button class="abtn abtn--dark">Mark done</button>
+          <button class="abtn">Mark not relevant</button>
+          <button class="abtn">Auto follow-up on</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <script>
+    /* ─── sidebar view switching (single module) ─── */
+    function switchView(name){
+      const view = document.getElementById('view-'+name);
+      if (view) view.scrollTop = 0;
+      document.querySelectorAll('[data-view]').forEach(n=>n.classList.toggle('active', n.dataset.view===name));
+      showPlays();
+    }
+
+    /* ─── helpers ─── */
+    const c = (name,title,role,email,li)=>({name,title,role,email,li});
+    const initials = n => n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    const ICON = {
+      zap:'<path d="M13 2 3 14h9l-1 8 10-12h-9z"/>',
+      grad:'<path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/>',
+      flag:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
+      ball:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2v20M5.5 5.5c3.4 3 4.4 8 3.4 13M18.5 5.5c-3.4 3-4.4 8-3.4 13"/>',
+      gift:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v9h14v-9M12 8v13"/><path d="M12 8S10.5 3 8 4s4 4 4 4M12 8s1.5-5 4-4-4 4-4 4"/>'
+    };
+    const svgIcon = (k,s=21)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON[k]||''}</svg>`;
+    const STPILL = { draft:["pill--draft","Drafted"], ready:["pill--ready","Ready"], sent:["pill--sent","Sent"] };
+
+    /* ─── PLAYS: the atomic object. Pick a play, agent runs the whole funnel. ─── */
+    const PLAYS = [
+      { id:"nfl", name:"NFL Pre-Season", kind:"Seasonality · live sports", icon:"zap", status:"Live", statusColor:"green",
+        angle:"Get in front of brands before the NFL season kicks off. Pitch NFL run-of-network plus our marquee NFL shows to brands already spending on football.",
+        chips:["NFL RON","The Blitz","Gridiron Weekly","6 marquee shows"],
+        brands:[
+          { id:"draftkings", brand:"DraftKings", logo:"DK", cat:"Sportsbook", score:96, show:"The Blitz", val:"$120K", status:"ready",
+            whyNow:"Top-5 sports podcast spender. Runs football pods heavily but <b>not yet on The Blitz</b>, where your NFL audience over-indexes. Pre-season is their biggest acquisition window.",
+            grading:"DraftKings is one of the highest-spending brands in sports podcasting and leans hardest into the NFL pre-season acquisition window. SpotsNow shows heavy spend on football-adjacent shows but no presence on The Blitz, where your NFL audience concentration is highest. Direct, high-value fit and the pre-roll is open now.",
+            gradeTag:"fit: 96 · already buys NFL pods · gap on The Blitz",
+            hook:"You're all over football podcasts for pre-season, but not on The Blitz yet, which is where our NFL audience is most concentrated. Open pre-roll right now, felt like the exact window DraftKings wants before kickoff.",
+            subject:"The Blitz pre-roll open before kickoff, a gap in your NFL slate",
+            body:"Hey Ryan,\n\nDraftKings is already across most of the football podcasts for pre-season, but not on The Blitz yet, which is where our NFL audience is most concentrated.\n\nThe pre-roll is open right now and pre-season is your biggest acquisition window, so the timing lines up. It fills a clear gap in what you're already running.\n\nWant me to hold the slot and send a plan and pricing before kickoff?",
+            linkedin:"Hey Ryan, we make podcast ads easy. You're across most football pods for pre-season but not on The Blitz yet, which is where our NFL audience over-indexes. Pre-roll's open now, right before your biggest acquisition window. Want me to hold it and send a plan?",
+            contacts:[ c("Ryan Kessler","Director of Media Investment","Media Investment","rkessler@draftkings.com","/in/ryan-kessler"),
+                       c("Megan Ortiz","Brand Marketing Manager","Brand","mortiz@draftkings.com","/in/megan-ortiz"),
+                       c("Chris Vaughn","Senior Digital Media","Digital","cvaughn@draftkings.com","/in/chris-vaughn"),
+                       c("Priya Shah","Sports Partnerships Lead","Partnerships","pshah@draftkings.com","/in/priya-shah") ] },
+          { id:"bww", brand:"Buffalo Wild Wings", logo:"BW", cat:"QSR", score:91, show:"Gridiron Weekly", val:"$58K", status:"ready",
+            whyNow:"Runs NFL-adjacent every fall. <b>Gridiron Weekly</b> maps to their game-day audience, and no QSR currently holds the category on it.",
+            grading:"Buffalo Wild Wings activates around the NFL every fall and owns the game-day occasion. Gridiron Weekly's audience is squarely game-day viewers, and the QSR category on the show is open. Strong, seasonal, endemic fit.",
+            gradeTag:"fit: 91 · game-day brand · QSR category open",
+            hook:"Gridiron Weekly is basically a game-day show, which is your whole occasion. No QSR holds the category on it yet, so felt like a natural one for Buffalo Wild Wings before the season.",
+            subject:"Game-day audience on Gridiron Weekly, QSR slot open",
+            body:"Hey Dana,\n\nGridiron Weekly's audience is game-day viewers, which is exactly the occasion Buffalo Wild Wings owns every fall.\n\nThe QSR category on the show is currently open, so there's a clean window to own it before the season ramps.\n\nWant me to put together a quick plan and pricing?",
+            linkedin:"Hey Dana, we make podcast ads easy. Gridiron Weekly is a game-day show, which is Buffalo Wild Wings' whole occasion. No QSR holds the category yet. Want me to send a quick plan before the season?",
+            contacts:[ c("Dana Whitfield","Brand Marketing Director","Brand","dwhitfield@buffalowildwings.com","/in/dana-whitfield"),
+                       c("Luis Romero","Media Investment Manager","Media Investment","lromero@buffalowildwings.com","/in/luis-romero"),
+                       c("Sara Kline","Content & Social Lead","Content","skline@buffalowildwings.com","/in/sara-kline") ] },
+          { id:"drpepper", brand:"Dr Pepper", logo:"DP", cat:"Beverage", score:84, show:"The Blitz", val:"$47K", status:"draft",
+            whyNow:"College-football heavyweight expanding into the NFL. <b>Newly ramped podcast spend this week</b> per SpotsNow. The Blitz pre-roll is open.",
+            grading:"Dr Pepper is a college-football institution now pushing into NFL moments. SpotsNow flagged a fresh ramp in their podcast spend this week, which is a strong buying signal. The Blitz gives them an NFL audience at scale while the pre-roll is open.",
+            gradeTag:"fit: 84 · new spend signal · CFB brand entering NFL",
+            hook:"You own college football and it looks like you're leaning into the NFL this year too. Your podcast spend just ramped, and The Blitz pre-roll is open, so the timing works to get in front of an NFL audience at scale.",
+            subject:"Dr Pepper into the NFL: The Blitz pre-roll is open",
+            body:"Hey Marcus,\n\nDr Pepper owns college football, and it looks like you're extending into NFL moments this season.\n\nYour podcast spend ramped this week and The Blitz pre-roll is open, so there's a timely window to reach an NFL audience at scale.\n\nWant me to send a quick plan and pricing?",
+            linkedin:"Hey Marcus, we make podcast ads easy. You own CFB and look to be leaning into the NFL this year. The Blitz pre-roll is open and your podcast spend just ramped. Want me to send a plan?",
+            contacts:[ c("Marcus Bell","Group Brand Manager","Brand","mbell@drpepper.com","/in/marcus-bell"),
+                       c("Erin Tao","Media Investment","Media Investment","etao@drpepper.com","/in/erin-tao"),
+                       c("Jamal Price","Digital Marketing Lead","Digital","jprice@drpepper.com","/in/jamal-price") ] },
+          { id:"prizepicks", brand:"Prize Picks", logo:"PP", cat:"Fantasy", score:82, show:"NFL RON", val:"$35K", status:"draft",
+            whyNow:"DFS challenger scaling audio fast. Buys on football lookalikes; <b>NFL RON</b> gives cheap reach at scale before the season.",
+            grading:"Prize Picks is scaling aggressively in audio and buys against football lookalikes. NFL run-of-network is the efficient way to give a challenger brand broad NFL reach before the season without a premium single-show buy. Good scale play.",
+            gradeTag:"fit: 82 · scaling DFS · efficient RON reach",
+            hook:"You're scaling audio fast and buying football lookalikes. NFL RON gets Prize Picks broad NFL reach efficiently before the season, without paying up for a single premium show.",
+            subject:"NFL RON for Prize Picks: efficient reach before the season",
+            body:"Hey Alex,\n\nPrize Picks is scaling in audio and already buying football lookalikes.\n\nNFL run-of-network is the efficient way to get broad NFL reach before the season without paying up for one premium show, which fits a challenger's growth math.\n\nWant me to send a quick plan and pricing?",
+            linkedin:"Hey Alex, we make podcast ads easy. You're scaling audio and buying football lookalikes. NFL RON gets Prize Picks broad reach efficiently before the season. Want me to send a plan?",
+            contacts:[ c("Alex Nguyen","Head of Growth","Marketing","anguyen@prizepicks.com","/in/alex-nguyen"),
+                       c("Bella Hart","Performance Media Lead","Media Investment","bhart@prizepicks.com","/in/bella-hart"),
+                       c("Devon Ross","Paid Media Manager","Digital","dross@prizepicks.com","/in/devon-ross") ] },
+          { id:"chevy", brand:"Chevy", logo:"CH", cat:"Auto", score:79, show:"Gridiron Weekly", val:"$66K", status:"sent",
+            whyNow:"Perennial NFL sponsor. Already ran two of your shows last season, so this is a <b>reup window</b> for mid-roll position #1.",
+            grading:"Chevy is a perennial NFL sponsor and ran two of your shows last season, so this is a warm reup rather than a cold pitch. Mid-roll position #1 on Gridiron Weekly is open for the season. Reliable, high-value, low-friction.",
+            gradeTag:"fit: 79 · past buyer · reup window open",
+            hook:"You ran two of our shows last season and mid-roll #1 on Gridiron Weekly is open for this one. Easy reup before the season fills up.",
+            subject:"Chevy reup: Gridiron Weekly mid-roll #1 open for the season",
+            body:"Hey Karen,\n\nChevy ran two of our shows last season, so this is more of a reup than a cold note.\n\nMid-roll position #1 on Gridiron Weekly is open for the season, which is a strong slot for a perennial NFL sponsor.\n\nWant me to hold it and send pricing before the season fills up?",
+            linkedin:"Hey Karen, we make podcast ads easy. Chevy ran two of our shows last season and mid-roll #1 on Gridiron Weekly is open again. Easy reup. Want me to hold it and send pricing?",
+            contacts:[ c("Karen Diaz","Associate Director of Investment","Media Investment","kdiaz@chevy.com","/in/karen-diaz"),
+                       c("Neil Foster","Brand Manager","Brand","nfoster@chevy.com","/in/neil-foster"),
+                       c("Amara Cole","Digital Media","Digital","acole@chevy.com","/in/amara-cole"),
+                       c("Rick Salter","Sponsorships","Partnerships","rsalter@chevy.com","/in/rick-salter") ] },
+        ] },
+
+      { id:"hbcu", name:"Cam Newton HBCU Tour", kind:"Talent-led · tentpole", icon:"grad", status:"Live", statusColor:"green",
+        angle:"Cam Newton's fall HBCU live-show tour, 8 campus stops. Pitch brands that activate around HBCUs and Southeastern college football.",
+        chips:["Cam Newton · talent","8 campus stops","The Cam Newton Show","Live tour"],
+        brands:[
+          { id:"statefarm", brand:"State Farm", logo:"SF", cat:"Insurance", score:94, show:"HBCU Tour", val:"$150K", status:"ready",
+            whyNow:"Deep HBCU and college-football activation history. The <b>tour sponsorship plus Cam's show</b> is a direct fit, and they already sponsor campus programs.",
+            grading:"State Farm has a long track record of HBCU and college-football activation and already funds campus programs. The Cam Newton tour plus his show is a marquee, talent-led fit that maps to their existing playbook. Highest-value opportunity in this play.",
+            gradeTag:"fit: 94 · HBCU history · talent-led tentpole",
+            hook:"You already activate around HBCUs and college football. Cam Newton's tour hits 8 campuses this fall, and a title sponsorship plus his show is exactly the kind of talent-led moment State Farm owns.",
+            subject:"Cam Newton HBCU Tour: a title sponsorship built for State Farm",
+            body:"Hey Marcus,\n\nState Farm already activates around HBCUs and college football, so Cam Newton's fall tour felt like a direct fit.\n\nIt's 8 campus stops with Cam, plus his show, which is exactly the kind of talent-led moment you own. We can build a title sponsorship around it.\n\nWant me to put together the tour package and pricing?",
+            linkedin:"Hey Marcus, we make podcast ads easy. Cam Newton's HBCU tour hits 8 campuses this fall. Given State Farm's HBCU and CFB history, a title sponsorship plus his show is a natural fit. Want me to send the package?",
+            contacts:[ c("Marcus Grant","Head of Brand Partnerships","Partnerships","mgrant@statefarm.com","/in/marcus-grant"),
+                       c("Tanya Reed","Multicultural Marketing Lead","Marketing","treed@statefarm.com","/in/tanya-reed"),
+                       c("Owen Blake","Media Investment Director","Media Investment","oblake@statefarm.com","/in/owen-blake"),
+                       c("Nadia Cruz","Sponsorship Manager","Partnerships","ncruz@statefarm.com","/in/nadia-cruz") ] },
+          { id:"chickfila", brand:"Chick-fil-A", logo:"CF", cat:"QSR", score:88, show:"HBCU Tour", val:"$72K", status:"draft",
+            whyNow:"Southeastern brand with heavy campus presence. <b>Tour stops overlap their core markets</b>, and no audio partner holds HBCU content yet.",
+            grading:"Chick-fil-A is a Southeastern institution with deep campus presence, and the tour stops overlap their core markets almost one to one. No brand currently holds the HBCU content, so there's a clean lane to own the moment.",
+            gradeTag:"fit: 88 · Southeastern · campus market overlap",
+            hook:"The tour stops line up almost exactly with your core Southeastern markets, and no brand holds the HBCU content yet. Felt like a natural way for Chick-fil-A to show up on campus this fall.",
+            subject:"Cam Newton HBCU Tour: stops overlap your core markets",
+            body:"Hey Bethany,\n\nCam Newton's HBCU tour stops overlap Chick-fil-A's core Southeastern markets almost one to one.\n\nNo brand currently holds the HBCU content, so there's a clean way to own a campus moment that fits your footprint this fall.\n\nWant me to send the stop list and a plan?",
+            linkedin:"Hey Bethany, we make podcast ads easy. Cam Newton's HBCU tour stops overlap Chick-fil-A's core markets. No brand holds the content yet. Want me to send the stop list and a plan?",
+            contacts:[ c("Bethany Cole","Field Marketing Director","Marketing","bcole@cfa.com","/in/bethany-cole"),
+                       c("Isaac Moore","Brand Manager","Brand","imoore@cfa.com","/in/isaac-moore"),
+                       c("Gina Park","Digital & Audio Lead","Digital","gpark@cfa.com","/in/gina-park") ] },
+          { id:"nike", brand:"Nike", logo:"NK", cat:"Apparel", score:86, show:"The Cam Newton Show", val:"$95K", status:"draft",
+            whyNow:"Owns HBCU culture moments. Cam's tour and show are on-brand for their <b>college-football push</b> this fall.",
+            grading:"Nike consistently owns HBCU culture and is pushing college football hard this fall. Cam Newton as talent and his show are directly on-brand. A talent-led cultural fit with real scale.",
+            gradeTag:"fit: 86 · owns HBCU culture · CFB push",
+            hook:"You own HBCU culture moments and you're pushing college football this fall. Cam Newton's tour and show is right in that lane, and it's a talent-led moment we can build around Nike.",
+            subject:"Cam Newton x Nike: HBCU tour and show for your CFB push",
+            body:"Hey Serena,\n\nNike consistently owns HBCU culture, and you're leaning into college football this fall.\n\nCam Newton's tour and his show sit right in that lane, and it's a talent-led moment we can build a package around.\n\nWant me to send the concept and pricing?",
+            linkedin:"Hey Serena, we make podcast ads easy. Nike owns HBCU culture and is pushing CFB this fall. Cam Newton's tour and show is right in that lane. Want me to send a concept?",
+            contacts:[ c("Serena Vaughn","Sports Marketing Manager","Marketing","svaughn@nike.com","/in/serena-vaughn"),
+                       c("Terrence Hill","Brand Partnerships","Partnerships","thill@nike.com","/in/terrence-hill"),
+                       c("Mika Sato","Content Lead","Content","msato@nike.com","/in/mika-sato"),
+                       c("Paul Reyes","Media Investment","Media Investment","preyes@nike.com","/in/paul-reyes") ] },
+          { id:"wellsfargo", brand:"Wells Fargo", logo:"WF", cat:"Bank", score:80, show:"HBCU Tour", val:"$60K", status:"sent",
+            whyNow:"Runs active HBCU scholarship programs. A <b>talent-led pitch around Cam</b> resonates, and they already spend in sports audio.",
+            grading:"Wells Fargo funds HBCU scholarship programs and already buys sports audio. A talent-led pitch anchored on Cam Newton connects their existing HBCU commitment to a live, ownable moment. Solid, warm fit.",
+            gradeTag:"fit: 80 · HBCU programs · already in sports audio",
+            hook:"You already fund HBCU scholarship programs and buy sports audio. Anchoring on Cam Newton ties that commitment to a live tour moment you can actually own this fall.",
+            subject:"Cam Newton HBCU Tour: a live moment for your HBCU programs",
+            body:"Hey Dwight,\n\nWells Fargo already funds HBCU scholarship programs and buys sports audio.\n\nCam Newton's tour is a live, ownable moment that ties your existing HBCU commitment to something fans experience on campus this fall.\n\nWant me to send the package and pricing?",
+            linkedin:"Hey Dwight, we make podcast ads easy. Wells Fargo funds HBCU programs and buys sports audio. Cam Newton's tour ties that to a live campus moment. Want me to send the package?",
+            contacts:[ c("Dwight Ellis","Brand Marketing Director","Brand","dellis@wellsfargo.com","/in/dwight-ellis"),
+                       c("Rhea Kapoor","Media Investment","Media Investment","rkapoor@wellsfargo.com","/in/rhea-kapoor"),
+                       c("Sam Fields","Sponsorships Lead","Partnerships","sfields@wellsfargo.com","/in/sam-fields") ] },
+        ] },
+
+      { id:"golf", name:"Creator Golf", kind:"Content vertical", icon:"flag", status:"Queued", statusColor:"blue",
+        angle:"Brands activating in the creator-golf space. Pitch our golf creator shows to lifestyle, apparel and finance brands leaning into golf.",
+        chips:["Fairway Fridays","3 golf creator shows"],
+        brands:[
+          { id:"rocketmortgage", brand:"Rocket Mortgage", logo:"RM", cat:"Fintech", score:90, show:"Fairway Fridays", val:"$54K", status:"ready",
+            whyNow:"Golf-heavy sponsor with PGA ties. Creator golf is their next frontier and <b>Fairway Fridays</b> pre-roll is open.",
+            grading:"Rocket Mortgage is golf-forward with existing PGA ties and is expanding toward creator golf. Fairway Fridays reaches the creator-golf audience directly, and the pre-roll is open. Endemic, warm fit.",
+            gradeTag:"fit: 90 · PGA ties · creator golf next",
+            hook:"You're already golf-forward with the PGA, and creator golf is the natural next step. Fairway Fridays reaches that audience directly and the pre-roll is open.",
+            subject:"Fairway Fridays pre-roll open: creator golf for Rocket Mortgage",
+            body:"Hey Grant,\n\nRocket Mortgage is already golf-forward, and creator golf is the natural next frontier.\n\nFairway Fridays reaches that audience directly and the pre-roll is open right now, so the timing works.\n\nWant me to send a quick plan and pricing?",
+            linkedin:"Hey Grant, we make podcast ads easy. You're golf-forward with the PGA and creator golf is next. Fairway Fridays pre-roll is open. Want me to send a plan?",
+            contacts:[ c("Grant Weber","Head of Media","Media Investment","gweber@rocketmortgage.com","/in/grant-weber"),
+                       c("Holly Mars","Brand Marketing","Brand","hmars@rocketmortgage.com","/in/holly-mars"),
+                       c("Zane Ali","Digital Media","Digital","zali@rocketmortgage.com","/in/zane-ali") ] },
+          { id:"badbirdie", brand:"Bad Birdie", logo:"BB", cat:"Apparel", score:85, show:"Fairway Fridays", val:"$22K", status:"draft",
+            whyNow:"Golf-apparel DTC scaling audio. Perfectly <b>endemic</b> to creator-golf content.",
+            grading:"Bad Birdie is a golf-apparel DTC brand scaling audio spend. Creator-golf content is as endemic as it gets for them, which makes conversion likely. Smaller budget but very high relevance.",
+            gradeTag:"fit: 85 · endemic golf DTC",
+            hook:"Creator golf is about as endemic as it gets for a golf-apparel brand. You're scaling audio, and Fairway Fridays puts Bad Birdie in front of exactly the right audience.",
+            subject:"Fairway Fridays: an endemic creator-golf audience for Bad Birdie",
+            body:"Hey Cody,\n\nCreator golf is an endemic fit for a golf-apparel brand, and Bad Birdie is scaling audio.\n\nFairway Fridays puts you in front of the exact audience that buys golf apparel, which should convert efficiently.\n\nWant me to send a quick plan and pricing?",
+            linkedin:"Hey Cody, we make podcast ads easy. Creator golf is endemic for Bad Birdie and you're scaling audio. Fairway Fridays is the right audience. Want me to send a plan?",
+            contacts:[ c("Cody Lane","Head of Growth","Marketing","clane@badbirdie.com","/in/cody-lane"),
+                       c("Mia Torres","Brand Lead","Brand","mtorres@badbirdie.com","/in/mia-torres"),
+                       c("Owen Katz","Paid Media","Digital","okatz@badbirdie.com","/in/owen-katz") ] },
+          { id:"michelob", brand:"Michelob Ultra", logo:"MU", cat:"Beverage", score:81, show:"Fairway Fridays", val:"$38K", status:"draft",
+            whyNow:"Golf-forward beer brand. Runs golf creators on social but <b>not yet in podcast</b>.",
+            grading:"Michelob Ultra is a golf-forward beer brand already working with golf creators on social, but not in podcast yet. Fairway Fridays extends a strategy that's already working for them into audio. Clear whitespace.",
+            gradeTag:"fit: 81 · golf on social · podcast whitespace",
+            hook:"You already work with golf creators on social, just not in podcast yet. Fairway Fridays extends what's already working for Michelob into audio.",
+            subject:"Golf creators on social, not podcast yet: Fairway Fridays",
+            body:"Hey Renee,\n\nMichelob Ultra already works with golf creators on social, but not in podcast yet.\n\nFairway Fridays is a natural extension of that strategy into audio, reaching the same golf audience in a new format.\n\nWant me to send a quick plan and pricing?",
+            linkedin:"Hey Renee, we make podcast ads easy. Michelob works golf creators on social but not podcast yet. Fairway Fridays extends that into audio. Want me to send a plan?",
+            contacts:[ c("Renee Ford","Brand Director","Brand","rford@michelobultra.com","/in/renee-ford"),
+                       c("Hank Silva","Media Investment","Media Investment","hsilva@michelobultra.com","/in/hank-silva"),
+                       c("Iris Chen","Social & Content","Content","ichen@michelobultra.com","/in/iris-chen") ] },
+        ] },
+
+      { id:"nba", name:"NBA Tip-Off", kind:"Seasonality · live sports", icon:"ball", status:"Queued", statusColor:"blue",
+        angle:"Pre-season NBA push. Pitch our basketball shows to brands that spend around the NBA and creator hoops.",
+        chips:["Coast to Coast Hoops","Full Court","4 NBA shows"],
+        brands:[
+          { id:"gatorade", brand:"Gatorade", logo:"GT", cat:"Sports Drink", score:92, show:"Coast to Coast Hoops", val:"$80K", status:"ready",
+            whyNow:"NBA-native brand. <b>Coast to Coast Hoops</b> maps to their core audience and tip-off is peak spend.",
+            grading:"Gatorade is NBA-native and spends heaviest around tip-off. Coast to Coast Hoops maps directly to their core basketball audience. A premium, on-brand, seasonally-timed fit.",
+            gradeTag:"fit: 92 · NBA-native · peak tip-off spend",
+            hook:"Tip-off is your peak window and Coast to Coast Hoops is right in Gatorade's core. Felt like the obvious NBA show to get you on before the season.",
+            subject:"Coast to Coast Hoops for Gatorade, before tip-off",
+            body:"Hey Marcus,\n\nGatorade is NBA-native and tip-off is your peak spend window.\n\nCoast to Coast Hoops maps directly to your core basketball audience, so it's a clean show to own heading into the season.\n\nWant me to send a plan and pricing before tip-off?",
+            linkedin:"Hey Marcus, we make podcast ads easy. Gatorade is NBA-native and tip-off is peak. Coast to Coast Hoops is right in your core. Want me to send a plan before the season?",
+            contacts:[ c("Marcus Iverson","Sports Marketing Director","Marketing","miverson@gatorade.com","/in/marcus-iverson"),
+                       c("Lena Wu","Media Investment","Media Investment","lwu@gatorade.com","/in/lena-wu"),
+                       c("Tariq Boyd","Brand Manager","Brand","tboyd@gatorade.com","/in/tariq-boyd"),
+                       c("Ella Frost","Digital Media","Digital","efrost@gatorade.com","/in/ella-frost") ] },
+          { id:"doordash", brand:"DoorDash", logo:"DD", cat:"Delivery", score:83, show:"Full Court", val:"$44K", status:"draft",
+            whyNow:"<b>Ramped sports podcast spend this week</b> per SpotsNow. Game-night ordering ties directly to the NBA audience.",
+            grading:"DoorDash just ramped sports podcast spend this week, a strong buying signal, and game-night ordering ties naturally to NBA viewership. Full Court reaches that audience during the exact moments they order. Timely fit.",
+            gradeTag:"fit: 83 · new spend signal · game-night occasion",
+            hook:"Your podcast spend ramped this week, and game-night ordering is basically an NBA occasion. Full Court reaches that audience right when they're ordering.",
+            subject:"Game-night is an NBA occasion: Full Court for DoorDash",
+            body:"Hey Priya,\n\nDoorDash just ramped sports podcast spend this week, and game-night ordering is an NBA occasion at its core.\n\nFull Court reaches that audience during the exact moments they're ordering, which ties the message to intent.\n\nWant me to send a quick plan and pricing?",
+            linkedin:"Hey Priya, we make podcast ads easy. DoorDash ramped sports podcast spend this week and game-night is an NBA occasion. Full Court reaches that audience. Want me to send a plan?",
+            contacts:[ c("Priya Menon","Performance Media Lead","Media Investment","pmenon@doordash.com","/in/priya-menon"),
+                       c("Jake Sullivan","Brand Marketing","Brand","jsullivan@doordash.com","/in/jake-sullivan"),
+                       c("Nora Beck","Paid Media","Digital","nbeck@doordash.com","/in/nora-beck") ] },
+          { id:"fanduel", brand:"FanDuel", logo:"FD", cat:"Sportsbook", score:81, show:"Full Court", val:"$52K", status:"draft",
+            whyNow:"NBA betting surges at tip-off. Buys hoops lookalikes; <b>Full Court</b> mid-roll is open.",
+            grading:"FanDuel sees a betting surge at tip-off and already buys basketball lookalikes. Full Court's mid-roll is open, giving them a core NBA audience during their highest-intent window. Solid seasonal fit.",
+            gradeTag:"fit: 81 · tip-off betting surge · hoops lookalikes",
+            hook:"Tip-off is a betting surge for you and you already buy hoops lookalikes. Full Court's mid-roll is open, so it's a clean way to hit a core NBA audience at the right time.",
+            subject:"FanDuel at tip-off: Full Court mid-roll open",
+            body:"Hey Ben,\n\nTip-off drives a betting surge for FanDuel, and you already buy basketball lookalikes.\n\nFull Court's mid-roll is open, which puts you in front of a core NBA audience during your highest-intent window.\n\nWant me to hold it and send pricing?",
+            linkedin:"Hey Ben, we make podcast ads easy. Tip-off is a betting surge and you buy hoops lookalikes. Full Court mid-roll is open. Want me to hold it and send pricing?",
+            contacts:[ c("Ben Carter","Director of Media Investment","Media Investment","bcarter@fanduel.com","/in/ben-carter"),
+                       c("Sofia Reyes","Brand Marketing","Brand","sreyes@fanduel.com","/in/sofia-reyes"),
+                       c("Max Long","Digital Acquisition","Digital","mlong@fanduel.com","/in/max-long") ] },
+        ] },
+
+      { id:"gift", name:"Q4 Gifting", kind:"Seasonality", icon:"gift", status:"Queued", statusColor:"blue",
+        angle:"Holiday gifting seasonality. Pitch broad-reach shows to consumer brands with a Q4 gifting push.",
+        chips:["Broad slate","Gifting angle","Q4"],
+        brands:[
+          { id:"raycon", brand:"Raycon", logo:"RY", cat:"Consumer Tech", score:86, show:"Broad slate", val:"$28K", status:"ready",
+            whyNow:"Proven podcast gifter re-entering. A <b>broad Q4 slate</b> fits their gifting push.",
+            grading:"Raycon is a proven podcast advertiser with a strong gifting history, and looks to be re-entering. A broad Q4 slate gives them reach across gift-driven audiences at an efficient rate. Warm re-entry.",
+            gradeTag:"fit: 86 · proven gifter · re-entering",
+            hook:"You've run podcast gifting campaigns before and it looks like you're stepping back in. A broad Q4 slate gets Raycon in front of gift-driven audiences at an efficient rate.",
+            subject:"Q4 gifting slate for Raycon, an efficient re-entry",
+            body:"Hey Alyssa,\n\nRaycon has a strong podcast gifting history and looks to be re-entering for Q4.\n\nA broad holiday slate gets you in front of gift-driven audiences at an efficient rate, which fits a re-entry budget well.\n\nWant me to send a quick plan and pricing?",
+            linkedin:"Hey Alyssa, we make podcast ads easy. Raycon's a proven podcast gifter and looks to be re-entering. A broad Q4 slate fits your gifting push. Want me to send a plan?",
+            contacts:[ c("Alyssa Kim","Brand Manager","Brand","akim@rayconglobal.com","/in/alyssa-kim"),
+                       c("Reed Palmer","Media Investment","Media Investment","rpalmer@rayconglobal.com","/in/reed-palmer"),
+                       c("Tess Ng","Digital Media","Digital","tng@rayconglobal.com","/in/tess-ng") ] },
+          { id:"keurig", brand:"Keurig", logo:"KG", cat:"Appliances", score:79, show:"Broad slate", val:"$33K", status:"draft",
+            whyNow:"Seasonal gifting spender. <b>Lifestyle shows</b> fit the holiday window.",
+            grading:"Keurig spends around seasonal gifting and coffee machines are a classic holiday gift. Lifestyle shows across a broad slate reach gift-buyers during the Q4 window. Reliable seasonal fit.",
+            gradeTag:"fit: 79 · seasonal gifter · lifestyle audience",
+            hook:"Coffee machines are a classic holiday gift and you already spend around gifting. A lifestyle-heavy Q4 slate reaches gift-buyers right in the window.",
+            subject:"Q4 gifting: a lifestyle slate for Keurig",
+            body:"Hey Dana,\n\nKeurig is a classic holiday gift, and you already spend around seasonal gifting.\n\nA lifestyle-heavy Q4 slate reaches gift-buyers during the exact window they're deciding, which should convert well.\n\nWant me to send a quick plan and pricing?",
+            linkedin:"Hey Dana, we make podcast ads easy. Keurig is a classic holiday gift and you spend around gifting. A lifestyle Q4 slate fits the window. Want me to send a plan?",
+            contacts:[ c("Dana Ruiz","Brand Marketing Director","Brand","druiz@keurig.com","/in/dana-ruiz"),
+                       c("Paul Estes","Media Investment","Media Investment","pestes@keurig.com","/in/paul-estes"),
+                       c("Amy Cho","Digital Media","Digital","acho@keurig.com","/in/amy-cho") ] },
+          { id:"bombas", brand:"Bombas", logo:"BM", cat:"Apparel", score:77, show:"Broad slate", val:"$19K", status:"draft",
+            whyNow:"Gifting-heavy DTC. <b>Story-driven host reads</b> convert for them.",
+            grading:"Bombas leans on gifting and their give-back story converts best through story-driven host reads. A broad Q4 slate with strong hosts reaches gift-buyers with the format that works for them. Good, if smaller, fit.",
+            gradeTag:"fit: 77 · gifting DTC · host-read converts",
+            hook:"Your give-back story lands best through a host actually telling it. A Q4 slate with strong hosts reaches gift-buyers in the format that converts for Bombas.",
+            subject:"Q4 host reads for Bombas: the format that converts",
+            body:"Hey Chris,\n\nBombas leans on gifting, and your give-back story converts best when a host actually tells it.\n\nA broad Q4 slate with strong hosts reaches gift-buyers in the host-read format that works for you.\n\nWant me to send a quick plan and pricing?",
+            linkedin:"Hey Chris, we make podcast ads easy. Bombas' give-back story converts through host reads. A Q4 slate with strong hosts fits. Want me to send a plan?",
+            contacts:[ c("Chris Vale","Growth Marketing Lead","Marketing","cvale@bombas.com","/in/chris-vale"),
+                       c("Deb Ash","Brand Manager","Brand","dash@bombas.com","/in/deb-ash"),
+                       c("Nina Sol","Paid Media","Digital","nsol@bombas.com","/in/nina-sol") ] },
+        ] },
+    ];
+
+    /* ─── PLAYS HOME ─── */
+    function renderPlays(){
+      const grid = document.getElementById('plays-grid');
+      const cards = PLAYS.map(p=>{
+        const ready = p.brands.filter(b=>b.status==='ready').length;
+        const sc = p.statusColor==='green' ? 'background:var(--green-bg);color:var(--green-text)' : 'background:var(--blue-bg);color:var(--blue-text)';
+        return `<button class="play-card" onclick="openPlay('${p.id}')">
+          <div class="play-card__top">
+            <div class="play-card__icon">${svgIcon(p.icon)}</div>
+            <div><div class="play-card__name">${p.name}</div><div class="play-card__kind">${p.kind}</div></div>
+            <span class="play-card__status" style="${sc}">${p.status}</span>
+          </div>
+          <div class="play-card__angle">${p.angle}</div>
+          <div class="play-card__inv"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>${p.chips.slice(0,3).join(' · ')}</div>
+          <div class="play-card__foot">
+            <div class="play-card__stat"><b>${p.brands.length}</b><span>ranked</span></div>
+            <div class="play-card__stat"><b>${ready}</b><span>ready</span></div>
+            <span class="play-card__open">Open play <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </div>
+        </button>`;
+      }).join('');
+      grid.innerHTML = cards + `<button class="play-card play-card--new" onclick="openPlay('nfl',true)">
+        <div class="plus">+</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text-secondary)">New play</div>
+        <div style="font-size:12px;max-width:180px;line-height:1.45">Describe an initiative and the agent sources and ranks the brands</div>
+      </button>`;
+    }
+
+    /* ─── PLAY DETAIL ─── */
+    let currentPlay = null, obFilter = "all";
+
+    function showPlays(){
+      document.getElementById('screen-plays').style.display='';
+      document.getElementById('screen-play').style.display='none';
+      document.getElementById('view-outbound').scrollTop = 0;
+    }
+    function openPlay(id, isNew){
+      currentPlay = PLAYS.find(p=>p.id===id) || PLAYS[0];
+      document.getElementById('screen-plays').style.display='none';
+      document.getElementById('screen-play').style.display='';
+      document.getElementById('ph-icon').innerHTML = svgIcon(currentPlay.icon,24);
+      document.getElementById('ph-name').textContent = isNew ? "New play · Fall sports slate" : currentPlay.name;
+      document.getElementById('ph-angle').textContent = isNew
+        ? "Sourced from your prompt: brands activating around live sports this fall that already buy podcast and index on our audience."
+        : currentPlay.angle;
+      document.getElementById('ph-chips').innerHTML = currentPlay.chips.map(ch=>`<span class="pchip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>${ch}</span>`).join('');
+      obFilter = "all";
+      document.querySelectorAll('#ob-seg button').forEach(x=>x.classList.remove('on'));
+      document.querySelector('#ob-seg button[data-f="all"]').classList.add('on');
+      // reset pipeline
+      const pipe = document.getElementById('pipe');
+      pipe.classList.remove('show');
+      document.querySelectorAll('#pipe .pipe__step').forEach(n=>{ n.classList.remove('run','done'); n.querySelector('.pipe__meta').textContent=''; });
+      renderDeck();
+      document.getElementById('view-outbound').scrollTop = 0;
+      if (isNew) setTimeout(runAgent, 350);
+    }
+
+    function renderDeck(){
+      const deck = document.getElementById('deck');
+      const list = currentPlay.brands.filter(b => obFilter==="all" || b.status===obFilter);
+      deck.innerHTML = list.map(b=>{
+        const [pc,pl] = STPILL[b.status];
+        const scls = b.score>=85 ? 'hi' : 'mid';
+        return `<tr>
+          <td><div class="ob-brand">
+            <div class="ob-brand__logo">${b.logo}</div>
+            <div><div class="ob-brand__name">${b.brand}</div><div class="ob-brand__cat">${b.cat}</div></div>
+          </div></td>
+          <td><span class="ob-fit ob-fit--${scls}">${b.score}</span></td>
+          <td class="ob-signal"><div class="ob-matched">${b.show}</div>${b.whyNow}</td>
+          <td class="ob-buyers">${b.contacts.length}</td>
+          <td class="ob-val">${b.val}</td>
+          <td><span class="pill ${pc}">${pl}</span></td>
+          <td style="text-align:right"><button class="ob-review" onclick="openReview('${b.id}')">Review</button></td>
+        </tr>`;
+      }).join('');
+      const n = s => currentPlay.brands.filter(b=>b.status===s).length;
+      document.getElementById('deck-count').textContent = currentPlay.brands.length;
+      document.getElementById('c-all').textContent = currentPlay.brands.length;
+      document.getElementById('c-draft').textContent = n('draft');
+      document.getElementById('c-ready').textContent = n('ready');
+      document.getElementById('c-sent').textContent = n('sent');
+    }
+
+    // deck filter segments
+    document.querySelectorAll('#ob-seg button').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        document.querySelectorAll('#ob-seg button').forEach(x=>x.classList.remove('on'));
+        b.classList.add('on');
+        obFilter = b.dataset.f;
+        renderDeck();
+      });
+    });
+
+    /* ─── run / re-run pipeline animation ─── */
+    function runAgent(){
+      const btn = document.getElementById('rerunBtn');
+      const pipe = document.getElementById('pipe');
+      const n = currentPlay.brands.length;
+      const buyers = currentPlay.brands.reduce((s,b)=>s+b.contacts.length,0);
+      const steps = [
+        `${n+11} brands sourced · ranked on your inventory`,
+        `top ${n} scored 75+ fit`,
+        `${buyers} buyers · emails verified via Apollo`,
+        `hook + email + LinkedIn · ${n} brands`,
+        `${n} Canva one-pagers ready`,
+      ];
+      const nodes = [...document.querySelectorAll('#pipe .pipe__step')];
+      nodes.forEach(nd=>{ nd.classList.remove('run','done'); nd.querySelector('.pipe__meta').textContent=''; });
+      pipe.classList.add('show');
+      btn.disabled = true;
+      const lbl = btn.lastChild; const old = lbl.textContent;
+      lbl.textContent = ' Running…';
+      pipe.scrollIntoView({behavior:'smooth', block:'nearest'});
+      let i = 0;
+      const tick = ()=>{
+        if (i>0) { nodes[i-1].classList.remove('run'); nodes[i-1].classList.add('done'); nodes[i-1].querySelector('.pipe__meta').textContent = steps[i-1]; }
+        if (i < nodes.length){
+          nodes[i].classList.add('run');
+          nodes[i].querySelector('.pipe__meta').textContent = 'working…';
+          i++;
+          setTimeout(tick, 700);
+        } else {
+          btn.disabled = false; lbl.textContent = old;
+          renderDeck();
+        }
+      };
+      tick();
+    }
+
+    /* ─── drawer (brand-level review) ─── */
+    const setText=(id,v)=>document.getElementById(id).textContent=v;
+    const setVal=(id,v)=>document.getElementById(id).value=v;
+    let currentBrand = null;
+
+    function openReview(brandId){
+      const b = currentPlay.brands.find(x=>x.id===brandId);
+      if (!b) return;
+      currentBrand = b;
+      document.getElementById('dwLogo').textContent = b.logo;
+      setText('dwName', b.brand);
+      setText('dwSub', `${b.cat} · ranked ${b.score} · ${b.show}`);
+      setText('dwScore', `Fit ${b.score}`);
+      setText('dwGrading', b.grading);
+      setText('dwGradeTag', b.gradeTag);
+      setVal('dwHook', b.hook);
+      setText('dwAttachName', `${b.brand} × ${b.show} · one-pager`);
+      setVal('dwSubject', b.subject);
+      setVal('dwBody', b.body);
+      setVal('dwLinkedin', b.linkedin);
+      setText('dwLiCount', `${b.linkedin.length} / 600`);
+      setText('dwPplCount', `· ${b.contacts.length} found`);
+      document.getElementById('dwContacts').innerHTML = b.contacts.map(p=>`
+        <div class="cl-row">
+          <div class="cl-av">${initials(p.name)}</div>
+          <div class="cl-who">
+            <div class="cl-name">${p.name} <a class="ob-in" href="https://www.linkedin.com${p.li}" target="_blank" rel="noopener" title="Open LinkedIn">in</a></div>
+            <div class="cl-sub">${p.title} · <span class="mono">${p.email}</span></div>
+          </div>
+          <div class="cl-act"><button class="c-mini" onclick="copyStr('${p.email}',this)">Copy</button></div>
+        </div>`).join('');
+      document.getElementById('overlay').classList.add('open');
+      document.getElementById('drawer').classList.add('open');
+      document.getElementById('drawer').setAttribute('aria-hidden','false');
+    }
+    function closeReview(){
+      document.getElementById('overlay').classList.remove('open');
+      document.getElementById('drawer').classList.remove('open');
+      document.getElementById('drawer').setAttribute('aria-hidden','true');
+    }
+    function copyStr(str, btn){
+      navigator.clipboard && navigator.clipboard.writeText(str);
+      const old = btn.textContent; btn.textContent = 'Copied'; setTimeout(()=>btn.textContent=old, 1200);
+    }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeReview(); });
+
+    /* ─── init ─── */
+    renderPlays();
+  </script>
+</body>
+</html>

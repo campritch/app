@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blue Wire · Outbound Agent</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2317212B'/%3E%3Ctext x='16' y='22' font-family='Helvetica,Arial,sans-serif' font-size='15' font-weight='700' fill='%23ffffff' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ───────── shadcn / zinc tokens (matched to North Station Inventory) ───────── */
+    :root {
+      --primary: #18181B;
+      --primary-hover: #27272A;
+      --dark: #18181B;
+      --accent: #18181B;
+      --accent-hover: #27272A;
+      --accent-soft: #F4F4F5;
+      --text-primary: #18181B;
+      --text-secondary: #52525B;
+      --text-tertiary: #71717A;
+      --border: #E4E4E7;
+      --border-light: #F1F1F3;
+      --border-strong: #D4D4D8;
+      --white: #ffffff;
+      --secondary-lite: #F4F4F5;
+      --nav-current: #F4F4F5;
+      --nav-hover: #FAFAFA;
+      --page-bg: #FAFAFA;
+      /* status tokens, deliberately monochrome */
+      --green-text: #3F3F46; --green-bg: #FAFAFA; --green-line: #E4E4E7;
+      --blue-text: #52525B;  --blue-bg: #F4F4F5;  --blue-line: #E4E4E7;
+      --orange-text: #52525B;--orange-bg: #F4F4F5;--orange-line: #D4D4D8;
+      --sold-bg: #27272A;
+      --shadow-post: 0 1px 2px 0 rgba(16,19,35,.04);
+      --shadow-btn: 0 1px 2px 0 rgba(16,19,35,.05);
+      --shadow-card: 0 1px 2px 0 rgba(16,19,35,.04);
+      --shadow-hover: 0 8px 24px rgba(16,19,35,.10);
+      --radius-card: 10px;
+      --radius-btn: 9px;
+      --radius-pill: 999px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "system-ui", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: var(--page-bg); color: var(--text-primary);
+      -webkit-font-smoothing: antialiased; line-height: 1.45; letter-spacing: -.01em;
+    }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* ─── shell ─── */
+    .wrap { max-width: 1320px; margin: 0 auto; padding: 20px 26px 90px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand__logo { width: 38px; height: 38px; border-radius: 4px; background: #1A2332; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: .92; flex-shrink: 0; }
+    .brand__logo span { font-weight: 800; font-size: 11px; letter-spacing: -.02em; font-family: 'Inter', Arial, sans-serif; }
+    .brand__logo .bw1 { color: #fff; }
+    .brand__logo .bw2 { color: #3DA0EE; }
+    .brand__divider { width: 1px; height: 30px; background: var(--border); }
+    .brand__sub { font-size: 14px; font-weight: 800; color: var(--text-primary); line-height: 1.2; letter-spacing: -.02em; }
+    .brand__sub span { font-size: 12px; font-weight: 500; color: var(--text-tertiary); letter-spacing: 0; }
+    .topbar__right { display: flex; align-items: center; gap: 10px; }
+    .tabs { display: flex; gap: 4px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 5px; margin-bottom: 22px; width: fit-content; }
+    .tab { border: none; background: none; padding: 9px 15px; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+    .tab:hover { background: var(--secondary-lite); }
+    .tab.active { background: var(--primary); color: #fff; }
+
+    /* page heading */
+    .view-title { font-size: 20px; font-weight: 700; letter-spacing: -.03em; display: flex; align-items: center; gap: 11px; }
+    .view-sub { font-size: 13px; color: var(--text-secondary); margin-top: 3px; font-weight: 500; }
+    .date-pill { display: inline-flex; align-items: center; gap: 8px; background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 8px 13px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); font-family: inherit; }
+    button.date-pill:hover { border-color: var(--border-strong); color: var(--text-primary); }
+    .date-pill svg { color: var(--text-tertiary); }
+    .ob-empty { text-align: center; color: var(--text-tertiary); font-size: 12.5px; font-weight: 500; padding: 26px 0; }
+    .sf-btn { display: inline-flex; align-items: center; gap: 7px; background: var(--white); border: 1px solid var(--border); color: var(--text-tertiary); border-radius: 9px; padding: 8px 13px; font-size: 12.5px; font-weight: 600; cursor: default; }
+    .sf-btn .dot { width: 7px; height: 7px; border-radius: 50%; background: #C9CDD6; }
+    .topav { width: 37px; height: 37px; border-radius: 50%; background: var(--sold-bg); color: #fff; display: grid; place-items: center; font-weight: 600; font-size: 13px; flex-shrink: 0; }
+    .live-dot { display: inline-flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 600; color: var(--text-tertiary); background: var(--white); border: 1px solid var(--border); padding: 4px 10px; border-radius: var(--radius-pill); }
+    .live-dot::before { content:""; width: 6px; height: 6px; border-radius: 50%; background: #C9CDD6; }
+
+    /* stats hero */
+    .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); overflow: hidden; box-shadow: var(--shadow-card); margin-top: 24px; }
+    .stats--4 { grid-template-columns: repeat(4, 1fr); }
+    .stat { padding: 22px 22px; border-right: 1px solid var(--border-light); }
+    .stat:last-child { border-right: none; }
+    .stat__label { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-tertiary); }
+    .stat__value { font-size: clamp(27px, 3vw, 34px); font-weight: 700; letter-spacing: -.045em; line-height: 1.04; margin-top: 11px; color: var(--text-primary); }
+    .stat__sub { font-size: 12px; color: var(--text-secondary); margin-top: 8px; font-weight: 500; }
+    .stat__sub b { color: var(--green-text); font-weight: 700; }
+
+    .section-title { display:flex; align-items:center; gap:10px; font-size: 16px; font-weight: 700; letter-spacing: -.03em; margin: 36px 0 15px; }
+    .section-title .count { background: var(--accent); color:#fff; font-size: 12px; font-weight: 700; min-width: 21px; height: 21px; padding: 0 7px; border-radius: var(--radius-pill); display: inline-flex; align-items:center; justify-content:center; }
+    .section-title .muted { color: var(--text-secondary); font-weight: 500; font-size: 13px; margin-left: auto; letter-spacing: -.01em; }
+
+    /* add-on / agent cards */
+    .agents { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+    .agent { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 19px; display: flex; flex-direction: column; box-shadow: var(--shadow-card); transition: box-shadow .16s, transform .16s, border-color .16s; cursor: pointer; }
+    .agent:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); border-color: var(--border-strong); }
+    .agent__head { display:flex; align-items:center; gap: 12px; }
+    .agent__icon { width: 44px; height: 44px; border-radius: 12px; display:grid; place-items:center; flex-shrink:0; color: var(--accent); background: var(--accent-soft); }
+    .agent__name { font-size: 16px; font-weight: 700; letter-spacing: -.03em; }
+    .agent__role { font-size: 12px; color: var(--text-secondary); margin-top: 1px; font-weight: 500; }
+    .agent__status { margin-left:auto; font-size: 10.5px; font-weight: 700; padding: 4px 9px; border-radius: var(--radius-pill); white-space: nowrap; }
+    .st-working { background: var(--green-bg); color: var(--green-text); }
+    .agent__desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-top: 14px; min-height: 38px; font-weight: 500; }
+    .agent__foot { display:flex; align-items:flex-end; justify-content:space-between; margin-top: 15px; padding-top: 14px; border-top: 1px solid var(--border-light); }
+    .agent__stat b { font-size: 23px; font-weight: 700; letter-spacing: -.04em; }
+    .agent__stat span { font-size: 12px; color: var(--text-secondary); font-weight: 500; display:block; margin-top:-1px; }
+    .agent__open { font-size: 12.5px; font-weight: 700; color: var(--accent); display: inline-flex; align-items: center; gap: 5px; }
+
+    /* upsell strip */
+    .upsell { display: flex; align-items: center; gap: 16px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 16px 20px; box-shadow: var(--shadow-card); margin-top: 16px; }
+    .upsell__icon { width: 42px; height: 42px; border-radius: 12px; border: 1.5px dashed var(--border-strong); color: var(--text-tertiary); display: grid; place-items: center; flex-shrink: 0; font-size: 22px; line-height: 1; }
+    .upsell__title { font-size: 15px; font-weight: 700; letter-spacing: -.02em; }
+    .upsell__sub { font-size: 12.5px; color: var(--text-secondary); margin-top: 2px; font-weight: 500; }
+    .upsell__addons { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+    .upsell__chip { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); background: var(--secondary-lite); border: 1px solid var(--border); border-radius: 999px; padding: 7px 13px; }
+    .upsell__chip i { width: 6px; height: 6px; border-radius: 50%; background: var(--text-tertiary); flex-shrink: 0; }
+    .upsell__cta { border: none; background: var(--primary); color: #fff; border-radius: var(--radius-btn); padding: 9px 15px; font-size: 13px; font-weight: 700; font-family: inherit; white-space: nowrap; }
+    .upsell__cta:hover { background: var(--primary-hover); }
+
+    /* approval queue */
+    .approvals { display: grid; grid-template-columns: repeat(2,1fr); gap: 15px; }
+    .approval { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 18px 19px 17px; display: flex; flex-direction: column; box-shadow: var(--shadow-card); }
+    .approval__by { font-size: 11px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--text-tertiary); display:flex; align-items:center; gap:7px; margin-bottom: 9px; }
+    .approval__by i { width: 8px; height: 8px; border-radius: 3px; background: var(--accent); }
+    .approval__title { font-size: 15.5px; font-weight: 700; letter-spacing: -.02em; }
+    .approval__meta { font-size: 13px; color: var(--text-secondary); margin-top: 5px; flex: 1; line-height: 1.5; font-weight: 500; }
+    .approval__meta b { color: var(--text-primary); font-weight: 700; }
+    .approval__actions { display:flex; gap:8px; margin-top: 15px; }
+    .btn { border: none; border-radius: var(--radius-btn); padding: 9px 15px; font-size: 13px; font-weight: 700; font-family: inherit; transition: background .14s, opacity .14s; }
+    .btn--accent { background: var(--accent); color:#fff; }
+    .btn--accent:hover { background: var(--accent-hover); }
+    .btn--primary { background: var(--primary); color:#fff; }
+    .btn--primary:hover { background: var(--primary-hover); }
+    .btn--ghost { background: var(--secondary-lite); color: var(--text-primary); }
+    .btn--ghost:hover { background: var(--nav-current); }
+
+    /* ─── OUTBOUND TABLE ─── */
+    .ob-toolbar { display: flex; align-items: center; gap: 10px; margin: 22px 0 16px; flex-wrap: wrap; }
+    /* left rail */
+    .ob-layout { display: flex; gap: 20px; align-items: flex-start; margin-top: 16px; }
+    .ob-side { width: 178px; flex-shrink: 0; display: flex; flex-direction: column; gap: 3px; }
+    .ob-side__item { display: flex; align-items: center; gap: 10px; width: 100%; border: none; background: none; padding: 9px 12px; border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--text-secondary); font-family: inherit; text-align: left; transition: background .12s, color .12s; }
+    .ob-side__item svg { width: 16px; height: 16px; opacity: .8; flex-shrink: 0; }
+    .ob-side__item span { margin-left: auto; font-size: 11.5px; font-weight: 700; color: var(--text-tertiary); background: var(--secondary-lite); border-radius: 999px; min-width: 20px; text-align: center; padding: 1px 6px; }
+    .ob-side__item:hover { background: var(--secondary-lite); color: var(--text-primary); }
+    .ob-side__item.on { background: var(--primary); color: #fff; }
+    .ob-side__item.on svg { opacity: 1; }
+    .ob-side__item.on span { background: rgba(255,255,255,.18); color: #fff; }
+    .ob-card { flex: 1; min-width: 0; }
+    .ob-side__div { height: 1px; background: var(--border); margin: 8px 6px; }
+    /* brand database bulk bar + tools */
+    .bulkbar { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--page-bg); flex-wrap: wrap; }
+    .bulkbar__all { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text-primary); cursor: pointer; white-space: nowrap; }
+    .bulkbar__all input, .bl-cb { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+    .bulkbar__count { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; min-width: 74px; }
+    .bulkbar__grow { display: flex; align-items: center; gap: 8px; margin: 0 auto; flex-wrap: wrap; }
+    .dbtools__sel { font-family: inherit; font-size: 12.5px; font-weight: 600; color: var(--text-primary); background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; cursor: pointer; }
+    .dbtools__in { font-family: inherit; font-size: 12.5px; color: var(--text-primary); background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 7px 11px; width: 190px; max-width: 40vw; }
+    .dbtools__in:focus { outline: none; border-color: var(--primary); }
+    .dbtools__btn { border: 1px solid var(--border); background: var(--white); color: var(--text-primary); border-radius: 8px; padding: 7px 13px; font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; }
+    .dbtools__btn:hover { background: var(--secondary-lite); }
+    .dbtools__btn--ghost { color: var(--text-secondary); }
+    .bulkbar__btn { border: 1px solid var(--border); background: var(--white); color: var(--text-primary); border-radius: 8px; padding: 8px 13px; font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; }
+    .bulkbar__btn:hover:not(:disabled) { background: var(--secondary-lite); }
+    .bulkbar__btn--danger:hover:not(:disabled) { border-color: #DC2626; color: #DC2626; }
+    .bulkbar__btn:disabled { opacity: .4; cursor: default; }
+    .bulkbar__send { border: none; background: var(--primary); color: #fff; border-radius: 8px; padding: 8px 15px; font-size: 12.5px; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; }
+    .bulkbar__send:hover:not(:disabled) { background: var(--primary-hover); }
+    .bulkbar__send:disabled { opacity: .45; cursor: default; }
+    .blrow { cursor: pointer; }
+    .bl-cell { display: flex; align-items: center; gap: 12px; }
+    .src-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: var(--text-secondary); background: var(--secondary-lite); border: 1px solid var(--border); border-radius: 999px; padding: 4px 11px; white-space: nowrap; }
+    .src-badge i { width: 5px; height: 5px; border-radius: 50%; background: var(--text-tertiary); }
+    /* database status chips */
+    .db-chip { display: inline-flex; align-items: center; font-size: 11.5px; font-weight: 700; border-radius: 999px; padding: 4px 11px; margin-right: 8px; border: 1px solid var(--border); white-space: nowrap; }
+    .db-chip--new { color: #1D4ED8; background: #EFF4FF; border-color: #DBE4FF; }
+    .db-chip--ready { color: var(--text-primary); background: var(--secondary-lite); }
+    .db-chip--follow { color: #92400E; background: #FEF6E7; border-color: #FCE7BD; }
+    .db-chip--sent { color: #3F3F46; background: #FAFAFA; }
+    .db-chip--arch { color: var(--text-tertiary); background: var(--white); }
+    .db-chip--off { color: var(--text-tertiary); background: var(--white); border-style: dashed; }
+    .rowico { border: none; background: transparent; color: var(--text-tertiary); border-radius: 7px; padding: 6px; cursor: pointer; display: inline-flex; }
+    .rowico:hover { background: var(--secondary-lite); color: var(--text-primary); }
+    @media (max-width: 900px) { .ob-layout { flex-direction: column; } .ob-side { width: 100%; flex-direction: row; flex-wrap: wrap; } .ob-side__item { width: auto; } .ob-side__item span { margin-left: 6px; } }
+    .inner { }
+    .ob-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); overflow: hidden; box-shadow: var(--shadow-card); }
+    table.ob { width: 100%; border-collapse: collapse; }
+    table.ob th, table.ob td { text-align: left; padding: 9px 16px; border-bottom: 1px solid var(--border-light); font-size: 13px; vertical-align: middle; }
+    table.ob thead th { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-tertiary); background: var(--white); padding-top: 11px; padding-bottom: 9px; }
+    table.ob tbody tr:last-child td { border-bottom: none; }
+    table.ob tbody tr.brow:hover { background: var(--page-bg); cursor: pointer; }
+    .ob-brand { display: flex; align-items: center; gap: 11px; }
+    .ob-brand__name { font-weight: 600; font-size: 13.5px; letter-spacing: -.02em; }
+    .ob-brand__cat { font-size: 11.5px; color: var(--text-tertiary); font-weight: 500; margin-top: 1px; }
+    .ob-signal { color: var(--text-secondary); font-weight: 500; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+    .ob-campaign { font-weight: 600; font-size: 13px; color: var(--text-primary); letter-spacing: -.01em; }
+    .ob-follow { display: block; color: var(--text-primary); font-weight: 500; font-size: 11.5px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ob-assign { width: 1%; white-space: nowrap; }
+    .ob-actions { width: 1%; white-space: nowrap; text-align: right; }
+    .ob-actions .kebab, .ob-actions .chev { vertical-align: middle; }
+    .kebab { width: 28px; height: 28px; border-radius: 7px; border: none; background: none; color: var(--text-tertiary); display: inline-grid; place-items: center; font-family: inherit; }
+    .kebab:hover { background: var(--secondary-lite); color: var(--text-primary); }
+    .ob-val { font-weight: 600; letter-spacing: -.02em; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; padding: 4px 11px; border-radius: 999px; white-space: nowrap; border: 1px solid var(--border); }
+    .pill::before { content:""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .55; }
+    .pill--draft { background: var(--white); color: var(--text-tertiary); border-color: var(--border); }
+    .pill--ready { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .pill--ready::before { opacity: 1; }
+    .pill--sent { background: var(--secondary-lite); color: var(--text-secondary); border-color: var(--border-strong); }
+    .pill--followup { background: var(--white); color: var(--text-primary); border-color: var(--text-primary); }
+    .ob-review { border: 1px solid var(--border-strong); background: var(--white); border-radius: 7px; padding: 5px 12px; font-size: 12px; font-weight: 600; color: var(--text-primary); box-shadow: var(--shadow-btn); }
+    .ob-review:hover { background: var(--secondary-lite); }
+
+    .footnote { text-align: center; color: var(--text-tertiary); font-size: 12px; margin-top: 46px; font-weight: 500; }
+    .footnote b { color: var(--text-secondary); font-weight: 700; }
+
+    /* ─── OUTBOUND RUN / INPUT ─── */
+    /* New Brand Search Run button */
+    .newrun-btn { display: inline-flex; align-items: center; gap: 7px; border: none; background: var(--primary); color: #fff; border-radius: var(--radius-btn); padding: 9px 15px; font-size: 12.5px; font-weight: 700; font-family: inherit; white-space: nowrap; box-shadow: var(--shadow-btn); }
+    .newrun-btn:hover { background: var(--primary-hover); }
+    .fld__note { font-size: 12px; color: var(--text-tertiary); font-weight: 500; line-height: 1.45; margin-top: 9px; }
+    .run__title { font-size: 15px; font-weight: 700; letter-spacing: -.02em; display: flex; align-items: center; gap: 9px; }
+    .run__title .k { font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 3px 8px; border-radius: 6px; }
+    .run__hint { font-size: 12.5px; color: var(--text-secondary); margin-top: 4px; font-weight: 500; }
+    .run__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .run__row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; align-items: start; }
+    .run__foot { display: flex; align-items: center; gap: 14px; margin-top: 17px; }
+    .run__note { font-size: 12px; color: var(--text-tertiary); font-weight: 500; max-width: 60%; line-height: 1.45; }
+    .run__cta { margin-left: auto; border: none; background: var(--primary); color: #fff; border-radius: var(--radius-btn); padding: 11px 20px; font-size: 13.5px; font-weight: 700; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+    .run__cta:hover { background: var(--primary-hover); }
+    .run__cta:disabled { opacity: .55; cursor: default; }
+    .fld { display: flex; flex-direction: column; gap: 6px; }
+    .fld__label { font-size: 11px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--text-tertiary); }
+    .fld__in { width: 100%; border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px; font-family: inherit; font-size: 13px; color: var(--text-primary); line-height: 1.5; resize: vertical; background: var(--white); }
+    .fld__in:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .roles { display: flex; flex-wrap: wrap; gap: 7px; }
+    .role { border: 1px solid var(--border-strong); background: var(--white); color: var(--text-secondary); border-radius: 999px; padding: 7px 13px; font-size: 12.5px; font-weight: 600; font-family: inherit; display: inline-flex; align-items: center; gap: 7px; }
+    .role::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--border-strong); }
+    .role.on { border-color: var(--primary); color: var(--text-primary); background: var(--accent-soft); }
+    .role.on::before { background: #3FB87C; }
+
+    /* ─── PIPELINE ─── */
+    .pipe { display: none; margin-top: 18px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: 20px 14px 16px; }
+    .pipe.show { display: block; }
+    .pipe__track { display: flex; align-items: flex-start; }
+    .pipe__step { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 4px; position: relative; }
+    .pipe__step::after { content: ""; position: absolute; top: 18px; left: 50%; width: 100%; height: 2px; background: var(--border-light); z-index: 0; }
+    .pipe__step:last-child::after { display: none; }
+    .pipe__dot { width: 38px; height: 38px; border-radius: 50%; background: var(--secondary-lite); border: 1px solid var(--border); color: var(--text-tertiary); display: grid; place-items: center; position: relative; z-index: 1; transition: background .25s, border-color .25s, color .25s; }
+    .pipe__dot svg { width: 17px; height: 17px; }
+    .pipe__step.run .pipe__dot { background: var(--accent-soft); border-color: var(--primary); color: var(--primary); animation: pulse2 1.4s infinite; }
+    .pipe__step.done .pipe__dot { background: var(--green-bg); border-color: var(--green-text); color: var(--green-text); }
+    .pipe__step.done::after { background: var(--green-text); opacity: .3; }
+    .pipe__label { font-size: 11.5px; font-weight: 700; letter-spacing: -.01em; margin-top: 10px; color: var(--text-secondary); }
+    .pipe__step.done .pipe__label, .pipe__step.run .pipe__label { color: var(--text-primary); }
+    .pipe__meta { font-size: 10.5px; color: var(--text-tertiary); margin-top: 3px; font-weight: 500; min-height: 13px; line-height: 1.3; }
+
+    /* ─── outbound contact / email cells ─── */
+    .ob-person { font-weight: 700; font-size: 13.5px; letter-spacing: -.02em; display: flex; align-items: center; gap: 7px; }
+    .ob-in { width: 16px; height: 16px; border-radius: 3px; background: #0A66C2; color: #fff; display: inline-grid; place-items: center; font-size: 9px; font-weight: 800; flex-shrink: 0; text-decoration: none; }
+    .ob-in:hover { opacity: .85; }
+    .ob-title { font-size: 11.5px; color: var(--text-secondary); font-weight: 600; margin-top: 2px; }
+    .ob-email { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--text-primary); }
+    .ob-email__badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; color: var(--green-text); background: var(--green-bg); padding: 2px 7px; border-radius: 999px; margin-top: 5px; }
+    .ob-email__badge i { width: 4px; height: 4px; border-radius: 50%; background: var(--green-text); }
+    .ob-matched { font-weight: 700; font-size: 12.5px; letter-spacing: -.01em; }
+
+    /* ─── grade grouping ─── */
+    .grouprow > td { background: var(--page-bg); padding: 7px 16px 6px; border-bottom: 1px solid var(--border-light); }
+    .grade-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 800; letter-spacing: -.02em; padding: 4px 10px; border-radius: 7px; border: 1px solid transparent; }
+    .g-aplus { background: var(--primary); color: #fff; }
+    .g-a { background: #3F3F46; color: #fff; }
+    .g-bplus { background: var(--secondary-lite); color: var(--text-primary); border-color: var(--border-strong); }
+    .g-b { background: var(--white); color: var(--text-tertiary); border-color: var(--border); }
+    .groupcount { font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-left: 9px; }
+    .grouphint { font-size: 12px; font-weight: 500; color: var(--text-tertiary); margin-left: 9px; }
+    /* ─── Canva template rows ─── */
+    .tpl { display: flex; align-items: center; gap: 11px; padding: 12px 0; border-top: 1px solid var(--border-light); }
+    .tpl:first-child { border-top: none; padding-top: 2px; }
+    .tpl__thumb { width: 42px; height: 42px; border-radius: 9px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex-shrink: 0; }
+    .tpl__meta { flex: 1; min-width: 0; }
+    .tpl__name { font-size: 13px; font-weight: 700; letter-spacing: -.01em; }
+    .tpl__desc { font-size: 11.5px; color: var(--text-secondary); font-weight: 500; line-height: 1.4; margin-top: 2px; }
+    .tpl__foot { font-size: 10.5px; color: var(--text-tertiary); font-weight: 600; margin-top: 4px; }
+
+    /* ─── message templates ─── */
+    .varbar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 11px; align-items: center; }
+    .varbar__lbl { font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-tertiary); margin-right: 2px; }
+    .varchip { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 600; color: var(--text-secondary); background: var(--secondary-lite); border: 1px solid var(--border); border-radius: 6px; padding: 3px 7px; }
+    .varchip:hover { color: var(--text-primary); border-color: var(--border-strong); background: var(--white); }
+    .mtpl { display: flex; align-items: flex-start; gap: 11px; padding: 12px 0; border-top: 1px solid var(--border-light); }
+    .mtpl:first-child { border-top: none; padding-top: 2px; }
+    .mtpl__meta { flex: 1; min-width: 0; }
+    .mtpl__name { font-size: 13px; font-weight: 700; letter-spacing: -.01em; display: flex; align-items: center; gap: 7px; }
+    .mtpl__badge { font-size: 9.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-tertiary); background: var(--secondary-lite); border: 1px solid var(--border); border-radius: 5px; padding: 2px 6px; }
+    .mtpl__when { font-size: 11.5px; color: var(--text-secondary); font-weight: 500; line-height: 1.4; margin-top: 3px; }
+    .mtpl__prev { font-size: 11px; color: var(--text-tertiary); font-weight: 500; line-height: 1.4; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .legend-btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); background: var(--white); color: var(--text-secondary); border-radius: 8px; padding: 6px 11px; font-size: 12px; font-weight: 600; font-family: inherit; box-shadow: var(--shadow-btn); }
+    .legend-btn:hover { color: var(--text-primary); border-color: var(--border-strong); }
+    .legend { position: fixed; z-index: 60; width: 420px; max-width: 92vw; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-hover); padding: 16px 18px; }
+    .legend__title { font-size: 13.5px; font-weight: 700; letter-spacing: -.02em; }
+    .legend__sub { font-size: 12px; color: var(--text-secondary); font-weight: 500; margin-top: 3px; line-height: 1.45; }
+    .legend__row { display: flex; gap: 11px; padding: 10px 0; border-top: 1px solid var(--border-light); }
+    .legend__row:first-of-type { margin-top: 12px; }
+    .legend__txt { font-size: 12px; color: var(--text-secondary); line-height: 1.45; font-weight: 500; }
+    .legend__inputs { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-light); }
+    .legend__ilabel { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 7px; }
+    .legend__i { display: flex; gap: 8px; font-size: 11.5px; line-height: 1.45; margin-bottom: 5px; }
+    .legend__i b { color: var(--text-primary); font-weight: 700; flex-shrink: 0; width: 96px; }
+    .legend__i span { color: var(--text-secondary); font-weight: 500; }
+
+    /* ─── expandable brand rows ─── */
+    .brow { cursor: pointer; }
+    .chev { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 7px; color: var(--text-tertiary); transition: transform .15s, background .12s; }
+    .chev.is-open { transform: rotate(90deg); }
+    .brow:hover .chev { background: var(--secondary-lite); color: var(--text-primary); }
+    .peoplerow > td { background: var(--page-bg); padding: 4px 18px 8px 18px; }
+    .people { display: flex; flex-direction: column; }
+    .prow { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-top: 1px solid var(--border-light); }
+    .prow:first-child { border-top: none; }
+    .prow__who { flex: 1; min-width: 0; }
+    /* run loading bar */
+    .runbar { display: none; height: 4px; border-radius: 999px; background: var(--secondary-lite); overflow: hidden; margin: 0 0 14px; }
+    .runbar.on { display: block; }
+    .runbar__fill { height: 100%; width: 0; border-radius: 999px; background: var(--primary); transition: width .2s linear; }
+    /* per-person "mark sent" check (Superhuman-style) */
+    .prow__check { width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border-strong); background: var(--white); color: var(--text-tertiary); display: grid; place-items: center; flex-shrink: 0; box-shadow: var(--shadow-btn); }
+    .prow__check:hover { color: var(--text-primary); border-color: var(--text-primary); }
+    .prow__check.on { background: #16A34A; border-color: #16A34A; color: #fff; }
+    .prow.is-sent { opacity: .5; }
+    .prow.is-sent .ob-review { text-decoration: line-through; }
+    /* add-a-buyer row */
+    .prow--add { padding: 11px 0 3px; border-top: 1px dashed var(--border-strong); }
+    .addin { border: 1px solid var(--border); border-radius: 7px; padding: 7px 10px; font-family: inherit; font-size: 12.5px; background: var(--white); color: var(--text-primary); }
+    .addin:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .addin--name { width: 170px; flex-shrink: 0; }
+    .addin--email { flex: 1; min-width: 120px; }
+    .run-add { border: none; background: var(--primary); color: #fff; border-radius: 7px; padding: 7px 15px; font-size: 12.5px; font-weight: 700; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .run-add:hover { background: var(--primary-hover); }
+    .row-check { width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border-strong); background: var(--white); color: var(--text-tertiary); display: inline-grid; place-items: center; vertical-align: middle; box-shadow: var(--shadow-btn); }
+    .row-check:hover { color: var(--text-primary); border-color: var(--text-primary); }
+    .row-check.on { background: #16A34A; border-color: #16A34A; color: #fff; }
+    .brow.is-done .ob-brand__name { text-decoration: line-through; color: var(--text-secondary); }
+    .brow.is-done td:not(.ob-actions) { opacity: .55; }
+    .prow__name { font-size: 12.5px; font-weight: 600; letter-spacing: -.01em; }
+    .prow__role { color: var(--text-secondary); font-weight: 500; }
+    .prow__title { font-size: 11px; color: var(--text-tertiary); font-weight: 500; margin-top: 1px; }
+    .prow__title .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+    /* ─── assignable tag / owner / value ─── */
+    .tag-chip { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; color: var(--text-secondary); background: var(--secondary-lite); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+    .owner-chip { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--text-primary); white-space: nowrap; }
+    .ownav { width: 23px; height: 23px; border-radius: 50%; color: #fff; display: inline-grid; place-items: center; font-size: 9px; font-weight: 700; flex-shrink: 0; }
+    /* Enter-to-add chip input */
+    .chipin { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; width: 100%; border: 1px solid var(--border); border-radius: 9px; padding: 8px 10px; background: var(--white); min-height: 44px; cursor: text; }
+    .chipin:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    #brand-chips { display: contents; }
+    .chip-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; color: var(--text-primary); background: var(--secondary-lite); border: 1px solid var(--border); border-radius: 7px; padding: 4px 5px 4px 9px; }
+    .chip-name { font-weight: 700; }
+    .chip-dom { font-size: 11px; color: var(--text-tertiary); text-decoration: none; border-bottom: 1px solid transparent; }
+    .chip-dom:hover { color: var(--accent); border-bottom-color: currentColor; }
+    .linklike { border: none; background: none; padding: 0; font-family: inherit; font-size: inherit; font-weight: 700; color: var(--accent); cursor: pointer; }
+    .linklike:hover { text-decoration: underline; }
+    .bulk { margin-top: 11px; }
+    .chip-x { border: none; background: none; color: var(--text-tertiary); font-size: 15px; line-height: 1; cursor: pointer; padding: 0 2px; font-family: inherit; }
+    .chip-x:hover { color: var(--text-primary); }
+    .chipin__in { flex: 1; min-width: 90px; border: none; outline: none; font-family: inherit; font-size: 13px; padding: 4px 2px; background: none; color: var(--text-primary); }
+    .assign-btn { display: inline-block; font-size: 11.5px; font-weight: 600; color: var(--text-tertiary); border: 1px dashed var(--border-strong); border-radius: 7px; padding: 4px 9px; white-space: nowrap; }
+    .assign-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+    .assign-btn--plus { padding: 0; width: 26px; height: 26px; text-align: center; line-height: 24px; font-size: 15px; font-weight: 500; }
+    .val-set { font-weight: 700; letter-spacing: -.02em; font-size: 13.5px; }
+    .val-in { width: 92px; border: 1px solid var(--accent); border-radius: 7px; padding: 5px 8px; font-family: inherit; font-size: 13px; outline: none; }
+    .mini { position: fixed; z-index: 60; background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow-hover); padding: 5px; min-width: 180px; display: flex; flex-direction: column; }
+    .mini button { display: flex; align-items: center; gap: 8px; text-align: left; border: none; background: none; font-family: inherit; font-size: 12.5px; font-weight: 600; color: var(--text-primary); padding: 8px 10px; border-radius: 7px; }
+    .mini button:hover { background: var(--secondary-lite); }
+    /* Gmail-style follow-up (snooze) menu */
+    .snooze { min-width: 246px; padding: 6px; }
+    .snooze__head { font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-tertiary); padding: 8px 10px 6px; }
+    .snooze__row { display: flex !important; align-items: center; justify-content: space-between; gap: 18px; width: 100%; padding: 9px 10px !important; }
+    .snooze__row > span:first-child { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .snooze__date { font-size: 12.5px; font-weight: 500; color: var(--text-tertiary); }
+    .snooze__div { height: 1px; background: var(--border-light); margin: 5px 4px; }
+    .snooze__pick { display: flex !important; align-items: center; gap: 10px; width: 100%; font-size: 13px !important; padding: 9px 10px !important; }
+    .snooze__pick svg { color: var(--text-tertiary); flex-shrink: 0; }
+    .snooze__custom { display: none; gap: 8px; padding: 8px 8px 4px; }
+    .snooze__custom.show { display: flex; }
+    .snooze__custom .fld__in { flex: 1; }
+    .snooze__custom .abtn { flex-shrink: 0; }
+
+    /* ─── drawer contact panel ─── */
+    .c-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--border-light); }
+    .c-row:first-of-type { border-top: none; padding-top: 2px; }
+    .c-row__k { font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-tertiary); width: 70px; flex-shrink: 0; }
+    .c-row__v { font-size: 13px; font-weight: 600; color: var(--text-primary); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .c-row__v.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; font-weight: 500; }
+    .c-mini { font-family: inherit; font-size: 11.5px; font-weight: 700; border: 1px solid var(--border-strong); background: var(--white); color: var(--text-primary); padding: 5px 10px; border-radius: 7px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; }
+    .c-mini:hover { background: var(--secondary-lite); }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: var(--text-secondary); background: var(--secondary-lite); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; }
+    .chip i { width: 5px; height: 5px; border-radius: 50%; background: #3FB87C; }
+    .ob-role-tag { display: inline-flex; font-size: 11px; font-weight: 700; color: var(--text-secondary); background: var(--secondary-lite); border: 1px solid var(--border); padding: 3px 9px; border-radius: 999px; }
+
+    /* ─── DRAWER (outbound review) ─── */
+    .drawer-overlay { position: fixed; inset: 0; background: rgba(14,19,35,.34); opacity: 0; pointer-events: none; transition: opacity .22s ease; z-index: 40; }
+    .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+    .drawer { position: fixed; top: 0; right: 0; height: 100%; width: 560px; max-width: 94vw; background: var(--page-bg); border-left: 1px solid var(--border); box-shadow: -16px 0 48px rgba(14,19,35,.16); transform: translateX(100%); transition: transform .26s cubic-bezier(.4,0,.2,1); z-index: 41; display: flex; flex-direction: column; }
+    .drawer.open { transform: translateX(0); }
+    .drawer__head { display: flex; align-items: center; gap: 13px; padding: 18px 22px; border-bottom: 1px solid var(--border); background: var(--white); }
+    .drawer__icon { width: 40px; height: 40px; border-radius: 11px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex-shrink: 0; }
+    .drawer__who { line-height: 1.3; }
+    .drawer__name { font-size: 15px; font-weight: 700; letter-spacing: -.02em; }
+    .drawer__role { font-size: 12.5px; color: var(--text-secondary); }
+    .drawer__close { margin-left: auto; width: 34px; height: 34px; border-radius: 9px; border: none; background: var(--secondary-lite); color: var(--text-secondary); display: grid; place-items: center; font-family: inherit; }
+    .drawer__body { overflow-y: auto; padding: 18px 22px 40px; display: flex; flex-direction: column; gap: 14px; }
+    .panel { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow-post); }
+    .panel__head { display: flex; align-items: center; margin-bottom: 10px; }
+    .panel__title { font-size: 14px; font-weight: 700; letter-spacing: -.02em; }
+    .icon-btn { margin-left: auto; width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border); background: var(--white); color: var(--text-secondary); display: grid; place-items: center; font-family: inherit; flex-shrink: 0; }
+    .icon-btn:hover { background: var(--secondary-lite); color: var(--text-primary); border-color: var(--border-strong); }
+    .icon-btn.copied { background: var(--green-bg); color: var(--green-text); border-color: var(--green-text); }
+    .icon-btn--lg { margin-left: 0; width: 37px; height: 37px; border-radius: 9px; }
+    .panel__regen { margin-left: auto; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); background: none; border: none; font-family: inherit; padding: 0; }
+    .panel__regen:hover { color: var(--accent); }
+    .panel__text { font-size: 13.5px; color: var(--text-secondary); line-height: 1.55; font-weight: 500; }
+    .panel__tag { display: block; font-size: 11.5px; color: var(--text-tertiary); margin-top: 9px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .panel__count { font-size: 11.5px; color: var(--text-tertiary); margin-top: 7px; }
+    .field { width: 100%; border: 1px solid var(--border); border-radius: 9px; padding: 11px 13px; font-family: inherit; font-size: 13.5px; color: var(--text-primary); line-height: 1.55; resize: vertical; background: var(--white); }
+    .field:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .field--mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; }
+    .field + .field { margin-top: 9px; }
+    .action-block { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow-post); }
+    .action-block__label { font-size: 13px; font-weight: 700; margin-bottom: 11px; }
+    .action-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .action-row .divider { width: 1px; align-self: stretch; background: var(--border); margin: 0 2px; }
+    .abtn { font-family: inherit; font-size: 12.5px; font-weight: 600; border: 1px solid var(--border-strong); background: var(--white); color: var(--text-primary); padding: 8px 12px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+    .abtn:hover { background: var(--secondary-lite); }
+    .abtn--dark { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .abtn--accent { background: var(--accent); color: #fff; border-color: var(--accent); }
+    /* generated attachment */
+    .attach { display: flex; align-items: center; gap: 12px; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: var(--secondary-lite); }
+    .attach__icon { width: 40px; height: 40px; border-radius: 9px; background: var(--white); border: 1px solid var(--border); display: grid; place-items: center; flex-shrink: 0; color: var(--accent); }
+    .attach__meta { flex: 1; min-width: 0; }
+    .attach__name { font-size: 13px; font-weight: 700; letter-spacing: -.01em; }
+    .attach__sub { font-size: 11.5px; color: var(--text-tertiary); margin-top: 2px; font-weight: 500; line-height: 1.4; }
+    .attach .abtn { text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+
+    @media (max-width: 1080px) {
+      .stats { grid-template-columns: repeat(2,1fr); }
+      .agents { grid-template-columns: 1fr; }
+      .approvals { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ───────── SIDEBAR ───────── -->
+  <div class="wrap">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand__logo"><span class="bw1">BLUE</span><span class="bw2">WIRE</span></div>
+        <div class="brand__divider"></div>
+        <div class="brand__sub">Blue Wire<br><span>Outbound Agent</span></div>
+      </div>
+      <div class="topbar__right">
+        <button class="date-pill" id="datePill" onclick="pickDateRange(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg><span id="dateLabel">All time</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+        <button class="newrun-btn" onclick="openRunDrawer()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          New Brand Search Run
+        </button>
+        <button class="icon-btn icon-btn--lg" title="Settings" onclick="openSettings(this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        <div class="topav">CP</div>
+      </div>
+    </div>
+
+    <section id="view-outbound">
+      <div class="inner">
+
+        <!-- RESULTS -->
+        <div class="section-title" id="ob-heading"><span class="muted" id="ob-runline">Last run 8 min ago · 8 brands · 26 people found</span></div>
+
+        <div class="runbar" id="runbar"><div class="runbar__fill" id="runbarFill"></div></div>
+
+        <div class="ob-layout">
+          <nav class="ob-side" id="ob-seg">
+            <button class="ob-side__item on" data-f="nextup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>Next Up <span id="c-nextup">7</span></button>
+            <button class="ob-side__item" data-f="followup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/><path d="M12 8v4l3 2"/></svg>Follow Up <span id="c-followup">2</span></button>
+            <button class="ob-side__item" data-f="sent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>Sent <span id="c-sent">1</span></button>
+            <button class="ob-side__item" data-f="archived"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></svg>Archived <span id="c-archived">2</span></button>
+            <div class="ob-side__div"></div>
+            <button class="ob-side__item" data-f="database"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>Brands <span id="c-backlog">10</span></button>
+          </nav>
+
+          <div class="ob-card">
+            <div class="bulkbar" id="bulkbar" hidden>
+              <label class="bulkbar__all"><input type="checkbox" id="bl-all" onchange="toggleBacklogAll(this.checked)"> Select all</label>
+              <span class="bulkbar__count" id="bl-count">None selected</span>
+              <div class="bulkbar__grow">
+                <select class="dbtools__sel" id="db-filter" onchange="setDbFilter(this.value)" onclick="event.stopPropagation()">
+                  <option value="active">All active</option>
+                  <option value="new">New</option>
+                  <option value="pipeline">In pipeline</option>
+                  <option value="notrel">Not relevant</option>
+                  <option value="all">Everything</option>
+                </select>
+                <input class="dbtools__in" id="db-add" placeholder="Add a brand by name" onclick="event.stopPropagation()" onkeydown="if(event.key==='Enter'){event.preventDefault();dbAddManual()}" />
+                <button class="dbtools__btn" onclick="dbAddManual()">Add</button>
+                <label class="dbtools__btn dbtools__btn--ghost" title="Upload a CSV of brands">Upload CSV<input type="file" id="db-csv" accept=".csv,text/csv" hidden onchange="dbUploadCsv(event)" /></label>
+              </div>
+              <button class="bulkbar__btn" id="bl-nr" onclick="toggleRelevantSelected()" disabled>Not relevant</button>
+              <button class="bulkbar__btn bulkbar__btn--danger" id="bl-del" onclick="deleteSelected()" disabled>Delete</button>
+              <button class="bulkbar__send" id="bl-send" onclick="sendSelectedToNextUp()" disabled>Send to Next Up</button>
+            </div>
+            <table class="ob">
+              <thead id="ob-thead">
+                <tr><th>Brand</th><th>Campaign</th><th>Status</th><th></th><th></th><th></th></tr>
+              </thead>
+              <tbody id="ob-rows"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ───────── MESSAGE TEMPLATES (side modal) ───────── -->
+  <div class="drawer-overlay" id="msgOverlay" onclick="closeMsgTemplates()"></div>
+  <aside class="drawer" id="msgDrawer" aria-hidden="true">
+    <div class="drawer__head">
+      <div class="drawer__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H5.17L4 17.17z"/><path d="M8 9h8M8 13h5"/></svg></div>
+      <div class="drawer__who">
+        <div class="drawer__name">Message templates</div>
+        <div class="drawer__role">Your voice and message frames. The agent writes to these.</div>
+      </div>
+      <button class="drawer__close" onclick="closeMsgTemplates()" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="drawer__body">
+      <div class="panel">
+        <div class="panel__head"><span class="panel__title">Voice &amp; rules</span><button class="panel__regen" id="msgPromptSave" onclick="saveMsgPrompt(this)">Save</button></div>
+        <textarea class="field" id="msgPrompt" rows="6"></textarea>
+        <div class="fld__note">The instructions every message is written to. Change these to retrain how the agent writes across all templates.</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel__head"><span class="panel__title" id="msgFormTitle">Add a template</span><button class="panel__regen" id="msgFormReset" style="display:none" onclick="resetMsgForm()">Cancel edit</button></div>
+        <div class="fld"><span class="fld__label">Name</span><input class="fld__in" id="msgName" placeholder="Open-window pitch" /></div>
+        <div class="fld" style="margin-top:10px"><span class="fld__label">When to use it</span><input class="fld__in" id="msgWhen" placeholder="A show has an open slot and the brand already buys the category" /></div>
+        <div class="fld" style="margin-top:10px"><span class="fld__label">Email subject</span><input class="fld__in" id="msgSubject" placeholder="{{show}} slot open for {{brand}}" /></div>
+        <div class="fld" style="margin-top:10px"><span class="fld__label">Email body</span><textarea class="fld__in" id="msgBody" rows="6" placeholder="Hey {{first_name}}, ..."></textarea></div>
+        <div class="fld" style="margin-top:10px"><span class="fld__label">LinkedIn note <span style="color:var(--text-tertiary);font-weight:500">· 300 char max</span></span><textarea class="fld__in" id="msgLi" rows="3" maxlength="300"></textarea></div>
+        <div class="varbar" id="msgVars"></div>
+        <button class="abtn abtn--dark" style="margin-top:12px;width:100%" id="msgAddBtn" onclick="saveMsgTemplate()">Add template</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel__head"><span class="panel__title">Your templates <span id="msgCount" style="color:var(--text-tertiary);font-weight:600"></span></span></div>
+        <div id="msgList"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ───────── CANVA TEMPLATE LIBRARY (side modal) ───────── -->
+  <div class="drawer-overlay" id="tplOverlay" onclick="closeTemplates()"></div>
+  <aside class="drawer" id="tplDrawer" aria-hidden="true">
+    <div class="drawer__head">
+      <div class="drawer__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></svg></div>
+      <div class="drawer__who">
+        <div class="drawer__name">Canva templates</div>
+        <div class="drawer__role">Your designs. The agent fills them in per brand.</div>
+      </div>
+      <button class="drawer__close" onclick="closeTemplates()" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="drawer__body">
+      <div class="panel">
+        <div class="panel__head"><span class="panel__title">Add a template</span></div>
+        <div class="fld"><span class="fld__label">Name</span><input class="fld__in" id="tplName" placeholder="NFL one-sheet" /></div>
+        <div class="fld" style="margin-top:10px"><span class="fld__label">Canva link</span><input class="fld__in" id="tplLink" placeholder="https://www.canva.com/design/..." /></div>
+        <div class="fld" style="margin-top:10px"><span class="fld__label">When to use it</span><input class="fld__in" id="tplDesc" placeholder="Single show pitches with audience stats" /></div>
+        <button class="abtn abtn--dark" style="margin-top:12px;width:100%" onclick="addTemplate()">Add template</button>
+        <div class="fld__note">Paste any Canva design you already use. The agent keeps your layout and swaps in the brand logo, hook and show data.</div>
+      </div>
+      <div class="panel">
+        <div class="panel__head"><span class="panel__title">Your templates <span id="tplCount" style="color:var(--text-tertiary);font-weight:600"></span></span></div>
+        <div id="tplList"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ───────── NEW BRAND SEARCH RUN (side modal) ───────── -->
+  <div class="drawer-overlay" id="runOverlay" onclick="closeRunDrawer()"></div>
+  <aside class="drawer" id="runDrawer" aria-hidden="true">
+    <div class="drawer__head">
+      <div class="drawer__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div>
+      <div class="drawer__who">
+        <div class="drawer__name">New Brand Search Run</div>
+        <div class="drawer__role">Tell the agent who to find and why</div>
+      </div>
+      <button class="drawer__close" onclick="closeRunDrawer()" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="drawer__body">
+      <div class="panel">
+        <label class="fld">
+          <span class="fld__label">Campaign name</span>
+          <input id="in-campaign" class="fld__in" value="Cam Newton HBCU Tour" placeholder="e.g. Cam Newton HBCU Tour" />
+        </label>
+        <div class="fld__note">What this run is for. Every brand it finds is grouped under this campaign.</div>
+      </div>
+
+      <div class="panel">
+        <div class="fld">
+          <span class="fld__label">Brands</span>
+          <div class="chipin" onclick="document.getElementById('brand-input').focus()">
+            <span id="brand-chips"></span>
+            <input class="chipin__in" id="brand-input" placeholder="e.g. Kroger" onkeydown="brandKey(event)" />
+          </div>
+        </div>
+        <div class="fld__note">Type a brand <b>name</b> and press <b>Enter</b>. We match the website automatically. <button type="button" class="linklike" onclick="toggleBulkImport()">Paste a list</button>, or import from CSV, HubSpot or Magellan.</div>
+        <div class="bulk" id="bulkImport" hidden>
+          <textarea id="bulk-in" class="fld__in" rows="3" placeholder="Paste brand names, one per line or comma-separated"></textarea>
+          <button type="button" class="abtn abtn--dark" style="margin-top:8px" onclick="bulkAddBrands()">Add all</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel__head"><span class="panel__title">The pitch</span></div>
+        <div class="fld__note" style="margin:0 0 12px">These feed the hook. The agent combines them with signals about each brand (recent campaigns, LinkedIn, Magellan) to write a message tied to the content, not our company stats.</div>
+        <label class="fld">
+          <span class="fld__label">Talent / shows / content we're leading with</span>
+          <input id="in-talent" class="fld__in" value="Cam Newton, 4th & 1" placeholder="e.g. Cam Newton, or our top NBA shows" />
+        </label>
+        <label class="fld" style="margin-top:12px">
+          <span class="fld__label">Moment, event or theme</span>
+          <input id="in-moment" class="fld__in" value="HBCU Tour, 8 campus stops this fall" placeholder="e.g. HBCU tour, NBA All-Star, season kickoff" />
+        </label>
+        <label class="fld" style="margin-top:12px">
+          <span class="fld__label">Integration, what's in it for the brand</span>
+          <textarea id="in-integration" class="fld__in" rows="3" placeholder="How the brand shows up in the content">Official [category] partner of the tour: branded activations at each stop and custom host-read segments with Cam.</textarea>
+        </label>
+        <label class="fld" style="margin-top:12px">
+          <span class="fld__label">Blue Wire's objective <span style="color:var(--text-tertiary);font-weight:500">· optional</span></span>
+          <input id="in-objective" class="fld__in" value="Land tentpole sponsors for the tour" placeholder="Why Blue Wire wants this" />
+        </label>
+      </div>
+
+      <div class="panel">
+        <span class="fld__label">Target roles, who to find at each brand</span>
+        <div class="roles" id="roles" style="margin-top:9px">
+          <button type="button" class="role on" onclick="this.classList.toggle('on')">Marketing</button>
+          <button type="button" class="role on" onclick="this.classList.toggle('on')">Brand</button>
+          <button type="button" class="role on" onclick="this.classList.toggle('on')">Media Investment</button>
+          <button type="button" class="role on" onclick="this.classList.toggle('on')">Content</button>
+          <button type="button" class="role" onclick="this.classList.toggle('on')">Digital</button>
+          <button type="button" class="role" onclick="this.classList.toggle('on')">Partnerships</button>
+        </div>
+      </div>
+
+      <div class="action-block">
+        <div class="run__note" style="margin-bottom:12px">Every message waits for your approval before it sends. No unsubscribe footer, always comes from your inbox.</div>
+        <button class="run__cta" id="runBtn" style="width:100%;justify-content:center" onclick="runAgent()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 3 14 9-14 9z"/></svg>
+          Run Outbound Agent
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ───────── OUTBOUND REVIEW DRAWER ───────── -->
+  <div class="drawer-overlay" id="overlay" onclick="closeReview()"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer__head">
+      <div class="drawer__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></div>
+      <div class="drawer__who">
+        <div class="drawer__name" id="dwName">Marcus Bell · Kroger</div>
+        <div class="drawer__role">Drafted by Outbound Agent</div>
+      </div>
+      <button class="drawer__close" onclick="closeReview()" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="drawer__body">
+      <div class="panel">
+        <div class="panel__head"><span class="panel__title">Contact</span></div>
+        <div class="c-row"><div class="c-row__k">Person</div><div class="c-row__v" id="dwPerson">Marcus Bell</div></div>
+        <div class="c-row"><div class="c-row__k">Title</div><div class="c-row__v" id="dwTitle">Director of Brand Partnerships · Kroger</div></div>
+        <div class="c-row"><div class="c-row__k">Email</div><div class="c-row__v mono" id="dwEmail">mbell@kroger.com</div><button class="c-mini" onclick="copyFrom('dwEmail',this)">Copy</button></div>
+        <div class="c-row"><div class="c-row__k">LinkedIn</div><div class="c-row__v" id="dwLi">/in/marcus-bell</div><a class="c-mini" id="dwLiBtn" href="https://www.linkedin.com/" target="_blank" rel="noopener">Open</a></div>
+        <div class="chips">
+          <span class="chip"><i></i>Email verified · Apollo</span>
+          <span class="chip"><i></i>Profile · LinkedIn</span>
+          <span class="chip" id="dwRoleChip"><i></i>Role match: Partnerships</span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel__head"><span class="panel__title">Grading</span></div>
+        <div class="panel__text" id="dwGrading">Kroger publicly leans into HBCU community work, so Cam Newton's HBCU tour is a natural on-the-ground extension. Game-day food activations map straight to their business.</div>
+        <span class="panel__tag" id="dwGradeTag">signal: HBCU commitments · integration: official food partner</span>
+      </div>
+      <div class="panel">
+        <div class="panel__head"><span class="panel__title">Hook</span><button class="panel__regen">Regenerate</button></div>
+        <textarea class="field" id="dwHook" rows="4">I've seen Kroger's commitment to HBCU communities, so there's a natural way to bring that to life on the ground on game days. Cam Newton's 4th & 1 is going on an 8-stop HBCU tour this fall, with Kroger as the official food partner: branded catering and giveaways at each stop, plus custom host-read segments with Cam.</textarea>
+        <span class="panel__tag">confidence: high · built from your intent + brand research</span>
+      </div>
+      <div class="panel">
+        <div class="panel__head"><span class="panel__title">LinkedIn note</span><button class="panel__regen">Regenerate</button></div>
+        <textarea class="field" id="dwLinkedin" rows="5" maxlength="300" oninput="updateLiCount()"></textarea>
+        <div class="panel__count" id="dwLiCount">0 / 300 · connection request limit</div>
+      </div>
+      <div class="panel">
+        <div class="panel__head">
+          <span class="panel__title">Email</span>
+          <button class="icon-btn" id="copyEmailBtn" title="Copy subject and body" onclick="copyEmail(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+          <button class="panel__regen" style="margin-left:10px">Regenerate</button>
+        </div>
+        <input class="field" id="dwSubject" value="Cam Newton's HBCU Tour: Kroger as official food partner" />
+        <textarea class="field field--mono" id="dwBody" rows="13">Hey Marcus,
+
+I've seen Kroger's commitment to HBCU communities, so I wanted to reach out about bringing that relationship to life on the ground on game days.
+
+Cam Newton is taking 4th & 1 on the road this fall for an 8-stop HBCU live-show tour. We're envisioning Kroger as the official food partner of the tour: branded catering and giveaways at each stop, plus custom host-read segments with Cam that tie back to the community work you already do.
+
+Would love to walk you through it. Worth a quick chat?</textarea>
+      </div>
+      <div class="action-block">
+        <div class="action-block__label">One-pager</div>
+        <div class="attach">
+          <div class="attach__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></svg></div>
+          <div class="attach__meta">
+            <div class="attach__name" id="dwAttachName">Kroger × HBCU Tour · one-pager</div>
+            <div class="attach__sub">Template: <b id="dwTplName">Show spotlight</b> · your design, brand logo and hook dropped in</div>
+          </div>
+          <button class="abtn" onclick="pickTemplate(this)">Change</button>
+          <a class="abtn" id="dwTplLink" href="https://www.canva.com/" target="_blank" rel="noopener">Open in Canva</a>
+        </div>
+      </div>
+
+      <div class="action-block">
+        <div class="action-block__label">Send it</div>
+        <div class="action-row">
+          <button class="abtn" onclick="openLinkedIn()">Copy note &amp; open LinkedIn</button>
+          <button class="abtn">Mark LinkedIn sent</button>
+          <span class="divider"></span>
+          <button class="abtn abtn--accent">Send email</button>
+        </div>
+      </div>
+      <div class="action-block">
+        <div class="action-block__label">State</div>
+        <div class="action-row">
+          <button class="abtn abtn--dark">Mark done</button>
+          <button class="abtn" onclick="archiveBrand()">Archive</button>
+          <button class="abtn">Auto follow-up on</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <script>
+    /* ─── view switching ─── */
+    function switchView(name){
+      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+      const view = document.getElementById('view-'+name);
+      view.classList.add('active');
+      const ifr = view.querySelector('iframe[data-src]');
+      if (ifr && !ifr.src) ifr.src = ifr.getAttribute('data-src');
+      document.querySelectorAll('[data-view]').forEach(n=>n.classList.toggle('active', n.dataset.view===name));
+      if (view.classList.contains('view--scroll')) view.scrollTop = 0;
+    }
+
+    /* ─── outbound contacts: one buyer per row, fully drafted ─── */
+    /* Demo campaign: Cam Newton's HBCU Tour. Each brand's message ties to the content (Cam / the tour)
+       and the integration (what's in it for the brand), opened with a signal about the brand. */
+    const CONTACTS = [
+      { id:"kroger", brand:"Kroger", logo:"KR", cat:"Grocery", domain:"kroger.com",
+        person:"Marcus Bell", title:"Director of Brand Partnerships", role:"Partnerships", email:"mbell@kroger.com", li:"/in/marcus-bell",
+        show:"HBCU Tour", signal:"Kroger has publicized its commitments to HBCU communities and campus programs.", val:"$120K", status:"ready",
+        grading:"Kroger publicly leans into HBCU community work, so Cam Newton's HBCU tour is a natural on-the-ground extension. Game-day food activations map straight to their business.",
+        gradeTag:"signal: HBCU commitments · integration: official food partner",
+        hook:"I've seen Kroger's commitment to HBCU communities, so there's a natural way to bring that to life on the ground on game days. Cam Newton's 4th & 1 is going on an 8-stop HBCU tour this fall, with Kroger as the official food partner: branded catering and giveaways at each stop, plus custom host-read segments with Cam.",
+        linkedin:"Hey Marcus, saw Kroger's commitment to HBCU communities. Cam Newton's 4th & 1 is doing an 8-stop HBCU tour this fall, and Kroger could be the official food partner: branded catering and giveaways at each stop, plus host reads with Cam. Worth a quick chat?",
+        subject:"Cam Newton's HBCU Tour: Kroger as official food partner",
+        body:"Hey Marcus,\n\nI've seen Kroger's commitment to HBCU communities, so I wanted to reach out about bringing that relationship to life on the ground on game days.\n\nCam Newton is taking 4th & 1 on the road this fall for an 8-stop HBCU live-show tour. We're envisioning Kroger as the official food partner of the tour: branded catering and giveaways at each stop, plus custom host-read segments with Cam that tie back to the community work you already do.\n\nWould love to walk you through it. Worth a quick chat?" },
+
+      { id:"statefarm", brand:"State Farm", logo:"SF", cat:"Insurance", domain:"statefarm.com",
+        person:"Tanya Reed", title:"Multicultural Marketing Lead", role:"Marketing", email:"treed@statefarm.com", li:"/in/tanya-reed",
+        show:"HBCU Tour", signal:"State Farm runs active HBCU scholarship and campus programs.", val:"$150K", status:"ready",
+        grading:"State Farm already funds HBCU scholarships and campus programs. A presenting-sponsor role on Cam's tour turns that commitment into live fan experiences.",
+        gradeTag:"signal: HBCU scholarships · integration: presenting sponsor",
+        hook:"State Farm already funds HBCU scholarships and campus programs, so Cam Newton's HBCU tour is a live extension of that. Presenting sponsor with campus fan zones and financial-literacy moments built into the show with Cam.",
+        linkedin:"Hey Tanya, State Farm's HBCU scholarship work is a natural fit for Cam Newton's 8-stop HBCU tour this fall. Presenting sponsor with campus fan zones and financial-literacy moments in the show. Worth a quick chat?",
+        subject:"Cam Newton's HBCU Tour: a presenting-sponsor fit for State Farm",
+        body:"Hey Tanya,\n\nState Farm's HBCU scholarship and campus work is exactly the kind of commitment Cam Newton's tour is built to celebrate.\n\nCam is taking 4th & 1 to 8 HBCU campuses this fall. We'd love State Farm as presenting sponsor: campus fan zones, on-stage moments, and financial-literacy segments woven into the show with Cam.\n\nWorth a quick chat?" },
+
+      { id:"chickfila", brand:"Chick-fil-A", logo:"CF", cat:"QSR", domain:"cfa.com",
+        person:"Bethany Cole", title:"Field Marketing Director", role:"Marketing", email:"bcole@cfa.com", li:"/in/bethany-cole",
+        show:"HBCU Tour", signal:"Chick-fil-A has deep Southeastern campus presence.", val:"$72K", status:"ready",
+        grading:"Chick-fil-A owns the Southeastern campus footprint the tour travels through. Official meal partner with tailgate activations is a clean fit.",
+        gradeTag:"signal: campus footprint · integration: official meal partner",
+        hook:"The tour stops sit right in Chick-fil-A's Southeastern campus footprint. Official meal partner with tailgate activations at each stop and host reads with Cam.",
+        linkedin:"Hey Bethany, Cam Newton's 8-stop HBCU tour runs through Chick-fil-A's core Southeastern campuses. Official meal partner with tailgate activations and host reads. Worth a quick chat?",
+        subject:"Cam Newton's HBCU Tour: Chick-fil-A on campus",
+        body:"Hey Bethany,\n\nCam Newton's HBCU tour travels straight through Chick-fil-A's Southeastern campus footprint this fall.\n\nWe'd love Chick-fil-A as the official meal partner: tailgate activations at each of the 8 stops and custom host-read segments with Cam. It puts you on campus at exactly the moments students show up.\n\nWorth a quick chat?" },
+
+      { id:"nike", brand:"Nike", logo:"NK", cat:"Apparel", domain:"nike.com",
+        person:"Serena Vaughn", title:"Sports Marketing Manager", role:"Marketing", email:"svaughn@nike.com", li:"/in/serena-vaughn",
+        show:"HBCU Tour", signal:"Nike consistently owns HBCU culture moments.", val:"$95K", status:"ready",
+        grading:"Nike owns HBCU culture. Cam Newton as talent plus a campus apparel moment is squarely on-brand.",
+        gradeTag:"signal: owns HBCU culture · integration: official apparel + capsule",
+        hook:"Nike consistently owns HBCU culture, and Cam Newton's tour is a talent-led moment right in that lane. Official apparel with a campus capsule tied to the tour and host-read integration with Cam.",
+        linkedin:"Hey Serena, Nike owns HBCU culture and Cam Newton's HBCU tour is a talent-led moment in that lane. Official apparel with a campus capsule and host reads with Cam. Worth a quick chat?",
+        subject:"Cam Newton x Nike: owning the HBCU tour moment",
+        body:"Hey Serena,\n\nNike owns HBCU culture, and Cam Newton's fall HBCU tour is a talent-led moment right in that space.\n\nWe'd love Nike as the official apparel partner: a campus capsule tied to the tour and host-read integration with Cam across the 8 stops.\n\nWorth a quick chat?" },
+
+      { id:"gatorade", brand:"Gatorade", logo:"GT", cat:"Sports Drink", domain:"gatorade.com",
+        person:"Marcus Iverson", title:"Sports Marketing Director", role:"Marketing", email:"miverson@gatorade.com", li:"/in/marcus-iverson",
+        show:"HBCU Tour", signal:"Gatorade activates hard around game day and college sports.", val:"$88K", status:"ready",
+        grading:"Gatorade is a game-day native. The tour's on-the-field, game-day moments are a natural hydration-partner fit.",
+        gradeTag:"signal: game-day native · integration: official hydration partner",
+        hook:"Gatorade lives on game day, and the tour is built around it. Official hydration partner with sideline and on-stage moments across the stops, plus host reads with Cam.",
+        linkedin:"Hey Marcus, Gatorade is game-day native and Cam Newton's HBCU tour lives there. Official hydration partner with sideline moments and host reads across the stops. Worth a quick chat?",
+        subject:"Cam Newton's HBCU Tour: Gatorade on game day",
+        body:"Hey Marcus,\n\nGatorade lives on game day, and Cam Newton's HBCU tour is built around exactly those moments.\n\nWe'd love Gatorade as the official hydration partner: sideline and on-stage moments at each of the 8 stops, plus host reads with Cam.\n\nWorth a quick chat?" },
+
+      { id:"wellsfargo", brand:"Wells Fargo", logo:"WF", cat:"Bank", domain:"wellsfargo.com",
+        person:"Dwight Ellis", title:"Brand Marketing Director", role:"Brand", email:"dellis@wellsfargo.com", li:"/in/dwight-ellis",
+        show:"HBCU Tour", signal:"Wells Fargo funds HBCU scholarship programs.", val:"$60K", status:"ready",
+        grading:"Wells Fargo funds HBCU scholarships. Financial-literacy segments on the tour connect their commitment to a live audience.",
+        gradeTag:"signal: HBCU scholarships · integration: financial-literacy segments",
+        hook:"Wells Fargo funds HBCU scholarships, and Cam's tour can put that in front of students live. Financial-literacy segments woven into the show at each stop with Cam.",
+        linkedin:"Hey Dwight, Wells Fargo funds HBCU scholarships. Cam Newton's HBCU tour can put that in front of students live with financial-literacy segments at each stop. Worth a quick chat?",
+        subject:"Cam Newton's HBCU Tour: financial-literacy fit for Wells Fargo",
+        body:"Hey Dwight,\n\nWells Fargo's HBCU scholarship work is exactly the commitment Cam Newton's tour is built to amplify.\n\nWe'd love to weave Wells Fargo financial-literacy segments into the show at each of the 8 campus stops, with Cam leading them. It puts your programs in front of students in person.\n\nWorth a quick chat?" },
+
+      { id:"doordash", brand:"DoorDash", logo:"DD", cat:"Delivery", domain:"doordash.com",
+        person:"Priya Menon", title:"Performance Media Lead", role:"Media Investment", email:"pmenon@doordash.com", li:"/in/priya-menon",
+        show:"HBCU Tour", signal:"DoorDash has ramped campus and game-day marketing.", val:"$44K", status:"ready",
+        grading:"DoorDash leans into game-day and campus ordering. A game-day delivery activation around the tour ties directly to intent.",
+        gradeTag:"signal: campus + game-day push · integration: game-day delivery",
+        hook:"DoorDash has leaned into campus and game-day ordering. The tour's game days are a natural home: a delivery activation at each stop plus host reads with Cam.",
+        linkedin:"Hey Priya, DoorDash's campus and game-day push lines up with Cam Newton's HBCU tour. A game-day delivery activation at each stop plus host reads. Worth a quick chat?",
+        subject:"Cam Newton's HBCU Tour: game-day delivery for DoorDash",
+        body:"Hey Priya,\n\nDoorDash has been leaning into campus and game-day ordering, which is exactly when Cam Newton's HBCU tour shows up.\n\nWe'd love a DoorDash game-day delivery activation at each of the 8 stops, with host reads from Cam tying it to the moment.\n\nWorth a quick chat?" },
+
+      { id:"michelob", brand:"Michelob Ultra", logo:"MU", cat:"Beverage", domain:"michelobultra.com",
+        person:"Renee Ford", title:"Brand Director", role:"Brand", email:"rford@michelobultra.com", li:"/in/renee-ford",
+        show:"HBCU Tour", signal:"Michelob Ultra is a sports-forward, tailgate brand.", val:"$52K", status:"sent",
+        grading:"Michelob Ultra is sports and tailgate forward. Official adult-beverage of the tailgate is a clean fit.",
+        gradeTag:"signal: sports/tailgate brand · integration: official tailgate beverage",
+        hook:"Michelob Ultra is a tailgate brand, and every tour stop is a tailgate. Official adult beverage of the tour with on-site activations and host reads with Cam.",
+        linkedin:"Hey Renee, every stop on Cam Newton's HBCU tour is a tailgate, which is Michelob Ultra's world. Official tailgate beverage with on-site activations and host reads. Worth a quick chat?",
+        subject:"Cam Newton's HBCU Tour: Michelob Ultra at the tailgate",
+        body:"Hey Renee,\n\nEvery stop on Cam Newton's HBCU tour is a tailgate, which is Michelob Ultra's whole world.\n\nWe'd love Michelob Ultra as the official adult beverage of the tour: on-site activations at each stop and host reads with Cam.\n\nWorth a quick chat?" },
+    ];
+
+    const STPILL = { ready:["pill--ready","Ready to send"], sent:["pill--sent","Sent"], followup:["pill--followup","Follow up due"] };
+    let obFilter = "nextup";
+
+    /* letter grade per brand, graded on fit against your inventory */
+    const GRADE = { kroger:"A+", statefarm:"A+", chickfila:"A", nike:"A", gatorade:"A", wellsfargo:"B+", doordash:"B+", michelob:"B" };
+    const STATUS_OVERRIDE = { wellsfargo:"followup", doordash:"followup" };
+    /* two buckets only: the A+ picks, then everyone else */
+    const bucketOf = b => b.grade === "A+" ? "A+" : "Rest";
+    const GRADE_ORDER = ["A+","Rest"];
+    const GRADE_LABEL = { "A+":"A+", "Rest":"The rest" };
+    const GRADE_CLASS = { "A+":"g-aplus", "Rest":"g-b" };
+    const GRADE_HINT = {
+      "A+":"Already buying your category, audience maps to a named show, and inventory is open now. Work these first.",
+      "Rest":"Everyone else worth a touch. Good fit but no open-window urgency."
+    };
+    const GRADE_INPUTS = [
+      ["Category spend","Are they already buying podcast in this category, per your spend data"],
+      ["Audience match","How closely their buyer maps to a specific show on your slate"],
+      ["Open window","Whether the inventory they'd want is actually open right now"],
+      ["Relationship","Past buys, lapsed sponsorships or a live RFP with you"]
+    ];
+    const FOLLOWUP_NOTE = { wellsfargo:"Sent 9 days ago, no reply. Second touch due.", doordash:"Sent 6 days ago, opened twice, no reply." };
+    /* campaign = the run this brand came from. Named when you kick off a Brand Search Run. */
+    let RUN_CAMPAIGN = "Cam Newton HBCU Tour";
+    const CAMPAIGN = { wellsfargo:"Q2 HBCU push", doordash:"Spring campus push" };
+
+    /* ─── the network's own Canva designs ─── */
+    let TEMPLATES = [
+      { id:"t1", name:"Show spotlight", desc:"One show, audience stats and host photo. The default for direct show pitches.", size:"1080 × 1350", link:"https://www.canva.com/" },
+      { id:"t2", name:"Talent-led", desc:"Leads with the host or talent. Use when the name is the hook.", size:"1080 × 1350", link:"https://www.canva.com/" },
+      { id:"t3", name:"Seasonal / tentpole", desc:"Event or season framing with room for dates and stops.", size:"1080 × 1350", link:"https://www.canva.com/" },
+      { id:"t4", name:"Category exclusivity", desc:"Built around an open category or a lapsed sponsor angle.", size:"1080 × 1350", link:"https://www.canva.com/" },
+      { id:"t5", name:"Network overview", desc:"Full slate at a glance. Good for first contact at big agencies.", size:"1920 × 1080", link:"https://www.canva.com/" },
+    ];
+    /* the agent picks a starting template per brand, you can override it */
+    const TEMPLATE_DEFAULT = { kroger:"t3", statefarm:"t3", chickfila:"t3", nike:"t2", gatorade:"t3", wellsfargo:"t4", doordash:"t3", michelob:"t3" };
+
+    /* ─── message templates: the voice + the frames the agent writes to ─── */
+    const MSG_VARS = ["{{first_name}}","{{brand}}","{{talent}}","{{moment}}","{{integration}}","{{signal}}"];
+    let MSG_PROMPT = "Write like a Blue Wire seller: warm, specific, short. American spelling, no em-dashes. Open with a signal about the brand (a recent campaign, LinkedIn post or Magellan spend). Then tie to the specific content, talent and moment we're pitching from the campaign (for example Cam Newton's HBCU tour), and the integration, what's in it for the brand (official partner, branded activation, custom host-read). Do NOT lead with company metrics like show count or downloads. Keep LinkedIn notes under 300 characters. No unsubscribe footer. End on a light ask like 'Worth a quick chat?'";
+    let MSG_TEMPLATES = [
+      { id:"m1", name:"Signal + integration", when:"The default. Open on a brand signal, tie to the talent, moment and integration.",
+        subject:"{{moment}}: {{brand}} as official partner",
+        body:"Hey {{first_name}},\n\n{{signal}}\n\n{{talent}} is going out around {{moment}}. We're envisioning {{brand}} as the official partner: {{integration}}\n\nWould love to walk you through it. Worth a quick chat?",
+        li:"Hey {{first_name}}, {{signal}} {{talent}} is going out around {{moment}}, and {{brand}} could be the official partner: {{integration}} Worth a quick chat?" },
+      { id:"m2", name:"Talent-led", when:"When the talent is the reason the brand should care.",
+        subject:"{{talent}} x {{brand}}: {{moment}}",
+        body:"Hey {{first_name}},\n\n{{signal}}\n\n{{talent}} is a natural fit for {{brand}} around {{moment}}. The integration: {{integration}}\n\nWorth a quick chat?",
+        li:"Hey {{first_name}}, {{talent}} is a natural fit for {{brand}} around {{moment}}. {{integration}} Worth a quick chat?" },
+      { id:"m3", name:"Activation-led", when:"When the on-the-ground activation is the hook.",
+        subject:"An idea for {{brand}} around {{moment}}",
+        body:"Hey {{first_name}},\n\n{{signal}}\n\nHere's the idea: {{integration}} tied to {{talent}} and {{moment}}. It puts {{brand}} in front of the audience at exactly the right moment.\n\nWorth a quick chat?",
+        li:"Hey {{first_name}}, idea for {{brand}} around {{moment}}: {{integration}} with {{talent}}. Worth a quick chat?" },
+      { id:"m4", name:"Follow-up 1 (nudge)", when:"First follow-up when the intro got no reply.",
+        subject:"Re: {{brand}} x {{moment}}",
+        body:"Hey {{first_name}},\n\nQuick nudge on this. I still think {{brand}} would be a great official partner for {{moment}} with {{talent}}.\n\nWorth 15 minutes?",
+        li:"Hey {{first_name}}, circling back on {{brand}} for {{moment}} with {{talent}}. Still a strong fit. Worth 15 minutes?" },
+      { id:"m5", name:"Follow-up 2 (final)", when:"Last touch before dropping the thread.",
+        subject:"Closing the loop on {{brand}} x {{moment}}",
+        body:"Hey {{first_name}},\n\nLast one from me. If {{moment}} isn't a fit for {{brand}} right now, no worries, I'll close the loop.\n\nHappy to pick it back up whenever the timing is better.",
+        li:"Hey {{first_name}}, last nudge on {{brand}} for {{moment}}. If it's not the moment, no worries, I'll leave it here." },
+    ];
+    let msgEditId = null, msgVarTarget = null;
+
+    /* the same pitch goes to several people at each brand */
+    const p = (name,title,role,email,li)=>({name,title,role,email,li});
+    const MORE_PEOPLE = {
+      kroger:[ p("Elena Ruiz","Community Marketing Manager","Marketing","eruiz@kroger.com","/in/elena-ruiz"),
+               p("Tom Slater","Sponsorships Lead","Partnerships","tslater@kroger.com","/in/tom-slater"),
+               p("Amara Cole","Media Investment","Media Investment","acole@kroger.com","/in/amara-cole") ],
+      statefarm:[ p("Owen Blake","Media Investment Director","Media Investment","oblake@statefarm.com","/in/owen-blake"),
+                  p("Nadia Cruz","Sponsorship Manager","Partnerships","ncruz@statefarm.com","/in/nadia-cruz") ],
+      chickfila:[ p("Isaac Moore","Brand Manager","Brand","imoore@cfa.com","/in/isaac-moore"),
+                  p("Gina Park","Digital & Content Lead","Digital","gpark@cfa.com","/in/gina-park") ],
+      nike:[ p("Terrence Hill","Brand Partnerships","Partnerships","thill@nike.com","/in/terrence-hill"),
+             p("Mika Sato","Content Lead","Content","msato@nike.com","/in/mika-sato"),
+             p("Paul Reyes","Media Investment","Media Investment","preyes@nike.com","/in/paul-reyes") ],
+      gatorade:[ p("Lena Wu","Media Investment","Media Investment","lwu@gatorade.com","/in/lena-wu"),
+                 p("Tariq Boyd","Brand Manager","Brand","tboyd@gatorade.com","/in/tariq-boyd") ],
+      wellsfargo:[ p("Rhea Kapoor","Media Investment","Media Investment","rkapoor@wellsfargo.com","/in/rhea-kapoor"),
+                   p("Sam Fields","Sponsorships Lead","Partnerships","sfields@wellsfargo.com","/in/sam-fields") ],
+      doordash:[ p("Jake Sullivan","Brand Marketing","Brand","jsullivan@doordash.com","/in/jake-sullivan"),
+                 p("Nora Beck","Paid Media","Digital","nbeck@doordash.com","/in/nora-beck") ],
+      michelob:[ p("Hank Silva","Media Investment","Media Investment","hsilva@michelobultra.com","/in/hank-silva"),
+                 p("Iris Chen","Social & Content","Content","ichen@michelobultra.com","/in/iris-chen") ],
+    };
+
+    const OWNERS = ["Andrew Rotondi","Ben Wasserman","Henry Ettinger","Kevin Jones","Kyle Bandujo","Cam Pritchard"];
+    const OWNER_COLOR = { "Andrew Rotondi":"#7C3AED", "Ben Wasserman":"#2563EB", "Henry Ettinger":"#0D9488", "Kevin Jones":"#EA580C", "Kyle Bandujo":"#DB2777", "Cam Pritchard":"#18181B" };
+    const ownerAv = n => `<span class="ownav" style="background:${OWNER_COLOR[n]||'#18181B'}">${initials(n)}</span>`;
+    const TAGS = ["HBCU Tour","Tentpole","Presenting sponsor","Game day","Priority","Nurture"];
+
+    /* how long ago each brand was last touched, drives the date-range filter */
+    const DAYS_AGO = { kroger:0, statefarm:1, chickfila:2, nike:2, gatorade:1, wellsfargo:9, doordash:6, michelob:4 };
+
+    /* brand is the unit of work. Tag, owner and value are assigned by you, not the agent.
+       worked = has been pulled into the active pipeline. relevant = still a fit (false = not relevant). */
+    const BRANDS = CONTACTS.map(x=>({
+      id:x.id, brand:x.brand, logo:x.logo, cat:x.cat, domain:x.domain, show:x.show, signal:x.signal,
+      status: STATUS_OVERRIDE[x.id] || (x.status === 'draft' ? 'ready' : x.status),
+      grade: GRADE[x.id] || "B",
+      followNote: FOLLOWUP_NOTE[x.id] || null,
+      campaign: CAMPAIGN[x.id] || RUN_CAMPAIGN,
+      template: TEMPLATE_DEFAULT[x.id] || "t1",
+      archived: false, daysAgo: DAYS_AGO[x.id] ?? 3, worked: true, relevant: true, source: "Search run",
+      grading:x.grading, gradeTag:x.gradeTag, hook:x.hook, linkedin:x.linkedin, subject:x.subject, body:x.body,
+      autoVal:x.val, val:null, tag:null, owner:null,
+      contacts:[ p(x.person,x.title,x.role,x.email,x.li), ...(MORE_PEOPLE[x.id]||[]) ]
+    }));
+
+    /* a couple of older runs already archived, so the Archived tab and date ranges have history */
+    const archivedSeed = (id, brand, cat, campaign, daysAgo, contacts) => ({
+      id, brand, cat, domain:"", campaign, status:"sent", archived:true, daysAgo, worked:true, relevant:true, source:"Search run",
+      show:"", signal:"", followNote:null, grade:"B", template:"t1",
+      grading:"Archived from an earlier campaign.", gradeTag:"archived",
+      hook:"", subject:"", body:"", linkedin:"",
+      autoVal:"$0", val:null, tag:null, owner:null, contacts
+    });
+    BRANDS.push(
+      archivedSeed("footlocker","Foot Locker","Apparel","Q1 campus test",52,
+        [ p("Cara Nolan","Brand Marketing Manager","Brand","cnolan@footlocker.com","/in/cara-nolan") ]),
+      archivedSeed("beats","Beats by Dre","Consumer Tech","Winter tour test",71,
+        [ p("Ravi Shah","Media Investment","Media Investment","rshah@beatsbydre.com","/in/ravi-shah") ])
+    );
+
+    /* ─── Brand database: every brand we know about. Sourced leads land here un-worked,
+       waiting to be pulled into the pipeline (worked=false). ─── */
+    const SOURCED_SEED = [
+      { brand:"Buffalo Wild Wings", cat:"QSR", domain:"buffalowildwings.com", source:"Magellan" },
+      { brand:"Dr Pepper", cat:"Beverage", domain:"drpepper.com", source:"Magellan" },
+      { brand:"Progressive", cat:"Insurance", domain:"progressive.com", source:"HubSpot" },
+      { brand:"Bose", cat:"Consumer Tech", domain:"bose.com", source:"LinkedIn" },
+      { brand:"Chipotle", cat:"QSR", domain:"chipotle.com", source:"Magellan" },
+      { brand:"Rocket Mortgage", cat:"Fintech", domain:"rocketmortgage.com", source:"SellerCrowd" },
+      { brand:"Prime Hydration", cat:"Sports Drink", domain:"drinkprime.com", source:"ChatGPT" },
+      { brand:"Dollar Shave Club", cat:"Grooming", domain:"dollarshaveclub.com", source:"HubSpot" },
+      { brand:"Bud Light", cat:"Beverage", domain:"budlight.com", source:"Magellan" },
+      { brand:"Fanatics", cat:"Apparel", domain:"fanatics.com", source:"LinkedIn" },
+    ];
+    let leadIdSeq = 0;
+    /* a blank, un-worked brand sitting in the database */
+    function makeLeadBrand({brand, cat, domain, source}){
+      return {
+        id: "lead-" + (++leadIdSeq), brand, logo: initials(brand), cat: cat || "Brand", domain: domain || "",
+        source: source || "Manual", worked: false, relevant: true, archived: false, status: "ready", daysAgo: 0,
+        show:"", signal:"", followNote:null, grade:"B", campaign: RUN_CAMPAIGN, template:"t3",
+        grading:"", gradeTag:"", hook:"", linkedin:"", subject:"", body:"",
+        autoVal:"$0", val:null, tag:null, owner:null, contacts:[]
+      };
+    }
+    SOURCED_SEED.forEach(l => BRANDS.push(makeLeadBrand(l)));
+
+    const selectedBacklog = new Set();   // ids selected in the database view
+    let dbFilter = "active";             // active | new | pipeline | notrel | all
+    const CAT_WORD = { QSR:"food", Grocery:"food", Beverage:"beverage", "Sports Drink":"hydration", Apparel:"apparel", Insurance:"presenting", Bank:"presenting", Delivery:"delivery", Fintech:"finance", "Consumer Tech":"tech", Grooming:"grooming" };
+    const LEAD_ROLES = [["Brand Marketing Manager","Brand"],["Media Investment","Media Investment"],["Sponsorships Lead","Partnerships"]];
+    const LEAD_FIRST = ["Alex","Jordan","Sam","Riley","Casey","Morgan"];
+    const LEAD_LAST = ["Morgan","Lee","Rivera","Chen","Brooks","Patel"];
+
+    /* read the current campaign pitch context (from the run modal, or its defaults) */
+    function pitchContext(){
+      const g = (id,d) => { const el = document.getElementById(id); return (el && el.value.trim()) || d; };
+      return {
+        talent: g('in-talent',"Cam Newton, 4th & 1"),
+        moment: g('in-moment',"HBCU Tour"),
+        integration: g('in-integration',"Official partner of the tour with branded activations and custom host-read segments with Cam."),
+      };
+    }
+    /* fill a former lead with contacts + a drafted message the first time it enters the pipeline */
+    let leadSeq = 0;
+    function fillLeadDraft(b){
+      const P = pitchContext();
+      const integ = P.integration.replace(/\[category\]/gi, CAT_WORD[b.cat] || 'official');
+      const signal = `${b.brand} is active in the ${b.cat.toLowerCase()} space and a strong fit for ${P.moment}.`;
+      const domain = b.domain || (b.brand.toLowerCase().replace(/[^a-z0-9]+/g,'') + '.com');
+      const contacts = [0,1].map(i=>{
+        const first = LEAD_FIRST[(leadSeq + i) % LEAD_FIRST.length];
+        const last = LEAD_LAST[(leadSeq + i) % LEAD_LAST.length];
+        const [title, role] = LEAD_ROLES[i % LEAD_ROLES.length];
+        return p(`${first} ${last}`, title, role, `${first[0].toLowerCase()}${last.toLowerCase()}@${domain}`, `/in/${first.toLowerCase()}-${last.toLowerCase()}`);
+      });
+      leadSeq += 2;
+      b.show = P.moment; b.signal = signal;
+      b.grading = `Sourced from ${b.source}. ${b.brand} fits ${P.moment}, and the integration ties it to ${P.talent}.`;
+      b.gradeTag = `sourced: ${b.source} · integration: ${CAT_WORD[b.cat] || 'official'} partner`;
+      b.hook = `${signal} ${P.talent} is going out around ${P.moment}, and ${b.brand} could be the official partner: ${integ}`;
+      b.linkedin = `Hey ${contacts[0].name.split(' ')[0]}, ${P.talent} is going out around ${P.moment}, and ${b.brand} could be a great official partner: ${integ}`.slice(0,300);
+      b.subject = `${P.moment}: ${b.brand} as official partner`;
+      b.body = `Hey ${contacts[0].name.split(' ')[0]},\n\n${signal}\n\n${P.talent} is going out around ${P.moment}. We're envisioning ${b.brand} as the official partner: ${integ}\n\nWould love to walk you through it. Worth a quick chat?`;
+      b.contacts = contacts;
+    }
+    /* pull a brand into the active pipeline (Next Up). Drafts a message if it has none yet. */
+    function promoteToNextUp(b){
+      if (!b.worked && (!b.contacts || !b.contacts.length)) fillLeadDraft(b);
+      b.worked = true; b.relevant = true; b.archived = false; b.status = "ready";
+      b.followNote = null; b.followDate = null; b.daysAgo = 0; b.done = false;
+    }
+
+    /* ── database filter + status labelling ── */
+    function dbMatch(b){
+      if (dbFilter === 'all') return true;
+      if (dbFilter === 'notrel') return b.relevant === false;
+      if (b.relevant === false) return false;            // not-relevant hidden from every other view
+      if (dbFilter === 'new') return !b.worked;
+      if (dbFilter === 'pipeline') return b.worked && !b.archived;
+      return true;                                       // 'active' = everything still relevant
+    }
+    function dbStatus(b){
+      if (b.relevant === false) return ['Not relevant','off'];
+      if (!b.worked) return ['New','new'];
+      if (b.archived) return ['Archived','arch'];
+      if (b.status === 'sent') return ['Messaged','sent'];
+      if (b.status === 'followup') return ['Follow up','follow'];
+      return ['In pipeline','ready'];
+    }
+    const DB_SORT = b => (b.relevant === false ? 3 : !b.worked ? 0 : b.archived ? 2 : 1);
+    function databaseList(){ return BRANDS.filter(dbMatch).slice().sort((a,b)=>DB_SORT(a)-DB_SORT(b)); }
+
+    function setDbFilter(v){ dbFilter = v; selectedBacklog.clear(); renderProspects(); }
+    function toggleBacklogSel(id){
+      selectedBacklog.has(id) ? selectedBacklog.delete(id) : selectedBacklog.add(id);
+      renderProspects();
+    }
+    function toggleBacklogAll(on){
+      selectedBacklog.clear();
+      if (on) databaseList().forEach(b=>selectedBacklog.add(b.id));
+      renderProspects();
+    }
+    function selectedBrands(){ return BRANDS.filter(b=>selectedBacklog.has(b.id)); }
+
+    function sendSelectedToNextUp(){
+      const picked = selectedBrands(); if (!picked.length) return;
+      picked.forEach(promoteToNextUp);
+      selectedBacklog.clear();
+      switchTab('nextup');
+    }
+    function markSelectedRelevant(makeRelevant){
+      selectedBrands().forEach(b => { b.relevant = makeRelevant; if (!makeRelevant) b.worked = false; });
+      selectedBacklog.clear();
+      renderProspects();
+    }
+    function toggleRelevantSelected(){ markSelectedRelevant(dbFilter === 'notrel'); }
+    function deleteSelected(){
+      if (!selectedBacklog.size) return;
+      for (let i = BRANDS.length - 1; i >= 0; i--) if (selectedBacklog.has(BRANDS[i].id)) BRANDS.splice(i,1);
+      selectedBacklog.clear();
+      renderProspects();
+    }
+    /* per-row database actions */
+    function deleteOne(id){ const i = BRANDS.findIndex(x=>x.id===id); if (i>=0) BRANDS.splice(i,1); selectedBacklog.delete(id); renderProspects(); }
+    function notRelevantOne(id){ const b = BRANDS.find(x=>x.id===id); if (b){ b.relevant=false; b.worked=false; } selectedBacklog.delete(id); renderProspects(); }
+    function restoreOne(id){ const b = BRANDS.find(x=>x.id===id); if (b) b.relevant=true; renderProspects(); }
+
+    /* add brands to the database */
+    function dbAddManual(){
+      const el = document.getElementById('db-add'); if (!el) return;
+      const name = el.value.trim(); if (!name) return;
+      BRANDS.unshift(makeLeadBrand({ brand:name, domain: resolveDomain(name), source:"Manual" }));
+      el.value = "";
+      renderProspects();
+    }
+    function dbUploadCsv(ev){
+      const file = ev.target.files && ev.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const rows = String(reader.result).split(/\r?\n/).map(r=>r.trim()).filter(Boolean);
+        let added = 0;
+        rows.forEach((line, i) => {
+          const cells = line.split(',').map(c=>c.trim());
+          const first = (cells[0]||'').toLowerCase();
+          if (i === 0 && (first === 'brand' || first === 'name' || first === 'company')) return; // header
+          const brand = cells[0]; if (!brand) return;
+          const domain = cells[1] || resolveDomain(brand);
+          const cat = cells[2] || "Brand";
+          BRANDS.unshift(makeLeadBrand({ brand, domain, cat, source:"CSV import" }));
+          added++;
+        });
+        ev.target.value = "";
+        if (added) { dbFilter = 'new'; renderProspects(); }
+      };
+      reader.readAsText(file);
+    }
+    function switchTab(f){
+      obFilter = f;
+      document.querySelectorAll('#ob-seg button').forEach(x=>x.classList.toggle('on', x.dataset.f===f));
+      setTabTitle();
+      renderProspects();
+    }
+
+    /* date-range filter over the whole list */
+    let dateRange = "all"; // days, or "all"
+    const RANGE_OPTS = [ ["7","Last 7 days"], ["30","Last 30 days"], ["90","Last 90 days"], ["all","All time"] ];
+    const withinRange = b => dateRange === "all" ? true : b.daysAgo <= Number(dateRange);
+
+    const expanded = new Set();
+    function initials(n){ return n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+
+    function renderProspects(){
+      const tb = document.getElementById('ob-rows');
+      const bar = document.getElementById('bulkbar');
+      const thead = document.getElementById('ob-thead');
+
+      /* ── Brand database view: the full master list, bulk-select + manage ── */
+      if (obFilter === 'database'){
+        thead.hidden = true;
+        bar.hidden = false;
+        const list = databaseList();
+        const notRel = dbFilter === 'notrel';
+        if (!list.length){
+          const msg = notRel ? "Nothing marked not relevant." : "No brands here yet. Add one or upload a CSV.";
+          tb.innerHTML = `<tr><td colspan="6" class="ob-empty">${msg}</td></tr>`;
+        } else {
+          tb.innerHTML = list.map(b=>{
+            const on = selectedBacklog.has(b.id);
+            const [st, cls] = dbStatus(b);
+            const dom = b.domain ? ` · <span class="mono">${b.domain}</span>` : '';
+            const rowAct = b.relevant === false
+              ? `<button class="rowico" title="Restore" onclick="event.stopPropagation();restoreOne('${b.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 8"/></svg></button>`
+              : `<button class="rowico" title="Not relevant" onclick="event.stopPropagation();notRelevantOne('${b.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg></button>`;
+            return `<tr class="brow blrow" onclick="toggleBacklogSel('${b.id}')">
+              <td><div class="bl-cell">
+                <input type="checkbox" class="bl-cb" ${on?'checked':''} onclick="event.stopPropagation();toggleBacklogSel('${b.id}')" />
+                <div>
+                  <div class="ob-brand__name">${b.brand}</div>
+                  <div class="ob-brand__cat">${b.cat}${dom}</div>
+                </div>
+              </div></td>
+              <td colspan="4" class="ob-signal"><span class="db-chip db-chip--${cls}">${st}</span><span class="src-badge"><i></i>${b.source}</span></td>
+              <td class="ob-actions">${rowAct}<button class="rowico" title="Delete" onclick="event.stopPropagation();deleteOne('${b.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button></td>
+            </tr>`;
+          }).join('');
+        }
+        const c = selectedBacklog.size;
+        document.getElementById('bl-count').textContent = c ? `${c} selected` : 'None selected';
+        document.getElementById('bl-all').checked = list.length > 0 && list.every(b=>selectedBacklog.has(b.id));
+        document.getElementById('bl-send').disabled = c === 0;
+        document.getElementById('bl-send').textContent = c ? `Send ${c} to Next Up` : 'Send to Next Up';
+        document.getElementById('bl-del').disabled = c === 0;
+        const nr = document.getElementById('bl-nr');
+        nr.disabled = c === 0;
+        nr.textContent = notRel ? 'Restore' : 'Not relevant';
+        document.getElementById('db-filter').value = dbFilter;
+        document.getElementById('c-backlog').textContent = BRANDS.filter(b=>b.relevant!==false).length;
+        return;
+      }
+      thead.hidden = false;
+      bar.hidden = true;
+      document.getElementById('c-backlog').textContent = BRANDS.filter(b=>b.relevant!==false).length;
+
+      const rows = BRANDS.filter(b => inTab(b, obFilter) && withinRange(b));
+      const rowHtml = b=>{
+        const [pc,pl] = STPILL[b.status];
+        const open = expanded.has(b.id);
+        const tag = b.tag ? `<span class="tag-chip">${b.tag}</span>` : `<span class="assign-btn">+ Tag</span>`;
+        const owner = b.owner ? `<span class="owner-chip">${ownerAv(b.owner)}${b.owner}</span>` : `<span class="assign-btn assign-btn--plus">+</span>`;
+        const people = b.contacts.map((c,i)=>`
+          <div class="prow ${c.sent?'is-sent':''}">
+            <div class="prow__who">
+              <div class="prow__name">${c.name}${c.title?` <span class="prow__role">· ${c.title}</span>`:''}</div>
+              <div class="prow__title"><span class="mono">${c.email}</span> · ${c.added?'added by you':'verified'}</div>
+            </div>
+            <button class="ob-review" onclick="event.stopPropagation();openReview('${b.id}',${i})">Message</button>
+            <button class="prow__check ${c.sent?'on':''}" title="${c.sent?'Sent':'Mark sent'}" onclick="event.stopPropagation();toggleSent('${b.id}',${i})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>
+          </div>`).join('');
+        const addRow = `
+          <div class="prow prow--add" onclick="event.stopPropagation()">
+            <input class="addin addin--name" id="add-name-${b.id}" placeholder="Full name" />
+            <input class="addin addin--email" id="add-email-${b.id}" placeholder="name@company.com" onkeydown="if(event.key==='Enter'){event.preventDefault();addPerson('${b.id}')}" />
+            <button class="run-add" onclick="event.stopPropagation();addPerson('${b.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 3 14 9-14 9z"/></svg>Run</button>
+          </div>`;
+        return `<tr class="brow ${b.done?'is-done':''}" onclick="toggleBrand('${b.id}')">
+          <td><div class="ob-brand">
+            <div>
+              <div class="ob-brand__name">${b.brand}</div>
+              <div class="ob-brand__cat">${b.cat} · ${b.contacts.length} buyers</div>
+            </div>
+          </div></td>
+          <td class="ob-signal"><div class="ob-campaign">${b.campaign}</div>${b.followNote ? `<span class="ob-follow">${b.followNote}</span>` : ''}</td>
+          <td><span class="pill ${pc}">${pl}</span></td>
+          <td class="ob-assign" onclick="event.stopPropagation();pickTag('${b.id}',this)">${tag}</td>
+          <td class="ob-assign" onclick="event.stopPropagation();pickOwner('${b.id}',this)">${owner}</td>
+          <td class="ob-actions">
+            <button class="row-check ${b.done?'on':''}" title="${b.done?'Done':'Mark done'}" onclick="event.stopPropagation();toggleDone('${b.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>
+            <button class="kebab" onclick="event.stopPropagation();rowMenu(this,'${b.id}')" title="Actions"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>
+            ${b.archived ? '' : `<span class="chev ${open?'is-open':''}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>`}
+          </td>
+        </tr>${open?`<tr class="peoplerow"><td colspan="6"><div class="people">${people}${addRow}</div></td></tr>`:''}`;
+      };
+
+      if (!rows.length) tb.innerHTML = `<tr><td colspan="6" class="ob-empty">Nothing here for this date range.</td></tr>`;
+      else tb.innerHTML = rows.map(rowHtml).join('');
+
+      const cnt = f => BRANDS.filter(b=>inTab(b,f) && withinRange(b)).length;
+      document.getElementById('c-nextup').textContent = cnt('nextup');
+      document.getElementById('c-followup').textContent = cnt('followup');
+      document.getElementById('c-sent').textContent = cnt('sent');
+      document.getElementById('c-archived').textContent = cnt('archived');
+    }
+
+    /* which tab a brand belongs to */
+    function inTab(b, tab){
+      if (!b.worked || b.relevant === false) return false; // un-worked / not-relevant live only in the database
+      if (tab === 'archived') return !!b.archived;
+      if (b.archived) return false;
+      if (tab === 'followup') return b.status === 'followup';
+      if (tab === 'sent') return b.status === 'sent';
+      return b.status !== 'sent'; // nextup = everything actionable, follow-ups included
+    }
+
+    /* ─── per-row actions: move to next up / set follow-up / archive ─── */
+    function archiveBrand(){ if (currentBrand) { setState(currentBrand.id,'archive'); closeReview(); } }
+    function setState(id, action, date){
+      const b = BRANDS.find(x=>x.id===id); if (!b) return;
+      if (action === 'nextup'){ b.archived = false; b.status = 'ready'; b.followNote = null; b.followDate = null; b.daysAgo = 0; }
+      else if (action === 'archive'){ b.archived = true; }
+      else if (action === 'followup'){ b.archived = false; b.status = 'followup'; b.followDate = date; b.followNote = 'Follow up ' + fmtDate(date); }
+      else if (action === 'todatabase'){ b.worked = false; b.archived = false; b.status = 'ready'; b.followNote = null; b.followDate = null; b.done = false; }
+      renderProspects();
+    }
+    function fmtDate(d){ try { return new Date(d+'T00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch(e){ return d; } }
+
+    function rowMenu(anchor, id){
+      const b = BRANDS.find(x=>x.id===id);
+      const items = b.archived ? ['Move to Next Up','Move to database','Not relevant']
+        : b.status === 'followup' ? ['Move to Next Up','Change follow-up date','Archive','Move to database','Not relevant']
+        : ['Set follow-up','Archive','Move to database','Not relevant'];
+      miniMenu(anchor, items, v=>{
+        if (v === 'Archive') setState(id,'archive');
+        else if (v === 'Move to Next Up') setState(id,'nextup');
+        else if (v === 'Move to database') setState(id,'todatabase');
+        else if (v === 'Not relevant') notRelevantOne(id);
+        else setTimeout(()=>followDatePopover(anchor, id), 0); // set or change follow-up
+      });
+    }
+    function followDatePopover(anchor, id){
+      closeMini();
+      const now = new Date();
+      const mk = days => { const x = new Date(now); x.setHours(0,0,0,0); x.setDate(x.getDate()+days); return x; };
+      const dow = now.getDay();
+      const untilSat = ((6 - dow + 7) % 7) || 7;
+      const untilMon = ((1 - dow + 7) % 7) || 7;
+      let untilThu = (4 - dow + 7) % 7; if (untilThu < 2) untilThu = 3;
+      const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const fmt = d => d.toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'});
+      const opts = [ ['Tomorrow',mk(1)], ['Later this week',mk(untilThu)], ['This weekend',mk(untilSat)], ['Next week',mk(untilMon)] ];
+
+      const el = document.createElement('div'); el.className = 'mini snooze';
+      el.innerHTML =
+        `<div class="snooze__head">Follow up on</div>` +
+        opts.map((o,i)=>`<button type="button" class="snooze__row" data-i="${i}"><span>${o[0]}</span><span class="snooze__date">${fmt(o[1])}</span></button>`).join('') +
+        `<div class="snooze__div"></div>` +
+        `<button type="button" class="snooze__pick" id="snoozePick"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Pick a date</button>` +
+        `<div class="snooze__custom" id="snoozeCustom"><input type="date" class="fld__in" id="fuDate" style="font-size:13px" /><button type="button" class="abtn abtn--dark" id="fuSet">Set</button></div>`;
+      document.body.appendChild(el);
+      const r = anchor.getBoundingClientRect();
+      el.style.top = Math.min(r.bottom + 6, window.innerHeight - el.offsetHeight - 10) + 'px';
+      el.style.left = Math.max(10, Math.min(r.right - el.offsetWidth, window.innerWidth - el.offsetWidth - 10)) + 'px';
+      el.onclick = e => e.stopPropagation();
+      el.querySelectorAll('.snooze__row').forEach((btn,i)=>{ btn.onclick = ()=>{ setState(id,'followup',iso(opts[i][1])); closeMini(); }; });
+      el.querySelector('#snoozePick').onclick = ()=>{ const c = el.querySelector('#snoozeCustom'); c.classList.add('show'); const inp = el.querySelector('#fuDate'); inp.value = iso(mk(untilThu)); inp.focus(); };
+      el.querySelector('#fuSet').onclick = ()=>{ const v = el.querySelector('#fuDate').value; if (v) setState(id,'followup',v); closeMini(); };
+      setTimeout(()=>document.addEventListener('click', closeMini, {once:true}), 0);
+    }
+
+    function pickDateRange(anchor){
+      miniMenu(anchor, RANGE_OPTS.map(o=>o[1]), label=>{
+        const opt = RANGE_OPTS.find(o=>o[1]===label);
+        dateRange = opt[0];
+        document.getElementById('dateLabel').textContent = label;
+        renderProspects();
+      });
+    }
+
+    function toggleBrand(id){
+      expanded.has(id) ? expanded.delete(id) : expanded.add(id);
+      renderProspects();
+    }
+
+    /* mark an individual buyer's message as sent */
+    function toggleSent(id, i){
+      const b = BRANDS.find(x=>x.id===id); if (!b) return;
+      const c = b.contacts[i]; if (!c) return;
+      c.sent = !c.sent;
+      renderProspects();
+    }
+
+    /* manually add a buyer (name + email), then draft their message */
+    function addPerson(id){
+      const b = BRANDS.find(x=>x.id===id); if (!b) return;
+      const nameEl = document.getElementById('add-name-'+id);
+      const emailEl = document.getElementById('add-email-'+id);
+      const name = nameEl.value.trim(), email = emailEl.value.trim();
+      if (!name){ nameEl.focus(); return; }
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ emailEl.focus(); return; }
+      const li = '/in/' + name.toLowerCase().replace(/[^a-z0-9 ]/g,'').trim().replace(/\s+/g,'-');
+      b.contacts.push({ name, title:'', role:'Marketing', email, li, added:true });
+      expanded.add(id);
+      renderProspects();
+      openReview(id, b.contacts.length - 1); // Run turns it into a drafted message
+    }
+
+    /* mark a whole brand done (cascades to its buyers) */
+    function toggleDone(id){
+      const b = BRANDS.find(x=>x.id===id); if (!b) return;
+      b.done = !b.done;
+      b.contacts.forEach(c=>c.sent = b.done);
+      renderProspects();
+    }
+
+    /* ─── assign tag / owner / value ─── */
+    function closeMini(){ document.querySelectorAll('.mini').forEach(x=>x.remove()); }
+    function miniMenu(anchor, items, onPick){
+      closeMini();
+      const m = document.createElement('div');
+      m.className = 'mini';
+      m.innerHTML = items.map(t=>`<button type="button">${t}</button>`).join('');
+      document.body.appendChild(m);
+      const r = anchor.getBoundingClientRect();
+      m.style.top = Math.min(r.bottom + 6, window.innerHeight - m.offsetHeight - 10) + 'px';
+      m.style.left = Math.min(r.left, window.innerWidth - m.offsetWidth - 10) + 'px';
+      [...m.querySelectorAll('button')].forEach((btn,i)=>{
+        btn.onclick = e => { e.stopPropagation(); onPick(items[i]); closeMini(); };
+      });
+      setTimeout(()=>document.addEventListener('click', closeMini, {once:true}), 0);
+    }
+    /* ─── Canva template library ─── */
+    /* ─── settings menu (hub for the two template areas) ─── */
+    function openSettings(anchor){
+      miniMenu(anchor, ["Message templates","Canva templates"], v=>{
+        if (v === "Message templates") openMsgTemplates();
+        else openTemplates();
+      });
+    }
+
+    /* ─── message templates ─── */
+    function openMsgTemplates(){
+      document.getElementById('msgPrompt').value = MSG_PROMPT;
+      resetMsgForm();
+      renderMsgTemplates();
+      renderMsgVars();
+      document.getElementById('msgOverlay').classList.add('open');
+      document.getElementById('msgDrawer').classList.add('open');
+      document.getElementById('msgDrawer').setAttribute('aria-hidden','false');
+    }
+    function closeMsgTemplates(){
+      document.getElementById('msgOverlay').classList.remove('open');
+      document.getElementById('msgDrawer').classList.remove('open');
+      document.getElementById('msgDrawer').setAttribute('aria-hidden','true');
+    }
+    function saveMsgPrompt(btn){
+      MSG_PROMPT = document.getElementById('msgPrompt').value;
+      const old = btn.textContent; btn.textContent = 'Saved'; setTimeout(()=>btn.textContent=old, 1200);
+    }
+    function renderMsgVars(){
+      document.getElementById('msgVars').innerHTML =
+        `<span class="varbar__lbl">Insert</span>` +
+        MSG_VARS.map(v=>`<button type="button" class="varchip" onclick="insertVar('${v}')">${v}</button>`).join('');
+    }
+    function insertVar(v){
+      const el = msgVarTarget && document.body.contains(msgVarTarget) ? msgVarTarget : document.getElementById('msgBody');
+      const s = el.selectionStart ?? el.value.length, e = el.selectionEnd ?? el.value.length;
+      el.value = el.value.slice(0,s) + v + el.value.slice(e);
+      el.focus(); el.selectionStart = el.selectionEnd = s + v.length;
+    }
+    ['msgSubject','msgBody','msgLi'].forEach(id=>{
+      document.addEventListener('focusin', e=>{ if (e.target.id===id) msgVarTarget = e.target; });
+    });
+    function renderMsgTemplates(){
+      document.getElementById('msgCount').textContent = `· ${MSG_TEMPLATES.length}`;
+      document.getElementById('msgList').innerHTML = MSG_TEMPLATES.map(t=>`
+        <div class="mtpl">
+          <div class="mtpl__meta">
+            <div class="mtpl__name">${t.name}</div>
+            <div class="mtpl__when">${t.when}</div>
+            <div class="mtpl__prev">Subject: ${t.subject}</div>
+          </div>
+          <button class="c-mini" onclick="editMsgTemplate('${t.id}')">Edit</button>
+          <button class="c-mini" onclick="removeMsgTemplate('${t.id}')">Remove</button>
+        </div>`).join('');
+    }
+    function resetMsgForm(){
+      msgEditId = null;
+      ['msgName','msgWhen','msgSubject','msgBody','msgLi'].forEach(i=>document.getElementById(i).value='');
+      document.getElementById('msgFormTitle').textContent = 'Add a template';
+      document.getElementById('msgAddBtn').textContent = 'Add template';
+      document.getElementById('msgFormReset').style.display = 'none';
+    }
+    function editMsgTemplate(id){
+      const t = MSG_TEMPLATES.find(x=>x.id===id); if (!t) return;
+      msgEditId = id;
+      document.getElementById('msgName').value = t.name;
+      document.getElementById('msgWhen').value = t.when;
+      document.getElementById('msgSubject').value = t.subject;
+      document.getElementById('msgBody').value = t.body;
+      document.getElementById('msgLi').value = t.li;
+      document.getElementById('msgFormTitle').textContent = 'Edit template';
+      document.getElementById('msgAddBtn').textContent = 'Save changes';
+      document.getElementById('msgFormReset').style.display = '';
+      document.querySelector('#msgDrawer .drawer__body').scrollTop = 0;
+    }
+    function saveMsgTemplate(){
+      const g = id => document.getElementById(id).value.trim();
+      const name = g('msgName'); if (!name) { document.getElementById('msgName').focus(); return; }
+      const data = { name, when: g('msgWhen') || 'Custom template', subject: g('msgSubject'), body: document.getElementById('msgBody').value, li: document.getElementById('msgLi').value };
+      if (msgEditId){ Object.assign(MSG_TEMPLATES.find(x=>x.id===msgEditId), data); }
+      else { MSG_TEMPLATES.push({ id:'m'+Date.now(), ...data }); }
+      resetMsgForm();
+      renderMsgTemplates();
+    }
+    function removeMsgTemplate(id){
+      if (MSG_TEMPLATES.length <= 1) return;
+      MSG_TEMPLATES = MSG_TEMPLATES.filter(t=>t.id!==id);
+      if (msgEditId===id) resetMsgForm();
+      renderMsgTemplates();
+    }
+
+    function openTemplates(){
+      renderTemplates();
+      document.getElementById('tplOverlay').classList.add('open');
+      document.getElementById('tplDrawer').classList.add('open');
+      document.getElementById('tplDrawer').setAttribute('aria-hidden','false');
+    }
+    function closeTemplates(){
+      document.getElementById('tplOverlay').classList.remove('open');
+      document.getElementById('tplDrawer').classList.remove('open');
+      document.getElementById('tplDrawer').setAttribute('aria-hidden','true');
+    }
+    function renderTemplates(){
+      document.getElementById('tplCount').textContent = `· ${TEMPLATES.length}`;
+      document.getElementById('tplList').innerHTML = TEMPLATES.map(t=>{
+        const used = BRANDS.filter(b=>b.template===t.id).length;
+        return `<div class="tpl">
+          <div class="tpl__thumb"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></svg></div>
+          <div class="tpl__meta">
+            <div class="tpl__name">${t.name}</div>
+            <div class="tpl__desc">${t.desc}</div>
+            <div class="tpl__foot">${t.size} · used by ${used} brand${used===1?'':'s'}</div>
+          </div>
+          <a class="c-mini" href="${t.link}" target="_blank" rel="noopener">Open</a>
+          <button class="c-mini" onclick="removeTemplate('${t.id}')">Remove</button>
+        </div>`;
+      }).join('');
+    }
+    function addTemplate(){
+      const name = document.getElementById('tplName').value.trim();
+      const link = document.getElementById('tplLink').value.trim();
+      const desc = document.getElementById('tplDesc').value.trim();
+      if (!name) { document.getElementById('tplName').focus(); return; }
+      TEMPLATES.push({ id:'t'+Date.now(), name, desc: desc || 'Added from Canva', size:'1080 × 1350', link: link || 'https://www.canva.com/' });
+      ['tplName','tplLink','tplDesc'].forEach(i=>document.getElementById(i).value='');
+      renderTemplates();
+    }
+    function removeTemplate(id){
+      if (TEMPLATES.length <= 1) return;
+      TEMPLATES = TEMPLATES.filter(t=>t.id!==id);
+      BRANDS.forEach(b=>{ if (b.template===id) b.template = TEMPLATES[0].id; });
+      renderTemplates();
+    }
+    function pickTemplate(anchor){
+      if (!currentBrand) return;
+      const names = TEMPLATES.map(t=>t.name);
+      miniMenu(anchor, [...names, "Manage templates…"], v=>{
+        if (v === "Manage templates…") { openTemplates(); return; }
+        const t = TEMPLATES.find(x=>x.name===v);
+        if (t){ currentBrand.template = t.id; applyTemplate(); }
+      });
+    }
+    function applyTemplate(){
+      const t = TEMPLATES.find(x=>x.id===currentBrand.template) || TEMPLATES[0];
+      document.getElementById('dwTplName').textContent = t.name;
+      document.getElementById('dwTplLink').href = t.link;
+    }
+
+    function showGradeLegend(anchor){
+      closeMini();
+      const el = document.createElement('div');
+      el.className = 'legend mini';
+      el.innerHTML = `
+        <div class="legend__title">How grading works</div>
+        <div class="legend__sub">Every brand is scored against your inventory. The A+ picks rise to the top, everyone else follows.</div>
+        ${GRADE_ORDER.map(g=>`
+          <div class="legend__row">
+            <span class="grade-badge ${GRADE_CLASS[g]}" style="flex-shrink:0;align-self:flex-start">${GRADE_LABEL[g]}</span>
+            <span class="legend__txt">${GRADE_HINT[g]}</span>
+          </div>`).join('')}
+        <div class="legend__inputs">
+          <div class="legend__ilabel">What feeds the score</div>
+          ${GRADE_INPUTS.map(([k,v])=>`<div class="legend__i"><b>${k}</b><span>${v}</span></div>`).join('')}
+        </div>`;
+      document.body.appendChild(el);
+      const r = anchor.getBoundingClientRect();
+      el.style.top = Math.min(r.bottom + 8, window.innerHeight - el.offsetHeight - 10) + 'px';
+      el.style.left = Math.max(10, Math.min(r.right - el.offsetWidth, window.innerWidth - el.offsetWidth - 10)) + 'px';
+      el.onclick = e => e.stopPropagation();
+      setTimeout(()=>document.addEventListener('click', closeMini, {once:true}), 0);
+    }
+
+    function pickTag(id, cell){
+      const b = BRANDS.find(x=>x.id===id);
+      miniMenu(cell, [...TAGS,"Clear tag"], v=>{ b.tag = v==="Clear tag" ? null : v; renderProspects(); });
+    }
+    function pickOwner(id, cell){
+      const b = BRANDS.find(x=>x.id===id);
+      closeMini();
+      const m = document.createElement('div'); m.className = 'mini';
+      const opts = [...OWNERS, "Unassign"];
+      m.innerHTML = opts.map(n => n==="Unassign"
+        ? `<button type="button" data-n="Unassign" style="color:var(--text-secondary)">Unassign</button>`
+        : `<button type="button" data-n="${n}">${ownerAv(n)}${n}</button>`).join('');
+      document.body.appendChild(m);
+      const r = cell.getBoundingClientRect();
+      m.style.top = Math.min(r.bottom + 6, window.innerHeight - m.offsetHeight - 10) + 'px';
+      m.style.left = Math.min(r.left, window.innerWidth - m.offsetWidth - 10) + 'px';
+      m.querySelectorAll('button').forEach(btn=>{
+        btn.onclick = e => { e.stopPropagation(); const n = btn.dataset.n; b.owner = n==="Unassign" ? null : n; closeMini(); renderProspects(); };
+      });
+      setTimeout(()=>document.addEventListener('click', closeMini, {once:true}), 0);
+    }
+    function editVal(id, cell){
+      const b = BRANDS.find(x=>x.id===id);
+      cell.innerHTML = `<input class="val-in" placeholder="${b.autoVal}" value="${b.val||''}" />`;
+      const inp = cell.querySelector('input');
+      inp.onclick = e => e.stopPropagation();
+      const commit = ()=>{ b.val = inp.value.trim() || null; renderProspects(); };
+      inp.onkeydown = e => {
+        if (e.key === 'Enter'){ e.preventDefault(); commit(); }
+        if (e.key === 'Escape'){ renderProspects(); }
+      };
+      inp.onblur = commit;
+      inp.focus(); inp.select();
+    }
+
+    /* ─── brands: Enter-to-add chips ─── */
+    /* enter a brand by NAME; the domain resolves automatically (unique identifier) */
+    const DOMAIN_MAP = {
+      "kroger":"kroger.com","state farm":"statefarm.com","chick-fil-a":"cfa.com","chick fil a":"cfa.com","chickfila":"cfa.com",
+      "nike":"nike.com","gatorade":"gatorade.com","wells fargo":"wellsfargo.com","doordash":"doordash.com","door dash":"doordash.com",
+      "michelob ultra":"michelobultra.com","michelob":"michelobultra.com","foot locker":"footlocker.com","beats by dre":"beatsbydre.com","beats":"beatsbydre.com"
+    };
+    function resolveDomain(name){
+      const k = name.toLowerCase().trim();
+      if (DOMAIN_MAP[k]) return DOMAIN_MAP[k];
+      return k.replace(/&/g,'and').replace(/[^a-z0-9]+/g,'') + '.com';
+    }
+    let BRAND_CHIPS = ["Kroger","State Farm","Chick-fil-A","Nike","Gatorade"].map(n=>({name:n, domain:resolveDomain(n)}));
+    function renderBrandChips(){
+      document.getElementById('brand-chips').innerHTML = BRAND_CHIPS.map((c,i)=>
+        `<span class="chip-tag"><span class="chip-name">${c.name}</span><a class="chip-dom" href="https://${c.domain}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${c.domain}</a><button type="button" class="chip-x" onclick="removeBrandChip(${i});event.stopPropagation()">&times;</button></span>`).join('');
+    }
+    function addBrandChip(name){
+      const n = name.trim(); if (!n) return;
+      BRAND_CHIPS.push({ name:n, domain:resolveDomain(n) });
+    }
+    function brandKey(e){
+      const inp = e.target;
+      if (e.key === 'Enter'){ e.preventDefault(); if (inp.value.trim()){ addBrandChip(inp.value); inp.value=''; renderBrandChips(); } }
+      else if (e.key === 'Backspace' && !inp.value && BRAND_CHIPS.length){ BRAND_CHIPS.pop(); renderBrandChips(); }
+    }
+    function removeBrandChip(i){ BRAND_CHIPS.splice(i,1); renderBrandChips(); }
+    function toggleBulkImport(){ const b = document.getElementById('bulkImport'); b.hidden = !b.hidden; if (!b.hidden) document.getElementById('bulk-in').focus(); }
+    function bulkAddBrands(){
+      const raw = document.getElementById('bulk-in').value;
+      raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean).forEach(addBrandChip);
+      document.getElementById('bulk-in').value = '';
+      document.getElementById('bulkImport').hidden = true;
+      renderBrandChips();
+    }
+    renderBrandChips();
+
+    const TAB_LABEL = { nextup:"Next Up", followup:"Follow Up", sent:"Sent", archived:"Archived", database:"Brands" };
+    function setTabTitle(){ const el = document.getElementById('ob-title'); if (el) el.textContent = TAB_LABEL[obFilter] || "Next Up"; }
+    renderProspects();
+    setTabTitle();
+
+    // left rail
+    document.querySelectorAll('#ob-seg button').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        document.querySelectorAll('#ob-seg button').forEach(x=>x.classList.remove('on'));
+        b.classList.add('on');
+        obFilter = b.dataset.f;
+        setTabTitle();
+        renderProspects();
+      });
+    });
+
+    /* ─── New Brand Search Run side modal ─── */
+    function openRunDrawer(){
+      document.getElementById('runOverlay').classList.add('open');
+      document.getElementById('runDrawer').classList.add('open');
+      document.getElementById('runDrawer').setAttribute('aria-hidden','false');
+    }
+    function closeRunDrawer(){
+      document.getElementById('runOverlay').classList.remove('open');
+      document.getElementById('runDrawer').classList.remove('open');
+      document.getElementById('runDrawer').setAttribute('aria-hidden','true');
+    }
+
+    /* ─── run the agent, report how many brands and people came back ─── */
+    function runAgent(){
+      const btn = document.getElementById('runBtn');
+      const line = document.getElementById('ob-runline');
+      const campaign = (document.getElementById('in-campaign').value || '').trim() || RUN_CAMPAIGN;
+      RUN_CAMPAIGN = campaign;
+      // the run's brands (everything not carried over as a prior follow-up) join this campaign
+      BRANDS.forEach(b=>{ if (b.status !== 'followup') b.campaign = campaign; });
+      closeRunDrawer();
+      btn.disabled = true;
+      btn.querySelector('svg').style.display = 'none';
+      btn.lastChild.textContent = ' Running…';
+      line.textContent = 'Running…';
+
+      // loading bar feedback
+      const bar = document.getElementById('runbar');
+      const fill = document.getElementById('runbarFill');
+      const steps = ['Sourcing brands…','Finding buyers…','Verifying emails via Apollo…','Drafting messages…'];
+      bar.classList.add('on'); fill.style.width = '0%';
+      let pct = 0, si = 0;
+      const tick = setInterval(()=>{
+        pct = Math.min(100, pct + 14);
+        fill.style.width = pct + '%';
+        si = Math.min(steps.length-1, Math.floor(pct/26));
+        line.textContent = steps[si];
+      }, 190);
+
+      setTimeout(()=>{
+        clearInterval(tick);
+        fill.style.width = '100%';
+        setTimeout(()=>{ bar.classList.remove('on'); fill.style.width = '0%'; }, 250);
+        btn.disabled = false;
+        btn.querySelector('svg').style.display = '';
+        btn.lastChild.textContent = ' Run Outbound Agent';
+        const live = BRANDS.filter(b=>!b.archived);
+        const people = live.reduce((s,b)=>s+b.contacts.length,0);
+        line.textContent = `Just now · ${live.length} brands · ${people} people found`;
+        obFilter = "nextup";
+        document.querySelectorAll('#ob-seg button').forEach(x=>x.classList.remove('on'));
+        document.querySelector('#ob-seg button[data-f="nextup"]').classList.add('on');
+        setTabTitle();
+        renderProspects();
+      }, 1500);
+    }
+
+    /* ─── drawer ─── */
+    function setText(id,v){ document.getElementById(id).textContent = v; }
+    function setVal(id,v){ document.getElementById(id).value = v; }
+    let currentContact = null, currentBrand = null;
+
+    function openReview(id, idx){
+      const b = BRANDS.find(x=>x.id===id) || BRANDS[0];
+      const c = b.contacts[idx || 0] || b.contacts[0];
+      currentContact = c;
+      currentBrand = b;
+      const first = c.name.split(' ')[0];
+      const greet = t => t.replace(/^Hey [^,]+,/, `Hey ${first},`);
+      const li = greet(b.linkedin);
+      setText('dwName', `${c.name} · ${b.brand}`);
+      setText('dwPerson', c.name);
+      document.getElementById('dwTitle').innerHTML = `${c.title} · ${b.brand}`;
+      setText('dwEmail', c.email);
+      setText('dwLi', c.li);
+      document.getElementById('dwLiBtn').href = 'https://www.linkedin.com'+c.li;
+      document.getElementById('dwRoleChip').innerHTML = `<i></i>Role match: ${c.role}`;
+      setText('dwGrading', b.grading);
+      setText('dwGradeTag', b.gradeTag);
+      setVal('dwHook', b.hook);
+      setVal('dwLinkedin', li);
+      updateLiCount();
+      setVal('dwSubject', b.subject);
+      setVal('dwBody', greet(b.body));
+      setText('dwAttachName', `${b.brand} × ${b.show} · one-pager`);
+      applyTemplate();
+      document.getElementById('overlay').classList.add('open');
+      document.getElementById('drawer').classList.add('open');
+      document.getElementById('drawer').setAttribute('aria-hidden','false');
+    }
+    /* LinkedIn connection request notes cap at 300 characters */
+    function updateLiCount(){
+      const t = document.getElementById('dwLinkedin').value;
+      const el = document.getElementById('dwLiCount');
+      el.textContent = `${t.length} / 300 · connection request limit`;
+      el.style.color = t.length > 270 ? 'var(--orange-text)' : '';
+    }
+    function closeReview(){
+      document.getElementById('overlay').classList.remove('open');
+      document.getElementById('drawer').classList.remove('open');
+      document.getElementById('drawer').setAttribute('aria-hidden','true');
+    }
+    function copyEmail(btn){
+      const subject = document.getElementById('dwSubject').value;
+      const body = document.getElementById('dwBody').value;
+      navigator.clipboard && navigator.clipboard.writeText(`${subject}\n\n${body}`);
+      btn.classList.add('copied');
+      setTimeout(()=>btn.classList.remove('copied'), 1200);
+    }
+    function copyFrom(id, btn){
+      const t = document.getElementById(id).textContent;
+      navigator.clipboard && navigator.clipboard.writeText(t);
+      const old = btn.textContent; btn.textContent = 'Copied'; setTimeout(()=>btn.textContent=old, 1200);
+    }
+    function openLinkedIn(){
+      if (currentContact){
+        navigator.clipboard && navigator.clipboard.writeText(document.getElementById('dwLinkedin').value);
+        window.open('https://www.linkedin.com'+currentContact.li, '_blank', 'noopener');
+      }
+    }
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeReview(); closeRunDrawer(); closeTemplates(); closeMsgTemplates(); } });
+  </script>
+</body>
+</html>

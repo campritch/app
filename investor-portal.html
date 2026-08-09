@@ -4,8 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
+<!-- deploy env refresh -->
 <title>SpotsNow — Investor Portal</title>
-<link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Parkinsans:wght@600;700;800&display=swap" rel="stylesheet">
@@ -36,23 +39,39 @@ const CONTENT = {
 
   // ---- Document buttons (open in new tab if url set; else show a quiet "Soon") ----
   docs: {
-    deck:   { label: "View deck",     url: "/investors" },       // spotsnow.wiki/investors
+    deck:   { label: "View deck",     url: "https://pitch.com/v/investordeck-xagiqv" },       // spotsnow.wiki/investors
     letter: { label: "Founder letter", url: "https://dropstation.notion.site/SpotsNow-Founder-Letter-308bb6074fe3801e92abefd97d30abfb" },
   },
 
   // ---- Videos (any iframe embed URL; empty => graceful "coming soon") ----
   founderVideo: {
-    url: "https://www.youtube.com/embed/rATGEnqHzR0",  // https://youtu.be/rATGEnqHzR0
+    url: "https://www.youtube.com/embed/uo5rFj-v564",  // https://youtu.be/uo5rFj-v564
     caption: "Founder pitch",
     sub: "Cam Pritchard, Co-Founder & CEO",
     soonLabel: "Founder pitch coming this week",
+    highlights: [
+      "There's $32B in podcast and YouTube ad inventory, and half of it sits unsold.",
+      "SpotsNow makes it simple to plan, book, and track host-read ads, all measured to the dollar.",
+      "700+ shows onboarded without owning any, more sellable inventory than iHeartMedia.",
+      "AI gives any brand agency-level intelligence: the highest-converting shows, pricing, and forecasts.",
+      "Podcasts are the one creator channel you can measure to the sale, and SpotsNow is the data brain behind it.",
+      "Team from Thumbtack, a $3B marketplace; this round funds the path to $2.4M ARR and a Series A that expands into YouTube.",
+    ],
   },
   investorVideo: {
     url: "https://www.youtube.com/embed/yUuwxEfx-E8",  // https://youtube.com/shorts/yUuwxEfx-E8
     portrait: true,                           // vertical Short — render 9:16
     caption: "Why we're in",
-    sub: "Sebastian Moftakhar & Nicole",
+    sub: "Nicole Behnam & Sebastian Moftakhar",
     soonLabel: "Investor video coming soon",
+    highlights: [
+      "Sebastian and Nicole are leading an SPV into SpotsNow.",
+      "SpotsNow is Hotel Tonight for podcast ads: discover shows, build a plan, book, and track it yourself.",
+      "Already $280K+ in GMV and millions of impressions, with brands like TurboTax, Toyota, Peloton, and Liquid IV.",
+      "They're backing the product and the founder, and can open doors to brands, agencies, and networks.",
+      "$500K allocation secured at a discounted entry point ahead of the priced seed round.",
+      "Looking for people close to brands, agencies, media buyers, podcast networks, and creators.",
+    ],
   },
 
   // ---- Key metrics (all confirmed in the seed deck) ----
@@ -69,6 +88,46 @@ const CONTENT = {
     { label: "POST-MONEY VALUATION", value: "$10M" },
     { label: "ALLOCATION",           value: "$500K" },
   ],
+
+  // ---- Try it yourself (interactive demo) ----
+  demo: {
+    eyebrow: "TRY IT YOURSELF",
+    heading: "See SpotsNow live",
+    sub: "Pick your side of the marketplace and run a real test in a couple of clicks.",
+    brand: {
+      tab: "I'm a brand",
+      summary: "Enter your brand's website and SpotsNow instantly builds a campaign: your highest-converting shows, priced and ready to book.",
+      steps: [
+        "Go to SpotsNow.io",
+        "Enter your brand website",
+        "Generate a campaign and see your highest-converting shows",
+      ],
+      image: "",  // Cam to supply a preview image later; empty shows a placeholder
+      primary: { label: "Get started", url: "https://spotsnow.io" },
+      howto: [
+        "Head to SpotsNow.io.",
+        "Type in your brand's website URL.",
+        "Hit generate: SpotsNow scores 59,000+ shows and builds a campaign of your highest-converting matches, with pricing.",
+        "Adjust the show list and book, all in one place.",
+      ],
+    },
+    show: {
+      tab: "I'm a podcast / show",
+      summary: "Search your show to see every metric: who's advertising, who isn't, and your perfect-fit sponsors.",
+      steps: [
+        "Search your show on SpotsNow",
+        "See your metrics and who's advertising",
+        "Get 50 best-fit sponsors, instantly",
+      ],
+      image: "",  // Cam to supply a show-side preview image later; empty shows a placeholder
+      primary: { label: "Demo on SpotsNow", url: "https://spotsnow.io" },
+      howto: [
+        "Search your show on SpotsNow to pull its full profile.",
+        "See your audience metrics, plus which brands are and aren't advertising with you.",
+        "Get 50 perfect-fit sponsors to pitch.",
+      ],
+    },
+  },
 
   // ---- Footer ----
   contact: "cam@spotsnow.io",
@@ -293,6 +352,61 @@ const CONTENT = {
     .acq{grid-template-columns:repeat(2,1fr)}
     .ov h2{font-size:25px}
   }
+  /* ---------------- VIDEO HIGHLIGHTS ---------------- */
+  .vid-highlights{margin-top:14px;text-align:left}
+  .vid-highlights summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--salmon);
+    list-style:none;display:inline-flex;align-items:center;gap:6px}
+  .vid-highlights summary::-webkit-details-marker{display:none}
+  .vid-highlights summary::after{content:"▾";font-size:10px;transition:transform .15s}
+  .vid-highlights[open] summary::after{transform:rotate(180deg)}
+  .vid-highlights ul{margin:12px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:8px}
+  .vid-highlights li{color:var(--mute);font-size:13.5px;line-height:1.5}
+
+  /* ---------------- TRY IT YOURSELF (demo) ---------------- */
+  .demo-h{font-size:26px;font-weight:800;letter-spacing:-.01em;margin-top:2px}
+  .demo-sub{color:var(--mute);font-size:15px;margin:6px 0 22px}
+  .demo-toggle{display:inline-flex;background:var(--navy-3);border:1px solid var(--line);
+    border-radius:12px;padding:4px;gap:4px;margin-bottom:26px}
+  .demo-tab{font-family:var(--body);font-size:14px;font-weight:700;color:var(--mute);
+    background:transparent;border:0;border-radius:9px;padding:10px 20px;cursor:pointer;transition:.15s}
+  .demo-tab:hover{color:var(--text)}
+  .demo-tab.active{background:var(--salmon);color:#fff}
+  .demo-panel[hidden]{display:none}
+  .demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center}
+  .demo-summary{font-size:16px;line-height:1.6;color:var(--text);margin-bottom:20px}
+  .demo-steps{list-style:none;counter-reset:step;margin:0 0 24px;padding:0;
+    display:flex;flex-direction:column;gap:13px}
+  .demo-steps li{counter-increment:step;position:relative;padding-left:40px;
+    color:var(--mute);font-size:14.5px;line-height:1.5}
+  .demo-steps li::before{content:counter(step);position:absolute;left:0;top:-2px;
+    width:26px;height:26px;border-radius:999px;background:rgba(240,96,96,.14);
+    color:var(--salmon);font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+  .demo-cta{display:flex;flex-wrap:wrap;gap:10px}
+  .demo-media img{width:100%;border-radius:12px;border:1px solid var(--line)}
+  .demo-media-ph{aspect-ratio:16/10;border:1px dashed var(--line-2);border-radius:12px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    color:var(--mute-2);font-size:14px;font-weight:600;text-align:center;gap:6px;background:var(--navy-3)}
+  .demo-media-ph span{font-size:12px;font-weight:500}
+  .demo-prompt{background:var(--navy-3);border:1px solid var(--line-2);border-radius:14px;padding:20px}
+  .demo-prompt-label{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--mute-2);margin-bottom:12px}
+  .demo-prompt-text{font-size:15px;line-height:1.55;color:var(--text);background:var(--navy);
+    border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-style:italic}
+  .demo-copy-btn{margin-top:14px;font-family:var(--body);font-size:13.5px;font-weight:700;
+    color:var(--text);background:transparent;border:1px solid var(--line-2);border-radius:10px;
+    padding:9px 16px;cursor:pointer;transition:.15s}
+  .demo-copy-btn:hover{border-color:var(--salmon);color:var(--salmon)}
+  .demo-modal{position:fixed;inset:0;z-index:120;background:rgba(6,10,14,.7);
+    display:flex;align-items:center;justify-content:center;padding:24px}
+  .demo-modal[hidden]{display:none}
+  .demo-modal-card{position:relative;width:100%;max-width:480px;background:var(--navy-2);
+    border:1px solid var(--line-2);border-radius:16px;padding:32px}
+  .demo-modal-card h3{font-size:18px;font-weight:800;margin-bottom:18px}
+  .demo-modal-card ol{padding-left:20px;display:flex;flex-direction:column;gap:12px}
+  .demo-modal-card li{color:var(--mute);font-size:14.5px;line-height:1.55}
+  .demo-modal-x{position:absolute;top:14px;right:18px;background:none;border:0;
+    color:var(--mute);font-size:26px;line-height:1;cursor:pointer}
+  .demo-modal-x:hover{color:var(--text)}
+  @media (max-width:760px){ .demo-grid{grid-template-columns:1fr;gap:24px} }
 </style>
 </head>
 <body>
@@ -369,8 +483,43 @@ const CONTENT = {
       </section>
     </div>
 
+    <!-- TRY IT YOURSELF -->
+    <section class="card demo" style="margin-top:22px">
+      <div class="eyebrow" id="demoEyebrow"></div>
+      <h2 class="demo-h" id="demoHeading"></h2>
+      <div class="demo-sub" id="demoSub"></div>
+
+      <div class="demo-toggle">
+        <button class="demo-tab active" data-demo="brand" id="tabBrand"></button>
+        <button class="demo-tab" data-demo="show" id="tabShow"></button>
+      </div>
+
+      <div class="demo-panel" id="panelBrand">
+        <div class="demo-grid">
+          <div class="demo-copy">
+            <p class="demo-summary" id="brandSummary"></p>
+            <ol class="demo-steps" id="brandSteps"></ol>
+            <div class="demo-cta" id="brandCta"></div>
+          </div>
+          <div class="demo-media" id="brandMedia"></div>
+        </div>
+      </div>
+
+      <div class="demo-panel" id="panelShow" hidden>
+        <div class="demo-grid">
+          <div class="demo-copy">
+            <p class="demo-summary" id="showSummary"></p>
+            <ol class="demo-steps" id="showSteps"></ol>
+            <div class="demo-cta" id="showCta"></div>
+          </div>
+          <div class="demo-media" id="showMedia"></div>
+        </div>
+      </div>
+    </section>
+
   </div>
 </main>
+
 
 <footer>
   <div class="foot-inner">
@@ -422,10 +571,15 @@ document.addEventListener("click", (e)=>{
   if (!f) return;
   const id = f.dataset.yt;
   f.parentElement.innerHTML =
-    `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1" ` +
+    `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3" ` +
     `allow="autoplay; encrypted-media; picture-in-picture; web-share; fullscreen" allowfullscreen></iframe>`;
 });
-function vidCap(cfg){ return `<b>${cfg.caption}</b><small>${cfg.sub}</small>`; }
+function vidCap(cfg){
+  const hl = (cfg.highlights && cfg.highlights.length)
+    ? `<details class="vid-highlights"><summary>View Summary</summary><ul>${cfg.highlights.map(h=>`<li>${h}</li>`).join("")}</ul></details>`
+    : "";
+  return `<b>${cfg.caption}</b><small>${cfg.sub}</small>${hl}`;
+}
 
 function docButton(d, primary){
   if (d.soon || !d.url){
@@ -474,6 +628,28 @@ function render(){
   $("terms").innerHTML = c.terms.map(t=>`
     <div class="term"><div class="k">${t.label}</div><div class="v">${cell(t.value)}</div></div>
   `).join("");
+
+  // demo (try it yourself)
+  const d = c.demo;
+  $("demoEyebrow").textContent = d.eyebrow;
+  $("demoHeading").textContent = d.heading;
+  $("demoSub").textContent = d.sub;
+  $("tabBrand").textContent = d.brand.tab;
+  $("tabShow").textContent = d.show.tab;
+  $("brandSummary").textContent = d.brand.summary;
+  $("brandSteps").innerHTML = d.brand.steps.map(s=>`<li>${s}</li>`).join("");
+  $("brandCta").innerHTML =
+    `<a class="docbtn primary" href="${d.brand.primary.url}" target="_blank" rel="noopener">${d.brand.primary.label} &rarr;</a>`;
+  $("brandMedia").innerHTML = d.brand.image
+    ? `<img src="${d.brand.image}" alt="SpotsNow campaign preview">`
+    : `<div class="demo-media-ph">Preview image coming<span>Cam to supply</span></div>`;
+  $("showSummary").textContent = d.show.summary;
+  $("showSteps").innerHTML = d.show.steps.map(s=>`<li>${s}</li>`).join("");
+  $("showCta").innerHTML =
+    `<a class="docbtn primary" href="${d.show.primary.url}" target="_blank" rel="noopener">${d.show.primary.label} &rarr;</a>`;
+  $("showMedia").innerHTML = d.show.image
+    ? `<img src="${d.show.image}" alt="SpotsNow show metrics preview">`
+    : `<div class="demo-media-ph">Preview image coming<span>Cam to supply</span></div>`;
 
   // footer
   $("year").textContent = "2026";
@@ -536,6 +712,14 @@ $("signout").addEventListener("click", ()=>{
   fetch("/api/investor-access?signout=1").catch(()=>{});
   location.reload();
 });
+
+/* ---------- try-it-yourself interactivity ---------- */
+document.querySelectorAll(".demo-tab").forEach(t=>t.addEventListener("click", ()=>{
+  const which = t.dataset.demo;
+  document.querySelectorAll(".demo-tab").forEach(x=>x.classList.toggle("active", x===t));
+  $("panelBrand").hidden = which !== "brand";
+  $("panelShow").hidden  = which !== "show";
+}));
 
 /* ---------- boot ---------- */
 injectLogo();

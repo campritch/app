@@ -16,7 +16,12 @@ cp *.html dist/
 rm -f dist/vetting-demo.html dist/acme-vetting.html
 # Pulled offline: Magellan pixel-setup flow (tracking-pixel pages). Keep source, never publish.
 rm -f dist/pixel-setup.html dist/submit-creative.html
+# Privacy: Relationship Intelligence holds real personal contact data (contacts-data.js).
+# Keep source, never publish to the public (unauthenticated) wiki.
+rm -f dist/contacts.html
 cp styles.css script.js dist/ 2>/dev/null || true
+# Marketplace page assets (kept out of the generic css/js copy on purpose).
+cp credits.css credits.js data.js dist/ 2>/dev/null || true
 cp *.png dist/ 2>/dev/null || true
 cp *.jpg dist/ 2>/dev/null || true
 cp *.jpeg dist/ 2>/dev/null || true

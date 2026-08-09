@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>North Station Media — Inventory Planning</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2318181B'/%3E%3Ctext x='16' y='22' font-family='Helvetica,Arial,sans-serif' font-size='15' font-weight='700' fill='%23ffffff' text-anchor='middle'%3ENS%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      /* shadcn zinc neutral scale */
+      --primary: #18181B;
+      --dark: #18181B;
+      --text-primary: #18181B;
+      --text-secondary: #52525B;
+      --text-tertiary: #71717A;
+      --border: #E4E4E7;
+      --border-light: #F1F1F3;
+      --white: #ffffff;
+      --accent: #18181B;
+      --accent-soft: #F4F4F5;
+      --accent-line: #E4E4E7;
+      --secondary-lite: #F4F4F5;
+      --page-bg: #FAFAFA;
+      --green-text: #3F3F46;
+      --green-bg: #FAFAFA;
+      --green-line: #E4E4E7;
+      --amber-text: #52525B;
+      --amber-bg: #F4F4F5;
+      --amber-line: #D4D4D8;
+      --blue-text: #52525B;
+      --blue-bg: #FAFAFA;
+      --blue-line: #E4E4E7;
+      --orange-text: #52525B;
+      --orange-bg: #FAFAFA;
+      --orange-line: #E4E4E7;
+      --sold-bg: #27272A;
+      --radius-card: 10px;
+      --radius-pill: 999px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: var(--page-bg); color: var(--text-primary);
+      -webkit-font-smoothing: antialiased; line-height: 1.45;
+    }
+    button { font-family: inherit; cursor: pointer; }
+    .wrap { max-width: 1320px; margin: 0 auto; padding: 20px 26px 90px; }
+
+    /* TOP BAR */
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand__mark { width: 40px; height: 40px; border-radius: 11px; background: var(--accent); color: #fff; display: grid; place-items: center; box-shadow: 0 6px 18px rgba(255,98,103,.32); flex-shrink: 0; }
+    .brand__name { font-size: 19px; font-weight: 700; letter-spacing: -.02em; }
+    .brand__name span { color: var(--accent); }
+    .brand__sub { font-size: 11.5px; color: var(--text-tertiary); font-weight: 500; margin-top: -2px; }
+    .ns-logo { height: 50px; width: auto; display: block; }
+    .brand__divider { width: 1px; height: 34px; background: var(--border); margin: 0 3px; }
+    .brand__sub2 { font-size: 12px; font-weight: 600; color: var(--text-tertiary); line-height: 1.18; }
+    .topbar__right { display: flex; align-items: center; gap: 11px; }
+    .date-pill { display: inline-flex; align-items: center; gap: 8px; background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 8px 13px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+    .date-pill svg { color: var(--text-tertiary); }
+    .icon-btn { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border); background: var(--white); color: var(--text-secondary); display: grid; place-items: center; }
+    .icon-btn:hover { background: var(--secondary-lite); }
+    .sf-btn { display: inline-flex; align-items: center; gap: 7px; background: var(--white); border: 1px solid var(--border); color: var(--text-tertiary); border-radius: 9px; padding: 8px 13px; font-size: 12.5px; font-weight: 600; cursor: not-allowed; opacity: .85; }
+    .sf-btn .dot { width: 7px; height: 7px; border-radius: 50%; background: #C9CDD6; }
+    .net-switch { display: flex; align-items: center; gap: 9px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 6px 13px 6px 8px; font-weight: 600; font-size: 13.5px; }
+    .net-switch__logo { width: 25px; height: 25px; border-radius: 7px; background: linear-gradient(135deg,#0E2A47,#1E7A4D); color:#fff; display:grid; place-items:center; font-size:11px; font-weight:700; }
+    .avatar { width: 37px; height: 37px; border-radius: 50%; background: #27272A; color: #fff; display: grid; place-items: center; font-weight: 600; font-size: 13px; }
+
+    /* TABS */
+    .tabs { display: flex; gap: 4px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 5px; margin-bottom: 22px; width: fit-content; }
+    .tab { border: none; background: none; padding: 9px 15px; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+    .tab:hover { background: var(--secondary-lite); }
+    .tab.active { background: var(--primary); color: #fff; }
+
+    /* SHOW + AVAILABILITY HEADER */
+    .planhead { display: grid; grid-template-columns: 300px 1fr; gap: 16px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 16px; margin-bottom: 22px; box-shadow: 0 1px 2px rgba(16,19,35,.04); }
+    .showpick { display: flex; align-items: center; gap: 13px; }
+    .showpick__thumb { width: 56px; height: 56px; border-radius: 10px; background: #27272A; color: #fff; display: grid; place-items: center; font-size: 19px; font-weight: 700; flex-shrink: 0; letter-spacing: -.02em; }
+    .showpick__body { min-width: 0; flex: 1; }
+    .showpick__label { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-tertiary); }
+    .showpick select { appearance: none; border: none; background: transparent; font-family: inherit; font-size: 17px; font-weight: 700; letter-spacing: -.02em; color: var(--text-primary); padding: 2px 18px 2px 0; cursor: pointer; max-width: 100%; }
+    .showpick select:focus { outline: none; }
+    .showpick__eps { font-size: 11.5px; font-weight: 600; color: var(--text-tertiary); margin-top: 1px; }
+
+    .avails { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-left: 1px solid var(--border-light); }
+    .avail { padding: 4px 18px; border-right: 1px solid var(--border-light); position: relative; }
+    .avail:last-child { border-right: none; }
+    .avail::before { content: ""; position: absolute; left: 0; top: 6px; bottom: 6px; width: 3px; border-radius: 3px; }
+    .avail.pre::before, .avail.mid::before, .avail.post::before { background: #D4D4D8; }
+    .avail.total::before { background: transparent; }
+    .avail__label { font-size: 11px; font-weight: 600; color: var(--text-tertiary); }
+    .avail__value { font-size: 30px; font-weight: 700; letter-spacing: -.03em; line-height: 1.1; margin-top: 6px; color: #2E3440; }
+    .avail__value.off { color: #C2C6CE; font-size: 22px; }
+    .avail__sub { font-size: 10.5px; color: var(--text-tertiary); margin-top: 6px; font-weight: 600; line-height: 1.5; }
+    .avail__sub b { color: var(--accent); font-weight: 700; }
+    .fill-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: 0; }
+
+    /* CONTROLS */
+    .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .seg { display: inline-flex; background: var(--secondary-lite); border-radius: 10px; padding: 3px; gap: 2px; }
+    .seg button { border: none; background: none; padding: 7px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+    .seg button.on { background: var(--white); color: var(--text-primary); box-shadow: 0 1px 2px rgba(16,19,35,.12); }
+    .roll-legend { display: flex; align-items: center; gap: 16px; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-left: auto; }
+    .roll-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .roll-legend i { width: 9px; height: 9px; border-radius: 3px; }
+    .rl-pre { background: var(--blue-text); } .rl-mid { background: var(--accent); } .rl-post { background: var(--orange-text); }
+    .status-legend { display: flex; align-items: center; gap: 13px; font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+    .status-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .status-legend i { width: 12px; height: 12px; border-radius: 4px; border: 1px solid rgba(0,0,0,.05); }
+    .sl-av { background: var(--white); border-color: var(--border); border-style: dashed; }
+    .sl-hold { background: var(--secondary-lite); border-color: var(--border); }
+    .sl-sold { background: var(--sold-bg); border-color: var(--sold-bg); }
+
+    /* GRID TABLE */
+    .gridwrap { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); overflow: hidden; }
+    .gridscroll { overflow-x: auto; }
+    table.grid { border-collapse: collapse; width: 100%; min-width: max-content; }
+    table.grid th, table.grid td { border-right: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light); }
+    .col-ep { position: sticky; left: 0; z-index: 3; background: var(--white); width: 190px; min-width: 190px; }
+    thead .col-ep { z-index: 5; }
+    .roll-h { text-align: left; padding: 10px 14px 6px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .roll-h.pre, .roll-h.mid, .roll-h.post { color: var(--text-secondary); background: #FAFAFA; }
+    .pos-h { text-align: left; padding: 7px 14px 9px; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; color: var(--text-tertiary); background: #FCFCFD; width: 158px; min-width: 158px; }
+    .pos-h.firstcol { box-shadow: none; }
+
+    .month-row td { background: #FBFBFC; padding: 9px 14px; font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-tertiary); border-bottom: 1px solid var(--border); }
+    .ep-c { padding: 11px 14px; vertical-align: middle; }
+    .ep-c__status { font-size: 9.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: #9AA0A8; display:flex; align-items:center; gap:6px; }
+    .ep-c__status .tick { width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid var(--green-line); background: var(--green-bg); display: grid; place-items: center; color: var(--green-text); }
+    .ep-c__date { font-size: 13.5px; font-weight: 700; margin-top: 3px; letter-spacing: -.01em; }
+    .ep-c__day { font-size: 11px; color: var(--text-tertiary); font-weight: 600; }
+
+    /* compact merged episode cells */
+    .grid--compact .pos-h { padding: 7px 12px 8px; }
+    .ep-c--compact { padding: 4px 12px; display: flex; align-items: baseline; gap: 7px; white-space: nowrap; }
+    .ep-c--compact .ep-c__date { font-size: 12px; font-weight: 700; }
+    .ep-c--compact .ep-c__day { font-size: 10.5px; color: var(--text-tertiary); font-weight: 600; }
+    .ccol { padding: 2px 3px; vertical-align: middle; height: 28px; }
+    .ccell { width: 100%; height: 100%; min-height: 24px; box-sizing: border-box; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; border: 1px solid var(--border); cursor: pointer; transition: box-shadow .1s; padding: 2px 9px; overflow: hidden; }
+    .ccell:hover { box-shadow: 0 3px 10px rgba(16,19,35,.14); z-index: 2; }
+    .ccell__name { font-size: 12px; font-weight: 700; line-height: 1.18; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; letter-spacing: -.01em; }
+    .ccell__range { font-size: 9.5px; font-weight: 500; line-height: 1.2; white-space: nowrap; }
+    .ccell__plus { color: #C2C6CE; }
+    .ccell--av { background: var(--white); border: 1px dashed var(--border); }
+    .ccell--av:hover .ccell__plus { color: var(--text-primary); }
+    .ccell--sold { background: var(--sold-bg); border-color: var(--sold-bg); color: #fff; }
+    .ccell--sold .ccell__range { color: #ADB1B9; }
+    .ccell--hold { background: var(--secondary-lite); border-color: var(--border); color: var(--text-secondary); }
+    .ccell--hold .ccell__range { color: var(--text-tertiary); }
+    .cell { padding: 6px; }
+    .slot { width: 100%; text-align: left; border: 1px solid var(--border); background: var(--white); border-radius: 8px; padding: 8px 9px; min-height: 46px; display: flex; flex-direction: column; justify-content: center; gap: 2px; transition: box-shadow .1s, transform .07s; }
+    .slot:hover { box-shadow: 0 4px 12px rgba(16,19,35,.12); transform: translateY(-1px); }
+    .slot__top { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
+    .slot__status { font-size: 12px; font-weight: 700; letter-spacing: -.01em; color: var(--green-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .slot__pos { font-size: 9.5px; font-weight: 700; color: #A8AEB6; white-space: nowrap; }
+    .slot__flight { font-size: 10px; font-weight: 600; color: var(--text-tertiary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .slot--hold { background: var(--secondary-lite); border-color: var(--border); }
+    .slot--hold .slot__status { color: var(--text-secondary); }
+    .slot--sold { background: var(--sold-bg); border-color: var(--sold-bg); }
+    .slot--sold .slot__status { color: #fff; }
+    .slot--sold .slot__pos { color: #A1A1AA; }
+    .slot--sold .slot__flight { color: #A1A1AA; }
+    .slot--empty { background: var(--white); border: 1px dashed var(--border); }
+    .slot--empty .slot__status { color: var(--text-tertiary); }
+    .cell--off { background: repeating-linear-gradient(45deg,#FCFCFD,#FCFCFD 6px,#F6F7F9 6px,#F6F7F9 12px); }
+
+    /* ALL SHOWS MATRIX */
+    .matrix { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); overflow: hidden; }
+    table.mx { width: 100%; border-collapse: collapse; }
+    table.mx th, table.mx td { text-align: left; padding: 13px 16px; border-bottom: 1px solid var(--border-light); font-size: 13px; }
+    table.mx thead th { font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-tertiary); background: #FCFCFD; }
+    table.mx tbody tr:last-child td { border-bottom: none; }
+    table.mx tbody tr.clickable:hover { background: #FCFCFD; cursor: pointer; }
+    .mx-show { font-weight: 700; font-size: 13.5px; }
+    .mx-show small { display: block; font-weight: 600; color: var(--text-tertiary); font-size: 11px; margin-top: 1px; }
+    .mx-bar { height: 7px; border-radius: 5px; background: var(--secondary-lite); overflow: hidden; display: flex; margin-bottom: 5px; min-width: 120px; }
+    .mx-bar i { display: block; height: 100%; }
+    .b-sold { background: var(--accent); } .b-hold { background: #E0A93B; } .b-av { background: #4FB87C; }
+    .mx-frac { font-size: 11.5px; font-weight: 700; color: var(--text-secondary); }
+
+    /* STATS HERO */
+    .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); overflow: hidden; box-shadow: 0 1px 2px rgba(16,19,35,.04); margin-bottom: 24px; }
+    .stat { padding: 20px 20px; border-right: 1px solid var(--border-light); }
+    .stat:last-child { border-right: none; }
+    .stat__label { font-size: 10.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-tertiary); }
+    .stat__value { font-size: clamp(26px, 3vw, 40px); font-weight: 700; letter-spacing: -.035em; line-height: 1.04; margin-top: 9px; color: #3F4550; }
+    .stat__value.sold { color: var(--accent); } .stat__value.hold { color: var(--amber-text); } .stat__value.av { color: var(--green-text); }
+    .stat__sub { font-size: 12px; color: var(--text-secondary); margin-top: 7px; font-weight: 500; }
+    .section-title { font-size: 15px; font-weight: 700; letter-spacing: -.02em; margin: 30px 0 14px; }
+
+    .bigbar-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 24px 26px; margin-bottom: 20px; }
+    .bigbar-card__line { font-size: 17px; font-weight: 600; letter-spacing: -.02em; }
+    .bigbar { height: 15px; border-radius: 8px; background: var(--secondary-lite); overflow: hidden; display: flex; margin-top: 16px; }
+    .bigbar i { display: block; height: 100%; }
+    .bigbar-legend { display: flex; gap: 20px; margin-top: 12px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+    .bigbar-legend span::before { content: ""; display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 7px; vertical-align: -1px; }
+
+    /* CATEGORY */
+    .cat-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .cat-pill { border: 1px solid var(--border); background: var(--white); border-radius: 999px; padding: 8px 15px; font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+    .cat-pill.on { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 5px 14px rgba(255,98,103,.28); }
+
+    /* CONFIG */
+    .cfg { display: grid; grid-template-columns: 270px 1fr; gap: 18px; }
+    .cfg-list { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); overflow: hidden; height: fit-content; }
+    .cfg-list__item { padding: 12px 15px; border-bottom: 1px solid var(--border-light); cursor: pointer; }
+    .cfg-list__item:last-child { border-bottom: none; }
+    .cfg-list__item.on { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+    .cfg-list__name { font-size: 13px; font-weight: 700; }
+    .cfg-list__meta { font-size: 11px; color: var(--text-tertiary); font-weight: 600; margin-top: 2px; }
+    .cfg-panel { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 24px 26px; }
+    .cfg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 28px; }
+    .cfg-field { margin-bottom: 4px; }
+    .cfg-field.span2 { grid-column: 1 / -1; }
+    .cfg-field__label { font-size: 12.5px; font-weight: 700; margin-bottom: 3px; }
+    .cfg-field__hint { font-size: 11.5px; color: var(--text-tertiary); font-weight: 500; margin-bottom: 9px; line-height: 1.45; }
+    .stepper { display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .stepper button { width: 36px; height: 36px; border: none; background: var(--white); font-size: 17px; color: var(--text-secondary); }
+    .stepper button:hover { background: var(--secondary-lite); }
+    .stepper span { min-width: 42px; text-align: center; font-size: 15px; font-weight: 700; border-left: 1px solid var(--border); border-right: 1px solid var(--border); height: 36px; display: grid; place-items: center; }
+    .toggle-row { display: flex; align-items: center; gap: 10px; }
+    .toggle { width: 42px; height: 24px; border-radius: 999px; border: none; background: var(--secondary-lite); position: relative; transition: background .15s; flex-shrink: 0; }
+    .toggle.on { background: var(--accent); }
+    .toggle::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .15s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+    .toggle.on::after { transform: translateX(18px); }
+    .toggle-row__txt { font-size: 12.5px; font-weight: 600; }
+    .toggle-row__txt small { display: block; font-size: 11px; color: var(--text-tertiary); font-weight: 500; }
+    .input { border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px; font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--text-primary); width: 100%; }
+    .input:focus { outline: none; border-color: var(--accent); }
+    .price-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+    .price-table td { padding: 7px 0; font-size: 13px; border-bottom: 1px solid var(--border-light); }
+    .price-table td:first-child { font-weight: 600; color: var(--text-secondary); }
+    .price-table td:last-child { text-align: right; }
+    .price-inp { border: 1px solid var(--border); border-radius: 8px; padding: 6px 9px; width: 92px; text-align: right; font-family: inherit; font-weight: 700; font-size: 13px; }
+    .price-inp:focus { outline: none; border-color: var(--accent); }
+
+    .btn { border: none; border-radius: 10px; padding: 10px 16px; font-size: 13.5px; font-weight: 700; font-family: inherit; }
+    .btn--primary { background: var(--primary); color: #fff; }
+    .btn--accent { background: var(--accent); color: #fff; }
+    .btn--ghost { background: var(--secondary-lite); color: var(--text-primary); }
+    .btn--outline { background: var(--white); color: var(--text-primary); border: 1px solid var(--border); }
+    .btn--outline:hover { background: var(--secondary-lite); }
+    .btn--sm { padding: 8px 13px; font-size: 13px; }
+    .btn--saved { background: #18794E; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    /* ─── MANAGE SHOWS SPREADSHEET ─── */
+    .msheet-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); overflow: hidden; }
+    .msheet-toolbar { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .msheet-search { flex: 1; max-width: 340px; display: flex; align-items: center; gap: 9px; background: var(--white); border: 1px solid var(--border); border-radius: 9px; padding: 8px 12px; color: var(--text-tertiary); }
+    .msheet-search input { border: none; outline: none; background: none; font-family: inherit; font-size: 13.5px; font-weight: 500; color: var(--text-primary); width: 100%; }
+    .msheet-tools { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .iconbtn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: var(--white); color: var(--text-secondary); display: grid; place-items: center; }
+    .iconbtn:hover:not(:disabled) { background: var(--secondary-lite); color: var(--text-primary); }
+    .iconbtn:disabled { opacity: .4; cursor: not-allowed; }
+
+    .msheet-scroll { overflow-x: auto; }
+    table.msheet { border-collapse: separate; border-spacing: 0; width: 100%; min-width: max-content; }
+    .msheet .mh { background: #FAFAFA; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border-light); padding: 12px 10px; font-size: 11.5px; font-weight: 700; color: var(--text-secondary); text-align: center; white-space: nowrap; position: sticky; top: 0; z-index: 2; }
+    .msheet .mh--show { text-align: left; padding-left: 18px; left: 0; z-index: 4; width: 248px; min-width: 248px; }
+    .msheet .mh--act { width: 50px; min-width: 50px; border-right: none; }
+    .msheet .mtd { border-bottom: 1px solid var(--border-light); border-right: 1px solid var(--border-light); height: 52px; padding: 0; vertical-align: middle; background: var(--white); }
+    .msheet .mrow:hover .mtd { background: #FCFCFC; }
+    .mtd--show { position: sticky; left: 0; z-index: 1; width: 248px; min-width: 248px; box-shadow: 1px 0 0 var(--border-light); }
+    .msheet .mrow:hover .mtd--show { background: #FCFCFC; }
+    .mtd--act { border-right: none; }
+    .mshowcell { display: flex; align-items: center; gap: 11px; padding: 0 14px; overflow: hidden; }
+    .mshowcell--btn { width: 100%; height: 52px; border: none; background: none; font-family: inherit; text-align: left; cursor: pointer; border-radius: 8px; }
+    .mshowcell--btn:hover { background: var(--secondary-lite); }
+    .mthumb { width: 34px; height: 34px; border-radius: 8px; background: #27272A; color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 700; flex-shrink: 0; letter-spacing: -.02em; }
+    .mshowcell__body { min-width: 0; }
+    .mshowname { font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mshowdetail { display: flex; align-items: center; gap: 1px; font-size: 10.5px; font-weight: 600; color: var(--text-tertiary); margin-top: 1px; }
+    .mshowcell--btn:hover .mshowdetail { color: var(--accent); }
+    /* what's-included box in booking drawer */
+    .incl-box { margin-top: 10px; background: var(--secondary-lite); border: 1px solid var(--border); border-radius: 11px; padding: 11px 13px; }
+    .incl-box__label { font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 4px; }
+    .incl-box__txt { font-size: 12.5px; font-weight: 500; color: var(--text-secondary); line-height: 1.45; }
+    /* compliance section */
+    .ai-tag { font-size: 9.5px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--text-secondary); background: var(--secondary-lite); border: 1px solid var(--border); border-radius: 999px; padding: 2px 8px; }
+    .cmp-hint { font-size: 11.5px; color: var(--text-tertiary); font-weight: 500; line-height: 1.45; margin-bottom: 11px; }
+    .cmp-row { border: 1px solid var(--border); border-radius: 11px; padding: 10px 12px; margin-bottom: 9px; }
+    .cmp-row__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .cmp-row__date { font-size: 12.5px; font-weight: 700; }
+    .cmp-status { font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+    .cmp-status.ok { color: var(--green-text); background: #E9F5EE; border: 1px solid #CDEBD8; }
+    .cmp-status.pend { color: var(--text-tertiary); background: var(--secondary-lite); border: 1px solid var(--border); }
+    .cmp-inp { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-family: inherit; font-size: 12px; color: var(--text-primary); margin-top: 6px; }
+    .cmp-inp:focus { outline: none; border-color: var(--accent); }
+    .cmp-inp::placeholder { color: var(--text-tertiary); }
+
+    .mcell { position: relative; height: 52px; display: flex; align-items: center; justify-content: center; padding: 0 4px; cursor: cell; }
+    .mcell--sel { box-shadow: inset 0 0 0 2px var(--primary); border-radius: 3px; z-index: 3; }
+    .mcell--range { background: rgba(24,24,27,.06); box-shadow: inset 0 0 0 1px rgba(24,24,27,.18); }
+    .mfill { position: absolute; right: -1px; bottom: -1px; width: 9px; height: 9px; background: var(--primary); border: 1.5px solid var(--white); cursor: crosshair; z-index: 5; }
+    .mctl { font-family: inherit; border: none; background: transparent; outline: none; color: var(--text-primary); font-weight: 600; }
+    .mctl--num { width: 100%; text-align: center; font-size: 13px; -moz-appearance: textfield; }
+    .mctl--num::-webkit-outer-spin-button, .mctl--num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .mnum { display: inline-flex; align-items: center; justify-content: center; gap: 1px; width: 100%; }
+    .maffix { font-size: 12px; font-weight: 600; color: var(--text-tertiary); }
+    .mctl--select { width: 100%; text-align: center; text-align-last: center; font-size: 12.5px; padding: 0 4px; cursor: pointer; appearance: none; }
+    .mdel { width: 30px; height: 30px; margin: 0 auto; border: none; background: none; color: #C2C6CE; border-radius: 7px; display: grid; place-items: center; }
+    .msheet .mrow:hover .mdel { color: var(--text-tertiary); }
+    .mdel:hover { background: #FEECEC; color: #DC2626; }
+
+    .msheet-foot { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-top: 1px solid var(--border); }
+    .msheet-total { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+
+    /* DRAWER */
+    .drawer-overlay { position: fixed; inset: 0; background: rgba(14,19,35,.34); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40; }
+    .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+    .drawer { position: fixed; top: 0; right: 0; height: 100%; width: 440px; max-width: 95vw; background: var(--page-bg); border-left: 1px solid var(--border); box-shadow: -16px 0 48px rgba(14,19,35,.16); transform: translateX(100%); transition: transform .25s cubic-bezier(.4,0,.2,1); z-index: 41; display: flex; flex-direction: column; }
+    .drawer.open { transform: translateX(0); }
+    .drawer__head { padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--white); position: relative; }
+    .drawer__eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; display:inline-flex; align-items:center; gap:7px; }
+    .drawer__eyebrow i { width: 8px; height: 8px; border-radius: 2px; }
+    .drawer__title { font-size: 18px; font-weight: 700; letter-spacing: -.02em; margin-top: 5px; }
+    .drawer__sub { font-size: 12.5px; color: var(--text-secondary); margin-top: 3px; font-weight: 500; }
+    .drawer__close { position: absolute; top: 18px; right: 20px; width: 32px; height: 32px; border-radius: 9px; border: none; background: var(--secondary-lite); color: var(--text-secondary); font-size: 16px; display: grid; place-items: center; }
+    .drawer__body { overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; }
+    .drawer__foot { margin-top: auto; padding: 15px 24px; border-top: 1px solid var(--border); background: var(--white); display: flex; gap: 10px; }
+    .fld__label { font-size: 11.5px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 8px; }
+    .status-seg { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+    .status-seg button { border: 1.5px solid var(--border); background: var(--white); border-radius: 11px; padding: 11px 6px; font-size: 12.5px; font-weight: 700; color: var(--text-secondary); }
+    .status-seg button.on.s-available { border-color: var(--text-primary); background: var(--white); color: var(--text-primary); }
+    .status-seg button.on.s-hold { border-color: var(--text-secondary); background: var(--secondary-lite); color: var(--text-primary); }
+    .status-seg button.on.s-sold { border-color: var(--sold-bg); background: var(--sold-bg); color: #fff; }
+    .scope-seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .scope-seg button { border: 1.5px solid var(--border); background: var(--white); border-radius: 11px; padding: 10px 8px; font-size: 12.5px; font-weight: 700; color: var(--text-secondary); text-align: left; }
+    .scope-seg button.on { border-color: var(--primary); background: var(--primary); color: #fff; }
+    .scope-seg small { display: block; font-weight: 500; font-size: 10.5px; opacity: .8; margin-top: 1px; }
+    .hold-note { display: flex; gap: 9px; align-items: flex-start; background: var(--amber-bg); border: 1px solid var(--amber-line); border-radius: 11px; padding: 11px 13px; font-size: 12px; color: var(--amber-text); font-weight: 600; line-height: 1.45; }
+    .field { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-family: inherit; font-size: 13.5px; color: var(--text-primary); font-weight: 500; }
+    .field:focus { outline: none; border-color: var(--accent); }
+    textarea.field { resize: vertical; min-height: 70px; line-height: 1.5; }
+    .cpm-row { display: flex; align-items: center; gap: 10px; }
+    .cpm-inp { display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .cpm-inp span { padding: 9px 11px; background: var(--secondary-lite); font-weight: 700; color: var(--text-secondary); font-size: 14px; }
+    .cpm-inp input { border: none; padding: 9px 12px; font-family: inherit; font-size: 14px; font-weight: 700; width: 90px; }
+    .cpm-inp input:focus { outline: none; }
+    .cpm-hint { font-size: 11.5px; color: var(--text-tertiary); font-weight: 600; }
+
+    .footnote { text-align: center; color: var(--text-tertiary); font-size: 12px; margin-top: 44px; }
+    .footnote b { color: var(--text-secondary); font-weight: 600; }
+
+    @media (max-width: 1040px) { .planhead { grid-template-columns: 1fr; } .avails { border-left: none; border-top: 1px solid var(--border-light); padding-top: 10px; } .stats { grid-template-columns: repeat(2,1fr); } .cfg, .cfg-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+  <script type="text/jsx-source" id="appsrc">
+    const { useState, useMemo, useEffect, useRef } = React;
+
+    /* ───────────────── SEED DATA — CLNS Media ───────────────── */
+    // 12 broadcast weeks (Mon–Sun), Jun–Aug 2026
+    const WEEKS = ["2026-06-01","2026-06-08","2026-06-15","2026-06-22","2026-06-29","2026-07-06","2026-07-13","2026-07-20","2026-07-27","2026-08-03","2026-08-10","2026-08-17"];
+    const MON=0,TUE=1,WED=2,THU=3,FRI=4,SAT=5;
+    const DAY_NAMES = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+    const SPONSORS = {
+      "PrizePicks": { category:"Gambling", buysWeek:true },
+      "FanDuel": { category:"Gambling", buysWeek:true },
+      "DraftKings": { category:"Gambling", buysWeek:true },
+      "BetMGM": { category:"Gambling", buysWeek:true },
+      "Underdog": { category:"Gambling", buysWeek:true },
+      "BetterHelp": { category:"Wellness", buysWeek:false },
+      "HelloFresh": { category:"Meal Kit", buysWeek:false },
+      "Factor": { category:"Meal Kit", buysWeek:false },
+      "Athletic Greens": { category:"Supplements", buysWeek:false },
+      "Raycon": { category:"Consumer Tech", buysWeek:false },
+      "Decagon": { category:"SaaS", buysWeek:false },
+    };
+    const CATEGORIES = ["Gambling","Wellness","Meal Kit","Supplements","Consumer Tech","SaaS"];
+
+    // par = release pattern per week (day offsets). impressions = avg per episode.
+    const SHOW_DEFS = [
+      { id:"garden", name:"The Garden Report", note:"Celtics postgame · live + on-demand", contentType:"Live + On-demand", videosPerWeek:3, livePerWeek:3, avgLenReg:75, avgLenLive:95,
+        midPositions:4, preRoll:true, postRoll:true, cadence:"variable", impressions:85000, cpm:[25,20,18,16],
+        weeks:[[TUE,THU,SAT],[MON,WED,FRI,SAT],[THU,SAT],[TUE,THU,SAT],[MON,WED,FRI],[TUE,THU,SAT],[TUE,THU,SAT],[THU,SAT],[TUE,THU,SAT],[TUE,THU,SAT],[TUE,THU],[TUE,THU,SAT]] },
+      { id:"bball", name:"B-Ball Breakdown", note:"NBA film study · on-demand", contentType:"On-demand", videosPerWeek:3, livePerWeek:0, avgLenReg:35, avgLenLive:0,
+        midPositions:3, preRoll:true, postRoll:true, cadence:"fixed", impressions:40000, cpm:[22,18,15],
+        weeks: Array(12).fill([MON,WED,FRI]) },
+      { id:"patriots", name:"Patriots Beat", note:"NFL beat · live + on-demand", contentType:"Live + On-demand", videosPerWeek:2, livePerWeek:1, avgLenReg:40, avgLenLive:60,
+        midPositions:2, preRoll:true, postRoll:true, cadence:"fixed", impressions:60000, cpm:[24,19],
+        weeks: Array(12).fill([TUE,FRI]) },
+      { id:"twintalks", name:"Twin Talks", note:"Long-form interview · on-demand", contentType:"On-demand", videosPerWeek:1, livePerWeek:0, avgLenReg:90, avgLenLive:0,
+        midPositions:4, preRoll:true, postRoll:true, cadence:"fixed", impressions:30000, cpm:[20,17,15,13],
+        weeks: Array(12).fill([WED]) },
+      { id:"lockedon", name:"Locked On Celtics", note:"Daily NBA · on-demand", contentType:"On-demand", videosPerWeek:3, livePerWeek:0, avgLenReg:28, avgLenLive:0,
+        midPositions:3, preRoll:true, postRoll:true, cadence:"fixed", impressions:35000, cpm:[20,17,15],
+        weeks: Array(12).fill([MON,WED,FRI]) },
+      { id:"sixrings", name:"Six Rings", note:"NFL roundtable · on-demand", contentType:"On-demand", videosPerWeek:2, livePerWeek:0, avgLenReg:45, avgLenLive:0,
+        midPositions:3, preRoll:false, postRoll:true, cadence:"fixed", impressions:28000, cpm:[18,15,13],
+        weeks: Array(12).fill([TUE,THU]) },
+      { id:"easterntip", name:"The Eastern Tip", note:"Weekly hoops deep dive", contentType:"On-demand", videosPerWeek:1, livePerWeek:0, avgLenReg:55, avgLenLive:0,
+        midPositions:3, preRoll:true, postRoll:true, cadence:"fixed", impressions:22000, cpm:[18,15,13],
+        weeks: Array(12).fill([THU]) },
+    ];
+
+    function dateOf(weekIso, off){ const [y,m,d]=weekIso.split("-").map(Number); return new Date(y,m-1,d+off); }
+    function fmtOrdinal(n){ const s=["th","st","nd","rd"],v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
+    function fmtEpDate(dt){ return fmtOrdinal(dt.getDate())+" "+MONTH_NAMES[dt.getMonth()].slice(0,3); }
+    function fmtFlight(a,b){ return fmtOrdinal(a.getDate())+" "+MONTH_NAMES[a.getMonth()].slice(0,3)+" – "+fmtOrdinal(b.getDate())+" "+MONTH_NAMES[b.getMonth()].slice(0,3); }
+    function monthKey(dt){ return MONTH_NAMES[dt.getMonth()]+" "+dt.getFullYear(); }
+
+    function buildSeed(){
+      const shows = SHOW_DEFS.map(s => ({ ...s }));
+      // delivery + audio/video split + par for the Manage Shows spreadsheet
+      const DELIV = { garden:["Simulcast",45,55], bball:["Simulcast",60,40], patriots:["Simulcast",40,60] };
+      // per-show deliverables / notes (open text, edited in the show details panel)
+      const DETAILS = {
+        garden: { notes:"Goes live 3–4x/week after each Celtics game (live drives the RSS feed). On-demand clips/segments are added value, not charged against deliverables.", ep:"1 live stream + the audio version of that live stream.", su:"Every live episode that broadcast week (live + audio), Mon–Sun." },
+        bball: { notes:"Live show simulcast to the podcast, plus a separate on-demand video simulcast. Together they count as one deliverable / one episode.", ep:"1 live stream + its audio + 1 on-demand video + its on-demand audio (= 1 episode).", su:"All episodes that week, each with live + on-demand and their audio uploads." },
+        patriots: { notes:"NFL beat. Live + on-demand simulcast to the podcast feed.", ep:"1 live stream + audio + 1 on-demand video + audio.", su:"All episodes that broadcast week (live + on-demand + audio)." },
+        twintalks: { notes:"Long-form interview, on-demand audio only.", ep:"1 mid-roll read in the episode (audio).", su:"Mid-roll read in the weekly episode (audio)." },
+      };
+      shows.forEach(s => {
+        const d = DELIV[s.id] || ["Audio Only",0,100];
+        s.delivery=d[0]; s.videoPct=d[1]; s.audioPct=d[2];
+        s.releasesPerWeek = (SHOW_DEFS.find(x=>x.id===s.id).weeks[0]||[]).length;
+        s.episodicImpressions = s.impressions;
+        s.weeklyImpressions = s.impressions * (s.releasesPerWeek || 1);
+        const det = DETAILS[s.id] || { notes:"", ep:"1 mid-roll read in the episode (audio + video where applicable).", su:"Mid-roll read in every episode that broadcast week." };
+        s.notes = det.notes; s.deliverablesEpisodic = det.ep; s.deliverablesSuperUnit = det.su;
+      });
+      const episodes = [];
+      SHOW_DEFS.forEach(def => {
+        def.weeks.forEach((dayset, wi) => {
+          dayset.forEach(off => {
+            const dt = dateOf(WEEKS[wi], off);
+            const epId = def.id+"-w"+wi+"-d"+off;
+            const slots = [];
+            if (def.preRoll) slots.push(mkSlot(epId,"pre",1));
+            for (let p=1;p<=def.midPositions;p++) slots.push(mkSlot(epId,"mid",p));
+            if (def.postRoll) slots.push(mkSlot(epId,"post",1));
+            episodes.push({ id:epId, showId:def.id, weekIndex:wi, dayOffset:off, date:dt, slots });
+          });
+        });
+      });
+
+      const book = (showId, roll, pos, sponsor, status, wFrom, wTo) => {
+        const cat = SPONSORS[sponsor] ? SPONSORS[sponsor].category : null;
+        const eps = episodes.filter(e => e.showId===showId && e.weekIndex>=wFrom && e.weekIndex<=wTo);
+        const dates = eps.map(e=>e.date);
+        const fStart = new Date(Math.min.apply(null,dates)), fEnd = new Date(Math.max.apply(null,dates));
+        eps.forEach(e => { const s=e.slots.find(x=>x.roll===roll&&x.position===pos); if(s){ s.status=status; s.sponsor=sponsor; s.category=cat; s.flightStart=fStart; s.flightEnd=fEnd; } });
+      };
+
+      // Gambling super units (buy the whole week → every episode, premium pos 1)
+      book("garden","mid",1,"PrizePicks","sold",0,2);
+      book("garden","mid",1,"FanDuel","sold",4,5);
+      book("garden","mid",2,"DraftKings","sold",0,1);
+      book("bball","mid",1,"PrizePicks","sold",0,1);
+      book("bball","mid",1,"Underdog","sold",4,5);
+      book("lockedon","mid",1,"FanDuel","sold",2,4);
+      book("sixrings","mid",1,"BetMGM","sold",1,3);
+      book("patriots","mid",1,"DraftKings","sold",3,5);
+
+      // Cherry-pick a la carte (non-gambling, single positions / episodes)
+      book("twintalks","mid",1,"BetterHelp","sold",0,4);   // multi-week flight, premium slot
+      book("garden","mid",3,"Athletic Greens","sold",1,1);
+      book("bball","mid",2,"Factor","sold",2,2);
+      book("patriots","mid",2,"HelloFresh","sold",4,4);
+      book("easterntip","mid",1,"Raycon","sold",1,2);
+
+      // On Hold (pending) with sales notes
+      const hold = (showId, wi, off, roll, pos, sponsor, cpm, note, followIso) => {
+        const e = episodes.find(x=>x.showId===showId&&x.weekIndex===wi&&x.dayOffset===off);
+        if(!e) return; const s=e.slots.find(x=>x.roll===roll&&x.position===pos); if(!s) return;
+        s.status="hold"; s.sponsor=sponsor; s.category=SPONSORS[sponsor]?SPONSORS[sponsor].category:null;
+        s.cpm=cpm; s.notes=note; s.followUp=followIso;
+      };
+      hold("garden",3,TUE,"mid",2,"HelloFresh",18,"Offered $18 net CPM. Should hear back by 6/20. Can drop to $16 or offer BOGO on week 2 if they push.","2026-06-20");
+      hold("twintalks",2,WED,"mid",2,"Raycon",15,"Verbal yes on slot 2. Waiting on signed IO. Follow up 6/19.","2026-06-19");
+      hold("bball",5,WED,"mid",2,"Decagon",16,"New SaaS sponsor, onboarding call needed a week ahead of go-live.","2026-07-03");
+
+      return { shows, episodes };
+    }
+    function mkSlot(epId, roll, position){ return { id:epId+"-"+roll+position, roll, position, status:"available", sponsor:null, category:null, cpm:null, notes:"", followUp:"", flightStart:null, flightEnd:null }; }
+
+    /* ── Manage Shows spreadsheet helpers ── */
+    const clamp = (n,lo,hi) => Math.max(lo, Math.min(hi, n));
+    const STRUCTURAL = new Set(["midPositions","preRoll","postRoll"]);
+    let ADD_COUNTER = 0;
+    function getVal(s, key){
+      if (key==="cpm") return s.cpm[0];
+      if (key==="preRoll") return s.preRoll?"On":"Off";
+      if (key==="postRoll") return s.postRoll?"On":"Off";
+      return s[key];
+    }
+    function computePatch(s, key, raw){
+      if (key==="cpm"){ const arr=s.cpm.slice(); arr[0]=Math.max(0,Math.round(Number(raw)||0)); return {cpm:arr}; }
+      if (key==="preRoll") return {preRoll: raw===true||raw==="On"};
+      if (key==="postRoll") return {postRoll: raw===true||raw==="On"};
+      if (key==="delivery"){ let v=s.videoPct,a=s.audioPct; if(raw==="Audio Only"){v=0;a=100;} else if(raw==="Video Only"){v=100;a=0;} else if(a===0&&v===0){v=50;a=50;} return {delivery:raw,videoPct:v,audioPct:a}; }
+      if (key==="videoPct"){ const v=clamp(Math.round(Number(raw)||0),0,100); return s.delivery==="Simulcast"?{videoPct:v,audioPct:100-v}:{videoPct:v}; }
+      if (key==="audioPct"){ const v=clamp(Math.round(Number(raw)||0),0,100); return s.delivery==="Simulcast"?{audioPct:v,videoPct:100-v}:{audioPct:v}; }
+      if (key==="midPositions") return {midPositions: clamp(Math.round(Number(raw)||1),1,6)};
+      if (key==="episodicImpressions"){ const v=Math.max(0,Math.round(Number(raw)||0)); return {episodicImpressions:v, impressions:v}; }
+      if (key==="weeklyImpressions") return {weeklyImpressions: Math.max(0,Math.round(Number(raw)||0))};
+      if (key==="impressions") return {impressions: Math.max(0,Math.round(Number(raw)||0))};
+      if (key==="releasesPerWeek") return {releasesPerWeek: clamp(Math.round(Number(raw)||0),0,14)};
+      return {[key]:raw};
+    }
+    function reconcileEp(e, show){
+      const want=[]; if(show.preRoll)want.push(["pre",1]); for(let p=1;p<=show.midPositions;p++)want.push(["mid",p]); if(show.postRoll)want.push(["post",1]);
+      return { ...e, slots: want.map(([roll,pos])=> e.slots.find(x=>x.roll===roll&&x.position===pos) || mkSlot(e.id,roll,pos)) };
+    }
+    function buildNextData(d, edits){
+      const shows = d.shows.map(s=>({...s, cpm:s.cpm.slice()}));
+      const byId = {}; shows.forEach(s=>byId[s.id]=s);
+      const structural = new Set();
+      edits.forEach(({showId,key,raw})=>{ const s=byId[showId]; if(!s)return; Object.assign(s, computePatch(s,key,raw)); if(STRUCTURAL.has(key)) structural.add(showId); });
+      let episodes = d.episodes;
+      if (structural.size) episodes = d.episodes.map(e=> structural.has(e.showId)? reconcileEp(e, byId[e.showId]) : e);
+      return { shows, episodes };
+    }
+    function genEpisodes(show, pattern){
+      const eps=[];
+      WEEKS.forEach((wk,wi)=> pattern.forEach(off=>{ const dt=dateOf(wk,off); const epId=show.id+"-w"+wi+"-d"+off; const slots=[]; if(show.preRoll)slots.push(mkSlot(epId,"pre",1)); for(let p=1;p<=show.midPositions;p++)slots.push(mkSlot(epId,"mid",p)); if(show.postRoll)slots.push(mkSlot(epId,"post",1)); eps.push({id:epId,showId:show.id,weekIndex:wi,dayOffset:off,date:dt,slots}); }));
+      return eps;
+    }
+    function newShowDef(){
+      const id = "added-"+(++ADD_COUNTER);
+      return { id, name:"New Show", note:"On-demand", contentType:"On-demand", videosPerWeek:3, livePerWeek:0, avgLenReg:30, avgLenLive:0, midPositions:3, preRoll:true, postRoll:true, cadence:"fixed", impressions:15000, episodicImpressions:15000, weeklyImpressions:45000, cpm:[18,15,13], delivery:"Audio Only", videoPct:0, audioPct:100, releasesPerWeek:3, notes:"", deliverablesEpisodic:"1 mid-roll read in the episode.", deliverablesSuperUnit:"Mid-roll read in every episode that week." };
+    }
+
+    const SHEET_COLS = [
+      { key:"cpm", label:"CPM", type:"money", w:84 },
+      { key:"episodicImpressions", label:"Episodic impr.", type:"int", w:112 },
+      { key:"weeklyImpressions", label:"Weekly impr.", type:"int", w:112 },
+      { key:"delivery", label:"Delivery", type:"select", opts:["Audio Only","Simulcast","Video Only"], w:122 },
+      { key:"videoPct", label:"Video %", type:"pct", w:80 },
+      { key:"audioPct", label:"Audio %", type:"pct", w:80 },
+      { key:"releasesPerWeek", label:"Releases/wk", type:"int", w:104 },
+      { key:"midPositions", label:"Mid-roll slots", type:"int", w:116 },
+      { key:"preRoll", label:"Pre-roll", type:"bool", w:92 },
+      { key:"postRoll", label:"Post-roll", type:"bool", w:92 },
+    ];
+
+    /* ── drag-fill hook (vertical, fill source value down a column) ── */
+    function useGridFill(rowIds, onFill){
+      const [sel, setSel] = useState(null);     // {rowId,key}
+      const [drag, setDrag] = useState(null);   // {key,startId,endId}
+      const dragRef = useRef(null); dragRef.current = drag;
+      const selectCell = (rowId,key)=> setSel({rowId,key});
+      const startDrag = (rowId,key)=>{
+        const d={key,startId:rowId,endId:rowId}; setDrag(d); dragRef.current=d;
+        const up=()=>{ const dd=dragRef.current; if(dd && dd.startId!==dd.endId){ const s=rowIds.indexOf(dd.startId),e=rowIds.indexOf(dd.endId); const min=Math.min(s,e),max=Math.max(s,e); const targets=rowIds.slice(min,max+1).filter(id=>id!==dd.startId); if(targets.length) onFill(dd.startId, targets, dd.key); } setDrag(null); dragRef.current=null; window.removeEventListener("mouseup",up); };
+        window.addEventListener("mouseup",up);
+      };
+      const enterRow = (rowId)=>{ if(dragRef.current){ const d={...dragRef.current,endId:rowId}; setDrag(d); dragRef.current=d; } };
+      const rangeActive = (rowIndex,key)=>{ if(!drag||drag.key!==key) return false; const s=rowIds.indexOf(drag.startId),e=rowIds.indexOf(drag.endId); return rowIndex>=Math.min(s,e)&&rowIndex<=Math.max(s,e); };
+      const handleOn = (rowId,key)=> sel && sel.rowId===rowId && sel.key===key;
+      return { selectCell, startDrag, enterRow, rangeActive, handleOn, isDragging:!!drag };
+    }
+
+    const ROLL_LABEL = { pre:"Pre-Roll", mid:"Mid-Roll", post:"Post-Roll" };
+    const STATUS_LABEL = { available:"Available", hold:"On Hold", sold:"Sold" };
+
+    function showColumns(show){
+      const cols = [];
+      if (show.preRoll) cols.push({roll:"pre",position:1,key:"pre1"});
+      for (let p=1;p<=show.midPositions;p++) cols.push({roll:"mid",position:p,key:"mid"+p});
+      if (show.postRoll) cols.push({roll:"post",position:1,key:"post1"});
+      return cols;
+    }
+    function avail(show, episodes, roll){
+      let total=0,sold=0,hold=0;
+      const positions = roll==="pre"?(show.preRoll?1:0): roll==="post"?(show.postRoll?1:0): show.midPositions;
+      if (positions===0) return null;
+      episodes.forEach(e=>e.slots.forEach(s=>{ if(s.roll!==roll) return; total++; if(s.status==="sold")sold++; else if(s.status==="hold")hold++; }));
+      if (total===0) return null;
+      return { total, sold, hold, available: total-sold-hold, availPct: ((total-sold-hold)/total*100), soldPct:(sold/total*100), holdPct:(hold/total*100) };
+    }
+
+    /* ───────────────── SLOT CELL ───────────────── */
+    function SlotCell({ slot, onClick }){
+      const cls = "slot slot--"+(slot.status==="available"?"empty":slot.status);
+      return (
+        <button className={cls} onClick={onClick}>
+          <span className="slot__top">
+            <span className="slot__status">{slot.status==="available"?"Available":slot.sponsor}</span>
+            <span className="slot__pos">POS #{slot.position}</span>
+          </span>
+          {slot.status==="sold" && slot.flightStart && <span className="slot__flight">{fmtFlight(slot.flightStart, slot.flightEnd)}</span>}
+          {slot.status==="hold" && <span className="slot__flight" style={{color:"var(--amber-text)"}}>On hold{slot.followUp?" · by "+fmtEpDate(new Date(slot.followUp+"T00:00")):""}</span>}
+        </button>
+      );
+    }
+
+    /* ───────────────── AVAILABILITY HEADER ───────────────── */
+    // Fill-rate traffic light: ≥75% sold green, 60–74% amber, <60% red
+    function fillLevel(pct){ return pct>=75 ? "#1A9E63" : pct>=60 ? "#D68C1A" : "#DE4B3E"; }
+    const FILL_TITLE = "Fill rate · ≥75% sold green, 60–74% amber, <60% red";
+    function AvailabilityHeader({ show, episodes }){
+      const pre = avail(show, episodes, "pre");
+      const mid = avail(show, episodes, "mid");
+      const post = avail(show, episodes, "post");
+      let t=0,s=0,h=0; [pre,mid,post].forEach(x=>{ if(x){t+=x.total;s+=x.sold;h+=x.hold;} });
+      const totalPct = t? ((t-s-h)/t*100):0, soldPct=t?(s/t*100):0, holdPct=t?(h/t*100):0;
+      const card = (key, label, data) => (
+        <div className={"avail "+key}>
+          <div className="avail__label">{label}</div>
+          {data ? <React.Fragment>
+            <div className="avail__value">{data.availPct.toFixed(data.availPct===100?0:2)}%</div>
+            <div className="avail__sub" title={FILL_TITLE}><b style={{color:fillLevel(data.soldPct)}}><span className="fill-dot" style={{background:fillLevel(data.soldPct)}}></span>{data.soldPct.toFixed(data.soldPct===0?0:1)}% sold</b> · {data.holdPct.toFixed(data.holdPct===0?0:1)}% on hold</div>
+          </React.Fragment> : <React.Fragment>
+            <div className="avail__value off">Off</div>
+            <div className="avail__sub">disabled for this show</div>
+          </React.Fragment>}
+        </div>
+      );
+      return (
+        <div className="avails">
+          {card("pre","Available Pre-Roll", pre)}
+          {card("mid","Available Mid-Roll", mid)}
+          {card("post","Available Post-Roll", post)}
+          <div className="avail total">
+            <div className="avail__label">Total Available</div>
+            <div className="avail__value">{totalPct.toFixed(totalPct===100?0:2)}%</div>
+            <div className="avail__sub" title={FILL_TITLE}><b style={{color:fillLevel(soldPct)}}><span className="fill-dot" style={{background:fillLevel(soldPct)}}></span>{soldPct.toFixed(1)}% sold</b> · {holdPct.toFixed(1)}% on hold</div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ───────────────── EPISODE GRID (reference layout) ───────────────── */
+    function EpisodeGrid({ show, episodes, onSlot }){
+      const cols = showColumns(show);
+      const eps = episodes.slice().sort((a,b)=>a.date-b.date);
+      const groups = [];
+      eps.forEach(e=>{ const k=monthKey(e.date); let g=groups.find(x=>x.key===k); if(!g){g={key:k,eps:[]};groups.push(g);} g.eps.push(e); });
+      const rollSpans = [];
+      let i=0; while(i<cols.length){ const r=cols[i].roll; let j=i; while(j<cols.length&&cols[j].roll===r)j++; rollSpans.push({roll:r,span:j-i}); i=j; }
+      const getSlot = (ep,c)=> ep.slots.find(s=>s.roll===c.roll&&s.position===c.position);
+      // Merge consecutive episodes booked to the same sponsor in a column into one block.
+      const spansFor = (gEps)=>{
+        const map = gEps.map(()=>({}));
+        cols.forEach(c=>{
+          let r=0;
+          while(r<gEps.length){
+            const slot=getSlot(gEps[r],c);
+            const mergeable = slot && (slot.status==="sold"||slot.status==="hold") && slot.sponsor;
+            if(!mergeable){ map[r][c.key]={render:true,span:1,slot,ep:gEps[r],lastEp:gEps[r]}; r++; continue; }
+            let e2=r+1;
+            while(e2<gEps.length){ const s2=getSlot(gEps[e2],c); if(s2&&s2.status===slot.status&&s2.sponsor===slot.sponsor) e2++; else break; }
+            map[r][c.key]={render:true,span:e2-r,slot,ep:gEps[r],lastEp:gEps[e2-1]};
+            for(let k=r+1;k<e2;k++) map[k][c.key]={render:false};
+            r=e2;
+          }
+        });
+        return map;
+      };
+      return (
+        <div className="gridwrap"><div className="gridscroll">
+          <table className="grid grid--compact">
+            <thead>
+              <tr>
+                <th className="col-ep roll-h" rowSpan={2} style={{verticalAlign:"bottom",borderBottom:"1px solid var(--border)"}}>Episode</th>
+                {rollSpans.map((rs,k)=>(<th key={k} className={"roll-h "+rs.roll} colSpan={rs.span}>{ROLL_LABEL[rs.roll]}</th>))}
+              </tr>
+              <tr>{cols.map((c,k)=>(<th key={k} className="pos-h">POS #{c.position}</th>))}</tr>
+            </thead>
+            <tbody>
+              {groups.map(g=>{
+                const sp = spansFor(g.eps);
+                return (
+                  <React.Fragment key={g.key}>
+                    <tr className="month-row"><td colSpan={cols.length+1}>{g.key}</td></tr>
+                    {g.eps.map((ep,ri)=>(
+                      <tr key={ep.id}>
+                        <td className="col-ep ep-c ep-c--compact">
+                          <span className="ep-c__date">{fmtEpDate(ep.date)}</span>
+                          <span className="ep-c__day">{DAY_NAMES[ep.dayOffset]}</span>
+                        </td>
+                        {cols.map((c)=>{
+                          const cell = sp[ri][c.key];
+                          if(!cell.render) return null;
+                          const slot = cell.slot;
+                          const st = slot ? slot.status : "available";
+                          const cls = "ccell ccell--"+(st==="available"?"av":st)+(cell.span>1?" ccell--merged":"");
+                          const sameDay = cell.ep.date.getTime()===cell.lastEp.date.getTime();
+                          const sub = st==="hold" ? ("On hold · by "+(slot.followUp?fmtEpDate(new Date(slot.followUp+"T00:00")):"—")) : (sameDay ? fmtEpDate(cell.ep.date) : fmtFlight(cell.ep.date, cell.lastEp.date));
+                          return (
+                            <td key={c.key} className="ccol" rowSpan={cell.span}>
+                              <button className={cls} onClick={()=>onSlot(cell.ep, slot)} title={slot&&slot.sponsor?slot.sponsor:"Add booking"}>
+                                {st==="available"
+                                  ? <svg className="ccell__plus" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                                  : <React.Fragment>
+                                      <span className="ccell__name">{slot.sponsor}</span>
+                                      <span className="ccell__range">{sub}</span>
+                                    </React.Fragment>}
+                              </button>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+        </div></div>
+      );
+    }
+
+    /* ───────────────── WEEK (SUPER UNIT) GRID ───────────────── */
+    function WeekGrid({ show, episodes, onSlot }){
+      const cols = showColumns(show);
+      const rollSpans = []; let i=0; while(i<cols.length){const r=cols[i].roll;let j=i;while(j<cols.length&&cols[j].roll===r)j++;rollSpans.push({roll:r,span:j-i});i=j;}
+      return (
+        <div className="gridwrap"><div className="gridscroll">
+          <table className="grid">
+            <thead>
+              <tr>
+                <th className="col-ep roll-h" rowSpan={2} style={{verticalAlign:"bottom",borderBottom:"1px solid var(--border)"}}>Broadcast week</th>
+                {rollSpans.map((rs,k)=>(<th key={k} className={"roll-h "+rs.roll} colSpan={rs.span}>{ROLL_LABEL[rs.roll]} · super unit</th>))}
+              </tr>
+              <tr>{cols.map((c,k)=>(<th key={k} className="pos-h">POS #{c.position}</th>))}</tr>
+            </thead>
+            <tbody>
+              {WEEKS.map((wk,wi)=>{
+                const weekEps = episodes.filter(e=>e.weekIndex===wi);
+                if (weekEps.length===0) return null;
+                return (
+                  <tr key={wk}>
+                    <td className="col-ep ep-c">
+                      <div className="ep-c__status">Week of</div>
+                      <div className="ep-c__date">{fmtEpDate(dateOf(wk,0))} {dateOf(wk,0).getFullYear()}</div>
+                      <div className="ep-c__day">{weekEps.length} episode{weekEps.length>1?"s":""}</div>
+                    </td>
+                    {cols.map((c,k)=>{
+                      // week-level rollup of this position across all episodes
+                      const slots = weekEps.map(e=>e.slots.find(s=>s.roll===c.roll&&s.position===c.position)).filter(Boolean);
+                      const sold = slots.filter(s=>s.status==="sold");
+                      const hold = slots.filter(s=>s.status==="hold");
+                      let status="available", sponsor=null;
+                      if (sold.length===slots.length && slots.length>0){ status="sold"; sponsor=sold[0].sponsor; }
+                      else if (sold.length>0){ status="partial"; sponsor=sold[0].sponsor; }
+                      else if (hold.length>0){ status="hold"; sponsor=hold[0].sponsor; }
+                      const cls = status==="sold"?"slot slot--sold": status==="hold"?"slot slot--hold": status==="partial"?"slot slot--hold":"slot slot--empty";
+                      const firstEp = weekEps.sort((a,b)=>a.date-b.date)[0];
+                      const firstSlot = firstEp.slots.find(s=>s.roll===c.roll&&s.position===c.position);
+                      return (
+                        <td key={k} className="cell">
+                          <button className={cls} onClick={()=>onSlot(firstEp, firstSlot, "week")}>
+                            <span className="slot__top">
+                              <span className="slot__status">{status==="available"?"Open week":status==="partial"?(sponsor+" (partial)"):sponsor}</span>
+                              <span className="slot__pos">POS #{c.position}</span>
+                            </span>
+                            <span className="slot__flight">{sold.length}/{slots.length} eps {status==="available"?"open":"sold"}</span>
+                          </button>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div></div>
+      );
+    }
+
+
+    /* ───────────────── MANAGE SHOWS (spreadsheet) ───────────────── */
+    function SheetControl({ col, value, onCommit, onLive, onFocusEdit }){
+      if (col.type==="select" || col.type==="bool"){
+        const opts = col.type==="bool" ? ["On","Off"] : col.opts;
+        return <select className="mctl mctl--select" value={value} onChange={e=>onCommit(e.target.value)}>{opts.map(o=><option key={o} value={o}>{o}</option>)}</select>;
+      }
+      const prefix = col.type==="money" ? "$" : "";
+      const suffix = col.type==="pct" ? "%" : "";
+      return (
+        <span className="mnum">
+          {prefix && <span className="maffix">{prefix}</span>}
+          <input className="mctl mctl--num" type="text" inputMode="numeric" value={value}
+            onFocus={onFocusEdit}
+            onChange={e=>onLive(e.target.value.replace(/[^0-9.]/g,""))} />
+          {suffix && <span className="maffix">{suffix}</span>}
+        </span>
+      );
+    }
+
+    function ManageShowsGrid({ shows, fill, onLiveEdit, onCommitEdit, onFocusEdit, onAdd, onBulk, onDelete, onSave, onOpenDetails, search, setSearch, canUndo, canRedo, onUndo, onRedo }){
+      const q = search.trim().toLowerCase();
+      const rows = q ? shows.filter(s=>s.name.toLowerCase().includes(q)) : shows;
+      const [saved, setSaved] = useState(false);
+      const doSave = () => { onSave(); setSaved(true); setTimeout(()=>setSaved(false), 1600); };
+      const exportXlsx = () => {
+        const data = shows.map(s=>({ Show:s.name, "CPM ($)":s.cpm[0], "Episodic impressions":s.episodicImpressions, "Weekly impressions":s.weeklyImpressions, Delivery:s.delivery, "Video %":s.videoPct, "Audio %":s.audioPct, "Releases/wk":s.releasesPerWeek, "Mid-roll slots":s.midPositions, "Pre-roll":s.preRoll?"On":"Off", "Post-roll":s.postRoll?"On":"Off" }));
+        if (typeof XLSX !== "undefined"){ const ws=XLSX.utils.json_to_sheet(data); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"Shows"); XLSX.writeFile(wb,"north-station-shows.xlsx"); return; }
+        const cols=Object.keys(data[0]||{}); const csv=[cols.join(",")].concat(data.map(r=>cols.map(c=>'"'+String(r[c]).replace(/"/g,'""')+'"').join(","))).join("\n");
+        const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download="north-station-shows.csv"; a.click();
+      };
+      return (
+        <div className="msheet-card">
+          <div className="msheet-toolbar">
+            <div className="msheet-search">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input placeholder="Search shows…" value={search} onChange={e=>setSearch(e.target.value)} />
+            </div>
+            <div className="msheet-tools">
+              <button className="iconbtn" disabled={!canUndo} onClick={onUndo} title="Undo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg></button>
+              <button className="iconbtn" disabled={!canRedo} onClick={onRedo} title="Redo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h1"/></svg></button>
+              <button className="btn btn--primary btn--sm" onClick={onAdd}>+ Add Show</button>
+              <button className="btn btn--outline btn--sm" onClick={onBulk}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" style={{marginRight:"6px"}}><path d="M12 3v12m0-12 4 4m-4-4-4 4"/><path d="M5 21h14"/></svg>Bulk CSV Add</button>
+              <button className="btn btn--outline btn--sm" onClick={exportXlsx} title="Export shows to Excel"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" style={{marginRight:"6px"}}><path d="M12 15V3m0 12-4-4m4 4 4-4"/><path d="M5 21h14"/></svg>Export .xlsx</button>
+            </div>
+          </div>
+          <div className="msheet-scroll">
+            <table className="msheet">
+              <thead>
+                <tr>
+                  <th className="mh mh--show">Shows</th>
+                  {SHEET_COLS.map(c=><th key={c.key} className="mh" style={{width:c.w,minWidth:c.w}}>{c.label}</th>)}
+                  <th className="mh mh--act"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((s, rowIndex)=>(
+                  <tr key={s.id} className="mrow">
+                    <td className="mtd mtd--show">
+                      <button className="mshowcell mshowcell--btn" onClick={()=>onOpenDetails(s.id)} title="Open show details & deliverables">
+                        <div className="mthumb">{s.name.split(" ").map(w=>w[0]).slice(0,2).join("")}</div>
+                        <div className="mshowcell__body">
+                          <div className="mshowname">{s.name}</div>
+                          <div className="mshowdetail">Details<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M9 6l6 6-6 6"/></svg></div>
+                        </div>
+                      </button>
+                    </td>
+                    {SHEET_COLS.map(c=>{
+                      const selected = fill.handleOn(s.id, c.key);
+                      const inRange = fill.rangeActive(rowIndex, c.key);
+                      return (
+                        <td key={c.key} className="mtd" style={{width:c.w,minWidth:c.w}} onMouseEnter={()=>fill.enterRow(s.id)}>
+                          <div className={"mcell"+(selected?" mcell--sel":"")+(inRange?" mcell--range":"")} onMouseDown={()=>fill.selectCell(s.id,c.key)}>
+                            <SheetControl col={c} value={getVal(s,c.key)}
+                              onLive={raw=>onLiveEdit(s.id,c.key,raw)}
+                              onCommit={raw=>onCommitEdit(s.id,c.key,raw)}
+                              onFocusEdit={onFocusEdit} />
+                            {selected && <span className="mfill" onMouseDown={e=>{e.stopPropagation(); fill.startDrag(s.id,c.key);}}></span>}
+                          </div>
+                        </td>
+                      );
+                    })}
+                    <td className="mtd mtd--act"><button className="mdel" title="Remove show" onClick={()=>onDelete(s.id)}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"/></svg></button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="msheet-foot">
+            <span className="msheet-total">{rows.length} show{rows.length!==1?"s":""}{q?" matched":""}</span>
+            <button className={"btn btn--primary"+(saved?" btn--saved":"")} onClick={doSave}>{saved?"Saved ✓":"Save and Update"}</button>
+          </div>
+        </div>
+      );
+    }
+
+    /* ───────────────── SHOW DETAILS DRAWER ───────────────── */
+    function DetailsDrawer({ show, onClose, onUpdate }){
+      const open = !!show;
+      const [notes,setNotes]=useState(""); const [ep,setEp]=useState(""); const [su,setSu]=useState("");
+      useEffect(()=>{ if(show){ setNotes(show.notes||""); setEp(show.deliverablesEpisodic||""); setSu(show.deliverablesSuperUnit||""); } },[show]);
+      if(!show) return <div className="drawer-overlay" onClick={onClose}></div>;
+      const save = () => { onUpdate(show.id, { notes, deliverablesEpisodic:ep, deliverablesSuperUnit:su }); onClose(); };
+      return (
+        <React.Fragment>
+          <div className={"drawer-overlay"+(open?" open":"")} onClick={onClose}></div>
+          <div className={"drawer"+(open?" open":"")}>
+            <div className="drawer__head">
+              <button className="drawer__close" onClick={onClose}>×</button>
+              <div className="drawer__eyebrow">Show details</div>
+              <div className="drawer__title">{show.name}</div>
+              <div className="drawer__sub">{show.contentType} · {show.releasesPerWeek}/wk · {show.midPositions} mid-roll slots</div>
+            </div>
+            <div className="drawer__body">
+              <div><div className="fld__label">General notes</div><textarea className="field" style={{minHeight:"90px"}} placeholder="e.g. goes live 3–4x/week after each game; segments are added value, not charged…" value={notes} onChange={e=>setNotes(e.target.value)} /></div>
+              <div><div className="fld__label">What's included — Episodic booking</div><textarea className="field" placeholder="Deliverables for a single-episode (a la carte) buy…" value={ep} onChange={e=>setEp(e.target.value)} /></div>
+              <div><div className="fld__label">What's included — Super-unit booking</div><textarea className="field" placeholder="Deliverables for a whole-week buy…" value={su} onChange={e=>setSu(e.target.value)} /></div>
+              <div className="hold-note" style={{background:"var(--secondary-lite)",borderColor:"var(--border)",color:"var(--text-secondary)"}}><span>ⓘ</span><span>These show up in the booking panel based on whether the slot is sold episodic or as a super unit, so ad ops knows exactly what to verify.</span></div>
+            </div>
+            <div className="drawer__foot"><button className="btn btn--accent" style={{flex:1}} onClick={save}>Save details</button></div>
+          </div>
+        </React.Fragment>
+      );
+    }
+
+    /* ───────────────── SLOT EDITOR ───────────────── */
+    function SlotEditor({ ctx, shows, episodes, onClose, onSave }){
+      const open = !!ctx;
+      const [status,setStatus]=useState("available");
+      const [sponsor,setSponsor]=useState("");
+      const [category,setCategory]=useState("");
+      const [cpm,setCpm]=useState("");
+      const [notes,setNotes]=useState("");
+      const [followUp,setFollowUp]=useState("");
+      const [scope,setScope]=useState("episode");
+      useEffect(()=>{ if(ctx){ const s=ctx.slot; setStatus(s.status); setSponsor(s.sponsor||""); setCategory(s.category||""); const sh=shows.find(x=>x.id===ctx.ep.showId); setCpm(s.cpm||sh.cpm[s.position-1]||""); setNotes(s.notes||""); setFollowUp(s.followUp||""); setScope(ctx.defaultScope||"episode"); } },[ctx]);
+      useEffect(()=>{ if(sponsor && SPONSORS[sponsor]) setCategory(SPONSORS[sponsor].category); },[sponsor]);
+      if(!ctx) return <div className="drawer-overlay" onClick={onClose}></div>;
+      const sh = shows.find(x=>x.id===ctx.ep.showId);
+      const needsSponsor = status!=="available";
+      const rollColor = ctx.slot.roll==="pre"?"var(--blue-text)":ctx.slot.roll==="post"?"var(--orange-text)":"var(--accent)";
+      const known = SPONSORS[sponsor];
+      const flightEps = (ctx.slot.status==="sold" && ctx.slot.flightStart)
+        ? (episodes||[]).filter(e=>e.showId===ctx.ep.showId && e.date>=ctx.slot.flightStart && e.date<=ctx.slot.flightEnd && e.slots.some(s=>s.roll===ctx.slot.roll&&s.position===ctx.slot.position&&s.sponsor===ctx.slot.sponsor)).sort((a,b)=>a.date-b.date)
+        : (ctx.slot.status==="sold" ? [ctx.ep] : []);
+      const save = () => { onSave(ctx.ep, ctx.slot, { status, sponsor:needsSponsor?(sponsor||null):null, category:needsSponsor?(category||(known?known.category:null)):null, cpm:needsSponsor?(Number(cpm)||null):null, notes:needsSponsor?notes:"", followUp:status==="hold"?followUp:"" }, scope); onClose(); };
+      const clear = () => { onSave(ctx.ep, ctx.slot, { status:"available", sponsor:null, category:null, cpm:null, notes:"", followUp:"" }, scope); onClose(); };
+      return (
+        <React.Fragment>
+          <div className={"drawer-overlay"+(open?" open":"")} onClick={onClose}></div>
+          <div className={"drawer"+(open?" open":"")}>
+            <div className="drawer__head">
+              <button className="drawer__close" onClick={onClose}>×</button>
+              <div className="drawer__eyebrow" style={{color:rollColor}}><i style={{background:rollColor}}></i>{sh.name} · {ROLL_LABEL[ctx.slot.roll]}</div>
+              <div className="drawer__title">{fmtEpDate(ctx.ep.date)} {ctx.ep.date.getFullYear()} · Slot {ctx.slot.position}{ctx.slot.position===1&&ctx.slot.roll==="mid"?" (premium)":""}</div>
+              <div className="drawer__sub">{DAY_NAMES[ctx.ep.dayOffset]} · {sh.midPositions} mid-roll slots · ~{(sh.impressions/1000)}k impressions/ep</div>
+            </div>
+            <div className="drawer__body">
+              <div><div className="fld__label">Status</div>
+                <div className="status-seg">
+                  <button className={(status==="available"?"on ":"")+"s-available"} onClick={()=>setStatus("available")}>Available</button>
+                  <button className={(status==="hold"?"on ":"")+"s-hold"} onClick={()=>setStatus("hold")}>On Hold</button>
+                  <button className={(status==="sold"?"on ":"")+"s-sold"} onClick={()=>setStatus("sold")}>Sold</button>
+                </div>
+              </div>
+              {needsSponsor && <React.Fragment>
+                <div><div className="fld__label">Sponsor</div>
+                  <input className="field" list="sponsor-list" placeholder="Type or pick a sponsor…" value={sponsor} onChange={e=>setSponsor(e.target.value)} />
+                  <datalist id="sponsor-list">{Object.keys(SPONSORS).map(s=><option key={s} value={s} />)}</datalist>
+                  <div className="cpm-hint" style={{marginTop:"7px"}}>{sponsor? (known? <span>Known sponsor · category <b>{category}</b></span> : <span>New sponsor — it will be saved for next time</span>) : "Detects existing sponsors as you type, or creates a new one."}</div>
+                </div>
+                {!known && sponsor && <div><div className="fld__label">Category</div>
+                  <select className="field" value={category} onChange={e=>setCategory(e.target.value)}><option value="">Select category…</option>{CATEGORIES.map(c=><option key={c} value={c}>{c}</option>)}</select>
+                </div>}
+                <div><div className="fld__label">Offered CPM</div>
+                  <div className="cpm-row"><div className="cpm-inp"><span>$</span><input type="number" value={cpm} onChange={e=>setCpm(e.target.value)} /></div><span className="cpm-hint">net CPM · slot {ctx.slot.position} rate card ${sh.cpm[ctx.slot.position-1]}</span></div>
+                </div>
+                {status==="hold" && <div><div className="fld__label">Hear back by</div><input type="date" className="field" value={followUp} onChange={e=>setFollowUp(e.target.value)} /></div>}
+                <div><div className="fld__label">Notes</div><textarea className="field" placeholder="Offered $18 CPM, hear back by Fri, can offer BOGO…" value={notes} onChange={e=>setNotes(e.target.value)} /></div>
+                {status==="hold" && notes && <div className="hold-note"><span>⚑</span><span>On hold for {sponsor||"sponsor"}. Surfaces on your weekly sales call so you can push it over the line.</span></div>}
+                <div><div className="fld__label">Booking type</div>
+                  <div className="scope-seg">
+                    <button className={scope==="episode"?"on":""} onClick={()=>setScope("episode")}>Episodic<small>this episode</small></button>
+                    <button className={scope==="week"?"on":""} onClick={()=>setScope("week")}>Super unit<small>whole week · all eps</small></button>
+                  </div>
+                  <div className="incl-box">
+                    <div className="incl-box__label">What's included · {scope==="week"?"Super unit":"Episodic"}</div>
+                    <div className="incl-box__txt">{(scope==="week" ? sh.deliverablesSuperUnit : sh.deliverablesEpisodic) || <span style={{color:"var(--text-tertiary)"}}>No deliverables set — add them in the show details.</span>}</div>
+                  </div>
+                </div>
+              </React.Fragment>}
+              {ctx.slot.status==="sold" && flightEps.length>0 && (
+                <div>
+                  <div className="fld__label" style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}><span>Deliverables &amp; compliance</span><span className="ai-tag">AI auto-detect</span></div>
+                  <div className="cmp-hint">Ad links + timestamps for every episode in this booking, auto-pulled from the show's feeds. Verify and mark passed.</div>
+                  {flightEps.map((e,i)=>{ const detected=i<2; return (
+                    <div className="cmp-row" key={e.id}>
+                      <div className="cmp-row__top"><span className="cmp-row__date">{fmtEpDate(e.date)} · {DAY_NAMES[e.dayOffset]}</span><span className={"cmp-status "+(detected?"ok":"pend")}>{detected?"✓ Passed":"Pending"}</span></div>
+                      <input className="cmp-inp" defaultValue={detected?("youtu.be/x"+e.id.slice(-4)+"  @ "+(8+i)+":3"+i):""} placeholder="Video link @ timestamp" />
+                      <input className="cmp-inp" defaultValue={detected?("mgphn.fm/x"+e.id.slice(-4)+"  @ "+(8+i)+":3"+i):""} placeholder="Audio link @ timestamp" />
+                    </div>
+                  ); })}
+                </div>
+              )}
+            </div>
+            <div className="drawer__foot">
+              {ctx.slot.status!=="available" && <button className="btn btn--ghost" onClick={clear}>Clear</button>}
+              <button className="btn btn--accent" style={{flex:1}} onClick={save} disabled={needsSponsor&&!sponsor}>Save{scope==="week"?" week":""}</button>
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    }
+
+    /* ───────────────── APP ───────────────── */
+    function App(){
+      const [data,setData]=useState(buildSeed);
+      const [past,setPast]=useState([]);
+      const [future,setFuture]=useState([]);
+      const [view,setView]=useState("calendar");
+      const [selectedShow,setSelectedShow]=useState("garden");
+      const [calMode,setCalMode]=useState("episode");
+      const [editCtx,setEditCtx]=useState(null);
+      const [detailsId,setDetailsId]=useState(null);
+      const [sheetSearch,setSheetSearch]=useState("");
+      const { shows, episodes } = data;
+      const goView = v => { setEditCtx(null); setView(v); };
+      const show = shows.find(s=>s.id===selectedShow) || shows[0];
+      const showEpisodes = useMemo(()=>episodes.filter(e=>e.showId===selectedShow),[episodes,selectedShow]);
+
+      // undo / redo history
+      const snapshot = () => { setPast(p=>[...p, data].slice(-100)); setFuture([]); };
+      const commit = (next) => { snapshot(); setData(next); };
+      const undo = () => { if(!past.length) return; setFuture(f=>[data,...f].slice(0,100)); setData(past[past.length-1]); setPast(p=>p.slice(0,-1)); };
+      const redo = () => { if(!future.length) return; setPast(p=>[...p,data].slice(-100)); setData(future[0]); setFuture(f=>f.slice(1)); };
+
+      const onSave = (ep, slot, patch, scope) => {
+        snapshot();
+        setData(d=>{
+          const apply = (s)=>({ ...s, ...patch, flightStart: patch.status==="sold"?ep.date:null, flightEnd: patch.status==="sold"?ep.date:null });
+          return { ...d, episodes: d.episodes.map(e=>{
+            if (e.showId!==ep.showId) return e;
+            const sameWeek = e.weekIndex===ep.weekIndex;
+            if (scope==="week" && sameWeek) return { ...e, slots: e.slots.map(s=> (s.roll===slot.roll&&s.position===slot.position)?apply(s):s) };
+            if (e.id===ep.id) return { ...e, slots: e.slots.map(s=> s.id===slot.id?apply(s):s) };
+            return e;
+          })};
+        });
+      };
+
+      // Manage Shows spreadsheet
+      const sheetRowIds = (sheetSearch.trim()? shows.filter(s=>s.name.toLowerCase().includes(sheetSearch.trim().toLowerCase())) : shows).map(s=>s.id);
+      const onFill = (sourceId, targetIds, key) => { snapshot(); const src=data.shows.find(s=>s.id===sourceId); const raw=getVal(src,key); setData(d=>buildNextData(d, targetIds.map(id=>({showId:id,key,raw})))); };
+      const fill = useGridFill(sheetRowIds, onFill);
+      const liveRef = useRef(false);
+      const onFocusEdit = () => { liveRef.current = false; };
+      const onLiveEdit = (showId,key,raw) => { if(!liveRef.current){ snapshot(); liveRef.current=true; } setData(d=>buildNextData(d,[{showId,key,raw}])); };
+      const onCommitEdit = (showId,key,raw) => { snapshot(); setData(d=>buildNextData(d,[{showId,key,raw}])); };
+      const addShow = () => { const ns=newShowDef(); commit({ shows:[...data.shows, ns], episodes:[...data.episodes, ...genEpisodes(ns,[MON,WED,FRI])] }); };
+      const bulkAdd = () => { const a=newShowDef(); a.name="Imported Show A"; const b=newShowDef(); b.name="Imported Show B"; commit({ shows:[...data.shows,a,b], episodes:[...data.episodes, ...genEpisodes(a,[TUE,THU]), ...genEpisodes(b,[MON,WED,FRI])] }); };
+      const deleteShow = (id) => { commit({ shows:data.shows.filter(s=>s.id!==id), episodes:data.episodes.filter(e=>e.showId!==id) }); if(selectedShow===id){ const fallback=data.shows.find(s=>s.id!==id); if(fallback) setSelectedShow(fallback.id); } };
+
+      return (
+        <div className="wrap">
+          <div className="topbar">
+            <div className="brand">
+              <svg className="ns-logo" viewBox="0 0 200 112" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="North Station Media">
+                <text x="100" y="37" textAnchor="middle" fontFamily="'Helvetica Neue',Arial,sans-serif" fontWeight="800" fontSize="38" letterSpacing="-1" fill="#0E1116">NORTH</text>
+                <text x="100" y="75" textAnchor="middle" fontFamily="'Helvetica Neue',Arial,sans-serif" fontWeight="800" fontSize="38" letterSpacing="-1" fill="#0E1116">STATION</text>
+                <text x="98" y="100" textAnchor="middle" fontFamily="'Helvetica Neue',Arial,sans-serif" fontWeight="700" fontSize="17" letterSpacing="9" fill="#0E1116">MEDIA</text>
+              </svg>
+              <div className="brand__divider"></div>
+              <div className="brand__sub2">Inventory<br/>Planning</div>
+            </div>
+            <div className="topbar__right">
+              <div className="date-pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Jun 1 – Aug 30, 2026</div>
+              <button className="sf-btn" title="Connect once your Salesforce IT lead enables the API"><span className="dot"></span>Sync to Salesforce</button>
+              <div className="avatar">GN</div>
+            </div>
+          </div>
+
+          <div className="tabs">
+            <button className={"tab"+(view==="calendar"?" active":"")} onClick={()=>goView("calendar")}>Inventory calendar</button>
+            <button className={"tab"+(view==="config"?" active":"")} onClick={()=>goView("config")}>Show setup</button>
+          </div>
+
+          {view==="calendar" && <React.Fragment>
+            <div className="planhead">
+              <div className="showpick">
+                <div className="showpick__thumb">{show.name.split(" ").map(w=>w[0]).slice(0,2).join("")}</div>
+                <div className="showpick__body">
+                  <div className="showpick__label">Podcast</div>
+                  <select value={selectedShow} onChange={e=>setSelectedShow(e.target.value)}>{shows.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select>
+                  <div className="showpick__eps">{showEpisodes.length} episodes · {show.contentType}</div>
+                </div>
+              </div>
+              <AvailabilityHeader show={show} episodes={showEpisodes} />
+            </div>
+            <div className="controls">
+              <div className="seg">
+                <button className={calMode==="episode"?"on":""} onClick={()=>setCalMode("episode")}>By episode</button>
+                <button className={calMode==="week"?"on":""} onClick={()=>setCalMode("week")}>By week</button>
+              </div>
+              <div className="status-legend" style={{marginLeft:"auto"}}><span><i className="sl-av"></i>Available</span><span><i className="sl-hold"></i>On hold</span><span><i className="sl-sold"></i>Sold</span></div>
+            </div>
+            {calMode==="episode"
+              ? <EpisodeGrid show={show} episodes={showEpisodes} onSlot={(ep,slot)=>setEditCtx({ep,slot})} />
+              : <WeekGrid show={show} episodes={showEpisodes} onSlot={(ep,slot,scope)=>setEditCtx({ep,slot,defaultScope:scope})} />}
+          </React.Fragment>}
+
+          {view==="config" && <React.Fragment>
+            <div style={{marginBottom:"16px"}}>
+              <h1 style={{fontSize:"22px",fontWeight:700,letterSpacing:"-.03em"}}>Manage shows</h1>
+              <p style={{color:"var(--text-secondary)",fontSize:"14px",marginTop:"3px"}}>Edit show-level setup in the grid. Click a cell, then drag the corner handle down to fill the column.</p>
+            </div>
+            <ManageShowsGrid shows={shows} fill={fill} onLiveEdit={onLiveEdit} onCommitEdit={onCommitEdit} onFocusEdit={onFocusEdit} onAdd={addShow} onBulk={bulkAdd} onDelete={deleteShow} onSave={()=>{}} onOpenDetails={setDetailsId} search={sheetSearch} setSearch={setSheetSearch} canUndo={past.length>0} canRedo={future.length>0} onUndo={undo} onRedo={redo} />
+          </React.Fragment>}
+
+          <div className="footnote">Built for <b>North Station Media</b> · seeded mock data, in-memory · powered by SpotsNow</div>
+          <SlotEditor ctx={editCtx} shows={shows} episodes={episodes} onClose={()=>setEditCtx(null)} onSave={onSave} />
+          <DetailsDrawer show={detailsId?shows.find(s=>s.id===detailsId):null} onClose={()=>setDetailsId(null)} onUpdate={(id,patch)=>{ snapshot(); setData(d=>({...d, shows:d.shows.map(s=>s.id===id?{...s,...patch}:s)})); }} />
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+
+  <script>
+    // Transform with the CLASSIC runtime (the in-browser preset defaults to the
+    // automatic runtime, which emits bare imports that fail in a classic script).
+    (function () {
+      try {
+        var src = document.getElementById("appsrc").textContent;
+        var out = Babel.transform(src, { presets: [["react", { runtime: "classic" }]] }).code;
+        (0, eval)(out);
+      } catch (err) {
+        document.getElementById("root").innerHTML =
+          '<pre style="margin:40px;padding:20px;border-radius:12px;background:#FFEDED;color:#b00;font:12px/1.5 ui-monospace,monospace;white-space:pre-wrap">' +
+          (err && err.message ? err.message : String(err)) + "</pre>";
+      }
+    })();
+  </script>
+</body>
+</html>
