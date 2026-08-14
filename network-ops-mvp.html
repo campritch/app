@@ -1000,12 +1000,14 @@
     <div style="padding:0"><div class="reel-stage"><iframe src="https://www.youtube.com/embed/${yt}?start=${ts}&autoplay=1" allow="autoplay" allowfullscreen></iframe></div></div>`); }
 
   /* ═══════════════════════════ VIEW: DELIVERY ═══════════════════════════ */
-  let delFilter={type:'brand',val:'all'};
+  let delFilter={type:'brand',val:'all'}, delTab='attention';
   RENDER.delivery = () => {
     const approved=SPOTS.filter(s=>s.status==='approved');
     const pend=SPOTS.filter(s=>s.status==='pending'), found=SPOTS.filter(s=>s.status==='agent_found'), missed=SPOTS.filter(s=>s.status==='missed');
-    const toVerify=pend.length+found.length+missed.length;
-    // ONE table: every scheduled spot, verify + delivery together
+    const todayPending=pend.filter(s=>s.airDate===TODAY);
+    const att=needsAttention();
+    const attCount=found.length+att.pacing.length+att.copy.length+missed.length+todayPending.length;
+    // table rows for the All-spots tab
     let rows=SPOTS.slice();
     if(delFilter.type==='brand'&&delFilter.val!=='all') rows=rows.filter(s=>s.brand===delFilter.val);
     if(delFilter.type==='show'&&delFilter.val!=='all') rows=rows.filter(s=>s.showId===delFilter.val);
@@ -1013,42 +1015,58 @@
     rows.sort((a,b)=>(order[a.status]-order[b.status])||a.brand.localeCompare(b.brand)||a.showId.localeCompare(b.showId));
     const fApproved=rows.filter(s=>s.status==='approved');
     const totExp=fApproved.reduce((a,s)=>a+s.expected,0), totAct=fApproved.reduce((a,s)=>a+(s.actual||0),0);
-    const camps={}; approved.forEach(s=>{ const k=s.brand+'·'+s.showId; camps[k]=camps[k]||{brand:s.brand,showId:s.showId,exp:0,act:0}; camps[k].exp+=s.expected; camps[k].act+=(s.actual||0); });
-    const behind=Object.values(camps).map(c=>({...c,pct:Math.round(c.act/c.exp*100)})).filter(c=>c.pct<95);
-    const att=needsAttention();
     const brands=[...new Set(SPOTS.map(s=>s.brand))];
     const shownShows=[...new Set(SPOTS.map(s=>s.showId))];
-    document.getElementById('view-delivery').innerHTML=`
-    <div class="inner">
-      <div class="pagebar">
-        <div class="head"><h1>Delivery <span class="live-dot"><i></i>Agent polling</span></h1><p>Every scheduled spot in one table — verify today's air checks and track pacing to goal in the same place. The air-check agent and the delivery rollup, together.</p></div>
-        <div class="pagebar__right">
-          <div class="seg"><button class="${delFilter.type==='brand'?'active':''}" onclick="delFilter={type:'brand',val:'all'};RENDER.delivery()">By brand</button><button class="${delFilter.type==='show'?'active':''}" onclick="delFilter={type:'show',val:'all'};RENDER.delivery()">By show</button></div>
-        </div>
-      </div>
-      ${att.total?`<div class="card" style="margin-bottom:16px;border-color:var(--orange-bg)">
-        <div class="card__head"><div><div class="card__title">Needs attention <span class="tag tag--orange" style="margin-left:4px"><i></i>${att.total}</span></div><div class="card__sub">The agent scans Airtable every 24h — pacing, month-end shortfalls and missing copy surface here.</div></div></div>
-        <div class="card__pad" style="display:flex;flex-direction:column;gap:9px">
-          ${att.pacing.map(c=>`<div style="display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid var(--orange-bg);border-radius:11px">
-            <div style="width:30px;height:30px;border-radius:8px;background:var(--orange-bg);display:grid;place-items:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--orange-text)" stroke-width="2.2"><path d="M12 9v4M12 17h.01M10.3 3.9L2 18a2 2 0 001.7 3h16.6A2 2 0 0022 18L13.7 3.9a2 2 0 00-3.4 0z"/></svg></div>
-            <div style="flex:1"><b style="font-size:13px">${esc(c.brand)} on ${esc(show(c.showId).name)} is ${100-c.pct}% behind pace</b><div class="muted" style="font-size:12px">${K(c.short)} impressions short this flight — make-good drafted.</div></div>
-            <button class="btn btn--ghost btn--sm" onclick="openMakegood('${c.brand}','${c.showId}')">Make-good</button></div>`).join('')}
-          ${att.copy.map(s=>`<div style="display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid var(--border-light);border-radius:11px">
-            <div style="width:30px;height:30px;border-radius:8px;background:var(--blue-bg);display:grid;place-items:center;flex-shrink:0"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--blue-text)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></div>
-            <div style="flex:1"><b style="font-size:13px">${esc(s.brand)} on ${esc(show(s.showId).name)} — ${copyState(s)==='needs_copy'?'ad copy not added yet':'needs a CTA in the description'}</b><div class="muted" style="font-size:12px">Airs ${fmtDate(s.airDate)} · flag before it goes live.</div></div>
-            <button class="btn btn--ghost btn--sm" onclick="markCopyReady('${s.id}')">Mark ready</button></div>`).join('')}
-        </div></div>`:''}
+
+    const attnRow=(bg,stroke,pathHtml,title,sub,action)=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border-light);border-radius:11px;background:var(--white)">
+      <div style="width:30px;height:30px;border-radius:8px;background:${bg};display:grid;place-items:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="2.1">${pathHtml}</svg></div>
+      <div style="flex:1;min-width:0"><b style="font-size:13px">${title}</b><div class="muted" style="font-size:12px">${sub}</div></div>${action}</div>`;
+    const attnSection=(label,count,tone,rowsHtml)=>count?`<div style="margin-bottom:18px"><div style="display:flex;align-items:center;gap:8px;margin:0 2px 9px"><span style="font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-secondary)">${label}</span><span class="tag tag--${tone}">${count}</span></div><div style="display:flex;flex-direction:column;gap:9px">${rowsHtml.join('')}</div></div>`:'';
+
+    const foundRows=found.map(s=>attnRow('var(--green-bg)','var(--green-text)','<path d="M20 6L9 17l-5-5"/>',
+      `${esc(s.brand)} on ${esc(show(s.showId).name)}`,
+      `${s.yt?`Ad at ${mmss(s.ts)} · `:''}${K(s.actual)} impressions${s.verified?' · copy verified':''}`,
+      `<div style="display:flex;gap:6px"><button class="btn btn--ghost btn--sm" onclick="openProofSpot('${s.id}')">Proof</button><button class="btn btn--green btn--sm" onclick="approveSpot('${s.id}')">✓ Approve</button></div>`));
+    const pacingRows=att.pacing.map(c=>attnRow('var(--orange-bg)','var(--orange-text)','<path d="M12 9v4M12 17h.01M10.3 3.9L2 18a2 2 0 001.7 3h16.6A2 2 0 0022 18L13.7 3.9a2 2 0 00-3.4 0z"/>',
+      `${esc(c.brand)} on ${esc(show(c.showId).name)} is ${100-c.pct}% behind pace`,
+      `${K(c.short)} impressions short this flight — make-good drafted.`,
+      `<button class="btn btn--ghost btn--sm" onclick="openMakegood('${c.brand}','${c.showId}')">Make-good</button>`));
+    const copyRows=att.copy.map(s=>attnRow('var(--blue-bg)','var(--blue-text)','<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>',
+      `${esc(s.brand)} on ${esc(show(s.showId).name)} — ${copyState(s)==='needs_copy'?'ad copy not added yet':'needs a CTA in the description'}`,
+      `Airs ${fmtDate(s.airDate)} · flag before it goes live.`,
+      `<button class="btn btn--ghost btn--sm" onclick="markCopyReady('${s.id}')">Mark ready</button>`));
+    const missedRows=missed.map(s=>attnRow('var(--red-bg)','var(--red-text)','<path d="M12 9v4M12 17h.01M10.3 3.9L2 18a2 2 0 001.7 3h16.6A2 2 0 0022 18L13.7 3.9a2 2 0 00-3.4 0z"/>',
+      `${esc(s.brand)} on ${esc(show(s.showId).name)}`,
+      `No episode found after polling — needs a manual look.`,
+      `<button class="btn btn--ghost btn--sm" onclick="toast('Opens manual entry / nudge the show.')">Handle</button>`));
+
+    const attentionHTML=`
+      ${todayPending.length?`<div class="card" style="margin-bottom:18px"><div class="card__pad" style="display:flex;align-items:center;gap:14px">
+        <div style="width:38px;height:38px;border-radius:10px;background:var(--blue-bg);display:grid;place-items:center;flex-shrink:0"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--blue-text)" stroke-width="2"><path d="M12 2a3 3 0 013 3v6a3 3 0 01-6 0V5a3 3 0 013-3z"/><path d="M19 10a7 7 0 01-14 0M12 17v4"/></svg></div>
+        <div style="flex:1"><b style="font-size:13.5px">${todayPending.length} spots aired today</b><div class="muted" style="font-size:12.5px">Run the agent to auto-detect the YouTube link, timestamp and views for each.</div></div>
+        <button class="btn btn--primary btn--sm" id="runBtn" onclick="runAgent()">▶ Run agent</button></div>
+        <div id="scanPanel" style="padding:0 20px 6px"></div></div>`:'<div id="scanPanel"></div>'}
+      ${attnSection('Verified · ready to approve',found.length,'green',foundRows)}
+      ${attnSection('Behind pace',att.pacing.length,'orange',pacingRows)}
+      ${attnSection('Waiting on copy / CTA',att.copy.length,'blue',copyRows)}
+      ${attnSection('Flagged',missed.length,'red',missedRows)}
+      ${attCount===0?`<div class="card"><div class="empty">✨ All clear — every spot is verified and pacing on or above goal.</div></div>`:''}`;
+
+    const allHTML=`
       <div class="tiles" style="grid-template-columns:repeat(3,1fr)">
         <div class="tile"><div class="tile__label">Expected</div><div class="tile__val">${K(totExp)}</div></div>
         <div class="tile"><div class="tile__label">Delivered</div><div class="tile__val">${K(totAct)}</div></div>
         <div class="tile"><div class="tile__label">Pacing</div><div class="tile__val" style="color:${totAct>=totExp?'var(--green-text)':'var(--orange-text)'}">${Math.round(totAct/Math.max(totExp,1)*100)}%</div></div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 6px">
-        <button class="tag ${delFilter.val==='all'?'tag--blue':'tag--grey'}" onclick="delFilter.val='all';RENDER.delivery()">All</button>
-        ${(delFilter.type==='brand'?brands.map(b=>`<button class="tag ${delFilter.val===b?'tag--blue':'tag--grey'}" onclick="delFilter.val='${b}';RENDER.delivery()">${esc(b)}</button>`):shownShows.map(id=>`<button class="tag ${delFilter.val===id?'tag--blue':'tag--grey'}" onclick="delFilter.val='${id}';RENDER.delivery()">${esc(show(id).name)}</button>`)).join('')}
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:16px 0 6px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="tag ${delFilter.val==='all'?'tag--blue':'tag--grey'}" onclick="delFilter.val='all';RENDER.delivery()">All</button>
+          ${(delFilter.type==='brand'?brands.map(b=>`<button class="tag ${delFilter.val===b?'tag--blue':'tag--grey'}" onclick="delFilter.val='${b}';RENDER.delivery()">${esc(b)}</button>`):shownShows.map(id=>`<button class="tag ${delFilter.val===id?'tag--blue':'tag--grey'}" onclick="delFilter.val='${id}';RENDER.delivery()">${esc(show(id).name)}</button>`)).join('')}
+        </div>
+        <div class="seg"><button class="${delFilter.type==='brand'?'active':''}" onclick="delFilter={type:'brand',val:'all'};RENDER.delivery()">By brand</button><button class="${delFilter.type==='show'?'active':''}" onclick="delFilter={type:'show',val:'all'};RENDER.delivery()">By show</button></div>
       </div>
       <div class="card">
-        <div class="card__head"><div><div class="card__title">Spots ${toVerify?`<span class="tag tag--orange" style="margin-left:4px"><i></i>${toVerify} to verify</span>`:'<span class="live-dot"><i></i>all verified</span>'}</div><div class="card__sub">Approve today's air checks and pacing updates in the same row. Click ▶ Proof to watch, score and edit the link.</div></div>
+        <div class="card__head"><div><div class="card__title">All spots</div><div class="card__sub">Every scheduled spot with air-check status and pacing. Click ▶ Proof to watch, score and edit the link.</div></div>
           <div style="display:flex;gap:8px">${found.length?`<button class="btn btn--green btn--sm" onclick="approveAll()">✓ Approve all (${found.length})</button>`:''}<button class="btn btn--primary btn--sm" id="runBtn" onclick="runAgent()">▶ Run agent</button></div></div>
         <div id="scanPanel" style="padding:0 20px"></div>
         <table>
@@ -1068,8 +1086,18 @@
               <td class="num">${s.actual!=null?K(s.actual):(s.status==='pending'?'<span class="muted">awaiting</span>':'<span class="muted">—</span>')}</td>
               <td>${pct!=null?`<div style="display:flex;align-items:center;gap:8px"><div class="pace ${cls}" style="flex:1"><div class="pace__fill" style="width:${Math.min(pct,100)}%"></div></div><b style="font-size:12px;min-width:36px">${pct}%</b></div>`:'<span class="muted">—</span>'}</td>
               <td class="right">${action}</td></tr>`; }).join('')}</tbody></table>
+      </div>`;
+
+    document.getElementById('view-delivery').innerHTML=`
+    <div class="inner">
+      <div class="pagebar">
+        <div class="head"><h1>Delivery <span class="live-dot"><i></i>Agent polling</span></h1><p>${delTab==='attention'?'What needs you today — the agent auto-detects links and timestamps, flags pacing and missing copy. You approve.':'Every scheduled spot with its air-check status and pacing to goal, in one place.'}</p></div>
+        <div class="pagebar__right">
+          <div class="seg"><button class="${delTab==='attention'?'active':''}" onclick="delTab='attention';RENDER.delivery()">Needs attention${attCount?` · ${attCount}`:''}</button><button class="${delTab==='all'?'active':''}" onclick="delTab='all';RENDER.delivery()">All spots</button></div>
+        </div>
       </div>
-      <div class="footnote">Approve an air check and its delivery, pacing, advertiser portal and proof reel all update at once.</div>
+      ${delTab==='attention'?attentionHTML:allHTML}
+      <div class="footnote">Approve an air check and its delivery, pacing and advertiser portal all update at once.</div>
     </div>`;
   };
   function openMakegood(brand,showId){ openModal(`<div class="drawer__head"><div><span class="tag tag--orange"><i></i>Drafted by Pacing Agent</span><h2 style="font-size:18px;font-weight:800;margin-top:8px">Makegood + heads-up · ${esc(brand)}</h2></div><button class="x" onclick="closeOverlays()">✕</button></div>
