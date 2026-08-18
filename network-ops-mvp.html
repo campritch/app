@@ -214,22 +214,27 @@
     .brand-chip { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-weight: 800; color: #fff; font-size: 15px; flex-shrink: 0; }
 
 
-    /* ─── delivery clock (the 4 checks from the VMG call) ─── */
-    .clock { display:flex; align-items:center; gap:0; margin-top:8px; }
-    .clock__seg { flex:1; height:5px; background:var(--border-light); position:relative; border-right:2px solid var(--white); }
-    .clock__seg:last-child { border-right:0; }
-    .clock__seg:first-child { border-radius:3px 0 0 3px; } .clock__seg:last-child { border-radius:0 3px 3px 0; }
-    .clock__seg.done { background:var(--primary); } .clock__seg.now { background:var(--orange-text); }
-    .clock__labels { display:flex; font-size:9px; font-weight:700; letter-spacing:.03em; text-transform:uppercase; color:var(--text-tertiary); margin-top:5px; }
-    .clock__labels span { flex:1; text-align:center; }
-    .clock__labels span.on { color:var(--orange-text); }
+    /* ─── one work row, used for every kind of item ─── */
+    .wrow { display:flex; align-items:center; gap:13px; padding:13px 16px; border:1px solid var(--border-light); border-radius:12px; background:var(--white); }
+    .wrow + .wrow { margin-top:8px; }
+    .wrow__ico { width:34px; height:34px; border-radius:9px; display:grid; place-items:center; flex-shrink:0; }
+    .wrow__thumb { width:60px; height:34px; border-radius:6px; object-fit:cover; flex-shrink:0; background:var(--secondary-lite); }
+    .wrow__main { flex:1; min-width:0; }
+    .wrow__main b { font-size:13px; font-weight:700; display:block; }
+    .wrow__main span { font-size:12px; color:var(--text-secondary); }
+    .wrow__num { width:132px; flex-shrink:0; display:flex; align-items:center; gap:9px; }
+    .wrow__num b { font-size:12.5px; min-width:38px; text-align:right; }
+    .wrow button { flex-shrink:0; }
+    .askbar { display:flex; gap:8px; margin-bottom:18px; }
+    .askbar input { flex:1; min-width:0; padding:10px 14px; border:1px solid var(--border); border-radius:10px; font-size:13.5px; font-family:inherit; background:var(--white); }
+    .askbar input:focus { outline:none; border-color:var(--primary); }
+    .answer { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:14px 16px; font-size:13px; line-height:1.6; margin-bottom:18px; box-shadow:var(--shadow-card); }
 
-    /* ─── approval toggles (show ✓ / brand ✓) ─── */
-    .tog { display:flex; align-items:center; gap:10px; padding:11px 13px; border:1px solid var(--border-light); border-radius:11px; background:var(--white); }
+    /* ─── show / brand sign-off toggles ─── */
+    .tog { display:flex; align-items:center; gap:11px; padding:11px 13px; border:1px solid var(--border-light); border-radius:11px; background:var(--white); }
     .tog__sw { width:42px; height:24px; border-radius:999px; background:var(--border-strong); position:relative; flex-shrink:0; transition:.16s; border:none; }
     .tog__sw i { position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff; transition:.16s; box-shadow:0 1px 2px rgba(0,0,0,.2); }
     .tog__sw.on { background:var(--green-text); } .tog__sw.on i { left:21px; }
-    .tog__sw.no { background:var(--red-text); }
     .tog b { font-size:12.5px; display:block; } .tog small { font-size:11px; color:var(--text-tertiary); font-weight:500; }
 
     /* ─── curve / projection chart ─── */
@@ -257,23 +262,12 @@
     </div>
     <div class="sb-scroll">
       <div class="sb-group">
-        <div class="sb-group__label">Ad Ops</div>
-        <button class="nav-item active" data-view="overview" onclick="go('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Command Center</button>
-        <button class="nav-item" data-view="delivery" onclick="go('delivery')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Delivery <span class="badge" id="nav-del-badge"></span></button>
-        <button class="nav-item" data-view="makegoods" onclick="go('makegoods')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1015-6.7L21 8"/><path d="M21 3v5h-5"/></svg>Make Goods <span class="badge" id="nav-mg-badge"></span></button>
-        <button class="nav-item" data-view="copy" onclick="go('copy')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg>Copy &amp; Proof <span class="badge" id="nav-copy-badge"></span></button>
-      </div>
-      <div class="sb-group">
-        <div class="sb-group__label">Advertiser</div>
+        <button class="nav-item active" data-view="delivery" onclick="go('delivery')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Delivery <span class="badge" id="nav-del-badge"></span></button>
         <button class="nav-item" data-view="portal" onclick="go('portal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg>Campaign Portal <span class="dot"></span></button>
-      </div>
-      <div class="sb-group">
-        <div class="sb-group__label">Setup</div>
-        <button class="nav-item" data-view="shows" onclick="go('shows')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 4v16"/></svg>Shows &amp; Inventory</button>
+        <button class="nav-item" data-view="shows" onclick="go('shows')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 4v16"/></svg>Shows</button>
       </div>
     </div>
     <div class="sb-foot">
-      <button class="sb-powered" style="margin-bottom:2px" onclick="toast('Alerts route to #adops-alerts in Slack and the adops@ alias. Per-person: Sydney → Slack, Shelby → email.')"><span class="smark" style="background:#4A154B">#</span>Alerts → <b>#adops-alerts</b> + <b>adops@</b></button>
       <div class="sb-user">
         <div class="sb-user__av">SD</div>
         <div><div class="sb-user__name">Sydney D.</div><div class="sb-user__sub">Ad Ops · Acme Network</div></div>
@@ -283,10 +277,7 @@
   </nav>
 
   <main class="main" id="main">
-    <section class="view active" id="view-overview"></section>
-    <section class="view" id="view-delivery"></section>
-    <section class="view" id="view-makegoods"></section>
-    <section class="view" id="view-copy"></section>
+    <section class="view active" id="view-delivery"></section>
     <section class="view" id="view-portal"></section>
     <section class="view" id="view-shows"></section>
   </main>
@@ -600,10 +591,8 @@
   }
   function rerender(){ if(RENDER[CURRENT]) RENDER[CURRENT](); }
   function refreshBadges(){
-    const set=(id,n)=>{ const el=document.getElementById(id); if(!el) return; el.textContent=n; el.style.display=n?'':'none'; };
-    set('nav-del-badge', deliveryAttention().count);
-    set('nav-mg-badge',  MAKEGOODS.filter(m=>m.status!=='scheduled').length);
-    set('nav-copy-badge',SPOTS.filter(s=>['needs_copy','needs_cta'].includes(s.copyStatus)).length);
+    const el=document.getElementById('nav-del-badge'); if(!el) return;
+    const n=workList().length; el.textContent=n; el.style.display=n?'':'none';
   }
 
   /* ═══════════════════════════ OVERLAYS ═══════════════════════════ */
@@ -611,632 +600,288 @@
   function openModal(html){ const m=document.getElementById('modal'); m.innerHTML=html; m.classList.add('open'); document.getElementById('scrim').classList.add('open'); }
   function closeOverlays(){ document.getElementById('drawer').classList.remove('open'); document.getElementById('modal').classList.remove('open'); document.getElementById('scrim').classList.remove('open'); }
 
-  /* ═══════════════════════════ ASK ACME (chat over the store) ═══════════════════════════ */
-  let CHAT=[];
-  const goChip=(label,view)=>`<button class="btn btn--ghost btn--sm" style="margin-top:11px;margin-right:6px" onclick="go('${view}')">${label}</button>`;
-  function askAcme(qOverride){
-    const el=document.getElementById('acAsk'); let q=qOverride||(el?el.value.trim():''); if(!q) return;
-    CHAT.push({role:'user',text:q}); CHAT.push({role:'bot',html:answerQuery(q)});
-    if(el&&!qOverride) el.value=''; renderChatMsgs();
+  /* ═══════════════════════════ ASK ═══════════════════════════ */
+  let ANSWER='';
+  function askAcme(q){
+    const el=document.getElementById('acAsk'); const t=q||(el?el.value.trim():''); if(!t) return;
+    ANSWER=answerQuery(t); if(el) el.value=''; rerender();
   }
-  function renderChatMsgs(){
-    const box=document.getElementById('acChatMsgs'); if(!box) return;
-    if(!CHAT.length){ box.style.display='none'; return; }
-    box.style.display='flex';
-    box.innerHTML=CHAT.map(m=>m.role==='user'
-      ?`<div style="align-self:flex-end;max-width:80%;background:var(--primary);color:#fff;padding:9px 13px;border-radius:14px 14px 3px 14px;font-size:13px;font-weight:500">${esc(m.text)}</div>`
-      :`<div style="align-self:flex-start;max-width:92%;background:var(--page-bg);border:1px solid var(--border-light);padding:11px 14px;border-radius:14px 14px 14px 3px;font-size:13px;line-height:1.55">${m.html}</div>`
-    ).join('');
-    box.scrollTop=box.scrollHeight;
-  }
-  function chatCard(){
-    const sugg=["What needs a make good?","What's behind pace?","Will Kalshi on Sage Steele deliver?","What's waiting on copy?","Which guarantees are too high?"];
-    return `<div class="card" style="margin-bottom:16px">
-      <div class="card__pad">
-        <div style="display:flex;align-items:center;gap:11px;margin-bottom:13px">
-          <div style="width:34px;height:34px;border-radius:10px;background:var(--primary);color:#fff;display:grid;place-items:center;font-size:15px;font-weight:800">✦</div>
-          <div><b style="font-size:14px">Ask Acme Network</b><div class="muted" style="font-size:12px">Ask anything about delivery, pacing and make goods — answered off Airtable + Booster.</div></div>
-        </div>
-        <div id="acChatMsgs" style="display:none;flex-direction:column;gap:10px;max-height:340px;overflow-y:auto;padding:4px 2px;margin-bottom:12px"></div>
-        <div style="display:flex;gap:8px">
-          <input id="acAsk" placeholder="Ask anything about Acme Network…" onkeydown="if(event.key==='Enter')askAcme()" style="flex:1;min-width:0;padding:11px 13px;border:1px solid var(--border);border-radius:10px;font-size:13.5px;font-family:inherit">
-          <button class="btn btn--primary" onclick="askAcme()">Ask</button>
-        </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">${sugg.map(x=>`<button class="tag tag--grey" style="cursor:pointer" onclick="askAcme('${x.replace(/'/g,"\\'")}')">${esc(x)}</button>`).join('')}</div>
-      </div></div>`;
-  }
+  const goChip=(label,view)=>`<button class="btn btn--ghost btn--sm" style="margin-top:10px" onclick="go('${view}')">${label}</button>`;
   const nameOf = s => `${esc(s.brand)} on ${esc(show(s.showId).name)}`;
   function answerQuery(raw){
     const q=raw.toLowerCase().trim();
     const live=SPOTS.filter(s=>projection(s));
-    const brands=[...new Set(SPOTS.map(s=>s.brand))];
-    const brandHit=brands.find(b=>q.includes(b.toLowerCase()));
+    const brandHit=[...new Set(SPOTS.map(s=>s.brand))].find(b=>q.includes(b.toLowerCase()));
     const showHit=SHOWS.find(s=>q.includes(s.name.toLowerCase())||q.includes(s.host.toLowerCase()));
-
-    if(/make ?good|short|under.?deliver|owe/.test(q)){
-      const need=needsMakegood(), open=MAKEGOODS.filter(m=>m.status!=='scheduled');
-      let out = need.length
-        ? `<b>${need.length}</b> flight${need.length>1?'s':''} project${need.length>1?'':'s'} short of the 90% IAB line: `+need.map(s=>{const v=verdict(s);return `${nameOf(s)} (<b>${Math.round(v.pr.ratio*100)}%</b>, ${K(shortfall(s))} short)`;}).join(', ')+`.`
-        : `Nothing new projecting short — every live flight clears 90%.`;
-      if(open.length) out += ` ${open.length} make good${open.length>1?'s are':' is'} already in the loop waiting on sign-off.`;
-      return out+goChip('Open Make Goods →','makegoods');
-    }
-    if(/decision|day 1[0-4]|window|when.*(decide|call)/.test(q)){
-      const d=live.filter(s=>phase(s)==='decide');
-      return (d.length?`<b>${d.length}</b> flight${d.length>1?'s are':' is'} in the day 10–14 decision window: `+d.map(s=>`${nameOf(s)} — ${verdict(s).label.toLowerCase()}`).join(', ')+`.`:`Nothing in the decision window today.`)+goChip('Open Delivery →','delivery');
-    }
     if(brandHit && showHit){
-      const sp=SPOTS.filter(s=>s.brand===brandHit&&s.showId===showHit.id&&projection(s)).sort((a,b)=>liveDays(b)-liveDays(a))[0];
+      const sp=live.filter(s=>s.brand===brandHit&&s.showId===showHit.id).sort((x,y)=>liveDays(y)-liveDays(x))[0];
       if(sp){ const v=verdict(sp), pr=v.pr;
-        return `<b>${nameOf(sp)}</b> is day ${pr.day} of 30. ${K(pr.got)} delivered against a ${K(sp.guarantee)} guarantee — that reads <b>${Math.round(pr.rawRatio*100)}%</b> raw, but ${esc(showHit.name)}'s curve only has ${Math.round(pr.curvePct*100)}% of the views in by now. Projected final is <b>${K(pr.proj)}</b> = <b>${Math.round(pr.ratio*100)}%</b> of guarantee. ${v.k==='short'?'That lands short — make good recommended.':'That clears the 90% line, no make good needed.'}`+goChip('Open Delivery →','delivery'); }
+        return `<b>${nameOf(sp)}</b> is day ${pr.day} of 30. ${K(pr.got)} delivered against ${K(sp.guarantee)} — reads <b>${Math.round(pr.rawRatio*100)}%</b> raw, but ${esc(showHit.name)} only has ${Math.round(pr.curvePct*100)}% of views in by now. Projects <b>${K(pr.proj)}</b> = <b>${Math.round(pr.ratio*100)}%</b>. ${v.k==='short'?'Lands short — make good needed.':'Clears the 90% line.'}`; }
     }
-    if(/behind|pacing|pace|at risk|track/.test(q)){
-      const behind=live.filter(s=>['short','early'].includes(verdict(s).k)&&phase(s)!=='booked');
-      const looksBad=live.filter(s=>{const v=verdict(s);return v.pr&&v.pr.rawRatio<0.7&&v.k!=='short';});
-      let out = behind.filter(s=>verdict(s).k==='short').length
-        ? `Behind: `+behind.filter(s=>verdict(s).k==='short').map(s=>`<b>${nameOf(s)}</b> (${Math.round(verdict(s).pr.ratio*100)}% projected)`).join(', ')+`.`
-        : `Nothing projecting behind right now.`;
-      if(looksBad.length) out += ` Note ${looksBad.map(s=>`<b>${nameOf(s)}</b>`).join(', ')} look${looksBad.length>1?'':'s'} light on raw numbers but the curve says ${looksBad.length>1?'they land':'it lands'} fine — no action needed.`;
-      return out+goChip('Open Delivery →','delivery');
+    if(/make ?good|short|under.?deliver/.test(q)){
+      const need=needsMakegood();
+      return need.length?`${need.length} flight${need.length>1?'s':''} project${need.length>1?'':'s'} under 90%: `+need.map(x=>`<b>${nameOf(x)}</b> (${Math.round(verdict(x).pr.ratio*100)}%, ${K(shortfall(x))} short)`).join(', ')+`.`:`Nothing new projecting short.`;
     }
-    if(/copy|cta|proof of post|not opened|read receipt/.test(q)){
-      const need=SPOTS.filter(s=>['needs_copy','needs_cta'].includes(s.copyStatus));
-      const unseen=SPOTS.filter(s=>s.copyStatus==='sent');
-      let out = need.length?`${need.length} spot${need.length>1?'s':''} still need copy or a CTA: `+need.map(s=>`<b>${nameOf(s)}</b> (${s.copyStatus==='needs_copy'?'ad copy':'CTA'}, airs ${fmtDate(s.published)})`).join(', ')+`.`:`Every booked spot has its copy in.`;
-      if(unseen.length) out += ` ${unseen.length} copy email${unseen.length>1?'s have':' has'} been sent but not opened yet.`;
-      return out+goChip('Open Copy & Proof →','copy');
+    if(/behind|pacing|pace|track/.test(q)){
+      const soft=live.filter(x=>{const v=verdict(x);return v.pr&&v.pr.rawRatio<0.75&&v.k!=='short';});
+      const bad=live.filter(x=>verdict(x).k==='short');
+      return (bad.length?`Behind: `+bad.map(x=>`<b>${nameOf(x)}</b> (${Math.round(verdict(x).pr.ratio*100)}%)`).join(', ')+`. `:`Nothing behind. `)
+        +(soft.length?`${soft.map(x=>`<b>${nameOf(x)}</b>`).join(', ')} look${soft.length>1?'':'s'} light on raw numbers but the curve says ${soft.length>1?'they land':'it lands'} fine.`:'');
     }
-    if(/guarantee|too high|lower|reduce|fill rate|bonus/.test(q)){
+    if(/copy|cta|opened/.test(q)){
+      const n=SPOTS.filter(x=>['needs_copy','needs_cta'].includes(x.copyStatus)), u=SPOTS.filter(x=>x.copyStatus==='sent');
+      return (n.length?`${n.length} spot${n.length>1?'s':''} need copy or a CTA: `+n.map(x=>`<b>${nameOf(x)}</b>`).join(', ')+`. `:`All copy is in. `)+(u.length?`${u.length} copy email${u.length>1?'s':''} sent but not opened.`:'');
+    }
+    if(/guarantee|too high|fill rate|bonus/.test(q)){
       const adv=guaranteeAdvice(), f=fillStats();
-      let out=`Paid fill rate is <b>${f.rate}%</b> — ${f.paid} paid spots against ${f.free} given as make goods or bonus.`;
-      if(adv.length){ const a=adv[0]; out+=` <b>${esc(show(a.showId).name)}</b> has needed a make good on ${a.shortCount} of the last ${a.flights} flights. Its reads typically land near ${K(a.typical)}, so a ${K(a.suggest)} guarantee would stop the bleed (currently ${K(a.current)}).`; }
-      return out+goChip('Open Shows & Inventory →','shows');
+      return `Paid fill rate is <b>${f.rate}%</b> (${f.paid} sold, ${f.free} given).`+(adv.length?` <b>${esc(show(adv[0].showId).name)}</b> needed a make good on ${adv[0].shortCount} of its last ${adv[0].flights} flights — reads land near ${K(adv[0].typical)}, so drop the guarantee to ${K(adv[0].suggest)} from ${K(adv[0].current)}.`:'')+goChip('Open Shows →','shows');
     }
-    if(/aired today|today|daily|new episode|live check/.test(q)){
-      const t=SPOTS.filter(s=>s.status==='aired');
-      return (t.length?`<b>${t.length}</b> spots are due to air today — ${t.map(s=>esc(show(s.showId).name)).join(', ')}. Run the agent and it scans each channel for the episode, finds the read, and grabs the link + timestamp.`:`Every spot due today has been checked.`)+goChip('Open Delivery →','delivery');
-    }
-    if(/avail|inventory|open|slot|space|book/.test(q)){
-      const sh=showHit||SHOWS[0]; const av=nextEpisodes(sh.id,3);
-      return `<b>${esc(sh.name)}</b> publishes ${sh.publishDays.join('/')} with ${sh.positionsPerEp} ad positions an episode. Next avails: `+av.map(e=>`${fmtDate(e.date)} (${e.open} of ${e.cap} open)`).join(', ')+`.`+goChip('Open Shows & Inventory →','shows');
-    }
-    if(showHit){
-      const sh=showHit; const sp=SPOTS.filter(s=>s.showId===sh.id&&projection(s));
-      return `<b>${esc(sh.name)}</b> — ${sh.publishDays.join('/')}, ${sh.positionsPerEp} positions per episode, ${K(sh.guarantee)} guarantee. Learned curve: <b>${Math.round(curveAt(sh.curve,2)*100)}%</b> of views inside 48h, off ${sh.samples} verified reads. ${sp.length} flight${sp.length!==1?'s':''} live.`+goChip('Open Shows & Inventory →','shows');
-    }
+    if(showHit) return `<b>${esc(showHit.name)}</b> publishes ${showHit.publishDays.join('/')}, ${showHit.positionsPerEp} positions an episode, ${K(showHit.guarantee)} guarantee. <b>${Math.round(curveAt(showHit.curve,2)*100)}%</b> of views land inside 48h, off ${showHit.samples} reads.`+goChip('Open Shows →','shows');
     if(brandHit){
-      const sp=SPOTS.filter(s=>s.brand===brandHit&&projection(s));
-      if(!sp.length) return `${esc(brandHit)} has nothing live right now.`+goChip('Open Delivery →','delivery');
-      const g=sp.reduce((a,s)=>a+s.guarantee,0), got=sp.reduce((a,s)=>a+(delivered(s)||0),0), proj=sp.reduce((a,s)=>a+projection(s).proj,0);
-      return `<b>${esc(brandHit)}</b> — ${sp.length} flight${sp.length>1?'s':''} across ${[...new Set(sp.map(s=>show(s.showId).name))].join(', ')}. ${K(got)} delivered so far against ${K(g)} guaranteed, projecting <b>${K(proj)}</b> = ${pctOf(proj,g)}%.`+goChip('Open Campaign Portal →','portal');
+      const sp=live.filter(x=>x.brand===brandHit); if(!sp.length) return `${esc(brandHit)} has nothing live.`;
+      const g=sp.reduce((t,x)=>t+x.guarantee,0), pj=sp.reduce((t,x)=>t+projection(x).proj,0);
+      return `<b>${esc(brandHit)}</b> — ${sp.length} flight${sp.length>1?'s':''}, projecting ${K(pj)} against ${K(g)} = <b>${pctOf(pj,g)}%</b>.`+goChip('Open Portal →','portal');
     }
-    return `I can answer on delivery pacing, projections, the day 10–14 make-good call, copy status and guarantee tuning. Try "Will Kalshi on Sage Steele deliver?" or "What needs a make good?"`;
+    return `Try "will Kalshi on Sage Steele deliver?", "what needs a make good?", or "which guarantees are too high?"`;
   }
 
-  /* ═══════════════════════════ SHARED PIECES ═══════════════════════════ */
+  /* ═══════════════════════════ SHARED ═══════════════════════════ */
   const toneVar = t => ({green:'var(--green-text)',red:'var(--red-text)',orange:'var(--orange-text)',blue:'var(--blue-text)',purple:'var(--purple-text)',grey:'var(--text-tertiary)'}[t]||'var(--text-secondary)');
-
-  // The four checks from the call: did it go live · weekly pace · day 10-14 call · 30-day final
-  function clockBar(s){
-    const i=PHASE_STEP[phase(s)]||0;
-    return `<div style="min-width:172px;flex-shrink:0">
-      <div class="clock">${PHASES.map((p,n)=>`<div class="clock__seg ${n<i?'done':n===i?'now':''}"></div>`).join('')}</div>
-      <div class="clock__labels">${PHASES.map((p,n)=>`<span class="${n===i?'on':''}">${p.l}</span>`).join('')}</div></div>`;
-  }
-
-  // Delivered-so-far + where the curve says it lands, against the guarantee and the 90% line
   function projBar(s){
-    const pr=projection(s); if(!pr) return '<span class="muted">—</span>';
-    const max=Math.max(s.guarantee, pr.proj)*1.06;
-    const w=v=>Math.min(100, v/max*100);
-    const tone=verdict(s).tone;
-    return `<div style="position:relative;height:10px;border-radius:5px;background:var(--secondary-lite);overflow:visible">
-      <div style="position:absolute;inset:0 auto 0 0;width:${w(pr.proj)}%;border-radius:5px;background:${toneVar(tone)};opacity:.28"></div>
-      <div style="position:absolute;inset:0 auto 0 0;width:${w(pr.got)}%;border-radius:5px;background:${toneVar(tone)}"></div>
-      <div title="IAB full delivery · 90%" style="position:absolute;top:-3px;bottom:-3px;left:${w(s.guarantee*IAB_FULL)}%;width:2px;background:var(--green-text)"></div>
-      <div title="Guarantee ${K(s.guarantee)}" style="position:absolute;top:-3px;bottom:-3px;left:${w(s.guarantee)}%;width:2px;background:var(--text-tertiary)"></div>
-    </div>`;
+    const pr=projection(s); if(!pr) return '';
+    const max=Math.max(s.guarantee,pr.proj)*1.06, w=v=>Math.min(100,v/max*100), tone=toneVar(verdict(s).tone);
+    return `<div style="position:relative;flex:1;height:8px;border-radius:4px;background:var(--secondary-lite)">
+      <div style="position:absolute;inset:0 auto 0 0;width:${w(pr.proj)}%;border-radius:4px;background:${tone};opacity:.3"></div>
+      <div style="position:absolute;inset:0 auto 0 0;width:${w(pr.got)}%;border-radius:4px;background:${tone}"></div>
+      <div title="90% IAB line" style="position:absolute;top:-3px;bottom:-3px;left:${w(s.guarantee*IAB_FULL)}%;width:2px;background:var(--green-text)"></div></div>`;
   }
-
-  // Deterministic jitter so the observed line has real texture instead of sitting on the model
   const jit=(id,d)=>{ let h=0; const k=id+':'+d; for(let i=0;i<k.length;i++) h=(h*31+k.charCodeAt(i))|0; return ((h%1000)/1000-0.5)*0.09; };
   function observations(s){
-    const pr=projection(s); if(!pr) return [];
-    const sh=show(s.showId); const out=[{d:0,v:0}];
-    for(let d=1; d<=pr.day && d<=30; d++){
-      const base=curveAt(sh.curve,d)*pr.proj;
-      out.push({ d, v: Math.max(0, Math.round(base*(1+(d===pr.day?0:jit(s.id,d))))) });
-    }
-    if(out[out.length-1]) out[out.length-1].v=pr.got;
+    const pr=projection(s); if(!pr) return []; const sh=show(s.showId); const out=[{d:0,v:0}];
+    for(let d=1;d<=pr.day&&d<=30;d++) out.push({d, v:Math.max(0,Math.round(curveAt(sh.curve,d)*pr.proj*(1+(d===pr.day?0:jit(s.id,d)))))});
+    if(out.length>1) out[out.length-1].v=pr.got;
     return out;
   }
-
-  /* The chart that makes the call legible: this show's learned shape, where the
-     episode actually is, the projection, the guarantee and the 90% IAB line. */
-  function curveChart(s,{w=560,h=230}={}){
+  function curveChart(s,{w=520,h=210}={}){
     const pr=projection(s); if(!pr) return '';
-    const sh=show(s.showId), padL=44, padR=54, padT=14, padB=28;
-    const max=Math.max(s.guarantee, pr.proj)*1.14;
-    const X=d=>padL+(w-padL-padR)*(d/30);
-    const Y=v=>h-padB-(h-padT-padB)*(v/max);
-    const model=[]; for(let d=0;d<=30;d++) model.push([X(d),Y(curveAt(sh.curve,d)*pr.proj)]);
-    const modelPath='M'+model.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L');
-    const obs=observations(s);
-    const obsPath='M'+obs.map(o=>X(o.d).toFixed(1)+' '+Y(o.v).toFixed(1)).join(' L');
-    const gy=Y(s.guarantee), iy=Y(s.guarantee*IAB_FULL), tone=toneVar(verdict(s).tone);
-    const grid=[0,.25,.5,.75,1].map(f=>`<line x1="${padL}" x2="${w-padR}" y1="${Y(max*f)}" y2="${Y(max*f)}" stroke="var(--border-light)" stroke-width="1"/><text x="${padL-6}" y="${Y(max*f)+3.5}" text-anchor="end" font-size="9.5" font-weight="600" fill="var(--text-tertiary)">${K(Math.round(max*f))}</text>`).join('');
-    const ticks=[0,7,14,21,30].map(d=>`<text x="${X(d)}" y="${h-9}" text-anchor="middle" font-size="9.5" font-weight="600" fill="var(--text-tertiary)">${d?'d'+d:'pub'}</text>`).join('');
-    return `<svg viewBox="0 0 ${w} ${h}" width="100%" role="img" aria-label="Projected delivery curve">
-      ${grid}${ticks}
-      <line x1="${padL}" x2="${w-padR}" y1="${gy}" y2="${gy}" stroke="var(--text-tertiary)" stroke-width="1.5" stroke-dasharray="5 4"/>
-      <text x="${w-padR+5}" y="${gy+3.5}" font-size="9.5" font-weight="800" fill="var(--text-secondary)">GUAR</text>
-      <line x1="${padL}" x2="${w-padR}" y1="${iy}" y2="${iy}" stroke="var(--green-text)" stroke-width="1.5" stroke-dasharray="5 4"/>
-      <text x="${w-padR+5}" y="${iy+3.5}" font-size="9.5" font-weight="800" fill="var(--green-text)">90%</text>
-      <path d="${modelPath}" fill="none" stroke="var(--text-tertiary)" stroke-width="2" stroke-dasharray="4 4" opacity=".85"/>
-      <path d="${obsPath}" fill="none" stroke="${tone}" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-      ${obs.filter(o=>o.d%2===0&&o.d>0).map(o=>`<circle cx="${X(o.d)}" cy="${Y(o.v)}" r="2.6" fill="${tone}"><title>Day ${o.d}: ${K(o.v)}</title></circle>`).join('')}
-      <line x1="${X(pr.day)}" x2="${X(pr.day)}" y1="${padT}" y2="${h-padB}" stroke="${tone}" stroke-width="1" opacity=".35"/>
-      <circle cx="${X(pr.day)}" cy="${Y(pr.got)}" r="4.5" fill="${tone}" stroke="#fff" stroke-width="2"><title>Today · day ${pr.day}: ${K(pr.got)}</title></circle>
-      <circle cx="${X(30)}" cy="${Y(pr.proj)}" r="4.5" fill="none" stroke="${tone}" stroke-width="2.4"><title>Projected day 30: ${K(pr.proj)}</title></circle>
-      <text x="${X(30)}" y="${Y(pr.proj)-10}" text-anchor="end" font-size="11" font-weight="800" fill="${tone}">${K(pr.proj)}</text>
-    </svg>
-    <div class="curvekey">
-      <span><i style="border-color:${tone}"></i>Actual to day ${pr.day}</span>
-      <span><i style="border-color:var(--text-tertiary);border-top-style:dashed"></i>${esc(sh.name)}'s learned curve (${sh.samples} reads)</span>
-      <span><i style="border-color:var(--green-text);border-top-style:dashed"></i>IAB full delivery · 90%</span>
-    </div>`;
+    const sh=show(s.showId), padL=42, padR=50, padT=14, padB=26;
+    const max=Math.max(s.guarantee,pr.proj)*1.14, X=d=>padL+(w-padL-padR)*(d/30), Y=v=>h-padB-(h-padT-padB)*(v/max);
+    const model=[]; for(let d=0;d<=30;d++) model.push(X(d).toFixed(1)+' '+Y(curveAt(sh.curve,d)*pr.proj).toFixed(1));
+    const obs=observations(s), tone=toneVar(verdict(s).tone);
+    const grid=[0,.5,1].map(f=>`<line x1="${padL}" x2="${w-padR}" y1="${Y(max*f)}" y2="${Y(max*f)}" stroke="var(--border-light)"/><text x="${padL-6}" y="${Y(max*f)+3.5}" text-anchor="end" font-size="9.5" font-weight="600" fill="var(--text-tertiary)">${K(Math.round(max*f))}</text>`).join('');
+    return `<svg viewBox="0 0 ${w} ${h}" width="100%">${grid}
+      ${[0,10,20,30].map(d=>`<text x="${X(d)}" y="${h-8}" text-anchor="middle" font-size="9.5" font-weight="600" fill="var(--text-tertiary)">${d?'d'+d:'pub'}</text>`).join('')}
+      <line x1="${padL}" x2="${w-padR}" y1="${Y(s.guarantee)}" y2="${Y(s.guarantee)}" stroke="var(--text-tertiary)" stroke-width="1.5" stroke-dasharray="5 4"/>
+      <text x="${w-padR+5}" y="${Y(s.guarantee)+3.5}" font-size="9.5" font-weight="800" fill="var(--text-secondary)">GUAR</text>
+      <line x1="${padL}" x2="${w-padR}" y1="${Y(s.guarantee*IAB_FULL)}" y2="${Y(s.guarantee*IAB_FULL)}" stroke="var(--green-text)" stroke-width="1.5" stroke-dasharray="5 4"/>
+      <text x="${w-padR+5}" y="${Y(s.guarantee*IAB_FULL)+3.5}" font-size="9.5" font-weight="800" fill="var(--green-text)">90%</text>
+      <path d="M${model.join(' L')}" fill="none" stroke="var(--text-tertiary)" stroke-width="2" stroke-dasharray="4 4" opacity=".8"/>
+      <path d="M${obs.map(o=>X(o.d).toFixed(1)+' '+Y(o.v).toFixed(1)).join(' L')}" fill="none" stroke="${tone}" stroke-width="2.8" stroke-linecap="round"/>
+      <circle cx="${X(pr.day)}" cy="${Y(pr.got)}" r="4.5" fill="${tone}" stroke="#fff" stroke-width="2"/>
+      <circle cx="${X(30)}" cy="${Y(pr.proj)}" r="4.5" fill="none" stroke="${tone}" stroke-width="2.4"/>
+      <text x="${X(30)}" y="${Y(pr.proj)-10}" text-anchor="end" font-size="11" font-weight="800" fill="${tone}">${K(pr.proj)}</text></svg>
+    <div class="curvekey"><span><i style="border-color:${tone}"></i>This episode</span>
+      <span><i style="border-color:var(--text-tertiary);border-top-style:dashed"></i>${esc(sh.name)}'s usual curve</span></div>`;
+  }
+  function sparkline(k,{w=88,h=26}={}){
+    const pts=[]; for(let d=0;d<=30;d++) pts.push((2+(w-4)*(d/30)).toFixed(1)+' '+(h-2-(h-6)*curveAt(k,d)).toFixed(1));
+    return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"><path d="M${pts.join(' L')}" fill="none" stroke="var(--c2)" stroke-width="2" stroke-linecap="round"/></svg>`;
   }
 
-  function sparkline(curveKey,{w=104,h=30}={}){
-    const pts=[]; for(let d=0;d<=30;d++) pts.push([2+(w-4)*(d/30), h-2-(h-6)*curveAt(curveKey,d)]);
-    return `<svg class="spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"><path d="M${pts.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L')}" fill="none" stroke="var(--c2)" stroke-width="2" stroke-linecap="round"/></svg>`;
+  /* ═══════════════════════════ THE WORK LIST ═══════════════════════════
+     Everything that wants a human, in one flat list. No sub-tabs, no
+     section headers — just the next thing to do. */
+  const ICO={ mic:'<path d="M12 2a3 3 0 013 3v6a3 3 0 01-6 0V5a3 3 0 013-3z"/><path d="M19 10a7 7 0 01-14 0M12 17v4"/>',
+    warn:'<path d="M12 9v4M12 17h.01M10.3 3.9L2 18a2 2 0 001.7 3h16.6A2 2 0 0022 18L13.7 3.9a2 2 0 00-3.4 0z"/>',
+    doc:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>',
+    mg:'<path d="M3 12a9 9 0 1015-6.7L21 8"/><path d="M21 3v5h-5"/>',
+    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' };
+  const icoBox=(k,tone)=>`<div class="wrow__ico" style="background:var(--${tone}-bg)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--${tone}-text)" stroke-width="2.1">${ICO[k]}</svg></div>`;
+  const row=(lead,title,sub,num,action)=>`<div class="wrow">${lead}<div class="wrow__main"><b>${title}</b><span>${sub}</span></div>${num||''}${action||''}</div>`;
+  const spotLead=s=>s.yt?`<img class="wrow__thumb" src="https://img.youtube.com/vi/${s.yt}/mqdefault.jpg" onerror="this.style.visibility='hidden'">`:`<div class="wrow__thumb"></div>`;
+  const spotNum=s=>{ const pr=projection(s); if(!pr) return ''; const v=verdict(s);
+    return `<div class="wrow__num">${projBar(s)}<b style="color:${toneVar(v.tone)}">${Math.round(pr.ratio*100)}%</b></div>`; };
+
+  function workList(){
+    const aired=SPOTS.filter(s=>s.status==='aired'&&!s.missed);
+    const noEp=SPOTS.filter(s=>s.status==='aired'&&s.missed);
+    const out=[];
+    if(aired.length) out.push(row(icoBox('mic','blue'),
+      `${aired.length} spot${aired.length!==1?'s':''} due to air today`,
+      `The agent scans ${[...new Set(aired.map(s=>show(s.showId).channel))].join(', ')} for the episode and pulls the link + timestamp.`,
+      '', `<button class="btn btn--primary btn--sm" id="runBtn" onclick="runAgent()">▶ Run check</button>`));
+    noEp.forEach(s=>out.push(row(icoBox('warn','red'), `${nameOf(s)} — no episode up yet`,
+      `Booked for ${fmtDate(s.published)}. Scanned ${esc(show(s.showId).channel)}, nothing posted. Rechecking every 24h.`,
+      '', `<button class="btn btn--ghost btn--sm" onclick="nudgeEpisode('${s.id}')">Nudge show</button>`)));
+    needsMakegood().forEach(s=>out.push(row(spotLead(s), nameOf(s),
+      `Day ${projection(s).day} · projecting ${K(projection(s).proj)} of ${K(s.guarantee)} — ${K(shortfall(s))} short`,
+      spotNum(s), `<button class="btn btn--primary btn--sm" onclick="createMakegood('${s.id}')">Make good</button>`)));
+    MAKEGOODS.filter(m=>m.status!=='scheduled').forEach(m=>{ const s=spot(m.spotId);
+      out.push(row(icoBox('mg','orange'), `Make good · ${nameOf(s)}`,
+        m.date?`${fmtDate(m.date)} · ${m.showOk===true?'show ✓':'waiting on show'} · ${m.brandOk===true?'brand ✓':'waiting on brand'}`:'Needs a date',
+        '', `<button class="btn btn--primary btn--sm" onclick="openMg('${m.id}')">Open</button>`)); });
+    SPOTS.filter(s=>s.dlState==='requested').forEach(s=>out.push(row(icoBox('clock','purple'),
+      `${nameOf(s)} — waiting on downloads`,
+      `${esc(show(s.showId).host)} hosts elsewhere. Audio numbers have to come back before the total closes.`,
+      '', `<button class="btn btn--ghost btn--sm" onclick="chaseDownloads('${s.id}')">Chase</button>`)));
+    SPOTS.filter(s=>['needs_copy','needs_cta'].includes(s.copyStatus)).forEach(s=>out.push(row(icoBox('doc','blue'),
+      `Copy for ${nameOf(s)}`, `Airs ${dayName(s.published)} ${fmtDate(s.published)} · ${s.copyStatus==='needs_copy'?'no ad copy yet':'needs a CTA'}`,
+      '', `<button class="btn btn--ghost btn--sm" onclick="markCopy('${s.id}')">Send copy</button>`)));
+    SPOTS.filter(s=>s.copyStatus==='sent').forEach(s=>out.push(row(icoBox('doc','orange'),
+      `Copy not opened · ${nameOf(s)}`, `Sent ${fmtDate(s.copySent)} to ${esc(show(s.showId).host)} · unopened after ${daysBetween(s.copySent,TODAY)} days`,
+      '', `<button class="btn btn--ghost btn--sm" onclick="nudgeShow('${s.id}')">Nudge</button>`)));
+    return out;
   }
-  const curveNote = sh => `${Math.round(curveAt(sh.curve,2)*100)}% of the final number lands inside 48h`;
-
-  /* ═══════════════════════════ VIEW: COMMAND CENTER ═══════════════════════════ */
-  RENDER.overview = () => {
-    const aired=SPOTS.filter(s=>s.status==='aired');
-    const deciding=SPOTS.filter(s=>phase(s)==='decide');
-    const mgOpen=MAKEGOODS.filter(m=>m.status!=='scheduled');
-    const live=SPOTS.filter(s=>projection(s));
-    const g=live.reduce((a,s)=>a+s.guarantee,0), proj=live.reduce((a,s)=>a+projection(s).proj,0);
-    const needCopy=SPOTS.filter(s=>['needs_copy','needs_cta'].includes(s.copyStatus));
-    const adv=guaranteeAdvice(), f=fillStats();
-    const blocked=SPOTS.filter(s=>s.dlState==='requested');
-
-    document.getElementById('view-overview').innerHTML = `
-    <div class="inner">
-      <div class="pagebar">
-        <div class="head"><h1>Command Center <span class="live-dot"><i></i>Airtable + Booster</span></h1>
-        <p>Everything the agent is watching, and what it needs from you. Delivery is judged against the IAB line — 90% of the guarantee is full delivery, anything over is bonus.</p></div>
-        <div class="pagebar__right"><span class="tag tag--grey">${dayName(TODAY)} ${fmtDate(TODAY)}</span></div>
-      </div>
-      ${chatCard()}
-      <div class="tiles">
-        <div class="tile"><div class="tile__label">Airing today</div><div class="tile__val">${aired.length}</div><div class="tile__delta"><span class="muted">daily check pending</span></div></div>
-        <div class="tile"><div class="tile__label">In the decision window</div><div class="tile__val" style="color:${deciding.length?'var(--orange-text)':'var(--text-primary)'}">${deciding.length}</div><div class="tile__delta"><span class="muted">day 10–14 · call it now</span></div></div>
-        <div class="tile"><div class="tile__label">Make goods to sign off</div><div class="tile__val" style="color:${mgOpen.length?'var(--red-text)':'var(--text-primary)'}">${mgOpen.length}</div><div class="tile__delta"><span class="muted">${mgOpen.length?'drafted and waiting':'all clear'}</span></div></div>
-        <div class="tile"><div class="tile__label">Projected vs guaranteed</div><div class="tile__val">${pctOf(proj,g)}%</div><div class="tile__delta ${proj>=g?'up':'down'}">${K(proj)} of ${K(g)} across ${live.length} flights</div></div>
-      </div>
-
-      <div class="card" style="margin-top:16px">
-        <div class="card__head"><div><div class="card__title">What needs you today</div><div class="card__sub">Pulled from the four checks the agent runs — live, weekly, day 10–14, and the 30-day final.</div></div></div>
-        <div class="card__pad" style="display:flex;flex-direction:column;gap:11px">
-          ${aired.length?actionRow('Daily check', `<b>${aired.length} spot${aired.length!==1?'s are':' is'} due to air today</b> on ${[...new Set(aired.map(s=>show(s.showId).name))].join(', ')}. The agent scans each channel for the episode, finds the read and grabs the link + timestamp.`,'delivery','Run the check'):''}
-          ${deciding.length?(()=>{ const shorts=deciding.filter(s=>verdict(s).k==='short'), fresh=shorts.filter(s=>!mgForSpot(s.id));
-            return actionRow('Decision window', `<b>${deciding.length} flight${deciding.length!==1?'s':''} hit day 10–14.</b> `+(shorts.length
-              ? `${shorts.length} project under the 90% line — ${shorts.map(s=>esc(s.brand)).join(', ')}.`+(fresh.length?` ${fresh.length} still ${fresh.length>1?'need':'needs'} a make good raised.`:` Make goods already in flight.`)
-              : `All of them clear the 90% line, nothing to raise.`),'delivery','Review'); })():''}
-          ${mgOpen.length?actionRow('Make goods', `<b>${mgOpen.length} make good${mgOpen.length>1?'s':''}</b> drafted and waiting — ${mgOpen.map(m=>esc(spot(m.spotId).brand)+' / '+esc(show(spot(m.spotId).showId).name)).join(', ')}.`,'makegoods','Approve &amp; send'):''}
-          ${blocked.length?actionRow('Blocked', `<b>${blocked.map(s=>esc(show(s.showId).name)).join(', ')}</b> — download numbers requested from the creator, not back yet. Can't close the delivery number until they land.`,'delivery','Chase'):''}
-          ${needCopy.length?actionRow('Copy', `<b>${needCopy.length} booked spots</b> still need ad copy or a CTA before they air.`,'copy','Open copy'):''}
-        </div>
-      </div>
-
-      <div class="grid" style="grid-template-columns:1.35fr 1fr;margin-top:16px">
-        <div class="card">
-          <div class="card__head"><div><div class="card__title">What the agent has learned</div><div class="card__sub">Patterns it can only see because it watches every read across every show.</div></div></div>
-          <div class="card__pad" style="display:flex;flex-direction:column;gap:11px">
-            ${adv.length?adv.slice(0,2).map(a=>`<div style="display:flex;gap:12px;align-items:flex-start;padding:13px 14px;border:1px solid var(--orange-bg);border-radius:12px;background:rgba(255,237,213,.35)">
-              <div style="width:30px;height:30px;border-radius:8px;background:var(--orange-bg);display:grid;place-items:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--orange-text)" stroke-width="2.2"><path d="M3 12a9 9 0 1015-6.7L21 8"/><path d="M21 3v5h-5"/></svg></div>
-              <div style="flex:1"><b style="font-size:13px">${esc(show(a.showId).name)} has needed a make good on ${a.shortCount} of its last ${a.flights} flights</b>
-              <div class="muted" style="font-size:12.5px;margin-top:3px">Reads there typically land around ${K(a.typical)}. The ${K(a.current)} guarantee is set above what the show actually does — drop it to <b>${K(a.suggest)}</b> and the make goods stop.</div></div>
-              <button class="btn btn--ghost btn--sm" onclick="applyGuarantee('${a.showId}',${a.suggest})">Apply</button></div>`).join(''):`<div class="empty" style="padding:22px">No guarantee is running hot right now.</div>`}
-            <div style="display:flex;gap:12px;align-items:center;padding:13px 14px;border:1px solid var(--border-light);border-radius:12px">
-              <div style="width:30px;height:30px;border-radius:8px;background:var(--blue-bg);display:grid;place-items:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue-text)" stroke-width="2.2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
-              <div style="flex:1"><b style="font-size:13px">Paid fill rate is ${f.rate}%</b><div class="muted" style="font-size:12.5px;margin-top:3px">${f.paid} spots sold against ${f.free} given away as make goods or bonus. That split is what tells you which guarantees are priced wrong.</div></div>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card__head"><div class="card__title">How each show builds views</div></div>
-          <div class="card__pad" style="display:flex;flex-direction:column;gap:9px">
-            ${SHOWS.slice(0,5).map(sh=>`<div style="display:flex;align-items:center;gap:11px">
-              <div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(sh.name)}</div>
-              <div class="muted" style="font-size:11px">${curveNote(sh)}</div></div>
-              ${sparkline(sh.curve)}</div>`).join('')}
-            <button class="btn btn--ghost btn--sm" style="justify-content:center;margin-top:4px" onclick="go('shows')">Show setup &amp; inventory →</button>
-          </div>
-        </div>
-      </div>
-      <div class="footnote">Acme Network Ops · MVP · Delivery Agent + Command Center + Campaign Portal · reads Airtable, respects Booster's inventory caps · powered by SpotsNow</div>
-    </div>`;
-    renderChatMsgs();
-  };
-  const actionRow = (by,txt,view,cta) => `
-    <div style="display:flex;gap:13px;align-items:center;padding:13px 15px;border:1px solid var(--border-light);border-radius:12px">
-      <div style="width:8px;height:8px;border-radius:50%;background:#3FB87C;flex-shrink:0"></div>
-      <div style="flex:1"><div style="font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-tertiary)">${by}</div>
-      <div style="font-size:13px;margin-top:2px">${txt}</div></div>
-      <button class="btn btn--ghost btn--sm" style="flex-shrink:0" onclick="go('${view}')">${cta}</button>
-    </div>`;
-  function applyGuarantee(showId,v){ show(showId).guarantee=v; rerender(); toast(`${show(showId).name} guarantee set to ${K(v)}. Written back to Booster and Airtable.`); }
+  function deliveryAttention(){ return { count: workList().length }; }
 
   /* ═══════════════════════════ VIEW: DELIVERY ═══════════════════════════ */
-  let delTab='attention', delFilter='all', agentRunning=false;
+  let delTab='work';
   RENDER.delivery = () => {
-    const A=deliveryAttention(), aired=A.aired, noEp=A.noEp;
-    const blockedIds=new Set(SPOTS.filter(s=>s.dlState==='requested').map(s=>s.id));
-    const deciding=SPOTS.filter(s=>phase(s)==='decide'&&!blockedIds.has(s.id));
-    const weekly=SPOTS.filter(s=>phase(s)==='weekly');
-    const settling=SPOTS.filter(s=>phase(s)==='settling');
-    const finals=SPOTS.filter(s=>phase(s)==='final');
-    const blocked=A.blocked, shortNow=A.shortNow, attCount=A.count;
-
-    const attention=`
-      ${aired.length?`<div class="card" style="margin-bottom:18px"><div class="card__pad" style="display:flex;align-items:center;gap:14px">
-        <div style="width:38px;height:38px;border-radius:10px;background:var(--blue-bg);display:grid;place-items:center;flex-shrink:0"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--blue-text)" stroke-width="2"><path d="M12 2a3 3 0 013 3v6a3 3 0 01-6 0V5a3 3 0 013-3z"/><path d="M19 10a7 7 0 01-14 0M12 17v4"/></svg></div>
-        <div style="flex:1"><b style="font-size:13.5px">Daily check · ${aired.length} spot${aired.length!==1?'s':''} due to air today</b><div class="muted" style="font-size:12.5px">The agent scans ${[...new Set(aired.map(s=>show(s.showId).channel))].join(', ')} for a new episode, finds the read and pulls the link + timestamp.</div></div>
-        <button class="btn btn--primary btn--sm" id="runBtn" onclick="runAgent()">▶ Run check</button></div>
-        <div id="scanPanel" style="padding:0 20px 6px"></div></div>`:'<div id="scanPanel"></div>'}
-
-      ${section('No episode up yet', noEp.length, 'red',
-        `The agent checked and the show hasn't posted. It rechecks every 24h — nudge the show if the window is closing.`,
-        noEp.map(s=>`<div style="display:flex;align-items:center;gap:12px;padding:13px 15px;border:1px solid var(--red-bg);border-radius:11px;background:var(--white)">
-          <div style="flex:1"><b style="font-size:13px">${esc(s.brand)} on ${esc(show(s.showId).name)}</b>
-          <div class="muted" style="font-size:12px;margin-top:2px">Booked for ${dayName(s.published)} ${fmtDate(s.published)} · scanned ${esc(show(s.showId).channel)}, no new episode found.</div></div>
-          <button class="btn btn--primary btn--sm" onclick="nudgeEpisode('${s.id}')">Nudge the show</button></div>`).join(''))}
-
-      ${section('Decision window · day 10–14', deciding.length, deciding.length&&shortNow.length?'red':'orange',
-        `This is where the make-good call gets made — not at day 30. Raw numbers lie early; the projection is what matters.`,
-        deciding.map(s=>bigRow(s)).join(''))}
-
-      ${section('Waiting on download numbers', blocked.length, 'purple',
-        `${blocked.length?esc(show(blocked[0].showId).name)+' hosts elsewhere — audio downloads have to be requested from the creator before the number closes.':''}`,
-        blocked.map(s=>bigRow(s)).join(''))}
-
-      ${section('Live and pacing', weekly.length, 'blue',
-        `Weekly check. Nothing to do unless the projection drops under 90%.`,
-        weekly.map(s=>bigRow(s)).join(''))}
-
-      ${section('Riding to the 30-day number', settling.length, 'grey',
-        `The call is already made on these — the agent just keeps checking until day 30 locks the final number.`,
-        settling.map(s=>bigRow(s)).join(''))}
-
-      ${section('Closed out · 30-day final', finals.length, 'green',
-        `Final numbers locked. Delivery reports ready to send.`,
-        finals.map(s=>bigRow(s)).join(''))}
-
-      ${attCount===0?`<div class="card"><div class="empty">✨ All clear — every live flight projects over the 90% line.</div></div>`:''}`;
-
-    let rows=SPOTS.slice();
-    if(delFilter!=='all') rows=rows.filter(s=>s.showId===delFilter||s.brand===delFilter);
-    const ord={aired:0,found:1,verified:2,scheduled:3};
-    rows.sort((a,b)=>(ord[a.status]-ord[b.status])||(liveDays(b)-liveDays(a)));
-    const brands=[...new Set(SPOTS.map(s=>s.brand))];
-    const all=`
-      <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px">
-        <button class="tag ${delFilter==='all'?'tag--blue':'tag--grey'}" onclick="delFilter='all';RENDER.delivery()">All</button>
-        ${SHOWS.map(sh=>`<button class="tag ${delFilter===sh.id?'tag--blue':'tag--grey'}" onclick="delFilter='${sh.id}';RENDER.delivery()">${esc(sh.name)}</button>`).join('')}
-        ${brands.map(b=>`<button class="tag ${delFilter===b?'tag--blue':'tag--grey'}" onclick="delFilter='${b}';RENDER.delivery()">${esc(b)}</button>`).join('')}
-      </div>
-      <div class="card"><table>
-        <thead><tr><th>Campaign</th><th>Published</th><th>Day</th><th class="num">Guarantee</th><th class="num">Delivered</th><th class="num">Projected</th><th style="width:170px">Against guarantee</th><th></th></tr></thead>
-        <tbody>${rows.map(s=>{ const pr=projection(s), v=verdict(s);
-          return `<tr style="${v.k==='short'?'background:rgba(254,228,226,.28)':''}">
-            <td style="cursor:pointer" onclick="openSpot('${s.id}')"><b>${esc(s.brand)}</b>${s.kind!=='paid'?` <span class="tag tag--purple">${esc(s.kind)}</span>`:''}<div class="muted" style="font-size:11.5px">${esc(show(s.showId).name)}</div></td>
-            <td>${fmtDate(s.published)}</td>
-            <td>${pr?`<b>${pr.day}</b><span class="muted">/30</span>`:'<span class="muted">—</span>'}</td>
-            <td class="num">${s.guarantee?K(s.guarantee):'<span class="muted">bonus</span>'}</td>
-            <td class="num">${delivered(s)!=null?K(delivered(s)):'<span class="muted">—</span>'}</td>
-            <td class="num">${pr?`<b>${K(pr.proj)}</b>`:'<span class="muted">—</span>'}</td>
-            <td>${pr?`<div style="display:flex;align-items:center;gap:9px"><div style="flex:1">${projBar(s)}</div><b style="font-size:12px;min-width:38px;color:${toneVar(v.tone)}">${Math.round(pr.ratio*100)}%</b></div>`:`<span class="tag tag--grey">${s.status==='scheduled'?'booked':'awaiting'}</span>`}</td>
-            <td class="right"><button class="btn btn--ghost btn--sm" onclick="openSpot('${s.id}')">Open</button></td></tr>`; }).join('')}</tbody></table></div>`;
-
+    const work=workList();
+    const live=SPOTS.filter(s=>projection(s)).sort((a,b)=>liveDays(a)-liveDays(b));
     document.getElementById('view-delivery').innerHTML=`
-    <div class="inner">
+    <div class="inner" style="max-width:940px">
       <div class="pagebar">
-        <div class="head"><h1>Delivery <span class="live-dot"><i></i>Agent watching ${SHOWS.length} shows</span></h1>
-        <p>${delTab==='attention'?'The four checks, in order: did it go live, weekly pace, the day 10–14 make-good call, and the 30-day final.':'Every spot with its delivered number, its projection and where it lands against the guarantee.'}</p></div>
+        <div class="head"><h1>Delivery</h1>
+        <p>Every read is projected off its own show's view curve, so the make-good call happens around day 12 instead of day 30. 90% of guarantee is full delivery.</p></div>
         <div class="pagebar__right"><div class="seg">
-          <button class="${delTab==='attention'?'active':''}" onclick="delTab='attention';RENDER.delivery()">Needs attention${attCount?' · '+attCount:''}</button>
-          <button class="${delTab==='all'?'active':''}" onclick="delTab='all';RENDER.delivery()">All spots</button></div></div>
+          <button class="${delTab==='work'?'active':''}" onclick="delTab='work';RENDER.delivery()">Needs you${work.length?' · '+work.length:''}</button>
+          <button class="${delTab==='all'?'active':''}" onclick="delTab='all';RENDER.delivery()">All flights</button></div></div>
       </div>
-      ${delTab==='attention'?attention:all}
-      <div class="footnote">Projections come from each show's own view curve, refit every time a read is verified. 90% of guarantee is full delivery under IAB — a make good only gets raised below that line.</div>
+      <div class="askbar">
+        <input id="acAsk" placeholder="Ask anything — e.g. will Kalshi on Sage Steele deliver?" onkeydown="if(event.key==='Enter')askAcme()">
+        <button class="btn btn--primary" onclick="askAcme()">Ask</button>
+      </div>
+      ${ANSWER?`<div class="answer">${ANSWER}<button class="x" style="float:right;margin-top:-22px" onclick="ANSWER='';rerender()">✕</button></div>`:''}
+      <div id="scanPanel"></div>
+      ${delTab==='work'
+        ? (work.length?work.join(''):`<div class="card"><div class="empty">✨ Nothing needs you — every flight projects over the 90% line.</div></div>`)
+        : live.map(s=>{ const pr=projection(s);
+            return row(spotLead(s), nameOf(s),
+              `Day ${pr.day} of 30 · ${K(pr.got)} delivered · projecting ${K(pr.proj)} of ${K(s.guarantee)}`,
+              spotNum(s), `<button class="btn btn--ghost btn--sm" onclick="openSpot('${s.id}')">Open</button>`); }).join('')}
+      <div class="footnote">Projections come from each show's own curve, refit every time a read is verified.</div>
     </div>`;
   };
-  const section=(label,count,tone,sub,rowsHtml)=>count?`<div style="margin-bottom:20px">
-    <div style="display:flex;align-items:center;gap:8px;margin:0 2px 4px"><span style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-secondary)">${label}</span><span class="tag tag--${tone}">${count}</span></div>
-    ${sub?`<div class="muted" style="font-size:12px;margin:0 2px 10px">${sub}</div>`:''}
-    <div style="display:flex;flex-direction:column;gap:10px">${rowsHtml}</div></div>`:'';
 
-  // One live flight, with everything you need to make the call visible at a glance
-  function bigRow(s){
-    const pr=projection(s), v=verdict(s), sh=show(s.showId);
-    const thumb=s.yt?`<img class="thumb" src="https://img.youtube.com/vi/${s.yt}/mqdefault.jpg" onerror="this.style.display='none'">`:`<div class="thumb" style="display:grid;place-items:center;color:var(--text-tertiary);font-size:11px">${sh.simulcast?'YT+RSS':'YT'}</div>`;
-    const m=mgForSpot(s.id);
-    let action;
-    if(v.k==='short'&&!m) action=`<button class="btn btn--primary btn--sm" onclick="createMakegood('${s.id}')">Set up make good</button>`;
-    else if(m) action=`<button class="btn btn--ghost btn--sm" onclick="go('makegoods');setTimeout(()=>openMg('${m.id}'),60)">Make good · ${esc(m.status)}</button>`;
-    else if(v.k==='blocked') action=`<button class="btn btn--primary btn--sm" onclick="chaseDownloads('${s.id}')">Chase creator</button>`;
-    else if(v.k==='full'&&pr.final) action=`<button class="btn btn--green btn--sm" onclick="sendReport('${s.id}')">Send report</button>`;
-    else action=`<button class="btn btn--ghost btn--sm" onclick="openSpot('${s.id}')">Open</button>`;
-    const naive=pr&&Math.abs(pr.rawRatio-pr.ratio)>0.12;
-    return `<div style="display:flex;gap:14px;align-items:center;padding:14px 16px;border:1px solid ${v.k==='short'?'var(--red-bg)':'var(--border-light)'};border-radius:12px;background:var(--white)">
-      ${thumb}
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><b style="font-size:13.5px">${esc(s.brand)} on ${esc(sh.name)}</b>
-          <span class="tag tag--${v.tone}"><i></i>${esc(v.label)}</span>
-          ${pr?`<span class="tag tag--grey">Day ${pr.day} of 30</span>`:''}</div>
-        <div class="muted" style="font-size:12.5px;margin-top:4px">
-          ${pr?`${K(pr.got)} delivered · projecting <b style="color:${toneVar(v.tone)}">${K(pr.proj)}</b> against a ${K(s.guarantee)} guarantee${v.k==='short'?` — <b>${K(shortfall(s))} short</b>`:v.soft?` <span class="muted">· indicative, firms up at day ${DECIDE_FROM}</span>`:''}`:'Awaiting the episode.'}
-        </div>
-        ${naive?`<div style="font-size:11.5px;margin-top:5px;color:var(--text-secondary);background:var(--secondary-lite);border-radius:7px;padding:5px 9px;display:inline-block">Reads <b>${Math.round(pr.rawRatio*100)}%</b> raw, but ${esc(sh.name)} only has ${Math.round(pr.curvePct*100)}% of views in by day ${pr.day} — ${v.k==='short'?'it still lands short':'it lands fine'}.</div>`:''}
-        ${pr?`<div style="margin-top:8px;max-width:340px">${projBar(s)}</div>`:''}
-      </div>
-      ${clockBar(s)}
-      <div style="flex-shrink:0;display:flex;flex-direction:column;gap:6px">${action}
-        ${s.yt?`<button class="btn btn--ghost btn--sm" onclick="playClip('${s.yt}',${s.ts})">▶ Hear it</button>`:''}</div>
-    </div>`;
-  }
-  function nudgeEpisode(id){ const s=spot(id); toast(`Nudged ${show(s.showId).host} from adops@ — flagged in #adops-alerts. The agent keeps checking every 24h.`); }
-  function chaseDownloads(id){ const s=spot(id); s.dlState='received'; s.downloads=Math.round(s.views*0.24); rerender(); refreshBadges(); toast(`Requested downloads from ${show(s.showId).host} — ${K(s.downloads)} came back and were added to the delivery number.`); }
-  function sendReport(id){ const s=spot(id); toast(`Delivery report for ${s.brand} on ${show(s.showId).name} sent to the brand and copied to adops@. Logged in Airtable.`); }
-
-  /* ── Spot drawer: the curve, the call, and the actual read ── */
+  /* ── the one drawer that explains a call ── */
   function openSpot(id){
     const s=spot(id), sh=show(s.showId), pr=projection(s), v=verdict(s), m=mgForSpot(s.id);
-    openDrawer(`<div class="drawer__head"><div>
-        <span class="tag tag--${v.tone}"><i></i>${esc(v.label)}</span>
-        <h2 style="font-size:18px;font-weight:800;margin-top:8px">${esc(s.brand)} · ${esc(sh.name)}</h2>
-        <div class="muted" style="font-size:12px">Published ${fmtDate(s.published)} · ${s.length} host-read · ${s.kind==='paid'?'paid spot':esc(s.kind)}</div>
-      </div><button class="x" onclick="closeOverlays()">✕</button></div>
+    openDrawer(`<div class="drawer__head"><div><span class="tag tag--${v.tone}"><i></i>${esc(v.label)}</span>
+      <h2 style="font-size:18px;font-weight:800;margin-top:8px">${esc(s.brand)} · ${esc(sh.name)}</h2>
+      <div class="muted" style="font-size:12px">Published ${fmtDate(s.published)} · ${s.length} host-read</div></div>
+      <button class="x" onclick="closeOverlays()">✕</button></div>
     <div class="drawer__body">
       ${pr?`<div class="curvewrap">${curveChart(s)}</div>
-      <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px">
-        ${kpi('Delivered so far',K(pr.got),`day ${pr.day} of 30`)}
-        ${kpi('Projected final',K(pr.proj),`${Math.round(pr.ratio*100)}% of guarantee`,toneVar(v.tone))}
-        ${kpi('Guarantee',K(s.guarantee),`90% line = ${K(Math.round(s.guarantee*IAB_FULL))}`)}
-      </div>
       <div style="margin-top:14px;padding:13px 15px;border:1px solid var(--border-light);border-radius:12px;font-size:12.5px;line-height:1.6">
-        <b>How the agent read it.</b> ${esc(sh.name)} publishes ${sh.publishDays.join('/')}, and across ${sh.samples} verified reads ${Math.round(curveAt(sh.curve,2)*100)}% of a video's views land inside 48 hours. At day ${pr.day} this episode should be ${Math.round(pr.curvePct*100)}% of the way to its final number, and it has ${K(pr.got)} — so the final lands near <b>${K(pr.proj)}</b>.
-        ${v.k==='short'?` That's <b style="color:var(--red-text)">${K(shortfall(s))} under</b> the 90% IAB line, so a make good is warranted.`
-          :v.k==='bonus'?` That clears the guarantee outright — the overage is bonus.`
-          :v.k==='early'?` Only ${Math.round(pr.curvePct*100)}% of the curve is in, so there is nothing worth calling yet — the agent decides by day ${DECIDE_FROM}.`
-          :v.soft?` Too much of the curve is still ahead to act on it, so this stays indicative until day ${DECIDE_FROM}. On current shape it ${v.k==='trackLight'?'lands under the line and is worth watching':'lands fine'}.`
-          :` That clears the 90% line, so no make good is needed.`}
-        ${sh.simulcast?`<br><br><b>Simulcast.</b> ${K(s.views||0)} YouTube views ${s.dlState==='requested'?'· audio downloads requested from the creator, not back yet':'+ '+K(s.downloads||0)+' audio downloads from the host platform'}.`:''}
+        Across ${sh.samples} reads, ${Math.round(curveAt(sh.curve,2)*100)}% of ${esc(sh.name)}'s views land inside 48h. At day ${pr.day} this episode should be ${Math.round(pr.curvePct*100)}% of the way there, and it has ${K(pr.got)} — so it lands near <b>${K(pr.proj)}</b>, <b>${Math.round(pr.ratio*100)}%</b> of the ${K(s.guarantee)} guarantee.
+        ${v.k==='short'?` That's <b style="color:var(--red-text)">${K(shortfall(s))} under</b> the 90% line — make good warranted.`
+          :v.k==='bonus'?` Clears the guarantee outright; the overage is bonus.`
+          :v.soft||v.k==='early'?` Still ${100-Math.round(pr.curvePct*100)}% of the curve to come, so this stays indicative until day ${DECIDE_FROM}.`
+          :` Clears the 90% line — no make good needed.`}
+        ${sh.simulcast?`<br><br>${K(s.views||0)} video ${s.dlState==='requested'?'· audio downloads still requested from the creator':'+ '+K(s.downloads||0)+' audio'}.`:''}
       </div>
       ${s.yt?`<div class="reel-stage" style="margin-top:14px"><iframe src="https://www.youtube.com/embed/${s.yt}?start=${s.ts}" allow="autoplay" allowfullscreen></iframe></div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
-        <span class="tag tag--green"><i></i>Read verified at ${mmss(s.ts)}</span>
-        <a href="${clipUrl(s)}" target="_blank" style="font-size:12px;color:var(--blue-text);font-weight:600;text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${clipUrl(s)} ↗</a>
-        <button class="btn btn--ghost btn--sm" onclick="navigator.clipboard&&navigator.clipboard.writeText('${clipUrl(s)}');toast('Deep link copied — opens at ${mmss(s.ts)}.')">Copy</button></div>
-      <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">${(s.copy||[]).map(c=>`<span class="tag tag--blue">${esc(c)}</span>`).join('')}</div>`:''}
-      `:`<div class="empty">This spot hasn't aired yet — it airs ${fmtDate(s.published)} on ${esc(sh.name)}.</div>`}
+      <div style="display:flex;align-items:center;gap:8px;margin-top:10px"><span class="tag tag--green"><i></i>Read verified at ${mmss(s.ts)}</span>
+        <a href="${clipUrl(s)}" target="_blank" style="font-size:12px;color:var(--blue-text);font-weight:600;text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${clipUrl(s)} ↗</a></div>`:''}`
+      :`<div class="empty">Airs ${fmtDate(s.published)} on ${esc(sh.name)}.</div>`}
     </div>
-    <div class="drawer__foot">
-      <button class="btn btn--ghost" onclick="closeOverlays()">Close</button>
+    <div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Close</button>
       ${v.k==='short'&&!m?`<button class="btn btn--primary" onclick="closeOverlays();createMakegood('${s.id}')">Set up make good</button>`
-        :m?`<button class="btn btn--primary" onclick="closeOverlays();go('makegoods');setTimeout(()=>openMg('${m.id}'),60)">Open make good</button>`
-        :pr&&pr.final?`<button class="btn btn--primary" onclick="closeOverlays();sendReport('${s.id}')">Send delivery report</button>`:''}
-    </div>`);
+        :m?`<button class="btn btn--primary" onclick="closeOverlays();openMg('${m.id}')">Open make good</button>`:''}</div>`);
   }
-  const kpi=(l,v,s,c)=>`<div style="border:1px solid var(--border-light);border-radius:11px;padding:12px 14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-tertiary)">${l}</div><div style="font-size:22px;font-weight:800;letter-spacing:-.03em;margin-top:4px;${c?`color:${c}`:''}">${v}</div><div class="muted" style="font-size:11px">${s}</div></div>`;
 
-  /* ── Daily air check ── */
+  /* ── make good: date, two drafts, two sign-offs, write back ── */
+  function createMakegood(spotId){
+    const ex=mgForSpot(spotId); if(ex){ openMg(ex.id); return; }
+    const s=spot(spotId), sh=show(s.showId), av=nextEpisodes(s.showId,4).find(e=>e.open>0);
+    const m={ id:'mg'+(++MG_SEQ), spotId, date:av?av.date:null, status:'proposed',
+      showOk: sh.mgPolicy==='auto'?true:null, brandOk:null, showVia: sh.mgPolicy==='auto'?'auto':null, brandVia:null };
+    MAKEGOODS.push(m); rerender(); refreshBadges(); openMg(m.id);
+  }
+  function setMgDate(id,d){ mg(id).date=d; openMg(id); rerender(); }
+  function toggleMg(id,key){ const m=mg(id); m[key]=m[key]===true?null:true; openMg(id); rerender(); refreshBadges(); }
+  function commitMg(id){
+    const m=mg(id), s=spot(m.spotId), sh=show(s.showId);
+    m.status='scheduled';
+    SPOTS.push({ id:'mgs'+m.id, dealId:s.dealId, brand:s.brand, showId:s.showId, kind:'makegood', published:m.date,
+      guarantee:0, views:null, downloads:null, dlState:sh.simulcast?'auto':'none', status:'scheduled',
+      length:s.length, yt:'', ts:null, copyStatus:'seen', copy:[] });
+    closeOverlays(); rerender(); refreshBadges();
+    toast(`${s.brand} make good scheduled on ${sh.name} for ${fmtDate(m.date)}. Written to Airtable as "Make Good" and flagged in Booster so the slot can't be sold twice.`);
+  }
+  function openMg(id){
+    const m=mg(id), s=spot(m.spotId), sh=show(s.showId), pr=projection(s), auto=sh.mgPolicy==='auto';
+    const d=m.date?fmtDate(m.date):'[date]', both=m.showOk===true&&m.brandOk===true;
+    const sw=(on,label,note,key)=>`<div class="tog"><button class="tog__sw ${on?'on':''}" onclick="toggleMg('${id}','${key}')"><i></i></button>
+      <div style="flex:1"><b>${label}</b><small>${note}</small></div></div>`;
+    openDrawer(`<div class="drawer__head"><div><span class="tag tag--orange"><i></i>${K(shortfall(s))} short</span>
+      <h2 style="font-size:18px;font-weight:800;margin-top:8px">Make good · ${esc(s.brand)} on ${esc(sh.name)}</h2>
+      <div class="muted" style="font-size:12px">Projecting ${K(pr?pr.proj:0)} against a ${K(s.guarantee)} guarantee</div></div>
+      <button class="x" onclick="closeOverlays()">✕</button></div>
+    <div class="drawer__body">
+      <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:7px">Date · from ${esc(sh.name)}'s avails</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">${nextEpisodes(s.showId,4).map(e=>`<button class="tag ${m.date===e.date?'tag--blue':'tag--grey'}" style="padding:7px 11px;cursor:${e.open?'pointer':'not-allowed'};opacity:${e.open?1:.45}" ${e.open?`onclick="setMgDate('${id}','${e.date}')"`:''}>${dayName(e.date)} ${fmtDate(e.date)} · ${e.open}/${e.cap}</button>`).join('')}</div>
+      <div class="muted" style="font-size:11.5px;margin-top:8px">Booster caps ${esc(sh.name)} at ${sh.positionsPerEp} positions an episode, so these slots are real.</div>
+
+      <div style="display:flex;flex-direction:column;gap:9px;margin-top:16px">
+        ${sw(m.showOk===true,'Show approved', auto?`${esc(sh.name)} auto-schedules — no ask needed`:m.showVia==='gmail'?'Detected from the reply in adops@':'Send the draft below', 'showOk')}
+        ${sw(m.brandOk===true,'Brand approved', m.sentBrand?`Sent ${fmtDate(m.sentBrand)} · no reply yet`:'Send the draft below', 'brandOk')}
+      </div>
+
+      <details style="margin-top:16px"><summary style="font-size:12.5px;font-weight:700;cursor:pointer;color:var(--text-secondary)">Drafts${auto?' · brand only':''}</summary>
+        ${auto?'':`<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--text-tertiary);margin:12px 0 6px">To ${esc(sh.host)}</div>
+        <textarea class="cmp-inp" style="min-height:110px;line-height:1.6;font-size:12.5px">Hey ${esc(sh.host.split(' ')[0])} — the ${esc(s.brand)} read from ${fmtDate(s.published)} is tracking to land near ${K(pr?pr.proj:0)} against a ${K(s.guarantee)} guarantee, so we owe them a make good. Can we put a free ${esc(s.length)} read on ${d}? Same placement, same copy — comes out of our end, no change to your split. Thanks, Sydney</textarea>
+        <button class="btn btn--primary btn--sm" style="margin-top:7px" onclick="sendMg('${id}','show')">Send to show</button>`}
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--text-tertiary);margin:14px 0 6px">To ${esc(s.brand)}</div>
+        <textarea class="cmp-inp" style="min-height:110px;line-height:1.6;font-size:12.5px">Hi ${esc(s.brand)} team — heads up on the ${esc(sh.name)} read from ${fmtDate(s.published)}. It's pacing a little under the guarantee, so we've queued an additional read on ${d} at no cost to bring the flight back over. Nothing needed on your end. Thanks, Sydney</textarea>
+        <button class="btn btn--primary btn--sm" style="margin-top:7px" onclick="sendMg('${id}','brand')">Send to brand</button>
+      </details>
+    </div>
+    <div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Close</button>
+      <button class="btn btn--green" ${both?'':'disabled style="opacity:.45"'} onclick="commitMg('${id}')">✓ Write to Airtable</button></div>`);
+  }
+  function sendMg(id,who){ const m=mg(id), s=spot(m.spotId);
+    if(who==='show') toast(`Sent to ${show(s.showId).host} from adops@. The agent reads the reply and flips the toggle.`);
+    else { m.sentBrand=TODAY; toast(`Sent to ${s.brand} in the existing thread.`); }
+    m.status='awaiting'; openMg(id); rerender(); refreshBadges(); }
+
+  function nudgeEpisode(id){ const s=spot(id); toast(`Nudged ${show(s.showId).host} from adops@. The agent keeps checking every 24h.`); }
+  function chaseDownloads(id){ const s=spot(id); s.dlState='received'; s.downloads=Math.round(s.views*0.24); rerender(); refreshBadges();
+    toast(`Requested downloads from ${show(s.showId).host} — ${K(s.downloads)} came back and were added to the total.`); }
+  function markCopy(id){ const s=spot(id); s.copyStatus='sent'; s.copySent=TODAY; rerender(); refreshBadges();
+    toast(`Copy written to the ${s.brand} spot in Airtable. Auto-email sent to ${show(s.showId).host}.`); }
+  function nudgeShow(id){ const s=spot(id); s.copyStatus='seen'; s.copySeen=TODAY; rerender(); refreshBadges();
+    toast(`Nudged ${show(s.showId).host} — opened it right after.`); }
+
+  /* ── daily air check ── */
+  let agentRunning=false;
   async function runAgent(){
     if(agentRunning) return; agentRunning=true;
     const btn=document.getElementById('runBtn'); if(btn){ btn.textContent='Scanning…'; btn.disabled=true; }
     const panel=document.getElementById('scanPanel');
-    if(panel) panel.innerHTML=`<div class="card" style="margin-bottom:16px"><div class="card__pad">
-      <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;margin-bottom:8px"><span id="scanLabel">Scanning channels for new episodes…</span><span id="scanPct" class="muted">0%</span></div>
+    if(panel) panel.innerHTML=`<div class="card" style="margin-bottom:12px"><div class="card__pad">
+      <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;margin-bottom:8px"><span id="scanLabel">Scanning channels…</span><span id="scanPct" class="muted">0%</span></div>
       <div class="scanbar"><div class="scanbar__fill" id="scanFill"></div></div></div></div>`;
-    const aired=SPOTS.filter(s=>s.status==='aired');
     const finds={ s11:{yt:'dQw4w9WgXcQ',ts:455,epLen:5380,views:9200,downloads:1400,copy:['Named the brand','Read promo code KALSHI','Free-trial CTA']},
-                  s12:{yt:'ScMzIvxBSi4',ts:612,epLen:6100,views:31000,downloads:0,copy:['Named the brand','Mental-health disclaimer','URL CTA']},
-                  s13:{miss:true} };
-    const steps=['Scanning channels for new episodes…','The Rubin Report posted 3h ago — pulling transcript…','Matching the ad segment to the Kalshi copy…','Warren Smith posted 6h ago — reading views…','Nate has no new episode yet — flagging…','Writing links + timestamps back to Airtable…'];
+                  s12:{yt:'ScMzIvxBSi4',ts:612,epLen:6100,views:31000,downloads:0,copy:['Named the brand','URL CTA']}, s13:{miss:true} };
+    const steps=['Scanning channels…','The Rubin Report posted 3h ago — pulling transcript…','Matching the read to the Kalshi copy…','Warren Smith posted 6h ago — reading views…','Nate has no episode yet — flagging…','Writing links + timestamps to Airtable…'];
     for(let i=0;i<steps.length;i++){ const l=document.getElementById('scanLabel'); if(l) l.textContent=steps[i];
       const p=Math.round((i+1)/steps.length*100); const f=document.getElementById('scanFill'); if(f) f.style.width=p+'%';
-      const pc=document.getElementById('scanPct'); if(pc) pc.textContent=p+'%'; await sleep(600); }
+      const pc=document.getElementById('scanPct'); if(pc) pc.textContent=p+'%'; await sleep(560); }
     try{ const r=await fetch('/api/transcript',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:'https://www.youtube.com/watch?v='+finds.s11.yt})});
-      if(r.ok){ const j=await r.json(); const seg=findAd(j,'Kalshi'); if(seg){ finds.s11.ts=Math.round(seg.start); finds.s11.copy=['Named the brand','Verified in transcript','Free-trial CTA']; } }
-    }catch(e){ /* offline demo → seeded */ }
-    aired.forEach(s=>{ const f=finds[s.id]; if(!f) return; if(f.miss){ s.missed=true; return; } Object.assign(s,f,{status:'verified'}); });
+      if(r.ok){ const j=await r.json(); const seg=findAd(j,'Kalshi'); if(seg) finds.s11.ts=Math.round(seg.start); }
+    }catch(e){}
+    SPOTS.filter(s=>s.status==='aired').forEach(s=>{ const f=finds[s.id]; if(!f) return;
+      if(f.miss){ s.missed=true; return; } Object.assign(s,f,{status:'verified'}); });
     agentRunning=false; rerender(); refreshBadges();
-    toast('Air check done — 2 reads found and timestamped, 1 show has no episode up yet.');
+    toast('2 reads found and timestamped. 1 show has no episode up yet.');
   }
   function findAd(json,brand){ const arr=json.transcript||json.segments||json.data||[]; const b=brand.toLowerCase();
-    for(const seg of arr){ const t=(seg.text||'').toLowerCase(); if(t.includes(b)) return {start:seg.start||seg.offset||0}; } return null; }
+    for(const seg of arr){ if((seg.text||'').toLowerCase().includes(b)) return {start:seg.start||seg.offset||0}; } return null; }
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-  function playClip(yt,ts){ openModal(`<div class="drawer__head"><h2 style="font-size:16px;font-weight:700">Ad read · jumps to ${mmss(ts)}</h2><button class="x" onclick="closeOverlays()">✕</button></div>
-    <div style="padding:0"><div class="reel-stage"><iframe src="https://www.youtube.com/embed/${yt}?start=${ts}&autoplay=1" allow="autoplay" allowfullscreen></iframe></div></div>`); }
-
-  /* ═══════════════════════════ VIEW: MAKE GOODS ═══════════════════════════ */
-  RENDER.makegoods = () => {
-    const props=MAKEGOODS.filter(m=>m.status==='proposed');
-    const await_=MAKEGOODS.filter(m=>m.status==='awaiting');
-    const sched=MAKEGOODS.filter(m=>m.status==='scheduled');
-    const need=needsMakegood();
-    const freeImp=MAKEGOODS.filter(m=>m.status==='scheduled').reduce((a,m)=>a+shortfall(spot(m.spotId)),0);
-    document.getElementById('view-makegoods').innerHTML=`
-    <div class="inner">
-      <div class="pagebar">
-        <div class="head"><h1>Make Goods</h1><p>Raised off the projection, scheduled against real avails, and sent to the show and the brand from here. Nothing writes back to Airtable until both have signed off.</p></div>
-      </div>
-      <div class="tiles">
-        <div class="tile"><div class="tile__label">Needs a date</div><div class="tile__val" style="color:${props.length+need.length?'var(--red-text)':'var(--text-primary)'}">${props.length+need.length}</div></div>
-        <div class="tile"><div class="tile__label">Awaiting sign-off</div><div class="tile__val" style="color:${await_.length?'var(--orange-text)':'var(--text-primary)'}">${await_.length}</div></div>
-        <div class="tile"><div class="tile__label">Scheduled</div><div class="tile__val" style="color:var(--green-text)">${sched.length}</div></div>
-        <div class="tile"><div class="tile__label">Impressions given back</div><div class="tile__val">${K(freeImp)}</div><div class="tile__delta"><span class="muted">counts against paid fill rate</span></div></div>
-      </div>
-      ${need.length?`<div class="card" style="margin-top:16px;border-color:var(--red-bg)"><div class="card__head"><div><div class="card__title">Flagged by the projection · no make good raised yet</div><div class="card__sub">These hit the decision window projecting under the 90% line.</div></div></div>
-        <div class="card__pad" style="display:flex;flex-direction:column;gap:10px">${need.map(s=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--red-bg);border-radius:11px">
-          <div style="flex:1"><b style="font-size:13px">${esc(s.brand)} on ${esc(show(s.showId).name)}</b>
-          <div class="muted" style="font-size:12px">Projecting ${K(projection(s).proj)} against ${K(s.guarantee)} — ${K(shortfall(s))} short at day ${projection(s).day}.</div></div>
-          <button class="btn btn--primary btn--sm" onclick="createMakegood('${s.id}')">Set up make good</button></div>`).join('')}</div></div>`:''}
-      <div style="margin-top:16px;display:flex;flex-direction:column;gap:14px">
-        ${MAKEGOODS.length?MAKEGOODS.map(m=>mgCard(m)).join(''):`<div class="card"><div class="empty">No make goods in flight.</div></div>`}
-      </div>
-      <div class="footnote">Recommended dates come from Airtable's booked spots capped by Booster's positions-per-episode, so the agent never proposes a slot that doesn't exist.</div>
-    </div>`;
-  };
-  const MGTONE={proposed:'red',awaiting:'orange',scheduled:'green'};
-  const MGLABEL={proposed:'Needs a date',awaiting:'Awaiting sign-off',scheduled:'Scheduled'};
-  function mgCard(m){
-    const s=spot(m.spotId), sh=show(s.showId), pr=projection(s);
-    const auto = sh.mgPolicy==='auto';
-    const avails=nextEpisodes(s.showId,4);
-    const both = m.showOk===true && m.brandOk===true;
-    return `<div class="card">
-      <div class="card__head"><div>
-        <div class="card__title">${esc(s.brand)} on ${esc(sh.name)} <span class="tag tag--${MGTONE[m.status]}"><i></i>${MGLABEL[m.status]}</span></div>
-        <div class="card__sub">Original read published ${fmtDate(s.published)} · projected ${pr?K(pr.proj):'—'} against ${K(s.guarantee)} · <b>${K(shortfall(s))} short</b></div></div>
-        <button class="btn btn--ghost btn--sm" onclick="openMg('${m.id}')">Open drafts</button></div>
-      <div class="card__pad">
-        <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:8px">Recommended date · from ${esc(sh.name)}'s avails</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          ${avails.map(e=>`<button class="tag ${m.date===e.date?'tag--blue':'tag--grey'}" style="cursor:${e.open?'pointer':'not-allowed'};opacity:${e.open?1:.45};padding:7px 11px" ${e.open?`onclick="setMgDate('${m.id}','${e.date}')"`:''}>
-            ${dayName(e.date)} ${fmtDate(e.date)} · ${e.open} of ${e.cap} open</button>`).join('')}
-        </div>
-        ${m.date?`<div class="muted" style="font-size:12px;margin-top:9px">Goes into Airtable as inventory type <b>Make Good</b> on ${fmtDate(m.date)}, same placement as the original read. Booster caps ${esc(sh.name)} at ${sh.positionsPerEp} positions an episode, so this slot is real.</div>`:`<div class="muted" style="font-size:12px;margin-top:9px">Pick a date to draft the messages.</div>`}
-
-        <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
-          <div class="tog">
-            <button class="tog__sw ${m.showOk===true?'on':m.showOk===false?'no':''}" onclick="toggleMg('${m.id}','showOk')"><i></i></button>
-            <div style="flex:1"><b>Show approved</b><small>${auto?`${esc(sh.name)} is set to auto-schedule — no ask needed`:m.showVia==='gmail'?'Detected from the reply in adops@':m.showOk===true?'Marked approved':'Needs a message to '+esc(sh.host)}</small></div>
-          </div>
-          <div class="tog">
-            <button class="tog__sw ${m.brandOk===true?'on':m.brandOk===false?'no':''}" onclick="toggleMg('${m.id}','brandOk')"><i></i></button>
-            <div style="flex:1"><b>Brand approved</b><small>${m.brandVia==='gmail'?'Detected from the reply in adops@':m.sentBrand?'Sent '+fmtDate(m.sentBrand)+' · no reply yet':'Not sent yet'}</small></div>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;margin-top:13px;padding-top:13px;border-top:1px solid var(--border-light)">
-          <div class="muted" style="flex:1;font-size:12px">${both?'Both sign-offs in — ready to write the spot into Airtable.':m.status==='scheduled'?esc(m.note||''):'Airtable stays untouched until both toggles are green.'}</div>
-          ${m.status==='scheduled'?`<span class="tag tag--green"><i></i>Written to Airtable · ${fmtDate(m.date)}</span>`
-            :both?`<button class="btn btn--green btn--sm" onclick="commitMg('${m.id}')">✓ Write to Airtable</button>`
-            :`<button class="btn btn--primary btn--sm" ${m.date?'':'disabled style="opacity:.45"'} onclick="openMg('${m.id}')">Review &amp; send drafts</button>`}
-        </div>
-      </div></div>`;
-  }
-  function createMakegood(spotId){
-    if(mgForSpot(spotId)) { go('makegoods'); return; }
-    const s=spot(spotId), sh=show(s.showId);
-    const av=nextEpisodes(s.showId,4).find(e=>e.open>0);
-    MAKEGOODS.push({ id:'mg'+(++MG_SEQ), spotId, date:av?av.date:null, status:'proposed',
-      showOk: sh.mgPolicy==='auto'?true:null, brandOk:null, showVia: sh.mgPolicy==='auto'?'auto':null, brandVia:null });
-    go('makegoods'); refreshBadges();
-    toast(`Make good raised for ${s.brand} on ${sh.name}${av?` — ${fmtDate(av.date)} recommended off Airtable avails`:''}.`);
-  }
-  function setMgDate(id,d){ mg(id).date=d; rerender(); toast(`Make good moved to ${fmtDate(d)}.`); }
-  function toggleMg(id,key){ const m=mg(id); m[key] = m[key]===true?false:m[key]===false?null:true;
-    if(key==='showOk') m.showVia='manual'; else m.brandVia='manual';
-    if(m.showOk===true&&m.brandOk===true&&m.status==='proposed') m.status='awaiting';
-    rerender(); refreshBadges(); }
-  function commitMg(id){
-    const m=mg(id), s=spot(m.spotId), sh=show(s.showId);
-    m.status='scheduled'; m.note=`Written to Airtable as Make Good · ${fmtDate(m.date)}.`;
-    SPOTS.push({ id:'mgs'+m.id, dealId:s.dealId, brand:s.brand, showId:s.showId, kind:'makegood', published:m.date,
-      guarantee:0, views:null, downloads:null, dlState:sh.simulcast?'auto':'none', status:'scheduled', length:s.length,
-      yt:'', ts:null, copyStatus:'seen', copy:[] });
-    rerender(); refreshBadges();
-    toast(`${s.brand} make good scheduled on ${sh.name} for ${fmtDate(m.date)}. Written to Airtable as inventory type "Make Good" and flagged in Booster so the slot can't be sold twice.`);
-  }
-  function openMg(id){
-    const m=mg(id), s=spot(m.spotId), sh=show(s.showId), pr=projection(s), auto=sh.mgPolicy==='auto';
-    const d=m.date?fmtDate(m.date):'[date]';
-    const toShow=`Hey ${esc(sh.host.split(' ')[0])} — the ${esc(s.brand)} read from ${fmtDate(s.published)} is tracking to land around ${K(pr?pr.proj:0)} against a ${K(s.guarantee)} guarantee, so we owe them a make good.\n\nCan we put a free ${esc(s.length)} read on ${d}? Same placement, same copy. No change to your split — this comes out of our end.\n\nThanks,\nSydney`;
-    const toBrand=`Hi ${esc(s.brand)} team — heads up on the ${esc(sh.name)} read from ${fmtDate(s.published)}. It's pacing to land a little under the guarantee, so we've queued an additional read on ${d} at no cost to bring the flight back over.\n\nNothing needed on your end. I'll confirm once it's live and the numbers are in the report.\n\nThanks,\nSydney`;
-    openDrawer(`<div class="drawer__head"><div><span class="tag tag--${MGTONE[m.status]}"><i></i>${MGLABEL[m.status]}</span>
-      <h2 style="font-size:18px;font-weight:800;margin-top:8px">Make good · ${esc(s.brand)} on ${esc(sh.name)}</h2>
-      <div class="muted" style="font-size:12px">${K(shortfall(s))} short · recommended ${d}</div></div><button class="x" onclick="closeOverlays()">✕</button></div>
-    <div class="drawer__body">
-      ${auto?`<div style="padding:12px 14px;border:1px solid var(--green-bg);background:var(--green-bg);border-radius:11px;font-size:12.5px;margin-bottom:14px"><b>${esc(sh.name)} is set to auto-schedule.</b> No need to ask the show first — we just book it and tell the brand.</div>`:''}
-      ${auto?'':`<div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:7px">Draft to the show · ${esc(sh.host)}</div>
-      <textarea class="cmp-inp" style="min-height:150px;line-height:1.6;font-size:12.5px;margin-bottom:8px">${esc(toShow)}</textarea>
-      <div style="display:flex;gap:8px;margin-bottom:18px"><button class="btn btn--ghost btn--sm" onclick="toast('Draft saved.')">Save draft</button>
-      <button class="btn btn--primary btn--sm" onclick="sendMg('${m.id}','show')">Send to show</button></div>`}
-      <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:7px">Draft to the brand · ${esc(s.brand)}</div>
-      <textarea class="cmp-inp" style="min-height:150px;line-height:1.6;font-size:12.5px">${esc(toBrand)}</textarea>
-      <div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn--ghost btn--sm" onclick="toast('Draft saved.')">Save draft</button>
-      <button class="btn btn--primary btn--sm" onclick="sendMg('${m.id}','brand')">Send to brand</button></div>
-      <div class="muted" style="font-size:11.5px;margin-top:14px;line-height:1.55">Sends from the adops@ alias in the existing thread. When a reply comes back the agent reads it and flips the toggle — you can always override it by hand.</div>
-    </div>
-    <div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Close</button>
-      <button class="btn btn--green" ${m.showOk===true&&m.brandOk===true?'':'disabled style="opacity:.45"'} onclick="closeOverlays();commitMg('${m.id}')">✓ Write to Airtable</button></div>`);
-  }
-  function sendMg(id,who){
-    const m=mg(id), s=spot(m.spotId), sh=show(s.showId);
-    if(who==='show'){ m.status='awaiting'; toast(`Sent to ${sh.host} from adops@. The agent will read the reply and flip the toggle.`); }
-    else { m.sentBrand=TODAY; m.status='awaiting'; toast(`Sent to ${s.brand} in the existing thread. Also posted to #adops-alerts.`); }
-    closeOverlays(); rerender(); refreshBadges();
-  }
-
-  /* ═══════════════════════════ VIEW: COPY & PROOF ═══════════════════════════ */
-  RENDER.copy = () => {
-    const need=SPOTS.filter(s=>['needs_copy','needs_cta'].includes(s.copyStatus));
-    const sent=SPOTS.filter(s=>s.copyStatus==='sent');
-    const seen=SPOTS.filter(s=>s.copyStatus==='seen'&&s.status==='scheduled');
-    const proofs=SPOTS.filter(s=>s.status==='verified'&&s.yt).sort((a,b)=>dt(b.published)-dt(a.published));
-    const copyRow=(s,body,action)=>`<div style="display:flex;align-items:center;gap:12px;padding:13px 15px;border:1px solid var(--border-light);border-radius:11px">
-      <div style="flex:1;min-width:0"><b style="font-size:13px">${esc(s.brand)} on ${esc(show(s.showId).name)}</b>
-      <div class="muted" style="font-size:12px;margin-top:2px">${body}</div></div>${action}</div>`;
-    document.getElementById('view-copy').innerHTML=`
-    <div class="inner">
-      <div class="pagebar"><div class="head"><h1>Copy &amp; Proof</h1>
-        <p>Ad copy per inventory spot, the auto-email that goes to the show when it lands, and whether they actually opened it. Proof of post sits underneath.</p></div>
-        ${need.length||sent.length?`<button class="btn btn--primary btn--sm" onclick="sendAllCopy()">Send copy to shows (${need.length})</button>`:''}
-      </div>
-      <div class="tiles" style="grid-template-columns:repeat(4,1fr)">
-        <div class="tile"><div class="tile__label">Missing copy or CTA</div><div class="tile__val" style="color:${need.length?'var(--blue-text)':'var(--text-primary)'}">${need.length}</div></div>
-        <div class="tile"><div class="tile__label">Sent · not opened</div><div class="tile__val" style="color:${sent.length?'var(--orange-text)':'var(--text-primary)'}">${sent.length}</div></div>
-        <div class="tile"><div class="tile__label">Opened by the show</div><div class="tile__val" style="color:var(--green-text)">${seen.length}</div></div>
-        <div class="tile"><div class="tile__label">Proof of post logged</div><div class="tile__val">${proofs.length}</div></div>
-      </div>
-
-      ${section('Needs copy or a CTA before it airs', need.length, 'blue', 'Sits on the inventory spot in Airtable, not the deal.',
-        need.map(s=>copyRow(s, `Airs ${dayName(s.published)} ${fmtDate(s.published)} · ${s.copyStatus==='needs_copy'?'no ad copy entered yet':'copy is in, still needs a CTA'}`,
-        `<button class="btn btn--ghost btn--sm" onclick="markCopy('${s.id}')">Mark ready &amp; send</button>`)).join(''))}
-
-      ${section('Sent to the show · not opened yet', sent.length, 'orange', 'The auto-email fires when copy is added. Read receipts tell you who is actually looking.',
-        sent.map(s=>copyRow(s, `Sent ${fmtDate(s.copySent)} to ${esc(show(s.showId).host)} · <b style="color:var(--orange-text)">not opened</b> after ${daysBetween(s.copySent,TODAY)} days`,
-        `<button class="btn btn--primary btn--sm" onclick="nudgeShow('${s.id}')">Nudge</button>`)).join(''))}
-
-      ${section('Copy in and opened', seen.length, 'green', '',
-        seen.map(s=>copyRow(s, `Airs ${dayName(s.published)} ${fmtDate(s.published)}${s.copySeen?` · opened ${fmtDate(s.copySeen)}`:''}`,
-        `<span class="tag tag--green"><i></i>Ready</span>`)).join(''))}
-
-      <div class="card" style="margin-top:6px">
-        <div class="card__head"><div><div class="card__title">Proof of post</div><div class="card__sub">Link and timestamp for every verified read — the same deep links the advertiser sees in the portal.</div></div></div>
-        <table><thead><tr><th>Campaign</th><th>Published</th><th>Ad at</th><th>Copy verified</th><th>Link</th><th></th></tr></thead>
-        <tbody>${proofs.map(s=>`<tr><td><b>${esc(s.brand)}</b><div class="muted" style="font-size:11.5px">${esc(show(s.showId).name)}</div></td>
-          <td>${fmtDate(s.published)}</td><td><b>${mmss(s.ts)}</b></td>
-          <td>${(s.copy||[]).length?`<span class="tag tag--green"><i></i>${(s.copy||[]).length} points</span>`:'<span class="tag tag--grey">—</span>'}</td>
-          <td><a href="${clipUrl(s)}" target="_blank" style="font-size:12px;color:var(--blue-text);font-weight:600;text-decoration:none">youtu.be/${esc(s.yt)}?t=${s.ts} ↗</a></td>
-          <td class="right"><button class="btn btn--ghost btn--sm" onclick="playClip('${s.yt}',${s.ts})">▶ Hear it</button></td></tr>`).join('')}</tbody></table>
-      </div>
-      <div class="footnote">Copy lives on the inventory spot in Airtable. Adding it fires the existing auto-email to the show — this just makes the open/unopened state visible.</div>
-    </div>`;
-  };
-  function markCopy(id){ const s=spot(id); s.copyStatus='sent'; s.copySent=TODAY; s.copySeen=null; rerender(); refreshBadges();
-    toast(`Copy written to the ${s.brand} inventory spot in Airtable. Auto-email sent to ${show(s.showId).host}.`); }
-  function sendAllCopy(){ const n=SPOTS.filter(s=>['needs_copy','needs_cta'].includes(s.copyStatus));
-    n.forEach(s=>{ s.copyStatus='sent'; s.copySent=TODAY; s.copySeen=null; }); rerender(); refreshBadges();
-    toast(`Copy sent for ${n.length} spots. Read receipts show up here as the shows open them.`); }
-  function nudgeShow(id){ const s=spot(id); s.copyStatus='seen'; s.copySeen=TODAY; rerender(); refreshBadges();
-    toast(`Nudged ${show(s.showId).host} in the existing thread — opened it right after.`); }
+  function playClip(yt,ts){ openModal(`<div class="drawer__head"><h2 style="font-size:16px;font-weight:700">Ad read · ${mmss(ts)}</h2><button class="x" onclick="closeOverlays()">✕</button></div>
+    <div class="reel-stage"><iframe src="https://www.youtube.com/embed/${yt}?start=${ts}&autoplay=1" allow="autoplay" allowfullscreen></iframe></div>`); }
 
   /* ═══════════════════════════ VIEW: CAMPAIGN PORTAL ═══════════════════════════ */
   let portalBrand='Kalshi';
@@ -1244,106 +889,73 @@
     const brands=[...new Set(SPOTS.filter(s=>projection(s)).map(s=>s.brand))];
     if(!brands.includes(portalBrand)) portalBrand=brands[0];
     const spots=SPOTS.filter(s=>s.brand===portalBrand&&projection(s));
-    const g=spots.reduce((a,s)=>a+s.guarantee,0);
-    const got=spots.reduce((a,s)=>a+(delivered(s)||0),0);
+    const g=spots.reduce((a,s)=>a+s.guarantee,0), got=spots.reduce((a,s)=>a+(delivered(s)||0),0);
     const proj=spots.reduce((a,s)=>a+projection(s).proj,0);
-    const yt=spots.reduce((a,s)=>a+(s.views||0),0), aud=spots.reduce((a,s)=>a+(s.downloads||0),0);
-    const paid=spots.reduce((a,s)=>a+spotCost(s),0);          // make goods cost 0, so they pull the effective CPM down
-    const cpm=got?(paid/(got/1000)):0;
-    const bookedCpm=g?(paid/(g/1000)):0;
-    const finals=spots.filter(s=>projection(s).final);
-    const done=finals.length===spots.length&&spots.length>0;
-    const bg=spots.find(s=>s.yt);
+    const paid=spots.reduce((a,s)=>a+spotCost(s),0);
     const mgs=SPOTS.filter(s=>s.brand===portalBrand&&s.kind==='makegood');
+    const bg=spots.find(s=>s.yt);
     document.getElementById('view-portal').innerHTML=`
-    <div class="inner">
+    <div class="inner" style="max-width:940px">
       <div class="pagebar">
-        <div class="head"><h1>Campaign Portal <span class="live-dot"><i></i>Live link</span></h1>
-        <p>What the advertiser sees. Every read embedded at its exact timestamp so they can hear it, with delivery measured against the 90% IAB line — this is the delivery report, not a spreadsheet export.</p></div>
+        <div class="head"><h1>Campaign Portal</h1><p>What the advertiser sees — every read playable at its exact timestamp, updating itself as spots land.</p></div>
         <div class="pagebar__right">
           <select class="field" style="width:auto" onchange="portalBrand=this.value;RENDER.portal()">${brands.map(b=>`<option ${b===portalBrand?'selected':''}>${esc(b)}</option>`).join('')}</select>
-          <button class="btn btn--ghost btn--sm" onclick="toast('Copied acme.live/${portalBrand.toLowerCase()}-aug — read-only, updates as spots land.')">🔗 Copy link</button>
           <button class="btn btn--primary btn--sm" onclick="toast('Delivery report sent to ${esc(portalBrand)} and copied to adops@.')">Send report</button></div>
       </div>
       <div class="portal-hero" style="position:relative;overflow:hidden">
-        ${bg?`<iframe title="ad playing" style="position:absolute;inset:0;width:100%;height:100%;border:0;opacity:.22;pointer-events:none" src="https://www.youtube.com/embed/${bg.yt}?start=${bg.ts}&autoplay=1&mute=1&controls=0&loop=1&playlist=${bg.yt}&modestbranding=1&playsinline=1"></iframe><div style="position:absolute;inset:0;background:linear-gradient(120deg,rgba(23,33,43,.92),rgba(38,51,63,.78))"></div>`:''}
+        ${bg?`<iframe style="position:absolute;inset:0;width:100%;height:100%;border:0;opacity:.2;pointer-events:none" src="https://www.youtube.com/embed/${bg.yt}?start=${bg.ts}&autoplay=1&mute=1&controls=0&loop=1&playlist=${bg.yt}&modestbranding=1&playsinline=1"></iframe><div style="position:absolute;inset:0;background:linear-gradient(120deg,rgba(23,33,43,.92),rgba(38,51,63,.78))"></div>`:''}
         <div style="position:relative;z-index:1">
         <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
           <div class="brand-chip" style="background:${brandColor[portalBrand]||'#3B82F6'}">${esc(portalBrand[0])}</div>
           <div><div style="font-size:12px;opacity:.7;font-weight:600;letter-spacing:.04em">DELIVERY REPORT · AUGUST 2026</div><h2>${esc(portalBrand)} on Acme Network</h2></div>
-          <div style="margin-left:auto;text-align:right"><div style="font-size:32px;font-weight:800">${pctOf(proj,g)}%</div><div style="font-size:12px;opacity:.7">${done?'of guaranteed impressions':'projected against guarantee'}</div></div>
+          <div style="margin-left:auto;text-align:right"><div style="font-size:32px;font-weight:800">${pctOf(proj,g)}%</div><div style="font-size:12px;opacity:.7">of guarantee</div></div>
         </div>
-        <div style="display:flex;gap:26px;margin-top:22px;flex-wrap:wrap">
-          ${portalMini('Delivered so far',K(got))}
-          ${portalMini('Projected final',K(proj))}
-          ${portalMini('Guaranteed',K(g))}
-          ${portalMini('Effective CPM','$'+cpm.toFixed(2))}
-          ${portalMini('Booked CPM','$'+bookedCpm.toFixed(2))}
-          ${portalMini('YouTube views',K(yt))}
-          ${portalMini('Audio downloads',K(aud))}
+        <div style="display:flex;gap:30px;margin-top:20px;flex-wrap:wrap">
+          ${portalMini('Delivered',K(got))}${portalMini('Projected',K(proj))}${portalMini('Guaranteed',K(g))}${portalMini('Effective CPM','$'+(got?(paid/(got/1000)):0).toFixed(2))}
         </div>
-        ${proj>=g?`<div style="margin-top:20px;padding:11px 14px;border-radius:10px;background:rgba(214,241,224,.16);border:1px solid rgba(214,241,224,.3);font-size:12.5px;display:flex;align-items:center;gap:9px">
-          <span style="font-size:15px">✓</span><span><b>Full delivery.</b> ${K(proj-g)} impressions over the guarantee are bonus — no charge.</span></div>`
-        :`<div style="margin-top:20px;padding:11px 14px;border-radius:10px;background:rgba(255,237,213,.16);border:1px solid rgba(255,237,213,.3);font-size:12.5px;display:flex;align-items:center;gap:9px">
-          <span style="font-size:15px">↻</span><span><b>${mgs.length?`${mgs.length} additional read${mgs.length>1?'s':''} scheduled`:'Tracking under guarantee'}.</b> ${mgs.length?`Booked at no cost on ${mgs.map(m=>fmtDate(m.published)).join(', ')} to bring the flight back over.`:'We will add reads at no cost to close the gap.'}</span></div>`}
+        ${proj>=g?`<div style="margin-top:18px;padding:10px 13px;border-radius:10px;background:rgba(214,241,224,.16);font-size:12.5px">✓ <b>Full delivery.</b> ${K(proj-g)} impressions over the guarantee are bonus, no charge.</div>`
+        :mgs.length?`<div style="margin-top:18px;padding:10px 13px;border-radius:10px;background:rgba(255,237,213,.16);font-size:12.5px">↻ <b>${mgs.length} additional read${mgs.length>1?'s':''} booked at no cost</b> on ${mgs.map(m=>fmtDate(m.published)).join(', ')} to bring the flight back over.</div>`:''}
         </div>
       </div>
-
-      <div class="card" style="margin-top:16px">
-        <div class="card__head"><div><div class="card__title">Every read, with the tape</div><div class="card__sub">Click a timestamp to hear the actual host read from that episode.</div></div>
-        <span class="tag tag--grey">${spots.length} read${spots.length!==1?'s':''} · ${[...new Set(spots.map(s=>s.showId))].length} show${[...new Set(spots.map(s=>s.showId))].length!==1?'s':''}</span></div>
-        <div class="card__pad" style="display:flex;flex-direction:column;gap:11px">
-          ${spots.map(s=>{ const pr=projection(s), v=verdict(s);
-            return `<div style="display:flex;align-items:center;gap:13px;padding:12px 14px;border:1px solid var(--border-light);border-radius:12px">
-            ${s.yt?`<img src="https://img.youtube.com/vi/${s.yt}/mqdefault.jpg" style="width:84px;height:48px;border-radius:7px;object-fit:cover;flex-shrink:0" onerror="this.style.visibility='hidden'">`:''}
-            <div style="flex:1;min-width:0"><b style="font-size:13px">${esc(show(s.showId).name)}</b>
-              <div class="muted" style="font-size:12px;margin-top:2px">${fmtDate(s.published)} · ${s.length} host-read${show(s.showId).simulcast?` · ${K(s.views||0)} video + ${K(s.downloads||0)} audio`:''}</div>
-              <div style="margin-top:6px;max-width:280px">${projBar(s)}</div></div>
-            <div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:800">${K(pr.got)}</div><div class="muted" style="font-size:11px">${pr.final?'final':'projecting '+K(pr.proj)}</div></div>
-            ${s.yt?`<button class="btn btn--ghost btn--sm" onclick="playClip('${s.yt}',${s.ts})">▶ ${mmss(s.ts)}</button>`:''}</div>`; }).join('')}
-          ${mgs.map(s=>`<div style="display:flex;align-items:center;gap:13px;padding:12px 14px;border:1px dashed var(--purple-bg);border-radius:12px;background:rgba(235,233,254,.3)">
-            <div style="flex:1"><b style="font-size:13px">${esc(show(s.showId).name)}</b> <span class="tag tag--purple">Added at no cost</span>
-            <div class="muted" style="font-size:12px;margin-top:2px">Scheduled ${dayName(s.published)} ${fmtDate(s.published)} · ${s.length} host-read</div></div></div>`).join('')}
-        </div>
+      <div style="margin-top:16px">
+        ${spots.map(s=>{ const pr=projection(s);
+          return row(spotLead(s), esc(show(s.showId).name),
+            `${fmtDate(s.published)} · ${K(pr.got)} delivered${pr.final?'':' · projecting '+K(pr.proj)}`,
+            spotNum(s), s.yt?`<button class="btn btn--ghost btn--sm" onclick="playClip('${s.yt}',${s.ts})">▶ ${mmss(s.ts)}</button>`:''); }).join('')}
+        ${mgs.map(s=>row(`<div class="wrow__thumb"></div>`, esc(show(s.showId).name)+' <span class="tag tag--purple">Added at no cost</span>',
+          `Scheduled ${dayName(s.published)} ${fmtDate(s.published)}`,'','')).join('')}
       </div>
-      <div class="footnote">Read-only for the advertiser and updates itself as reads land — no export, no version to keep in sync.</div>
+      <div class="footnote">Read-only for the advertiser, updates itself as reads land.</div>
     </div>`;
   };
-  const portalMini=(l,v)=>`<div><div style="font-size:24px;font-weight:800">${v}</div><div style="font-size:11.5px;opacity:.7;font-weight:600">${l}</div></div>`;
+  const portalMini=(l,v)=>`<div><div style="font-size:23px;font-weight:800">${v}</div><div style="font-size:11.5px;opacity:.7;font-weight:600">${l}</div></div>`;
 
-  /* ═══════════════════════════ VIEW: SHOWS & INVENTORY ═══════════════════════════ */
+  /* ═══════════════════════════ VIEW: SHOWS ═══════════════════════════ */
   RENDER.shows = () => {
+    const adv=guaranteeAdvice(), f=fillStats();
     document.getElementById('view-shows').innerHTML=`
-    <div class="inner">
-      <div class="pagebar"><div class="head"><h1>Shows &amp; Inventory</h1>
-        <p>The setup layer every projection reads from — how often a show publishes, how many ad positions exist per episode, where the audio numbers come from, and whether a make good needs the show's sign-off. Pulled from Booster where we can.</p></div>
-        <div class="pagebar__right"><span class="tag tag--purple">${SHOWS.filter(s=>s.src==='booster').length} of ${SHOWS.length} synced from Booster</span></div>
-      </div>
-      <div class="grid" style="grid-template-columns:1fr 1fr">
-        ${SHOWS.map(sh=>{ const av=nextEpisodes(sh.id,3); const live=SPOTS.filter(s=>s.showId===sh.id&&projection(s));
-        return `<div class="card"><div class="card__head"><div>
-            <div class="card__title">${esc(sh.name)} <span class="srcpill ${sh.src==='booster'?'booster':''}">${sh.src}</span></div>
-            <div class="card__sub">${esc(sh.host)} · ${esc(sh.category)} · ${esc(sh.channel)}</div></div>
-            ${sparkline(sh.curve,{w:88,h:28})}</div>
-          <div class="card__pad">
-            <div class="kv"><span>Publishes</span><b>${sh.publishDays.join(' · ')}</b></div>
-            <div class="kv"><span>Episodes a week</span><b>${sh.epsPerWeek}</b></div>
-            <div class="kv"><span>Ad positions per episode</span><b>${sh.positionsPerEp} <span class="muted" style="font-weight:500">· cap from Booster</span></b></div>
-            <div class="kv"><span>Impression guarantee</span><b>${K(sh.guarantee)} <span class="muted" style="font-weight:500">· 90% = ${K(Math.round(sh.guarantee*IAB_FULL))}</span></b></div>
-            <div class="kv"><span>Delivery numbers</span><b>${sh.simulcast?`video + audio · ${sh.audioSrc==='hosting'?'auto from host':'request from creator'}`:'video only'}</b></div>
-            <div class="kv"><span>Make goods</span><b>${sh.mgPolicy==='auto'?'auto-schedule':'ask the show first'}</b></div>
-            <div style="margin-top:11px;padding:11px 12px;border-radius:10px;background:var(--page-bg);border:1px solid var(--border-light)">
-              <div style="font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--text-tertiary)">Learned view curve</div>
-              <div style="font-size:12.5px;margin-top:4px;line-height:1.5">${curveNote(sh)}, and ${Math.round(curveAt(sh.curve,7)*100)}% by day 7. Fitted from <b>${sh.samples}</b> verified reads — the more we check, the tighter the projection gets.</div>
-            </div>
-            <div style="margin-top:11px"><div style="font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:6px">Next avails</div>
-              <div style="display:flex;gap:6px;flex-wrap:wrap">${av.map(e=>`<span class="tag ${e.open?'tag--green':'tag--grey'}">${dayName(e.date)} ${fmtDate(e.date)} · ${e.open}/${e.cap}</span>`).join('')}</div></div>
-            ${live.length?`<div class="muted" style="font-size:11.5px;margin-top:10px">${live.length} flight${live.length>1?'s':''} live · ${live.map(s=>esc(s.brand)).join(', ')}</div>`:''}
-          </div></div>`; }).join('')}
-      </div>
-      <div class="footnote">Positions per episode and the guarantee live in Booster, so the agent never recommends a make-good slot that doesn't exist. Everything else is learned from what actually aired.</div>
+    <div class="inner" style="max-width:940px">
+      <div class="pagebar"><div class="head"><h1>Shows</h1>
+        <p>What every projection reads from — publish days, ad positions per episode, the guarantee, and the view curve the agent has learned.</p></div></div>
+      ${adv.length?`<div class="card" style="margin-bottom:16px;border-color:var(--orange-bg)"><div class="card__pad" style="display:flex;align-items:center;gap:13px">
+        <div class="wrow__ico" style="background:var(--orange-bg)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--orange-text)" stroke-width="2.1">${ICO.mg}</svg></div>
+        <div style="flex:1"><b style="font-size:13px">${esc(show(adv[0].showId).name)} needed a make good on ${adv[0].shortCount} of its last ${adv[0].flights} flights</b>
+        <div class="muted" style="font-size:12.5px;margin-top:2px">Reads land near ${K(adv[0].typical)}, so the ${K(adv[0].current)} guarantee is set too high. Paid fill rate is ${f.rate}%.</div></div>
+        <button class="btn btn--ghost btn--sm" onclick="applyGuarantee('${adv[0].showId}',${adv[0].suggest})">Drop to ${K(adv[0].suggest)}</button></div></div>`:''}
+      <div class="card"><table>
+        <thead><tr><th>Show</th><th>Publishes</th><th class="num">Positions</th><th class="num">Guarantee</th><th>Make goods</th><th>View curve</th></tr></thead>
+        <tbody>${SHOWS.map(sh=>`<tr>
+          <td><b>${esc(sh.name)}</b><div class="muted" style="font-size:11.5px">${esc(sh.channel)} · ${sh.simulcast?'video + audio':'video only'}</div></td>
+          <td style="font-size:12.5px">${sh.publishDays.join(' · ')}</td>
+          <td class="num">${sh.positionsPerEp}<div class="muted" style="font-size:10.5px">per ep</div></td>
+          <td class="num">${K(sh.guarantee)}<div class="muted" style="font-size:10.5px">90% = ${K(Math.round(sh.guarantee*IAB_FULL))}</div></td>
+          <td><span class="tag ${sh.mgPolicy==='auto'?'tag--green':'tag--grey'}">${sh.mgPolicy==='auto'?'auto':'ask first'}</span></td>
+          <td><div style="display:flex;align-items:center;gap:9px">${sparkline(sh.curve)}<div class="muted" style="font-size:11px;line-height:1.35">${Math.round(curveAt(sh.curve,2)*100)}% in 48h<br>${sh.samples} reads</div></div></td>
+        </tr>`).join('')}</tbody></table></div>
+      <div class="footnote">Positions per episode and the guarantee come from Booster, so a make good is never offered a slot that doesn't exist.</div>
     </div>`;
   };
+  function applyGuarantee(showId,v){ show(showId).guarantee=v; rerender(); toast(`${show(showId).name} guarantee set to ${K(v)}. Written back to Booster and Airtable.`); }
 
   /* ═══════════════════════════ TOAST ═══════════════════════════ */
   let toastT;
@@ -1351,7 +963,7 @@
     el.textContent=msg; requestAnimationFrame(()=>{el.style.opacity=1;el.style.transform='translateX(-50%) translateY(0)';}); clearTimeout(toastT); toastT=setTimeout(()=>{el.style.opacity=0;el.style.transform='translateX(-50%) translateY(20px)';},3400); }
 
   /* init */
-  refreshBadges(); RENDER.overview();
+  refreshBadges(); RENDER.delivery();
   </script>
 </body>
 </html>
