@@ -218,7 +218,6 @@
     .wrow { display:flex; align-items:center; gap:13px; padding:13px 16px; border:1px solid var(--border-light); border-radius:12px; background:var(--white); }
     .wrow + .wrow { margin-top:8px; }
     .wrow__ico { width:34px; height:34px; border-radius:9px; display:grid; place-items:center; flex-shrink:0; }
-    .wrow__thumb { width:60px; height:34px; border-radius:6px; object-fit:cover; flex-shrink:0; background:var(--secondary-lite); }
     .wrow__main { flex:1; min-width:0; }
     .wrow__main b { font-size:13px; font-weight:700; display:block; }
     .wrow__main span { font-size:12px; color:var(--text-secondary); }
@@ -697,10 +696,11 @@
     warn:'<path d="M12 9v4M12 17h.01M10.3 3.9L2 18a2 2 0 001.7 3h16.6A2 2 0 0022 18L13.7 3.9a2 2 0 00-3.4 0z"/>',
     doc:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>',
     mg:'<path d="M3 12a9 9 0 1015-6.7L21 8"/><path d="M21 3v5h-5"/>',
-    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' };
+    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    wave:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>' };
   const icoBox=(k,tone)=>`<div class="wrow__ico" style="background:var(--${tone}-bg)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--${tone}-text)" stroke-width="2.1">${ICO[k]}</svg></div>`;
   const row=(lead,title,sub,num,action)=>`<div class="wrow">${lead}<div class="wrow__main"><b>${title}</b><span>${sub}</span></div>${num||''}${action||''}</div>`;
-  const spotLead=s=>s.yt?`<img class="wrow__thumb" src="https://img.youtube.com/vi/${s.yt}/mqdefault.jpg" onerror="this.style.visibility='hidden'">`:`<div class="wrow__thumb"></div>`;
+  const spotLead=s=>icoBox('wave', verdict(s).tone==='grey'?'blue':verdict(s).tone);
   const spotNum=s=>{ const pr=projection(s); if(!pr) return ''; const v=verdict(s);
     return `<div class="wrow__num">${projBar(s)}<b style="color:${toneVar(v.tone)}">${Math.round(pr.ratio*100)}%</b></div>`; };
 
@@ -945,7 +945,6 @@
     const proj=spots.reduce((a,s)=>a+projection(s).proj,0);
     const paid=spots.reduce((a,s)=>a+spotCost(s),0);
     const mgs=SPOTS.filter(s=>s.brand===portalBrand&&s.kind==='makegood');
-    const bg=spots.find(s=>s.yt);
     document.getElementById('view-portal').innerHTML=`
     <div class="inner" style="max-width:940px">
       <div class="pagebar">
@@ -954,8 +953,7 @@
           <select class="field" style="width:auto" onchange="portalBrand=this.value;RENDER.portal()">${brands.map(b=>`<option ${b===portalBrand?'selected':''}>${esc(b)}</option>`).join('')}</select>
           <button class="btn btn--primary btn--sm" onclick="toast('Delivery report sent to ${esc(portalBrand)} and copied to adops@.')">Send report</button></div>
       </div>
-      <div class="portal-hero" style="position:relative;overflow:hidden">
-        ${bg?`<iframe style="position:absolute;inset:0;width:100%;height:100%;border:0;opacity:.2;pointer-events:none" src="https://www.youtube.com/embed/${bg.yt}?start=${bg.ts}&autoplay=1&mute=1&controls=0&loop=1&playlist=${bg.yt}&modestbranding=1&playsinline=1"></iframe><div style="position:absolute;inset:0;background:linear-gradient(120deg,rgba(23,33,43,.92),rgba(38,51,63,.78))"></div>`:''}
+      <div class="portal-hero">
         <div style="position:relative;z-index:1">
         <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
           <div class="brand-chip" style="background:${brandColor[portalBrand]||'#3B82F6'}">${esc(portalBrand[0])}</div>
@@ -974,7 +972,7 @@
           return row(spotLead(s), esc(show(s.showId).name),
             `${fmtDate(s.published)} · ${K(pr.got)} delivered${pr.final?'':' · projecting '+K(pr.proj)}`,
             spotNum(s), s.yt?`<button class="btn btn--ghost btn--sm" onclick="playClip('${s.yt}',${s.ts})">▶ ${mmss(s.ts)}</button>`:''); }).join('')}
-        ${mgs.map(s=>row(`<div class="wrow__thumb"></div>`, esc(show(s.showId).name)+' <span class="tag tag--purple">Added at no cost</span>',
+        ${mgs.map(s=>row(icoBox('mg','purple'), esc(show(s.showId).name)+' <span class="tag tag--purple">Added at no cost</span>',
           `Scheduled ${dayName(s.published)} ${fmtDate(s.published)}`,'','')).join('')}
       </div>
       <div class="footnote">Read-only for the advertiser, updates itself as reads land.</div>
