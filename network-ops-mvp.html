@@ -262,7 +262,8 @@
     </div>
     <div class="sb-scroll">
       <div class="sb-group">
-        <button class="nav-item active" data-view="delivery" onclick="go('delivery')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Delivery <span class="badge" id="nav-del-badge"></span></button>
+        <button class="nav-item active" data-view="overview" onclick="go('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Command Center</button>
+        <button class="nav-item" data-view="delivery" onclick="go('delivery')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Delivery <span class="badge" id="nav-del-badge"></span></button>
         <button class="nav-item" data-view="portal" onclick="go('portal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg>Campaign Portal <span class="dot"></span></button>
         <button class="nav-item" data-view="shows" onclick="go('shows')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 4v16"/></svg>Shows</button>
       </div>
@@ -277,7 +278,8 @@
   </nav>
 
   <main class="main" id="main">
-    <section class="view active" id="view-delivery"></section>
+    <section class="view active" id="view-overview"></section>
+    <section class="view" id="view-delivery"></section>
     <section class="view" id="view-portal"></section>
     <section class="view" id="view-shows"></section>
   </main>
@@ -603,7 +605,7 @@
   /* ═══════════════════════════ ASK ═══════════════════════════ */
   let ANSWER='';
   function askAcme(q){
-    const el=document.getElementById('acAsk'); const t=q||(el?el.value.trim():''); if(!t) return;
+    const el=document.querySelector('.view.active #acAsk'); const t=q||(el?el.value.trim():''); if(!t) return;
     ANSWER=answerQuery(t); if(el) el.value=''; rerender();
   }
   const goChip=(label,view)=>`<button class="btn btn--ghost btn--sm" style="margin-top:10px" onclick="go('${view}')">${label}</button>`;
@@ -734,6 +736,55 @@
   }
   function deliveryAttention(){ return { count: workList().length }; }
 
+  /* ═══════════════════════════ VIEW: COMMAND CENTER ═══════════════════════════
+     The glance. Three numbers, the next three things, one thing worth knowing.
+     Everything else lives one click away in Delivery. */
+  RENDER.overview = () => {
+    const work=workList();
+    const live=SPOTS.filter(s=>projection(s));
+    const g=live.reduce((a,s)=>a+s.guarantee,0), proj=live.reduce((a,s)=>a+projection(s).proj,0);
+    const mgOpen=MAKEGOODS.filter(m=>m.status!=='scheduled').length;
+    const adv=guaranteeAdvice()[0];
+    const pct=pctOf(proj,g);
+    document.getElementById('view-overview').innerHTML=`
+    <div class="inner" style="max-width:940px">
+      <div class="pagebar">
+        <div class="head"><h1>Command Center</h1>
+        <p>Everything the agent is watching, and what it needs from you.</p></div>
+        <div class="pagebar__right"><span class="tag tag--grey">${dayName(TODAY)} ${fmtDate(TODAY)}</span></div>
+      </div>
+
+      <div class="askbar">
+        <input id="acAsk" placeholder="Ask anything — e.g. will Kalshi on Sage Steele deliver?" onkeydown="if(event.key==='Enter')askAcme()">
+        <button class="btn btn--primary" onclick="askAcme()">Ask</button>
+      </div>
+      ${ANSWER?`<div class="answer">${ANSWER}<button class="x" style="float:right;margin-top:-22px" onclick="ANSWER='';rerender()">✕</button></div>`:''}
+
+      <div class="tiles" style="grid-template-columns:repeat(3,1fr)">
+        <button class="tile" style="text-align:left;font-family:inherit" onclick="go('delivery')">
+          <div class="tile__label">Needs you</div><div class="tile__val">${work.length}</div></button>
+        <div class="tile"><div class="tile__label">Projected vs guaranteed</div>
+          <div class="tile__val" style="color:${proj>=g?'var(--green-text)':'var(--orange-text)'}">${pct}%</div></div>
+        <div class="tile"><div class="tile__label">Make goods open</div><div class="tile__val">${mgOpen}</div></div>
+      </div>
+
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin:22px 2px 10px">
+        <b style="font-size:14px;letter-spacing:-.02em">Next up</b>
+        ${work.length>3?`<button class="btn btn--ghost btn--sm" onclick="go('delivery')">See all ${work.length} →</button>`:''}
+      </div>
+      <div id="scanPanel"></div>
+      ${work.length?work.slice(0,3).join(''):`<div class="card"><div class="empty">✨ Nothing needs you — every flight projects over the 90% line.</div></div>`}
+
+      ${adv?`<div class="wrow" style="margin-top:22px;background:rgba(255,237,213,.4);border-color:var(--orange-bg)">
+        <div class="wrow__ico" style="background:var(--orange-bg)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--orange-text)" stroke-width="2.1">${ICO.mg}</svg></div>
+        <div class="wrow__main"><b>${esc(show(adv.showId).name)}'s guarantee is set too high</b>
+        <span>A make good on ${adv.shortCount} of its last ${adv.flights} flights. Reads land near ${K(adv.typical)}, not ${K(adv.current)}.</span></div>
+        <button class="btn btn--ghost btn--sm" onclick="applyGuarantee('${adv.showId}',${adv.suggest})">Drop to ${K(adv.suggest)}</button></div>`:''}
+
+      <div class="footnote">Acme Network Ops · reads Airtable, respects Booster's inventory caps · powered by SpotsNow</div>
+    </div>`;
+  };
+
   /* ═══════════════════════════ VIEW: DELIVERY ═══════════════════════════ */
   let delTab='work';
   RENDER.delivery = () => {
@@ -858,17 +909,18 @@
   let agentRunning=false;
   async function runAgent(){
     if(agentRunning) return; agentRunning=true;
-    const btn=document.getElementById('runBtn'); if(btn){ btn.textContent='Scanning…'; btn.disabled=true; }
-    const panel=document.getElementById('scanPanel');
+    const q=sel=>document.querySelector('.view.active '+sel);   // both views carry these ids
+    const btn=q('#runBtn'); if(btn){ btn.textContent='Scanning…'; btn.disabled=true; }
+    const panel=q('#scanPanel');
     if(panel) panel.innerHTML=`<div class="card" style="margin-bottom:12px"><div class="card__pad">
       <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;margin-bottom:8px"><span id="scanLabel">Scanning channels…</span><span id="scanPct" class="muted">0%</span></div>
       <div class="scanbar"><div class="scanbar__fill" id="scanFill"></div></div></div></div>`;
     const finds={ s11:{yt:'dQw4w9WgXcQ',ts:455,epLen:5380,views:9200,downloads:1400,copy:['Named the brand','Read promo code KALSHI','Free-trial CTA']},
                   s12:{yt:'ScMzIvxBSi4',ts:612,epLen:6100,views:31000,downloads:0,copy:['Named the brand','URL CTA']}, s13:{miss:true} };
     const steps=['Scanning channels…','The Rubin Report posted 3h ago — pulling transcript…','Matching the read to the Kalshi copy…','Warren Smith posted 6h ago — reading views…','Nate has no episode yet — flagging…','Writing links + timestamps to Airtable…'];
-    for(let i=0;i<steps.length;i++){ const l=document.getElementById('scanLabel'); if(l) l.textContent=steps[i];
-      const p=Math.round((i+1)/steps.length*100); const f=document.getElementById('scanFill'); if(f) f.style.width=p+'%';
-      const pc=document.getElementById('scanPct'); if(pc) pc.textContent=p+'%'; await sleep(560); }
+    for(let i=0;i<steps.length;i++){ const l=q('#scanLabel'); if(l) l.textContent=steps[i];
+      const p=Math.round((i+1)/steps.length*100); const f=q('#scanFill'); if(f) f.style.width=p+'%';
+      const pc=q('#scanPct'); if(pc) pc.textContent=p+'%'; await sleep(560); }
     try{ const r=await fetch('/api/transcript',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:'https://www.youtube.com/watch?v='+finds.s11.yt})});
       if(r.ok){ const j=await r.json(); const seg=findAd(j,'Kalshi'); if(seg) finds.s11.ts=Math.round(seg.start); }
     }catch(e){}
@@ -932,16 +984,11 @@
 
   /* ═══════════════════════════ VIEW: SHOWS ═══════════════════════════ */
   RENDER.shows = () => {
-    const adv=guaranteeAdvice(), f=fillStats();
+    const f=fillStats();
     document.getElementById('view-shows').innerHTML=`
     <div class="inner" style="max-width:940px">
       <div class="pagebar"><div class="head"><h1>Shows</h1>
         <p>What every projection reads from — publish days, ad positions per episode, the guarantee, and the view curve the agent has learned.</p></div></div>
-      ${adv.length?`<div class="card" style="margin-bottom:16px;border-color:var(--orange-bg)"><div class="card__pad" style="display:flex;align-items:center;gap:13px">
-        <div class="wrow__ico" style="background:var(--orange-bg)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--orange-text)" stroke-width="2.1">${ICO.mg}</svg></div>
-        <div style="flex:1"><b style="font-size:13px">${esc(show(adv[0].showId).name)} needed a make good on ${adv[0].shortCount} of its last ${adv[0].flights} flights</b>
-        <div class="muted" style="font-size:12.5px;margin-top:2px">Reads land near ${K(adv[0].typical)}, so the ${K(adv[0].current)} guarantee is set too high. Paid fill rate is ${f.rate}%.</div></div>
-        <button class="btn btn--ghost btn--sm" onclick="applyGuarantee('${adv[0].showId}',${adv[0].suggest})">Drop to ${K(adv[0].suggest)}</button></div></div>`:''}
       <div class="card"><table>
         <thead><tr><th>Show</th><th>Publishes</th><th class="num">Positions</th><th class="num">Guarantee</th><th>Make goods</th><th>View curve</th></tr></thead>
         <tbody>${SHOWS.map(sh=>`<tr>
@@ -952,7 +999,7 @@
           <td><span class="tag ${sh.mgPolicy==='auto'?'tag--green':'tag--grey'}">${sh.mgPolicy==='auto'?'auto':'ask first'}</span></td>
           <td><div style="display:flex;align-items:center;gap:9px">${sparkline(sh.curve)}<div class="muted" style="font-size:11px;line-height:1.35">${Math.round(curveAt(sh.curve,2)*100)}% in 48h<br>${sh.samples} reads</div></div></td>
         </tr>`).join('')}</tbody></table></div>
-      <div class="footnote">Positions per episode and the guarantee come from Booster, so a make good is never offered a slot that doesn't exist.</div>
+      <div class="footnote">Positions per episode and the guarantee come from Booster, so a make good is never offered a slot that doesn't exist. Paid fill rate is ${f.rate}% — ${f.paid} spots sold, ${f.free} given as make goods or bonus.</div>
     </div>`;
   };
   function applyGuarantee(showId,v){ show(showId).guarantee=v; rerender(); toast(`${show(showId).name} guarantee set to ${K(v)}. Written back to Booster and Airtable.`); }
@@ -963,7 +1010,7 @@
     el.textContent=msg; requestAnimationFrame(()=>{el.style.opacity=1;el.style.transform='translateX(-50%) translateY(0)';}); clearTimeout(toastT); toastT=setTimeout(()=>{el.style.opacity=0;el.style.transform='translateX(-50%) translateY(20px)';},3400); }
 
   /* init */
-  refreshBadges(); RENDER.delivery();
+  refreshBadges(); RENDER.overview();
   </script>
 </body>
 </html>
