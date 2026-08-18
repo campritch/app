@@ -1,6 +1,6 @@
 import AnthropicSDK from "@anthropic-ai/sdk";
 
-const STATION_API = "https://station-api-693004779323.northamerica-northeast2.run.app";
+const STATION_API = "https://backend.spotsnow.io";
 
 function extractCampaignId(url) {
   const match = url.match(/\/c\/([0-9a-f-]{36})/);
@@ -93,13 +93,23 @@ Return JSON with these keys. Keep it SHORT — a creator should scan this in 30 
 Return ONLY valid JSON.`;
 
   const message = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 2000,
+    model: "claude-sonnet-5",
+    max_tokens: 4000,
+    // Sonnet 5 thinks by default; thinking shares the max_tokens budget and would
+    // truncate the JSON. This is a straight extraction, so keep it off.
+    thinking: { type: "disabled" },
     system: SYSTEM_PROMPT,
     messages: [{ role: "user", content: userPrompt }],
   });
 
-  let text = message.content[0].text.trim();
+  if (message.stop_reason === "refusal") {
+    throw new Error("Model declined the request");
+  }
+
+  const textBlock = message.content.find((b) => b.type === "text");
+  if (!textBlock) throw new Error(`No text in response (stop_reason: ${message.stop_reason})`);
+
+  let text = textBlock.text.trim();
   if (text.startsWith("```")) {
     text = text.replace(/^```(?:json)?\s*/, "").replace(/\s*```$/, "");
   }
@@ -192,6 +202,6 @@ export default async function handler(req, res) {
     return res.status(200).json(result);
   } catch (e) {
     console.error("Generation error:", e);
-    return res.status(500).json({ error: "Failed to generate talking points. Please try again." });
+    return res.status(500).json({ error: `Failed to generate talking points: ${e.message}` });
   }
 }

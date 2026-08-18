@@ -18,7 +18,7 @@ import anthropic
 # Config
 # ---------------------------------------------------------------------------
 
-STATION_API = "https://station-api-693004779323.northamerica-northeast2.run.app"
+STATION_API = "https://backend.spotsnow.io"
 
 # Map known frontend domains to the station API
 # Both spotsnow.io and the pre-prod Firebase domain use the same backend
@@ -163,13 +163,16 @@ Return JSON with these keys. Keep it SHORT — a creator should scan this in 30 
 Return ONLY valid JSON."""
 
     message = client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=2000,
+        model="claude-sonnet-5",
+        max_tokens=4000,
+        # Sonnet 5 thinks by default; thinking shares the max_tokens budget and would
+        # truncate the JSON. This is a straight extraction, so keep it off.
+        thinking={"type": "disabled"},
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_prompt}],
     )
 
-    text = message.content[0].text.strip()
+    text = next(b.text for b in message.content if b.type == "text").strip()
     # Strip markdown fences if present
     if text.startswith("```"):
         text = re.sub(r"^```(?:json)?\s*", "", text)
