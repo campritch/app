@@ -219,8 +219,9 @@
     .wrow + .wrow { margin-top:8px; }
     .wrow__ico { width:34px; height:34px; border-radius:9px; display:grid; place-items:center; flex-shrink:0; }
     .wrow__main { flex:1; min-width:0; }
-    .wrow__main b { font-size:13px; font-weight:700; display:block; }
+    .wrow__main > b { font-size:13px; font-weight:700; display:block; }
     .wrow__main span { font-size:12px; color:var(--text-secondary); }
+    .wrow__main span b { font-weight:700; color:var(--text-primary); }
     .wrow__num { width:132px; flex-shrink:0; display:flex; align-items:center; gap:9px; }
     .wrow__num b { font-size:12.5px; min-width:38px; text-align:right; }
     .wrow button { flex-shrink:0; }
@@ -268,6 +269,7 @@
       </div>
     </div>
     <div class="sb-foot">
+      <button class="sb-powered" onclick="toast('Alerts route to #adops-alerts in Slack and the adops@ alias. Sydney takes Slack, Shelby takes email.')"><span class="smark" style="background:#4A154B">#</span>Alerts → <b>#adops-alerts</b> + <b>adops@</b></button>
       <div class="sb-user">
         <div class="sb-user__av">SD</div>
         <div><div class="sb-user__name">Sydney D.</div><div class="sb-user__sub">Ad Ops · Acme Network</div></div>
@@ -309,8 +311,10 @@
 
   /* ── IAB: full delivery is 90% of the guarantee. Anything over 100% is bonus. ── */
   const IAB_FULL = 0.90;
-  /* ── The make-good call gets made in the day 10–14 window, not at day 30. ── */
-  const DECIDE_FROM = 10, DECIDE_TO = 14, FINAL_DAY = 30;
+  /* ── The make-good call gets made as soon as the show's own curve is settled
+        enough to trust, not on a fixed day-10 rule and not at day 30. Warren
+        Smith is callable on day 3; Sage Steele needs to day 13. ── */
+  const FINAL_DAY = 30, CALL_AT = 0.90;
 
   /* ═══ LEARNED VIEW CURVES ═══
      Cumulative share of the 30-day number by day. The agent refits these from
@@ -323,6 +327,15 @@
     steady: {0:0, 1:.22, 2:.38, 3:.50, 5:.66, 7:.76, 10:.85, 14:.91, 21:.96, 30:1},
     slow:   {0:0, 1:.06, 2:.18, 3:.34, 5:.62, 7:.75, 10:.85, 14:.92, 21:.97, 30:1},
   };
+  // First day this show's curve is settled enough to call the number.
+  const _ci={};
+  function checkInDay(sh){
+    if(_ci[sh.id]!=null) return _ci[sh.id];
+    let d=3; while(d<30 && curveAt(sh.curve,d)<CALL_AT) d++;
+    return _ci[sh.id]=d;
+  }
+  const checkInDate = s => addDays(s.published, checkInDay(show(s.showId)));
+
   function curveAt(key, day){
     const c=CURVES[key]||CURVES.medium; const ks=Object.keys(c).map(Number).sort((a,b)=>a-b);
     if(day<=0) return 0; if(day>=30) return 1;
@@ -409,20 +422,8 @@
     const p = curveAt(sh.curve, Math.max(d,1));
     const proj = d >= FINAL_DAY ? got : Math.round(got / Math.max(p,.02));
     return { day:d, curvePct:p, got, proj, ratio: proj/Math.max(s.guarantee,1), rawRatio: got/Math.max(s.guarantee,1),
-             final: d >= FINAL_DAY, confident: d >= DECIDE_FROM || p >= .80, samples: sh.samples };
+             final: d >= FINAL_DAY, confident: d >= checkInDay(sh), callAt: checkInDay(sh), samples: sh.samples };
   }
-  // What phase of the 4 checks is this spot in?
-  function phase(s){
-    if(s.status==='scheduled') return 'booked';
-    if(s.status==='aired' || s.status==='found') return 'daily';
-    const d = liveDays(s);
-    if(d >= FINAL_DAY) return 'final';
-    if(d > DECIDE_TO) return 'settling';        // call already made, riding to the 30-day number
-    if(d >= DECIDE_FROM) return 'decide';
-    return 'weekly';
-  }
-  const PHASES=[{k:'daily',l:'Live'},{k:'weekly',l:'Weekly'},{k:'decide',l:'D10–14'},{k:'final',l:'D30'}];
-  const PHASE_STEP={daily:0,weekly:1,decide:2,settling:3,final:3,booked:0};
   /* verdict — the projection is always reported, but only a *firm* one raises a
      make good. Firm means the day 10–14 window is open, or enough of the curve
      is already in that the number can't move much. Before that it's indicative:
@@ -430,7 +431,7 @@
   function verdict(s){
     const pr = projection(s); if(!pr) return { k:'pending', label:'Awaiting episode', tone:'grey' };
     if(s.dlState==='requested') return { k:'blocked', label:'Waiting on downloads', tone:'purple', pr };
-    if(pr.curvePct < .45 && pr.day < DECIDE_FROM) return { k:'early', label:'Too early to call', tone:'grey', pr };
+    if(pr.curvePct < .45 && !pr.confident) return { k:'early', label:'Too early to call', tone:'grey', pr };
     if(!pr.confident){
       if(pr.ratio >= 1.0)     return { k:'trackOver',  label:'Tracking over',        tone:'green',  pr, soft:true };
       if(pr.ratio >= IAB_FULL) return { k:'trackFull', label:'Tracking to clear 90%', tone:'green',  pr, soft:true };
@@ -793,8 +794,8 @@
     document.getElementById('view-delivery').innerHTML=`
     <div class="inner" style="max-width:940px">
       <div class="pagebar">
-        <div class="head"><h1>Delivery</h1>
-        <p>Every read is projected off its own show's view curve, so the make-good call happens around day 12 instead of day 30. 90% of guarantee is full delivery.</p></div>
+        <div class="head"><h1>Delivery <span class="live-dot"><i></i>Checked ${LAST_CHECK}</span></h1>
+        <p>Every read is projected off its own show's view curve, and each show gets its own check-in date — Warren Smith settles by day 3, Sage Steele needs to day 13. 90% of guarantee is full delivery.</p></div>
         <div class="pagebar__right"><div class="seg">
           <button class="${delTab==='work'?'active':''}" onclick="delTab='work';RENDER.delivery()">Needs you${work.length?' · '+work.length:''}</button>
           <button class="${delTab==='all'?'active':''}" onclick="delTab='all';RENDER.delivery()">All flights</button></div></div>
@@ -809,7 +810,8 @@
         ? (work.length?work.join(''):`<div class="card"><div class="empty">✨ Nothing needs you — every flight projects over the 90% line.</div></div>`)
         : live.map(s=>{ const pr=projection(s);
             return row(spotLead(s), nameOf(s),
-              `Day ${pr.day} of 30 · ${K(pr.got)} delivered · projecting ${K(pr.proj)} of ${K(s.guarantee)}`,
+              `Day ${pr.day} · ${K(pr.got)} delivered · projecting ${K(pr.proj)} of ${K(s.guarantee)}`
+              + (pr.confident?'':` · <b>call it ${fmtDate(checkInDate(s))}</b>`),
               spotNum(s), `<button class="btn btn--ghost btn--sm" onclick="openSpot('${s.id}')">Open</button>`); }).join('')}
       <div class="footnote">Projections come from each show's own curve, refit every time a read is verified.</div>
     </div>`;
@@ -828,13 +830,22 @@
         Across ${sh.samples} reads, ${Math.round(curveAt(sh.curve,2)*100)}% of ${esc(sh.name)}'s views land inside 48h. At day ${pr.day} this episode should be ${Math.round(pr.curvePct*100)}% of the way there, and it has ${K(pr.got)} — so it lands near <b>${K(pr.proj)}</b>, <b>${Math.round(pr.ratio*100)}%</b> of the ${K(s.guarantee)} guarantee.
         ${v.k==='short'?` That's <b style="color:var(--red-text)">${K(shortfall(s))} under</b> the 90% line — make good warranted.`
           :v.k==='bonus'?` Clears the guarantee outright; the overage is bonus.`
-          :v.soft||v.k==='early'?` Still ${100-Math.round(pr.curvePct*100)}% of the curve to come, so this stays indicative until day ${DECIDE_FROM}.`
+          :v.soft||v.k==='early'?` Still ${100-Math.round(pr.curvePct*100)}% of the curve to come. ${esc(sh.name)} settles on day ${pr.callAt}, so the call gets made ${fmtDate(checkInDate(s))}.`
           :` Clears the 90% line — no make good needed.`}
         ${sh.simulcast?`<br><br>${K(s.views||0)} video ${s.dlState==='requested'?'· audio downloads still requested from the creator':'+ '+K(s.downloads||0)+' audio'}.`:''}
       </div>
-      ${s.yt?`<div class="reel-stage" style="margin-top:14px"><iframe src="https://www.youtube.com/embed/${s.yt}?start=${s.ts}" allow="autoplay" allowfullscreen></iframe></div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:10px"><span class="tag tag--green"><i></i>Read verified at ${mmss(s.ts)}</span>
-        <a href="${clipUrl(s)}" target="_blank" style="font-size:12px;color:var(--blue-text);font-weight:600;text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${clipUrl(s)} ↗</a></div>`:''}`
+      ${s.yt?`<div style="margin-top:14px;background:var(--primary);border-radius:12px;padding:14px 16px;color:#fff;display:flex;align-items:center;gap:14px">
+        <button onclick="playClip('${s.yt}',${s.ts})" style="width:40px;height:40px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:14px;flex-shrink:0">▶</button>
+        <div style="flex:1;min-width:0">
+          <b style="font-size:13px">Ad read verified · ${mmss(s.ts)}–${mmss(s.ts+adSecs(s))}</b>
+          <div style="font-size:11.5px;opacity:.72;margin-top:2px">${(s.copy||[]).join(' · ')||'Copy points logged on approval'}</div>
+        </div>
+        <button class="btn btn--sm" style="background:rgba(255,255,255,.15);color:#fff;flex-shrink:0" onclick="playClip('${s.yt}',${s.ts})">Play</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:9px">
+        <a href="${clipUrl(s)}" target="_blank" style="font-size:12px;color:var(--blue-text);font-weight:600;text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${clipUrl(s)} ↗</a>
+        <button class="btn btn--ghost btn--sm" onclick="navigator.clipboard&&navigator.clipboard.writeText('${clipUrl(s)}');toast('Deep link copied — opens at ${mmss(s.ts)}.')">Copy link</button>
+      </div>`:''}`
       :`<div class="empty">Airs ${fmtDate(s.published)} on ${esc(sh.name)}.</div>`}
     </div>
     <div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Close</button>
@@ -906,7 +917,7 @@
     toast(`Nudged ${show(s.showId).host} — opened it right after.`); }
 
   /* ── daily air check ── */
-  let agentRunning=false;
+  let agentRunning=false, LAST_CHECK='2h ago';
   async function runAgent(){
     if(agentRunning) return; agentRunning=true;
     const q=sel=>document.querySelector('.view.active '+sel);   // both views carry these ids
@@ -927,6 +938,7 @@
     SPOTS.filter(s=>s.status==='aired').forEach(s=>{ const f=finds[s.id]; if(!f) return;
       if(f.miss){ s.missed=true; return; } Object.assign(s,f,{status:'verified'}); });
     agentRunning=false; rerender(); refreshBadges();
+    LAST_CHECK='just now'; rerender();
     toast('2 reads found and timestamped. 1 show has no episode up yet.');
   }
   function findAd(json,brand){ const arr=json.transcript||json.segments||json.data||[]; const b=brand.toLowerCase();
@@ -986,14 +998,15 @@
     document.getElementById('view-shows').innerHTML=`
     <div class="inner" style="max-width:940px">
       <div class="pagebar"><div class="head"><h1>Shows</h1>
-        <p>What every projection reads from — publish days, ad positions per episode, the guarantee, and the view curve the agent has learned.</p></div></div>
+        <p>What every projection reads from. The check-in date is set by each show's own curve, so a fast show gets called in days and a slow one is left alone until its number is real.</p></div></div>
       <div class="card"><table>
-        <thead><tr><th>Show</th><th>Publishes</th><th class="num">Positions</th><th class="num">Guarantee</th><th>Make goods</th><th>View curve</th></tr></thead>
+        <thead><tr><th>Show</th><th>Publishes</th><th class="num">Positions</th><th class="num">Guarantee</th><th class="num">Call it</th><th>Make goods</th><th>View curve</th></tr></thead>
         <tbody>${SHOWS.map(sh=>`<tr>
           <td><b>${esc(sh.name)}</b><div class="muted" style="font-size:11.5px">${esc(sh.channel)} · ${sh.simulcast?'video + audio':'video only'}</div></td>
           <td style="font-size:12.5px">${sh.publishDays.join(' · ')}</td>
           <td class="num">${sh.positionsPerEp}<div class="muted" style="font-size:10.5px">per ep</div></td>
           <td class="num">${K(sh.guarantee)}<div class="muted" style="font-size:10.5px">90% = ${K(Math.round(sh.guarantee*IAB_FULL))}</div></td>
+          <td class="num"><b>day ${checkInDay(sh)}</b><div class="muted" style="font-size:10.5px">of 30</div></td>
           <td><span class="tag ${sh.mgPolicy==='auto'?'tag--green':'tag--grey'}">${sh.mgPolicy==='auto'?'auto':'ask first'}</span></td>
           <td><div style="display:flex;align-items:center;gap:9px">${sparkline(sh.curve)}<div class="muted" style="font-size:11px;line-height:1.35">${Math.round(curveAt(sh.curve,2)*100)}% in 48h<br>${sh.samples} reads</div></div></td>
         </tr>`).join('')}</tbody></table></div>
