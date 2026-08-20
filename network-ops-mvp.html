@@ -263,15 +263,6 @@
     .askwrap input:focus { outline:none; border-color:var(--border-strong); box-shadow:var(--shadow-hover); }
     .askwrap input::placeholder { color:var(--text-tertiary); }
     .askwrap__go { position:absolute; right:9px; top:50%; transform:translateY(-50%); width:36px; height:36px; border-radius:9px; border:none; background:var(--primary); color:#fff; display:grid; place-items:center; }
-    .sugg { display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-top:14px; text-align:left; }
-    .sugg__card { position:relative; color:var(--text-primary); background:var(--white); border:1px solid var(--border); border-radius:13px; padding:15px 16px; display:flex; gap:12px; align-items:flex-start; box-shadow:var(--shadow-card); transition:.13s; font-family:inherit; text-align:left; }
-    .sugg__card:hover { border-color:var(--border-strong); box-shadow:var(--shadow-hover); transform:translateY(-1px); }
-    .sugg__ico { width:32px; height:32px; border-radius:9px; background:var(--secondary-lite); display:grid; place-items:center; flex-shrink:0; }
-    .sugg__body { flex:1; min-width:0; padding-right:72px; }   /* clears the widest tag */
-    .sugg__card b { display:block; font-size:13px; font-weight:700; letter-spacing:-.01em; }
-    .sugg__card span { display:block; font-size:11.5px; color:var(--text-tertiary); font-weight:500; margin-top:3px; line-height:1.45; }
-    .sugg__tag { position:absolute; top:14px; right:14px; font-size:10px; font-weight:800; padding:2.5px 8px; border-radius:999px; letter-spacing:-.01em; }
-    @media (max-width:760px){ .sugg { grid-template-columns:1fr; } }
 
     /* ─── one work row, used for every kind of item ─── */
     .wrow { display:flex; align-items:center; gap:13px; padding:13px 16px; border:1px solid var(--border-light); border-radius:12px; background:var(--white); }
@@ -817,18 +808,6 @@
   /* ═══════════════════════════ VIEW: COMMAND CENTER ═══════════════════════════
      The glance. Three numbers, the next three things, one thing worth knowing.
      Everything else lives one click away in Delivery. */
-  // Suggestions map onto the branches answerQuery already handles, so every card returns a real answer.
-  const SUGGESTIONS=[
-    { q:"What needs a make good?", sub:"Flights projecting under the 90% IAB line", tag:"Delivery", tone:"red",
-      ico:'<path d="M3 12a9 9 0 1015-6.7L21 8"/><path d="M21 3v5h-5"/>' },
-    { q:"Will Kalshi on Sage Steele deliver?", sub:"Project any flight off its show's own view curve", tag:"Pacing", tone:"green",
-      ico:'<path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/>' },
-    { q:"Which guarantees are too high?", sub:"Shows that keep costing you free reads", tag:"Inventory", tone:"purple",
-      ico:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 4v16"/>' },
-    { q:"What's waiting on copy?", sub:"Spots airing soon with no ad copy in yet", tag:"Copy", tone:"blue",
-      ico:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>' },
-  ];
-
   RENDER.overview = () => {
     const work=workList();
     const live=SPOTS.filter(s=>projection(s));
@@ -850,13 +829,6 @@
         </div>
         ${ANSWER?`<div class="answer" style="text-align:left;margin-top:14px;margin-bottom:0">${ANSWER}
           <button class="x" style="float:right;margin-top:-22px" onclick="ANSWER='';rerender()">✕</button></div>`:''}
-        <div class="sugg">
-          ${SUGGESTIONS.map(x=>`<button class="sugg__card" onclick="askVmg('${x.q.replace(/'/g,"\\'")}')">
-            <div class="sugg__ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2">${x.ico}</svg></div>
-            <div class="sugg__body"><b>${esc(x.q)}</b><span>${esc(x.sub)}</span></div>
-            <span class="sugg__tag" style="background:var(--${x.tone}-bg);color:var(--${x.tone}-text)">${x.tag}</span>
-          </button>`).join('')}
-        </div>
       </div>
 
       <div style="display:flex;align-items:baseline;justify-content:space-between;margin:36px 2px 10px">
