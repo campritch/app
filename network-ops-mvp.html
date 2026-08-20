@@ -16,7 +16,7 @@
       --border: #E4E6ED; --border-light: #EDEEF1; --border-strong: #C5CBD5;
       --white: #ffffff; --secondary-lite: #F3F4F6;
       --nav: #F3F4F6; --nav-current: #E4E6ED; --nav-hover: #EBEDF2;
-      --page-bg: #F9FAFB;
+      --page-bg: #EDEEF1; --panel: #ffffff;
       --green-text: #0E6832; --green-bg: #D6F1E0;
       --blue-text: #1435C0; --blue-bg: #C7E0FF;
       --orange-text: #C2410C; --orange-bg: #FFEDD5;
@@ -30,19 +30,31 @@
       /* categorical chart palette */
       --c1:#17212B; --c2:#3B82F6; --c3:#10B981; --c4:#F59E0B; --c5:#8B5CF6; --c6:#EC4899; --c7:#06B6D4;
     }
+    body.dark {
+      --primary:#F3F4F6; --primary-hover:#E4E6ED;
+      --text-primary:#F0F1F4; --text-secondary:#9BA3B0; --text-tertiary:#6C7581;
+      --border:#2A2F38; --border-light:#232830; --border-strong:#3C434E;
+      --white:#161A20; --panel:#161A20; --secondary-lite:#212630; --page-bg:#0D1015;
+      --nav:#212630; --nav-current:#2A2F38; --nav-hover:#212630;
+      --green-bg:#12351F; --blue-bg:#152A47; --orange-bg:#3A2410; --red-bg:#3D1A18; --purple-bg:#241C42;
+      --green-text:#5BD68F; --blue-text:#7FB4FF; --orange-text:#F0A868; --red-text:#F58B84; --purple-text:#B69BF5;
+      --shadow-card:0 1px 2px rgba(0,0,0,.4); --shadow-btn:0 1px 3px rgba(0,0,0,.35); --shadow-hover:0 12px 34px rgba(0,0,0,.5);
+    }
+    body.dark .btn--primary, body.dark .pill--solid, body.dark .askwrap__go, body.dark .tb-av, body.dark .sb-powered .smark { color:#12161C; }
+    body.dark .portal-hero { background: linear-gradient(135deg,#212630,#2A3038); }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
       background: var(--page-bg); color: var(--text-primary);
       -webkit-font-smoothing: antialiased; line-height: 1.45; letter-spacing: -.01em;
-      display: flex; height: 100vh; overflow: hidden;
+      display: flex; gap: 9px; height: 100vh; overflow: hidden; padding: 9px;
     }
     button { font-family: inherit; cursor: pointer; }
     a { color: inherit; }
 
     /* ─── SIDEBAR ─── */
-    .sidebar { width: 244px; flex-shrink: 0; height: 100vh; background: var(--white); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 18px 14px 14px; }
+    .sidebar { width: 244px; flex-shrink: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 15px; display: flex; flex-direction: column; padding: 16px 13px 13px; overflow: hidden; }
     .sb-brand { display: flex; align-items: center; gap: 11px; padding: 4px 8px 18px; }
     .sb-brand__mark { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; background: var(--primary); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 13px; letter-spacing: -.02em; }
     .sb-brand__name b { display: block; color: var(--text-primary); font-size: 15px; font-weight: 800; letter-spacing: -.02em; }
@@ -68,8 +80,32 @@
     .sb-user__name { color: var(--text-primary); font-size: 12.5px; font-weight: 700; line-height: 1.2; }
     .sb-user__sub { color: var(--text-tertiary); font-size: 11px; font-weight: 500; }
 
+    /* recent questions, under the nav */
+    .recent { margin-top: 16px; padding-top: 13px; border-top: 1px solid var(--border-light); }
+    .recent__hd { display: flex; align-items: center; justify-content: space-between; padding: 0 10px 7px; }
+    .recent__hd span { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-tertiary); }
+    .recent__hd button { border: none; background: none; color: var(--text-tertiary); font-size: 11px; font-weight: 700; padding: 2px 5px; border-radius: 6px; }
+    .recent__hd button:hover { color: var(--text-primary); background: var(--nav-hover); }
+    .chat { display: block; width: 100%; text-align: left; border: none; background: none; border-radius: 9px; padding: 7px 10px; color: var(--text-tertiary); font-size: 11.5px; font-weight: 500; line-height: 1.45; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .chat:hover { background: var(--nav-hover); color: var(--text-secondary); }
+    .chat.active { background: var(--nav-current); color: var(--text-primary); font-weight: 600; }
+
+    /* ─── TOP BAR ─── */
+    .topbar { display: flex; align-items: center; gap: 4px; justify-content: flex-end; padding: 13px 18px 0; flex-shrink: 0; }
+    .nav-item .dot { width: 6px; height: 6px; border-radius: 50%; background: #3FB87C; margin-left: auto; }
+    .nav-item { border: none; background: none; border-radius: 8px; padding: 6px 11px; color: var(--text-tertiary); font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+    .nav-item:hover { color: var(--text-primary); background: var(--nav-hover); }
+    .nav-item.active { color: var(--text-primary); background: var(--nav-current); }
+    .nav-item .badge { background: var(--red-bg); color: var(--red-text); font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 999px; }
+    .nav-item .dot { width: 6px; height: 6px; border-radius: 50%; background: #3FB87C; }
+    .tb-btn { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--panel); color: var(--text-secondary); font-size: 12px; font-weight: 600; margin-left: 6px; }
+    .tb-btn:hover { border-color: var(--border-strong); color: var(--text-primary); }
+    .tb-btn svg { width: 13px; height: 13px; }
+    .tb-av { width: 30px; height: 30px; border-radius: 9px; background: var(--primary); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 11px; margin-left: 6px; border: none; flex-shrink: 0; }
+
     /* ─── MAIN ─── */
-    .main { flex: 1; height: 100vh; overflow-y: auto; position: relative; }
+    .main { flex: 1; min-width: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+    .views { flex: 1; overflow-y: auto; }
     .view { display: none; }
     .view.active { display: block; }
     .inner { max-width: 1220px; margin: 0 auto; padding: 26px 34px 90px; }
@@ -228,7 +264,7 @@
     .askwrap input::placeholder { color:var(--text-tertiary); }
     .askwrap__go { position:absolute; right:9px; top:50%; transform:translateY(-50%); width:36px; height:36px; border-radius:9px; border:none; background:var(--primary); color:#fff; display:grid; place-items:center; }
     .sugg { display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-top:14px; text-align:left; }
-    .sugg__card { position:relative; background:var(--white); border:1px solid var(--border); border-radius:13px; padding:15px 16px; display:flex; gap:12px; align-items:flex-start; box-shadow:var(--shadow-card); transition:.13s; font-family:inherit; text-align:left; }
+    .sugg__card { position:relative; color:var(--text-primary); background:var(--white); border:1px solid var(--border); border-radius:13px; padding:15px 16px; display:flex; gap:12px; align-items:flex-start; box-shadow:var(--shadow-card); transition:.13s; font-family:inherit; text-align:left; }
     .sugg__card:hover { border-color:var(--border-strong); box-shadow:var(--shadow-hover); transform:translateY(-1px); }
     .sugg__ico { width:32px; height:32px; border-radius:9px; background:var(--secondary-lite); display:grid; place-items:center; flex-shrink:0; }
     .sugg__body { flex:1; min-width:0; padding-right:72px; }   /* clears the widest tag */
@@ -277,7 +313,6 @@
   </style>
 </head>
 <body>
-  <!-- ───────── SIDEBAR ───────── -->
   <nav class="sidebar">
     <div class="sb-brand">
       <div class="sb-brand__mark">V</div>
@@ -290,6 +325,10 @@
         <button class="nav-item" data-view="portal" onclick="go('portal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg>Campaign Portal <span class="dot"></span></button>
         <button class="nav-item" data-view="shows" onclick="go('shows')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 4v16"/></svg>Shows</button>
       </div>
+      <div class="recent" id="recentWrap">
+        <div class="recent__hd"><span>Recent</span><button onclick="newChat()">+ New</button></div>
+        <div id="chats"></div>
+      </div>
     </div>
     <div class="sb-foot">
       <button class="sb-powered" onclick="toast('Alerts route to #adops-alerts in Slack and the adops@ alias. Sydney takes Slack, Shelby takes email.')"><span class="smark" style="background:#4A154B">#</span>Alerts → <b>#adops-alerts</b> + <b>adops@</b></button>
@@ -301,11 +340,16 @@
     </div>
   </nav>
 
-  <main class="main" id="main">
-    <section class="view active" id="view-overview"></section>
-    <section class="view" id="view-delivery"></section>
-    <section class="view" id="view-portal"></section>
-    <section class="view" id="view-shows"></section>
+  <main class="main">
+    <div class="topbar">
+      <button class="tb-btn" onclick="toggleDark()" id="dmBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>Dark Mode</button>
+    </div>
+    <div class="views" id="main">
+      <section class="view active" id="view-overview"></section>
+      <section class="view" id="view-delivery"></section>
+      <section class="view" id="view-portal"></section>
+      <section class="view" id="view-shows"></section>
+    </div>
   </main>
 
   <!-- overlays -->
@@ -626,10 +670,20 @@
   function closeOverlays(){ document.getElementById('drawer').classList.remove('open'); document.getElementById('modal').classList.remove('open'); document.getElementById('scrim').classList.remove('open'); }
 
   /* ═══════════════════════════ ASK ═══════════════════════════ */
-  let ANSWER='';
+  let ANSWER='', CHATS=[], ACTIVE_CHAT=-1;
+  function renderChats(){
+    const el=document.getElementById('chats'); if(!el) return;
+    const wrap=document.getElementById('recentWrap'); if(wrap) wrap.style.display = CHATS.length?'':'none';
+    el.innerHTML = CHATS.slice(0,6).map((c,i)=>`<button class="chat ${i===ACTIVE_CHAT?'active':''}" onclick="openChat(${i})">${esc(c.q)}</button>`).join('');
+  }
+  function openChat(i){ ACTIVE_CHAT=i; ANSWER=CHATS[i].a; go('overview'); }
+  function newChat(){ ACTIVE_CHAT=-1; ANSWER=''; go('overview'); const el=document.querySelector('.view.active #acAsk'); if(el) el.focus(); }
   function askVmg(q){
     const el=document.querySelector('.view.active #acAsk'); const t=q||(el?el.value.trim():''); if(!t) return;
-    ANSWER=answerQuery(t); if(el) el.value=''; rerender();
+    ANSWER=answerQuery(t);
+    CHATS.unshift({q:t, a:ANSWER}); ACTIVE_CHAT=0; CHATS=CHATS.slice(0,12);
+    if(el) el.value=''; if(CURRENT!=='overview') go('overview'); else rerender();
+    renderChats();
   }
   const goChip=(label,view)=>`<button class="btn btn--ghost btn--sm" style="margin-top:10px" onclick="go('${view}')">${label}</button>`;
   const nameOf = s => `${esc(s.brand)} on ${esc(show(s.showId).name)}`;
@@ -1050,6 +1104,12 @@
       <div class="footnote">Positions per episode and the guarantee come from Booster, so a make good is never offered a slot that doesn't exist. Paid fill rate is ${f.rate}% — ${f.paid} spots sold, ${f.free} given as make goods or bonus.</div>
     </div>`;
   };
+  function toggleDark(){
+    document.body.classList.toggle('dark');
+    const d=document.body.classList.contains('dark');
+    const b=document.getElementById('dmBtn');
+    if(b) b.lastChild.textContent = d?'Light Mode':'Dark Mode';
+  }
   function applyGuarantee(showId,v){ show(showId).guarantee=v; rerender(); toast(`${show(showId).name} guarantee set to ${K(v)}. Written back to Booster and Airtable.`); }
 
   /* ═══════════════════════════ TOAST ═══════════════════════════ */
@@ -1058,7 +1118,7 @@
     el.textContent=msg; requestAnimationFrame(()=>{el.style.opacity=1;el.style.transform='translateX(-50%) translateY(0)';}); clearTimeout(toastT); toastT=setTimeout(()=>{el.style.opacity=0;el.style.transform='translateX(-50%) translateY(20px)';},3400); }
 
   /* init */
-  refreshBadges(); RENDER.overview();
+  refreshBadges(); renderChats(); RENDER.overview();
   </script>
 </body>
 </html>
