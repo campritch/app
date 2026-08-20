@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Acme Network Ops — MVP</title>
+  <title>VMG Command Center</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2317212B'/%3E%3Ctext x='16' y='22' font-family='Helvetica,Arial,sans-serif' font-size='15' font-weight='700' fill='%23ffffff' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -214,6 +214,29 @@
     .brand-chip { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-weight: 800; color: #fff; font-size: 15px; flex-shrink: 0; }
 
 
+    /* ─── chat-first hero (matches the SpotsNow Intelligence layout) ─── */
+    .hero { max-width:720px; margin:0 auto; padding:44px 0 0; text-align:center; }
+    .hero h1 { font-size:34px; font-weight:800; letter-spacing:-.04em; }
+    .hero p { color:var(--text-secondary); font-size:14px; font-weight:500; line-height:1.6; max-width:560px; margin:12px auto 0; }
+    .hero__pills { display:flex; gap:9px; justify-content:center; margin-top:18px; }
+    .pill { display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; padding:7px 14px; border-radius:999px; border:1px solid var(--border); background:var(--white); color:var(--text-secondary); box-shadow:var(--shadow-btn); }
+    .pill--solid { background:var(--primary); border-color:var(--primary); color:#fff; }
+    .pill i { width:7px; height:7px; border-radius:50%; background:currentColor; }
+    .askwrap { position:relative; margin-top:26px; }
+    .askwrap input { width:100%; padding:16px 92px 16px 18px; border:1px solid var(--border); border-radius:13px; font-size:14.5px; font-family:inherit; background:var(--white); box-shadow:var(--shadow-card); color:var(--text-primary); }
+    .askwrap input:focus { outline:none; border-color:var(--border-strong); box-shadow:var(--shadow-hover); }
+    .askwrap input::placeholder { color:var(--text-tertiary); }
+    .askwrap__go { position:absolute; right:9px; top:50%; transform:translateY(-50%); width:36px; height:36px; border-radius:9px; border:none; background:var(--primary); color:#fff; display:grid; place-items:center; }
+    .sugg { display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-top:14px; text-align:left; }
+    .sugg__card { position:relative; background:var(--white); border:1px solid var(--border); border-radius:13px; padding:15px 16px; display:flex; gap:12px; align-items:flex-start; box-shadow:var(--shadow-card); transition:.13s; font-family:inherit; text-align:left; }
+    .sugg__card:hover { border-color:var(--border-strong); box-shadow:var(--shadow-hover); transform:translateY(-1px); }
+    .sugg__ico { width:32px; height:32px; border-radius:9px; background:var(--secondary-lite); display:grid; place-items:center; flex-shrink:0; }
+    .sugg__body { flex:1; min-width:0; padding-right:72px; }   /* clears the widest tag */
+    .sugg__card b { display:block; font-size:13px; font-weight:700; letter-spacing:-.01em; }
+    .sugg__card span { display:block; font-size:11.5px; color:var(--text-tertiary); font-weight:500; margin-top:3px; line-height:1.45; }
+    .sugg__tag { position:absolute; top:14px; right:14px; font-size:10px; font-weight:800; padding:2.5px 8px; border-radius:999px; letter-spacing:-.01em; }
+    @media (max-width:760px){ .sugg { grid-template-columns:1fr; } }
+
     /* ─── one work row, used for every kind of item ─── */
     .wrow { display:flex; align-items:center; gap:13px; padding:13px 16px; border:1px solid var(--border-light); border-radius:12px; background:var(--white); }
     .wrow + .wrow { margin-top:8px; }
@@ -257,8 +280,8 @@
   <!-- ───────── SIDEBAR ───────── -->
   <nav class="sidebar">
     <div class="sb-brand">
-      <div class="sb-brand__mark">A</div>
-      <div class="sb-brand__name"><b>Acme Network</b><span>NETWORK OPS</span></div>
+      <div class="sb-brand__mark">V</div>
+      <div class="sb-brand__name"><b>VMG</b><span>COMMAND CENTER</span></div>
     </div>
     <div class="sb-scroll">
       <div class="sb-group">
@@ -272,7 +295,7 @@
       <button class="sb-powered" onclick="toast('Alerts route to #adops-alerts in Slack and the adops@ alias. Sydney takes Slack, Shelby takes email.')"><span class="smark" style="background:#4A154B">#</span>Alerts → <b>#adops-alerts</b> + <b>adops@</b></button>
       <div class="sb-user">
         <div class="sb-user__av">SD</div>
-        <div><div class="sb-user__name">Sydney D.</div><div class="sb-user__sub">Ad Ops · Acme Network</div></div>
+        <div><div class="sb-user__name">Sydney D.</div><div class="sb-user__sub">Ad Ops · VMG</div></div>
       </div>
       <button class="sb-powered"><span class="smark">S</span>Airtable + Booster · by <b>SpotsNow</b></button>
     </div>
@@ -604,7 +627,7 @@
 
   /* ═══════════════════════════ ASK ═══════════════════════════ */
   let ANSWER='';
-  function askAcme(q){
+  function askVmg(q){
     const el=document.querySelector('.view.active #acAsk'); const t=q||(el?el.value.trim():''); if(!t) return;
     ANSWER=answerQuery(t); if(el) el.value=''; rerender();
   }
@@ -740,49 +763,63 @@
   /* ═══════════════════════════ VIEW: COMMAND CENTER ═══════════════════════════
      The glance. Three numbers, the next three things, one thing worth knowing.
      Everything else lives one click away in Delivery. */
+  // Suggestions map onto the branches answerQuery already handles, so every card returns a real answer.
+  const SUGGESTIONS=[
+    { q:"What needs a make good?", sub:"Flights projecting under the 90% IAB line", tag:"Delivery", tone:"red",
+      ico:'<path d="M3 12a9 9 0 1015-6.7L21 8"/><path d="M21 3v5h-5"/>' },
+    { q:"Will Kalshi on Sage Steele deliver?", sub:"Project any flight off its show's own view curve", tag:"Pacing", tone:"green",
+      ico:'<path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/>' },
+    { q:"Which guarantees are too high?", sub:"Shows that keep costing you free reads", tag:"Inventory", tone:"purple",
+      ico:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 4v16"/>' },
+    { q:"What's waiting on copy?", sub:"Spots airing soon with no ad copy in yet", tag:"Copy", tone:"blue",
+      ico:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>' },
+  ];
+
   RENDER.overview = () => {
     const work=workList();
     const live=SPOTS.filter(s=>projection(s));
     const g=live.reduce((a,s)=>a+s.guarantee,0), proj=live.reduce((a,s)=>a+projection(s).proj,0);
-    const mgOpen=MAKEGOODS.filter(m=>m.status!=='scheduled').length;
     const adv=guaranteeAdvice()[0];
-    const pct=pctOf(proj,g);
     document.getElementById('view-overview').innerHTML=`
-    <div class="inner" style="max-width:940px">
-      <div class="pagebar">
-        <div class="head"><h1>Command Center</h1>
-        <p>Everything the agent is watching, and what it needs from you.</p></div>
-        <div class="pagebar__right"><span class="tag tag--grey">${dayName(TODAY)} ${fmtDate(TODAY)}</span></div>
+    <div class="inner" style="max-width:940px;padding-top:8px">
+      <div class="hero">
+        <h1>VMG Command Center</h1>
+        <p>Ask anything about the network — delivery pacing, what needs a make good, which guarantees are running hot. Answered off Airtable and Booster.</p>
+        <div class="hero__pills">
+          <span class="pill"><i style="background:var(--green-text)"></i>Agent checked ${LAST_CHECK}</span>
+          <button class="pill pill--solid" onclick="go('delivery')">${work.length} need${work.length===1?'s':''} you</button>
+        </div>
+        <div class="askwrap">
+          <input id="acAsk" placeholder="Ask anything…" onkeydown="if(event.key==='Enter')askVmg()">
+          <button class="askwrap__go" onclick="askVmg()" aria-label="Ask">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h13M12 5l7 7-7 7"/></svg></button>
+        </div>
+        ${ANSWER?`<div class="answer" style="text-align:left;margin-top:14px;margin-bottom:0">${ANSWER}
+          <button class="x" style="float:right;margin-top:-22px" onclick="ANSWER='';rerender()">✕</button></div>`:''}
+        <div class="sugg">
+          ${SUGGESTIONS.map(x=>`<button class="sugg__card" onclick="askVmg('${x.q.replace(/'/g,"\\'")}')">
+            <div class="sugg__ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2">${x.ico}</svg></div>
+            <div class="sugg__body"><b>${esc(x.q)}</b><span>${esc(x.sub)}</span></div>
+            <span class="sugg__tag" style="background:var(--${x.tone}-bg);color:var(--${x.tone}-text)">${x.tag}</span>
+          </button>`).join('')}
+        </div>
       </div>
 
-      <div class="askbar">
-        <input id="acAsk" placeholder="Ask anything — e.g. will Kalshi on Sage Steele deliver?" onkeydown="if(event.key==='Enter')askAcme()">
-        <button class="btn btn--primary" onclick="askAcme()">Ask</button>
-      </div>
-      ${ANSWER?`<div class="answer">${ANSWER}<button class="x" style="float:right;margin-top:-22px" onclick="ANSWER='';rerender()">✕</button></div>`:''}
-
-      <div class="tiles" style="grid-template-columns:repeat(3,1fr)">
-        <button class="tile" style="text-align:left;font-family:inherit" onclick="go('delivery')">
-          <div class="tile__label">Needs you</div><div class="tile__val">${work.length}</div></button>
-        <div class="tile"><div class="tile__label">Projected vs guaranteed</div>
-          <div class="tile__val" style="color:${proj>=g?'var(--green-text)':'var(--orange-text)'}">${pct}%</div></div>
-        <div class="tile"><div class="tile__label">Make goods open</div><div class="tile__val">${mgOpen}</div></div>
-      </div>
-
-      <div style="display:flex;align-items:baseline;justify-content:space-between;margin:22px 2px 10px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin:36px 2px 10px">
         <b style="font-size:14px;letter-spacing:-.02em">Next up</b>
-        ${work.length>3?`<button class="btn btn--ghost btn--sm" onclick="go('delivery')">See all ${work.length} →</button>`:''}
+        <span class="muted" style="font-size:12px">Projecting ${K(proj)} against ${K(g)} guaranteed · ${pctOf(proj,g)}%
+          ${work.length>3?` · <button class="btn btn--ghost btn--sm" style="margin-left:6px" onclick="go('delivery')">See all ${work.length} →</button>`:''}</span>
       </div>
       <div id="scanPanel"></div>
       ${work.length?work.slice(0,3).join(''):`<div class="card"><div class="empty">✨ Nothing needs you — every flight projects over the 90% line.</div></div>`}
 
-      ${adv?`<div class="wrow" style="margin-top:22px;background:rgba(255,237,213,.4);border-color:var(--orange-bg)">
+      ${adv?`<div class="wrow" style="margin-top:20px;background:rgba(255,237,213,.4);border-color:var(--orange-bg)">
         <div class="wrow__ico" style="background:var(--orange-bg)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--orange-text)" stroke-width="2.1">${ICO.mg}</svg></div>
         <div class="wrow__main"><b>${esc(show(adv.showId).name)}'s guarantee is set too high</b>
         <span>A make good on ${adv.shortCount} of its last ${adv.flights} flights. Reads land near ${K(adv.typical)}, not ${K(adv.current)}.</span></div>
         <button class="btn btn--ghost btn--sm" onclick="applyGuarantee('${adv.showId}',${adv.suggest})">Drop to ${K(adv.suggest)}</button></div>`:''}
 
-      <div class="footnote">Acme Network Ops · reads Airtable, respects Booster's inventory caps · powered by SpotsNow</div>
+      <div class="footnote">VMG Command Center · reads Airtable, respects Booster's inventory caps · powered by SpotsNow</div>
     </div>`;
   };
 
@@ -801,8 +838,8 @@
           <button class="${delTab==='all'?'active':''}" onclick="delTab='all';RENDER.delivery()">All flights</button></div></div>
       </div>
       <div class="askbar">
-        <input id="acAsk" placeholder="Ask anything — e.g. will Kalshi on Sage Steele deliver?" onkeydown="if(event.key==='Enter')askAcme()">
-        <button class="btn btn--primary" onclick="askAcme()">Ask</button>
+        <input id="acAsk" placeholder="Ask anything — e.g. will Kalshi on Sage Steele deliver?" onkeydown="if(event.key==='Enter')askVmg()">
+        <button class="btn btn--primary" onclick="askVmg()">Ask</button>
       </div>
       ${ANSWER?`<div class="answer">${ANSWER}<button class="x" style="float:right;margin-top:-22px" onclick="ANSWER='';rerender()">✕</button></div>`:''}
       <div id="scanPanel"></div>
@@ -969,7 +1006,7 @@
         <div style="position:relative;z-index:1">
         <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
           <div class="brand-chip" style="background:${brandColor[portalBrand]||'#3B82F6'}">${esc(portalBrand[0])}</div>
-          <div><div style="font-size:12px;opacity:.7;font-weight:600;letter-spacing:.04em">DELIVERY REPORT · AUGUST 2026</div><h2>${esc(portalBrand)} on Acme Network</h2></div>
+          <div><div style="font-size:12px;opacity:.7;font-weight:600;letter-spacing:.04em">DELIVERY REPORT · AUGUST 2026</div><h2>${esc(portalBrand)} on VMG</h2></div>
           <div style="margin-left:auto;text-align:right"><div style="font-size:32px;font-weight:800">${pctOf(proj,g)}%</div><div style="font-size:12px;opacity:.7">of guarantee</div></div>
         </div>
         <div style="display:flex;gap:30px;margin-top:20px;flex-wrap:wrap">
