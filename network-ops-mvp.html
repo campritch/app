@@ -297,28 +297,6 @@
     .tx--ad:hover { background:var(--blue-bg); filter:brightness(.97); }
     .tx--ad time { color:var(--blue-text); }
 
-    /* ─── read cards on the delivery report ─── */
-    .rgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:12px; }
-    .rcard { background:var(--panel); border:1px solid var(--border); border-radius:13px; overflow:hidden; display:flex; flex-direction:column; }
-    .rcard__hd { display:flex; gap:11px; padding:13px 14px 10px; align-items:flex-start; text-align:left; flex:1; }
-    .rcard__art { position:relative; width:42px; height:42px; border-radius:9px; flex-shrink:0; display:grid; place-items:center; color:#fff; font-size:12px; font-weight:800; letter-spacing:-.02em; }
-    .rcard__play { position:absolute; inset:0; display:grid; place-items:center; background:rgba(0,0,0,.34); border-radius:9px; color:#fff; opacity:0; transition:.13s; border:none; cursor:pointer; }
-    .rcard__art:hover .rcard__play, .rcard--noplay .rcard__play { opacity:1; }
-    .rcard__ttl { flex:1; min-width:0; }
-    .rcard__ttl b { display:block; font-size:13px; font-weight:700; letter-spacing:-.01em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .rcard__ttl em { font-style:normal; color:var(--text-tertiary); font-weight:600; }
-    .rcard__note { display:block; font-size:11.5px; color:var(--text-secondary); line-height:1.45; margin-top:3px;
-      display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-    .rcard__ring { flex-shrink:0; margin:-2px -2px 0 0; }
-    .rcard__meta { display:flex; align-items:center; gap:7px; padding:0 14px 11px; }
-    .rchip { font-size:10.5px; font-weight:700; color:var(--text-secondary); background:var(--secondary-lite); padding:3px 8px; border-radius:6px; white-space:nowrap; }
-    .rcard__dur { font-size:14px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
-    .rcard__more { width:24px; height:24px; border:none; background:none; color:var(--text-tertiary); border-radius:6px; flex-shrink:0; }
-    .rcard__more:hover { background:var(--nav-hover); color:var(--text-primary); }
-    .rcard__bar { position:relative; height:7px; background:var(--secondary-lite); margin:0 14px 13px; border-radius:4px; overflow:visible; }
-    .rcard__body { padding:13px 14px; border-top:1px solid var(--border-light); background:var(--page-bg); }
-    .rcard__foot { display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:0 14px 7px; font-size:11.5px; font-weight:600; color:var(--text-tertiary); }
-    .rcard__add { font-size:11.5px; font-weight:700; color:var(--blue-text); background:none; border:none; padding:0; }
 
     /* ─── one work row, used for every kind of item ─── */
     .wrow { display:flex; align-items:center; gap:13px; padding:13px 16px; border:1px solid var(--border-light); border-radius:12px; background:var(--white); }
@@ -1308,64 +1286,86 @@
     if(portalBrand===null || !brands.includes(portalBrand)) return renderCampaignIndex(brands);
     const c=campaignSummary(portalBrand), cr=creative(portalBrand);
     const {spots,mgs,g,got,proj,paid,yt,aud,shows,flight,done}=c;
+    const verified=spots.filter(s=>s.status==='verified'&&s.yt).length;
+    const over = proj>=g;
+
+    // one line per show: what it reached and how that sits against its share
+    const byShow={}; spots.forEach(s=>{ const k=s.showId;
+      byShow[k]=byShow[k]||{showId:k,n:0,got:0,g:0,proj:0};
+      byShow[k].n++; byShow[k].got+=delivered(s)||0; byShow[k].g+=s.guarantee; byShow[k].proj+=projection(s).proj; });
 
     document.getElementById('view-portal').innerHTML=`
-    <div class="inner" style="max-width:1120px">
+    <div class="inner" style="max-width:940px">
       <button class="btn btn--ghost btn--sm" style="margin-bottom:14px" onclick="closeCampaign()">← All campaigns</button>
       <div class="pagebar">
-        <div class="head"><h1>${esc(portalBrand)}</h1><p>The live report the advertiser sees — every read, the tape, and the assets that ran.</p></div>
+        <div class="head"><h1>${esc(portalBrand)}</h1><p>The live report the advertiser sees. Read-only for them, and it fills in as reads land.</p></div>
         <div class="pagebar__right">
           <button class="btn btn--ghost btn--sm" onclick="toast('Copied vmg.live/${portalBrand.toLowerCase()}-aug — read-only, updates as reads land.')">🔗 Copy link</button>
           <button class="btn btn--primary btn--sm" onclick="sendCampaignReport('${esc(portalBrand)}')">Send report</button></div>
       </div>
 
-      <div class="card">
-        <div class="card__pad" style="padding:22px 24px">
-          <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap">
-            <div class="brand-chip" style="background:${brandColor[portalBrand]||'#3B82F6'};width:46px;height:46px;border-radius:12px;font-size:17px">${esc(portalBrand[0])}</div>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--text-tertiary)">DELIVERY REPORT · AUGUST 2026</div>
-              <h2 style="font-size:22px;font-weight:800;letter-spacing:-.03em;margin-top:2px">${esc(portalBrand)} on VMG</h2>
-              <div class="muted" style="font-size:12.5px;margin-top:3px">${flight} · ${shows.length} show${shows.length!==1?'s':''} · ${spots.length} read${spots.length!==1?'s':''}${mgs.length?` · ${mgs.length} make good`:''}</div>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:38px;font-weight:800;letter-spacing:-.04em;line-height:1;color:${proj>=g?'var(--green-text)':'var(--orange-text)'}">${pctOf(proj,g)}%</div>
-              <div class="muted" style="font-size:11.5px;margin-top:3px">${done?'of guarantee':'projected'}</div>
-            </div>
+      <div class="card"><div class="card__pad" style="padding:22px 24px">
+        <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap">
+          <div class="brand-chip" style="background:${brandColor[portalBrand]||'#3B82F6'};width:46px;height:46px;border-radius:12px;font-size:17px">${esc(portalBrand[0])}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--text-tertiary)">DELIVERY REPORT · AUGUST 2026</div>
+            <h2 style="font-size:22px;font-weight:800;letter-spacing:-.03em;margin-top:2px">${esc(portalBrand)} on VMG</h2>
+            <div class="muted" style="font-size:12.5px;margin-top:3px">${flight}</div>
           </div>
-
-          <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:22px;padding-top:20px;border-top:1px solid var(--border-light)">
-            ${pStat('Delivered',K(got))}${pStat('Projected',K(proj))}${pStat('Guaranteed',K(g))}
-            ${pStat('Video',K(yt))}${pStat('Audio',K(aud))}${pStat('Effective CPM','$'+(got?(paid/(got/1000)):0).toFixed(2))}
-          </div>
-
-          <div style="margin-top:18px;padding:12px 15px;border-radius:11px;font-size:12.5px;display:flex;align-items:center;gap:9px;background:${proj>=g?'var(--green-bg)':'var(--orange-bg)'};color:${proj>=g?'var(--green-text)':'var(--orange-text)'}">
-            <b style="font-size:14px">${proj>=g?'✓':'↻'}</b>
-            <span>${proj>=g
-              ? `<b>Full delivery.</b> ${K(proj-g)} impressions over the guarantee, delivered as bonus at no charge.`
-              : mgs.length?`<b>${mgs.length} additional read${mgs.length>1?'s':''} booked at no cost</b> on ${mgs.map(m=>fmtDate(m.published)).join(', ')} to bring the flight back over the line.`
-              :`<b>Tracking under guarantee.</b> We will add reads at no cost to close the gap.`}</span>
+          <div style="text-align:right">
+            <div style="font-size:38px;font-weight:800;letter-spacing:-.04em;line-height:1;color:${over?'var(--green-text)':'var(--orange-text)'}">${pctOf(proj,g)}%</div>
+            <div class="muted" style="font-size:11.5px;margin-top:3px">of booked impressions</div>
           </div>
         </div>
-      </div>
-
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:22px;padding-top:20px;border-top:1px solid var(--border-light)">
+          ${pStat('Impressions delivered',K(got))}${pStat('Delivered CPM','$'+(got?(paid/(got/1000)):0).toFixed(2))}
+          ${pStat('YouTube reach',K(yt))}${pStat('Audio reach',K(aud))}
+          ${pStat('Shows',shows.length)}${pStat('Verified reads',verified+'/'+spots.length)}
+        </div>
+      </div></div>
 
       <div class="card" style="margin-top:16px">
-        <div class="card__head"><div><div class="card__title">Reads</div>
-          <div class="card__sub">Open any read for the episode, the transcript and the brief the host was given.</div></div>
-          <span class="tag tag--grey">${spots.length} of ${spots.length + mgs.length} placed</span></div>
-        <div class="card__pad"><div class="rgrid">
-          ${spots.map(s=>portalRead(s,cr)).join('')}
-          ${mgs.map(s=>`<div class="wrow" style="border-style:dashed;background:rgba(235,233,254,.28)">
-            ${icoBox('mg','purple')}
-            <div class="wrow__main"><b>${esc(show(s.showId).name)} <span class="tag tag--purple">Added at no cost</span></b>
-            <span>Scheduled ${dayName(s.published)} ${fmtDate(s.published)} · ${esc(cr.len)} host-read</span></div></div>`).join('')}
-        </div></div>
+        <div class="card__head"><div class="card__title">Reach by show</div>
+          <span class="tag tag--grey">${shows.length} show${shows.length!==1?'s':''} · ${spots.length} read${spots.length!==1?'s':''}</span></div>
+        <div class="card__pad">${Object.values(byShow).map(r=>{ const pct=pctOf(r.proj,r.g);
+          return `<div style="margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:600">
+              <span>${esc(show(r.showId).name)} <span class="muted" style="font-weight:500">· ${r.n} read${r.n>1?'s':''}</span></span>
+              <span>${K(r.got)} · ${pct}%</span></div>
+            <div class="pace ${pct>=100?'pace--good':pct>=90?'':'pace--warn'}" style="margin-top:5px"><div class="pace__fill" style="width:${Math.min(pct,100)}%"></div></div>
+          </div>`; }).join('')}</div>
       </div>
 
-      <div class="footnote">Read-only for the advertiser and updates itself as reads land — no export to keep in sync.</div>
+      ${over&&done?`<div class="card" style="margin-top:16px;border-color:var(--green-bg)"><div class="card__pad" style="display:flex;align-items:center;gap:14px">
+        <div style="width:38px;height:38px;border-radius:10px;background:var(--green-bg);display:grid;place-items:center;flex-shrink:0"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--green-text)" stroke-width="2.2"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4-6.3-4.6L5.7 21 8 14 2 9.4h7.6z"/></svg></div>
+        <div style="flex:1"><b style="font-size:13.5px">This campaign over-delivered (${pctOf(proj,g)}%) — renewal moment</b>
+          <div class="muted" style="font-size:12.5px">${K(proj-g)} impressions over the guarantee, at no charge. The numbers are already attached.</div></div>
+        <button class="btn btn--green btn--sm" onclick="toast('Renewal pitch drafted for ${esc(portalBrand)} with the live numbers attached.')">Draft renewal</button></div></div>`
+      :!over?`<div class="card" style="margin-top:16px;border-color:var(--orange-bg)"><div class="card__pad" style="display:flex;align-items:center;gap:14px">
+        ${icoBox('mg','orange')}
+        <div style="flex:1"><b style="font-size:13.5px">${mgs.length?`${mgs.length} additional read${mgs.length>1?'s':''} booked at no cost`:'Tracking under the guarantee'}</b>
+          <div class="muted" style="font-size:12.5px">${mgs.length?`On ${mgs.map(m=>fmtDate(m.published)).join(', ')}, to bring the flight back over the line.`:'We will add reads at no cost to close the gap.'}</div></div></div></div>`:''}
+
+      <div class="card" style="margin-top:16px">
+        <div class="card__head"><div><div class="card__title">Reads that ran</div>
+          <div class="card__sub">Click a timestamp to hear the read, or open one for the transcript and the brief.</div></div></div>
+        <table><thead><tr><th>Show</th><th>Published</th><th class="num">Impressions</th><th>Verified</th><th>Ad read</th><th>Episode</th><th></th></tr></thead>
+        <tbody>${spots.map(s=>{ const pr=projection(s), v=verdict(s);
+          return `<tr><td><b>${esc(show(s.showId).name)}</b><div class="muted" style="font-size:11.5px">${esc(epTitle(s))}</div></td>
+            <td>${fmtDate(s.published)}</td>
+            <td class="num"><b>${K(pr.got)}</b>${pr.confident?`<div class="muted" style="font-size:11px">${Math.round(pr.ratio*100)}% of goal</div>`:'<div class="muted" style="font-size:11px">still building</div>'}</td>
+            <td>${s.yt?'<span class="tag tag--green"><i></i>Copy verified</span>':'<span class="tag tag--grey">—</span>'}</td>
+            <td>${s.yt?`<button class="btn btn--ghost btn--sm" onclick="playClip('${s.yt}',${s.ts})">${mmss(s.ts)}–${mmss(s.ts+adSecs(s))}</button>`:'<span class="muted" style="font-size:12px">audio</span>'}</td>
+            <td>${s.yt?`<a href="${clipUrl(s)}" target="_blank" style="font-size:12px;color:var(--blue-text);font-weight:600;text-decoration:none">youtu.be/${esc(s.yt)} ↗</a>`:'<span class="muted" style="font-size:12px">host feed</span>'}</td>
+            <td class="right"><button class="btn btn--ghost btn--sm" onclick="openRead('${s.id}')">More info</button></td></tr>`; }).join('')}
+          ${mgs.map(s=>`<tr style="background:rgba(235,233,254,.28)"><td><b>${esc(show(s.showId).name)}</b> <span class="tag tag--purple">Added at no cost</span></td>
+            <td>${fmtDate(s.published)}</td><td class="num muted">scheduled</td><td colspan="4"><span class="muted" style="font-size:12px">Make good — replaces the shortfall, no charge</span></td></tr>`).join('')}
+        </tbody></table>
+      </div>
+      <div class="footnote">This is the advertiser's view. Read-only for them and it updates itself as reads land — no export to keep in sync.</div>
     </div>`;
   };
+
   function sendCampaignReport(b){
     const done=SPOTS.filter(s=>s.brand===b&&closedOut(s));
     done.forEach(s=>s.reportSent=TODAY); rerender(); refreshBadges();
@@ -1410,10 +1410,8 @@
   }
   const pStat=(l,v)=>`<div><div style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary)">${l}</div><div style="font-size:19px;font-weight:800;letter-spacing:-.03em;margin-top:3px">${v}</div></div>`;
 
-  const ORD=['1st','2nd','3rd','4th'];
 
-  /* The transcript the agent pulled to find the read. Lines before and after
-     are the host's own content; the highlighted block is the ad. */
+  // Plain English, written for the advertiser reading the report.
   const PRE_LINES={
     rubin:"…and that's the part nobody wants to say out loud. Alright — quick word from a partner and we'll get straight back into it.",
     sage:"…which is exactly why the reaction was so overblown. Let me pause there for one second, because this one I actually use.",
@@ -1453,7 +1451,7 @@
     <div class="muted" style="font-size:11.5px;margin-top:8px;line-height:1.5">Pulled from the episode and matched against the brief${(s.copy||cr.points).length?` — ${(s.copy||cr.points).join(', ').toLowerCase()} all present`:''}.</div>`;
   }
 
-  // Plain English, written for the advertiser reading the report.
+
   function readNote(s){
     const pr=projection(s), v=verdict(s), m=mgForSpot(s.id);
     if(s.dlState==='requested') return 'Video counted. Waiting on the audio numbers from the show.';
@@ -1465,45 +1463,6 @@
     return m&&m.date?`Under the guarantee. An extra read is booked for ${fmtDate(m.date)} at no cost.`
                     :'Under the guarantee. We are adding a read at no cost.';
   }
-  function portalRead(s,cr){
-    const pr=projection(s), sh=show(s.showId), v=verdict(s);
-    const pct=Math.round(pr.ratio*100), tone=toneVar(v.tone);
-    const max=Math.max(s.guarantee,pr.proj)*1.06, w=x=>Math.min(100,x/max*100);
-    const waiting = s.dlState==='requested';
-    return `<div class="rcard">
-      <div class="rcard__hd">
-        <div class="rcard__art" style="background:${brandColor[s.brand]||'#3B82F6'}">${esc(sh.name.split(' ').map(x=>x[0]).slice(0,2).join(''))}
-          ${s.yt?`<button class="rcard__play" onclick="playClip('${s.yt}',${s.ts})" title="Play the read"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>`:''}
-        </div>
-        <div class="rcard__ttl">
-          <b>${esc(sh.name)} <em>${fmtDate(s.published)}</em></b>
-          <span class="rcard__note">${esc(readNote(s))}</span>
-        </div>
-        <div class="rcard__ring">${pr.confident
-          ? ring(pct,{size:46,thick:5,color:tone})
-          : `<span class="rchip" style="background:var(--blue-bg);color:var(--blue-text)">Live</span>`}</div>
-      </div>
-      <div class="rcard__meta">
-        <span class="rchip">Read: ${esc(cr.placement.replace('-roll',''))}</span>
-        <span class="rchip">Place: ${ORD[(s.pos||1)-1]}</span>
-        <span class="rcard__dur">${mmss(adSecs(s))}</span>
-        <div style="flex:1"></div>
-        <button class="btn btn--ghost btn--sm" onclick="openRead('${s.id}')">More info</button>
-      </div>
-      <div class="rcard__foot">
-        <span>${K(pr.got)} of ${K(s.guarantee)}${waiting?' · audio pending':pr.confident?'':' · still building'}</span>
-        ${waiting?`<button class="rcard__add" onclick="chaseDownloads('${s.id}')">+ Add impressions</button>`:''}
-      </div>
-      <div class="rcard__bar">
-        ${pr.confident?`<div style="position:absolute;inset:0 auto 0 0;width:${w(pr.proj)}%;background:${tone};opacity:.28;border-radius:4px"></div>`:''}
-        <div style="position:absolute;inset:0 auto 0 0;width:${w(pr.got)}%;background:${pr.confident?tone:'var(--blue-text)'};border-radius:4px"></div>
-        ${pr.confident?`<div title="90% of guarantee" style="position:absolute;top:-2px;bottom:-2px;left:${w(s.guarantee*IAB_FULL)}%;width:2px;background:var(--green-text)"></div>`:''}
-      </div>
-    </div>`;
-  }
-
-  /* What the advertiser gets when they open a read: the episode, the numbers,
-     the tape, the transcript, and the brief the host was given. */
   function openRead(id){
     const s=spot(id), sh=show(s.showId), pr=projection(s), v=verdict(s), cr=creative(s.brand);
     const waiting=s.dlState==='requested';
