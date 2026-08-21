@@ -252,6 +252,35 @@
     .askwrap input::placeholder { color:var(--text-tertiary); }
     .askwrap__go { position:absolute; right:9px; top:50%; transform:translateY(-50%); width:36px; height:36px; border-radius:9px; border:none; background:var(--primary); color:#fff; display:grid; place-items:center; }
 
+    /* ─── MANAGE SHOWS GRID (ported from inventory-demo3) ─── */
+    .msheet-card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-card); overflow: hidden; }
+    .msheet-toolbar { display: flex; align-items: center; gap: 12px; padding: 13px 15px; border-bottom: 1px solid var(--border); }
+    .msheet-search { flex: 1; max-width: 320px; display: flex; align-items: center; gap: 9px; background: var(--panel); border: 1px solid var(--border); border-radius: 9px; padding: 7px 12px; color: var(--text-tertiary); }
+    .msheet-search input { border: none; outline: none; background: none; font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text-primary); width: 100%; }
+    .msheet-tools { display: flex; align-items: center; gap: 7px; margin-left: auto; }
+    .msheet-scroll { overflow-x: auto; }
+    .msheet { border-collapse: collapse; width: 100%; }
+    .msheet .mh { background: var(--secondary-lite); border-bottom: 1px solid var(--border); border-right: 1px solid var(--border-light); padding: 11px 10px; font-size: 11px; font-weight: 700; color: var(--text-secondary); text-align: center; white-space: nowrap; }
+    .msheet .mh--show { text-align: left; padding-left: 16px; width: 210px; min-width: 210px; position: sticky; left: 0; z-index: 3; }
+    .msheet .mtd { border-bottom: 1px solid var(--border-light); border-right: 1px solid var(--border-light); height: 50px; padding: 0; vertical-align: middle; background: var(--panel); }
+    .msheet .mrow:hover .mtd { background: var(--nav-hover); }
+    .mtd--show { position: sticky; left: 0; z-index: 1; width: 210px; min-width: 210px; box-shadow: 1px 0 0 var(--border-light); }
+    .mshowcell { display: flex; align-items: center; gap: 10px; padding: 0 14px; height: 50px; overflow: hidden; }
+    .mthumb { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); color: var(--panel); display: grid; place-items: center; font-size: 11px; font-weight: 800; flex-shrink: 0; letter-spacing: -.02em; }
+    .mshowname { font-size: 12.5px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mshowsub { font-size: 10.5px; font-weight: 600; color: var(--text-tertiary); }
+    .mcell { position: relative; height: 50px; display: flex; align-items: center; justify-content: center; padding: 0 4px; cursor: cell; }
+    .mcell--sel { box-shadow: inset 0 0 0 2px var(--primary); border-radius: 3px; z-index: 3; }
+    .mcell--range { background: var(--nav-current); box-shadow: inset 0 0 0 1px var(--border-strong); }
+    .mfill { position: absolute; right: -1px; bottom: -1px; width: 9px; height: 9px; background: var(--primary); border: 1.5px solid var(--panel); cursor: crosshair; z-index: 5; }
+    .mctl { font-family: inherit; border: none; background: transparent; outline: none; color: var(--text-primary); font-weight: 600; }
+    .mctl--num { width: 100%; text-align: center; font-size: 13px; }
+    .mnum { display: inline-flex; align-items: center; justify-content: center; gap: 1px; width: 100%; }
+    .maffix { font-size: 12px; font-weight: 600; color: var(--text-tertiary); }
+    .mctl--select { width: 100%; text-align: center; text-align-last: center; font-size: 12.5px; padding: 0 4px; cursor: pointer; appearance: none; }
+    .msheet-foot { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; border-top: 1px solid var(--border); }
+    .msheet-total { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+
     /* ─── one work row, used for every kind of item ─── */
     .wrow { display:flex; align-items:center; gap:13px; padding:13px 16px; border:1px solid var(--border-light); border-radius:12px; background:var(--white); }
     .wrow + .wrow { margin-top:8px; }
@@ -1245,21 +1274,163 @@
   }
 
   /* ═══════════════════════════ VIEW: SHOWS ═══════════════════════════ */
+  /* ═══════════════════════════ MANAGE SHOWS GRID ═══════════════════════════
+     Ported from the inventory demo: editable cells with a drag-fill handle.
+     This is where show setup gets changed. Everything else only reads it. */
+  const SHEET_COLS=[
+    { key:'cpm',            label:'CPM',             type:'money',  w:82  },
+    { key:'guarantee',      label:'Impr. guarantee', type:'int',    w:124 },
+    { key:'epsPerWeek',     label:'Releases/wk',     type:'num',    w:102 },
+    { key:'positionsPerEp', label:'Ad positions',    type:'int',    w:104 },
+    { key:'delivery',       label:'Delivery',        type:'select', opts:['Video Only','Simulcast','Audio Only'], w:118 },
+    { key:'audioSrc',       label:'Audio numbers',   type:'select', opts:['auto from host','request creator','n/a'], w:130 },
+    { key:'scanEvery',      label:'Scan every',      type:'select', opts:['12h','24h','48h'], w:98 },
+    { key:'revShare',       label:'Rev share',       type:'pct',    w:90  },
+    { key:'mgPolicy',       label:'Make goods',      type:'select', opts:['auto','ask first'], w:104 },
+  ];
+  const AUDIO_LABEL={hosting:'auto from host', request:'request creator', none:'n/a'};
+  const AUDIO_VALUE={'auto from host':'hosting','request creator':'request','n/a':'none'};
+
+  function cellGet(sh,key){
+    if(key==='delivery') return sh.simulcast?'Simulcast':(sh.audioSrc==='none'?'Video Only':'Audio Only');
+    if(key==='audioSrc') return AUDIO_LABEL[sh.audioSrc]||'n/a';
+    if(key==='scanEvery') return sh.scanEvery+'h';
+    if(key==='revShare')  return Math.round(sh.revShare*100);
+    if(key==='mgPolicy')  return sh.mgPolicy==='auto'?'auto':'ask first';
+    return sh[key];
+  }
+  function cellSet(sh,key,raw){
+    if(key==='delivery'){
+      sh.simulcast = raw==='Simulcast';
+      if(raw==='Video Only') sh.audioSrc='none';
+      else if(sh.audioSrc==='none') sh.audioSrc='hosting';
+      return;
+    }
+    if(key==='audioSrc'){ sh.audioSrc=AUDIO_VALUE[raw]||'none'; if(sh.audioSrc==='none') sh.simulcast=false; return; }
+    if(key==='scanEvery'){ sh.scanEvery=parseInt(raw)||24; return; }
+    if(key==='revShare'){ sh.revShare=Math.min(100,Math.max(0,parseFloat(raw)||0))/100; return; }
+    if(key==='mgPolicy'){ sh.mgPolicy = raw==='auto'?'auto':'ask'; return; }
+    const n=parseFloat(String(raw).replace(/[^0-9.]/g,''));
+    if(!isNaN(n)) sh[key]= key==='epsPerWeek' ? n : Math.round(n);
+  }
+
+  let gridSel=null, gridDrag=null, gridQuery='', gridDirty=false;
+  const gridRows = () => { const q=gridQuery.trim().toLowerCase();
+    return q?SHOWS.filter(x=>x.name.toLowerCase().includes(q)||x.host.toLowerCase().includes(q)):SHOWS; };
+
+  function selectCell(id,key){ gridSel={id,key}; renderGrid(); }
+  function startFill(e,id,key){ e.stopPropagation(); e.preventDefault();
+    const rows=gridRows(); gridDrag={key, from:rows.findIndex(x=>x.id===id), to:rows.findIndex(x=>x.id===id), srcId:id}; }
+  function fillEnter(id){ if(!gridDrag) return; const rows=gridRows();
+    const i=rows.findIndex(x=>x.id===id); if(i>=gridDrag.from){ gridDrag.to=i; renderGrid(); } }
+  function endFill(){
+    if(!gridDrag) return;
+    const rows=gridRows(), {key,from,to,srcId}=gridDrag; gridDrag=null;
+    if(to>from){
+      const src=cellGet(show(srcId),key);
+      for(let i=from+1;i<=to;i++) cellSet(rows[i],key,src);
+      gridDirty=true; renderGrid(); refreshBadges();
+      toast(`Filled ${SHEET_COLS.find(c=>c.key===key).label} down ${to-from} row${to-from>1?'s':''}.`);
+    } else renderGrid();
+  }
+  document.addEventListener('mouseup', endFill);
+
+  function gridEdit(id,key,raw){ cellSet(show(id),key,raw); gridDirty=true; markGridDirty(); }
+  function gridCommit(id,key,raw){ cellSet(show(id),key,raw); gridDirty=true; renderGrid(); refreshBadges(); }
+  function markGridDirty(){ const b=document.getElementById('gridSave'); if(b){ b.textContent='Save and update'; b.disabled=false; } }
+  function saveGrid(){ gridDirty=false; renderGrid(); refreshBadges();
+    toast('Show setup saved. Guarantees, positions and scan cadence written back to Booster and Airtable.'); }
+
+  function addShow(){
+    const n=SHOWS.length+1;
+    SHOWS.push({ id:'new'+n, name:'New show '+n, host:'—', publishDays:['Mon'], epsPerWeek:1, positionsPerEp:2,
+      curve:'medium', samples:0, simulcast:false, audioSrc:'none', scanEvery:24, revShare:0.60, mgPolicy:'ask',
+      guarantee:50000, cpm:20, category:'—', channel:'@new', src:'manual' });
+    gridDirty=true; renderGrid(); toast('Show added. Fill in its setup, then save.');
+  }
+  function deleteShow(id){
+    if(SPOTS.some(x=>x.showId===id)){ toast(`${show(id).name} has spots booked — clear them before removing it.`); return; }
+    const i=SHOWS.findIndex(x=>x.id===id); if(i>-1) SHOWS.splice(i,1);
+    gridDirty=true; renderGrid(); refreshBadges(); toast('Show removed.');
+  }
+
+  function sheetControl(sh,col){
+    const v=cellGet(sh,col.key);
+    if(col.type==='select') return `<select class="mctl mctl--select" onmousedown="event.stopPropagation()" onchange="gridCommit('${sh.id}','${col.key}',this.value)">${col.opts.map(o=>`<option ${o===v?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+    const pre=col.type==='money'?'<span class="maffix">$</span>':'';
+    const suf=col.type==='pct'?'<span class="maffix">%</span>':'';
+    return `<span class="mnum">${pre}<input class="mctl mctl--num" type="text" inputmode="decimal" value="${v}"
+      onmousedown="event.stopPropagation()"
+      oninput="gridEdit('${sh.id}','${col.key}',this.value)"
+      onchange="gridCommit('${sh.id}','${col.key}',this.value)">${suf}</span>`;
+  }
+
+  function renderGrid(){
+    const host=document.getElementById('gridHost'); if(!host) return;
+    const rows=gridRows();
+    host.innerHTML=`
+      <div class="msheet-card">
+        <div class="msheet-toolbar">
+          <div class="msheet-search">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input placeholder="Search shows…" value="${esc(gridQuery)}" oninput="gridQuery=this.value;renderGrid()">
+          </div>
+          <div class="msheet-tools">
+            <button class="btn btn--primary btn--sm" onclick="addShow()">+ Add show</button>
+            <button class="btn btn--ghost btn--sm" onclick="toast('Paste a CSV of shows to add them in bulk.')">⬆ Bulk CSV</button>
+            <button class="btn btn--ghost btn--sm" onclick="toast('Exported vmg-shows.xlsx')">⬇ Export .xlsx</button>
+          </div>
+        </div>
+        <div class="msheet-scroll"><table class="msheet">
+          <thead><tr><th class="mh mh--show">Shows</th>
+            ${SHEET_COLS.map(c=>`<th class="mh" style="width:${c.w}px;min-width:${c.w}px">${c.label}</th>`).join('')}
+            <th class="mh" style="width:46px"></th></tr></thead>
+          <tbody>${rows.map((sh,ri)=>`<tr class="mrow" onmouseenter="fillEnter('${sh.id}')">
+            <td class="mtd mtd--show"><div class="mshowcell">
+              <div class="mthumb">${esc(sh.name.split(' ').map(w=>w[0]).slice(0,2).join(''))}</div>
+              <div style="min-width:0"><div class="mshowname">${esc(sh.name)}</div>
+              <div class="mshowsub">${sh.publishDays.join('·')} · ${sh.samples} reads</div></div></div></td>
+            ${SHEET_COLS.map(c=>{
+              const sel = gridSel && gridSel.id===sh.id && gridSel.key===c.key;
+              const inR = gridDrag && gridDrag.key===c.key && ri>gridDrag.from && ri<=gridDrag.to;
+              return `<td class="mtd" style="width:${c.w}px;min-width:${c.w}px">
+                <div class="mcell${sel?' mcell--sel':''}${inR?' mcell--range':''}" onmousedown="selectCell('${sh.id}','${c.key}')">
+                  ${sheetControl(sh,c)}
+                  ${sel?`<span class="mfill" onmousedown="startFill(event,'${sh.id}','${c.key}')"></span>`:''}
+                </div></td>`; }).join('')}
+            <td class="mtd" style="text-align:center"><button class="btn btn--ghost btn--sm" style="padding:4px 8px" onclick="deleteShow('${sh.id}')" title="Remove show">✕</button></td>
+          </tr>`).join('')}</tbody>
+        </table></div>
+        <div class="msheet-foot">
+          <span class="msheet-total">${rows.length} show${rows.length!==1?'s':''}${gridQuery?' matched':''} · click a cell, then drag the corner handle to fill down</span>
+          <button class="btn btn--primary btn--sm" id="gridSave" onclick="saveGrid()" ${gridDirty?'':'disabled style="opacity:.5"'}>${gridDirty?'Save and update':'Saved ✓'}</button>
+        </div>
+      </div>`;
+  }
+
   let showOpen={};
   function toggleShow(id){ showOpen[id]=!showOpen[id]; RENDER.shows(); }
+  let showsTab='setup';
   RENDER.shows = () => {
     const f=fillStats();
     document.getElementById('view-shows').innerHTML=`
-    <div class="inner" style="max-width:940px">
-      <div class="pagebar"><div class="head"><h1>Shows</h1>
-        <p>The inventory record every projection reads from. Open a show for its full setup — cadence, positions, guarantee, pacing, and where its numbers come from.</p></div>
-        <div class="pagebar__right"><span class="tag tag--purple">${SHOWS.filter(x=>x.src==='booster').length} of ${SHOWS.length} synced from Booster</span></div>
+    <div class="inner" style="max-width:${showsTab==='setup'?'1180px':'940px'}">
+      <div class="pagebar">
+        <div class="head"><h1>Shows</h1>
+        <p>${showsTab==='setup'
+          ? 'Show setup lives here — every projection, avail and make-good recommendation reads off this grid.'
+          : 'The inventory record as the rest of the app sees it. Read-only; change anything in Show setup.'}</p></div>
+        <div class="pagebar__right"><div class="seg">
+          <button class="${showsTab==='setup'?'active':''}" onclick="showsTab='setup';RENDER.shows()">Show setup</button>
+          <button class="${showsTab==='record'?'active':''}" onclick="showsTab='record';RENDER.shows()">Show records</button>
+        </div></div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:9px">
-        ${SHOWS.map(sh=>showRow(sh)).join('')}
-      </div>
-      <div class="footnote">Positions an episode and the guarantee come from Booster, so a make good is never offered a slot that doesn't exist. Paid fill rate is ${f.rate}% — ${f.paid} spots sold, ${f.free} given as make goods or bonus.</div>
+      ${showsTab==='setup'
+        ? `<div id="gridHost"></div>`
+        : `<div style="display:flex;flex-direction:column;gap:9px">${SHOWS.map(sh=>showRow(sh)).join('')}</div>`}
+      <div class="footnote">Ad positions an episode and the guarantee are Booster's numbers, so a make good is never offered a slot that doesn't exist. Paid fill rate is ${f.rate}% — ${f.paid} spots sold, ${f.free} given as make goods or bonus.</div>
     </div>`;
+    if(showsTab==='setup') renderGrid();
   };
 
   function showRow(sh){
