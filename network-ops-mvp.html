@@ -300,14 +300,15 @@
     /* ─── read cards on the delivery report ─── */
     .rgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:12px; }
     .rcard { background:var(--panel); border:1px solid var(--border); border-radius:13px; overflow:hidden; display:flex; flex-direction:column; }
-    .rcard__hd { display:flex; gap:11px; padding:13px 14px 10px; align-items:flex-start; text-align:left; }
+    .rcard__hd { display:flex; gap:11px; padding:13px 14px 10px; align-items:flex-start; text-align:left; flex:1; }
     .rcard__art { position:relative; width:42px; height:42px; border-radius:9px; flex-shrink:0; display:grid; place-items:center; color:#fff; font-size:12px; font-weight:800; letter-spacing:-.02em; }
     .rcard__play { position:absolute; inset:0; display:grid; place-items:center; background:rgba(0,0,0,.34); border-radius:9px; color:#fff; opacity:0; transition:.13s; border:none; cursor:pointer; }
     .rcard__art:hover .rcard__play, .rcard--noplay .rcard__play { opacity:1; }
     .rcard__ttl { flex:1; min-width:0; }
     .rcard__ttl b { display:block; font-size:13px; font-weight:700; letter-spacing:-.01em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .rcard__ttl em { font-style:normal; color:var(--text-tertiary); font-weight:600; }
-    .rcard__note { display:block; font-size:11.5px; color:var(--text-secondary); line-height:1.45; margin-top:3px; }
+    .rcard__note { display:block; font-size:11.5px; color:var(--text-secondary); line-height:1.45; margin-top:3px;
+      display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
     .rcard__ring { flex-shrink:0; margin:-2px -2px 0 0; }
     .rcard__meta { display:flex; align-items:center; gap:7px; padding:0 14px 11px; }
     .rchip { font-size:10.5px; font-weight:700; color:var(--text-secondary); background:var(--secondary-lite); padding:3px 8px; border-radius:6px; white-space:nowrap; }
@@ -316,7 +317,8 @@
     .rcard__more:hover { background:var(--nav-hover); color:var(--text-primary); }
     .rcard__bar { position:relative; height:7px; background:var(--secondary-lite); margin:0 14px 13px; border-radius:4px; overflow:visible; }
     .rcard__body { padding:13px 14px; border-top:1px solid var(--border-light); background:var(--page-bg); }
-    .rcard__add { margin:0 14px 13px; font-size:11.5px; font-weight:700; color:var(--blue-text); background:none; border:none; padding:0; text-align:left; }
+    .rcard__foot { display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:0 14px 7px; font-size:11.5px; font-weight:600; color:var(--text-tertiary); }
+    .rcard__add { font-size:11.5px; font-weight:700; color:var(--blue-text); background:none; border:none; padding:0; }
 
     /* ─── one work row, used for every kind of item ─── */
     .wrow { display:flex; align-items:center; gap:13px; padding:13px 16px; border:1px solid var(--border-light); border-radius:12px; background:var(--white); }
@@ -610,6 +612,21 @@
   const mgForSpot = id => MAKEGOODS.find(m=>m.spotId===id);
   // Any spot projected short that hasn't got a make-good yet
   const needsMakegood = () => SPOTS.filter(s=>verdict(s).k==='short' && !mgForSpot(s.id));
+
+  // A make good is inventory given away. Value it at the show's own rate.
+  const mgValue = m => { const sp=spot(m.spotId); return Math.round(shortfall(sp)/1000*show(sp.showId).cpm); };
+  function mgStats(){
+    const sched=MAKEGOODS.filter(m=>m.status==='scheduled'), open=MAKEGOODS.filter(m=>m.status!=='scheduled');
+    const imps=sched.reduce((a,m)=>a+shortfall(spot(m.spotId)),0);
+    const val=sched.reduce((a,m)=>a+mgValue(m),0);
+    const f=fillStats();
+    const byShow={};
+    MAKEGOODS.forEach(m=>{ const sp=spot(m.spotId), id=sp.showId;
+      byShow[id]=byShow[id]||{showId:id,n:0,imps:0,val:0};
+      byShow[id].n++; byShow[id].imps+=shortfall(sp); byShow[id].val+=mgValue(m); });
+    return { sched:sched.length, open:open.length, imps, val, ...f,
+             shows:Object.values(byShow).sort((a,b)=>b.val-a.val) };
+  }
 
   /* ═══ WHAT THE AGENT LEARNED ═══ the guarantee-tuning + fill-rate read ═══ */
   function fillStats(){
@@ -983,10 +1000,11 @@
         <p>Every read is projected off its own show's view curve, and each show gets its own check-in date — Warren Smith settles by day 3, Sage Steele needs to day 13. 90% of guarantee is full delivery.</p></div>
         <div class="pagebar__right"><div class="seg">
           <button class="${delTab==='work'?'active':''}" onclick="delTab='work';RENDER.delivery()">Needs you${work.length?' · '+work.length:''}</button>
-          <button class="${delTab==='all'?'active':''}" onclick="delTab='all';RENDER.delivery()">All flights</button></div></div>
+          <button class="${delTab==='all'?'active':''}" onclick="delTab='all';RENDER.delivery()">All flights</button>
+          <button class="${delTab==='mg'?'active':''}" onclick="delTab='mg';RENDER.delivery()">Make goods${MAKEGOODS.length?' · '+MAKEGOODS.length:''}</button></div></div>
       </div>
       <div id="scanPanel"></div>
-      ${delTab==='work'
+      ${delTab==='mg' ? makeGoodsPanel() : delTab==='work'
         ? (work.length?work.join(''):`<div class="card"><div class="empty">✨ Nothing needs you — every flight projects over the 90% line.</div></div>`)
         : `<div class="fhead"><span></span><span>Ad</span><span>Ran</span><span>Delivered</span><span>Pacing</span><span>Make good</span><span></span></div>`
           + live.map(s=>{ const pr=projection(s), v=verdict(s), sh=show(s.showId), m=mgForSpot(s.id);
@@ -1007,6 +1025,52 @@
       <div class="footnote">Projections come from each show's own curve, refit every time a read is verified.</div>
     </div>`;
   };
+
+  /* Every make good, in every state, plus what they have cost. The flowchart's
+     back half: written to Airtable, flagged in Booster, and the analytics that
+     come out of tracking sold against given. */
+  const MGSTEP=[['Date from avails',m=>!!m.date],['Show approved',m=>m.showOk===true],
+                ['Brand approved',m=>m.brandOk===true],['In Airtable',m=>m.status==='scheduled']];
+  function makeGoodsPanel(){
+    const st=mgStats();
+    const card=m=>{ const sp=spot(m.spotId), sh=show(sp.showId), done=m.status==='scheduled';
+      return `<div class="card" style="${done?'':'border-color:var(--orange-bg)'}">
+        <div class="card__pad">
+          <div style="display:flex;align-items:flex-start;gap:13px">
+            ${icoBox('mg',done?'green':'orange')}
+            <div style="flex:1;min-width:0">
+              <b style="font-size:13.5px">${esc(sp.brand)} on ${esc(sh.name)}</b>
+              <div class="muted" style="font-size:12px;margin-top:2px">Original read ${fmtDate(sp.published)} landed ${Math.round(projection(sp).ratio*100)}% · ${K(shortfall(sp))} short · worth ${money(mgValue(m))} at ${money(sh.cpm)} CPM</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              ${done?`<span class="tag tag--green"><i></i>Booked ${fmtDate(m.date)}</span>`
+                   :`<button class="btn btn--primary btn--sm" onclick="openMg('${m.id}')">${!m.date?'Pick a date':'Open'}</button>`}
+            </div>
+          </div>
+          <div style="display:flex;gap:7px;margin-top:13px;flex-wrap:wrap">
+            ${MGSTEP.map(([label,test])=>`<span class="tag ${test(m)?'tag--green':'tag--grey'}">${test(m)?'✓':'○'} ${label}</span>`).join('')}
+            ${sh.mgPolicy==='auto'&&m.showOk===true?'<span class="muted" style="font-size:11px;align-self:center">show auto-schedules</span>':''}
+          </div>
+          ${done?`<div class="muted" style="font-size:11.5px;margin-top:10px">Inventory type <b>Make Good</b> on ${fmtDate(m.date)}, its own colour in Airtable, and the slot is flagged in Booster so it cannot be sold twice.</div>`:''}
+        </div></div>`; };
+    return `
+      <div class="tiles" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
+        <div class="tile"><div class="tile__label">Given away</div><div class="tile__val">${money(st.val)}</div><div class="tile__delta"><span class="muted">${K(st.imps)} impressions</span></div></div>
+        <div class="tile"><div class="tile__label">Paid fill rate</div><div class="tile__val">${st.rate}%</div><div class="tile__delta"><span class="muted">${st.paid} sold · ${st.free} given</span></div></div>
+        <div class="tile"><div class="tile__label">Booked</div><div class="tile__val" style="color:var(--green-text)">${st.sched}</div></div>
+        <div class="tile"><div class="tile__label">Still open</div><div class="tile__val" style="color:${st.open?'var(--orange-text)':'var(--text-primary)'}">${st.open}</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:11px">${MAKEGOODS.map(card).join('')||'<div class="card"><div class="empty">No make goods.</div></div>'}</div>
+      ${st.shows.length?`<div class="card" style="margin-top:16px">
+        <div class="card__head"><div><div class="card__title">What it is costing, by show</div>
+          <div class="card__sub">Tracking sold against given is what tells you a guarantee is set wrong.</div></div></div>
+        <table><thead><tr><th>Show</th><th class="num">Make goods</th><th class="num">Impressions</th><th class="num">Value</th><th>What it says</th></tr></thead>
+        <tbody>${st.shows.map(r=>{ const sh=show(r.showId), adv=guaranteeAdvice().find(a=>a.showId===r.showId);
+          return `<tr><td><b>${esc(sh.name)}</b></td><td class="num">${r.n}</td><td class="num">${K(r.imps)}</td><td class="num">${money(r.val)}</td>
+            <td>${adv?`<span style="font-size:12.5px">Guarantee too high — reads land near ${K(adv.typical)}. <button class="btn btn--ghost btn--sm" style="margin-left:4px" onclick="applyGuarantee('${sh.id}',${adv.suggest})">Drop to ${K(adv.suggest)}</button></span>`
+                     :'<span class="muted" style="font-size:12.5px">Within normal range</span>'}</td></tr>`; }).join('')}</tbody></table>
+      </div>`:''}`;
+  }
 
   /* ── the one drawer that explains a call ── */
   // Every read booked on the same deal — the flight this one belongs to.
@@ -1426,15 +1490,15 @@
         <div style="flex:1"></div>
         <button class="btn btn--ghost btn--sm" onclick="openRead('${s.id}')">More info</button>
       </div>
-      ${waiting
-        ? `<button class="rcard__add" onclick="chaseDownloads('${s.id}')">+ Add impressions</button>`
-        : !pr.confident
-        ? `<div style="margin:0 14px 13px;font-size:11.5px;font-weight:600;color:var(--text-tertiary)">${K(pr.got)} impressions so far</div>`
-        : `<div class="rcard__bar">
-            <div style="position:absolute;inset:0 auto 0 0;width:${w(pr.proj)}%;background:${tone};opacity:.28;border-radius:4px"></div>
-            <div style="position:absolute;inset:0 auto 0 0;width:${w(pr.got)}%;background:${tone};border-radius:4px"></div>
-            <div title="90% of guarantee" style="position:absolute;top:-2px;bottom:-2px;left:${w(s.guarantee*IAB_FULL)}%;width:2px;background:var(--green-text)"></div>
-          </div>`}
+      <div class="rcard__foot">
+        <span>${K(pr.got)} of ${K(s.guarantee)}${waiting?' · audio pending':pr.confident?'':' · still building'}</span>
+        ${waiting?`<button class="rcard__add" onclick="chaseDownloads('${s.id}')">+ Add impressions</button>`:''}
+      </div>
+      <div class="rcard__bar">
+        ${pr.confident?`<div style="position:absolute;inset:0 auto 0 0;width:${w(pr.proj)}%;background:${tone};opacity:.28;border-radius:4px"></div>`:''}
+        <div style="position:absolute;inset:0 auto 0 0;width:${w(pr.got)}%;background:${pr.confident?tone:'var(--blue-text)'};border-radius:4px"></div>
+        ${pr.confident?`<div title="90% of guarantee" style="position:absolute;top:-2px;bottom:-2px;left:${w(s.guarantee*IAB_FULL)}%;width:2px;background:var(--green-text)"></div>`:''}
+      </div>
     </div>`;
   }
 
