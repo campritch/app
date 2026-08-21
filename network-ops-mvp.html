@@ -326,9 +326,11 @@
     .wpop button { display:block; width:100%; text-align:left; border:none; background:none; border-radius:7px;
                    padding:8px 11px; font-size:12.5px; font-weight:600; color:var(--text-primary); cursor:pointer; }
     .wpop button:hover { background:var(--nav-hover); }
-    .archdiv { display:flex; align-items:center; gap:10px; margin:22px 2px 10px; font-size:11px; font-weight:800;
-               letter-spacing:.07em; text-transform:uppercase; color:var(--text-tertiary); }
+    .archdiv { display:flex; align-items:center; gap:9px; width:100%; margin:22px 0 10px; padding:0 2px; font-size:11px; font-weight:800;
+               letter-spacing:.07em; text-transform:uppercase; color:var(--text-tertiary); border:none; background:none; cursor:pointer; font-family:inherit; }
+    .archdiv:hover { color:var(--text-secondary); }
     .archdiv::after { content:''; flex:1; height:1px; background:var(--border-light); }
+    .archdiv svg { transition:transform .15s; }
 
     .warch { width:26px; height:26px; border-radius:7px; border:none; background:none; color:var(--text-tertiary); font-size:12px; justify-self:center; }
     .warch:hover { background:var(--nav-hover); color:var(--text-primary); }
@@ -852,7 +854,7 @@
   const isArchived=id=>!!ARCHIVED['w:'+id];
   const unarchived=(kind,id)=>!isArchived(id);
 
-  let ROWMENU=null;
+  let ARCH_OPEN=false, ROWMENU=null;
   function closeRowMenu(){ if(ROWMENU){ ROWMENU.remove(); ROWMENU=null; document.removeEventListener('click',closeRowMenu); } }
   function rowMenu(ev,id){
     ev.stopPropagation(); closeRowMenu();
@@ -918,7 +920,12 @@
     const ids=[...wants].map(spot).sort((a,b)=>liveDays(b)-liveDays(a));
     const active=ids.filter(x=>!isArchived(x.id)).map(flightRow);
     const arch=ids.filter(x=>isArchived(x.id)).map(x=>flightRow(x).replace('class="wrow wflight','class="wrow wflight wrow--dim'));
-    if(arch.length) active.push(`<div class="archdiv">Archived · ${arch.length}</div>`, ...arch);
+    if(arch.length){
+      active.push(`<button class="archdiv" onclick="ARCH_OPEN=!ARCH_OPEN;rerender()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" style="transform:rotate(${ARCH_OPEN?90:0}deg)"><path d="M9 6l6 6-6 6"/></svg>
+        Archived · ${arch.length}</button>`);
+      if(ARCH_OPEN) active.push(...arch);
+    }
     active.count=ids.length-arch.length;
     return active;
   }
