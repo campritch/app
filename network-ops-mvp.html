@@ -400,12 +400,12 @@
      where the audio downloads come from, and whether a make-good needs the
      show's sign-off or can just be scheduled. */
   const SHOWS = [
-    { id:'rubin',  name:'The Rubin Report', host:'Dave Rubin',    publishDays:['Mon','Tue','Wed','Thu','Fri'], epsPerWeek:5, positionsPerEp:4, curve:'medium', samples:46, simulcast:true,  audioSrc:'hosting', mgPolicy:'auto', guarantee:95000,  cpm:26, category:'Politics / Culture', channel:'@rubinreport',   src:'booster' },
-    { id:'sage',   name:'Sage Steele',      host:'Sage Steele',   publishDays:['Wed'],                         epsPerWeek:1, positionsPerEp:4, curve:'slow',   samples:19, simulcast:true,  audioSrc:'hosting', mgPolicy:'auto', guarantee:120000, cpm:28, category:'Sports / Culture',   channel:'@sagesteele',    src:'booster' },
-    { id:'warren', name:'Warren Smith',     host:'Warren Smith',  publishDays:['Tue','Thu'],                   epsPerWeek:2.5, positionsPerEp:3, curve:'fast', samples:23, simulcast:false, audioSrc:'none',    mgPolicy:'ask',  guarantee:85000,  cpm:24, category:'Interview',          channel:'@warrensmith',   src:'booster' },
-    { id:'action', name:'Action Friends',   host:'The Action crew',publishDays:['Fri'],                        epsPerWeek:1, positionsPerEp:3, curve:'quick',  samples:15, simulcast:false, audioSrc:'none',    mgPolicy:'ask',  guarantee:70000,  cpm:22, category:'Comedy',             channel:'@actionfriends', src:'booster' },
-    { id:'nate',   name:'Nate',             host:'Nate',          publishDays:['Mon','Thu'],                   epsPerWeek:2, positionsPerEp:3, curve:'medium', samples:11, simulcast:false, audioSrc:'none',    mgPolicy:'ask',  guarantee:60000,  cpm:20, category:'Business',           channel:'@nate',          src:'manual' },
-    { id:'clinton',name:'Clinton',          host:'Clinton',       publishDays:['Tue'],                         epsPerWeek:1, positionsPerEp:2, curve:'steady', samples:7,  simulcast:true,  audioSrc:'request', mgPolicy:'ask',  guarantee:45000,  cpm:19, category:'Health',             channel:'@clinton',       src:'manual' },
+    { id:'rubin',  name:'The Rubin Report', host:'Dave Rubin',    publishDays:['Mon','Tue','Wed','Thu','Fri'], epsPerWeek:5, positionsPerEp:4, curve:'medium', samples:46, simulcast:true,  audioSrc:'hosting', scanEvery:24, revShare:0.65, mgPolicy:'auto', guarantee:95000,  cpm:26, category:'Politics / Culture', channel:'@rubinreport',   src:'booster' },
+    { id:'sage',   name:'Sage Steele',      host:'Sage Steele',   publishDays:['Wed'],                         epsPerWeek:1, positionsPerEp:4, curve:'slow',   samples:19, simulcast:true,  audioSrc:'hosting', scanEvery:24, revShare:0.70, mgPolicy:'auto', guarantee:120000, cpm:28, category:'Sports / Culture',   channel:'@sagesteele',    src:'booster' },
+    { id:'warren', name:'Warren Smith',     host:'Warren Smith',  publishDays:['Tue','Thu'],                   epsPerWeek:2.5, positionsPerEp:3, curve:'fast', samples:23, simulcast:false, audioSrc:'none',    scanEvery:12, revShare:0.60, mgPolicy:'ask',  guarantee:85000,  cpm:24, category:'Interview',          channel:'@warrensmith',   src:'booster' },
+    { id:'action', name:'Action Friends',   host:'The Action crew',publishDays:['Fri'],                        epsPerWeek:1, positionsPerEp:3, curve:'quick',  samples:15, simulcast:false, audioSrc:'none',    scanEvery:24, revShare:0.60, mgPolicy:'ask',  guarantee:70000,  cpm:22, category:'Comedy',             channel:'@actionfriends', src:'booster' },
+    { id:'nate',   name:'Nate',             host:'Nate',          publishDays:['Mon','Thu'],                   epsPerWeek:2, positionsPerEp:3, curve:'medium', samples:11, simulcast:false, audioSrc:'none',    scanEvery:24, revShare:0.55, mgPolicy:'ask',  guarantee:60000,  cpm:20, category:'Business',           channel:'@nate',          src:'manual' },
+    { id:'clinton',name:'Clinton',          host:'Clinton',       publishDays:['Tue'],                         epsPerWeek:1, positionsPerEp:2, curve:'steady', samples:7,  simulcast:true,  audioSrc:'request', scanEvery:48, revShare:0.55, mgPolicy:'ask',  guarantee:45000,  cpm:19, category:'Health',             channel:'@clinton',       src:'manual' },
   ];
   const show = id => SHOWS.find(s=>s.id===id) || SHOWS[0];
 
@@ -1245,32 +1245,70 @@
   }
 
   /* ═══════════════════════════ VIEW: SHOWS ═══════════════════════════ */
+  let showOpen={};
+  function toggleShow(id){ showOpen[id]=!showOpen[id]; RENDER.shows(); }
   RENDER.shows = () => {
     const f=fillStats();
     document.getElementById('view-shows').innerHTML=`
     <div class="inner" style="max-width:940px">
       <div class="pagebar"><div class="head"><h1>Shows</h1>
-        <p>What every projection reads from. The check-in date is set by each show's own curve, so a fast show gets called in days and a slow one is left alone until its number is real.</p></div></div>
-      <div class="card"><table>
-        <thead><tr><th>Show</th><th>Publishes</th><th class="num">Positions</th><th class="num">Guarantee</th><th class="num">Call it</th><th>Make goods</th><th>View curve</th></tr></thead>
-        <tbody>${SHOWS.map(sh=>`<tr>
-          <td><b>${esc(sh.name)}</b><div class="muted" style="font-size:11.5px">${esc(sh.channel)} · ${sh.simulcast?'video + audio':'video only'}</div></td>
-          <td style="font-size:12.5px">${sh.publishDays.join(' · ')}</td>
-          <td class="num">${sh.positionsPerEp}<div class="muted" style="font-size:10.5px">per ep</div></td>
-          <td class="num">${K(sh.guarantee)}<div class="muted" style="font-size:10.5px">90% = ${K(Math.round(sh.guarantee*IAB_FULL))}</div></td>
-          <td class="num"><b>day ${checkInDay(sh)}</b><div class="muted" style="font-size:10.5px">of 30</div></td>
-          <td><span class="tag ${sh.mgPolicy==='auto'?'tag--green':'tag--grey'}">${sh.mgPolicy==='auto'?'auto':'ask first'}</span></td>
-          <td><div style="display:flex;align-items:center;gap:9px">${sparkline(sh.curve)}<div class="muted" style="font-size:11px;line-height:1.35">${Math.round(curveAt(sh.curve,2)*100)}% in 48h<br>${sh.samples} reads</div></div></td>
-        </tr>`).join('')}</tbody></table></div>
-      <div class="footnote">Positions per episode and the guarantee come from Booster, so a make good is never offered a slot that doesn't exist. Paid fill rate is ${f.rate}% — ${f.paid} spots sold, ${f.free} given as make goods or bonus.</div>
+        <p>The inventory record every projection reads from. Open a show for its full setup — cadence, positions, guarantee, pacing, and where its numbers come from.</p></div>
+        <div class="pagebar__right"><span class="tag tag--purple">${SHOWS.filter(x=>x.src==='booster').length} of ${SHOWS.length} synced from Booster</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        ${SHOWS.map(sh=>showRow(sh)).join('')}
+      </div>
+      <div class="footnote">Positions an episode and the guarantee come from Booster, so a make good is never offered a slot that doesn't exist. Paid fill rate is ${f.rate}% — ${f.paid} spots sold, ${f.free} given as make goods or bonus.</div>
     </div>`;
   };
-  function toggleDark(){
-    document.body.classList.toggle('dark');
-    const d=document.body.classList.contains('dark');
-    const b=document.getElementById('dmBtn');
-    if(b) b.lastChild.textContent = d?'Light Mode':'Dark Mode';
+
+  function showRow(sh){
+    const open=!!showOpen[sh.id];
+    const av=nextEpisodes(sh.id,4);
+    const live=SPOTS.filter(x=>x.showId===sh.id&&projection(x));
+    const owed=wonDeals().filter(d=>d.showId===sh.id).reduce((a,d)=>a+Math.round(d.gross*0.85*sh.revShare),0);
+    return `<div class="card" style="${open?'border-color:var(--border-strong)':''}">
+      <button onclick="toggleShow('${sh.id}')" style="width:100%;border:none;background:none;text-align:left;padding:14px 18px;display:flex;align-items:center;gap:14px;font-family:inherit;color:var(--text-primary)">
+        <div style="flex:1;min-width:0">
+          <b style="font-size:14px;display:block">${esc(sh.name)} <span class="srcpill ${sh.src==='booster'?'booster':''}">${sh.src}</span></b>
+          <span style="font-size:12px;color:var(--text-secondary)">${sh.publishDays.join(' · ')} · ${sh.epsPerWeek} ep${sh.epsPerWeek===1?'':'s'}/wk · ${sh.positionsPerEp} positions · ${K(sh.guarantee)} guarantee</span>
+        </div>
+        <div style="text-align:center;flex-shrink:0"><div style="font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary)">Call it</div>
+          <b style="font-size:15px">day ${checkInDay(sh)}</b></div>
+        <div style="flex-shrink:0;text-align:right;min-width:110px">
+          ${sparkline(sh.curve)}
+          <div class="muted" style="font-size:10.5px;margin-top:-2px">${Math.round(curveAt(sh.curve,2)*100)}% in 48h · ${sh.samples} reads</div></div>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.4" style="flex-shrink:0;transform:rotate(${open?180:0}deg);transition:.15s"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      ${open?`<div style="padding:0 18px 18px;border-top:1px solid var(--border-light)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 26px;margin-top:14px">
+          <div>
+            <div class="kv"><span>Publishes</span><b>${sh.publishDays.join(' · ')}</b></div>
+            <div class="kv"><span>Episodes a week</span><b>${sh.epsPerWeek}</b></div>
+            <div class="kv"><span>Ad positions an episode</span><b>${sh.positionsPerEp} <span class="muted" style="font-weight:500">· Booster cap</span></b></div>
+            <div class="kv"><span>Impression guarantee</span><b>${K(sh.guarantee)} <span class="muted" style="font-weight:500">· 90% = ${K(Math.round(sh.guarantee*IAB_FULL))}</span></b></div>
+            <div class="kv"><span>Rate</span><b>${money(sh.cpm)} CPM</b></div>
+          </div>
+          <div>
+            <div class="kv"><span>Estimated pacing</span><b>${Math.round(curveAt(sh.curve,2)*100)}% by 48h · ${Math.round(curveAt(sh.curve,7)*100)}% by day 7</b></div>
+            <div class="kv"><span>Fitted from</span><b>${sh.samples} verified reads</b></div>
+            <div class="kv"><span>Delivery numbers</span><b>${sh.simulcast?`video + audio · ${sh.audioSrc==='hosting'?'auto from host':'request from creator'}`:'video only'}</b></div>
+            <div class="kv"><span>Channel scan</span><b>every ${sh.scanEvery}h</b></div>
+            <div class="kv"><span>Rev share to show</span><b>${Math.round(sh.revShare*100)}% <span class="muted" style="font-weight:500">· ${money(owed)} owed</span></b></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:13px;padding-top:12px;border-top:1px solid var(--border-light);flex-wrap:wrap">
+          <span class="tag ${sh.mgPolicy==='auto'?'tag--green':'tag--grey'}"><i></i>Make goods ${sh.mgPolicy==='auto'?'auto-schedule':'need the show to say yes'}</span>
+          ${live.length?`<span class="muted" style="font-size:11.5px">${live.length} flight${live.length>1?'s':''} live · ${live.map(x=>esc(x.brand)).join(', ')}</span>`:''}
+        </div>
+        <div style="margin-top:13px">
+          <div style="font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:6px">Next avails</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">${av.map(e=>`<span class="tag ${e.open?'tag--green':'tag--grey'}">${dayName(e.date)} ${fmtDate(e.date)} · ${e.open}/${e.cap}</span>`).join('')}</div>
+        </div>
+      </div>`:''}
+    </div>`;
   }
+
   function applyGuarantee(showId,v){ show(showId).guarantee=v; rerender(); toast(`${show(showId).name} guarantee set to ${K(v)}. Written back to Booster and Airtable.`); }
 
   /* ═══════════════════════════ TOAST ═══════════════════════════ */
