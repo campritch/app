@@ -1001,7 +1001,33 @@
         <div class="muted" style="font-size:12px">${pr?`${esc(epTitle(s))} · published ${fmtDate(s.published)}`:`Airs ${fmtDate(s.published)}`} · ${esc(cr.len)} ${esc(cr.placement).toLowerCase()}</div>
       </div><button class="x" onclick="closeOverlays()">✕</button></div>
     <div class="drawer__body">
-    ${!pr?`<div class="empty">Airs ${fmtDate(s.published)} on ${esc(sh.name)}. The agent starts scanning ${esc(sh.channel)} that day, every ${sh.scanEvery}h.</div>`:`
+    ${!pr?(()=>{ const kv=(l,v)=>`<div class="kv"><span>${l}</span><b>${v}</b></div>`;
+      const copyLabel = s.copyStatus==='needs_copy'?'<span style="color:var(--blue-text)">Not in yet</span>'
+        : s.copyStatus==='needs_cta'?'<span style="color:var(--blue-text)">In · needs a CTA</span>'
+        : s.copyStatus==='sent'?`Sent ${fmtDate(s.copySent)} · <span style="color:var(--orange-text)">not opened</span>`
+        : s.copySeen?`Sent · opened ${fmtDate(s.copySeen)}`:'In and confirmed';
+      return `
+      <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:10px">
+        ${kpiBox(s.missed?'Booked for':'Airs', fmtDate(s.published), dayName(s.published)+(s.missed?' · nothing posted yet':''))}
+        ${kpiBox('Guarantee', K(s.guarantee), '90% = '+K(Math.round(s.guarantee*IAB_FULL)))}
+        ${kpiBox('Check-in', 'day '+checkInDay(sh), 'call it '+fmtDate(addDays(s.published,checkInDay(sh))))}
+      </div>
+
+      <div style="margin-top:8px">
+        ${kv('Ad copy', copyLabel)}
+        ${kv('Placement', `${esc(cr.placement)} · ${esc(cr.len)}`)}
+        ${cr.code?kv('Promo code', `<span style="font-family:ui-monospace,monospace;letter-spacing:.03em">${esc(cr.code)}</span>`):''}
+        ${cr.cta?kv('Offer', esc(cr.cta)):''}
+        ${cr.url?kv('Landing', `<a href="https://${esc(cr.url)}" target="_blank" style="color:var(--blue-text);text-decoration:none">${esc(cr.url)} ↗</a>`):''}
+        ${kv('Air check', s.missed?`Scanned ${esc(sh.channel)} — no episode yet · rechecks every ${sh.scanEvery}h`:`Starts ${fmtDate(s.published)} · every ${sh.scanEvery}h on ${esc(sh.channel)}`)}
+      </div>
+
+      <div class="dhead">What the host reads</div>
+      <div style="background:var(--page-bg);border:1px solid var(--border-light);border-radius:11px;padding:13px 15px;font-size:12.5px;line-height:1.7;margin-top:8px">${esc(cr.copy)}</div>
+
+      <div class="dhead">${esc(sh.name)}'s next episodes</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${nextEpisodes(s.showId,5,s.published).map(ep=>`<span class="tag ${ep.date===s.published?'tag--blue':ep.open?'tag--green':'tag--grey'}">${dayName(ep.date)} ${fmtDate(ep.date)} · ${ep.open}/${ep.cap}${ep.date===s.published?' · this ad':''}</span>`).join('')}</div>
+      `; })():`
       ${s.yt?`<div class="reel-stage"><iframe src="https://www.youtube.com/embed/${s.yt}?start=${s.ts}" allow="autoplay" allowfullscreen></iframe></div>`
         :`<div class="reel-stage" style="color:#8a95a3;font-size:13px;text-align:center;padding:20px;display:grid;place-items:center">Audio-only read.<br>Impressions come from the host platform.</div>`}
 
@@ -1021,28 +1047,33 @@
         </div>
       </div>
 
-      ${(s.copy||[]).length?`<div style="margin-top:14px;display:flex;gap:6px;flex-wrap:wrap">${s.copy.map(c=>`<span class="tag tag--blue" style="font-weight:600">${esc(c)}</span>`).join('')}</div>`:''}
-
-      <div class="curvewrap" style="margin-top:16px">${curveChart(s,{w:470,h:196})}</div>
-      ${s.yt?`<div style="margin-top:16px">${transcriptBlock(s)}</div>`:''}
 
       <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light)">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em">Deliverables &amp; compliance</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;flex:1">Deliverables &amp; compliance</div>
+          <button class="btn btn--ghost btn--sm" onclick="copyDeliverables('${s.id}')">Copy all</button>
           <span class="ai-tag">AI auto-detect</span>
         </div>
-        <div class="cmp-hint">Every read booked on this deal, with the link and timestamp the agent pulled. Fix anything wrong and mark it passed — writes back to Airtable.</div>
+        <div class="cmp-hint">Every read booked on this deal, with the link and the ad's start–end the agent pulled. Fix anything wrong and mark it passed — writes back to Airtable.</div>
         ${flightRows(s).map(e=>{ const epr=projection(e), passed=e.status==='verified'&&!!e.yt;
           return `<div class="cmp-row">
           <div class="cmp-row__top"><span class="cmp-row__date">${fmtDate(e.published)} · ${dayName(e.published)}${epr?` <span class="muted" style="font-weight:500">· ${K(epr.got)} impressions</span>`:''}${e.id===s.id?' <span class="tag tag--blue" style="margin-left:4px">this read</span>':''}</span>
-            <span class="cmp-status ${passed?'ok':'pend'}">${passed?'✓ Passed':'Pending'}</span></div>
-          <input class="cmp-inp" value="${e.yt?esc('youtu.be/'+e.yt+'?t='+e.ts):''}" placeholder="Video link @ timestamp">
-          ${show(e.showId).simulcast?`<input class="cmp-inp" value="${e.yt?esc('mgphn.fm/'+e.yt+' @ '+mmss(e.ts)):''}" placeholder="Audio link @ timestamp">`:''}
+            <span style="display:inline-flex;align-items:center;gap:7px">
+              ${e.yt?`<button class="btn btn--ghost btn--sm" style="padding:3px 9px;font-size:11px" onclick="copyDeliverable('${e.id}')">Copy</button>`:''}
+              <span class="cmp-status ${passed?'ok':'pend'}">${passed?'✓ Passed':'Pending'}</span></span></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input class="cmp-inp" style="margin-top:6px;flex:1" value="${e.yt?esc('youtu.be/'+e.yt+'?t='+e.ts):''}" placeholder="Video link">
+            <span class="tag tag--grey" style="margin-top:6px;flex-shrink:0;font-variant-numeric:tabular-nums">${e.ts!=null?mmss(e.ts)+'–'+mmss(e.ts+adSecs(e)):'—'}</span>
+          </div>
+          ${show(e.showId).simulcast?`<input class="cmp-inp" value="${e.yt?esc('mgphn.fm/'+e.yt):''}" placeholder="Audio link">`:''}
         </div>`; }).join('')}
-      </div>`}
+      </div>
+
+      <div class="curvewrap" style="margin-top:20px">${curveChart(s,{w:470,h:196})}</div>`}
     </div>
     <div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Close</button>
-      ${v.k==='short'&&!m?`<button class="btn btn--primary" onclick="closeOverlays();createMakegood('${s.id}')">Set up make good</button>`
+      ${s.missed?`<button class="btn btn--primary" onclick="closeOverlays();nudgeEpisode('${s.id}')">Nudge show</button>`
+        :v.k==='short'&&!m?`<button class="btn btn--primary" onclick="closeOverlays();createMakegood('${s.id}')">Set up make good</button>`
         :m?`<button class="btn btn--primary" onclick="closeOverlays();openMg('${m.id}')">Open make good</button>`
         :closedOut(s)&&!s.reportSent?`<button class="btn btn--primary" onclick="closeOverlays();sendDeliveryReport('${s.id}')">Send delivery report</button>`
         :closedOut(s)&&!s.completed?`<button class="btn btn--primary" onclick="closeOverlays();markComplete('${s.id}')">Mark complete</button>`
@@ -1117,6 +1148,14 @@
   }
   const closedOut = s => { const pr=projection(s);
     return pr && pr.final && verdict(s).k!=='short' && s.dlState!=='requested'; };
+
+  const deliverableLine = e => `${spot(e).brand} on ${show(spot(e).showId).name} · ${fmtDate(spot(e).published)} · youtu.be/${spot(e).yt}?t=${spot(e).ts} · ad at ${mmss(spot(e).ts)}–${mmss(spot(e).ts+adSecs(spot(e)))}`;
+  function copyDeliverable(id){ const line=deliverableLine(id);
+    navigator.clipboard&&navigator.clipboard.writeText(line); toast('Copied — ready to paste: '+line.slice(0,60)+'…'); }
+  function copyDeliverables(id){ const s=spot(id);
+    const lines=flightRows(s).filter(e=>e.yt).map(e=>deliverableLine(e.id)).join('\n');
+    navigator.clipboard&&navigator.clipboard.writeText(lines);
+    toast('Copied every read on this deal — paste it straight into an email.'); }
 
   function nudgeEpisode(id){ const s=spot(id); toast(`Nudged ${show(s.showId).host} from adops@. The agent keeps checking every 24h.`); }
   function chaseDownloads(id){ const s=spot(id); s.dlState='received'; s.downloads=Math.round(s.views*0.24); rerender(); refreshBadges();
