@@ -1089,19 +1089,22 @@
     MAKEGOODS.push(m); rerender(); refreshBadges(); openMg(m.id);
   }
   function setMgDate(id,d){ mg(id).date=d; openMg(id); rerender(); }
+  function setMgPosition(id,pos){ mg(id).position=pos; openMg(id); rerender(); }
   function toggleMg(id,key){ const m=mg(id); m[key]=m[key]===true?null:true; openMg(id); rerender(); refreshBadges(); }
   function commitMg(id){
     const m=mg(id), s=spot(m.spotId), sh=show(s.showId);
     m.status='scheduled';
     SPOTS.push({ id:'mgs'+m.id, dealId:s.dealId, brand:s.brand, showId:s.showId, kind:'makegood', published:m.date,
+      position:m.position||'Mid-roll',
       guarantee:0, views:null, downloads:null, dlState:sh.simulcast?'auto':'none', status:'scheduled',
       length:s.length, yt:'', ts:null, copyStatus:'seen', copy:[] });
     closeOverlays(); rerender(); refreshBadges();
-    toast(`${s.brand} make good scheduled on ${sh.name} for ${fmtDate(m.date)}. Written to Airtable as "Make Good" and flagged in Booster so the slot can't be sold twice.`);
+    toast(`${s.brand} make good scheduled — ${m.position||'mid-roll'} on ${sh.name}, ${fmtDate(m.date)}. Written to Airtable as "Make Good" and flagged in Booster so the slot can't be sold twice.`);
   }
   function openMg(id){
     const m=mg(id), s=spot(m.spotId), sh=show(s.showId), pr=projection(s), auto=sh.mgPolicy==='auto';
-    const d=m.date?fmtDate(m.date):'[date]', both=m.showOk===true&&m.brandOk===true;
+    if(!m.position&&creative(s.brand).placement) m.position=creative(s.brand).placement;
+    const d=m.date?fmtDate(m.date):'[date]', both=m.showOk===true&&m.brandOk===true&&!!m.date&&!!m.position;
     const sw=(on,label,note,key)=>`<div class="tog"><button class="tog__sw ${on?'on':''}" onclick="toggleMg('${id}','${key}')"><i></i></button>
       <div style="flex:1"><b>${label}</b><small>${note}</small></div></div>`;
     openDrawer(`<div class="drawer__head"><div><span class="tag tag--orange"><i></i>${K(shortfall(s))} short</span>
@@ -1113,6 +1116,10 @@
       <div style="display:flex;gap:7px;flex-wrap:wrap">${nextEpisodes(s.showId,4).map(e=>`<button class="tag ${m.date===e.date?'tag--blue':'tag--grey'}" style="padding:7px 11px;cursor:${e.open?'pointer':'not-allowed'};opacity:${e.open?1:.45}" ${e.open?`onclick="setMgDate('${id}','${e.date}')"`:''}>${dayName(e.date)} ${fmtDate(e.date)} · ${e.open}/${e.cap}</button>`).join('')}</div>
       <div class="muted" style="font-size:11.5px;margin-top:8px">Booster caps ${esc(sh.name)} at ${sh.positionsPerEp} positions an episode, so these slots are real.</div>
 
+      <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary);margin:16px 0 7px">Position</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">${['Pre-roll','Mid-roll','Post-roll'].map(pos=>`<button class="tag ${m.position===pos?'tag--blue':'tag--grey'}" style="padding:7px 13px;cursor:pointer" onclick="setMgPosition('${id}','${pos}')">${pos}${pos===creative(s.brand).placement?' · same as original':''}</button>`).join('')}</div>
+      ${m.date&&!m.position?`<div class="muted" style="font-size:11.5px;margin-top:8px">Pick the position to finish the slot.</div>`:''}
+
       <div style="display:flex;flex-direction:column;gap:9px;margin-top:16px">
         ${sw(m.showOk===true,'Show approved', auto?`${esc(sh.name)} auto-schedules — no ask needed`:m.showVia==='gmail'?'Detected from the reply in adops@':'Send the draft below', 'showOk')}
         ${sw(m.brandOk===true,'Brand approved', m.sentBrand?`Sent ${fmtDate(m.sentBrand)} · no reply yet`:'Send the draft below', 'brandOk')}
@@ -1120,7 +1127,7 @@
 
       <details style="margin-top:16px"><summary style="font-size:12.5px;font-weight:700;cursor:pointer;color:var(--text-secondary)">Drafts${auto?' · brand only':''}</summary>
         ${auto?'':`<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--text-tertiary);margin:12px 0 6px">To ${esc(sh.host)}</div>
-        <textarea class="cmp-inp" style="min-height:110px;line-height:1.6;font-size:12.5px">Hey ${esc(sh.host.split(' ')[0])} — the ${esc(s.brand)} read from ${fmtDate(s.published)} is tracking to land near ${K(pr?pr.proj:0)} against a ${K(s.guarantee)} guarantee, so we owe them a make good. Can we put a free ${esc(s.length)} read on ${d}? Same placement, same copy — comes out of our end, no change to your split. Thanks, Sydney</textarea>
+        <textarea class="cmp-inp" style="min-height:110px;line-height:1.6;font-size:12.5px">Hey ${esc(sh.host.split(' ')[0])} — the ${esc(s.brand)} read from ${fmtDate(s.published)} is tracking to land near ${K(pr?pr.proj:0)} against a ${K(s.guarantee)} guarantee, so we owe them a make good. Can we put a free ${esc(s.length)} ${m.position?m.position.toLowerCase():'read'} on ${d}? Same placement, same copy — comes out of our end, no change to your split. Thanks, Sydney</textarea>
         <button class="btn btn--primary btn--sm" style="margin-top:7px" onclick="sendMg('${id}','show')">Send to show</button>`}
         <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--text-tertiary);margin:14px 0 6px">To ${esc(s.brand)}</div>
         <textarea class="cmp-inp" style="min-height:110px;line-height:1.6;font-size:12.5px">Hi ${esc(s.brand)} team — heads up on the ${esc(sh.name)} read from ${fmtDate(s.published)}. It's pacing a little under the guarantee, so we've queued an additional read on ${d} at no cost to bring the flight back over. Nothing needed on your end. Thanks, Sydney</textarea>
