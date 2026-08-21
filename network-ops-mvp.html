@@ -298,11 +298,11 @@
     .wrow { display:flex; align-items:center; gap:13px; padding:13px 16px; border:1px solid var(--border-light); border-radius:12px; background:var(--white); }
     .wrow + .wrow { margin-top:8px; }
     /* ─── flight rows: one grid for Needs you and All flights alike ─── */
-    .wflight { display:grid; grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 96px 118px 26px 26px; align-items:center; gap:0 14px; padding:15px 18px; }
+    .wflight { display:grid; grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 118px 26px 26px; align-items:center; gap:0 14px; padding:15px 18px; }
     .wflight .wrow__main > b { font-size:13.5px; }
     .wflight .wrow__num { width:auto; justify-content:flex-end; }
     .wflight .btn { width:100%; justify-content:center; }
-    .fhead { display:grid; grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 96px 118px 26px 26px; gap:0 14px; padding:0 18px 9px;
+    .fhead { display:grid; grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 118px 26px 26px; gap:0 14px; padding:0 18px 9px;
              font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--text-tertiary); }
     .fhead span:nth-child(2),.fhead span:nth-child(3),.fhead span:nth-child(4),.fhead span:nth-child(6) { text-align:center; }
     .fhead span:nth-child(5) { text-align:right; }
@@ -890,13 +890,12 @@
     return `<div class="wrow wflight wrow--click" onclick="openSpot('${s.id}')">
       <div class="wrow__main"><b>${nameOf(s)}</b></div>
       <div class="fnum">${pr?Math.min(pr.day,30):'—'}${pr?'<small>of 30</small>':''}</div>
-      <span onclick="event.stopPropagation()">${s.yt
+      <div onclick="event.stopPropagation()" style="display:flex;flex-direction:column;align-items:stretch;gap:4px">${s.yt
         ? `<button class="fran" onclick="playClip('${s.yt}',${s.ts})" title="Hear the read"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>${mmss(s.ts)}</button>`
-        : `<span class="fran fran--no">${s.status==='scheduled'?'due '+fmtDate(s.published):s.missed?'due '+fmtDate(s.published)+' ·  missed':'due today'}</span>`}</span>
+        : `<span class="fran fran--no">${s.status==='scheduled'?'due '+fmtDate(s.published):s.missed?'due '+fmtDate(s.published)+' ·  missed':'due today'}</span>`}
+        ${s.kind==='makegood'?'<span style="font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--purple-text);text-align:center">Make good</span>':''}</div>
       <div class="fnum">${pr?K(pr.got):dash}${pr&&sh.simulcast?`<small>${K(s.views||0)} + ${s.dlState==='requested'?'?':K(s.downloads||0)}</small>`:pr?'<small>video</small>':''}</div>
       <div class="wrow__num">${pr?`${projBar(s)}<b style="color:${toneVar(v.tone)}">${Math.round(pr.ratio*100)}%</b>`:'<span style="flex:1;text-align:left;font-size:12px;font-weight:600;color:var(--text-tertiary)">Not started</span>'}</div>
-      <div class="fnum">${m?`<span class="tag tag--purple">${fmtDate(m.date)}</span>`
-        : v.k==='short'?'<span class="tag tag--red"><i></i>Needed</span>' : dash}</div>
       <span onclick="event.stopPropagation()">${cta(c.label,`openSpot('${s.id}')`,c.dark)}</span>
       <span onclick="event.stopPropagation()"><button class="wcheck${isArchived(s.id)?' on':''}" title="${isArchived(s.id)?'Restore':'Mark done — moves down to archive'}" onclick="toggleArchive('${s.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6L9 17l-5-5"/></svg></button></span>
       <span onclick="event.stopPropagation()"><button class="wdots" title="More" onclick="rowMenu(event,'${s.id}')">⋮</button></span>
@@ -905,7 +904,7 @@
   const dcta=(label,onclick,dark)=>`<button class="btn ${dark?'btn--primary':'btn--ghost'} btn--sm" onclick="${onclick}">${label}</button>`;
   const cta=dcta;
 
-  const flightHead=()=>`<div class="fhead"><span>Ad</span><span>Day</span><span>Ran</span><span>Delivered</span><span>Pacing</span><span>Make good</span><span></span><span></span><span></span></div>`;
+  const flightHead=()=>`<div class="fhead"><span>Ad</span><span>Day</span><span>Ran</span><span>Delivered</span><span>Pacing</span><span></span><span></span><span></span></div>`;
 
   // Needs you: the same rows, filtered to the ads that want something.
   function workList(){
