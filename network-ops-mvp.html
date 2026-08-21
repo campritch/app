@@ -41,7 +41,6 @@
       --shadow-card:0 1px 2px rgba(0,0,0,.4); --shadow-btn:0 1px 3px rgba(0,0,0,.35); --shadow-hover:0 12px 34px rgba(0,0,0,.5);
     }
     body.dark .btn--primary, body.dark .pill--solid, body.dark .askwrap__go, body.dark .tb-av, body.dark .sb-powered .smark { color:#12161C; }
-    body.dark .portal-hero { background: linear-gradient(135deg,#212630,#2A3038); }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
     body {
@@ -236,8 +235,6 @@
     .cmp-inp::placeholder { color: var(--text-tertiary); }
 
     /* advertiser portal */
-    .portal-hero { background: linear-gradient(135deg, #17212B, #26333F); color: #fff; border-radius: 16px; padding: 26px 28px; }
-    .portal-hero h2 { font-size: 22px; font-weight: 800; letter-spacing: -.03em; }
     .brand-chip { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-weight: 800; color: #fff; font-size: 15px; flex-shrink: 0; }
 
 
@@ -552,6 +549,43 @@
     });
     return out.sort((a,b)=>b.shortCount-a.shortCount);
   }
+
+  /* ═══ CREATIVE ═══ the assets attached to a campaign — copy, code, landing page ═══ */
+  const CREATIVE = {
+    Kalshi:{ code:'KALSHI', url:'kalshi.com/vmg', cta:'$25 in trade credit', placement:'Mid-roll', len:'60s',
+      copy:'Kalshi is the first federally regulated prediction market in the US. You can trade on how real events turn out — elections, the Fed, the weather, award shows. Head to kalshi.com slash VMG and use code KALSHI to get twenty five dollars in trade credit on your first trade.',
+      points:['Named the brand','Read promo code KALSHI','Landing page read aloud','Regulatory disclaimer'] },
+    DraftKings:{ code:'DK50', url:'draftkings.com/vmg', cta:'Bet $5, get $150', placement:'Mid-roll', len:'60s',
+      copy:'DraftKings Sportsbook is the official partner of this show. New customers bet five dollars and get one hundred and fifty in bonus bets instantly. Download the DraftKings app and use code DK50. Must be twenty one or older, gambling problem call one eight hundred gambler.',
+      points:['Named the brand','Read promo code DK50','Age and geo disclaimer','Responsible gambling line'] },
+    BetterHelp:{ code:'VMG', url:'betterhelp.com/vmg', cta:'10% off first month', placement:'Mid-roll', len:'60s',
+      copy:'BetterHelp connects you with a licensed therapist entirely online. Fill out a short questionnaire and get matched in under forty eight hours. Visit betterhelp.com slash VMG for ten percent off your first month.',
+      points:['Named the brand','Landing page read aloud','Mental-health disclaimer','Discount CTA'] },
+    Ramp:{ code:'', url:'ramp.com/vmg', cta:'Free demo', placement:'Mid-roll', len:'60s',
+      copy:'Ramp is the corporate card and spend management platform that automates your expense reports. Businesses using Ramp save an average of five percent a year. Go to ramp.com slash VMG to get started for free.',
+      points:['Named the brand','Value prop read','Landing page read aloud'] },
+    Notion:{ code:'', url:'notion.com/vmg', cta:'Free plan', placement:'Pre-roll', len:'45s',
+      copy:'Notion is the connected workspace where better, faster work happens. Notes, docs, projects and AI in one place. Try Notion free at notion.com slash VMG.',
+      points:['Named the brand','Landing page read aloud'] },
+    Ritual:{ code:'RITUAL25', url:'ritual.com/vmg', cta:'25% off first month', placement:'Mid-roll', len:'60s',
+      copy:'Ritual makes a multivitamin with traceable ingredients and no shady additives. Third party tested, made for real bodies. Get twenty five percent off your first month at ritual.com slash VMG.',
+      points:['Named the brand','Read promo code RITUAL25','Supplement disclaimer'] },
+    AG1:{ code:'', url:'drinkag1.com/vmg', cta:'Free vitamin D + 5 travel packs', placement:'Mid-roll', len:'60s',
+      copy:'AG1 is one scoop, once a day, covering your daily nutritional bases. Subscribe today and get a free year supply of vitamin D and five free travel packs at drinkag1.com slash VMG.',
+      points:['Named the brand','Landing page read aloud','Subscription offer'] },
+  };
+  const creative = b => CREATIVE[b] || { code:'', url:'', cta:'', placement:'Mid-roll', len:'60s', copy:'Copy not logged for this flight.', points:[] };
+
+  // episode the read landed in
+  const EPISODES = {
+    s1:'The Case For Optimism In 2026', s2:'Why Nobody Trusts The Numbers Anymore',
+    s3:'What Everyone Gets Wrong About Focus', s4:'The Sleep Episode',
+    s5:'Live From The Convention Floor', s6:'A Conversation About Burnout',
+    s7:'The Productivity Trap', s8:'Friday Free-For-All #212',
+    s9:'Building In Public, Year Three', s10:'Morning Routines That Actually Stick',
+    s11:'The Monday Briefing', s12:'What The Data Actually Says',
+  };
+  const epTitle = s => EPISODES[s.id] || `${show(s.showId).name} · ${fmtDate(s.published)}`;
 
   const brandColor = { 'Kalshi':'#00d09c','DraftKings':'#53d337','Ritual':'#f8b3c0','Ramp':'#f7b32b','Notion':'#111','BetterHelp':'#2f9e97','AG1':'#0b3d2e' };
   const BRAND_DOMAIN = { Kalshi:'kalshi.com', DraftKings:'draftkings.com', Ritual:'ritual.com', Ramp:'ramp.com', Notion:'notion.so', BetterHelp:'betterhelp.com', AG1:'drinkag1.com' };
@@ -976,49 +1010,169 @@
     <div class="reel-stage"><iframe src="https://www.youtube.com/embed/${yt}?start=${ts}&autoplay=1" allow="autoplay" allowfullscreen></iframe></div>`); }
 
   /* ═══════════════════════════ VIEW: CAMPAIGN PORTAL ═══════════════════════════ */
-  let portalBrand='Kalshi';
+  let portalBrand='Kalshi', portalOpen={};
+  function togglePortalRead(id){ portalOpen[id]=!portalOpen[id]; RENDER.portal(); }
+
+  /* Campaign-level cumulative delivery: every read's curve summed day by day,
+     solid up to today and projected out to the last read's 30-day mark. */
+  function campaignChart(spots, guarantee, {w=660,h=200}={}){
+    if(!spots.length) return '';
+    const start=spots.map(x=>x.published).sort()[0];
+    const end=spots.map(x=>addDays(x.published,30)).sort().slice(-1)[0];
+    const span=Math.max(daysBetween(start,end),1), today=Math.min(daysBetween(start,TODAY),span);
+    const padL=46,padR=16,padT=14,padB=26;
+    const total=d=>spots.reduce((acc,x)=>{ const pr=projection(x); if(!pr) return acc;
+      const dd=d-daysBetween(start,x.published); if(dd<=0) return acc;
+      return acc + curveAt(show(x.showId).curve, Math.min(dd,30))*pr.proj; },0);
+    const max=Math.max(guarantee, total(span))*1.12;
+    const X=d=>padL+(w-padL-padR)*(d/span), Y=v=>h-padB-(h-padT-padB)*(v/max);
+    const pts=[]; for(let d=0;d<=span;d++) pts.push([X(d),Y(total(d))]);
+    const solid=pts.slice(0,today+1).map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1));
+    const dashed=pts.slice(today).map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1));
+    const gy=Y(guarantee);
+    const grid=[0,.5,1].map(f=>`<line x1="${padL}" x2="${w-padR}" y1="${Y(max*f)}" y2="${Y(max*f)}" stroke="var(--border-light)"/><text x="${padL-7}" y="${Y(max*f)+3.5}" text-anchor="end" font-size="9.5" font-weight="600" fill="var(--text-tertiary)">${K(Math.round(max*f))}</text>`).join('');
+    const marks=spots.map(x=>{ const d=daysBetween(start,x.published); if(d<0||d>span) return '';
+      return `<line x1="${X(d)}" x2="${X(d)}" y1="${h-padB}" y2="${h-padB+4}" stroke="var(--text-tertiary)" stroke-width="1.5"/>
+        <text x="${X(d)}" y="${h-8}" text-anchor="middle" font-size="9" font-weight="600" fill="var(--text-tertiary)">${fmtDate(x.published)}</text>`; }).join('');
+    return `<svg viewBox="0 0 ${w} ${h}" width="100%">${grid}${marks}
+      <line x1="${padL}" x2="${w-padR}" y1="${gy}" y2="${gy}" stroke="var(--text-tertiary)" stroke-width="1.5" stroke-dasharray="5 4"/>
+      <text x="${w-padR}" y="${gy-6}" text-anchor="end" font-size="9.5" font-weight="800" fill="var(--text-secondary)">GUARANTEE ${K(guarantee)}</text>
+      <path d="M${dashed.join(' L')}" fill="none" stroke="var(--green-text)" stroke-width="2.4" stroke-dasharray="5 4" opacity=".55"/>
+      <path d="M${solid.join(' L')}" fill="none" stroke="var(--green-text)" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="${X(today)}" cy="${Y(total(today))}" r="4.5" fill="var(--green-text)" stroke="var(--white)" stroke-width="2"/></svg>
+    <div class="curvekey" style="justify-content:center">
+      <span><i style="border-color:var(--green-text)"></i>Delivered to date</span>
+      <span><i style="border-color:var(--green-text);border-top-style:dashed"></i>Projected</span>
+      <span><i style="border-color:var(--text-tertiary);border-top-style:dashed"></i>Guarantee</span></div>`;
+  }
+
   RENDER.portal = () => {
     const brands=[...new Set(SPOTS.filter(s=>projection(s)).map(s=>s.brand))];
     if(!brands.includes(portalBrand)) portalBrand=brands[0];
-    const spots=SPOTS.filter(s=>s.brand===portalBrand&&projection(s));
-    const g=spots.reduce((a,s)=>a+s.guarantee,0), got=spots.reduce((a,s)=>a+(delivered(s)||0),0);
+    const spots=SPOTS.filter(s=>s.brand===portalBrand&&projection(s)).sort((x,y)=>dt(x.published)-dt(y.published));
+    const cr=creative(portalBrand);
+    const g=spots.reduce((a,s)=>a+s.guarantee,0);
+    const got=spots.reduce((a,s)=>a+(delivered(s)||0),0);
     const proj=spots.reduce((a,s)=>a+projection(s).proj,0);
     const paid=spots.reduce((a,s)=>a+spotCost(s),0);
+    const yt=spots.reduce((a,s)=>a+(s.views||0),0), aud=spots.reduce((a,s)=>a+(s.downloads||0),0);
     const mgs=SPOTS.filter(s=>s.brand===portalBrand&&s.kind==='makegood');
+    const shows=[...new Set(spots.map(s=>s.showId))];
+    const flight=spots.length?`${fmtDate(spots[0].published)} – ${fmtDate(addDays(spots[spots.length-1].published,30))}`:'—';
+    const done=spots.every(s=>projection(s).final);
+
     document.getElementById('view-portal').innerHTML=`
     <div class="inner" style="max-width:940px">
       <div class="pagebar">
-        <div class="head"><h1>Campaign Portal</h1><p>What the advertiser sees — every read playable at its exact timestamp, updating itself as spots land.</p></div>
+        <div class="head"><h1>Campaign Portal</h1><p>The advertiser's live delivery report — every read, the tape, and the assets that ran.</p></div>
         <div class="pagebar__right">
-          <select class="field" style="width:auto" onchange="portalBrand=this.value;RENDER.portal()">${brands.map(b=>`<option ${b===portalBrand?'selected':''}>${esc(b)}</option>`).join('')}</select>
+          <select class="field" style="width:auto" onchange="portalBrand=this.value;portalOpen={};RENDER.portal()">${brands.map(b=>`<option ${b===portalBrand?'selected':''}>${esc(b)}</option>`).join('')}</select>
+          <button class="btn btn--ghost btn--sm" onclick="toast('Copied vmg.live/${portalBrand.toLowerCase()}-aug — read-only, updates as reads land.')">🔗 Copy link</button>
           <button class="btn btn--primary btn--sm" onclick="toast('Delivery report sent to ${esc(portalBrand)} and copied to adops@.')">Send report</button></div>
       </div>
-      <div class="portal-hero">
-        <div style="position:relative;z-index:1">
-        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-          <div class="brand-chip" style="background:${brandColor[portalBrand]||'#3B82F6'}">${esc(portalBrand[0])}</div>
-          <div><div style="font-size:12px;opacity:.7;font-weight:600;letter-spacing:.04em">DELIVERY REPORT · AUGUST 2026</div><h2>${esc(portalBrand)} on VMG</h2></div>
-          <div style="margin-left:auto;text-align:right"><div style="font-size:32px;font-weight:800">${pctOf(proj,g)}%</div><div style="font-size:12px;opacity:.7">of guarantee</div></div>
-        </div>
-        <div style="display:flex;gap:30px;margin-top:20px;flex-wrap:wrap">
-          ${portalMini('Delivered',K(got))}${portalMini('Projected',K(proj))}${portalMini('Guaranteed',K(g))}${portalMini('Effective CPM','$'+(got?(paid/(got/1000)):0).toFixed(2))}
-        </div>
-        ${proj>=g?`<div style="margin-top:18px;padding:10px 13px;border-radius:10px;background:rgba(214,241,224,.16);font-size:12.5px">✓ <b>Full delivery.</b> ${K(proj-g)} impressions over the guarantee are bonus, no charge.</div>`
-        :mgs.length?`<div style="margin-top:18px;padding:10px 13px;border-radius:10px;background:rgba(255,237,213,.16);font-size:12.5px">↻ <b>${mgs.length} additional read${mgs.length>1?'s':''} booked at no cost</b> on ${mgs.map(m=>fmtDate(m.published)).join(', ')} to bring the flight back over.</div>`:''}
+
+      <div class="card">
+        <div class="card__pad" style="padding:22px 24px">
+          <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap">
+            <div class="brand-chip" style="background:${brandColor[portalBrand]||'#3B82F6'};width:46px;height:46px;border-radius:12px;font-size:17px">${esc(portalBrand[0])}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--text-tertiary)">DELIVERY REPORT · AUGUST 2026</div>
+              <h2 style="font-size:22px;font-weight:800;letter-spacing:-.03em;margin-top:2px">${esc(portalBrand)} on VMG</h2>
+              <div class="muted" style="font-size:12.5px;margin-top:3px">${flight} · ${shows.length} show${shows.length!==1?'s':''} · ${spots.length} read${spots.length!==1?'s':''}${mgs.length?` · ${mgs.length} make good`:''}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:38px;font-weight:800;letter-spacing:-.04em;line-height:1;color:${proj>=g?'var(--green-text)':'var(--orange-text)'}">${pctOf(proj,g)}%</div>
+              <div class="muted" style="font-size:11.5px;margin-top:3px">${done?'of guarantee':'projected'}</div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:22px;padding-top:20px;border-top:1px solid var(--border-light)">
+            ${pStat('Delivered',K(got))}${pStat('Projected',K(proj))}${pStat('Guaranteed',K(g))}
+            ${pStat('Video',K(yt))}${pStat('Audio',K(aud))}${pStat('Effective CPM','$'+(got?(paid/(got/1000)):0).toFixed(2))}
+          </div>
+
+          <div style="margin-top:18px;padding:12px 15px;border-radius:11px;font-size:12.5px;display:flex;align-items:center;gap:9px;background:${proj>=g?'var(--green-bg)':'var(--orange-bg)'};color:${proj>=g?'var(--green-text)':'var(--orange-text)'}">
+            <b style="font-size:14px">${proj>=g?'✓':'↻'}</b>
+            <span>${proj>=g
+              ? `<b>Full delivery.</b> ${K(proj-g)} impressions over the guarantee, delivered as bonus at no charge.`
+              : mgs.length?`<b>${mgs.length} additional read${mgs.length>1?'s':''} booked at no cost</b> on ${mgs.map(m=>fmtDate(m.published)).join(', ')} to bring the flight back over the line.`
+              :`<b>Tracking under guarantee.</b> We will add reads at no cost to close the gap.`}</span>
+          </div>
         </div>
       </div>
-      <div style="margin-top:16px">
-        ${spots.map(s=>{ const pr=projection(s);
-          return row(spotLead(s), esc(show(s.showId).name),
-            `${fmtDate(s.published)} · ${K(pr.got)} delivered${pr.final?'':' · projecting '+K(pr.proj)}`,
-            spotNum(s), s.yt?`<button class="btn btn--ghost btn--sm" onclick="playClip('${s.yt}',${s.ts})">▶ ${mmss(s.ts)}</button>`:''); }).join('')}
-        ${mgs.map(s=>row(icoBox('mg','purple'), esc(show(s.showId).name)+' <span class="tag tag--purple">Added at no cost</span>',
-          `Scheduled ${dayName(s.published)} ${fmtDate(s.published)}`,'','')).join('')}
+
+      <div class="card" style="margin-top:16px">
+        <div class="card__head"><div><div class="card__title">How it's tracking</div>
+          <div class="card__sub">Every read's own view curve, summed. Solid to today, projected to the 30-day close.</div></div></div>
+        <div class="card__pad">${campaignChart(spots,g)}</div>
       </div>
-      <div class="footnote">Read-only for the advertiser, updates itself as reads land.</div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="card__head"><div><div class="card__title">Reads</div>
+          <div class="card__sub">Open a read for the episode, the numbers and the tape.</div></div>
+          <span class="tag tag--grey">${spots.length} of ${spots.length + mgs.length} placed</span></div>
+        <div class="card__pad" style="display:flex;flex-direction:column;gap:9px">
+          ${spots.map(s=>portalRead(s,cr)).join('')}
+          ${mgs.map(s=>`<div class="wrow" style="border-style:dashed;background:rgba(235,233,254,.28)">
+            ${icoBox('mg','purple')}
+            <div class="wrow__main"><b>${esc(show(s.showId).name)} <span class="tag tag--purple">Added at no cost</span></b>
+            <span>Scheduled ${dayName(s.published)} ${fmtDate(s.published)} · ${esc(cr.len)} host-read</span></div></div>`).join('')}
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="card__head"><div><div class="card__title">Campaign assets</div>
+          <div class="card__sub">What every host was briefed to read.</div></div>
+          <button class="btn btn--ghost btn--sm" onclick="toast('Copy exported for ${esc(portalBrand)}.')">Export</button></div>
+        <div class="card__pad">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px">
+            ${pStat('Placement',esc(cr.placement))}${pStat('Read length',esc(cr.len))}
+            ${pStat('Promo code',cr.code?esc(cr.code):'<span class="muted">none</span>')}${pStat('Offer',esc(cr.cta)||'—')}
+          </div>
+          <div style="font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:6px">Ad copy</div>
+          <div style="background:var(--page-bg);border:1px solid var(--border-light);border-radius:11px;padding:14px 16px;font-size:13px;line-height:1.7">${esc(cr.copy)}</div>
+          ${cr.url?`<div style="display:flex;align-items:center;gap:8px;margin-top:11px">
+            <span style="font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-tertiary)">Landing</span>
+            <a href="https://${esc(cr.url)}" target="_blank" style="font-size:12.5px;color:var(--blue-text);font-weight:600;text-decoration:none">${esc(cr.url)} ↗</a></div>`:''}
+        </div>
+      </div>
+      <div class="footnote">Read-only for the advertiser and updates itself as reads land — no export to keep in sync.</div>
     </div>`;
   };
-  const portalMini=(l,v)=>`<div><div style="font-size:23px;font-weight:800">${v}</div><div style="font-size:11.5px;opacity:.7;font-weight:600">${l}</div></div>`;
+  const pStat=(l,v)=>`<div><div style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary)">${l}</div><div style="font-size:19px;font-weight:800;letter-spacing:-.03em;margin-top:3px">${v}</div></div>`;
+
+  function portalRead(s,cr){
+    const pr=projection(s), sh=show(s.showId), open=!!portalOpen[s.id], v=verdict(s);
+    return `<div style="border:1px solid ${open?'var(--border-strong)':'var(--border-light)'};border-radius:12px;overflow:hidden">
+      <button onclick="togglePortalRead('${s.id}')" style="width:100%;border:none;background:none;text-align:left;padding:13px 15px;display:flex;align-items:center;gap:13px;font-family:inherit;color:var(--text-primary)">
+        ${icoBox('wave', v.tone==='grey'?'blue':v.tone)}
+        <div style="flex:1;min-width:0">
+          <b style="font-size:13px;display:block">${esc(sh.name)}</b>
+          <span style="font-size:12px;color:var(--text-secondary)">${fmtDate(s.published)} · ${esc(epTitle(s))}</span>
+        </div>
+        <div class="wrow__num">${projBar(s)}<b style="color:${toneVar(v.tone)}">${Math.round(pr.ratio*100)}%</b></div>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.4" style="flex-shrink:0;transform:rotate(${open?180:0}deg);transition:.15s"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      ${open?`<div style="padding:0 15px 15px;border-top:1px solid var(--border-light)">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:15px 0 16px">
+          ${pStat('Delivered',K(pr.got))}
+          ${pStat(pr.final?'Final':'Projected',K(pr.proj))}
+          ${pStat('Video',K(s.views||0))}
+          ${pStat('Audio',sh.simulcast?K(s.downloads||0):'<span class="muted">—</span>')}
+        </div>
+        ${s.yt?`<div style="background:var(--primary);border-radius:12px;padding:13px 15px;color:#fff;display:flex;align-items:center;gap:13px">
+          <button onclick="playClip('${s.yt}',${s.ts})" style="width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:13px;flex-shrink:0">▶</button>
+          <div style="flex:1;min-width:0"><b style="font-size:12.5px">${esc(cr.placement)} · ${mmss(s.ts)}–${mmss(s.ts+adSecs(s))}</b>
+          <div style="font-size:11px;opacity:.72;margin-top:2px">${(s.copy||cr.points).join(' · ')}</div></div>
+          <button class="btn btn--sm" style="background:rgba(255,255,255,.15);color:#fff;flex-shrink:0" onclick="playClip('${s.yt}',${s.ts})">Play the read</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+          <a href="${clipUrl(s)}" target="_blank" style="font-size:12px;color:var(--blue-text);font-weight:600;text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${clipUrl(s)} ↗</a>
+          <button class="btn btn--ghost btn--sm" onclick="navigator.clipboard&&navigator.clipboard.writeText('${clipUrl(s)}');toast('Deep link copied — opens at ${mmss(s.ts)}.')">Copy link</button>
+        </div>`:`<div class="muted" style="font-size:12.5px;padding:14px 0">Audio-only read — impressions come from the host platform.</div>`}
+      </div>`:''}
+    </div>`;
+  }
 
   /* ═══════════════════════════ VIEW: SHOWS ═══════════════════════════ */
   RENDER.shows = () => {
