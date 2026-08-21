@@ -285,6 +285,18 @@
     .msheet-foot { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; border-top: 1px solid var(--border); }
     .msheet-total { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
 
+    /* ─── transcript ─── */
+    .txwrap { border:1px solid var(--border-light); border-radius:11px; overflow:hidden; }
+    .txhd { display:flex; align-items:center; justify-content:space-between; padding:9px 12px; background:var(--secondary-lite); border-bottom:1px solid var(--border-light); }
+    .txhd span { font-size:10px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-tertiary); }
+    .txbody { max-height:238px; overflow-y:auto; padding:6px; }
+    .tx { display:flex; gap:10px; width:100%; text-align:left; padding:6px 8px; border:none; background:none; border-radius:7px; font-family:inherit; font-size:12.5px; line-height:1.55; color:var(--text-secondary); cursor:pointer; }
+    .tx:hover { background:var(--nav-hover); color:var(--text-primary); }
+    .tx time { font-variant-numeric:tabular-nums; color:var(--text-tertiary); font-size:11px; font-weight:700; flex-shrink:0; width:38px; padding-top:1px; }
+    .tx--ad { color:var(--text-primary); background:var(--blue-bg); box-shadow:inset 2px 0 0 var(--blue-text); }
+    .tx--ad:hover { background:var(--blue-bg); filter:brightness(.97); }
+    .tx--ad time { color:var(--blue-text); }
+
     /* ─── read cards on the delivery report ─── */
     .rgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:12px; }
     .rcard { background:var(--panel); border:1px solid var(--border); border-radius:13px; overflow:hidden; display:flex; flex-direction:column; }
@@ -990,6 +1002,11 @@
         <div class="curvewrap" style="margin-top:10px">${curveChart(s,{w:470,h:196})}</div>
       </div>
 
+      ${s.yt?`<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light)">
+        <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:9px">How the agent found it</div>
+        ${transcriptBlock(s)}
+      </div>`:''}
+
       <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light)">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em">Deliverables &amp; compliance</div>
@@ -1106,8 +1123,8 @@
     <div class="reel-stage"><iframe src="https://www.youtube.com/embed/${yt}?start=${ts}&autoplay=1" allow="autoplay" allowfullscreen></iframe></div>`); }
 
   /* ═══════════════════════════ VIEW: CAMPAIGN PORTAL ═══════════════════════════ */
-  let portalBrand=null, portalOpen={};   // null = the index of every campaign
-  function openCampaign(b){ portalBrand=b; portalOpen={}; RENDER.portal(); document.querySelector('.views').scrollTop=0; }
+  let portalBrand=null;   // null = the index of every campaign
+  function openCampaign(b){ portalBrand=b; RENDER.portal(); document.querySelector('.views').scrollTop=0; }
   function closeCampaign(){ portalBrand=null; RENDER.portal(); document.querySelector('.views').scrollTop=0; }
 
   function campaignSummary(brand){
@@ -1150,7 +1167,6 @@
       <path d="M${solid.join(' L')}" fill="none" stroke="${tone}" stroke-width="2.4" stroke-linecap="round"/>
       <circle cx="${X(today)}" cy="${Y(total(today))}" r="3" fill="${tone}"/></svg>`;
   }
-  function togglePortalRead(id){ portalOpen[id]=!portalOpen[id]; RENDER.portal(); }
 
   RENDER.portal = () => {
     const brands=[...new Set(SPOTS.filter(s=>projection(s)).map(s=>s.brand))];
@@ -1201,7 +1217,7 @@
 
       <div class="card" style="margin-top:16px">
         <div class="card__head"><div><div class="card__title">Reads</div>
-          <div class="card__sub">Open a read for the episode, the numbers and the tape.</div></div>
+          <div class="card__sub">Open any read for the episode, the transcript and the brief the host was given.</div></div>
           <span class="tag tag--grey">${spots.length} of ${spots.length + mgs.length} placed</span></div>
         <div class="card__pad"><div class="rgrid">
           ${spots.map(s=>portalRead(s,cr)).join('')}
@@ -1212,22 +1228,6 @@
         </div></div>
       </div>
 
-      <div class="card" style="margin-top:16px">
-        <div class="card__head"><div><div class="card__title">Campaign assets</div>
-          <div class="card__sub">What every host was briefed to read.</div></div>
-          <button class="btn btn--ghost btn--sm" onclick="toast('Copy exported for ${esc(portalBrand)}.')">Export</button></div>
-        <div class="card__pad">
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px">
-            ${pStat('Placement',esc(cr.placement))}${pStat('Read length',esc(cr.len))}
-            ${pStat('Promo code',cr.code?esc(cr.code):'<span class="muted">none</span>')}${pStat('Offer',esc(cr.cta)||'—')}
-          </div>
-          <div style="font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:6px">Ad copy</div>
-          <div style="background:var(--page-bg);border:1px solid var(--border-light);border-radius:11px;padding:14px 16px;font-size:13px;line-height:1.7">${esc(cr.copy)}</div>
-          ${cr.url?`<div style="display:flex;align-items:center;gap:8px;margin-top:11px">
-            <span style="font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-tertiary)">Landing</span>
-            <a href="https://${esc(cr.url)}" target="_blank" style="font-size:12.5px;color:var(--blue-text);font-weight:600;text-decoration:none">${esc(cr.url)} ↗</a></div>`:''}
-        </div>
-      </div>
       <div class="footnote">Read-only for the advertiser and updates itself as reads land — no export to keep in sync.</div>
     </div>`;
   };
@@ -1270,6 +1270,48 @@
   const pStat=(l,v)=>`<div><div style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary)">${l}</div><div style="font-size:19px;font-weight:800;letter-spacing:-.03em;margin-top:3px">${v}</div></div>`;
 
   const ORD=['1st','2nd','3rd','4th'];
+
+  /* The transcript the agent pulled to find the read. Lines before and after
+     are the host's own content; the highlighted block is the ad. */
+  const PRE_LINES={
+    rubin:"…and that's the part nobody wants to say out loud. Alright — quick word from a partner and we'll get straight back into it.",
+    sage:"…which is exactly why the reaction was so overblown. Let me pause there for one second, because this one I actually use.",
+    warren:"…so I sat with that for a while before I had an answer. Before we go on, a word from someone supporting the show.",
+    action:"…absolutely not, and I stand by that. Okay — quick break, then we're straight into the second half.",
+    nate:"…and that changed how I think about the whole category. One quick thing before we keep going.",
+    clinton:"…which took me years to work out for myself. Quick word from a sponsor, then we'll pick this back up." };
+  const POST_LINES={
+    rubin:"Right — back to where we were, because this next part is the bit that actually matters.",
+    sage:"Okay, so, back to it. I promised I'd explain why that number is misleading.",
+    warren:"So — back in. And I want to pick up on something you said before the break.",
+    action:"And we're back. Second half, and this is where it gets properly stupid.",
+    nate:"Okay, back to it. So the thing I keep coming back to is…",
+    clinton:"Right, where were we. I want to come back to what you asked earlier." };
+
+  function transcript(s){
+    const cr=creative(s.brand), sh=show(s.showId), dur=adSecs(s), start=s.ts;
+    const words=cr.copy.split(/\s+/), lines=[]; let cur=[];
+    words.forEach(w=>{ cur.push(w); if(cur.length>=11){ lines.push(cur.join(' ')); cur=[]; } });
+    if(cur.length) lines.push(cur.join(' '));
+    const step=dur/Math.max(lines.length,1);
+    const out=[{ t:Math.max(0,start-13), text:PRE_LINES[sh.id]||'…and we will pick that back up in a moment. Quick word from a partner first.', ad:false }];
+    lines.forEach((l,i)=>out.push({ t:Math.round(start+i*step), text:l, ad:true }));
+    out.push({ t:start+dur+4, text:POST_LINES[sh.id]||'Right — back to it.', ad:false });
+    return out;
+  }
+  function transcriptBlock(s){
+    if(!s.yt) return '';
+    const cr=creative(s.brand);
+    return `<div class="txwrap">
+      <div class="txhd"><span>Episode transcript</span>
+        <span style="text-transform:none;letter-spacing:0;font-weight:600;color:var(--text-tertiary)">Read at ${mmss(s.ts)}–${mmss(s.ts+adSecs(s))} · click a line to play from there</span></div>
+      <div class="txbody">${transcript(s).map(l=>
+        `<button class="tx${l.ad?' tx--ad':''}" onclick="event.stopPropagation();playClip('${s.yt}',${l.t})">
+          <time>${mmss(l.t)}</time><span>${esc(l.text)}</span></button>`).join('')}</div>
+    </div>
+    <div class="muted" style="font-size:11.5px;margin-top:8px;line-height:1.5">Pulled from the episode and matched against the brief${(s.copy||cr.points).length?` — ${(s.copy||cr.points).join(', ').toLowerCase()} all present`:''}.</div>`;
+  }
+
   // Plain English, written for the advertiser reading the report.
   function readNote(s){
     const pr=projection(s), v=verdict(s), m=mgForSpot(s.id);
@@ -1283,7 +1325,7 @@
                     :'Under the guarantee. We are adding a read at no cost.';
   }
   function portalRead(s,cr){
-    const pr=projection(s), sh=show(s.showId), open=!!portalOpen[s.id], v=verdict(s);
+    const pr=projection(s), sh=show(s.showId), v=verdict(s);
     const pct=Math.round(pr.ratio*100), tone=toneVar(v.tone);
     const max=Math.max(s.guarantee,pr.proj)*1.06, w=x=>Math.min(100,x/max*100);
     const waiting = s.dlState==='requested';
@@ -1303,10 +1345,9 @@
       <div class="rcard__meta">
         <span class="rchip">Read: ${esc(cr.placement.replace('-roll',''))}</span>
         <span class="rchip">Place: ${ORD[(s.pos||1)-1]}</span>
-        <div style="flex:1"></div>
         <span class="rcard__dur">${mmss(adSecs(s))}</span>
-        <button class="rcard__more" onclick="togglePortalRead('${s.id}')" aria-label="${open?'Collapse':'Expand'}">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="transform:rotate(${open?90:0}deg);transition:.15s"><path d="M9 6l6 6-6 6"/></svg></button>
+        <div style="flex:1"></div>
+        <button class="btn btn--ghost btn--sm" onclick="openRead('${s.id}')">More info</button>
       </div>
       ${waiting
         ? `<button class="rcard__add" onclick="chaseDownloads('${s.id}')">+ Add impressions</button>`
@@ -1317,22 +1358,52 @@
             <div style="position:absolute;inset:0 auto 0 0;width:${w(pr.got)}%;background:${tone};border-radius:4px"></div>
             <div title="90% of guarantee" style="position:absolute;top:-2px;bottom:-2px;left:${w(s.guarantee*IAB_FULL)}%;width:2px;background:var(--green-text)"></div>
           </div>`}
-      ${open?`<div class="rcard__body">
-        <div style="font-size:12.5px;font-weight:700;margin-bottom:9px">${esc(epTitle(s))}</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px 14px">
-          ${pStat('Delivered',K(pr.got))}
-          ${pStat(pr.final?'Final':'Projected',K(pr.proj))}
-          ${pStat('Video',K(s.views||0))}
-          ${pStat('Audio',sh.simulcast?(waiting?'<span class="muted">pending</span>':K(s.downloads||0)):'<span class="muted">—</span>')}
-        </div>
-        ${s.yt?`<div style="margin-top:12px;padding-top:11px;border-top:1px solid var(--border-light)">
-          <span class="tag tag--green"><i></i>Verified ${mmss(s.ts)}–${mmss(s.ts+adSecs(s))}</span>
-          <div class="muted" style="font-size:11.5px;margin-top:7px;line-height:1.5">${(s.copy||cr.points).join(' · ')}</div>
-          <a href="${clipUrl(s)}" target="_blank" class="btn btn--ghost btn--sm" style="text-decoration:none;margin-top:9px">Open the episode ↗</a>
-        </div>`:''}
-      </div>`:''}
     </div>`;
   }
+
+  /* What the advertiser gets when they open a read: the episode, the numbers,
+     the tape, the transcript, and the brief the host was given. */
+  function openRead(id){
+    const s=spot(id), sh=show(s.showId), pr=projection(s), v=verdict(s), cr=creative(s.brand);
+    const waiting=s.dlState==='requested';
+    const fact=(l,val)=>`<div><div style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-tertiary)">${l}</div><div style="font-size:14px;font-weight:700;margin-top:3px">${val}</div></div>`;
+    openDrawer(`<div class="drawer__head"><div>
+        ${pr.confident?`<span class="tag tag--${v.tone}"><i></i>${Math.round(pr.ratio*100)}% of guarantee</span>`:'<span class="tag tag--blue"><i></i>Just live</span>'}
+        <h2 style="font-size:18px;font-weight:800;margin-top:8px">${esc(epTitle(s))}</h2>
+        <div class="muted" style="font-size:12px">${esc(sh.name)} · ${fmtDate(s.published)} · ${esc(cr.len)} ${esc(cr.placement).toLowerCase()}</div>
+      </div><button class="x" onclick="closeOverlays()">✕</button></div>
+    <div class="drawer__body">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+        ${fact('Delivered',K(pr.got))}
+        ${fact(pr.final?'Final':'Projected',pr.confident?K(pr.proj):'<span class="muted">building</span>')}
+        ${fact('Video',K(s.views||0))}
+        ${fact('Audio',sh.simulcast?(waiting?'<span class="muted">pending</span>':K(s.downloads||0)):'<span class="muted">—</span>')}
+      </div>
+      <div class="muted" style="font-size:12.5px;margin-top:11px;line-height:1.55">${esc(readNote(s))}</div>
+
+      ${s.yt?`<div style="margin-top:16px;background:var(--primary);border-radius:12px;padding:14px 16px;color:var(--panel);display:flex;align-items:center;gap:14px">
+        <button onclick="playClip('${s.yt}',${s.ts})" style="width:40px;height:40px;border-radius:50%;border:none;background:rgba(128,128,128,.28);color:inherit;font-size:14px;flex-shrink:0">▶</button>
+        <div style="flex:1;min-width:0"><b style="font-size:13px">Hear the read · ${mmss(s.ts)}–${mmss(s.ts+adSecs(s))}</b>
+        <div style="font-size:11.5px;opacity:.72;margin-top:2px">${(s.copy||cr.points).join(' · ')}</div></div>
+      </div>
+      <div style="margin-top:16px">${transcriptBlock(s)}</div>`:''}
+
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light)">
+        <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em">What the host was briefed to read</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:13px 0">
+          ${fact('Placement',esc(cr.placement))}${fact('Read length',esc(cr.len))}
+          ${fact('Promo code',cr.code?esc(cr.code):'<span class="muted">none</span>')}${fact('Offer',esc(cr.cta)||'—')}
+        </div>
+        <div style="background:var(--page-bg);border:1px solid var(--border-light);border-radius:11px;padding:13px 15px;font-size:12.5px;line-height:1.7">${esc(cr.copy)}</div>
+        ${cr.url?`<div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+          <span style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-tertiary)">Landing</span>
+          <a href="https://${esc(cr.url)}" target="_blank" style="font-size:12.5px;color:var(--blue-text);font-weight:600;text-decoration:none">${esc(cr.url)} ↗</a></div>`:''}
+      </div>
+    </div>
+    <div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Close</button>
+      ${s.yt?`<a href="${clipUrl(s)}" target="_blank" class="btn btn--primary" style="text-decoration:none">Open the episode ↗</a>`:''}</div>`);
+  }
+
 
 
 
