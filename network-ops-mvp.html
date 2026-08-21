@@ -881,7 +881,7 @@
     const pr=projection(s), v=verdict(s), m=mgForSpot(s.id);
     if(v.k==='short') return { label:'Make good', dark:!m };
     if(!pr || !pr.confident || s.status!=='verified') return { label:'In progress', dark:false };
-    return { label:'Verified', dark:false };
+    return { label:'Review', dark:false };
   }
 
   /* One row, used by Needs you and All flights alike. Six columns:
@@ -988,14 +988,13 @@
      back half: written to Airtable, flagged in Booster, and the analytics that
      come out of tracking sold against given. */
   const MGSTEP=[['Date from avails',m=>!!m.date],['Show approved',m=>m.showOk===true],
-                ['Brand approved',m=>m.brandOk===true],['In Airtable',m=>m.status==='scheduled']];
+                ['Brand approved',m=>m.brandOk===true]];
   function makeGoodsPanel(){
     const st=mgStats();
     const card=m=>{ const sp=spot(m.spotId), sh=show(sp.showId), done=m.status==='scheduled';
       return `<div class="card" style="${done?'':'border-color:var(--orange-bg)'}">
         <div class="card__pad">
           <div style="display:flex;align-items:flex-start;gap:13px">
-            ${icoBox('mg',done?'green':'orange')}
             <div style="flex:1;min-width:0">
               <b style="font-size:13.5px">${esc(sp.brand)} on ${esc(sh.name)}</b>
               <div class="muted" style="font-size:12px;margin-top:2px">Original read ${fmtDate(sp.published)} landed ${Math.round(projection(sp).ratio*100)}% · ${K(shortfall(sp))} short · worth ${money(mgValue(m))} at ${money(sh.cpm)} CPM</div>
