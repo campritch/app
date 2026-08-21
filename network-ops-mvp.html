@@ -838,7 +838,8 @@
     doc:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>',
     mg:'<path d="M3 12a9 9 0 1015-6.7L21 8"/><path d="M21 3v5h-5"/>',
     clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
-    wave:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>' };
+    wave:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+    check:'<path d="M20 6L9 17l-5-5"/>' };
   const icoBox=(k,tone)=>`<div class="wrow__ico" style="background:var(--${tone}-bg)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--${tone}-text)" stroke-width="2.1">${ICO[k]}</svg></div>`;
   const row=(lead,title,sub,num,action,click)=>`<div class="wrow${click?' wrow--click':''}"${click?` onclick="${click}"`:''}>${lead}<div class="wrow__main"><b>${title}</b><span>${sub}</span></div>${num||''}${action?`<span onclick="event.stopPropagation()">${action}</span>`:''}</div>`;
   const spotLead=s=>icoBox('wave', verdict(s).tone==='grey'?'blue':verdict(s).tone);
@@ -863,6 +864,8 @@
     if(!pr.confident)          return { label:'Ad run', tone:'blue' };
     const v=verdict(s);
     if(v.k==='short')          return { label:'Short', tone:'red' };
+    if(s.completed)            return { label:'Complete', tone:'green' };
+    if(s.reportSent)           return { label:'Report sent', tone:'green' };
     return { label: pr.final?'Delivered':'On track', tone:'green' };
   }
   // dark = you have to look at it; ghost = it is just running
@@ -913,6 +916,19 @@
       `Airs ${dayName(s.published)} ${fmtDate(s.published)} · ${s.copyStatus==='needs_copy'?'no ad copy yet':'copy in, no CTA'}`,
       wstat(s.copyStatus==='needs_copy'?'No copy':'No CTA','blue'), cta('Send copy',`markCopy('${s.id}')`,true),
       `openSpot('${s.id}')`, warch('cp',s.id)));
+
+    // cleared the line and closed at 30 days — send the report, then close it out
+    SPOTS.filter(s=>closedOut(s)&&!s.reportSent&&unarchived('rp',s.id)).forEach(s=>push(
+      icoBox('check','green'), nameOf(s),
+      `Closed at ${K(projection(s).proj)} of ${K(s.guarantee)} · ${Math.round(projection(s).ratio*100)}% — report ready for ${esc(s.brand)}`,
+      wstat('Delivered','green'), cta('Send report',`sendDeliveryReport('${s.id}')`,false),
+      `openSpot('${s.id}')`, warch('rp',s.id)));
+
+    SPOTS.filter(s=>closedOut(s)&&s.reportSent&&!s.completed&&unarchived('cm',s.id)).forEach(s=>push(
+      icoBox('check','green'), nameOf(s),
+      `Report sent ${fmtDate(s.reportSent)} · mark it 100% in Airtable and close the campaign`,
+      wstat('Report sent','green'), cta('Mark complete',`markComplete('${s.id}')`,false),
+      `openSpot('${s.id}')`, warch('cm',s.id)));
 
     // sent, unopened — worth a nudge, not worth shouting
     SPOTS.filter(s=>s.copyStatus==='sent'&&unarchived('nu',s.id)).forEach(s=>push(
@@ -1064,6 +1080,8 @@
     <div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Close</button>
       ${v.k==='short'&&!m?`<button class="btn btn--primary" onclick="closeOverlays();createMakegood('${s.id}')">Set up make good</button>`
         :m?`<button class="btn btn--primary" onclick="closeOverlays();openMg('${m.id}')">Open make good</button>`
+        :closedOut(s)&&!s.reportSent?`<button class="btn btn--primary" onclick="closeOverlays();sendDeliveryReport('${s.id}')">Send delivery report</button>`
+        :closedOut(s)&&!s.completed?`<button class="btn btn--primary" onclick="closeOverlays();markComplete('${s.id}')">Mark complete</button>`
         :pr?`<button class="btn btn--primary" onclick="closeOverlays();go('portal');openCampaign('${s.brand}')">See in the report</button>`:''}</div>`);
   }
 
@@ -1121,6 +1139,20 @@
     if(who==='show') toast(`Sent to ${show(s.showId).host} from adops@. The agent reads the reply and flips the toggle.`);
     else { m.sentBrand=TODAY; toast(`Sent to ${s.brand} in the existing thread.`); }
     m.status='awaiting'; openMg(id); rerender(); refreshBadges(); }
+
+  /* "Yes - Good" on the flowchart: the flight cleared the line, so the report
+     goes to the brand with adops@ copied, then the spot is marked complete —
+     100% in Airtable, colour changed, campaign ends. */
+  function sendDeliveryReport(id){
+    const s=spot(id); s.reportSent=TODAY; rerender(); refreshBadges();
+    toast(`Delivery report sent to ${s.brand}, adops@ copied. Every read, the tape and the final numbers attached.`);
+  }
+  function markComplete(id){
+    const s=spot(id); s.completed=TODAY; rerender(); refreshBadges();
+    toast(`${s.brand} on ${show(s.showId).name} marked complete — 100% written to Airtable, colour changed, campaign closed.`);
+  }
+  const closedOut = s => { const pr=projection(s);
+    return pr && pr.final && verdict(s).k!=='short' && s.dlState!=='requested'; };
 
   function nudgeEpisode(id){ const s=spot(id); toast(`Nudged ${show(s.showId).host} from adops@. The agent keeps checking every 24h.`); }
   function chaseDownloads(id){ const s=spot(id); s.dlState='received'; s.downloads=Math.round(s.views*0.24); rerender(); refreshBadges();
@@ -1220,7 +1252,7 @@
         <div class="head"><h1>${esc(portalBrand)}</h1><p>The live report the advertiser sees — every read, the tape, and the assets that ran.</p></div>
         <div class="pagebar__right">
           <button class="btn btn--ghost btn--sm" onclick="toast('Copied vmg.live/${portalBrand.toLowerCase()}-aug — read-only, updates as reads land.')">🔗 Copy link</button>
-          <button class="btn btn--primary btn--sm" onclick="toast('Delivery report sent to ${esc(portalBrand)} and copied to adops@.')">Send report</button></div>
+          <button class="btn btn--primary btn--sm" onclick="sendCampaignReport('${esc(portalBrand)}')">Send report</button></div>
       </div>
 
       <div class="card">
@@ -1270,6 +1302,12 @@
       <div class="footnote">Read-only for the advertiser and updates itself as reads land — no export to keep in sync.</div>
     </div>`;
   };
+  function sendCampaignReport(b){
+    const done=SPOTS.filter(s=>s.brand===b&&closedOut(s));
+    done.forEach(s=>s.reportSent=TODAY); rerender(); refreshBadges();
+    toast(done.length?`Delivery report sent to ${b}, adops@ copied. ${done.length} closed read${done.length>1?'s':''} attached.`
+                     :`Report sent to ${b}, adops@ copied.`);
+  }
   function renderCampaignIndex(brands){
     const cs=brands.map(campaignSummary).sort((a,b)=>(a.status.rank-b.status.rank)||(a.pct-b.pct));
     const totG=cs.reduce((a,c)=>a+c.g,0), totP=cs.reduce((a,c)=>a+c.proj,0);
