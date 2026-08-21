@@ -862,7 +862,7 @@
         ? `<button class="fran" onclick="playClip('${s.yt}',${s.ts})" title="Hear the read"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>${mmss(s.ts)}</button>`
         : `<span class="fran fran--no">${s.status==='scheduled'?'booked':s.missed?'no episode':'scanning'}</span>`}</span>
       <div class="fnum">${pr?K(pr.got):dash}${pr&&sh.simulcast?`<small>${K(s.views||0)} + ${s.dlState==='requested'?'?':K(s.downloads||0)}</small>`:pr?'<small>video</small>':''}</div>
-      <div class="wrow__num">${pr?`${projBar(s)}<b style="color:${toneVar(v.tone)}">${Math.round(pr.ratio*100)}%</b>`:'<span style="font-size:12px;font-weight:600;color:var(--text-tertiary)">Not started</span>'}</div>
+      <div class="wrow__num">${pr?`${projBar(s)}<b style="color:${toneVar(v.tone)}">${Math.round(pr.ratio*100)}%</b>`:'<span style="flex:1;text-align:left;font-size:12px;font-weight:600;color:var(--text-tertiary)">Not started</span>'}</div>
       <div class="fnum">${m?`<span class="tag tag--purple">${fmtDate(m.date)}</span>`
         : v.k==='short'?'<span class="tag tag--red"><i></i>Needed</span>' : dash}</div>
       <span onclick="event.stopPropagation()">${cta(c.label,`openSpot('${s.id}')`,c.dark)}</span>
