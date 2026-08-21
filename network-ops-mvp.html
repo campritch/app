@@ -309,11 +309,15 @@
     /* ─── one work row, used for every kind of item ─── */
     .wrow { display:flex; align-items:center; gap:13px; padding:13px 16px; border:1px solid var(--border-light); border-radius:12px; background:var(--white); }
     .wrow + .wrow { margin-top:8px; }
-    .wstat { display:inline-flex; align-items:center; gap:6px; flex-shrink:0; font-size:11.5px; font-weight:700; padding:5px 12px; border-radius:999px; white-space:nowrap; }
-    .wstat i { width:6px; height:6px; border-radius:50%; background:currentColor; }
-    .wstat--go { background:var(--primary); color:var(--panel); }
-    .wstat--wait { background:var(--panel); border:1px solid var(--border); color:var(--text-secondary); }
-    .warch { width:26px; height:26px; border-radius:7px; border:none; background:none; color:var(--text-tertiary); flex-shrink:0; font-size:12px; }
+    /* task rows: one grid, so status and action line up all the way down */
+    .wtask { display:grid; grid-template-columns:34px minmax(0,1fr) 172px 116px 26px; align-items:center; gap:0 13px; }
+    .wtask .wrow__num { width:auto; justify-content:flex-end; }
+    .wstat { display:inline-flex; align-items:center; gap:7px; justify-self:end; font-size:11.5px; font-weight:600;
+             padding:5px 12px; border-radius:999px; white-space:nowrap;
+             background:var(--panel); border:1px solid var(--border); color:var(--text-secondary); }
+    .wstat i { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+    .wtask .btn { width:100%; justify-content:center; }
+    .warch { width:26px; height:26px; border-radius:7px; border:none; background:none; color:var(--text-tertiary); font-size:12px; justify-self:center; }
     .warch:hover { background:var(--nav-hover); color:var(--text-primary); }
     .wrow--click { cursor:pointer; transition:border-color .12s, box-shadow .12s; }
     .wrow--click:hover { border-color:var(--border-strong); box-shadow:var(--shadow-card); }
@@ -814,8 +818,8 @@
   const spotNum=s=>{ const pr=projection(s); if(!pr) return ''; const v=verdict(s);
     return `<div class="wrow__num">${projBar(s)}<b style="color:${toneVar(v.tone)}">${Math.round(pr.ratio*100)}%</b></div>`; };
 
-  const wstat=(label,go)=>`<span class="wstat ${go?'wstat--go':'wstat--wait'}"><i></i>${label}</span>`;
-  const warch=(kind,id)=>`<button class="warch" title="Archive" onclick="event.stopPropagation();archiveItem('${kind}','${id}')">✕</button>`;
+  const wstat=(label,tone)=>`<span class="wstat"><i style="background:${toneVar(tone||'grey')}"></i>${label}</span>`;
+  const warch=(kind,id)=>kind?`<button class="warch" title="Archive" onclick="event.stopPropagation();archiveItem('${kind}','${id}')">✕</button>`:'<span></span>';
   const ARCHIVED={};
   function archiveItem(kind,id){ ARCHIVED[kind+':'+id]=true; rerender(); refreshBadges();
     toast('Archived. It stays on the record, it just stops asking.'); }
@@ -827,22 +831,22 @@
   function workList(){
     const out=[];
     const push=(lead,title,sub,mid,cta,click,arch)=>out.push(
-      `<div class="wrow${click?' wrow--click':''}"${click?` onclick="${click}"`:''}>${lead}
+      `<div class="wrow wtask${click?' wrow--click':''}"${click?` onclick="${click}"`:''}>${lead}
         <div class="wrow__main"><b>${title}</b><span>${sub}</span></div>
-        ${mid}<span onclick="event.stopPropagation()">${cta}</span>${arch||''}</div>`);
+        ${mid||'<span></span>'}<span onclick="event.stopPropagation()">${cta||''}</span>${arch||'<span></span>'}</div>`);
 
     // the show never posted — nothing to measure yet
     SPOTS.filter(s=>s.status==='aired'&&s.missed&&unarchived('ep',s.id)).forEach(s=>push(
       icoBox('warn','red'), nameOf(s),
       `Booked ${fmtDate(s.published)} · scanned ${esc(show(s.showId).channel)}, nothing posted`,
-      wstat('No episode'), `<button class="btn btn--primary btn--sm" onclick="nudgeEpisode('${s.id}')">Nudge show</button>`,
+      wstat('No episode','red'), `<button class="btn btn--ghost btn--sm" onclick="nudgeEpisode('${s.id}')">Nudge show</button>`,
       `openSpot('${s.id}')`, warch('ep',s.id)));
 
     // projecting under the line, no make good raised
     needsMakegood().filter(s=>unarchived('mg',s.id)).forEach(s=>push(
       spotLead(s), nameOf(s),
       `Day ${projection(s).day} · projecting ${K(projection(s).proj)} of ${K(s.guarantee)} — ${K(shortfall(s))} short`,
-      spotNum(s), `<button class="btn btn--primary btn--sm" onclick="createMakegood('${s.id}')">Make good</button>`,
+      spotNum(s), `<button class="btn btn--ghost btn--sm" onclick="createMakegood('${s.id}')">Make good</button>`,
       `openSpot('${s.id}')`, warch('mg',s.id)));
 
     // make goods mid-flight
@@ -851,30 +855,30 @@
       push(icoBox('mg','orange'), nameOf(s),
         m.date?`Make good ${fmtDate(m.date)} · ${needShow?'show not confirmed':'show ✓'} · ${needBrand?'brand not confirmed':'brand ✓'}`
               :`Make good · ${K(shortfall(s))} to replace`,
-        wstat(!m.date?'Needs a date':ready?'Ready to book':needShow?'Waiting on show':'Waiting on brand', !!ready),
-        `<button class="btn btn--primary btn--sm" onclick="openMg('${m.id}')">${!m.date?'Pick a date':ready?'Book it':'Chase'}</button>`,
+        wstat(!m.date?'Needs a date':ready?'Ready to book':needShow?'Waiting on show':'Waiting on brand', ready?'green':'orange'),
+        `<button class="btn btn--ghost btn--sm" onclick="openMg('${m.id}')">${!m.date?'Pick a date':ready?'Book it':'Chase'}</button>`,
         `openMg('${m.id}')`, ''); });
 
     // audio numbers not back from the creator — it has a partial number, so show it
     SPOTS.filter(s=>s.dlState==='requested'&&unarchived('dl',s.id)).forEach(s=>push(
       icoBox('clock','purple'), nameOf(s),
       `Day ${projection(s).day} · video in, ${esc(show(s.showId).host)} still owes the audio numbers`,
-      spotNum(s), `<button class="btn btn--primary btn--sm" onclick="chaseDownloads('${s.id}')">Request</button>`,
+      spotNum(s), `<button class="btn btn--ghost btn--sm" onclick="chaseDownloads('${s.id}')">Request</button>`,
       `openSpot('${s.id}')`, warch('dl',s.id)));
 
     // copy not in yet
     SPOTS.filter(s=>['needs_copy','needs_cta'].includes(s.copyStatus)&&unarchived('cp',s.id)).forEach(s=>push(
       icoBox('doc','blue'), nameOf(s),
       `Airs ${dayName(s.published)} ${fmtDate(s.published)} · ${s.copyStatus==='needs_copy'?'no ad copy yet':'copy in, no CTA'}`,
-      wstat(s.copyStatus==='needs_copy'?'No copy':'No CTA', true),
-      `<button class="btn btn--primary btn--sm" onclick="markCopy('${s.id}')">Send copy</button>`,
+      wstat(s.copyStatus==='needs_copy'?'No copy':'No CTA','blue'),
+      `<button class="btn btn--ghost btn--sm" onclick="markCopy('${s.id}')">Send copy</button>`,
       `openSpot('${s.id}')`, warch('cp',s.id)));
 
     // sent to the show, never opened
     SPOTS.filter(s=>s.copyStatus==='sent'&&unarchived('nu',s.id)).forEach(s=>push(
       icoBox('doc','orange'), nameOf(s),
       `Copy sent ${fmtDate(s.copySent)} to ${esc(show(s.showId).host)} · unopened after ${daysBetween(s.copySent,TODAY)} days`,
-      wstat('Not opened'), `<button class="btn btn--primary btn--sm" onclick="nudgeShow('${s.id}')">Nudge</button>`,
+      wstat('Not opened','orange'), `<button class="btn btn--ghost btn--sm" onclick="nudgeShow('${s.id}')">Nudge</button>`,
       `openSpot('${s.id}')`, warch('nu',s.id)));
 
     return out;
@@ -1557,6 +1561,11 @@
   };
 
 
+  function toggleDark(){
+    document.body.classList.toggle('dark');
+    const d=document.body.classList.contains('dark'), b=document.getElementById('dmBtn');
+    if(b) b.lastChild.textContent = d?'Light Mode':'Dark Mode';
+  }
   function applyGuarantee(showId,v){ show(showId).guarantee=v; rerender(); toast(`${show(showId).name} guarantee set to ${K(v)}. Written back to Booster and Airtable.`); }
 
   /* ═══════════════════════════ TOAST ═══════════════════════════ */
