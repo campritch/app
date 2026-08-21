@@ -298,14 +298,14 @@
     .wrow { display:flex; align-items:center; gap:13px; padding:13px 16px; border:1px solid var(--border-light); border-radius:12px; background:var(--white); }
     .wrow + .wrow { margin-top:8px; }
     /* ─── flight rows: one grid for Needs you and All flights alike ─── */
-    .wflight { display:grid; grid-template-columns:minmax(0,1fr) 92px 118px 168px 96px 118px 26px; align-items:center; gap:0 14px; padding:15px 18px; }
+    .wflight { display:grid; grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 96px 118px 26px 26px; align-items:center; gap:0 14px; padding:15px 18px; }
     .wflight .wrow__main > b { font-size:13.5px; }
     .wflight .wrow__num { width:auto; justify-content:flex-end; }
     .wflight .btn { width:100%; justify-content:center; }
-    .fhead { display:grid; grid-template-columns:minmax(0,1fr) 92px 118px 168px 96px 118px 26px; gap:0 14px; padding:0 18px 9px;
+    .fhead { display:grid; grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 96px 118px 26px 26px; gap:0 14px; padding:0 18px 9px;
              font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--text-tertiary); }
-    .fhead span:nth-child(2),.fhead span:nth-child(3),.fhead span:nth-child(5) { text-align:center; }
-    .fhead span:nth-child(4) { text-align:right; }
+    .fhead span:nth-child(2),.fhead span:nth-child(3),.fhead span:nth-child(4),.fhead span:nth-child(6) { text-align:center; }
+    .fhead span:nth-child(5) { text-align:right; }
     .fnum { text-align:center; font-size:13px; font-weight:700; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
     .fnum small { display:block; font-size:10.5px; font-weight:600; color:var(--text-tertiary); letter-spacing:0; margin-top:1px; }
     .fran { display:inline-flex; align-items:center; justify-content:center; gap:5px; width:100%; font-size:12px; font-weight:700;
@@ -313,9 +313,22 @@
             font-variant-numeric:tabular-nums; cursor:pointer; }
     .fran:hover { border-color:var(--border-strong); }
     .fran--no { border-style:dashed; color:var(--text-tertiary); font-weight:600; cursor:default; white-space:nowrap; }
-    .wcheck { width:18px; height:18px; border:1.5px solid var(--border-strong); border-radius:5px; background:var(--panel);
-              display:grid; place-items:center; color:transparent; font-size:11px; font-weight:800; padding:0; cursor:pointer; justify-self:center; }
+    .wcheck { width:26px; height:26px; border:1px solid var(--border); border-radius:8px; background:var(--panel);
+              display:grid; place-items:center; color:var(--text-tertiary); padding:0; cursor:pointer; justify-self:center; box-shadow:var(--shadow-btn); }
     .wcheck:hover { color:var(--green-text); border-color:var(--green-text); background:var(--green-bg); }
+    .wcheck.on { color:#fff; border-color:var(--green-text); background:var(--green-text); }
+    .wdots { width:26px; height:26px; border:none; border-radius:8px; background:none; color:var(--text-tertiary);
+             display:grid; place-items:center; padding:0; cursor:pointer; justify-self:center; font-size:14px; font-weight:800; letter-spacing:1px; }
+    .wdots:hover { background:var(--nav-hover); color:var(--text-primary); }
+    .wrow--dim { opacity:.55; }
+    .wpop { position:fixed; z-index:90; min-width:172px; background:var(--panel); border:1px solid var(--border); border-radius:11px;
+            box-shadow:var(--shadow-hover); padding:5px; }
+    .wpop button { display:block; width:100%; text-align:left; border:none; background:none; border-radius:7px;
+                   padding:8px 11px; font-size:12.5px; font-weight:600; color:var(--text-primary); cursor:pointer; }
+    .wpop button:hover { background:var(--nav-hover); }
+    .archdiv { display:flex; align-items:center; gap:10px; margin:22px 2px 10px; font-size:11px; font-weight:800;
+               letter-spacing:.07em; text-transform:uppercase; color:var(--text-tertiary); }
+    .archdiv::after { content:''; flex:1; height:1px; background:var(--border-light); }
 
     .warch { width:26px; height:26px; border-radius:7px; border:none; background:none; color:var(--text-tertiary); font-size:12px; justify-self:center; }
     .warch:hover { background:var(--nav-hover); color:var(--text-primary); }
@@ -834,9 +847,30 @@
 
   const warch=(kind,id)=>kind?`<button class="warch" title="Archive" onclick="event.stopPropagation();archiveItem('${kind}','${id}')">✕</button>`:'<span></span>';
   const ARCHIVED={};
-  function archiveItem(kind,id){ ARCHIVED[kind+':'+id]=true; rerender(); refreshBadges();
-    toast('Archived. It stays on the record, it just stops asking.'); }
-  const unarchived=(kind,id)=>!ARCHIVED[kind+':'+id];
+  function toggleArchive(id){ ARCHIVED['w:'+id]=!ARCHIVED['w:'+id]; closeRowMenu(); rerender(); refreshBadges(); }
+  const archiveItem=(kind,id)=>toggleArchive(id);
+  const isArchived=id=>!!ARCHIVED['w:'+id];
+  const unarchived=(kind,id)=>!isArchived(id);
+
+  let ROWMENU=null;
+  function closeRowMenu(){ if(ROWMENU){ ROWMENU.remove(); ROWMENU=null; document.removeEventListener('click',closeRowMenu); } }
+  function rowMenu(ev,id){
+    ev.stopPropagation(); closeRowMenu();
+    const s=spot(id), c=ctaFor(s), m=mgForSpot(id);
+    const el=document.createElement('div'); el.className='wpop';
+    el.innerHTML=[
+      `<button onclick="closeRowMenu();openSpot('${id}')">Open record</button>`,
+      s.yt?`<button onclick="closeRowMenu();playClip('${s.yt}',${s.ts})">Hear the read</button>`:'',
+      verdict(s).k==='short'&&!m?`<button onclick="closeRowMenu();createMakegood('${id}')">Set up make good</button>`:'',
+      m?`<button onclick="closeRowMenu();openMg('${m.id}')">Open make good</button>`:'',
+      `<button onclick="toggleArchive('${id}')">${isArchived(id)?'Restore':'Mark done · archive'}</button>`,
+    ].join('');
+    document.body.appendChild(el); ROWMENU=el;
+    const r=ev.currentTarget.getBoundingClientRect();
+    el.style.top=Math.min(innerHeight-el.offsetHeight-10, r.bottom+6)+'px';
+    el.style.left=Math.max(10, r.right-el.offsetWidth)+'px';
+    setTimeout(()=>document.addEventListener('click',closeRowMenu),0);
+  }
 
   /* Three words on the button, and only one of them is dark.
      In progress → running, nothing to do. Verified → it landed.
@@ -855,6 +889,7 @@
     const dash='<span class="muted" style="font-weight:600">—</span>';
     return `<div class="wrow wflight wrow--click" onclick="openSpot('${s.id}')">
       <div class="wrow__main"><b>${nameOf(s)}</b></div>
+      <div class="fnum">${pr?Math.min(pr.day,30):'—'}${pr?'<small>of 30</small>':''}</div>
       <span onclick="event.stopPropagation()">${s.yt
         ? `<button class="fran" onclick="playClip('${s.yt}',${s.ts})" title="Hear the read"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>${mmss(s.ts)}</button>`
         : `<span class="fran fran--no">${s.status==='scheduled'?'due '+fmtDate(s.published):s.missed?'due '+fmtDate(s.published)+' ·  missed':'due today'}</span>`}</span>
@@ -863,13 +898,14 @@
       <div class="fnum">${m?`<span class="tag tag--purple">${fmtDate(m.date)}</span>`
         : v.k==='short'?'<span class="tag tag--red"><i></i>Needed</span>' : dash}</div>
       <span onclick="event.stopPropagation()">${cta(c.label,`openSpot('${s.id}')`,c.dark)}</span>
-      <span onclick="event.stopPropagation()"><button class="wcheck" title="Archive — done with this" onclick="archiveItem('w','${s.id}')">✓</button></span>
+      <span onclick="event.stopPropagation()"><button class="wcheck${isArchived(s.id)?' on':''}" title="${isArchived(s.id)?'Restore':'Mark done — moves down to archive'}" onclick="toggleArchive('${s.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6L9 17l-5-5"/></svg></button></span>
+      <span onclick="event.stopPropagation()"><button class="wdots" title="More" onclick="rowMenu(event,'${s.id}')">⋮</button></span>
     </div>`;
   }
   const dcta=(label,onclick,dark)=>`<button class="btn ${dark?'btn--primary':'btn--ghost'} btn--sm" onclick="${onclick}">${label}</button>`;
   const cta=dcta;
 
-  const flightHead=()=>`<div class="fhead"><span>Ad</span><span>Ran</span><span>Delivered</span><span>Pacing</span><span>Make good</span><span></span><span></span></div>`;
+  const flightHead=()=>`<div class="fhead"><span>Ad</span><span>Day</span><span>Ran</span><span>Delivered</span><span>Pacing</span><span>Make good</span><span></span><span></span><span></span></div>`;
 
   // Needs you: the same rows, filtered to the ads that want something.
   function workList(){
@@ -880,13 +916,16 @@
     SPOTS.filter(s=>s.dlState==='requested').forEach(s=>wants.add(s.id));
     SPOTS.filter(s=>['needs_copy','needs_cta','sent'].includes(s.copyStatus)).forEach(s=>wants.add(s.id));
     SPOTS.filter(s=>closedOut(s)&&!s.completed).forEach(s=>wants.add(s.id));
-    return [...wants].filter(id=>unarchived('w',id)).map(spot)
-      .sort((a,b)=>(ctaFor(b).dark?1:0)-(ctaFor(a).dark?1:0))
-      .map(flightRow);
+    const ids=[...wants].map(spot).sort((a,b)=>liveDays(b)-liveDays(a));
+    const active=ids.filter(x=>!isArchived(x.id)).map(flightRow);
+    const arch=ids.filter(x=>isArchived(x.id)).map(x=>flightRow(x).replace('class="wrow wflight','class="wrow wflight wrow--dim'));
+    if(arch.length) active.push(`<div class="archdiv">Archived · ${arch.length}</div>`, ...arch);
+    active.count=ids.length-arch.length;
+    return active;
   }
 
 
-  function deliveryAttention(){ return { count: workList().length }; }
+  function deliveryAttention(){ return { count: workList().count||0 }; }
 
   /* ═══════════════════════════ VIEW: COMMAND CENTER ═══════════════════════════
      The glance. Three numbers, the next three things, one thing worth knowing.
@@ -920,7 +959,7 @@
   let delTab='work';
   RENDER.delivery = () => {
     const work=workList();
-    const live=SPOTS.filter(s=>projection(s)).sort((a,b)=>liveDays(a)-liveDays(b));
+    const live=SPOTS.filter(s=>projection(s)).sort((a,b)=>liveDays(b)-liveDays(a));
     document.getElementById('view-delivery').innerHTML=`
     <div class="inner" style="max-width:940px">
       <div class="pagebar">
@@ -1212,40 +1251,23 @@
     const g=spots.reduce((a,s)=>a+s.guarantee,0), got=spots.reduce((a,s)=>a+(delivered(s)||0),0);
     const proj=spots.reduce((a,s)=>a+projection(s).proj,0), paid=spots.reduce((a,s)=>a+spotCost(s),0);
     const done=spots.length&&spots.every(s=>projection(s).final);
+    // judge the campaign on the reads that can be judged — a day-0 read is building, not behind
+    const callable=spots.filter(s=>projection(s).confident);
+    const gC=callable.reduce((a,s)=>a+s.guarantee,0), projC=callable.reduce((a,s)=>a+projection(s).proj,0);
     // same confidence rule the rest of the app uses — an early read is not "behind"
     const blocked = spots.some(s=>verdict(s).k==='blocked');
-    const anyConfident = spots.some(s=>projection(s).confident);
-    const status = proj>=g ? {k:'full', label:done?'Delivered in full':'Tracking over', tone:'green', rank:4}
+    const status = !callable.length ? {k:'early', label:'Too early to call', tone:'grey', rank:3}
+      : projC>=gC ? {k:'full', label:done?'Delivered in full':'Tracking over', tone:'green', rank:4}
       : mgs.length ? {k:'mg', label:'Make good booked', tone:'purple', rank:2}
       : blocked ? {k:'blocked', label:'Waiting on downloads', tone:'purple', rank:1}
-      : !anyConfident ? {k:'early', label:'Too early to call', tone:'grey', rank:3}
       : {k:'under', label:'Tracking under', tone:'orange', rank:0};
     return { brand, spots, mgs, g, got, proj, paid, done, status,
       shows:[...new Set(spots.map(s=>s.showId))],
       yt:spots.reduce((a,s)=>a+(s.views||0),0), aud:spots.reduce((a,s)=>a+(s.downloads||0),0),
-      pct:pctOf(proj,g),
+      pct: callable.length?pctOf(projC,gC):pctOf(proj,g),
       flight: spots.length?`${fmtDate(spots[0].published)} – ${fmtDate(addDays(spots[spots.length-1].published,30))}`:'—' };
   }
 
-  // tiny version of the tracking line, for the index cards
-  function campaignSpark(c,{w=200,h=44}={}){
-    if(!c.spots.length) return '';
-    const start=c.spots[0].published, end=addDays(c.spots[c.spots.length-1].published,30);
-    const span=Math.max(daysBetween(start,end),1), today=Math.min(Math.max(daysBetween(start,TODAY),0),span);
-    const total=d=>c.spots.reduce((acc,x)=>{ const pr=projection(x); if(!pr) return acc;
-      const dd=d-daysBetween(start,x.published); return dd<=0?acc:acc+curveAt(show(x.showId).curve,Math.min(dd,30))*pr.proj; },0);
-    const max=Math.max(c.g,total(span))*1.1;
-    const X=d=>2+(w-4)*(d/span), Y=v=>h-3-(h-8)*(v/max);
-    const pts=[]; for(let d=0;d<=span;d++) pts.push([X(d),Y(total(d))]);
-    const solid=pts.slice(0,today+1).map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1));
-    const dash=pts.slice(today).map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1));
-    const tone=toneVar(c.status.tone);
-    return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="none">
-      <line x1="0" x2="${w}" y1="${Y(c.g)}" y2="${Y(c.g)}" stroke="var(--text-tertiary)" stroke-width="1" stroke-dasharray="3 3" opacity=".7"/>
-      ${dash.length>1?`<path d="M${dash.join(' L')}" fill="none" stroke="${tone}" stroke-width="2" stroke-dasharray="4 3" opacity=".5"/>`:''}
-      <path d="M${solid.join(' L')}" fill="none" stroke="${tone}" stroke-width="2.4" stroke-linecap="round"/>
-      <circle cx="${X(today)}" cy="${Y(total(today))}" r="3" fill="${tone}"/></svg>`;
-  }
 
   RENDER.portal = () => {
     const brands=[...new Set(SPOTS.filter(s=>projection(s)).map(s=>s.brand))];
@@ -1338,42 +1360,55 @@
     toast(done.length?`Delivery report sent to ${b}, adops@ copied. ${done.length} closed read${done.length>1?'s':''} attached.`
                      :`Report sent to ${b}, adops@ copied.`);
   }
+  let portalFilter='all';
+  const PORTAL_FILTERS=[
+    ['all','All'],
+    ['running','Running'],
+    ['under','Tracking under'],
+    ['over','Over guarantee'],
+  ];
+  const campaignIn=(c,f)=> f==='all' ? true
+    : f==='running' ? !c.done
+    : f==='under' ? (c.status.k==='under'||c.status.k==='mg')
+    : c.status.k==='full';
+
   function renderCampaignIndex(brands){
-    const cs=brands.map(campaignSummary).sort((a,b)=>(a.status.rank-b.status.rank)||(a.pct-b.pct));
-    const totG=cs.reduce((a,c)=>a+c.g,0), totP=cs.reduce((a,c)=>a+c.proj,0);
-    const risk=cs.filter(c=>c.status.k==='under').length;
+    const all=brands.map(campaignSummary).sort((a,b)=>(a.status.rank-b.status.rank)||(a.pct-b.pct));
+    const cs=all.filter(c=>campaignIn(c,portalFilter));
+    const totG=all.reduce((a,c)=>a+c.g,0), totP=all.reduce((a,c)=>a+c.proj,0);
     document.getElementById('view-portal').innerHTML=`
     <div class="inner" style="max-width:940px">
       <div class="pagebar"><div class="head"><h1>Campaign Portal</h1>
-        <p>Every live campaign and how it's tracking. Open one for the report you share with the advertiser.</p></div>
-        <div class="pagebar__right"><span class="tag tag--grey">${cs.length} live</span>
-        ${risk?`<span class="tag tag--orange"><i></i>${risk} projecting under</span>`:'<span class="tag tag--green"><i></i>none projecting under</span>'}</div>
+        <p>Every campaign and how it's tracking. Open one for the report you share with the advertiser.</p></div>
+        <div class="pagebar__right"><span class="tag tag--grey">Projecting ${pctOf(totP,totG)}% across ${all.length}</span></div>
       </div>
-      <div class="tiles" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px">
-        <div class="tile"><div class="tile__label">Campaigns live</div><div class="tile__val">${cs.length}</div></div>
-        <div class="tile"><div class="tile__label">Projected vs guaranteed</div><div class="tile__val" style="color:${totP>=totG?'var(--green-text)':'var(--orange-text)'}">${pctOf(totP,totG)}%</div></div>
-        <div class="tile"><div class="tile__label">Impressions guaranteed</div><div class="tile__val">${K(totG)}</div></div>
-      </div>
+      <div class="seg" style="margin-bottom:16px">${PORTAL_FILTERS.map(([k,label])=>{ const n=all.filter(c=>campaignIn(c,k)).length;
+        return `<button class="${portalFilter===k?'active':''}" onclick="portalFilter='${k}';RENDER.portal()">${label}${k==='all'?'':' · '+n}</button>`; }).join('')}</div>
       <div class="grid" style="grid-template-columns:1fr 1fr">
-        ${cs.map(c=>`<button class="card" onclick="openCampaign('${esc(c.brand)}')" style="text-align:left;font-family:inherit;color:var(--text-primary);border-color:var(--border);cursor:pointer;padding:0" onmouseover="this.style.boxShadow='var(--shadow-hover)'" onmouseout="this.style.boxShadow='var(--shadow-card)'">
-          <div class="card__pad">
-            <div style="display:flex;align-items:center;gap:12px">
-              <div class="brand-chip" style="background:${brandColor[c.brand]||'#3B82F6'}">${esc(c.brand[0])}</div>
-              <div style="flex:1;min-width:0"><b style="font-size:15px;letter-spacing:-.02em">${esc(c.brand)}</b>
-                <div class="muted" style="font-size:11.5px">${c.shows.length} show${c.shows.length!==1?'s':''} · ${c.spots.length} read${c.spots.length!==1?'s':''}${c.mgs.length?` · ${c.mgs.length} make good`:''}</div></div>
-              <div style="text-align:right"><div style="font-size:24px;font-weight:800;letter-spacing:-.03em;line-height:1;color:${toneVar(c.status.tone)}">${c.pct}%</div>
-                <div class="muted" style="font-size:10.5px;margin-top:2px">of guarantee</div></div>
+        ${cs.map(c=>{ const tone=toneVar(c.status.tone), max=Math.max(c.g,c.proj)*1.06, w=x=>Math.min(100,x/max*100);
+          return `<button class="card" onclick="openCampaign('${esc(c.brand)}')" style="text-align:left;font-family:inherit;color:var(--text-primary);border-color:var(--border);cursor:pointer;padding:0" onmouseover="this.style.boxShadow='var(--shadow-hover)'" onmouseout="this.style.boxShadow='var(--shadow-card)'">
+          <div class="card__pad" style="padding:15px 17px">
+            <div style="display:flex;align-items:center;gap:11px">
+              <div class="brand-chip" style="background:${brandColor[c.brand]||'#3B82F6'};width:34px;height:34px;border-radius:9px;font-size:13px">${esc(c.brand[0])}</div>
+              <div style="flex:1;min-width:0"><b style="font-size:14px;letter-spacing:-.02em">${esc(c.brand)}</b>
+                <div class="muted" style="font-size:11px">${c.shows.length} show${c.shows.length!==1?'s':''} · ${c.spots.length} read${c.spots.length!==1?'s':''}${c.mgs.length?` · ${c.mgs.length} make good`:''}</div></div>
+              <b style="font-size:18px;letter-spacing:-.03em;color:${tone}">${c.pct}%</b>
             </div>
-            <div style="margin:14px 0 10px">${campaignSpark(c)}</div>
+            <div style="position:relative;height:8px;border-radius:4px;background:var(--secondary-lite);margin:12px 0 9px">
+              <div style="position:absolute;inset:0 auto 0 0;width:${w(c.proj)}%;border-radius:4px;background:${tone};opacity:.28"></div>
+              <div style="position:absolute;inset:0 auto 0 0;width:${w(c.got)}%;border-radius:4px;background:${tone}"></div>
+              <div title="90% of guarantee" style="position:absolute;top:-2px;bottom:-2px;left:${w(c.g*IAB_FULL)}%;width:2px;background:var(--green-text)"></div>
+            </div>
             <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
               <span class="tag tag--${c.status.tone}"><i></i>${c.status.label}</span>
-              <span class="muted" style="font-size:11.5px">${K(c.got)} of ${K(c.g)} · ${esc(c.flight)}</span>
+              <span class="muted" style="font-size:11px">${K(c.got)} of ${K(c.g)} · ${esc(c.flight)}</span>
             </div>
-          </div></button>`).join('')}
+          </div></button>`; }).join('')||'<div class="card" style="grid-column:1/-1"><div class="empty">Nothing in this state.</div></div>'}
       </div>
       <div class="footnote">Each campaign opens a read-only page you can send straight to the advertiser.</div>
     </div>`;
   }
+
   const pStat=(l,v)=>`<div><div style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary)">${l}</div><div style="font-size:19px;font-weight:800;letter-spacing:-.03em;margin-top:3px">${v}</div></div>`;
 
 
