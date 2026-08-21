@@ -189,7 +189,6 @@
     .modal { position: fixed; z-index: 61; top: 50%; left: 50%; transform: translate(-50%,-46%); width: 720px; max-width: 94vw; max-height: 90vh; overflow-y: auto; background: var(--white); border-radius: 16px; box-shadow: var(--shadow-hover); opacity: 0; pointer-events: none; transition: .22s; }
     .modal.open { opacity: 1; pointer-events: auto; transform: translate(-50%,-50%); }
 
-    .kv { display: grid; grid-template-columns: 130px 1fr; gap: 8px 12px; font-size: 13px; }
     .kv dt { color: var(--text-tertiary); font-weight: 600; }
     .kv dd { font-weight: 600; }
 
@@ -301,6 +300,23 @@
     /* ─── one work row, used for every kind of item ─── */
     .wrow { display:flex; align-items:center; gap:13px; padding:13px 16px; border:1px solid var(--border-light); border-radius:12px; background:var(--white); }
     .wrow + .wrow { margin-top:8px; }
+    /* ─── flight rows: one grid for Needs you and All flights alike ─── */
+    .wflight { display:grid; grid-template-columns:minmax(0,1fr) 92px 118px 168px 96px 118px; align-items:center; gap:0 14px; padding:15px 18px; }
+    .wflight .wrow__main > b { font-size:13.5px; }
+    .wflight .wrow__num { width:auto; justify-content:flex-end; }
+    .wflight .btn { width:100%; justify-content:center; }
+    .fhead { display:grid; grid-template-columns:minmax(0,1fr) 92px 118px 168px 96px 118px; gap:0 14px; padding:0 18px 9px;
+             font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--text-tertiary); }
+    .fhead span:nth-child(2),.fhead span:nth-child(3),.fhead span:nth-child(5) { text-align:center; }
+    .fhead span:nth-child(4) { text-align:right; }
+    .fnum { text-align:center; font-size:13px; font-weight:700; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+    .fnum small { display:block; font-size:10.5px; font-weight:600; color:var(--text-tertiary); letter-spacing:0; margin-top:1px; }
+    .fran { display:inline-flex; align-items:center; justify-content:center; gap:5px; width:100%; font-size:12px; font-weight:700;
+            padding:5px 0; border-radius:7px; border:1px solid var(--border); background:var(--panel); color:var(--text-primary);
+            font-variant-numeric:tabular-nums; cursor:pointer; }
+    .fran:hover { border-color:var(--border-strong); }
+    .fran--no { border-style:dashed; color:var(--text-tertiary); font-weight:600; cursor:default; }
+
     .warch { width:26px; height:26px; border-radius:7px; border:none; background:none; color:var(--text-tertiary); font-size:12px; justify-self:center; }
     .warch:hover { background:var(--nav-hover); color:var(--text-primary); }
     .wrow--click { cursor:pointer; transition:border-color .12s, box-shadow .12s; }
@@ -337,10 +353,12 @@
     .curvekey span { display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:600; color:var(--text-secondary); }
     .curvekey i { width:14px; height:0; border-top:2px solid; border-radius:2px; }
 
-    /* ─── learned-pattern sparkline in show setup ─── */
-    .spark { display:block; }
-    .kv { display:flex; justify-content:space-between; gap:12px; font-size:12.5px; padding:6px 0; border-bottom:1px dashed var(--border-light); }
-    .kv:last-child { border-bottom:0; } .kv b { font-weight:700; } .kv span { color:var(--text-secondary); font-weight:500; }
+        .kv { display:flex; align-items:baseline; justify-content:space-between; gap:20px; font-size:13px; padding:10px 0; border-bottom:1px solid var(--border-light); }
+    .kv:last-child { border-bottom:0; }
+    .kv span { color:var(--text-secondary); font-weight:500; white-space:nowrap; }
+    .kv b { font-weight:700; text-align:right; }
+    .kv b em { font-style:normal; font-weight:500; color:var(--text-tertiary); }
+    .dhead { font-size:11px; font-weight:700; letter-spacing:.04em; color:var(--text-secondary); margin:22px 0 2px; }
     .srcpill { font-size:9.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; padding:2px 6px; border-radius:5px; background:var(--secondary-lite); color:var(--text-tertiary); }
     .srcpill.booster { background:var(--purple-bg); color:var(--purple-text); }
 
@@ -1553,71 +1571,58 @@
     const ran=SPOTS.filter(x=>x.showId===id&&x.kind==='paid'&&projection(x));
     const shorts=ran.filter(x=>verdict(x).k==='short').length;
     const owed=wonDeals().filter(d=>d.showId===id).reduce((a,d)=>a+Math.round(d.gross*0.85*sh.revShare),0);
-    const av=nextEpisodes(id,5);
     const adv=guaranteeAdvice().find(x=>x.showId===id);
     const kv=(l,v)=>`<div class="kv"><span>${l}</span><b>${v}</b></div>`;
     openDrawer(`<div class="drawer__head"><div>
         <span class="srcpill ${sh.src==='booster'?'booster':''}">${sh.src}</span>
-        <h2 style="font-size:18px;font-weight:800;margin-top:8px">${esc(sh.name)}</h2>
+        <h2 style="font-size:19px;font-weight:800;margin-top:8px;letter-spacing:-.03em">${esc(sh.name)}</h2>
         <div class="muted" style="font-size:12px">${esc(sh.host)} · ${esc(sh.category)} · ${esc(sh.channel)}</div>
       </div><button class="x" onclick="closeOverlays()">✕</button></div>
     <div class="drawer__body">
       <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:10px">
         ${kpiBox('Guarantee',K(sh.guarantee),`90% = ${K(Math.round(sh.guarantee*IAB_FULL))}`)}
-        ${kpiBox('Call it','day '+checkInDay(sh),'from its own curve')}
-        ${kpiBox('Live flights',live.length,live.length?live.map(x=>esc(x.brand)).join(', '):'none right now')}
+        ${kpiBox('Check-in','day '+checkInDay(sh),'set by its own curve')}
+        ${kpiBox('Live reads',live.length,live.length?live.map(x=>esc(x.brand)).join(', '):'none right now')}
       </div>
 
-      <div style="margin-top:16px;padding:14px 16px;border:1px solid var(--border-light);border-radius:12px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-          <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary)">Learned view curve</div>
-          ${sparkline(sh.curve,{w:110,h:30})}
-        </div>
-        <div style="font-size:12.5px;line-height:1.55">${Math.round(curveAt(sh.curve,2)*100)}% of a read's views land inside 48h, ${Math.round(curveAt(sh.curve,7)*100)}% by day 7, fitted from <b>${sh.samples}</b> verified reads. That is why the call gets made on day ${checkInDay(sh)} rather than a fixed rule.</div>
+      <div style="margin-top:8px">
+        ${kv('Publishes', sh.publishDays.join(' · '))}
+        ${kv('Episodes a week', sh.epsPerWeek)}
+        ${kv('Ad positions an episode', `${sh.positionsPerEp} <em>Booster cap</em>`)}
+        ${kv('Rate', money(sh.cpm)+' CPM')}
+        ${kv('Delivery numbers', sh.simulcast?`Video + audio <em>${sh.audioSrc==='hosting'?'auto from host':'requested from creator'}</em>`:'Video only')}
+        ${kv('Channel scan', 'Every '+sh.scanEvery+'h')}
+        ${kv('Rev share', `${Math.round(sh.revShare*100)}% <em>${money(owed)} owed</em>`)}
+        ${kv('Make goods', sh.mgPolicy==='auto'?'Auto-schedule':'Ask the show first')}
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;margin-top:16px">
-        <div>
-          ${kv('Publishes', sh.publishDays.join(' · '))}
-          ${kv('Episodes a week', sh.epsPerWeek)}
-          ${kv('Ad positions an episode', sh.positionsPerEp+' <span class="muted" style="font-weight:500">· Booster cap</span>')}
-          ${kv('Rate', money(sh.cpm)+' CPM')}
-        </div>
-        <div>
-          ${kv('Delivery numbers', sh.simulcast?`video + audio · ${sh.audioSrc==='hosting'?'auto from host':'request from creator'}`:'video only')}
-          ${kv('Channel scan', 'every '+sh.scanEvery+'h')}
-          ${kv('Rev share', Math.round(sh.revShare*100)+'% <span class="muted" style="font-weight:500">· '+money(owed)+' owed</span>')}
-          ${kv('Make goods', sh.mgPolicy==='auto'?'auto-schedule':'ask the show first')}
-        </div>
-      </div>
+      <div class="dhead">Pacing</div>
+      <p style="font-size:13px;line-height:1.6;color:var(--text-secondary);margin-top:6px">
+        <b style="color:var(--text-primary)">${Math.round(curveAt(sh.curve,2)*100)}%</b> of a read's views land inside 48 hours and
+        <b style="color:var(--text-primary)">${Math.round(curveAt(sh.curve,7)*100)}%</b> by day 7, fitted from ${sh.samples} verified reads.
+        That is why the call gets made on day ${checkInDay(sh)} here rather than on a fixed rule.
+        ${shorts?` ${shorts} of the last ${ran.length} flights came in under.`:''}
+      </p>
+      ${adv?`<div style="margin-top:11px;padding:12px 14px;border:1px solid var(--orange-bg);background:rgba(255,237,213,.4);border-radius:11px;display:flex;align-items:center;gap:11px">
+        <div style="flex:1;font-size:12.5px">The guarantee is set above what the show does — reads land near ${K(adv.typical)}.</div>
+        <button class="btn btn--ghost btn--sm" onclick="applyGuarantee('${sh.id}',${adv.suggest});closeOverlays()">Drop to ${K(adv.suggest)}</button></div>`:''}
 
-      ${adv?`<div style="margin-top:14px;padding:12px 14px;border:1px solid var(--orange-bg);background:rgba(255,237,213,.4);border-radius:11px;display:flex;align-items:center;gap:11px">
-        <div style="flex:1;font-size:12.5px"><b>Guarantee is running hot.</b> A make good on ${adv.shortCount} of the last ${adv.flights} flights; reads land near ${K(adv.typical)}.</div>
-        <button class="btn btn--ghost btn--sm" onclick="applyGuarantee('${sh.id}',${adv.suggest});closeOverlays()">Drop to ${K(adv.suggest)}</button></div>`
-        :shorts?`<div class="muted" style="font-size:12px;margin-top:12px">${shorts} of ${ran.length} flights here have needed a make good.</div>`:''}
+      ${live.length||booked.length?`<div class="dhead">Reads on this show</div>
+      <div style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
+        ${live.map(x=>{ const pr=projection(x), vv=verdict(x);
+          return `<div class="wrow wrow--click" style="padding:11px 13px" onclick="openSpot('${x.id}')">
+            <div class="wrow__main"><b>${esc(x.brand)}</b><span>Day ${pr.day} · ${K(pr.got)} of ${K(x.guarantee)}</span></div>
+            <div class="wrow__num" style="width:120px">${projBar(x)}<b style="color:${toneVar(vv.tone)}">${Math.round(pr.ratio*100)}%</b></div></div>`; }).join('')}
+        ${booked.map(x=>`<div class="wrow" style="padding:11px 13px;border-style:dashed">
+          <div class="wrow__main"><b>${esc(x.brand)}</b><span>Booked ${dayName(x.published)} ${fmtDate(x.published)}${x.kind!=='paid'?' · '+esc(x.kind):''}</span></div></div>`).join('')}
+      </div>`:''}
 
-      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light)">
-        <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em">Reads on this show</div>
-        <div class="cmp-hint">Open any one for its tape, grade and deliverables.</div>
-        <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
-          ${live.length?live.map(x=>{ const pr=projection(x), vv=verdict(x);
-            return `<div class="wrow wrow--click" onclick="openSpot('${x.id}')">
-              ${icoBox('wave', vv.tone==='grey'?'blue':vv.tone)}
-              <div class="wrow__main"><b>${esc(x.brand)}</b><span>Day ${pr.day} · ${K(pr.got)} of ${K(x.guarantee)} · ${esc(vv.label).toLowerCase()}</span></div>
-              <div class="wrow__num">${projBar(x)}<b style="color:${toneVar(vv.tone)}">${Math.round(pr.ratio*100)}%</b></div></div>`; }).join('')
-            :'<div class="muted" style="font-size:12.5px">Nothing live on this show right now.</div>'}
-          ${booked.map(x=>`<div class="wrow" style="border-style:dashed">${icoBox('clock','blue')}
-            <div class="wrow__main"><b>${esc(x.brand)}</b><span>Booked ${dayName(x.published)} ${fmtDate(x.published)}${x.kind!=='paid'?' · '+esc(x.kind):''}</span></div></div>`).join('')}
-        </div>
-      </div>
-
-      <div style="margin-top:18px">
-        <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:7px">Next avails</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">${av.map(e=>`<span class="tag ${e.open?'tag--green':'tag--grey'}">${dayName(e.date)} ${fmtDate(e.date)} · ${e.open}/${e.cap}</span>`).join('')}</div>
-      </div>
+      <div class="dhead">Next avails</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${nextEpisodes(id,5).map(e=>`<span class="tag ${e.open?'tag--green':'tag--grey'}">${dayName(e.date)} ${fmtDate(e.date)} · ${e.open}/${e.cap}</span>`).join('')}</div>
     </div>
     <div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Close</button></div>`);
   }
+
   const kpiBox=(l,v,sub)=>`<div style="border:1px solid var(--border-light);border-radius:11px;padding:12px 14px"><div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-tertiary)">${l}</div><div style="font-size:21px;font-weight:800;letter-spacing:-.03em;margin-top:3px">${v}</div><div class="muted" style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sub}</div></div>`;
 
   RENDER.shows = () => {
