@@ -1010,7 +1010,50 @@
     <div class="reel-stage"><iframe src="https://www.youtube.com/embed/${yt}?start=${ts}&autoplay=1" allow="autoplay" allowfullscreen></iframe></div>`); }
 
   /* ═══════════════════════════ VIEW: CAMPAIGN PORTAL ═══════════════════════════ */
-  let portalBrand='Kalshi', portalOpen={};
+  let portalBrand=null, portalOpen={};   // null = the index of every campaign
+  function openCampaign(b){ portalBrand=b; portalOpen={}; RENDER.portal(); document.querySelector('.views').scrollTop=0; }
+  function closeCampaign(){ portalBrand=null; RENDER.portal(); document.querySelector('.views').scrollTop=0; }
+
+  function campaignSummary(brand){
+    const spots=SPOTS.filter(s=>s.brand===brand&&projection(s)).sort((x,y)=>dt(x.published)-dt(y.published));
+    const mgs=SPOTS.filter(s=>s.brand===brand&&s.kind==='makegood');
+    const g=spots.reduce((a,s)=>a+s.guarantee,0), got=spots.reduce((a,s)=>a+(delivered(s)||0),0);
+    const proj=spots.reduce((a,s)=>a+projection(s).proj,0), paid=spots.reduce((a,s)=>a+spotCost(s),0);
+    const done=spots.length&&spots.every(s=>projection(s).final);
+    // same confidence rule the rest of the app uses — an early read is not "behind"
+    const blocked = spots.some(s=>verdict(s).k==='blocked');
+    const anyConfident = spots.some(s=>projection(s).confident);
+    const status = proj>=g ? {k:'full', label:done?'Delivered in full':'Tracking over', tone:'green', rank:4}
+      : mgs.length ? {k:'mg', label:'Make good booked', tone:'purple', rank:2}
+      : blocked ? {k:'blocked', label:'Waiting on downloads', tone:'purple', rank:1}
+      : !anyConfident ? {k:'early', label:'Too early to call', tone:'grey', rank:3}
+      : {k:'under', label:'Tracking under', tone:'orange', rank:0};
+    return { brand, spots, mgs, g, got, proj, paid, done, status,
+      shows:[...new Set(spots.map(s=>s.showId))],
+      yt:spots.reduce((a,s)=>a+(s.views||0),0), aud:spots.reduce((a,s)=>a+(s.downloads||0),0),
+      pct:pctOf(proj,g),
+      flight: spots.length?`${fmtDate(spots[0].published)} – ${fmtDate(addDays(spots[spots.length-1].published,30))}`:'—' };
+  }
+
+  // tiny version of the tracking line, for the index cards
+  function campaignSpark(c,{w=200,h=44}={}){
+    if(!c.spots.length) return '';
+    const start=c.spots[0].published, end=addDays(c.spots[c.spots.length-1].published,30);
+    const span=Math.max(daysBetween(start,end),1), today=Math.min(Math.max(daysBetween(start,TODAY),0),span);
+    const total=d=>c.spots.reduce((acc,x)=>{ const pr=projection(x); if(!pr) return acc;
+      const dd=d-daysBetween(start,x.published); return dd<=0?acc:acc+curveAt(show(x.showId).curve,Math.min(dd,30))*pr.proj; },0);
+    const max=Math.max(c.g,total(span))*1.1;
+    const X=d=>2+(w-4)*(d/span), Y=v=>h-3-(h-8)*(v/max);
+    const pts=[]; for(let d=0;d<=span;d++) pts.push([X(d),Y(total(d))]);
+    const solid=pts.slice(0,today+1).map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1));
+    const dash=pts.slice(today).map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1));
+    const tone=toneVar(c.status.tone);
+    return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="none">
+      <line x1="0" x2="${w}" y1="${Y(c.g)}" y2="${Y(c.g)}" stroke="var(--text-tertiary)" stroke-width="1" stroke-dasharray="3 3" opacity=".7"/>
+      ${dash.length>1?`<path d="M${dash.join(' L')}" fill="none" stroke="${tone}" stroke-width="2" stroke-dasharray="4 3" opacity=".5"/>`:''}
+      <path d="M${solid.join(' L')}" fill="none" stroke="${tone}" stroke-width="2.4" stroke-linecap="round"/>
+      <circle cx="${X(today)}" cy="${Y(total(today))}" r="3" fill="${tone}"/></svg>`;
+  }
   function togglePortalRead(id){ portalOpen[id]=!portalOpen[id]; RENDER.portal(); }
 
   /* Campaign-level cumulative delivery: every read's curve summed day by day,
@@ -1048,25 +1091,16 @@
 
   RENDER.portal = () => {
     const brands=[...new Set(SPOTS.filter(s=>projection(s)).map(s=>s.brand))];
-    if(!brands.includes(portalBrand)) portalBrand=brands[0];
-    const spots=SPOTS.filter(s=>s.brand===portalBrand&&projection(s)).sort((x,y)=>dt(x.published)-dt(y.published));
-    const cr=creative(portalBrand);
-    const g=spots.reduce((a,s)=>a+s.guarantee,0);
-    const got=spots.reduce((a,s)=>a+(delivered(s)||0),0);
-    const proj=spots.reduce((a,s)=>a+projection(s).proj,0);
-    const paid=spots.reduce((a,s)=>a+spotCost(s),0);
-    const yt=spots.reduce((a,s)=>a+(s.views||0),0), aud=spots.reduce((a,s)=>a+(s.downloads||0),0);
-    const mgs=SPOTS.filter(s=>s.brand===portalBrand&&s.kind==='makegood');
-    const shows=[...new Set(spots.map(s=>s.showId))];
-    const flight=spots.length?`${fmtDate(spots[0].published)} – ${fmtDate(addDays(spots[spots.length-1].published,30))}`:'—';
-    const done=spots.every(s=>projection(s).final);
+    if(portalBrand===null || !brands.includes(portalBrand)) return renderCampaignIndex(brands);
+    const c=campaignSummary(portalBrand), cr=creative(portalBrand);
+    const {spots,mgs,g,got,proj,paid,yt,aud,shows,flight,done}=c;
 
     document.getElementById('view-portal').innerHTML=`
     <div class="inner" style="max-width:940px">
+      <button class="btn btn--ghost btn--sm" style="margin-bottom:14px" onclick="closeCampaign()">← All campaigns</button>
       <div class="pagebar">
-        <div class="head"><h1>Campaign Portal</h1><p>The advertiser's live delivery report — every read, the tape, and the assets that ran.</p></div>
+        <div class="head"><h1>${esc(portalBrand)}</h1><p>The live report the advertiser sees — every read, the tape, and the assets that ran.</p></div>
         <div class="pagebar__right">
-          <select class="field" style="width:auto" onchange="portalBrand=this.value;portalOpen={};RENDER.portal()">${brands.map(b=>`<option ${b===portalBrand?'selected':''}>${esc(b)}</option>`).join('')}</select>
           <button class="btn btn--ghost btn--sm" onclick="toast('Copied vmg.live/${portalBrand.toLowerCase()}-aug — read-only, updates as reads land.')">🔗 Copy link</button>
           <button class="btn btn--primary btn--sm" onclick="toast('Delivery report sent to ${esc(portalBrand)} and copied to adops@.')">Send report</button></div>
       </div>
@@ -1139,6 +1173,42 @@
       <div class="footnote">Read-only for the advertiser and updates itself as reads land — no export to keep in sync.</div>
     </div>`;
   };
+  function renderCampaignIndex(brands){
+    const cs=brands.map(campaignSummary).sort((a,b)=>(a.status.rank-b.status.rank)||(a.pct-b.pct));
+    const totG=cs.reduce((a,c)=>a+c.g,0), totP=cs.reduce((a,c)=>a+c.proj,0);
+    const risk=cs.filter(c=>c.status.k==='under').length;
+    document.getElementById('view-portal').innerHTML=`
+    <div class="inner" style="max-width:940px">
+      <div class="pagebar"><div class="head"><h1>Campaign Portal</h1>
+        <p>Every live campaign and how it's tracking. Open one for the report you share with the advertiser.</p></div>
+        <div class="pagebar__right"><span class="tag tag--grey">${cs.length} live</span>
+        ${risk?`<span class="tag tag--orange"><i></i>${risk} projecting under</span>`:'<span class="tag tag--green"><i></i>none projecting under</span>'}</div>
+      </div>
+      <div class="tiles" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px">
+        <div class="tile"><div class="tile__label">Campaigns live</div><div class="tile__val">${cs.length}</div></div>
+        <div class="tile"><div class="tile__label">Projected vs guaranteed</div><div class="tile__val" style="color:${totP>=totG?'var(--green-text)':'var(--orange-text)'}">${pctOf(totP,totG)}%</div></div>
+        <div class="tile"><div class="tile__label">Impressions guaranteed</div><div class="tile__val">${K(totG)}</div></div>
+      </div>
+      <div class="grid" style="grid-template-columns:1fr 1fr">
+        ${cs.map(c=>`<button class="card" onclick="openCampaign('${esc(c.brand)}')" style="text-align:left;font-family:inherit;color:var(--text-primary);border-color:var(--border);cursor:pointer;padding:0" onmouseover="this.style.boxShadow='var(--shadow-hover)'" onmouseout="this.style.boxShadow='var(--shadow-card)'">
+          <div class="card__pad">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div class="brand-chip" style="background:${brandColor[c.brand]||'#3B82F6'}">${esc(c.brand[0])}</div>
+              <div style="flex:1;min-width:0"><b style="font-size:15px;letter-spacing:-.02em">${esc(c.brand)}</b>
+                <div class="muted" style="font-size:11.5px">${c.shows.length} show${c.shows.length!==1?'s':''} · ${c.spots.length} read${c.spots.length!==1?'s':''}${c.mgs.length?` · ${c.mgs.length} make good`:''}</div></div>
+              <div style="text-align:right"><div style="font-size:24px;font-weight:800;letter-spacing:-.03em;line-height:1;color:${toneVar(c.status.tone)}">${c.pct}%</div>
+                <div class="muted" style="font-size:10.5px;margin-top:2px">of guarantee</div></div>
+            </div>
+            <div style="margin:14px 0 10px">${campaignSpark(c)}</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <span class="tag tag--${c.status.tone}"><i></i>${c.status.label}</span>
+              <span class="muted" style="font-size:11.5px">${K(c.got)} of ${K(c.g)} · ${esc(c.flight)}</span>
+            </div>
+          </div></button>`).join('')}
+      </div>
+      <div class="footnote">Each campaign opens a read-only page you can send straight to the advertiser.</div>
+    </div>`;
+  }
   const pStat=(l,v)=>`<div><div style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary)">${l}</div><div style="font-size:19px;font-weight:800;letter-spacing:-.03em;margin-top:3px">${v}</div></div>`;
 
   function portalRead(s,cr){
