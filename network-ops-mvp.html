@@ -1256,10 +1256,10 @@
     const gC=callable.reduce((a,s)=>a+s.guarantee,0), projC=callable.reduce((a,s)=>a+projection(s).proj,0);
     // same confidence rule the rest of the app uses — an early read is not "behind"
     const blocked = spots.some(s=>verdict(s).k==='blocked');
-    const status = !callable.length ? {k:'early', label:'Too early to call', tone:'grey', rank:3}
+    const status = blocked ? {k:'blocked', label:'Waiting on downloads', tone:'purple', rank:1}
+      : !callable.length ? {k:'early', label:'Too early to call', tone:'grey', rank:3}
       : projC>=gC ? {k:'full', label:done?'Delivered in full':'Tracking over', tone:'green', rank:4}
       : mgs.length ? {k:'mg', label:'Make good booked', tone:'purple', rank:2}
-      : blocked ? {k:'blocked', label:'Waiting on downloads', tone:'purple', rank:1}
       : {k:'under', label:'Tracking under', tone:'orange', rank:0};
     return { brand, spots, mgs, g, got, proj, paid, done, status,
       shows:[...new Set(spots.map(s=>s.showId))],
@@ -1360,7 +1360,9 @@
     toast(done.length?`Delivery report sent to ${b}, adops@ copied. ${done.length} closed read${done.length>1?'s':''} attached.`
                      :`Report sent to ${b}, adops@ copied.`);
   }
-  let portalFilter='all';
+  let portalFilter='all', portalMonth='all';
+  const MONTH_NAME={ '2026-07':'July','2026-08':'August','2026-09':'September' };
+  const campaignMonths=c=>[...new Set(c.spots.map(x=>monthKey(x.published)))];
   const PORTAL_FILTERS=[
     ['all','All'],
     ['running','Running'],
@@ -1374,7 +1376,7 @@
 
   function renderCampaignIndex(brands){
     const all=brands.map(campaignSummary).sort((a,b)=>(a.status.rank-b.status.rank)||(a.pct-b.pct));
-    const cs=all.filter(c=>campaignIn(c,portalFilter));
+    const cs=all.filter(c=>campaignIn(c,portalFilter) && (portalMonth==='all'||campaignMonths(c).includes(portalMonth)));
     const totG=all.reduce((a,c)=>a+c.g,0), totP=all.reduce((a,c)=>a+c.proj,0);
     document.getElementById('view-portal').innerHTML=`
     <div class="inner" style="max-width:940px">
@@ -1382,8 +1384,14 @@
         <p>Every campaign and how it's tracking. Open one for the report you share with the advertiser.</p></div>
         <div class="pagebar__right"><span class="tag tag--grey">Projecting ${pctOf(totP,totG)}% across ${all.length}</span></div>
       </div>
-      <div class="seg" style="margin-bottom:16px">${PORTAL_FILTERS.map(([k,label])=>{ const n=all.filter(c=>campaignIn(c,k)).length;
-        return `<button class="${portalFilter===k?'active':''}" onclick="portalFilter='${k}';RENDER.portal()">${label}${k==='all'?'':' · '+n}</button>`; }).join('')}</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+        <div class="seg">${PORTAL_FILTERS.map(([k,label])=>{ const n=all.filter(c=>campaignIn(c,k)).length;
+          return `<button class="${portalFilter===k?'active':''}" onclick="portalFilter='${k}';RENDER.portal()">${label}${k==='all'?'':' · '+n}</button>`; }).join('')}</div>
+        <select class="field" style="width:auto;margin-left:auto" onchange="portalMonth=this.value;RENDER.portal()">
+          <option value="all" ${portalMonth==='all'?'selected':''}>Ran any time</option>
+          ${[...new Set(all.flatMap(campaignMonths))].sort().map(m=>`<option value="${m}" ${portalMonth===m?'selected':''}>Ran in ${MONTH_NAME[m]||m}</option>`).join('')}
+        </select>
+      </div>
       <div class="grid" style="grid-template-columns:1fr 1fr">
         ${cs.map(c=>{ const tone=toneVar(c.status.tone), max=Math.max(c.g,c.proj)*1.06, w=x=>Math.min(100,x/max*100);
           return `<button class="card" onclick="openCampaign('${esc(c.brand)}')" style="text-align:left;font-family:inherit;color:var(--text-primary);border-color:var(--border);cursor:pointer;padding:0" onmouseover="this.style.boxShadow='var(--shadow-hover)'" onmouseout="this.style.boxShadow='var(--shadow-card)'">
@@ -1399,8 +1407,8 @@
               <div style="position:absolute;inset:0 auto 0 0;width:${w(c.got)}%;border-radius:4px;background:${tone}"></div>
               <div title="90% of guarantee" style="position:absolute;top:-2px;bottom:-2px;left:${w(c.g*IAB_FULL)}%;width:2px;background:var(--green-text)"></div>
             </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-              <span class="tag tag--${c.status.tone}"><i></i>${c.status.label}</span>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:24px">
+              ${['under','mg','blocked'].includes(c.status.k)?`<span class="tag tag--${c.status.tone}"><i></i>${c.status.label}</span>`:'<span></span>'}
               <span class="muted" style="font-size:11px">${K(c.got)} of ${K(c.g)} · ${esc(c.flight)}</span>
             </div>
           </div></button>`; }).join('')||'<div class="card" style="grid-column:1/-1"><div class="empty">Nothing in this state.</div></div>'}
