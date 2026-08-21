@@ -298,11 +298,11 @@
     .wrow { display:flex; align-items:center; gap:13px; padding:13px 16px; border:1px solid var(--border-light); border-radius:12px; background:var(--white); }
     .wrow + .wrow { margin-top:8px; }
     /* ─── flight rows: one grid for Needs you and All flights alike ─── */
-    .wflight { display:grid; grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 118px 26px 26px; align-items:center; gap:0 14px; padding:15px 18px; }
+    .wflight { display:grid; grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 118px 26px; align-items:center; gap:0 14px; padding:15px 18px; }
     .wflight .wrow__main > b { font-size:13.5px; }
     .wflight .wrow__num { width:auto; justify-content:flex-end; }
     .wflight .btn { width:100%; justify-content:center; }
-    .fhead { display:grid; grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 118px 26px 26px; gap:0 14px; padding:0 18px 9px;
+    .fhead { display:grid; grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 118px 26px; gap:0 14px; padding:0 18px 9px;
              font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--text-tertiary); }
     .fhead span:nth-child(2),.fhead span:nth-child(3),.fhead span:nth-child(4),.fhead span:nth-child(6) { text-align:center; }
     .fhead span:nth-child(5) { text-align:right; }
@@ -313,10 +313,6 @@
             font-variant-numeric:tabular-nums; cursor:pointer; }
     .fran:hover { border-color:var(--border-strong); }
     .fran--no { border-style:dashed; color:var(--text-tertiary); font-weight:600; cursor:default; white-space:nowrap; }
-    .wcheck { width:26px; height:26px; border:1px solid var(--border); border-radius:8px; background:var(--panel);
-              display:grid; place-items:center; color:var(--text-tertiary); padding:0; cursor:pointer; justify-self:center; box-shadow:var(--shadow-btn); }
-    .wcheck:hover { color:var(--green-text); border-color:var(--green-text); background:var(--green-bg); }
-    .wcheck.on { color:#fff; border-color:var(--green-text); background:var(--green-text); }
     .wdots { width:26px; height:26px; border:none; border-radius:8px; background:none; color:var(--text-tertiary);
              display:grid; place-items:center; padding:0; cursor:pointer; justify-self:center; font-size:14px; font-weight:800; letter-spacing:1px; }
     .wdots:hover { background:var(--nav-hover); color:var(--text-primary); }
@@ -899,14 +895,13 @@
       <div class="fnum">${pr?K(pr.got):dash}${pr&&sh.simulcast?`<small>${K(s.views||0)} + ${s.dlState==='requested'?'?':K(s.downloads||0)}</small>`:pr?'<small>video</small>':''}</div>
       <div class="wrow__num">${pr?`${projBar(s)}<b style="color:${toneVar(v.tone)}">${Math.round(pr.ratio*100)}%</b>`:'<span style="flex:1;text-align:left;font-size:12px;font-weight:600;color:var(--text-tertiary)">Not started</span>'}</div>
       <span onclick="event.stopPropagation()">${cta(c.label,`openSpot('${s.id}')`,c.dark)}</span>
-      <span onclick="event.stopPropagation()"><button class="wcheck${isArchived(s.id)?' on':''}" title="${isArchived(s.id)?'Restore':'Mark done — moves down to archive'}" onclick="toggleArchive('${s.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6L9 17l-5-5"/></svg></button></span>
       <span onclick="event.stopPropagation()"><button class="wdots" title="More" onclick="rowMenu(event,'${s.id}')">⋮</button></span>
     </div>`;
   }
   const dcta=(label,onclick,dark)=>`<button class="btn ${dark?'btn--primary':'btn--ghost'} btn--sm" onclick="${onclick}">${label}</button>`;
   const cta=dcta;
 
-  const flightHead=()=>`<div class="fhead"><span>Ad</span><span>Day</span><span>Ran</span><span>Delivered</span><span>Pacing</span><span></span><span></span><span></span></div>`;
+  const flightHead=()=>`<div class="fhead"><span>Ad</span><span>Day</span><span>Ran</span><span>Delivered</span><span>Pacing</span><span></span><span></span></div>`;
 
   // Needs you: the same rows, filtered to the ads that want something.
   function workList(){
@@ -1311,7 +1306,7 @@
           </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:22px;padding-top:20px;border-top:1px solid var(--border-light)">
-          ${pStat('Impressions delivered',K(got))}${pStat('Delivered CPM','$'+(got?(paid/(got/1000)):0).toFixed(2))}
+          ${pStat('Imp delivered',K(got))}${pStat('Delivered CPM','$'+(got?(paid/(got/1000)):0).toFixed(2))}
           ${pStat('YouTube reach',K(yt))}${pStat('Audio reach',K(aud))}
           ${pStat('Shows',shows.length)}${pStat('Verified reads',verified+'/'+spots.length)}
         </div>
