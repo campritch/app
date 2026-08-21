@@ -301,29 +301,6 @@
     /* ─── one work row, used for every kind of item ─── */
     .wrow { display:flex; align-items:center; gap:13px; padding:13px 16px; border:1px solid var(--border-light); border-radius:12px; background:var(--white); }
     .wrow + .wrow { margin-top:8px; }
-    /* task rows: one grid, so status and action line up all the way down */
-    .wtask { display:grid; grid-template-columns:34px minmax(0,1fr) 172px 116px 26px; align-items:center; gap:0 13px; }
-    /* All flights answers four questions across, in fixed columns:
-       has it run · what did it deliver · how is it pacing · is a make good owed */
-    .wflight { display:grid; grid-template-columns:34px minmax(0,1fr) 96px 104px 172px 104px 108px; align-items:center; gap:0 12px; }
-    .wflight .wrow__num { width:auto; justify-content:flex-end; }
-    .wflight .btn { width:100%; justify-content:center; }
-    .fhead { display:grid; grid-template-columns:34px minmax(0,1fr) 96px 104px 172px 104px 108px; gap:0 12px;
-             padding:0 16px 8px; font-size:10px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-tertiary); }
-    .fhead span:nth-child(3),.fhead span:nth-child(4),.fhead span:nth-child(6) { text-align:center; }
-    .fhead span:nth-child(5) { text-align:right; }
-    .fnum { text-align:center; font-size:13.5px; font-weight:700; letter-spacing:-.02em; }
-    .fnum small { display:block; font-size:10.5px; font-weight:600; color:var(--text-tertiary); letter-spacing:0; margin-top:1px; }
-    .fran { display:inline-flex; align-items:center; justify-content:center; gap:5px; width:100%; font-size:12px; font-weight:700;
-            padding:5px 0; border-radius:7px; border:1px solid var(--border); background:var(--panel); color:var(--text-primary); }
-    .fran:hover { border-color:var(--border-strong); }
-    .fran--no { border-style:dashed; color:var(--text-tertiary); font-weight:600; }
-    .wtask .wrow__num { width:auto; justify-content:flex-end; }
-    .wstat { display:inline-flex; align-items:center; gap:7px; justify-self:end; font-size:11.5px; font-weight:600;
-             padding:5px 12px; border-radius:999px; white-space:nowrap;
-             background:var(--panel); border:1px solid var(--border); color:var(--text-secondary); }
-    .wstat i { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-    .wtask .btn { width:100%; justify-content:center; }
     .warch { width:26px; height:26px; border-radius:7px; border:none; background:none; color:var(--text-tertiary); font-size:12px; justify-self:center; }
     .warch:hover { background:var(--nav-hover); color:var(--text-primary); }
     .wrow--click { cursor:pointer; transition:border-color .12s, box-shadow .12s; }
@@ -837,102 +814,59 @@
     check:'<path d="M20 6L9 17l-5-5"/>' };
   const icoBox=(k,tone)=>`<div class="wrow__ico" style="background:var(--${tone}-bg)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--${tone}-text)" stroke-width="2.1">${ICO[k]}</svg></div>`;
   const row=(lead,title,sub,num,action,click)=>`<div class="wrow${click?' wrow--click':''}"${click?` onclick="${click}"`:''}>${lead}<div class="wrow__main"><b>${title}</b><span>${sub}</span></div>${num||''}${action?`<span onclick="event.stopPropagation()">${action}</span>`:''}</div>`;
-  const spotLead=s=>icoBox('wave', verdict(s).tone==='grey'?'blue':verdict(s).tone);
   const spotNum=s=>{ const pr=projection(s); if(!pr) return ''; const v=verdict(s);
     return `<div class="wrow__num">${projBar(s)}<b style="color:${toneVar(v.tone)}">${Math.round(pr.ratio*100)}%</b></div>`; };
 
-  const wstat=(label,tone)=>`<span class="wstat"><i style="background:${toneVar(tone||'grey')}"></i>${label}</span>`;
   const warch=(kind,id)=>kind?`<button class="warch" title="Archive" onclick="event.stopPropagation();archiveItem('${kind}','${id}')">✕</button>`:'<span></span>';
   const ARCHIVED={};
   function archiveItem(kind,id){ ARCHIVED[kind+':'+id]=true; rerender(); refreshBadges();
     toast('Archived. It stays on the record, it just stops asking.'); }
   const unarchived=(kind,id)=>!ARCHIVED[kind+':'+id];
 
-  /* Where an ad is in its life, in one consistent vocabulary:
-     In progress → Ad run → On track / Short. Only a state that needs a
-     decision gets a dark button; anything ticking along stays quiet. */
-  function adState(s){
-    if(s.status==='scheduled') return { label:'In progress', tone:'blue' };
-    if(s.status==='aired')     return s.missed ? { label:'No episode', tone:'red' } : { label:'Scanning', tone:'blue' };
-    if(s.dlState==='requested')return { label:'Waiting on audio', tone:'purple' };
-    const pr=projection(s); if(!pr) return { label:'In progress', tone:'blue' };
-    if(!pr.confident)          return { label:'Ad run', tone:'blue' };
-    const v=verdict(s);
-    if(v.k==='short')          return { label:'Short', tone:'red' };
-    if(s.completed)            return { label:'Complete', tone:'green' };
-    if(s.reportSent)           return { label:'Report sent', tone:'green' };
-    return { label: pr.final?'Delivered':'On track', tone:'green' };
+  /* Three words on the button, and only one of them is dark.
+     In progress → running, nothing to do. Verified → it landed.
+     Make good → it came in under, and that is the only thing worth shouting. */
+  function ctaFor(s){
+    const pr=projection(s), v=verdict(s), m=mgForSpot(s.id);
+    if(v.k==='short') return { label:'Make good', dark:!m };
+    if(!pr || !pr.confident || s.status!=='verified') return { label:'In progress', dark:false };
+    return { label:'Verified', dark:false };
   }
-  // dark = you have to look at it; ghost = it is just running
-  const cta=(label,onclick,review)=>`<button class="btn ${review?'btn--primary':'btn--ghost'} btn--sm" onclick="${onclick}">${label}</button>`;
 
+  /* One row, used by Needs you and All flights alike. Six columns:
+     the ad · did it run · what it delivered · how it is pacing · make good · action */
+  function flightRow(s){
+    const pr=projection(s), v=verdict(s), sh=show(s.showId), m=mgForSpot(s.id), c=ctaFor(s);
+    const dash='<span class="muted" style="font-weight:600">—</span>';
+    return `<div class="wrow wflight wrow--click" onclick="openSpot('${s.id}')">
+      <div class="wrow__main"><b>${nameOf(s)}</b></div>
+      <span onclick="event.stopPropagation()">${s.yt
+        ? `<button class="fran" onclick="playClip('${s.yt}',${s.ts})" title="Hear the read"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>${mmss(s.ts)}</button>`
+        : `<span class="fran fran--no">${s.status==='scheduled'?'booked':s.missed?'no episode':'scanning'}</span>`}</span>
+      <div class="fnum">${pr?K(pr.got):dash}${pr&&sh.simulcast?`<small>${K(s.views||0)} + ${s.dlState==='requested'?'?':K(s.downloads||0)}</small>`:pr?'<small>video</small>':''}</div>
+      <div class="wrow__num">${pr?`${projBar(s)}<b style="color:${toneVar(v.tone)}">${Math.round(pr.ratio*100)}%</b>`:dash}</div>
+      <div class="fnum">${m?`<span class="tag tag--purple">${fmtDate(m.date)}</span>`
+        : v.k==='short'?'<span class="tag tag--red"><i></i>Needed</span>' : dash}</div>
+      <span onclick="event.stopPropagation()">${cta(c.label,`openSpot('${s.id}')`,c.dark)}</span>
+    </div>`;
+  }
+  const dcta=(label,onclick,dark)=>`<button class="btn ${dark?'btn--primary':'btn--ghost'} btn--sm" onclick="${onclick}">${label}</button>`;
+  const cta=dcta;
+
+  const flightHead=()=>`<div class="fhead"><span>Ad</span><span>Ran</span><span>Delivered</span><span>Pacing</span><span>Make good</span><span></span></div>`;
+
+  // Needs you: the same rows, filtered to the ads that want something.
   function workList(){
-    const out=[];
-    const push=(lead,title,sub,stat,btn,click,arch)=>out.push(
-      `<div class="wrow wtask${click?' wrow--click':''}"${click?` onclick="${click}"`:''}>${lead}
-        <div class="wrow__main"><b>${title}</b><span>${sub}</span></div>
-        ${stat}<span onclick="event.stopPropagation()">${btn}</span>${arch||'<span></span>'}</div>`);
-
-    // should have aired, has not — someone has to chase it
-    SPOTS.filter(s=>s.status==='aired'&&s.missed&&unarchived('ep',s.id)).forEach(s=>push(
-      icoBox('warn','red'), nameOf(s),
-      `Booked ${fmtDate(s.published)} · scanned ${esc(show(s.showId).channel)}, nothing posted`,
-      wstat('No episode','red'), cta('Nudge show',`nudgeEpisode('${s.id}')`,true),
-      `openSpot('${s.id}')`, warch('ep',s.id)));
-
-    // projecting under the line — the decision this whole thing exists for
-    needsMakegood().filter(s=>unarchived('mg',s.id)).forEach(s=>push(
-      spotLead(s), nameOf(s),
-      `Day ${projection(s).day} · projecting ${K(projection(s).proj)} of ${K(s.guarantee)} — ${K(shortfall(s))} short`,
-      wstat('Short','red'), cta('Make good',`createMakegood('${s.id}')`,true),
-      `openSpot('${s.id}')`, warch('mg',s.id)));
-
-    // make goods mid-flight — dark only when the ball is in your court
-    MAKEGOODS.filter(m=>m.status!=='scheduled').forEach(m=>{ const s=spot(m.spotId);
-      const needShow=m.showOk!==true, needBrand=m.brandOk!==true, ready=m.date&&!needShow&&!needBrand;
-      const yours = !m.date || ready;
-      push(icoBox('mg','orange'), nameOf(s),
-        m.date?`Make good ${fmtDate(m.date)} · ${needShow?'show not confirmed':'show ✓'} · ${needBrand?'brand not confirmed':'brand ✓'}`
-              :`Make good · ${K(shortfall(s))} to replace`,
-        wstat(!m.date?'Needs a date':ready?'Ready to book':needShow?'Waiting on show':'Waiting on brand', ready?'green':'orange'),
-        cta(!m.date?'Pick a date':ready?'Book it':'Chase', `openMg('${m.id}')`, yours),
-        `openMg('${m.id}')`, ''); });
-
-    // audio numbers never requested
-    SPOTS.filter(s=>s.dlState==='requested'&&unarchived('dl',s.id)).forEach(s=>push(
-      icoBox('clock','purple'), nameOf(s),
-      `Day ${projection(s).day} · video in, ${esc(show(s.showId).host)} still owes the audio numbers`,
-      wstat('Waiting on audio','purple'), cta('Request',`chaseDownloads('${s.id}')`,true),
-      `openSpot('${s.id}')`, warch('dl',s.id)));
-
-    // copy has to be in before it airs
-    SPOTS.filter(s=>['needs_copy','needs_cta'].includes(s.copyStatus)&&unarchived('cp',s.id)).forEach(s=>push(
-      icoBox('doc','blue'), nameOf(s),
-      `Airs ${dayName(s.published)} ${fmtDate(s.published)} · ${s.copyStatus==='needs_copy'?'no ad copy yet':'copy in, no CTA'}`,
-      wstat(s.copyStatus==='needs_copy'?'No copy':'No CTA','blue'), cta('Send copy',`markCopy('${s.id}')`,true),
-      `openSpot('${s.id}')`, warch('cp',s.id)));
-
-    // cleared the line and closed at 30 days — send the report, then close it out
-    SPOTS.filter(s=>closedOut(s)&&!s.reportSent&&unarchived('rp',s.id)).forEach(s=>push(
-      icoBox('check','green'), nameOf(s),
-      `Closed at ${K(projection(s).proj)} of ${K(s.guarantee)} · ${Math.round(projection(s).ratio*100)}% — report ready for ${esc(s.brand)}`,
-      wstat('Delivered','green'), cta('Send report',`sendDeliveryReport('${s.id}')`,false),
-      `openSpot('${s.id}')`, warch('rp',s.id)));
-
-    SPOTS.filter(s=>closedOut(s)&&s.reportSent&&!s.completed&&unarchived('cm',s.id)).forEach(s=>push(
-      icoBox('check','green'), nameOf(s),
-      `Report sent ${fmtDate(s.reportSent)} · mark it 100% in Airtable and close the campaign`,
-      wstat('Report sent','green'), cta('Mark complete',`markComplete('${s.id}')`,false),
-      `openSpot('${s.id}')`, warch('cm',s.id)));
-
-    // sent, unopened — worth a nudge, not worth shouting
-    SPOTS.filter(s=>s.copyStatus==='sent'&&unarchived('nu',s.id)).forEach(s=>push(
-      icoBox('doc','orange'), nameOf(s),
-      `Copy sent ${fmtDate(s.copySent)} to ${esc(show(s.showId).host)} · unopened after ${daysBetween(s.copySent,TODAY)} days`,
-      wstat('Not opened','orange'), cta('Nudge',`nudgeShow('${s.id}')`,false),
-      `openSpot('${s.id}')`, warch('nu',s.id)));
-
-    return out;
+    const wants=new Set();
+    SPOTS.filter(s=>s.status==='aired'&&s.missed).forEach(s=>wants.add(s.id));
+    needsMakegood().forEach(s=>wants.add(s.id));
+    MAKEGOODS.filter(m=>m.status!=='scheduled').forEach(m=>wants.add(m.spotId));
+    SPOTS.filter(s=>s.dlState==='requested').forEach(s=>wants.add(s.id));
+    SPOTS.filter(s=>['needs_copy','needs_cta','sent'].includes(s.copyStatus)).forEach(s=>wants.add(s.id));
+    SPOTS.filter(s=>closedOut(s)&&!s.completed).forEach(s=>wants.add(s.id));
+    return [...wants].filter(id=>unarchived('w',id)).map(spot)
+      .sort((a,b)=>(ctaFor(b).dark?1:0)-(ctaFor(a).dark?1:0))
+      .map(flightRow);
   }
 
 
@@ -983,23 +917,8 @@
       </div>
       <div id="scanPanel"></div>
       ${delTab==='mg' ? makeGoodsPanel() : delTab==='work'
-        ? (work.length?work.join(''):`<div class="card"><div class="empty">✨ Nothing needs you — every flight projects over the 90% line.</div></div>`)
-        : `<div class="fhead"><span></span><span>Ad</span><span>Ran</span><span>Delivered</span><span>Pacing</span><span>Make good</span><span></span></div>`
-          + live.map(s=>{ const pr=projection(s), v=verdict(s), sh=show(s.showId), m=mgForSpot(s.id);
-            const owed = v.k==='short';
-            return `<div class="wrow wflight wrow--click" onclick="openSpot('${s.id}')">
-              ${spotLead(s)}
-              <div class="wrow__main"><b>${nameOf(s)}</b><span>${esc(epTitle(s))} · day ${pr.day} of 30</span></div>
-              <span onclick="event.stopPropagation()">${s.yt
-                ? `<button class="fran" onclick="playClip('${s.yt}',${s.ts})" title="Hear the read"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>${mmss(s.ts)}</button>`
-                : `<span class="fran fran--no">${s.dlState==='requested'?'audio':'not found'}</span>`}</span>
-              <div class="fnum">${K(pr.got)}${sh.simulcast?`<small>${K(s.views||0)} + ${s.dlState==='requested'?'?':K(s.downloads||0)}</small>`:'<small>video</small>'}</div>
-              <div class="wrow__num">${projBar(s)}<b style="color:${toneVar(v.tone)}">${Math.round(pr.ratio*100)}%</b></div>
-              <div class="fnum">${m?`<span class="tag tag--purple">${fmtDate(m.date)}</span>`
-                : owed?'<span class="tag tag--red"><i></i>Needed</span>'
-                : '<span class="muted" style="font-weight:600">—</span>'}</div>
-              <span onclick="event.stopPropagation()">${cta('More info',`openSpot('${s.id}')`,owed&&!m)}</span>
-            </div>`; }).join('')}
+        ? (work.length?flightHead()+work.join(''):`<div class="card"><div class="empty">✨ Nothing needs you — every flight projects over the 90% line.</div></div>`)
+        : flightHead() + live.map(flightRow).join('')}
       <div class="footnote">Projections come from each show's own curve, refit every time a read is verified.</div>
     </div>`;
   };
@@ -1086,23 +1005,8 @@
 
       ${(s.copy||[]).length?`<div style="margin-top:14px;display:flex;gap:6px;flex-wrap:wrap">${s.copy.map(c=>`<span class="tag tag--blue" style="font-weight:600">${esc(c)}</span>`).join('')}</div>`:''}
 
-      <div style="margin-top:18px;padding-top:15px;border-top:1px solid var(--border-light)">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em">Pacing against guarantee</div>
-          ${nx?`<span class="tag tag--grey">Next reading day ${nx}</span>`:'<span class="tag tag--green"><i></i>Final</span>'}
-        </div>
-        <div class="cmp-hint">${K(pr.got)} in at day ${pr.day}. ${esc(sh.name)} has ${Math.round(pr.curvePct*100)}% of its views in by now, so this lands near <b>${K(pr.proj)}</b> — <b>${Math.round(pr.ratio*100)}%</b> of the ${K(s.guarantee)} guarantee.
-          ${v.k==='short'?`<b style="color:var(--red-text)">${K(shortfall(s))} under</b> the 90% line, so a make good is warranted.`
-            :v.k==='bonus'?`Clears the guarantee outright; the overage is bonus.`
-            :v.soft||v.k==='early'?`Too early to act on — the call gets made ${fmtDate(checkInDate(s))}.`
-            :`Clears the 90% line, so no make good is needed.`}</div>
-        <div class="curvewrap" style="margin-top:10px">${curveChart(s,{w:470,h:196})}</div>
-      </div>
-
-      ${s.yt?`<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light)">
-        <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:9px">How the agent found it</div>
-        ${transcriptBlock(s)}
-      </div>`:''}
+      <div class="curvewrap" style="margin-top:16px">${curveChart(s,{w:470,h:196})}</div>
+      ${s.yt?`<div style="margin-top:16px">${transcriptBlock(s)}</div>`:''}
 
       <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light)">
         <div style="display:flex;align-items:center;justify-content:space-between">
