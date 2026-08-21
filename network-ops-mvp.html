@@ -40,7 +40,7 @@
       --green-text:#5BD68F; --blue-text:#7FB4FF; --orange-text:#F0A868; --red-text:#F58B84; --purple-text:#B69BF5;
       --shadow-card:0 1px 2px rgba(0,0,0,.4); --shadow-btn:0 1px 3px rgba(0,0,0,.35); --shadow-hover:0 12px 34px rgba(0,0,0,.5);
     }
-    body.dark .btn--primary, body.dark .pill--solid, body.dark .askwrap__go, body.dark .tb-av, body.dark .sb-powered .smark { color:#12161C; }
+    body.dark .btn--primary, body.dark .pill--solid, body.dark .askwrap__go, body.dark .tb-av { color:#12161C; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
     body {
@@ -71,13 +71,9 @@
     .nav-item .badge { margin-left: auto; background: var(--red-bg); color: var(--red-text); font-size: 10.5px; font-weight: 800; padding: 1px 7px; border-radius: 999px; }
     @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(63,184,124,.5);} 70%{box-shadow:0 0 0 5px rgba(63,184,124,0);} 100%{box-shadow:0 0 0 0 rgba(63,184,124,0);} }
     .sb-foot { padding-top: 10px; border-top: 1px solid var(--border-light); margin-top: 8px; }
-    .sb-powered { display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: 11px; font-weight: 600; color: var(--text-tertiary); width: 100%; border: none; background: none; text-align: left; border-radius: 9px; }
-    .sb-powered .smark { width: 18px; height: 18px; border-radius: 5px; background: var(--primary); color: #fff; display: grid; place-items: center; font-size: 10px; font-weight: 800; }
-    .sb-powered b { color: var(--text-secondary); font-weight: 700; }
     .sb-user { display: flex; align-items: center; gap: 10px; padding: 10px 8px 2px; }
     .sb-user__av { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 12px; }
     .sb-user__name { color: var(--text-primary); font-size: 12.5px; font-weight: 700; line-height: 1.2; }
-    .sb-user__sub { color: var(--text-tertiary); font-size: 11px; font-weight: 500; }
 
 
     /* ─── TOP BAR ─── */
@@ -380,12 +376,10 @@
       </div>
     </div>
     <div class="sb-foot">
-      <button class="sb-powered" onclick="toast('Alerts route to #adops-alerts in Slack and the adops@ alias. Sydney takes Slack, Shelby takes email.')"><span class="smark" style="background:#4A154B">#</span>Alerts → <b>#adops-alerts</b> + <b>adops@</b></button>
       <div class="sb-user">
         <div class="sb-user__av">SD</div>
-        <div><div class="sb-user__name">Sydney D.</div><div class="sb-user__sub">Ad Ops · VMG</div></div>
+        <div class="sb-user__name">Sydney D.</div>
       </div>
-      <button class="sb-powered"><span class="smark">S</span>Airtable + Booster · by <b>SpotsNow</b></button>
     </div>
   </nav>
 
