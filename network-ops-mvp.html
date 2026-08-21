@@ -285,9 +285,36 @@
     .msheet-foot { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; border-top: 1px solid var(--border); }
     .msheet-total { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
 
+    /* ─── read cards on the delivery report ─── */
+    .rgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:12px; }
+    .rcard { background:var(--panel); border:1px solid var(--border); border-radius:13px; overflow:hidden; display:flex; flex-direction:column; }
+    .rcard__hd { display:flex; gap:11px; padding:13px 14px 10px; align-items:flex-start; text-align:left; }
+    .rcard__art { position:relative; width:42px; height:42px; border-radius:9px; flex-shrink:0; display:grid; place-items:center; color:#fff; font-size:12px; font-weight:800; letter-spacing:-.02em; }
+    .rcard__play { position:absolute; inset:0; display:grid; place-items:center; background:rgba(0,0,0,.34); border-radius:9px; color:#fff; opacity:0; transition:.13s; border:none; cursor:pointer; }
+    .rcard__art:hover .rcard__play, .rcard--noplay .rcard__play { opacity:1; }
+    .rcard__ttl { flex:1; min-width:0; }
+    .rcard__ttl b { display:block; font-size:13px; font-weight:700; letter-spacing:-.01em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .rcard__ttl em { font-style:normal; color:var(--text-tertiary); font-weight:600; }
+    .rcard__note { display:block; font-size:11.5px; color:var(--text-secondary); line-height:1.45; margin-top:3px; }
+    .rcard__ring { flex-shrink:0; margin:-2px -2px 0 0; }
+    .rcard__meta { display:flex; align-items:center; gap:7px; padding:0 14px 11px; }
+    .rchip { font-size:10.5px; font-weight:700; color:var(--text-secondary); background:var(--secondary-lite); padding:3px 8px; border-radius:6px; white-space:nowrap; }
+    .rcard__dur { font-size:14px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+    .rcard__more { width:24px; height:24px; border:none; background:none; color:var(--text-tertiary); border-radius:6px; flex-shrink:0; }
+    .rcard__more:hover { background:var(--nav-hover); color:var(--text-primary); }
+    .rcard__bar { position:relative; height:7px; background:var(--secondary-lite); margin:0 14px 13px; border-radius:4px; overflow:visible; }
+    .rcard__body { padding:13px 14px; border-top:1px solid var(--border-light); background:var(--page-bg); }
+    .rcard__add { margin:0 14px 13px; font-size:11.5px; font-weight:700; color:var(--blue-text); background:none; border:none; padding:0; text-align:left; }
+
     /* ─── one work row, used for every kind of item ─── */
     .wrow { display:flex; align-items:center; gap:13px; padding:13px 16px; border:1px solid var(--border-light); border-radius:12px; background:var(--white); }
     .wrow + .wrow { margin-top:8px; }
+    .wstat { display:inline-flex; align-items:center; gap:6px; flex-shrink:0; font-size:11.5px; font-weight:700; padding:5px 12px; border-radius:999px; white-space:nowrap; }
+    .wstat i { width:6px; height:6px; border-radius:50%; background:currentColor; }
+    .wstat--go { background:var(--primary); color:var(--panel); }
+    .wstat--wait { background:var(--panel); border:1px solid var(--border); color:var(--text-secondary); }
+    .warch { width:26px; height:26px; border-radius:7px; border:none; background:none; color:var(--text-tertiary); flex-shrink:0; font-size:12px; }
+    .warch:hover { background:var(--nav-hover); color:var(--text-primary); }
     .wrow--click { cursor:pointer; transition:border-color .12s, box-shadow .12s; }
     .wrow--click:hover { border-color:var(--border-strong); box-shadow:var(--shadow-card); }
     .wrow__ico { width:34px; height:34px; border-radius:9px; display:grid; place-items:center; flex-shrink:0; }
@@ -553,16 +580,6 @@
   // Any spot projected short that hasn't got a make-good yet
   const needsMakegood = () => SPOTS.filter(s=>verdict(s).k==='short' && !mgForSpot(s.id));
 
-  // Everything on the Delivery page that wants a human — kept in one place so the
-  // sidebar badge and the tab counter can never drift apart.
-  function deliveryAttention(){
-    const aired   = SPOTS.filter(s=>s.status==='aired' && !s.missed);
-    const noEp    = SPOTS.filter(s=>s.status==='aired' && s.missed);
-    const blocked = SPOTS.filter(s=>s.dlState==='requested');
-    const shortNow= needsMakegood();
-    return { aired, noEp, blocked, shortNow, count: aired.length+noEp.length+blocked.length+shortNow.length };
-  }
-
   /* ═══ WHAT THE AGENT LEARNED ═══ the guarantee-tuning + fill-rate read ═══ */
   function fillStats(){
     const ran = SPOTS.filter(s=>s.status==='verified' || s.kind==='makegood');
@@ -646,59 +663,10 @@
 
   /* ═══════════════════════════ CHART HELPERS (inline SVG) ═══════════════════════════ */
   const PAL = ['var(--c1)','var(--c2)','var(--c3)','var(--c4)','var(--c5)','var(--c6)','var(--c7)'];
-  function barChart(data, {w=560,h=210,pad=30,fmt=money,color='var(--c1)'}={}){
-    const max = Math.max(...data.map(d=>d.v),1);
-    const bw = (w-pad*2)/data.length;
-    let bars='';
-    data.forEach((d,i)=>{
-      const bh = (h-pad-24)*(d.v/max);
-      const x = pad+i*bw+bw*0.16, y=h-24-bh, ww=bw*0.68;
-      const cc = d.color || color;
-      bars += `<rect x="${x}" y="${y}" width="${ww}" height="${bh}" rx="4" fill="${cc}"><title>${esc(d.k)}: ${fmt(d.v)}</title></rect>`;
-      bars += `<text x="${x+ww/2}" y="${h-8}" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--text-tertiary)">${esc(d.k)}</text>`;
-      bars += `<text x="${x+ww/2}" y="${y-5}" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--text-secondary)">${d.lbl||fmt(d.v)}</text>`;
-    });
-    return `<svg viewBox="0 0 ${w} ${h}" width="100%">${bars}</svg>`;
-  }
-  function stackedBar(cats, series, {w=560,h=230,pad=32,fmt=money}={}){
-    // cats: ['Jan',...]; series: [{name,color,vals:[..]}]
-    const totals = cats.map((_,i)=>series.reduce((a,s)=>a+s.vals[i],0));
-    const max = Math.max(...totals,1);
-    const bw=(w-pad*2)/cats.length; let out='';
-    cats.forEach((c,i)=>{
-      let y=h-24; const x=pad+i*bw+bw*0.15, ww=bw*0.7;
-      series.forEach(s=>{
-        const seg=(h-pad-24)*(s.vals[i]/max); if(seg<=0)return;
-        y-=seg; out+=`<rect x="${x}" y="${y}" width="${ww}" height="${seg}" fill="${s.color}"><title>${s.name} · ${esc(c)}: ${fmt(s.vals[i])}</title></rect>`;
-      });
-      out+=`<text x="${x+ww/2}" y="${h-8}" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--text-tertiary)">${esc(c)}</text>`;
-    });
-    return `<svg viewBox="0 0 ${w} ${h}" width="100%">${out}</svg>`;
-  }
-  function donut(data, {size=150,thick=26}={}){
-    const total=data.reduce((a,d)=>a+d.v,0)||1; const r=(size-thick)/2, cx=size/2, cy=size/2, C=2*Math.PI*r;
-    let off=0, segs='';
-    data.forEach((d,i)=>{
-      const frac=d.v/total, len=frac*C;
-      segs+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${d.color||PAL[i%7]}" stroke-width="${thick}" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}" transform="rotate(-90 ${cx} ${cy})"><title>${esc(d.k)}: ${d.v}</title></circle>`;
-      off+=len;
-    });
-    return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">${segs}<text x="${cx}" y="${cy-2}" text-anchor="middle" font-size="19" font-weight="800" fill="var(--text-primary)">${total}</text><text x="${cx}" y="${cy+15}" text-anchor="middle" font-size="9.5" font-weight="600" fill="var(--text-tertiary)">deals</text></svg>`;
-  }
-  function lineChart(pts, {w=560,h=200,pad=32,fmt=v=>v,color='var(--c2)'}={}){
-    const max=Math.max(...pts.map(p=>p.v))*1.15||1, min=0;
-    const X=i=>pad+(w-pad*2)*(i/(pts.length-1||1)); const Y=v=>h-26-(h-pad-26)*((v-min)/(max-min||1));
-    let d='',dots='',area='';
-    pts.forEach((p,i)=>{ const x=X(i),y=Y(p.v); d+=(i?'L':'M')+x+' '+y+' '; dots+=`<circle cx="${x}" cy="${y}" r="3.5" fill="${color}"><title>${esc(p.k)}: ${fmt(p.v)}</title></circle>`; });
-    area=`M${X(0)} ${h-26} `+pts.map((p,i)=>'L'+X(i)+' '+Y(p.v)).join(' ')+` L${X(pts.length-1)} ${h-26} Z`;
-    const labels=pts.map((p,i)=>`<text x="${X(i)}" y="${h-8}" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--text-tertiary)">${esc(p.k)}</text>`).join('');
-    return `<svg viewBox="0 0 ${w} ${h}" width="100%"><path d="${area}" fill="${color}" opacity="0.08"/><path d="${d}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>${dots}${labels}</svg>`;
-  }
   function ring(pct, {size=64,thick=8,color='var(--green-text)'}={}){
     const r=(size-thick)/2,c=size/2,C=2*Math.PI*r,len=Math.min(pct,150)/100*C;
     return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}"><circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--secondary-lite)" stroke-width="${thick}"/><circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${color}" stroke-width="${thick}" stroke-linecap="round" stroke-dasharray="${len} ${C}" transform="rotate(-90 ${c} ${c})"/><text x="${c}" y="${c+4}" text-anchor="middle" font-size="14" font-weight="800" fill="var(--text-primary)">${pct}%</text></svg>`;
   }
-  function legend(items){ return `<div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:12px">`+items.map(i=>`<span style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--text-secondary)"><i style="width:9px;height:9px;border-radius:3px;background:${i.color}"></i>${esc(i.k)}</span>`).join('')+`</div>`; }
 
   /* ═══════════════════════════ NAV ═══════════════════════════ */
   const RENDER = {};
@@ -846,36 +814,73 @@
   const spotNum=s=>{ const pr=projection(s); if(!pr) return ''; const v=verdict(s);
     return `<div class="wrow__num">${projBar(s)}<b style="color:${toneVar(v.tone)}">${Math.round(pr.ratio*100)}%</b></div>`; };
 
+  const wstat=(label,go)=>`<span class="wstat ${go?'wstat--go':'wstat--wait'}"><i></i>${label}</span>`;
+  const warch=(kind,id)=>`<button class="warch" title="Archive" onclick="event.stopPropagation();archiveItem('${kind}','${id}')">✕</button>`;
+  const ARCHIVED={};
+  function archiveItem(kind,id){ ARCHIVED[kind+':'+id]=true; rerender(); refreshBadges();
+    toast('Archived. It stays on the record, it just stops asking.'); }
+  const unarchived=(kind,id)=>!ARCHIVED[kind+':'+id];
+
+  /* One row per ad that wants something. The title is the ad. Anything with a
+     delivery number shows its progress against guarantee; anything without
+     shows a status pill instead. The button is always the verb. */
   function workList(){
-    const aired=SPOTS.filter(s=>s.status==='aired'&&!s.missed);
-    const noEp=SPOTS.filter(s=>s.status==='aired'&&s.missed);
     const out=[];
-    if(aired.length) out.push(row(icoBox('mic','blue'),
-      `${aired.length} spot${aired.length!==1?'s':''} due to air today`,
-      `The agent scans ${[...new Set(aired.map(s=>show(s.showId).channel))].join(', ')} for the episode and pulls the link + timestamp.`,
-      '', `<button class="btn btn--primary btn--sm" id="runBtn" onclick="runAgent()">▶ Run check</button>`));
-    noEp.forEach(s=>out.push(row(icoBox('warn','red'), `${nameOf(s)} — no episode up yet`,
-      `Booked for ${fmtDate(s.published)}. Scanned ${esc(show(s.showId).channel)}, nothing posted. Rechecking every 24h.`,
-      '', `<button class="btn btn--ghost btn--sm" onclick="nudgeEpisode('${s.id}')">Nudge show</button>`)));
-    needsMakegood().forEach(s=>out.push(row(spotLead(s), nameOf(s),
+    const push=(lead,title,sub,mid,cta,click,arch)=>out.push(
+      `<div class="wrow${click?' wrow--click':''}"${click?` onclick="${click}"`:''}>${lead}
+        <div class="wrow__main"><b>${title}</b><span>${sub}</span></div>
+        ${mid}<span onclick="event.stopPropagation()">${cta}</span>${arch||''}</div>`);
+
+    // the show never posted — nothing to measure yet
+    SPOTS.filter(s=>s.status==='aired'&&s.missed&&unarchived('ep',s.id)).forEach(s=>push(
+      icoBox('warn','red'), nameOf(s),
+      `Booked ${fmtDate(s.published)} · scanned ${esc(show(s.showId).channel)}, nothing posted`,
+      wstat('No episode'), `<button class="btn btn--primary btn--sm" onclick="nudgeEpisode('${s.id}')">Nudge show</button>`,
+      `openSpot('${s.id}')`, warch('ep',s.id)));
+
+    // projecting under the line, no make good raised
+    needsMakegood().filter(s=>unarchived('mg',s.id)).forEach(s=>push(
+      spotLead(s), nameOf(s),
       `Day ${projection(s).day} · projecting ${K(projection(s).proj)} of ${K(s.guarantee)} — ${K(shortfall(s))} short`,
-      spotNum(s), `<button class="btn btn--primary btn--sm" onclick="createMakegood('${s.id}')">Make good</button>`, `openSpot('${s.id}')`)));
+      spotNum(s), `<button class="btn btn--primary btn--sm" onclick="createMakegood('${s.id}')">Make good</button>`,
+      `openSpot('${s.id}')`, warch('mg',s.id)));
+
+    // make goods mid-flight
     MAKEGOODS.filter(m=>m.status!=='scheduled').forEach(m=>{ const s=spot(m.spotId);
-      out.push(row(icoBox('mg','orange'), `Make good · ${nameOf(s)}`,
-        m.date?`${fmtDate(m.date)} · ${m.showOk===true?'show ✓':'waiting on show'} · ${m.brandOk===true?'brand ✓':'waiting on brand'}`:'Needs a date',
-        '', `<button class="btn btn--primary btn--sm" onclick="openMg('${m.id}')">Open</button>`)); });
-    SPOTS.filter(s=>s.dlState==='requested').forEach(s=>out.push(row(icoBox('clock','purple'),
-      `${nameOf(s)} — waiting on downloads`,
-      `${esc(show(s.showId).host)} hosts elsewhere. Audio numbers have to come back before the total closes.`,
-      '', `<button class="btn btn--ghost btn--sm" onclick="chaseDownloads('${s.id}')">Chase</button>`, `openSpot('${s.id}')`)));
-    SPOTS.filter(s=>['needs_copy','needs_cta'].includes(s.copyStatus)).forEach(s=>out.push(row(icoBox('doc','blue'),
-      `Copy for ${nameOf(s)}`, `Airs ${dayName(s.published)} ${fmtDate(s.published)} · ${s.copyStatus==='needs_copy'?'no ad copy yet':'needs a CTA'}`,
-      '', `<button class="btn btn--ghost btn--sm" onclick="markCopy('${s.id}')">Send copy</button>`)));
-    SPOTS.filter(s=>s.copyStatus==='sent').forEach(s=>out.push(row(icoBox('doc','orange'),
-      `Copy not opened · ${nameOf(s)}`, `Sent ${fmtDate(s.copySent)} to ${esc(show(s.showId).host)} · unopened after ${daysBetween(s.copySent,TODAY)} days`,
-      '', `<button class="btn btn--ghost btn--sm" onclick="nudgeShow('${s.id}')">Nudge</button>`)));
+      const needShow=m.showOk!==true, needBrand=m.brandOk!==true, ready=m.date&&!needShow&&!needBrand;
+      push(icoBox('mg','orange'), nameOf(s),
+        m.date?`Make good ${fmtDate(m.date)} · ${needShow?'show not confirmed':'show ✓'} · ${needBrand?'brand not confirmed':'brand ✓'}`
+              :`Make good · ${K(shortfall(s))} to replace`,
+        wstat(!m.date?'Needs a date':ready?'Ready to book':needShow?'Waiting on show':'Waiting on brand', !!ready),
+        `<button class="btn btn--primary btn--sm" onclick="openMg('${m.id}')">${!m.date?'Pick a date':ready?'Book it':'Chase'}</button>`,
+        `openMg('${m.id}')`, ''); });
+
+    // audio numbers not back from the creator — it has a partial number, so show it
+    SPOTS.filter(s=>s.dlState==='requested'&&unarchived('dl',s.id)).forEach(s=>push(
+      icoBox('clock','purple'), nameOf(s),
+      `Day ${projection(s).day} · video in, ${esc(show(s.showId).host)} still owes the audio numbers`,
+      spotNum(s), `<button class="btn btn--primary btn--sm" onclick="chaseDownloads('${s.id}')">Request</button>`,
+      `openSpot('${s.id}')`, warch('dl',s.id)));
+
+    // copy not in yet
+    SPOTS.filter(s=>['needs_copy','needs_cta'].includes(s.copyStatus)&&unarchived('cp',s.id)).forEach(s=>push(
+      icoBox('doc','blue'), nameOf(s),
+      `Airs ${dayName(s.published)} ${fmtDate(s.published)} · ${s.copyStatus==='needs_copy'?'no ad copy yet':'copy in, no CTA'}`,
+      wstat(s.copyStatus==='needs_copy'?'No copy':'No CTA', true),
+      `<button class="btn btn--primary btn--sm" onclick="markCopy('${s.id}')">Send copy</button>`,
+      `openSpot('${s.id}')`, warch('cp',s.id)));
+
+    // sent to the show, never opened
+    SPOTS.filter(s=>s.copyStatus==='sent'&&unarchived('nu',s.id)).forEach(s=>push(
+      icoBox('doc','orange'), nameOf(s),
+      `Copy sent ${fmtDate(s.copySent)} to ${esc(show(s.showId).host)} · unopened after ${daysBetween(s.copySent,TODAY)} days`,
+      wstat('Not opened'), `<button class="btn btn--primary btn--sm" onclick="nudgeShow('${s.id}')">Nudge</button>`,
+      `openSpot('${s.id}')`, warch('nu',s.id)));
+
     return out;
   }
+
+
   function deliveryAttention(){ return { count: workList().length }; }
 
   /* ═══════════════════════════ VIEW: COMMAND CENTER ═══════════════════════════
@@ -1088,7 +1093,7 @@
       if(f.miss){ s.missed=true; return; } Object.assign(s,f,{status:'verified'}); });
     agentRunning=false; rerender(); refreshBadges();
     LAST_CHECK='just now'; rerender();
-    toast('2 reads found and timestamped. 1 show has no episode up yet.');
+    toast('Air check: 2 reads found and timestamped, 1 show has no episode up yet.');
   }
   function findAd(json,brand){ const arr=json.transcript||json.segments||json.data||[]; const b=brand.toLowerCase();
     for(const seg of arr){ if((seg.text||'').toLowerCase().includes(b)) return {start:seg.start||seg.offset||0}; } return null; }
@@ -1150,7 +1155,7 @@
     const {spots,mgs,g,got,proj,paid,yt,aud,shows,flight,done}=c;
 
     document.getElementById('view-portal').innerHTML=`
-    <div class="inner" style="max-width:940px">
+    <div class="inner" style="max-width:1120px">
       <button class="btn btn--ghost btn--sm" style="margin-bottom:14px" onclick="closeCampaign()">← All campaigns</button>
       <div class="pagebar">
         <div class="head"><h1>${esc(portalBrand)}</h1><p>The live report the advertiser sees — every read, the tape, and the assets that ran.</p></div>
@@ -1194,13 +1199,13 @@
         <div class="card__head"><div><div class="card__title">Reads</div>
           <div class="card__sub">Open a read for the episode, the numbers and the tape.</div></div>
           <span class="tag tag--grey">${spots.length} of ${spots.length + mgs.length} placed</span></div>
-        <div class="card__pad" style="display:flex;flex-direction:column;gap:9px">
+        <div class="card__pad"><div class="rgrid">
           ${spots.map(s=>portalRead(s,cr)).join('')}
           ${mgs.map(s=>`<div class="wrow" style="border-style:dashed;background:rgba(235,233,254,.28)">
             ${icoBox('mg','purple')}
             <div class="wrow__main"><b>${esc(show(s.showId).name)} <span class="tag tag--purple">Added at no cost</span></b>
             <span>Scheduled ${dayName(s.published)} ${fmtDate(s.published)} · ${esc(cr.len)} host-read</span></div></div>`).join('')}
-        </div>
+        </div></div>
       </div>
 
       <div class="card" style="margin-top:16px">
@@ -1260,38 +1265,72 @@
   }
   const pStat=(l,v)=>`<div><div style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary)">${l}</div><div style="font-size:19px;font-weight:800;letter-spacing:-.03em;margin-top:3px">${v}</div></div>`;
 
+  const ORD=['1st','2nd','3rd','4th'];
+  // Plain English, written for the advertiser reading the report.
+  function readNote(s){
+    const pr=projection(s), v=verdict(s), m=mgForSpot(s.id);
+    if(s.dlState==='requested') return 'Video counted. Waiting on the audio numbers from the show.';
+    // A read that cannot be called yet gets a factual line, not a verdict. Views
+    // build for a month, and a low early number is normal — not a warning.
+    if(!pr.confident) return `Just live. ${esc(show(s.showId).name)} builds views over the first month; the number closes ${fmtDate(addDays(s.published,30))}.`;
+    if(v.k==='bonus') return pr.final?`Delivered in full, plus ${K(pr.proj-s.guarantee)} bonus impressions.`:'Tracking over the guarantee.';
+    if(v.k==='full')  return pr.final?'Delivered in full.':'On track to full delivery.';
+    return m&&m.date?`Under the guarantee. An extra read is booked for ${fmtDate(m.date)} at no cost.`
+                    :'Under the guarantee. We are adding a read at no cost.';
+  }
   function portalRead(s,cr){
     const pr=projection(s), sh=show(s.showId), open=!!portalOpen[s.id], v=verdict(s);
-    return `<div style="border:1px solid ${open?'var(--border-strong)':'var(--border-light)'};border-radius:12px;overflow:hidden">
-      <button onclick="togglePortalRead('${s.id}')" style="width:100%;border:none;background:none;text-align:left;padding:13px 15px;display:flex;align-items:center;gap:13px;font-family:inherit;color:var(--text-primary)">
-        ${icoBox('wave', v.tone==='grey'?'blue':v.tone)}
-        <div style="flex:1;min-width:0">
-          <b style="font-size:13px;display:block">${esc(sh.name)}</b>
-          <span style="font-size:12px;color:var(--text-secondary)">${fmtDate(s.published)} · ${esc(epTitle(s))}</span>
+    const pct=Math.round(pr.ratio*100), tone=toneVar(v.tone);
+    const max=Math.max(s.guarantee,pr.proj)*1.06, w=x=>Math.min(100,x/max*100);
+    const waiting = s.dlState==='requested';
+    return `<div class="rcard">
+      <div class="rcard__hd">
+        <div class="rcard__art" style="background:${brandColor[s.brand]||'#3B82F6'}">${esc(sh.name.split(' ').map(x=>x[0]).slice(0,2).join(''))}
+          ${s.yt?`<button class="rcard__play" onclick="playClip('${s.yt}',${s.ts})" title="Play the read"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>`:''}
         </div>
-        <div class="wrow__num">${projBar(s)}<b style="color:${toneVar(v.tone)}">${Math.round(pr.ratio*100)}%</b></div>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.4" style="flex-shrink:0;transform:rotate(${open?180:0}deg);transition:.15s"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      ${open?`<div style="padding:0 15px 15px;border-top:1px solid var(--border-light)">
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:15px 0 16px">
+        <div class="rcard__ttl">
+          <b>${esc(sh.name)} <em>${fmtDate(s.published)}</em></b>
+          <span class="rcard__note">${esc(readNote(s))}</span>
+        </div>
+        <div class="rcard__ring">${pr.confident
+          ? ring(pct,{size:46,thick:5,color:tone})
+          : `<span class="rchip" style="background:var(--blue-bg);color:var(--blue-text)">Live</span>`}</div>
+      </div>
+      <div class="rcard__meta">
+        <span class="rchip">Read: ${esc(cr.placement.replace('-roll',''))}</span>
+        <span class="rchip">Place: ${ORD[(s.pos||1)-1]}</span>
+        <div style="flex:1"></div>
+        <span class="rcard__dur">${mmss(adSecs(s))}</span>
+        <button class="rcard__more" onclick="togglePortalRead('${s.id}')" aria-label="${open?'Collapse':'Expand'}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="transform:rotate(${open?90:0}deg);transition:.15s"><path d="M9 6l6 6-6 6"/></svg></button>
+      </div>
+      ${waiting
+        ? `<button class="rcard__add" onclick="chaseDownloads('${s.id}')">+ Add impressions</button>`
+        : !pr.confident
+        ? `<div style="margin:0 14px 13px;font-size:11.5px;font-weight:600;color:var(--text-tertiary)">${K(pr.got)} impressions so far</div>`
+        : `<div class="rcard__bar">
+            <div style="position:absolute;inset:0 auto 0 0;width:${w(pr.proj)}%;background:${tone};opacity:.28;border-radius:4px"></div>
+            <div style="position:absolute;inset:0 auto 0 0;width:${w(pr.got)}%;background:${tone};border-radius:4px"></div>
+            <div title="90% of guarantee" style="position:absolute;top:-2px;bottom:-2px;left:${w(s.guarantee*IAB_FULL)}%;width:2px;background:var(--green-text)"></div>
+          </div>`}
+      ${open?`<div class="rcard__body">
+        <div style="font-size:12.5px;font-weight:700;margin-bottom:9px">${esc(epTitle(s))}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px 14px">
           ${pStat('Delivered',K(pr.got))}
           ${pStat(pr.final?'Final':'Projected',K(pr.proj))}
           ${pStat('Video',K(s.views||0))}
-          ${pStat('Audio',sh.simulcast?K(s.downloads||0):'<span class="muted">—</span>')}
+          ${pStat('Audio',sh.simulcast?(waiting?'<span class="muted">pending</span>':K(s.downloads||0)):'<span class="muted">—</span>')}
         </div>
-        ${s.yt?`<div style="background:var(--primary);border-radius:12px;padding:13px 15px;color:#fff;display:flex;align-items:center;gap:13px">
-          <button onclick="playClip('${s.yt}',${s.ts})" style="width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:13px;flex-shrink:0">▶</button>
-          <div style="flex:1;min-width:0"><b style="font-size:12.5px">${esc(cr.placement)} · ${mmss(s.ts)}–${mmss(s.ts+adSecs(s))}</b>
-          <div style="font-size:11px;opacity:.72;margin-top:2px">${(s.copy||cr.points).join(' · ')}</div></div>
-          <button class="btn btn--sm" style="background:rgba(255,255,255,.15);color:#fff;flex-shrink:0" onclick="playClip('${s.yt}',${s.ts})">Play the read</button>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
-          <a href="${clipUrl(s)}" target="_blank" style="font-size:12px;color:var(--blue-text);font-weight:600;text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${clipUrl(s)} ↗</a>
-          <button class="btn btn--ghost btn--sm" onclick="navigator.clipboard&&navigator.clipboard.writeText('${clipUrl(s)}');toast('Deep link copied — opens at ${mmss(s.ts)}.')">Copy link</button>
-        </div>`:`<div class="muted" style="font-size:12.5px;padding:14px 0">Audio-only read — impressions come from the host platform.</div>`}
+        ${s.yt?`<div style="margin-top:12px;padding-top:11px;border-top:1px solid var(--border-light)">
+          <span class="tag tag--green"><i></i>Verified ${mmss(s.ts)}–${mmss(s.ts+adSecs(s))}</span>
+          <div class="muted" style="font-size:11.5px;margin-top:7px;line-height:1.5">${(s.copy||cr.points).join(' · ')}</div>
+          <a href="${clipUrl(s)}" target="_blank" class="btn btn--ghost btn--sm" style="text-decoration:none;margin-top:9px">Open the episode ↗</a>
+        </div>`:''}
       </div>`:''}
     </div>`;
   }
+
+
 
   /* ═══════════════════════════ VIEW: SHOWS ═══════════════════════════ */
   /* ═══════════════════════════ MANAGE SHOWS GRID ═══════════════════════════
@@ -1527,6 +1566,8 @@
 
   /* init */
   refreshBadges(); RENDER.overview();
+  // The agent is not something you start — it has already run by the time you look.
+  setTimeout(()=>{ if(SPOTS.some(s=>s.status==='aired')) runAgent(); }, 900);
   </script>
 </body>
 </html>
