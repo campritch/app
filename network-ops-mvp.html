@@ -487,16 +487,17 @@
   const show = id => SHOWS.find(s=>s.id===id) || SHOWS[0];
 
   const DEALS = [
-    { id:'d1',  brand:'Kalshi',     showId:'rubin',   gross:16400, sellType:'month', createdDate:'2026-06-18', closeDate:'2026-06-24', outcome:'won', rep:'Marcus Bell' },
-    { id:'d2',  brand:'DraftKings', showId:'sage',    gross:18900, sellType:'month', createdDate:'2026-06-02', closeDate:'2026-06-09', outcome:'won', rep:'Priya Shah' },
-    { id:'d3',  brand:'Ramp',       showId:'warren',  gross:11200, sellType:'month', createdDate:'2026-06-20', closeDate:'2026-07-01', outcome:'won', rep:'Devin Cole' },
-    { id:'d4',  brand:'Ritual',     showId:'clinton', gross:6400,  sellType:'month', createdDate:'2026-07-08', closeDate:'2026-07-14', outcome:'won', rep:'Priya Shah' },
-    { id:'d5',  brand:'Kalshi',     showId:'sage',    gross:14800, sellType:'month', createdDate:'2026-07-11', closeDate:'2026-07-19', outcome:'won', rep:'Marcus Bell' },
-    { id:'d6',  brand:'BetterHelp', showId:'warren',  gross:9800,  sellType:'month', createdDate:'2026-07-02', closeDate:'2026-07-16', outcome:'won', rep:'Priya Shah' },
-    { id:'d7',  brand:'Notion',     showId:'rubin',   gross:12600, sellType:'month', createdDate:'2026-07-05', closeDate:'2026-07-20', outcome:'won', rep:'Devin Cole' },
-    { id:'d8',  brand:'DraftKings', showId:'action',  gross:8300,  sellType:'month', createdDate:'2026-07-09', closeDate:'2026-07-21', outcome:'won', rep:'Marcus Bell' },
-    { id:'d9',  brand:'Ramp',       showId:'nate',    gross:7100,  sellType:'month', createdDate:'2026-07-22', closeDate:'2026-07-30', outcome:'won', rep:'Devin Cole' },
-    { id:'d10', brand:'AG1',        showId:'rubin',   gross:10400, sellType:'month', createdDate:'2026-07-28', closeDate:'2026-08-04', outcome:'won', rep:'Priya Shah' },
+    { id:'d1', title:'July flight',  brand:'Kalshi',     showId:'rubin',   gross:16400, sellType:'month', createdDate:'2026-06-18', closeDate:'2026-06-24', outcome:'won', rep:'Marcus Bell' },
+    { id:'d2', title:'July flight',  brand:'DraftKings', showId:'sage',    gross:18900, sellType:'month', createdDate:'2026-06-02', closeDate:'2026-06-09', outcome:'won', rep:'Priya Shah' },
+    { id:'d3', title:'Q3 flight',  brand:'Ramp',       showId:'warren',  gross:11200, sellType:'month', createdDate:'2026-06-20', closeDate:'2026-07-01', outcome:'won', rep:'Devin Cole' },
+    { id:'d4', title:'August flight',  brand:'Ritual',     showId:'clinton', gross:6400,  sellType:'month', createdDate:'2026-07-08', closeDate:'2026-07-14', outcome:'won', rep:'Priya Shah' },
+    { id:'d5', title:'August flight',  brand:'Kalshi',     showId:'sage',    gross:14800, sellType:'month', createdDate:'2026-07-11', closeDate:'2026-07-19', outcome:'won', rep:'Marcus Bell' },
+    { id:'d6', title:'Q3 flight',  brand:'BetterHelp', showId:'warren',  gross:9800,  sellType:'month', createdDate:'2026-07-02', closeDate:'2026-07-16', outcome:'won', rep:'Priya Shah' },
+    { id:'d7', title:'August flight',  brand:'Notion',     showId:'rubin',   gross:12600, sellType:'month', createdDate:'2026-07-05', closeDate:'2026-07-20', outcome:'won', rep:'Devin Cole' },
+    { id:'d8', title:'August flight',  brand:'DraftKings', showId:'action',  gross:8300,  sellType:'month', createdDate:'2026-07-09', closeDate:'2026-07-21', outcome:'won', rep:'Marcus Bell' },
+    { id:'d9', title:'August flight',  brand:'Ramp',       showId:'nate',    gross:7100,  sellType:'month', createdDate:'2026-07-22', closeDate:'2026-07-30', outcome:'won', rep:'Devin Cole' },
+    { id:'d10', title:'August flight', brand:'AG1',        showId:'rubin',   gross:10400, sellType:'month', createdDate:'2026-07-28', closeDate:'2026-08-04', outcome:'won', rep:'Priya Shah' },
+    { id:'d11', title:'September flight', brand:'AG1', showId:'sage', gross:15600, sellType:'month', createdDate:'2026-08-18', closeDate:'2026-08-20', outcome:'won', rep:'Priya Shah' },
   ];
   DEALS.forEach(d => { d.net = Math.round(d.gross*0.85); d.netToCreator = Math.round(d.net*0.6); });
   const deal = id => DEALS.find(d=>d.id===id);
@@ -530,11 +531,12 @@
 
     // ── booked, not yet aired · copy pipeline ──
     { id:'s14', dealId:'d6', brand:'BetterHelp', showId:'sage', kind:'paid', published:'2026-08-19', guarantee:120000, views:null, downloads:null, dlState:'auto', status:'scheduled', length:'60s', yt:'', ts:null, copyStatus:'needs_copy', copy:[] },
-    { id:'s15', dealId:'d8', brand:'Notion', showId:'action', kind:'paid', published:'2026-08-21', guarantee:70000, views:null, downloads:null, dlState:'none', status:'scheduled', length:'45s', yt:'', ts:null, copyStatus:'sent', copySent:'2026-08-14', copySeen:null, copy:[] },
+    { id:'s15', dealId:'d7', brand:'Notion', showId:'action', kind:'paid', published:'2026-08-21', guarantee:70000, views:null, downloads:null, dlState:'none', status:'scheduled', length:'45s', yt:'', ts:null, copyStatus:'sent', copySent:'2026-08-14', copySeen:null, copy:[] },
     { id:'s16', dealId:'d3', brand:'Ramp', showId:'clinton', kind:'paid', published:'2026-08-25', guarantee:45000, views:null, downloads:null, dlState:'request', status:'scheduled', length:'60s', yt:'', ts:null, copyStatus:'needs_cta', copy:[] },
     { id:'s17', dealId:'d5', brand:'Kalshi', showId:'sage', kind:'paid', published:'2026-08-26', guarantee:120000, views:null, downloads:null, dlState:'auto', status:'scheduled', length:'60s', yt:'', ts:null, copyStatus:'seen', copySent:'2026-08-12', copySeen:'2026-08-12', copy:[] },
     // ── the make-good that already ran the full loop ──
     { id:'s18', dealId:'d3', brand:'Ramp', showId:'warren', kind:'makegood', published:'2026-08-20', guarantee:0, views:null, downloads:null, dlState:'none', status:'scheduled', length:'60s', yt:'', ts:null, copyStatus:'seen', copy:[] },
+    { id:'s19', dealId:'d11', brand:'AG1', showId:'sage', kind:'paid', published:'2026-09-02', guarantee:120000, views:null, downloads:null, dlState:'auto', status:'scheduled', length:'60s', yt:'', ts:null, copyStatus:'needs_copy', copy:[] },
   ];
   const spot = id => SPOTS.find(s=>s.id===id);
 
@@ -718,7 +720,7 @@
   /* ═══════════════════════════ OVERLAYS ═══════════════════════════ */
   function openDrawer(html){ const d=document.getElementById('drawer'); d.innerHTML=html; d.classList.add('open'); document.getElementById('scrim').classList.add('open'); }
   function openModal(html){ const m=document.getElementById('modal'); m.innerHTML=html; m.classList.add('open'); document.getElementById('scrim').classList.add('open'); }
-  function closeOverlays(){ document.getElementById('drawer').classList.remove('open'); document.getElementById('modal').classList.remove('open'); document.getElementById('scrim').classList.remove('open'); }
+  function closeOverlays(){ SELFOR=null; document.getElementById('drawer').classList.remove('open'); document.getElementById('modal').classList.remove('open'); document.getElementById('scrim').classList.remove('open'); }
 
   /* ═══════════════════════════ ASK ═══════════════════════════ */
   let CHATS=[];
@@ -778,50 +780,50 @@
       <div style="position:absolute;inset:0 auto 0 0;width:${w(pr.got)}%;border-radius:4px;background:${tone}"></div>
       <div title="90% IAB line" style="position:absolute;top:-3px;bottom:-3px;left:${w(s.guarantee*IAB_FULL)}%;width:2px;background:var(--green-text)"></div></div>`;
   }
-  const jit=(id,d)=>{ let h=0; const k=id+':'+d; for(let i=0;i<k.length;i++) h=(h*31+k.charCodeAt(i))|0; return ((h%1000)/1000-0.5)*0.09; };
-
-  /* The agent does not watch views tick over — it pulls a number on a schedule:
-     the daily scan that finds the read, then weekly, the show's own check-in
-     day, and the 30-day final. These are the readings we actually hold. */
-  function checkPoints(s){
-    const pr=projection(s); if(!pr) return [];
-    const sh=show(s.showId);
-    const days=[...new Set([1,7,checkInDay(sh),14,21,30])].sort((a,b)=>a-b).filter(d=>d>=1&&d<pr.day);
-    days.push(pr.day);
-    return days.map(d=>({ d, v: d===pr.day ? pr.got : Math.round(curveAt(sh.curve,d)*pr.proj*(1+jit(s.id,d))), latest:d===pr.day }));
-  }
   const nextCheck = s => { const pr=projection(s); if(!pr||pr.final) return null;
     const sh=show(s.showId);
     return [...new Set([1,7,checkInDay(sh),14,21,30])].sort((a,b)=>a-b).find(d=>d>pr.day) || 30; };
 
   /* One line for what landed, one dashed line for where it goes, one goal.
      The goal drawn is the 90% IAB line — the number that actually decides. */
-  function curveChart(s,{w=520,h=200}={}){
-    const pr=projection(s); if(!pr) return '';
-    const goal=Math.round(s.guarantee*IAB_FULL);
-    const padL=14, padR=52, padT=18, padB=26;
-    const max=Math.max(goal, pr.proj)*1.15, X=d=>padL+(w-padL-padR)*(d/30), Y=v=>h-padB-(h-padT-padB)*(v/max);
-    const pts=checkPoints(s), tone=toneVar(verdict(s).tone), last=pts[pts.length-1];
-    const readPath = pts.length ? 'M'+[[X(0),Y(0)]].concat(pts.map(p=>[X(p.d),Y(p.v)])).map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L') : '';
-    const runout = last && !pr.final ? `M${X(last.d).toFixed(1)} ${Y(last.v).toFixed(1)} L${X(30).toFixed(1)} ${Y(pr.proj).toFixed(1)}` : '';
+  /* The record's graph covers the whole deal by default; click reads in the
+     deliverables list to include or exclude them. Selection dies with the
+     drawer, so it always reopens on the full picture. */
+  let SELSET=null, SELFOR=null;
+  function toggleSel(id){ if(!SELSET) return;
+    if(SELSET.has(id)){ if(SELSET.size===1) return; SELSET.delete(id); } else SELSET.add(id);
+    openSpot(DRAWER_SPOT); }
+  let DRAWER_SPOT=null;
+
+  function dealChart(sel,{w=470,h=200}={}){
+    const spots=sel.filter(x=>projection(x)); if(!spots.length) return '<div class="empty">Nothing selected.</div>';
+    const start=spots.map(x=>x.published).sort()[0];
+    const end=spots.map(x=>addDays(x.published,30)).sort().slice(-1)[0];
+    const span=Math.max(daysBetween(start,end),1), today=Math.min(Math.max(daysBetween(start,TODAY),0),span);
+    const goal=Math.round(spots.reduce((a,x)=>a+x.guarantee,0)*IAB_FULL);
+    const total=d=>spots.reduce((acc,x)=>{ const pr=projection(x); const dd=d-daysBetween(start,x.published);
+      return dd<=0?acc:acc+curveAt(show(x.showId).curve,Math.min(dd,30))*pr.proj; },0);
+    const padL=14,padR=52,padT=18,padB=26, max=Math.max(goal,total(span))*1.15;
+    const X=d=>padL+(w-padL-padR)*(d/span), Y=v=>h-padB-(h-padT-padB)*(v/max);
+    const pts=[]; for(let d=0;d<=span;d++) pts.push([X(d),Y(total(d))]);
+    const solid=pts.slice(0,today+1).map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1));
+    const dash=pts.slice(Math.max(today,0)).map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1));
     return `<svg viewBox="0 0 ${w} ${h}" width="100%">
-      <line x1="${padL}" x2="${w-padR}" y1="${h-padB}" y2="${h-padB}" stroke="var(--border)" stroke-width="1"/>
-      ${[0,10,20,30].map(d=>`<text x="${X(d)}" y="${h-9}" text-anchor="middle" font-size="10" font-weight="600" fill="var(--text-tertiary)">${d?'day '+d:'live'}</text>`).join('')}
+      <line x1="${padL}" x2="${w-padR}" y1="${h-padB}" y2="${h-padB}" stroke="var(--border)"/>
+      ${spots.map(x=>{ const d=daysBetween(start,x.published);
+        return `<line x1="${X(d)}" x2="${X(d)}" y1="${h-padB}" y2="${h-padB+4}" stroke="var(--text-tertiary)" stroke-width="1.5"/>
+        <text x="${X(d)}" y="${h-9}" text-anchor="middle" font-size="9" font-weight="600" fill="var(--text-tertiary)">${fmtDate(x.published)}</text>`; }).join('')}
       <line x1="${padL}" x2="${w-padR}" y1="${Y(goal)}" y2="${Y(goal)}" stroke="var(--text-tertiary)" stroke-width="1.5" stroke-dasharray="6 5"/>
       <text x="${w-padR+7}" y="${Y(goal)+3.5}" font-size="10.5" font-weight="700" fill="var(--text-secondary)">Goal ${K(goal)}</text>
-      ${readPath?`<path d="${readPath}" fill="none" stroke="${tone}" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>`:''}
-      ${runout?`<path d="${runout}" fill="none" stroke="${tone}" stroke-width="2" stroke-dasharray="5 4" opacity=".5"/>`:''}
-      ${pts.map(p=>`<circle cx="${X(p.d)}" cy="${Y(p.v)}" r="${p.latest?4.5:3}" fill="${p.latest?tone:'var(--panel)'}" stroke="${tone}" stroke-width="2"><title>Day ${p.d}: ${K(p.v)}</title></circle>`).join('')}
-      ${pr.final
-        ? `<text x="${X(last.d)}" y="${Y(last.v)-10}" text-anchor="middle" font-size="11.5" font-weight="800" fill="${tone}">${K(last.v)}</text>`
-        : `<circle cx="${X(30)}" cy="${Y(pr.proj)}" r="4" fill="none" stroke="${tone}" stroke-width="2"/>
-           <text x="${X(30)+2}" y="${Y(pr.proj)-10}" text-anchor="end" font-size="11.5" font-weight="800" fill="${tone}">${K(pr.proj)}</text>`}
+      ${dash.length>1?`<path d="M${dash.join(' L')}" fill="none" stroke="var(--green-text)" stroke-width="2" stroke-dasharray="5 4" opacity=".5"/>`:''}
+      <path d="M${solid.join(' L')}" fill="none" stroke="var(--green-text)" stroke-width="2.8" stroke-linecap="round"/>
+      <circle cx="${X(today)}" cy="${Y(total(today))}" r="4.5" fill="var(--green-text)" stroke="var(--panel)" stroke-width="2"/>
+      <text x="${X(span)}" y="${Y(total(span))-10}" text-anchor="end" font-size="11.5" font-weight="800" fill="var(--green-text)">${K(Math.round(total(span)))}</text>
     </svg>
-    <div class="curvekey">
-      <span><i style="border-color:${tone}"></i>Delivered</span>
-      ${pr.final?'':`<span><i style="border-color:${tone};border-top-style:dashed"></i>Where it lands</span>`}
-    </div>`;
+    <div class="curvekey"><span><i style="border-color:var(--green-text)"></i>Delivered</span>
+      <span><i style="border-color:var(--green-text);border-top-style:dashed"></i>Where it lands</span></div>`;
   }
+
 
   function sparkline(k,{w=88,h=26}={}){
     const pts=[]; for(let d=0;d<=30;d++) pts.push((2+(w-4)*(d/30)).toFixed(1)+' '+(h-2-(h-6)*curveAt(k,d)).toFixed(1));
@@ -892,7 +894,7 @@
         ? `<button class="fran" onclick="playClip('${s.yt}',${s.ts})" title="Hear the read"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>${mmss(s.ts)}</button>`
         : `<span class="fran fran--no">${s.status==='scheduled'?'due '+fmtDate(s.published):s.missed?'due '+fmtDate(s.published)+' ·  missed':'due today'}</span>`}
         ${s.kind==='makegood'?'<span style="font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--purple-text);text-align:center">Make good</span>':''}</div>
-      <div class="fnum">${pr?K(pr.got):dash}${pr&&sh.simulcast?`<small>${K(s.views||0)} + ${s.dlState==='requested'?'?':K(s.downloads||0)}</small>`:pr?'<small>video</small>':''}</div>
+      <div class="fnum">${pr?K(pr.got):dash}${pr&&sh.simulcast?`<small>${K(s.views||0)} vid · ${s.dlState==='requested'?'?':K(s.downloads||0)} aud</small>`:pr?'<small>video</small>':''}</div>
       <div class="wrow__num">${pr?`${projBar(s)}<b style="color:${toneVar(v.tone)}">${Math.round(pr.ratio*100)}%</b>`:'<span style="flex:1;text-align:left;font-size:12px;font-weight:600;color:var(--text-tertiary)">Not started</span>'}</div>
       <span onclick="event.stopPropagation()">${cta(c.label,`openSpot('${s.id}')`,c.dark)}</span>
       <span onclick="event.stopPropagation()"><button class="wdots" title="More" onclick="rowMenu(event,'${s.id}')">⋮</button></span>
@@ -982,8 +984,8 @@
   /* Every make good, in every state, plus what they have cost. The flowchart's
      back half: written to Airtable, flagged in Booster, and the analytics that
      come out of tracking sold against given. */
-  const MGSTEP=[['Date from avails',m=>!!m.date],['Show approved',m=>m.showOk===true],
-                ['Brand approved',m=>m.brandOk===true]];
+  const MGSTEP=[['Date from avails',m=>!!m.date],['Position',m=>!!m.position],
+                ['Show notified',m=>m.showOk],['Brand notified',m=>m.brandOk]];
   function makeGoodsPanel(){
     const st=mgStats();
     const card=m=>{ const sp=spot(m.spotId), sh=show(sp.showId), done=m.status==='scheduled';
@@ -996,11 +998,12 @@
             </div>
             <div style="text-align:right;flex-shrink:0">
               ${done?`<span class="tag tag--green"><i></i>Booked ${fmtDate(m.date)}</span>`
-                   :`<button class="btn btn--primary btn--sm" onclick="openMg('${m.id}')">${!m.date?'Pick a date':'Open'}</button>`}
+                   :`<button class="btn btn--primary btn--sm" onclick="openMg('${m.id}')">${!m.date?'Pick a date':!m.position?'Pick position':'Book it'}</button>`}
             </div>
           </div>
           <div style="display:flex;gap:7px;margin-top:13px;flex-wrap:wrap">
-            ${MGSTEP.map(([label,test])=>`<span class="tag ${test(m)?'tag--green':'tag--grey'}">${test(m)?'✓':'○'} ${label}</span>`).join('')}
+            ${MGSTEP.map(([label,test])=>{ const v=test(m);
+              return `<span class="tag ${v===true?'tag--green':'tag--grey'}">${v===true?'✓':v==='skip'?'–':'○'} ${label}${v==='skip'?' · skipped':''}</span>`; }).join('')}
             ${sh.mgPolicy==='auto'&&m.showOk===true?'<span class="muted" style="font-size:11px;align-self:center">show auto-schedules</span>':''}
           </div>
           ${done?`<div class="muted" style="font-size:11.5px;margin-top:10px">Inventory type <b>Make Good</b> on ${fmtDate(m.date)}, its own colour in Airtable, and the slot is flagged in Booster so it cannot be sold twice.</div>`:''}
@@ -1031,6 +1034,8 @@
 
   function openSpot(id){
     const s=spot(id), sh=show(s.showId), pr=projection(s), v=verdict(s), m=mgForSpot(s.id), cr=creative(s.brand);
+    DRAWER_SPOT=id;
+    if(SELFOR!==s.dealId){ SELSET=new Set(flightRows(s).filter(x=>projection(x)).map(x=>x.id)); SELFOR=s.dealId; }
     const q = pr ? qualityScore(s) : null, end = s.ts!=null ? s.ts+adSecs(s) : null, nx = pr ? nextCheck(s) : null;
     openDrawer(`<div class="drawer__head"><div>
         <span class="tag tag--${v.tone}"><i></i>${esc(v.label)}</span>
@@ -1091,10 +1096,11 @@
           <button class="btn btn--ghost btn--sm" onclick="copyDeliverables('${s.id}')">Copy all</button>
           <span class="ai-tag">AI auto-detect</span>
         </div>
-        <div class="cmp-hint">Every read booked on this deal, with the link and the ad's start–end the agent pulled. Fix anything wrong and mark it passed — writes back to Airtable.</div>
+        <div class="cmp-hint">Every read booked on this deal. Click a row to include or exclude it from the graph below — it reverts to the full deal when you close.</div>
         ${flightRows(s).map(e=>{ const epr=projection(e), passed=e.status==='verified'&&!!e.yt;
-          return `<div class="cmp-row">
-          <div class="cmp-row__top"><span class="cmp-row__date">${fmtDate(e.published)} · ${dayName(e.published)}${epr?` <span class="muted" style="font-weight:500">· ${K(epr.got)} impressions</span>`:''}${e.id===s.id?' <span class="tag tag--blue" style="margin-left:4px">this read</span>':''}</span>
+          const inSel=SELSET&&SELSET.has(e.id), selectable=!!epr;
+          return `<div class="cmp-row" style="${selectable?(inSel?'box-shadow:inset 3px 0 0 var(--green-text);':'opacity:.45;border-style:dashed;'):''}">
+          <div class="cmp-row__top" ${selectable?`style="cursor:pointer" onclick="toggleSel('${e.id}')"`:''}><span class="cmp-row__date">${fmtDate(e.published)} · ${dayName(e.published)}${epr?` <span class="muted" style="font-weight:500">· ${K(epr.got)} impressions</span>`:''}${e.id===s.id?' <span class="tag tag--blue" style="margin-left:4px">this read</span>':''}</span>
             <span style="display:inline-flex;align-items:center;gap:7px">
               ${e.yt?`<button class="btn btn--ghost btn--sm" style="padding:3px 9px;font-size:11px" onclick="copyDeliverable('${e.id}')">Copy</button>`:''}
               <span class="cmp-status ${passed?'ok':'pend'}">${passed?'✓ Passed':'Pending'}</span></span></div>
@@ -1102,11 +1108,21 @@
             <input class="cmp-inp" style="margin-top:6px;flex:1" value="${e.yt?esc('youtu.be/'+e.yt+'?t='+e.ts):''}" placeholder="Video link">
             <span class="tag tag--grey" style="margin-top:6px;flex-shrink:0;font-variant-numeric:tabular-nums">${e.ts!=null?mmss(e.ts)+'–'+mmss(e.ts+adSecs(e)):'—'}</span>
           </div>
-          ${show(e.showId).simulcast?`<input class="cmp-inp" value="${e.yt?esc('mgphn.fm/'+e.yt):''}" placeholder="Audio link">`:''}
+          ${show(e.showId).simulcast?`<div style="display:flex;align-items:center;gap:8px">
+            <input class="cmp-inp" style="margin-top:6px;flex:1" value="${e.yt?esc(e.brand.toLowerCase()+'-'+e.showId+'-'+e.published+'.mp3'):''}" placeholder="Audio file">
+            <button class="btn btn--ghost btn--sm" style="margin-top:6px;flex-shrink:0" onclick="event.stopPropagation();toast('Downloading the baked-in audio file. The feed itself can carry dynamic ads, so we hand over the file, not the link.')">↓ MP3</button>
+          </div>`:''}
         </div>`; }).join('')}
       </div>
 
-      <div class="curvewrap" style="margin-top:20px">${curveChart(s,{w:470,h:196})}</div>`}
+      ${(()=>{ const fr=flightRows(s).filter(x=>projection(x)); const sel=fr.filter(x=>SELSET&&SELSET.has(x.id));
+        const selG=sel.reduce((a,x)=>a+x.guarantee,0), selGot=sel.reduce((a,x)=>a+(delivered(x)||0),0), selProj=sel.reduce((a,x)=>a+projection(x).proj,0);
+        return `<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light)">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:9px">
+          <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em">Deal delivery${sel.length<fr.length?` · ${sel.length} of ${fr.length} reads`:''}</div>
+          <span class="muted" style="font-size:11.5px">${K(selGot)} delivered · projecting ${K(selProj)} of ${K(selG)}</span>
+        </div>
+        <div class="curvewrap">${dealChart(sel)}</div></div>`; })()}`}
     </div>
     <div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Close</button>
       ${s.missed?`<button class="btn btn--primary" onclick="closeOverlays();nudgeEpisode('${s.id}')">Nudge show</button>`
@@ -1114,7 +1130,7 @@
         :m?`<button class="btn btn--primary" onclick="closeOverlays();openMg('${m.id}')">Open make good</button>`
         :closedOut(s)&&!s.reportSent?`<button class="btn btn--primary" onclick="closeOverlays();sendDeliveryReport('${s.id}')">Send delivery report</button>`
         :closedOut(s)&&!s.completed?`<button class="btn btn--primary" onclick="closeOverlays();markComplete('${s.id}')">Mark complete</button>`
-        :pr?`<button class="btn btn--primary" onclick="closeOverlays();go('portal');openCampaign('${s.brand}')">See in the report</button>`:''}</div>`);
+        :pr?`<button class="btn btn--primary" onclick="closeOverlays();go('portal');openDeal('${s.dealId}')">See in the report</button>`:''}</div>`);
   }
 
 
@@ -1138,12 +1154,19 @@
     closeOverlays(); rerender(); refreshBadges();
     toast(`${s.brand} make good scheduled — ${m.position||'mid-roll'} on ${sh.name}, ${fmtDate(m.date)}. Written to Airtable as "Make Good" and flagged in Booster so the slot can't be sold twice.`);
   }
+  /* Make good, in the order the Aug 21 call asked for: date, position, drafts
+     you can send (or not), then Notified toggles that are guidance — never a
+     gate. Writing to Airtable needs only a date and a position (27:08). */
+  const noteState=v=>v===true?'✓ Notified':v==='skip'?'– Skipped':'○ Not sent';
+  function dismissMg(id,key){ const m=mg(id); m[key]=m[key]==='skip'?null:'skip'; openMg(id); rerender(); refreshBadges(); }
   function openMg(id){
     const m=mg(id), s=spot(m.spotId), sh=show(s.showId), pr=projection(s), auto=sh.mgPolicy==='auto';
     if(!m.position&&creative(s.brand).placement) m.position=creative(s.brand).placement;
-    const d=m.date?fmtDate(m.date):'[date]', both=m.showOk===true&&m.brandOk===true&&!!m.date&&!!m.position;
-    const sw=(on,label,note,key)=>`<div class="tog"><button class="tog__sw ${on?'on':''}" onclick="toggleMg('${id}','${key}')"><i></i></button>
-      <div style="flex:1"><b>${label}</b><small>${note}</small></div></div>`;
+    const d=m.date?fmtDate(m.date):'[date]', ready=!!m.date&&!!m.position;
+    const noteRow=(key,label,note)=>`<div class="tog">
+      <button class="tog__sw ${m[key]===true?'on':''}" onclick="toggleMg('${id}','${key}')"><i></i></button>
+      <div style="flex:1"><b>${label} ${m[key]==='skip'?'<span class="muted" style="font-weight:600">· skipped</span>':''}</b><small>${note}</small></div>
+      <button class="btn btn--ghost btn--sm" style="flex-shrink:0" onclick="dismissMg('${id}','${key}')">${m[key]==='skip'?'Undo':'Dismiss'}</button></div>`;
     openDrawer(`<div class="drawer__head"><div><span class="tag tag--orange"><i></i>${K(shortfall(s))} short</span>
       <h2 style="font-size:18px;font-weight:800;margin-top:8px">Make good · ${esc(s.brand)} on ${esc(sh.name)}</h2>
       <div class="muted" style="font-size:12px">Projecting ${K(pr?pr.proj:0)} against a ${K(s.guarantee)} guarantee</div></div>
@@ -1155,25 +1178,26 @@
 
       <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary);margin:16px 0 7px">Position</div>
       <div style="display:flex;gap:7px;flex-wrap:wrap">${['Pre-roll','Mid-roll','Post-roll'].map(pos=>`<button class="tag ${m.position===pos?'tag--blue':'tag--grey'}" style="padding:7px 13px;cursor:pointer" onclick="setMgPosition('${id}','${pos}')">${pos}${pos===creative(s.brand).placement?' · same as original':''}</button>`).join('')}</div>
-      ${m.date&&!m.position?`<div class="muted" style="font-size:11.5px;margin-top:8px">Pick the position to finish the slot.</div>`:''}
 
-      <div style="display:flex;flex-direction:column;gap:9px;margin-top:16px">
-        ${sw(m.showOk===true,'Show approved', auto?`${esc(sh.name)} auto-schedules — no ask needed`:m.showVia==='gmail'?'Detected from the reply in adops@':'Send the draft below', 'showOk')}
-        ${sw(m.brandOk===true,'Brand approved', m.sentBrand?`Sent ${fmtDate(m.sentBrand)} · no reply yet`:'Send the draft below', 'brandOk')}
+      <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary);margin:18px 0 7px">Drafts · sending is optional</div>
+      ${auto?`<div class="muted" style="font-size:12px;margin-bottom:9px">${esc(sh.name)} auto-schedules, so the show doesn't need an ask — the draft is here if you want to give them a heads-up anyway.</div>`:''}
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--text-tertiary);margin:8px 0 6px">To ${esc(sh.host)}</div>
+      <textarea class="cmp-inp" style="min-height:100px;line-height:1.6;font-size:12.5px">Hey ${esc(sh.host.split(' ')[0])} — the ${esc(s.brand)} read from ${fmtDate(s.published)} is tracking to land near ${K(pr?pr.proj:0)} against a ${K(s.guarantee)} guarantee, so we owe them a make good. Can we put a free ${esc(s.length)} ${m.position?m.position.toLowerCase():'read'} on ${d}? Same copy — comes out of our end, no change to your split. Thanks, Sydney</textarea>
+      <button class="btn btn--ghost btn--sm" style="margin-top:7px" onclick="sendMg('${id}','show')">Send to show</button>
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--text-tertiary);margin:14px 0 6px">To ${esc(s.brand)}</div>
+      <textarea class="cmp-inp" style="min-height:100px;line-height:1.6;font-size:12.5px">Hi ${esc(s.brand)} team — heads up on the ${esc(sh.name)} read from ${fmtDate(s.published)}. It's pacing a little under the guarantee, so we've queued an additional ${m.position?m.position.toLowerCase():'read'} on ${d} at no cost to bring the flight back over. Nothing needed on your end. Thanks, Sydney</textarea>
+      <button class="btn btn--ghost btn--sm" style="margin-top:7px" onclick="sendMg('${id}','brand')">Send to brand</button>
+
+      <div style="display:flex;flex-direction:column;gap:9px;margin-top:18px">
+        ${noteRow('showOk','Show notified', auto?'Auto-schedules — a courtesy, not an ask':m.showVia==='gmail'?'Detected from the reply in adops@':'Flips when the reply lands, or set it yourself')}
+        ${noteRow('brandOk','Brand notified', m.sentBrand?`Sent ${fmtDate(m.sentBrand)} · no reply yet`:'Flips when the reply lands, or set it yourself')}
       </div>
-
-      <details style="margin-top:16px"><summary style="font-size:12.5px;font-weight:700;cursor:pointer;color:var(--text-secondary)">Drafts${auto?' · brand only':''}</summary>
-        ${auto?'':`<div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--text-tertiary);margin:12px 0 6px">To ${esc(sh.host)}</div>
-        <textarea class="cmp-inp" style="min-height:110px;line-height:1.6;font-size:12.5px">Hey ${esc(sh.host.split(' ')[0])} — the ${esc(s.brand)} read from ${fmtDate(s.published)} is tracking to land near ${K(pr?pr.proj:0)} against a ${K(s.guarantee)} guarantee, so we owe them a make good. Can we put a free ${esc(s.length)} ${m.position?m.position.toLowerCase():'read'} on ${d}? Same placement, same copy — comes out of our end, no change to your split. Thanks, Sydney</textarea>
-        <button class="btn btn--primary btn--sm" style="margin-top:7px" onclick="sendMg('${id}','show')">Send to show</button>`}
-        <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--text-tertiary);margin:14px 0 6px">To ${esc(s.brand)}</div>
-        <textarea class="cmp-inp" style="min-height:110px;line-height:1.6;font-size:12.5px">Hi ${esc(s.brand)} team — heads up on the ${esc(sh.name)} read from ${fmtDate(s.published)}. It's pacing a little under the guarantee, so we've queued an additional read on ${d} at no cost to bring the flight back over. Nothing needed on your end. Thanks, Sydney</textarea>
-        <button class="btn btn--primary btn--sm" style="margin-top:7px" onclick="sendMg('${id}','brand')">Send to brand</button>
-      </details>
+      <div class="muted" style="font-size:11.5px;margin-top:10px">These track who's been told — they're guidance, not a gate. Every situation is different.</div>
     </div>
     <div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Close</button>
-      <button class="btn btn--green" ${both?'':'disabled style="opacity:.45"'} onclick="commitMg('${id}')">✓ Write to Airtable</button></div>`);
+      <button class="btn btn--green" ${ready?'':'disabled style="opacity:.45"'} onclick="commitMg('${id}')">✓ Write to Airtable</button></div>`);
   }
+
   function sendMg(id,who){ const m=mg(id), s=spot(m.spotId);
     if(who==='show') toast(`Sent to ${show(s.showId).host} from adops@. The agent reads the reply and flips the toggle.`);
     else { m.sentBrand=TODAY; toast(`Sent to ${s.brand} in the existing thread.`); }
@@ -1241,80 +1265,105 @@
     <div class="reel-stage"><iframe src="https://www.youtube.com/embed/${yt}?start=${ts}&autoplay=1" allow="autoplay" allowfullscreen></iframe></div>`); }
 
   /* ═══════════════════════════ VIEW: CAMPAIGN PORTAL ═══════════════════════════ */
-  let portalBrand=null;   // null = the index of every campaign
-  function openCampaign(b){ portalBrand=b; RENDER.portal(); document.querySelector('.views').scrollTop=0; }
-  function closeCampaign(){ portalBrand=null; RENDER.portal(); document.querySelector('.views').scrollTop=0; }
+  /* ═══ BRAND → DEAL → REPORT (Aug 21 call, 9:25-16:57) ═══
+     A brand holds several deals closed at different times; the report and the
+     guarantee live at the deal. The index defaults to live deals for speed. */
+  let portalDeal=null, portalFilter='live';
+  function openDeal(id){ portalDeal=id; RENDER.portal(); document.querySelector('.views').scrollTop=0; }
+  function closeDeal(){ portalDeal=null; RENDER.portal(); document.querySelector('.views').scrollTop=0; }
+  // back-compat: anything still pointing at a brand opens its most recent live deal
+  function openCampaign(b){ const d=DEALS.filter(x=>x.brand===b).map(x=>dealSummary(x)).sort((p,q)=>(p.state==='live'?0:1)-(q.state==='live'?0:1))[0]; if(d) openDeal(d.deal.id); }
+  const closeCampaign=closeDeal;
 
-  function campaignSummary(brand){
-    const spots=SPOTS.filter(s=>s.brand===brand&&projection(s)).sort((x,y)=>dt(x.published)-dt(y.published));
-    const mgs=SPOTS.filter(s=>s.brand===brand&&s.kind==='makegood');
-    const g=spots.reduce((a,s)=>a+s.guarantee,0), got=spots.reduce((a,s)=>a+(delivered(s)||0),0);
-    const proj=spots.reduce((a,s)=>a+projection(s).proj,0), paid=spots.reduce((a,s)=>a+spotCost(s),0);
-    const done=spots.length&&spots.every(s=>projection(s).final);
-    // judge the campaign on the reads that can be judged — a day-0 read is building, not behind
-    const callable=spots.filter(s=>projection(s).confident);
+  function dealSummary(d){
+    const spots=SPOTS.filter(s=>s.dealId===d.id).sort((x,y)=>dt(x.published)-dt(y.published));
+    const liveSpots=spots.filter(s=>projection(s));
+    const mgs=spots.filter(s=>s.kind==='makegood');
+    const paidLive=liveSpots.filter(s=>s.kind==='paid');
+    const g=paidLive.reduce((a,s)=>a+s.guarantee,0), got=liveSpots.reduce((a,s)=>a+(delivered(s)||0),0);
+    const proj=liveSpots.reduce((a,s)=>a+projection(s).proj,0), paid=paidLive.reduce((a,s)=>a+spotCost(s),0);
+    const done=paidLive.length&&paidLive.every(s=>projection(s).final)&&!spots.some(s=>s.status==='scheduled'||s.status==='aired');
+    const state = !liveSpots.length ? 'upcoming' : done ? 'complete' : 'live';
+    const callable=paidLive.filter(s=>projection(s).confident);
     const gC=callable.reduce((a,s)=>a+s.guarantee,0), projC=callable.reduce((a,s)=>a+projection(s).proj,0);
-    // same confidence rule the rest of the app uses — an early read is not "behind"
-    const blocked = spots.some(s=>verdict(s).k==='blocked');
+    const blocked = liveSpots.some(s=>verdict(s).k==='blocked');
     const status = blocked ? {k:'blocked', label:'Waiting on downloads', tone:'purple', rank:1}
       : !callable.length ? {k:'early', label:'Too early to call', tone:'grey', rank:3}
       : projC>=gC ? {k:'full', label:done?'Delivered in full':'Tracking over', tone:'green', rank:4}
       : mgs.length ? {k:'mg', label:'Make good booked', tone:'purple', rank:2}
       : {k:'under', label:'Tracking under', tone:'orange', rank:0};
-    return { brand, spots, mgs, g, got, proj, paid, done, status,
+    const first=spots[0], last=spots[spots.length-1];
+    return { deal:d, brand:d.brand, title:d.title||'Flight', spots, liveSpots, paidLive, mgs, g, got, proj, paid, done, state, status,
       shows:[...new Set(spots.map(s=>s.showId))],
-      yt:spots.reduce((a,s)=>a+(s.views||0),0), aud:spots.reduce((a,s)=>a+(s.downloads||0),0),
-      pct: callable.length?pctOf(projC,gC):pctOf(proj,g),
-      flight: spots.length?`${fmtDate(spots[0].published)} – ${fmtDate(addDays(spots[spots.length-1].published,30))}`:'—' };
+      yt:liveSpots.reduce((a,s)=>a+(s.views||0),0), aud:liveSpots.reduce((a,s)=>a+(s.downloads||0),0),
+      pct: callable.length?pctOf(projC,gC):(g?pctOf(proj,g):0),
+      flight: spots.length?`${fmtDate(first.published)} – ${fmtDate(addDays(last.published,30))}`:'—' };
   }
 
+  const DEAL_FILTERS=[['live','Live'],['upcoming','Upcoming'],['complete','Complete'],['all','All']];
+  const STATE_DOT={live:'var(--green-text)', upcoming:'var(--blue-text)', complete:'var(--text-tertiary)'};
+
+  function sendDealReport(id){
+    const ds=dealSummary(DEALS.find(x=>x.id===id));
+    const doneReads=ds.spots.filter(s=>closedOut(s));
+    doneReads.forEach(s=>s.reportSent=TODAY); rerender(); refreshBadges();
+    toast(`Delivery report for ${ds.brand} · ${ds.title} sent, adops@ copied.`);
+  }
 
   RENDER.portal = () => {
-    const brands=[...new Set(SPOTS.filter(s=>projection(s)).map(s=>s.brand))];
-    if(portalBrand===null || !brands.includes(portalBrand)) return renderCampaignIndex(brands);
-    const c=campaignSummary(portalBrand), cr=creative(portalBrand);
-    const {spots,mgs,g,got,proj,paid,yt,aud,shows,flight,done}=c;
+    if(portalDeal===null) return renderDealIndex();
+    const d=DEALS.find(x=>x.id===portalDeal); if(!d){ portalDeal=null; return renderDealIndex(); }
+    const c=dealSummary(d), cr=creative(d.brand);
+    const {spots,liveSpots,mgs,g,got,proj,paid,yt,aud,shows,flight,done}=c;
     const verified=spots.filter(s=>s.status==='verified'&&s.yt).length;
-    const over = proj>=g;
-
-    // one line per show: what it reached and how that sits against its share
-    const byShow={}; spots.forEach(s=>{ const k=s.showId;
+    const over=c.pct>=100;
+    const byShow={}; liveSpots.filter(s=>s.kind==='paid').forEach(s=>{ const k=s.showId;
       byShow[k]=byShow[k]||{showId:k,n:0,got:0,g:0,proj:0};
       byShow[k].n++; byShow[k].got+=delivered(s)||0; byShow[k].g+=s.guarantee; byShow[k].proj+=projection(s).proj; });
 
     document.getElementById('view-portal').innerHTML=`
     <div class="inner" style="max-width:940px">
-      <button class="btn btn--ghost btn--sm" style="margin-bottom:14px" onclick="closeCampaign()">← All campaigns</button>
+      <button class="btn btn--ghost btn--sm" style="margin-bottom:14px" onclick="closeDeal()">← All deals</button>
       <div class="pagebar">
-        <div class="head"><h1>${esc(portalBrand)}</h1><p>The live report the advertiser sees. Read-only for them, and it fills in as reads land.</p></div>
+        <div class="head"><h1>${esc(d.brand)} <span class="muted" style="font-weight:600;font-size:19px">· ${esc(c.title)}</span></h1>
+        <p>The live report the advertiser sees. Read-only for them, and it fills in as reads land.</p></div>
         <div class="pagebar__right">
-          <button class="btn btn--ghost btn--sm" onclick="toast('Copied vmg.live/${portalBrand.toLowerCase()}-aug — read-only, updates as reads land.')">🔗 Copy link</button>
-          <button class="btn btn--primary btn--sm" onclick="sendCampaignReport('${esc(portalBrand)}')">Send report</button></div>
+          <button class="btn btn--ghost btn--sm" onclick="toast('Copied vmg.live/${d.brand.toLowerCase()}-${d.id} — read-only, admin notes stay internal.')">🔗 Copy link</button>
+          <button class="btn btn--primary btn--sm" onclick="sendDealReport('${d.id}')">Send report</button></div>
       </div>
 
       <div class="card"><div class="card__pad" style="padding:22px 24px">
         <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap">
-          <div class="brand-chip" style="background:${brandColor[portalBrand]||'#3B82F6'};width:46px;height:46px;border-radius:12px;font-size:17px">${esc(portalBrand[0])}</div>
+          <div class="brand-chip" style="background:${brandColor[d.brand]||'#3B82F6'};width:46px;height:46px;border-radius:12px;font-size:17px">${esc(d.brand[0])}</div>
           <div style="flex:1;min-width:0">
-            <div style="font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--text-tertiary)">DELIVERY REPORT · AUGUST 2026</div>
-            <h2 style="font-size:22px;font-weight:800;letter-spacing:-.03em;margin-top:2px">${esc(portalBrand)} on VMG</h2>
+            <div style="font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--text-tertiary)">DELIVERY REPORT · ${esc(c.title).toUpperCase()}</div>
+            <h2 style="font-size:22px;font-weight:800;letter-spacing:-.03em;margin-top:2px">${esc(d.brand)} on VMG</h2>
             <div class="muted" style="font-size:12.5px;margin-top:3px">${flight}</div>
           </div>
           <div style="text-align:right">
-            <div style="font-size:38px;font-weight:800;letter-spacing:-.04em;line-height:1;color:${over?'var(--green-text)':'var(--orange-text)'}">${pctOf(proj,g)}%</div>
+            <div style="font-size:38px;font-weight:800;letter-spacing:-.04em;line-height:1;color:${over?'var(--green-text)':'var(--orange-text)'}">${c.pct}%</div>
             <div class="muted" style="font-size:11.5px;margin-top:3px">of booked impressions</div>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:22px;padding-top:20px;border-top:1px solid var(--border-light)">
           ${pStat('Imp delivered',K(got))}${pStat('Delivered CPM','$'+(got?(paid/(got/1000)):0).toFixed(2))}
           ${pStat('YouTube reach',K(yt))}${pStat('Audio reach',K(aud))}
-          ${pStat('Shows',shows.length)}${pStat('Verified reads',verified+'/'+spots.length)}
+          ${pStat('Shows',shows.length)}${pStat('Verified reads',verified+'/'+spots.filter(s=>s.kind==='paid').length)}
         </div>
       </div></div>
 
-      <div class="card" style="margin-top:16px">
+      <div class="card" style="margin-top:16px;border-style:dashed">
+        <div class="card__head"><div><div class="card__title">Admin notes <span class="tag tag--grey" style="margin-left:6px">Internal · not on the shared link</span></div>
+          <div class="card__sub">Ops notes for Sydney and Shelby — check-ins, addresses owed, things a show or brand said.</div></div>
+          <button class="btn btn--ghost btn--sm" onclick="saveDealNotes('${d.id}')">Save</button></div>
+        <div class="card__pad" style="padding-top:0">
+          <textarea id="dealNotes" class="cmp-inp" style="min-height:64px;line-height:1.6;font-size:12.5px" placeholder="e.g. Chase the gift-card redemptions — only a few shows have. Brand wants addresses by Friday.">${esc(d.notes||'')}</textarea>
+        </div>
+      </div>
+
+      ${Object.keys(byShow).length?`<div class="card" style="margin-top:16px">
         <div class="card__head"><div class="card__title">Reach by show</div>
-          <span class="tag tag--grey">${shows.length} show${shows.length!==1?'s':''} · ${spots.length} read${spots.length!==1?'s':''}</span></div>
+          <span class="tag tag--grey">${shows.length} show${shows.length!==1?'s':''} · ${spots.filter(s=>s.kind==='paid').length} read${spots.length!==1?'s':''}</span></div>
         <div class="card__pad">${Object.values(byShow).map(r=>{ const pct=pctOf(r.proj,r.g);
           return `<div style="margin-bottom:14px">
             <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:600">
@@ -1322,23 +1371,23 @@
               <span>${K(r.got)} · ${pct}%</span></div>
             <div class="pace ${pct>=100?'pace--good':pct>=90?'':'pace--warn'}" style="margin-top:5px"><div class="pace__fill" style="width:${Math.min(pct,100)}%"></div></div>
           </div>`; }).join('')}</div>
-      </div>
+      </div>`:''}
 
       ${over&&done?`<div class="card" style="margin-top:16px;border-color:var(--green-bg)"><div class="card__pad" style="display:flex;align-items:center;gap:14px">
         <div style="width:38px;height:38px;border-radius:10px;background:var(--green-bg);display:grid;place-items:center;flex-shrink:0"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--green-text)" stroke-width="2.2"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4-6.3-4.6L5.7 21 8 14 2 9.4h7.6z"/></svg></div>
-        <div style="flex:1"><b style="font-size:13.5px">This campaign over-delivered (${pctOf(proj,g)}%) — renewal moment</b>
-          <div class="muted" style="font-size:12.5px">${K(proj-g)} impressions over the guarantee, at no charge. The numbers are already attached.</div></div>
-        <button class="btn btn--green btn--sm" onclick="toast('Renewal pitch drafted for ${esc(portalBrand)} with the live numbers attached.')">Draft renewal</button></div></div>`
-      :!over?`<div class="card" style="margin-top:16px;border-color:var(--orange-bg)"><div class="card__pad" style="display:flex;align-items:center;gap:14px">
+        <div style="flex:1"><b style="font-size:13.5px">This deal over-delivered (${c.pct}%) — renewal moment</b>
+          <div class="muted" style="font-size:12.5px">The numbers are already attached. Pitch the next flight while it's hot.</div></div>
+        <button class="btn btn--green btn--sm" onclick="toast('Renewal pitch drafted for ${esc(d.brand)} with the live numbers attached.')">Draft renewal</button></div></div>`
+      :!over&&c.state==='live'?`<div class="card" style="margin-top:16px;border-color:var(--orange-bg)"><div class="card__pad" style="display:flex;align-items:center;gap:14px">
         ${icoBox('mg','orange')}
         <div style="flex:1"><b style="font-size:13.5px">${mgs.length?`${mgs.length} additional read${mgs.length>1?'s':''} booked at no cost`:'Tracking under the guarantee'}</b>
           <div class="muted" style="font-size:12.5px">${mgs.length?`On ${mgs.map(m=>fmtDate(m.published)).join(', ')}, to bring the flight back over the line.`:'We will add reads at no cost to close the gap.'}</div></div></div></div>`:''}
 
       <div class="card" style="margin-top:16px">
-        <div class="card__head"><div><div class="card__title">Reads that ran</div>
+        <div class="card__head"><div><div class="card__title">Reads on this deal</div>
           <div class="card__sub">Click a timestamp to hear the read, or open one for the transcript and the brief.</div></div></div>
         <table><thead><tr><th>Show</th><th>Published</th><th class="num">Impressions</th><th>Verified</th><th>Ad read</th><th>Episode</th><th></th></tr></thead>
-        <tbody>${spots.map(s=>{ const pr=projection(s), v=verdict(s);
+        <tbody>${liveSpots.filter(s=>s.kind==='paid').map(s=>{ const pr=projection(s);
           return `<tr><td><b>${esc(show(s.showId).name)}</b><div class="muted" style="font-size:11.5px">${esc(epTitle(s))}</div></td>
             <td>${fmtDate(s.published)}</td>
             <td class="num"><b>${K(pr.got)}</b>${pr.confident?`<div class="muted" style="font-size:11px">${Math.round(pr.ratio*100)}% of goal</div>`:'<div class="muted" style="font-size:11px">still building</div>'}</td>
@@ -1346,74 +1395,68 @@
             <td>${s.yt?`<button class="btn btn--ghost btn--sm" onclick="playClip('${s.yt}',${s.ts})">${mmss(s.ts)}–${mmss(s.ts+adSecs(s))}</button>`:'<span class="muted" style="font-size:12px">audio</span>'}</td>
             <td>${s.yt?`<a href="${clipUrl(s)}" target="_blank" style="font-size:12px;color:var(--blue-text);font-weight:600;text-decoration:none">youtu.be/${esc(s.yt)} ↗</a>`:'<span class="muted" style="font-size:12px">host feed</span>'}</td>
             <td class="right"><button class="btn btn--ghost btn--sm" onclick="openRead('${s.id}')">More info</button></td></tr>`; }).join('')}
+          ${spots.filter(s=>s.status==='scheduled'&&s.kind==='paid').map(s=>`<tr><td><b>${esc(show(s.showId).name)}</b></td>
+            <td>${fmtDate(s.published)}</td><td class="num muted">booked</td><td colspan="4"><span class="muted" style="font-size:12px">Due ${dayName(s.published)} ${fmtDate(s.published)}</span></td></tr>`).join('')}
           ${mgs.map(s=>`<tr style="background:rgba(235,233,254,.28)"><td><b>${esc(show(s.showId).name)}</b> <span class="tag tag--purple">Added at no cost</span></td>
             <td>${fmtDate(s.published)}</td><td class="num muted">scheduled</td><td colspan="4"><span class="muted" style="font-size:12px">Make good — replaces the shortfall, no charge</span></td></tr>`).join('')}
         </tbody></table>
       </div>
-      <div class="footnote">This is the advertiser's view. Read-only for them and it updates itself as reads land — no export to keep in sync.</div>
+      <div class="footnote">This is the advertiser's view of this deal. Read-only for them, updates as reads land — admin notes never leave the building.</div>
     </div>`;
   };
+  function saveDealNotes(id){ const d=DEALS.find(x=>x.id===id); d.notes=document.getElementById('dealNotes').value;
+    toast('Notes saved — internal only, and the Command Center reads them for check-ins.'); }
 
-  function sendCampaignReport(b){
-    const done=SPOTS.filter(s=>s.brand===b&&closedOut(s));
-    done.forEach(s=>s.reportSent=TODAY); rerender(); refreshBadges();
-    toast(done.length?`Delivery report sent to ${b}, adops@ copied. ${done.length} closed read${done.length>1?'s':''} attached.`
-                     :`Report sent to ${b}, adops@ copied.`);
-  }
-  let portalFilter='all', portalMonth='all';
-  const MONTH_NAME={ '2026-07':'July','2026-08':'August','2026-09':'September' };
-  const campaignMonths=c=>[...new Set(c.spots.map(x=>monthKey(x.published)))];
-  const PORTAL_FILTERS=[
-    ['all','All'],
-    ['running','Running'],
-    ['under','Tracking under'],
-    ['over','Over guarantee'],
-  ];
-  const campaignIn=(c,f)=> f==='all' ? true
-    : f==='running' ? !c.done
-    : f==='under' ? (c.status.k==='under'||c.status.k==='mg')
-    : c.status.k==='full';
-
-  function renderCampaignIndex(brands){
-    const all=brands.map(campaignSummary).sort((a,b)=>(a.status.rank-b.status.rank)||(a.pct-b.pct));
-    const cs=all.filter(c=>campaignIn(c,portalFilter) && (portalMonth==='all'||campaignMonths(c).includes(portalMonth)));
-    const totG=all.reduce((a,c)=>a+c.g,0), totP=all.reduce((a,c)=>a+c.proj,0);
+  /* The index: full-width brand rows, deals always visible under them (13:33 —
+     "the default should go straight to the deals for speed"). */
+  let BRAND_CLOSED={};
+  function renderDealIndex(){
+    const all=DEALS.filter(d=>d.outcome==='won').map(dealSummary);
+    const match=c=>portalFilter==='all'||c.state===portalFilter;
+    const shown=all.filter(match);
+    const byBrand={}; shown.forEach(c=>{ (byBrand[c.brand]=byBrand[c.brand]||[]).push(c); });
+    const totG=all.filter(c=>c.state==='live').reduce((a,c)=>a+c.g,0);
+    const totP=all.filter(c=>c.state==='live').reduce((a,c)=>a+c.proj,0);
     document.getElementById('view-portal').innerHTML=`
     <div class="inner" style="max-width:940px">
       <div class="pagebar"><div class="head"><h1>Campaign Portal</h1>
-        <p>Every campaign and how it's tracking. Open one for the report you share with the advertiser.</p></div>
-        <div class="pagebar__right"><span class="tag tag--grey">Projecting ${pctOf(totP,totG)}% across ${all.length}</span></div>
+        <p>Brand, then the deals under it — each deal has its own guarantee and its own report.</p></div>
+        <div class="pagebar__right"><span class="tag tag--grey">Live deals projecting ${pctOf(totP,totG)}%</span></div>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-        <div class="seg">${PORTAL_FILTERS.map(([k,label])=>{ const n=all.filter(c=>campaignIn(c,k)).length;
-          return `<button class="${portalFilter===k?'active':''}" onclick="portalFilter='${k}';RENDER.portal()">${label}${k==='all'?'':' · '+n}</button>`; }).join('')}</div>
-        <select class="field" style="width:auto;margin-left:auto" onchange="portalMonth=this.value;RENDER.portal()">
-          <option value="all" ${portalMonth==='all'?'selected':''}>Ran any time</option>
-          ${[...new Set(all.flatMap(campaignMonths))].sort().map(m=>`<option value="${m}" ${portalMonth===m?'selected':''}>Ran in ${MONTH_NAME[m]||m}</option>`).join('')}
-        </select>
+      <div class="seg" style="margin-bottom:16px">${DEAL_FILTERS.map(([k,label])=>{ const n=all.filter(c=>k==='all'||c.state===k).length;
+        return `<button class="${portalFilter===k?'active':''}" onclick="portalFilter='${k}';RENDER.portal()">${label}${k==='all'?'':' · '+n}</button>`; }).join('')}</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        ${Object.entries(byBrand).map(([b,deals])=>{ const closed=!!BRAND_CLOSED[b];
+          const allB=all.filter(c=>c.brand===b);
+          const totDelivered=allB.reduce((a,c)=>a+c.got,0);
+          return `<div class="card">
+          <button style="width:100%;border:none;background:none;font-family:inherit;color:var(--text-primary);text-align:left;padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="BRAND_CLOSED['${esc(b)}']=!BRAND_CLOSED['${esc(b)}'];RENDER.portal()">
+            <div class="brand-chip" style="background:${brandColor[b]||'#3B82F6'};width:32px;height:32px;border-radius:9px;font-size:12px">${esc(b[0])}</div>
+            <b style="font-size:14.5px;letter-spacing:-.02em;flex:1">${esc(b)}</b>
+            <span class="muted" style="font-size:11.5px">${K(totDelivered)} delivered to date · ${allB.length} deal${allB.length!==1?'s':''}</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.4" style="transform:rotate(${closed?0:90}deg);transition:.15s"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+          ${closed?'':`<div style="border-top:1px solid var(--border-light)">${deals.map(c=>{ const tone=toneVar(c.status.tone);
+            const max=Math.max(c.g,c.proj)*1.06, w=x=>c.g?Math.min(100,x/max*100):0;
+            return `<div class="wrow--click" style="display:grid;grid-template-columns:10px minmax(0,1fr) 150px 168px 118px 26px;align-items:center;gap:0 13px;padding:12px 16px;border-top:1px solid var(--border-light)" onclick="openDeal('${c.deal.id}')">
+              <span style="width:8px;height:8px;border-radius:50%;background:${STATE_DOT[c.state]}" title="${c.state}"></span>
+              <div style="min-width:0"><b style="font-size:13px">${esc(c.title)}</b>
+                <div class="muted" style="font-size:11px">${c.shows.map(x=>show(x).name).join(', ')} · ${esc(c.flight)}</div></div>
+              <div>${['under','mg','blocked'].includes(c.status.k)?`<span class="tag tag--${c.status.tone}"><i></i>${c.status.label}</span>`
+                :`<span class="muted" style="font-size:11.5px">${c.state==='upcoming'?'Starts '+fmtDate(c.spots[0].published):c.state==='complete'?'Complete':''}</span>`}</div>
+              <div class="wrow__num" style="width:auto;justify-content:flex-end;display:flex;align-items:center;gap:9px">${c.g?`
+                <div style="position:relative;flex:1;height:8px;border-radius:4px;background:var(--secondary-lite)">
+                  <div style="position:absolute;inset:0 auto 0 0;width:${w(c.proj)}%;border-radius:4px;background:${tone};opacity:.28"></div>
+                  <div style="position:absolute;inset:0 auto 0 0;width:${w(c.got)}%;border-radius:4px;background:${tone}"></div>
+                  <div style="position:absolute;top:-2px;bottom:-2px;left:${w(c.g*IAB_FULL)}%;width:2px;background:var(--green-text)"></div>
+                </div><b style="font-size:12px;color:${tone};min-width:36px;text-align:right">${c.pct}%</b>`
+                :'<span style="flex:1;text-align:left;font-size:12px;font-weight:600;color:var(--text-tertiary)">Not started</span>'}</div>
+              <div style="text-align:right"><span class="muted" style="font-size:11px">${c.g?K(c.got)+' of '+K(c.g):K(c.spots.reduce((a,s)=>a+s.guarantee,0))+' booked'}</span></div>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.4" style="justify-self:center"><path d="M9 6l6 6-6 6"/></svg>
+            </div>`; }).join('')}</div>`}
+          </div>`; }).join('')||'<div class="card"><div class="empty">No deals in this state.</div></div>'}
       </div>
-      <div class="grid" style="grid-template-columns:1fr 1fr">
-        ${cs.map(c=>{ const tone=toneVar(c.status.tone), max=Math.max(c.g,c.proj)*1.06, w=x=>Math.min(100,x/max*100);
-          return `<button class="card" onclick="openCampaign('${esc(c.brand)}')" style="text-align:left;font-family:inherit;color:var(--text-primary);border-color:var(--border);cursor:pointer;padding:0" onmouseover="this.style.boxShadow='var(--shadow-hover)'" onmouseout="this.style.boxShadow='var(--shadow-card)'">
-          <div class="card__pad" style="padding:15px 17px">
-            <div style="display:flex;align-items:center;gap:11px">
-              <div class="brand-chip" style="background:${brandColor[c.brand]||'#3B82F6'};width:34px;height:34px;border-radius:9px;font-size:13px">${esc(c.brand[0])}</div>
-              <div style="flex:1;min-width:0"><b style="font-size:14px;letter-spacing:-.02em">${esc(c.brand)}</b>
-                <div class="muted" style="font-size:11px">${c.shows.length} show${c.shows.length!==1?'s':''} · ${c.spots.length} read${c.spots.length!==1?'s':''}${c.mgs.length?` · ${c.mgs.length} make good`:''}</div></div>
-              <b style="font-size:18px;letter-spacing:-.03em;color:${tone}">${c.pct}%</b>
-            </div>
-            <div style="position:relative;height:8px;border-radius:4px;background:var(--secondary-lite);margin:12px 0 9px">
-              <div style="position:absolute;inset:0 auto 0 0;width:${w(c.proj)}%;border-radius:4px;background:${tone};opacity:.28"></div>
-              <div style="position:absolute;inset:0 auto 0 0;width:${w(c.got)}%;border-radius:4px;background:${tone}"></div>
-              <div title="90% of guarantee" style="position:absolute;top:-2px;bottom:-2px;left:${w(c.g*IAB_FULL)}%;width:2px;background:var(--green-text)"></div>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:24px">
-              ${['under','mg','blocked'].includes(c.status.k)?`<span class="tag tag--${c.status.tone}"><i></i>${c.status.label}</span>`:'<span></span>'}
-              <span class="muted" style="font-size:11px">${K(c.got)} of ${K(c.g)} · ${esc(c.flight)}</span>
-            </div>
-          </div></button>`; }).join('')||'<div class="card" style="grid-column:1/-1"><div class="empty">Nothing in this state.</div></div>'}
-      </div>
-      <div class="footnote">Each campaign opens a read-only page you can send straight to the advertiser.</div>
+      <div class="footnote">Every deal opens its own read-only report. Green dot live, blue upcoming, grey complete.</div>
     </div>`;
   }
 
@@ -1722,7 +1765,7 @@
         <div class="pagebar__right"><span class="tag tag--purple">${SHOWS.filter(x=>x.src==='booster').length} of ${SHOWS.length} synced from Booster</span></div>
       </div>
       <div id="gridHost"></div>
-      <div class="footnote">Ad positions an episode and the guarantee are Booster's numbers, so a make good is never offered a slot that doesn't exist. Paid fill rate is ${f.rate}% — ${f.paid} spots sold, ${f.free} given as make goods or bonus.</div>
+      <div class="footnote">Positions and the guarantee come from Booster; everything else maps 1:1 to the show page Sydney keeps in Airtable, so this pulls straight from there. Paid fill rate is ${f.rate}% — ${f.paid} spots sold, ${f.free} given as make goods or bonus.</div>
     </div>`;
     renderGrid();
   };
