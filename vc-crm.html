@@ -129,7 +129,7 @@
       font-size: 11px; font-weight: 600;
     }
     .tab.active .count { background: var(--muted); }
-    .tab .count.hot { background: var(--coral); color: #fff; }
+    .tab .count.hot { background: var(--primary); color: var(--primary-foreground); }
 
     /* ── Toolbar ── */
     .toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 12px 24px 16px; }
@@ -188,6 +188,11 @@
     .dd-btn svg { color: var(--muted-foreground); opacity: 0.7; flex-shrink: 0; }
     .dd--quiet .dd-btn { border-color: transparent; background: transparent; box-shadow: none; height: 28px; padding: 0 8px; border-radius: 6px; font-size: 13px; }
     .dd--quiet .dd-btn:hover { background: var(--accent); }
+    .dd--menu .dd-btn {
+      border: none; box-shadow: none; background: none;
+      color: var(--muted-foreground); font-size: 13.5px; padding: 0 12px;
+    }
+    .dd--menu .dd-btn:hover, .dd--menu.open .dd-btn { background: var(--accent); color: var(--foreground); }
     .dd-menu {
       position: absolute; top: calc(100% + 6px); left: 0; z-index: 320;
       background: var(--background); border: 1px solid var(--border); border-radius: 8px;
@@ -246,34 +251,29 @@
       border-radius: 6px; font-size: 12px; font-weight: 600; white-space: nowrap;
       border: 1px solid transparent;
     }
-    .pill--grade-a  { background: var(--green-bg); color: var(--green-text); }
-    .pill--grade-b  { background: var(--amber-bg); color: var(--amber-text); }
-    .pill--grade-c  { background: var(--secondary); color: var(--muted-foreground); }
+    .pill--grade-a  { background: var(--primary); color: var(--primary-foreground); }
+    .pill--grade-b  { background: var(--secondary); color: var(--foreground); }
+    .pill--grade-c  { background: transparent; border-color: var(--border); color: var(--muted-foreground); }
     .pill--type     { background: var(--secondary); color: var(--secondary-foreground); font-weight: 500; }
     .pill--sector   { background: transparent; border-color: var(--border); color: var(--text-secondary); font-weight: 500; }
-    .pill--due      { background: var(--amber-bg); color: var(--amber-text); }
-    .pill--overdue  { background: var(--red-bg); color: var(--red-text); }
-    .pill--needs    { background: var(--red-bg); color: var(--red-text); }
-    .pill--direct   { background: var(--green-bg); color: var(--green-text); }
+    .pill--due, .pill--overdue { background: none; border: none; padding: 0; height: auto; border-radius: 0; font-size: 12px; font-weight: 400; color: var(--muted-foreground); }
+    .pill--overdue  { color: var(--foreground); font-weight: 600; }
+    .pill--needs    { background: var(--primary); color: var(--primary-foreground); }
+    .pill--direct   { background: var(--primary); color: var(--primary-foreground); }
     .pill--nopath   { background: var(--secondary); color: var(--muted-foreground); font-weight: 500; }
     .pill--excluded { background: var(--secondary); color: var(--muted-foreground); }
     .conn-chip {
       display: inline-flex; align-items: center; height: 22px; padding: 0 10px;
       border-radius: 9999px; font-size: 12px; font-weight: 500;
-      background: var(--blue-bg); color: var(--blue-text); white-space: nowrap;
+      background: var(--secondary); color: var(--foreground); white-space: nowrap;
     }
     .why-cell {
       font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; max-width: 240px;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
 
-    .st-none    { color: var(--muted-foreground); }
-    .st-ask     { color: var(--blue-text); }
-    .st-intro   { color: var(--blue-text); }
-    .st-direct  { color: var(--amber-text); }
-    .st-replied { color: var(--green-text); }
-    .st-meeting { color: var(--green-text); }
-    .st-passed  { color: var(--red-text); }
+    .st-none, .st-passed { color: var(--muted-foreground); }
+    .st-ask, .st-intro, .st-direct, .st-replied, .st-meeting { color: var(--foreground); }
 
     /* ── Buttons (shadcn) ── */
     .mini-btn {
@@ -290,7 +290,7 @@
       font-size: 11.5px; font-weight: 500; color: var(--muted-foreground); white-space: nowrap;
       transition: all 0.12s;
     }
-    .inc-btn.on { background: var(--green-bg); color: var(--green-text); border-color: transparent; font-weight: 600; }
+    .inc-btn.on { background: var(--secondary); color: var(--foreground); border-color: transparent; font-weight: 600; }
     .inc-btn:hover { border-color: var(--muted-foreground); }
     .btn-primary {
       display: inline-flex; align-items: center; justify-content: center;
@@ -325,7 +325,7 @@
     .sync-card__title { font-size: 14px; font-weight: 600; margin-bottom: 3px; letter-spacing: -0.1px; }
     .sync-card__sub { font-size: 13px; color: var(--muted-foreground); line-height: 1.55; }
     .sync-card__sub b { color: var(--foreground); font-weight: 500; }
-    .sync-card__result { font-size: 12.5px; font-weight: 500; color: var(--green-text); margin-top: 6px; }
+    .sync-card__result { font-size: 12.5px; font-weight: 500; color: var(--foreground); margin-top: 6px; }
     .connector-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
     .connector-card {
       border: 1px solid var(--border); border-radius: 10px; padding: 16px;
@@ -368,11 +368,11 @@
       font-size: 12.5px; font-weight: 500; color: var(--muted-foreground);
     }
     .arch-strip:hover { color: var(--foreground); }
-    .pill--cst-none   { background: var(--secondary); color: var(--muted-foreground); }
-    .pill--cst-draft  { background: var(--amber-bg); color: var(--amber-text); }
-    .pill--cst-asked  { background: var(--blue-bg); color: var(--blue-text); }
-    .pill--cst-agreed { background: var(--green-bg); color: var(--green-text); }
-    .pill--cst-declined { background: var(--red-bg); color: var(--red-text); }
+    .pill--cst-none   { background: transparent; border-color: var(--border); color: var(--muted-foreground); }
+    .pill--cst-draft  { background: var(--secondary); color: var(--foreground); }
+    .pill--cst-asked  { background: var(--secondary); color: var(--foreground); }
+    .pill--cst-agreed { background: var(--primary); color: var(--primary-foreground); }
+    .pill--cst-declined { background: transparent; border-color: var(--border); color: var(--muted-foreground); }
 
     /* ── Templates ── */
     .tpl-card {
@@ -469,8 +469,8 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 19px; font-weight: 700;
     }
-    .grade-big.a { background: var(--green-bg); color: var(--green-text); }
-    .grade-big.b { background: var(--amber-bg); color: var(--amber-text); }
+    .grade-big.a { background: var(--primary); color: var(--primary-foreground); }
+    .grade-big.b { background: var(--secondary); color: var(--foreground); }
     .grade-big.c { background: var(--secondary); color: var(--muted-foreground); }
     .grade-card__score { font-size: 13.5px; font-weight: 600; }
     .grade-card__note { font-size: 12.5px; color: var(--text-secondary); line-height: 1.55; }
@@ -566,6 +566,16 @@
     </a>
     <span class="top-bar__title">Raise · VC outreach</span>
     <div class="top-bar__spacer"></div>
+    <div class="dd dd--menu">
+      <button type="button" class="dd-btn">Add funds
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="dd-menu" style="left:auto;right:0">
+        <button type="button" class="dd-item" data-fundact="upload">Upload CSV file</button>
+        <button type="button" class="dd-item" data-fundact="paste">Paste rows</button>
+        <button type="button" class="dd-item" data-fundact="samples" id="removeSamplesBtn">Remove sample funds</button>
+      </div>
+    </div>
     <button class="login-btn" id="tbPeople">People</button>
     <button class="login-btn" id="tbConnectors">Connectors</button>
     <button class="login-btn" id="tbTemplates">Templates</button>
@@ -599,22 +609,14 @@
       </div>
     </div>
 
-    <!-- Fund list import (funds tab only) -->
-    <div class="section-pad" id="fundsImportView" style="display:none;padding-top:0;padding-bottom:8px">
-      <div class="sync-card">
-        <div class="sync-card__info">
-          <div class="sync-card__title">Upload your fund list</div>
-          <div class="sync-card__sub">CSV with columns like <b>Fund, Person, Title, LinkedIn, Type, Check size, Location, Notes</b> - only Fund is required, repeat rows for extra people. The list below started as a <b>sample seeded from public info</b>; replace it with yours. New funds get matched against your synced LinkedIn connections automatically.</div>
-          <div class="sync-card__result" id="fundImportResult"></div>
-        </div>
-        <input type="file" id="fundCsvInput" accept=".csv,.txt" style="display:none" />
-        <button class="btn-primary" id="fundUploadBtn">Upload funds CSV</button>
-        <button class="btn-ghost" id="fundPasteBtn">Paste rows</button>
-        <button class="btn-ghost" id="removeSamplesBtn">Remove sample funds</button>
-      </div>
+    <!-- Fund list import (funds tab; actions live in the top-bar Add funds menu) -->
+    <div class="section-pad" id="fundsImportView" style="display:none;padding-top:0;padding-bottom:0">
+      <input type="file" id="fundCsvInput" accept=".csv,.txt" style="display:none" />
+      <div class="sync-card__result" id="fundImportResult" style="margin:0"></div>
       <div id="fundPasteWrap" style="display:none">
         <textarea class="tpl-body" id="fundPasteArea" placeholder="Fund, Person, Title, LinkedIn, Type, Check size, Location, Notes
 Acme Ventures, Jane Doe, Partner, https://linkedin.com/in/janedoe, Seed, $250k-$1M, New York, B2B marketplaces"></textarea>
+        <div class="token-hint" style="margin-top:6px">Only Fund is required; repeat rows for extra people. New funds are matched against your synced LinkedIn automatically.</div>
         <div class="d-row" style="margin-top:10px">
           <button class="btn-primary" id="fundPasteImport">Import pasted rows</button>
           <button class="btn-ghost" id="fundPasteCancel">Cancel</button>
@@ -2355,6 +2357,18 @@ $('clearFilters').addEventListener('click', () => { activeFilters = {}; render()
 
 /* One document-level click handler: custom dropdowns + filter popovers */
 document.addEventListener('click', e => {
+  const fact = e.target.closest('[data-fundact]');
+  if (fact) {
+    document.querySelectorAll('.dd.open').forEach(d => d.classList.remove('open'));
+    const act = fact.dataset.fundact;
+    if (act === 'upload') $('fundCsvInput').click();
+    if (act === 'paste') {
+      if (currentTab !== 'funds') switchTab('funds');
+      $('fundPasteWrap').style.display = 'block';
+      $('fundPasteWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return; // 'samples' is handled by its own removeSamplesBtn listener
+  }
   const ddItem = e.target.closest('.dd-item');
   if (ddItem) {
     const wrap = ddItem.closest('.dd');
@@ -2516,7 +2530,6 @@ $('cnCreate').addEventListener('click', () => {
 });
 
 /* Fund import */
-$('fundUploadBtn').addEventListener('click', () => $('fundCsvInput').click());
 $('fundCsvInput').addEventListener('change', e => {
   const file = e.target.files[0];
   if (!file) return;
@@ -2524,10 +2537,6 @@ $('fundCsvInput').addEventListener('change', e => {
   reader.onload = () => importFunds(reader.result);
   reader.readAsText(file);
   e.target.value = '';
-});
-$('fundPasteBtn').addEventListener('click', () => {
-  const w = $('fundPasteWrap');
-  w.style.display = w.style.display === 'none' ? 'block' : 'none';
 });
 $('fundPasteImport').addEventListener('click', () => {
   importFunds($('fundPasteArea').value);
