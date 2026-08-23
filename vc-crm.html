@@ -231,6 +231,12 @@
     .fund-cell { display: flex; flex-direction: column; gap: 2px; min-width: 160px; }
     .fund-name { font-weight: 500; color: var(--foreground); display: flex; align-items: center; gap: 7px; font-size: 14px; }
     .fund-sub { font-size: 12.5px; color: var(--muted-foreground); }
+    .fund-site {
+      font-size: 11.5px; color: var(--muted-foreground); text-decoration: none;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;
+    }
+    .fund-site:hover { color: var(--foreground); text-decoration: underline; text-underline-offset: 2px; }
+    .st-backlog { color: var(--text-secondary); }
     .chev { transition: transform 0.15s; color: var(--muted-foreground); flex-shrink: 0; }
     tr.expanded .chev { transform: rotate(90deg); }
     .li-link { display: inline-flex; color: #0a66c2; flex-shrink: 0; }
@@ -1283,7 +1289,7 @@ const P_STATUS = {
 };
 const C_STATUS = { none:'Not asked', draft:'Ask drafted', asked:'Asked', agreed:'Agreed', declined:'Declined' };
 /* Fund pipeline stages — the core CRM flow. */
-const F_STAGES = { none:'Backlog', target:'Target', booked:'Booked', pitching:'Pitching', closed:'Closed' };
+const F_STAGES = { none:'Backlog', target:'\ud83c\udfaf Target', booked:'\u2705 Booked', pitching:'\ud83c\udfa4 Pitching', closed:'\u274c Closed' };
 const STAGE_TABS = ['funds','targets','booked','pitching','closed'];
 const WARMTH = { na:'Warmth: not read', hot:'Hot', warm:'Warm', cool:'Cool', cold:'Cold' };
 function FS(id){ return state.funds[id] || (state.funds[id] = {}); }
@@ -1561,7 +1567,7 @@ function personSubRows(f){
         <span class="fund-sub">${p.tbd ? 'Map the right partner' : esc(p.title)}</span>
       </div></td>
       <td>${pathCellHtml(p)}</td>
-      <td colspan="3"><div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start">
+      <td colspan="4"><div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start">
         ${statusDdHtml(p)}
         ${due ? `<span class="pill ${due.cls}">Follow up · ${due.label}</span>` : ''}
       </div></td>
@@ -1571,14 +1577,14 @@ function personSubRows(f){
   }).join('') + `
     <tr class="sub-row add-person-row" data-addperson="${f.id}">
       <td class="sub-tick"></td>
-      <td colspan="7"><button class="add-person-btn">+ Add person to ${esc(f.name)}</button></td>
+      <td colspan="8"><button class="add-person-btn">+ Add person to ${esc(f.name)}</button></td>
     </tr>`;
 }
 
 function renderFundsTable(){
   $('tableHead').innerHTML = `<tr>
     <th style="width:34px"><input type="checkbox" class="row-check" id="checkAll"></th>
-    <th>Fund</th><th>Fit</th><th>Check</th><th class="hide-md">Why it fits</th><th>Stage</th><th>People</th><th style="text-align:right">Info</th>
+    <th>Fund</th><th class="hide-md">Profile</th><th>Fit</th><th>Check</th><th class="hide-md">Why it fits</th><th>Stage</th><th>People</th><th style="text-align:right">Info</th>
   </tr>`;
   const rows = visibleFunds();
   $('tableBody').innerHTML = rows.map(f => {
@@ -1589,13 +1595,14 @@ function renderFundsTable(){
       <td><input type="checkbox" class="row-check" data-check="${f.id}" ${selected.has(f.id)?'checked':''}></td>
       <td><div class="fund-cell">
         <span class="fund-name">${CHEV}${esc(f.name)}</span>
-        <span class="fund-sub">${esc(f.type||'—')} · ${esc(f.region||'—')}${(f.sectors||[]).length ? ' · ' + esc(f.sectors.slice(0,2).join(', ')) : ''}</span>
+        ${f.site ? `<a class="fund-site" href="https://${esc(f.site)}" target="_blank" rel="noopener" data-noopen title="Open website">${esc(f.site)}</a>` : ''}
       </div></td>
+      <td class="hide-md"><span class="fund-sub">${esc(f.type||'—')} · ${esc(f.region||'—')}${(f.sectors||[]).length ? ' · ' + esc(f.sectors.slice(0,2).join(', ')) : ''}</span></td>
       <td>${gradePillHtml(f)}</td>
       <td style="white-space:nowrap;font-weight:600">${checkFmt(f)}</td>
       <td class="hide-md"><div class="why-cell">${esc(f.why || 'Add a fit line - it feeds the intro messages.')}</div></td>
       <td><div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start">
-        ${ddHtml({ ctx:'fstage:'+f.id, value:fStage(f), quiet:true, options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:v})) })}
+        ${ddHtml({ ctx:'fstage:'+f.id, value:fStage(f), quiet:true, options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:v,cls:k==='none'?'st-backlog':''})) })}
         ${warmthPillHtml(f)}
       </div></td>
       <td><div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
@@ -2132,7 +2139,7 @@ function openFund(id){
   $('drawerBody').innerHTML = `
     <div class="d-row" style="justify-content:space-between;flex-wrap:wrap">
       <div class="d-row">
-        ${ddHtml({ ctx:'fstage:'+id, value:fStage(f), options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:'Stage: '+v})) })}
+        ${ddHtml({ ctx:'fstage:'+id, value:fStage(f), options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:'Stage: '+v,cls:k==='none'?'st-backlog':''})) })}
         ${ddHtml({ ctx:'fwarmth:'+id, value:FS(id).warmth || 'na', options: Object.entries(WARMTH).map(([k,v]) => ({v:k,l:k==='na'?v:'Warmth: '+v})) })}
       </div>
       <div class="d-row">
