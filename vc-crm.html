@@ -237,6 +237,15 @@
     }
     .fund-site:hover { color: var(--foreground); text-decoration: underline; text-underline-offset: 2px; }
     .st-backlog { color: var(--text-secondary); }
+    .read-more {
+      background: none; border: none; padding: 0; margin-left: 4px;
+      font-size: 12px; font-weight: 500; color: var(--foreground);
+      text-decoration: underline; text-underline-offset: 2px;
+    }
+    th.sortable { cursor: pointer; user-select: none; }
+    th.sortable:hover { color: var(--foreground); }
+    tr.arch-dim td { opacity: 0.6; }
+    tr.arch-dim td:last-child { opacity: 1; }
     .chev { transition: transform 0.15s; color: var(--muted-foreground); flex-shrink: 0; }
     tr.expanded .chev { transform: rotate(90deg); }
     .li-link { display: inline-flex; color: #0a66c2; flex-shrink: 0; }
@@ -610,6 +619,7 @@
       <div id="filterChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
       <button class="clear-filters" id="clearFilters" style="display:none">Clear</button>
       <div class="toolbar__right">
+        <button class="btn-ghost" style="height:32px;font-size:12px" id="viewArchiveBtn">View Archive</button>
         <span id="sortDD"></span>
         <button class="btn-ghost" style="height:32px;font-size:12px" id="exportBtn">Export CSV</button>
       </div>
@@ -719,8 +729,7 @@ Acme Ventures, Jane Doe, Partner, https://linkedin.com/in/janedoe, Seed, $250k-$
     <button class="bulk-btn bulk-fund" data-bulkstage="booked">→ Booked</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="pitching">→ Pitching</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="closed">→ Closed</button>
-    <button class="bulk-btn bulk-btn--coral bulk-people" id="bulkInclude">Include</button>
-    <button class="bulk-btn bulk-people" id="bulkExclude">Exclude</button>
+    <button class="bulk-btn bulk-people" id="bulkArchiveP">Archive</button>
     <button class="bulk-btn bulk-people" id="bulkPaths">Find connector paths</button>
     <button class="bulk-btn bulk-fund" id="bulkRemove">Remove funds</button>
     <button class="bulk-bar__close" id="bulkClear" title="Clear selection">✕</button>
@@ -1337,14 +1346,18 @@ const FILTER_DEFS = [
   { key:'check', label:'Check size', options: CHECK_BUCKETS.map(b=>b[0]) },
   { key:'region', label:'Location', options:() => [...new Set(FUNDS.map(f=>f.region||'—'))] },
   { key:'path', label:'Path', options:['Connector path','Direct (1st°)','No path yet','Needs name'], peopleOnly:true },
-  { key:'status', label:'Status', options: Object.values(P_STATUS), peopleOnly:true },
-  { key:'inc', label:'Included', options:['Included','Excluded'], peopleOnly:true }
+  { key:'status', label:'Status', options: Object.values(P_STATUS), peopleOnly:true }
 ];
 const SORT_OPTS = [
   { v:'grade', l:'Sort: Best fit' }, { v:'name', l:'Sort: A–Z' },
   { v:'path', l:'Sort: Warmest path' }, { v:'due', l:'Sort: Follow-up due' }
 ];
 let activeFilters = {};
+let fundArchiveView = false;
+let headSort = { key: null, dir: 1 };
+const HSORT_DEFAULT_DIR = { name:1, profile:1, fit:-1, check:-1, stage:1, people:-1, path:1, status:1 };
+const STAGE_ORDER = { none:0, target:1, booked:2, pitching:3, closed:4 };
+const hArrow = k => headSort.key === k ? (headSort.dir === 1 ? ' \u2191' : ' \u2193') : '';
 let currentTab = 'funds';
 let searchQ = '';
 let sortBy = 'grade';
@@ -1370,7 +1383,7 @@ function fundMatchesFilters(f){
 function personMatches(p){
   const f = FUND_BY_ID[p.fundId];
   if (!fundMatchesFilters(f)) return false;
-  const psel = activeFilters.path, ssel = activeFilters.status, isel = activeFilters.inc;
+  const psel = activeFilters.path, ssel = activeFilters.status;
   if (psel && psel.size) {
     const pi = pathInfo(p);
     const tags = [];
@@ -1381,7 +1394,6 @@ function personMatches(p){
     if (![...psel].some(t => tags.includes(t))) return false;
   }
   if (ssel && ssel.size && !ssel.has(P_STATUS[pStatus(p)])) return false;
-  if (isel && isel.size && !isel.has(isExcluded(p) ? 'Excluded' : 'Included')) return false;
   if (searchQ) {
     const hay = [p.name, p.title, f.name, (f.sectors||[]).join(' '), f.looking, f.region, f.type].join(' ').toLowerCase();
     if (!hay.includes(searchQ)) return false;
@@ -1389,8 +1401,21 @@ function personMatches(p){
   return true;
 }
 function visiblePeople(){
-  let rows = PEOPLE.filter(personMatches);
+  let rows = PEOPLE.filter(p => personMatches(p) && !FS(p.fundId).archived && isExcluded(p) === fundArchiveView);
   const pathRank = p => { const pi = pathInfo(p); return pi.kind==='direct'?0:pi.kind==='connector'?1:2; };
+  if (headSort.key) {
+    const k = headSort.key, d = headSort.dir;
+    const stOrder = Object.keys(P_STATUS);
+    rows.sort((a,b) => {
+      if (k === 'name') return (a.name||'zz').localeCompare(b.name||'zz') * d;
+      if (k === 'fit') return (score(FUND_BY_ID[a.fundId]) - score(FUND_BY_ID[b.fundId])) * d;
+      if (k === 'check') { const fa=FUND_BY_ID[a.fundId], fb=FUND_BY_ID[b.fundId]; return (((fa.check&&fa.check[1])||0) - ((fb.check&&fb.check[1])||0)) * d; }
+      if (k === 'path') return (pathRank(a) - pathRank(b)) * d;
+      if (k === 'status') return (stOrder.indexOf(pStatus(a)) - stOrder.indexOf(pStatus(b))) * d;
+      return 0;
+    });
+    return rows;
+  }
   rows.sort((a,b) => {
     if (sortBy === 'name') return (a.name||'zz').localeCompare(b.name||'zz');
     if (sortBy === 'path') return pathRank(a)-pathRank(b) || score(FUND_BY_ID[b.fundId])-score(FUND_BY_ID[a.fundId]);
@@ -1405,11 +1430,26 @@ function visiblePeople(){
 }
 function visibleFunds(){
   let rows = FUNDS.filter(f => fundMatchesFilters(f) && (!searchQ || [f.name,(f.sectors||[]).join(' '),f.looking,f.region,f.type,(f.people||[]).map(p=>p.n).join(' ')].join(' ').toLowerCase().includes(searchQ)));
-  if (currentTab !== 'funds' && STAGE_TABS.includes(currentTab)) {
+  rows = rows.filter(f => !!FS(f.id).archived === fundArchiveView);
+  if (!fundArchiveView && currentTab !== 'funds' && STAGE_TABS.includes(currentTab)) {
     const want = currentTab === 'targets' ? 'target' : currentTab;
     rows = rows.filter(f => fStage(f) === want);
   }
-  rows.sort((a,b) => sortBy === 'name' ? a.name.localeCompare(b.name) : score(b) - score(a));
+  const peopleCount = f => PEOPLE.filter(p => p.fundId === f.id).length;
+  if (headSort.key) {
+    const k = headSort.key, d = headSort.dir;
+    rows.sort((a,b) => {
+      if (k === 'name') return a.name.localeCompare(b.name) * d;
+      if (k === 'profile') return ((a.type||'') + (a.region||'')).localeCompare((b.type||'') + (b.region||'')) * d;
+      if (k === 'fit') return (score(a) - score(b)) * d;
+      if (k === 'check') return (((a.check && a.check[1]) || 0) - ((b.check && b.check[1]) || 0)) * d;
+      if (k === 'stage') return (STAGE_ORDER[fStage(a)] - STAGE_ORDER[fStage(b)]) * d || score(b) - score(a);
+      if (k === 'people') return (peopleCount(a) - peopleCount(b)) * d;
+      return 0;
+    });
+  } else {
+    rows.sort((a,b) => sortBy === 'name' ? a.name.localeCompare(b.name) : score(b) - score(a));
+  }
   return rows;
 }
 
@@ -1422,6 +1462,10 @@ const checkFmt = f => {
   return k(f.check[0]) + ' – ' + k(f.check[1]);
 };
 const LI_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>`;
+const ARCHIVE_ICON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>`;
+const UNARCHIVE_ICON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="m9.5 15 2.5-2.5 2.5 2.5"/><path d="M12 12.5V17"/></svg>`;
+const DONE_ICON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>`;
+const RESTORE_ICON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>`;
 const CHEV = `<svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 6 6 6-6 6"/></svg>`;
 
 /* Custom dropdown component. ctx routes the change to the right handler. */
@@ -1446,7 +1490,7 @@ function onDdChange(ctx, v){
   const i = ctx.indexOf(':');
   const kind = i === -1 ? ctx : ctx.slice(0, i);
   const arg = i === -1 ? null : ctx.slice(i + 1);
-  if (kind === 'sort') { sortBy = v; render(); return; }
+  if (kind === 'sort') { sortBy = v; headSort = { key: null, dir: 1 }; render(); return; }
   if (kind === 'pstatus') { setPersonStatus(arg, v); return; }
   if (kind === 'dstatus') {
     setPersonStatus(arg, v);
@@ -1496,9 +1540,10 @@ function pathCellHtml(p){
   }
   return `<span class="pill pill--nopath">No path yet</span>`;
 }
-function incBtnHtml(p){
-  const inc = !isExcluded(p);
-  return `<button class="inc-btn ${inc?'on':''}" data-inctoggle="${p.id}" title="${inc?'Included in outreach - click to exclude':'Excluded - click to include'}">${inc?'Included':'Excluded'}</button>`;
+function pArchBtnHtml(p){
+  return isExcluded(p)
+    ? `<button class="card-icon-btn" data-prestore="${p.id}" title="Restore to outreach">${RESTORE_ICON}</button>`
+    : `<button class="card-icon-btn" data-parch="${p.id}" title="Archive - hides them from outreach">${ARCHIVE_ICON}</button>`;
 }
 
 /* ── Main render ── */
@@ -1520,8 +1565,9 @@ function render(){
   const dueP = PEOPLE.map(personFollowUp).filter(d => d && d.days <= 0).length;
   const dueC = allConnectors().map(connectorFollowUp).filter(d => d && d.days <= 0).length;
   const allFollow = PEOPLE.filter(personFollowUp).length + allConnectors().filter(connectorFollowUp).length;
-  $('cntFunds').textContent = FUNDS.length;
-  const stageCount = s => FUNDS.filter(f => fStage(f) === s).length;
+  const activeFunds = FUNDS.filter(f => !FS(f.id).archived);
+  $('cntFunds').textContent = activeFunds.length;
+  const stageCount = s => activeFunds.filter(f => fStage(f) === s).length;
   $('cntTargets').textContent = stageCount('target');
   $('cntBooked').textContent = stageCount('booked');
   $('cntPitching').textContent = stageCount('pitching');
@@ -1537,12 +1583,19 @@ function render(){
   $('tbTemplates').classList.toggle('on', currentTab === 'templates');
 
   if ($('sortDD')) $('sortDD').innerHTML = ddHtml({ id:'sortSel', ctx:'sort', value:sortBy, options:SORT_OPTS });
+  const archN = currentTab === 'people'
+    ? PEOPLE.filter(p => isExcluded(p) && !FS(p.fundId).archived).length
+    : FUNDS.filter(f => FS(f.id).archived).length;
+  const vab = $('viewArchiveBtn');
+  vab.style.display = (isStageTab || currentTab === 'people') ? 'inline-flex' : 'none';
+  vab.textContent = fundArchiveView ? '\u2190 Back' : ('View Archive' + (archN ? ' \u00b7 ' + archN : ''));
 
   const bar = $('bulkBar');
   bar.classList.toggle('show', selected.size > 0 && (isStageTab || currentTab === 'people'));
   $('bulkCount').textContent = `${selected.size} selected`;
   document.querySelectorAll('.bulk-fund').forEach(b => b.style.display = isStageTab ? 'inline-block' : 'none');
   document.querySelectorAll('.bulk-people').forEach(b => b.style.display = currentTab === 'people' ? 'inline-block' : 'none');
+  $('bulkArchiveP').textContent = fundArchiveView ? 'Restore' : 'Archive';
 
   const allHidden = SEED_FUNDS.length && SEED_FUNDS.every(f => state.hiddenFunds.includes(f.id));
   $('removeSamplesBtn').textContent = allHidden ? 'Restore sample funds' : 'Remove sample funds';
@@ -1553,7 +1606,7 @@ function render(){
 }
 
 function personSubRows(f){
-  const ppl = PEOPLE.filter(p => p.fundId === f.id);
+  const ppl = PEOPLE.filter(p => p.fundId === f.id && !isExcluded(p));
   return ppl.map(p => {
     const due = personFollowUp(p);
     return `<tr class="sub-row ${isExcluded(p)?'excluded':''}" data-person="${p.id}">
@@ -1571,7 +1624,7 @@ function personSubRows(f){
         ${statusDdHtml(p)}
         ${due ? `<span class="pill ${due.cls}">Follow up · ${due.label}</span>` : ''}
       </div></td>
-      <td class="hide-md">${incBtnHtml(p)}</td>
+      <td class="hide-md">${pArchBtnHtml(p)}</td>
       <td style="text-align:right"><button class="mini-btn" data-openperson="${p.id}">Details</button></td>
     </tr>`;
   }).join('') + `
@@ -1584,14 +1637,21 @@ function personSubRows(f){
 function renderFundsTable(){
   $('tableHead').innerHTML = `<tr>
     <th style="width:34px"><input type="checkbox" class="row-check" id="checkAll"></th>
-    <th>Fund</th><th class="hide-md">Profile</th><th>Fit</th><th>Check</th><th class="hide-md">Why it fits</th><th>Stage</th><th>People</th><th style="text-align:right">Info</th>
+    <th class="sortable" data-hsort="name">Fund${hArrow('name')}</th>
+    <th class="sortable hide-md" data-hsort="profile">Profile${hArrow('profile')}</th>
+    <th class="sortable" data-hsort="fit">Fit${hArrow('fit')}</th>
+    <th class="sortable" data-hsort="check">Check${hArrow('check')}</th>
+    <th class="hide-md">Why it fits</th>
+    <th class="sortable" data-hsort="stage">Stage${hArrow('stage')}</th>
+    <th class="sortable" data-hsort="people">People${hArrow('people')}</th>
+    <th style="text-align:right">Info</th>
   </tr>`;
   const rows = visibleFunds();
   $('tableBody').innerHTML = rows.map(f => {
-    const ppl = PEOPLE.filter(p => p.fundId === f.id);
+    const ppl = PEOPLE.filter(p => p.fundId === f.id && !isExcluded(p));
     const tbd = ppl.filter(p => p.tbd).length;
     const open = expandedFunds.has(f.id);
-    return `<tr data-fundrow="${f.id}" class="${selected.has(f.id)?'selected':''} ${open?'expanded':''}">
+    return `<tr data-fundrow="${f.id}" class="${selected.has(f.id)?'selected':''} ${open?'expanded':''} ${fundArchiveView?'arch-dim':''}">
       <td><input type="checkbox" class="row-check" data-check="${f.id}" ${selected.has(f.id)?'checked':''}></td>
       <td><div class="fund-cell">
         <span class="fund-name">${CHEV}${esc(f.name)}</span>
@@ -1609,11 +1669,16 @@ function renderFundsTable(){
         <span style="font-weight:700">${ppl.length}</span>
         ${tbd ? `<span class="pill pill--needs">${tbd} unmapped</span>` : ''}
       </div></td>
-      <td style="text-align:right"><button class="mini-btn" data-openfundinfo="${f.id}">More info</button></td>
+      <td style="text-align:right;white-space:nowrap">
+        ${fundArchiveView
+          ? `<button class="card-icon-btn" data-fundrestore="${f.id}" title="Restore to pipeline">${RESTORE_ICON}</button>`
+          : `<button class="card-icon-btn" data-funddone="${f.id}" title="Mark done & archive">${DONE_ICON}</button>`}
+        <button class="mini-btn" data-openfundinfo="${f.id}">More info</button>
+      </td>
     </tr>
     ${open ? personSubRows(f) : ''}`;
   }).join('');
-  emptyState(rows.length, 'No funds match. Clear filters or upload your fund list above.');
+  emptyState(rows.length, fundArchiveView ? 'Archive is empty. The check icon on a fund row sends it here.' : 'No funds match. Clear filters or upload your fund list via Add funds in the top menu.');
   $('tableFoot').textContent = `${rows.length} of ${FUNDS.length} funds. Click a fund to expand its people; each person carries their own outreach status. Sample data is unverified - replace it with your list.`;
   wireCheckAll(rows.map(f => f.id));
 }
@@ -1621,13 +1686,18 @@ function renderFundsTable(){
 function renderPeopleTable(){
   $('tableHead').innerHTML = `<tr>
     <th style="width:34px"><input type="checkbox" class="row-check" id="checkAll"></th>
-    <th>Person</th><th>Fund fit</th><th class="hide-md">Check</th><th>Path in</th><th>Status</th><th class="hide-md">Include</th><th style="width:30px"></th>
+    <th class="sortable" data-hsort="name">Person${hArrow('name')}</th>
+    <th class="sortable" data-hsort="fit">Fund fit${hArrow('fit')}</th>
+    <th class="sortable hide-md" data-hsort="check">Check${hArrow('check')}</th>
+    <th class="sortable" data-hsort="path">Path in${hArrow('path')}</th>
+    <th class="sortable" data-hsort="status">Status${hArrow('status')}</th>
+    <th style="width:36px"></th><th style="width:30px"></th>
   </tr>`;
   const rows = visiblePeople();
   $('tableBody').innerHTML = rows.map(p => {
     const f = FUND_BY_ID[p.fundId];
     const due = personFollowUp(p);
-    return `<tr data-person="${p.id}" class="${selected.has(p.id)?'selected':''} ${isExcluded(p)?'excluded sub-row':''}">
+    return `<tr data-person="${p.id}" class="${selected.has(p.id)?'selected':''} ${fundArchiveView?'arch-dim':''}">
       <td><input type="checkbox" class="row-check" data-check="${p.id}" ${selected.has(p.id)?'checked':''}></td>
       <td><div class="fund-cell">
         <span class="fund-name">${p.tbd?`<span style="color:var(--grey-1)">${esc(p.title)}</span> <span class="pill pill--needs">Needs name</span>`:esc(p.name)}</span>
@@ -1640,12 +1710,12 @@ function renderPeopleTable(){
         ${statusDdHtml(p)}
         ${due ? `<span class="pill ${due.cls}">Follow up · ${due.label}</span>` : ''}
       </div></td>
-      <td class="hide-md">${incBtnHtml(p)}</td>
+      <td>${pArchBtnHtml(p)}</td>
       <td><a class="li-link" href="${esc(personLi(p))}" target="_blank" rel="noopener" title="Open LinkedIn" data-noopen>${LI_ICON}</a></td>
     </tr>`;
   }).join('');
   emptyState(rows.length, 'No people match these filters.');
-  $('tableFoot').textContent = `${rows.length} of ${PEOPLE.length} people. "Needs name" means the right partner still has to be mapped. Excluded people are skipped by connector asks.`;
+  $('tableFoot').textContent = fundArchiveView ? `${rows.length} archived people. Restore anyone with the arrow icon.` : `${rows.length} people. "Needs name" means the right partner still has to be mapped. Archived people are hidden and skipped by connector asks.`;
   wireCheckAll(rows.map(p => p.id));
 }
 
@@ -1653,6 +1723,7 @@ function renderFollowupsTable(){
   $('tableHead').innerHTML = `<tr><th style="padding-left:36px">Who</th><th>Kind</th><th class="hide-md">Last touch</th><th>Due</th><th>Next move</th></tr>`;
   const items = [];
   PEOPLE.forEach(p => {
+    if (FS(p.fundId).archived) return;
     const d = personFollowUp(p);
     if (d) items.push({ kind:'person', ref:p, due:d, st: PS(p.id) });
   });
@@ -1716,8 +1787,6 @@ function renderFilterChips(){
 
 /* ── Connectors view ── */
 let connView = 'active';
-const ARCHIVE_ICON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>`;
-const UNARCHIVE_ICON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="m9.5 15 2.5-2.5 2.5 2.5"/><path d="M12 12.5V17"/></svg>`;
 function connectorCardHtml(c){
   const st = CS(c.id);
   const cst = st.status || 'none';
@@ -2024,6 +2093,18 @@ function typeInto(text, onDone){
 
 /* ── Drawers (side nav) ── */
 let drawerRef = null;
+function firstSentence(t){ const i = (t||'').indexOf('. '); return i > -1 ? t.slice(0, i+1) : (t||''); }
+function restSentences(t){ const i = (t||'').indexOf('. '); return i > -1 ? t.slice(i+2) : ''; }
+function fundFitLine(f){
+  if (!f.dims) return '';
+  const because = { thesis:'the thesis overlap is direct', stage:'they invest at exactly our stage', check:'their check size fits the round', portfolio:'their portfolio pattern-matches us', geo:'they are warm to reach' };
+  const names = { thesis:'thesis fit', stage:'stage', check:'check size', portfolio:'portfolio adjacency', geo:'reachability' };
+  const sorted = PITCH_DIMS.map(([k]) => [k, f.dims[k]]).sort((a,b) => b[1]-a[1]);
+  let line = 'Good fit because ' + because[sorted[0][0]] + ' and ' + because[sorted[1][0]] + '.';
+  const low = sorted[sorted.length-1];
+  if (low[1] < 70) line += ' Weak spot: ' + names[low[0]] + '.';
+  return line;
+}
 function openPerson(id){
   const p = PERSON_BY_ID[id];
   if (!p) return;
@@ -2039,7 +2120,7 @@ function openPerson(id){
       ${ddHtml({ ctx:'dstatus:'+id, value:pStatus(p), options: Object.entries(P_STATUS).map(([k,v]) => ({v:k,l:v,cls:'st-'+k})) })}
       <div class="d-row">
         ${due ? `<span class="pill ${due.cls}">Follow-up ${due.label.toLowerCase()}</span>` : ''}
-        ${incBtnHtml(p)}
+        ${pArchBtnHtml(p)}
         ${p.tbd ? `<button class="btn-ghost" id="dNamePerson" style="height:34px;font-size:12px">Set name</button>` : ''}
       </div>
     </div>
@@ -2153,9 +2234,11 @@ function openFund(id){
         <div class="grade-big ${gradeClass(grade(f))}">${grade(f)}</div>
         <div>
           <div class="grade-card__score">Pitch fit ${Math.round(score(f))}/100</div>
-          <div class="grade-card__note">${esc(f.why||'')}</div>
+          <div class="grade-card__note">${esc(firstSentence(f.looking))} ${esc(fundFitLine(f))}
+            ${restSentences(f.looking) || f.why ? `<button class="read-more" id="dReadMore">Read more</button>` : ''}</div>
         </div>
       </div>
+      <div class="grade-card__note" id="dFundMore" style="display:none">${esc(restSentences(f.looking))}${f.why ? `<br><br><b>Our angle:</b> ${esc(f.why)}` : ''}</div>
       ${PITCH_DIMS.map(([k,label]) => `
         <div class="dim-row">
           <span class="dim-name">${label}</span>
@@ -2164,11 +2247,8 @@ function openFund(id){
         </div>`).join('')}
       <div class="grade-card__note" style="font-size:10.5px;color:var(--grey-1)">Thesis fit scores the deck's five surfaces: marketplaces, creator media, adtech / measurement, AI + data moat, and media SaaS. A fund hitting two or more scores 90+.</div>
     </div>` : `
-    <div class="info-card"><b>Not graded yet.</b> This fund came from your upload - it gets scored against the deck rubric (marketplaces, creator media, adtech, AI + data moat, media SaaS) on the next grading pass.</div>`}
-    <div class="d-section">
-      <span class="d-label">What they're looking for</span>
-      <div class="info-card">${esc(f.looking || 'No thesis notes yet.')}</div>
-    </div>
+    <div class="info-card"><b>Not graded yet.</b> This fund came from your upload - it gets scored against the deck rubric (marketplaces, creator media, adtech, AI + data moat, media SaaS) on the next grading pass.</div>
+    ${f.looking ? `<div class="d-section"><span class="d-label">About the fund</span><div class="info-card">${esc(f.looking)}</div></div>` : ''}`}
     <div class="d-section">
       <div class="d-row" style="justify-content:space-between">
         <span class="d-label">Pitch meetings (Fathom)</span>
@@ -2191,12 +2271,20 @@ function openFund(id){
           <span class="partner-ava">${p.tbd?'?':esc((p.name||'?').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase())}</span>
           <div class="person-row__info">
             <div class="person-row__name">${p.tbd?`<span style="color:var(--grey-1)">${esc(p.title)}</span> <span class="pill pill--needs">Needs name</span>`:esc(p.name)}</div>
-            <div class="person-row__sub">${p.tbd?'Map the right partner':esc(p.title)} · ${P_STATUS[pStatus(p)]}${isExcluded(p)?' · Excluded':''}</div>
+            <div class="person-row__sub">${p.tbd?'Map the right partner':esc(p.title)} · ${P_STATUS[pStatus(p)]}${isExcluded(p)?' · Archived':''}</div>
           </div>
           <button class="mini-btn" data-openperson="${p.id}">Open</button>
         </div>`).join('')}
       </div>
     </div>`;
+  const rm = $('dReadMore');
+  if (rm) rm.onclick = e => {
+    e.stopPropagation();
+    const more = $('dFundMore');
+    const open = more.style.display !== 'none';
+    more.style.display = open ? 'none' : 'block';
+    rm.textContent = open ? 'Read more' : 'Read less';
+  };
   $('dAddPerson').onclick = () => addPersonTo(id, () => openFund(id));
   $('dSyncMeetings').onclick = async () => {
     const btn = $('dSyncMeetings');
@@ -2262,7 +2350,7 @@ function openConnector(id, preselect){
           return `<label class="check-row">
             <input type="checkbox" data-inc="${p.id}" ${checkedSet.has(p.id)?'checked':''}>
             <span><b>${p.tbd?esc(p.title):esc(firstName(p.name))}</b> from ${esc(f.name)}</span>
-            <span class="cr-sub">${grade(f)} · ${P_STATUS[pStatus(p)]}${isExcluded(p)?' · Excluded':''}</span>
+            <span class="cr-sub">${grade(f)} · ${P_STATUS[pStatus(p)]}${isExcluded(p)?' · Archived':''}</span>
           </label>`;
         }).join('') : '<div class="info-card">No matches yet. Add one, or sync LinkedIn to match automatically.</div>'}
       </div>
@@ -2350,6 +2438,7 @@ function toast(msg){
 function switchTab(tab){
   currentTab = tab;
   selected.clear();
+  fundArchiveView = false;
   render();
 }
 $('tabRow').addEventListener('click', e => {
@@ -2361,6 +2450,15 @@ $('tbConnectors').addEventListener('click', () => switchTab('connectors'));
 $('tbTemplates').addEventListener('click', () => switchTab('templates'));
 $('searchInput').addEventListener('input', e => { searchQ = e.target.value.trim().toLowerCase(); render(); });
 $('clearFilters').addEventListener('click', () => { activeFilters = {}; render(); });
+$('viewArchiveBtn').addEventListener('click', () => { fundArchiveView = !fundArchiveView; selected.clear(); render(); });
+$('tableHead').addEventListener('click', e => {
+  const th = e.target.closest('[data-hsort]');
+  if (!th) return;
+  const k = th.dataset.hsort;
+  if (headSort.key === k) headSort.dir *= -1;
+  else headSort = { key: k, dir: HSORT_DEFAULT_DIR[k] || 1 };
+  render();
+});
 
 /* One document-level click handler: custom dropdowns + filter popovers */
 document.addEventListener('click', e => {
@@ -2425,16 +2523,40 @@ $('tableBody').addEventListener('click', e => {
     render();
     return;
   }
-  const inc = e.target.closest('[data-inctoggle]');
-  if (inc) {
+  const parch = e.target.closest('[data-parch]');
+  if (parch) {
     e.stopPropagation();
-    const st = PS(inc.dataset.inctoggle);
-    st.excluded = !st.excluded;
+    PS(parch.dataset.parch).excluded = true;
+    save(); render();
+    toast('Archived. View Archive on the People page to restore.');
+    return;
+  }
+  const prestore = e.target.closest('[data-prestore]');
+  if (prestore) {
+    e.stopPropagation();
+    delete PS(prestore.dataset.prestore).excluded;
     save(); render();
     return;
   }
   const info = e.target.closest('[data-openfundinfo]');
   if (info) { e.stopPropagation(); openFund(info.dataset.openfundinfo); return; }
+  const fdone = e.target.closest('[data-funddone]');
+  if (fdone) {
+    e.stopPropagation();
+    FS(fdone.dataset.funddone).archived = true;
+    selected.delete(fdone.dataset.funddone);
+    save(); render();
+    toast('Done. Archived - use View Archive to restore.');
+    return;
+  }
+  const frestore = e.target.closest('[data-fundrestore]');
+  if (frestore) {
+    e.stopPropagation();
+    delete FS(frestore.dataset.fundrestore).archived;
+    save(); render();
+    toast('Restored to the pipeline.');
+    return;
+  }
   const op = e.target.closest('[data-openperson]');
   if (op) { e.stopPropagation(); openPerson(op.dataset.openperson); return; }
   const connChip = e.target.closest('[data-openconn]');
@@ -2574,10 +2696,16 @@ $('drawerBody').addEventListener('click', e => {
   if (of) { e.preventDefault(); openFund(of.dataset.openfund); return; }
   const op = e.target.closest('[data-openperson]');
   if (op) { openPerson(op.dataset.openperson); return; }
-  const inc = e.target.closest('[data-inctoggle]');
-  if (inc) {
-    const st = PS(inc.dataset.inctoggle);
-    st.excluded = !st.excluded;
+  const parch = e.target.closest('[data-parch]');
+  if (parch) {
+    PS(parch.dataset.parch).excluded = true;
+    save(); render();
+    if (drawerRef && drawerRef.kind === 'person') openPerson(drawerRef.id);
+    return;
+  }
+  const prestore = e.target.closest('[data-prestore]');
+  if (prestore) {
+    delete PS(prestore.dataset.prestore).excluded;
     save(); render();
     if (drawerRef && drawerRef.kind === 'person') openPerson(drawerRef.id);
     return;
@@ -2619,17 +2747,13 @@ function selectedPeopleIds(){
   if (currentTab === 'people') return [...selected].filter(id => PERSON_BY_ID[id]);
   return [...selected].flatMap(fid => PEOPLE.filter(p => p.fundId === fid).map(p => p.id));
 }
-$('bulkInclude').addEventListener('click', () => {
+$('bulkArchiveP').addEventListener('click', () => {
   const ids = selectedPeopleIds();
-  ids.forEach(id => { delete PS(id).excluded; });
+  if (fundArchiveView) ids.forEach(id => { delete PS(id).excluded; });
+  else ids.forEach(id => { PS(id).excluded = true; });
+  selected.clear();
   save(); render();
-  toast(`${ids.length} people included in outreach`);
-});
-$('bulkExclude').addEventListener('click', () => {
-  const ids = selectedPeopleIds();
-  ids.forEach(id => { PS(id).excluded = true; });
-  save(); render();
-  toast(`${ids.length} people excluded`);
+  toast(`${ids.length} people ${fundArchiveView ? 'restored' : 'archived'}`);
 });
 $('bulkPaths').addEventListener('click', () => {
   const ids = selectedPeopleIds();
@@ -2655,7 +2779,7 @@ $('bulkBar').addEventListener('click', e => {
   if (!b || !STAGE_TABS.includes(currentTab)) return;
   const stage = b.dataset.bulkstage;
   let n = 0;
-  selected.forEach(id => { if (FUND_BY_ID[id]) { FS(id).stage = stage; n++; } });
+  selected.forEach(id => { if (FUND_BY_ID[id]) { const fs = FS(id); fs.stage = stage; delete fs.archived; n++; } });
   selected.clear();
   save(); render();
   toast(`${n} fund${n===1?'':'s'} moved to ${F_STAGES[stage]}`);
@@ -2675,14 +2799,14 @@ $('exportBtn').addEventListener('click', () => {
       .concat(rows.map(f => [f.name, f.type||'', f.region||'', f.check?f.check[0]:'', f.check?f.check[1]:'', grade(f), f.dims?Math.round(score(f)):'', PEOPLE.filter(p=>p.fundId===f.id).length, f.why||''].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')));
   } else {
     const rows = visiblePeople();
-    lines = [['person','title','fund','grade','fit','linkedin','path','connectors','status','included','follow_up_due','notes'].join(',')]
+    lines = [['person','title','fund','grade','fit','linkedin','path','connectors','status','archived','follow_up_due','notes'].join(',')]
       .concat(rows.map(p => {
         const f = FUND_BY_ID[p.fundId];
         const st = PS(p.id);
         const pi = pathInfo(p);
         return [p.tbd?('['+p.title+']'):p.name, p.title, f.name, grade(f), f.dims?Math.round(score(f)):'', personLi(p),
           pi.kind, pi.kind==='connector'?pi.connectors.map(c=>c.name).join('; '):'',
-          P_STATUS[pStatus(p)], isExcluded(p)?'no':'yes',
+          P_STATUS[pStatus(p)], isExcluded(p)?'yes':'no',
           st.followUp?new Date(st.followUp).toISOString().slice(0,10):'', st.notes||''
         ].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
       }));
