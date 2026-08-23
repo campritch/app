@@ -70,6 +70,7 @@
       text-decoration: none;
     }
     .login-btn:hover { background: var(--pill-bg); }
+    .login-btn.on { background: var(--dark); color: #fff; border-color: var(--dark); }
 
     /* ── Page card ── */
     .page-card {
@@ -77,38 +78,10 @@
       max-width: 1136px; margin: 24px auto 0; width: calc(100% - 48px);
       border-radius: 20px;
       border: 1px solid var(--border-light);
-      overflow: hidden;
+      overflow: visible;
     }
-    .page-card__inner { padding: 32px 36px 0; }
-
-    .crm-header { display: flex; align-items: flex-start; gap: 36px; margin-bottom: 24px; }
-    .crm-header__info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
-    .crm-header__title { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.6px; color: var(--dark); line-height: 1.1; }
-    .crm-header__desc { margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 540px; }
-
-    .crm-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex-shrink: 0; width: 290px; }
-    .stat-box { border-radius: 12px; padding: 14px 18px; display: flex; flex-direction: column; gap: 5px; }
-    .stat-box--light { background: #f8f8f8; border: 1px solid var(--border-light); }
-    .stat-box--dark  { background: var(--btn-dark); }
-    .stat-box__label { font-size: 10px; font-weight: 600; letter-spacing: 0.2px; }
-    .stat-box--light .stat-box__label { color: var(--grey-1); }
-    .stat-box--dark  .stat-box__label { color: rgba(255,255,255,0.55); }
-    .stat-box__value { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
-    .stat-box--light .stat-box__value { color: var(--dark); }
-    .stat-box--dark  .stat-box__value { color: white; }
-    .stat-box__value .due-red { color: var(--coral); }
-
-    .pitch-strip {
-      display: flex; align-items: center; gap: 12px;
-      background: var(--btn-dark); border-radius: 12px;
-      padding: 12px 18px; margin-bottom: 24px;
-    }
-    .pitch-strip__label {
-      flex-shrink: 0; font-size: 9px; font-weight: 700; letter-spacing: 0.8px;
-      text-transform: uppercase; color: rgba(255,255,255,0.45);
-    }
-    .pitch-strip__text { font-size: 12px; color: rgba(255,255,255,0.85); line-height: 1.5; }
-    .pitch-strip__text b { color: #fff; }
+    .page-card__inner { padding: 26px 36px 0; }
+    .crm-title { margin: 0 0 18px; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: var(--dark); line-height: 1.1; }
 
     /* Tabs */
     .tab-row { display: flex; gap: 4px; border-bottom: 1px solid var(--border-light); overflow-x: auto; }
@@ -133,7 +106,7 @@
     .search-box {
       display: flex; align-items: center; gap: 8px;
       background: var(--pill-bg); border-radius: 9px; padding: 8px 12px;
-      width: 230px;
+      width: 220px;
     }
     .search-box input { background: none; border: none; outline: none; font-size: 13px; width: 100%; color: var(--dark); }
     .search-box input::placeholder { color: var(--grey-1); }
@@ -152,10 +125,6 @@
     }
     .clear-filters { background: none; border: none; font-size: 12px; font-weight: 600; color: var(--grey-1); text-decoration: underline; }
     .toolbar__right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-    .sort-select, .status-select {
-      border: 1px solid var(--border); border-radius: 9px; background: var(--white);
-      font-size: 12px; font-weight: 600; color: var(--text-primary); padding: 7px 10px; outline: none;
-    }
     .popover {
       position: absolute; top: calc(100% + 6px); left: 0; z-index: 300;
       background: var(--white); border: 1px solid var(--border); border-radius: 12px;
@@ -171,8 +140,36 @@
     .popover label:hover { background: var(--pill-bg); }
     .popover input[type=checkbox] { accent-color: var(--dark); width: 14px; height: 14px; margin: 0; }
 
+    /* Custom dropdown (no native selects) */
+    .dd { position: relative; display: inline-flex; }
+    .dd-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 1px solid var(--border); border-radius: 9px; background: var(--white);
+      font-size: 12px; font-weight: 600; color: var(--text-primary); padding: 7px 10px;
+      white-space: nowrap;
+    }
+    .dd-btn:hover { background: var(--pill-bg); }
+    .dd-btn svg { color: var(--grey-1); flex-shrink: 0; }
+    .dd--quiet .dd-btn { border-color: transparent; background: transparent; padding: 4px 6px; border-radius: 7px; font-size: 11.5px; font-weight: 700; }
+    .dd--quiet .dd-btn:hover { border-color: var(--border); background: var(--white); }
+    .dd-menu {
+      position: absolute; top: calc(100% + 6px); left: 0; z-index: 320;
+      background: var(--white); border: 1px solid var(--border); border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(14,19,35,0.14);
+      padding: 6px; min-width: 185px; display: none;
+    }
+    .dd.open .dd-menu { display: block; }
+    .dd-item {
+      display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
+      background: none; border: none; padding: 8px 10px; border-radius: 8px;
+      font-size: 12.5px; font-weight: 500; color: var(--text-primary); white-space: nowrap;
+    }
+    .dd-item:hover { background: var(--pill-bg); }
+    .dd-item.on { font-weight: 700; }
+    .dd-item.on::after { content: '✓'; margin-left: auto; font-size: 11px; color: var(--grey-1); }
+
     /* ── Table ── */
-    .table-wrap { overflow-x: auto; }
+    .table-wrap { overflow-x: visible; }
     table { width: 100%; border-collapse: collapse; }
     thead th {
       text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
@@ -187,15 +184,25 @@
     tbody tr { cursor: pointer; }
     tbody tr:hover { background: #fafafa; }
     tbody tr.selected { background: #f6f8ff; }
-    tbody tr:last-child td { border-bottom: none; }
     .row-check { accent-color: var(--dark); width: 15px; height: 15px; cursor: pointer; }
 
     .fund-cell { display: flex; flex-direction: column; gap: 2px; min-width: 160px; }
-    .fund-name { font-weight: 700; color: var(--dark); display: flex; align-items: center; gap: 6px; }
+    .fund-name { font-weight: 700; color: var(--dark); display: flex; align-items: center; gap: 7px; }
     .fund-sub { font-size: 11px; color: var(--grey-1); }
-    .target-star { color: var(--coral); font-size: 12px; }
+    .chev { transition: transform 0.15s; color: var(--grey-1); flex-shrink: 0; }
+    tr.expanded .chev { transform: rotate(90deg); }
     .li-link { display: inline-flex; color: #0a66c2; flex-shrink: 0; }
     .li-link:hover { opacity: 0.75; }
+
+    /* Person sub-rows under an expanded fund */
+    tr.sub-row { background: #fbfbfa; }
+    tr.sub-row:hover { background: #f6f6f4; }
+    tr.sub-row td { padding: 9px 12px; }
+    tr.sub-row.excluded .fund-cell { opacity: 0.5; }
+    .sub-tick { color: var(--border); text-align: right; font-size: 14px; }
+    .add-person-row td { padding: 8px 12px; }
+    .add-person-btn { background: none; border: none; font-size: 12px; font-weight: 600; color: var(--grey-1); padding: 4px 0; }
+    .add-person-btn:hover { color: var(--dark); }
 
     .pill {
       display: inline-flex; align-items: center; height: 20px; padding: 0 8px;
@@ -211,19 +218,17 @@
     .pill--needs { background: var(--red-bg); color: var(--red-text); }
     .pill--direct { background: var(--green-bg); color: var(--green-text); }
     .pill--nopath { background: var(--pill-bg); color: var(--grey-1); }
+    .pill--excluded { background: var(--pill-bg); color: var(--grey-1); }
     .conn-chip {
       display: inline-flex; align-items: center; height: 20px; padding: 0 8px;
       border-radius: 10px; font-size: 10px; font-weight: 700;
       background: var(--blue-bg); color: var(--blue-text); white-space: nowrap;
     }
-
-    /* inline status select in table */
-    .inline-status {
-      border: 1px solid transparent; border-radius: 7px; background: transparent;
-      font-size: 11.5px; font-weight: 700; padding: 4px 6px; outline: none; cursor: pointer;
-      max-width: 130px;
+    .why-cell {
+      font-size: 11.5px; color: var(--text-secondary); line-height: 1.45; max-width: 240px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
-    .inline-status:hover, .inline-status:focus { border-color: var(--border); background: var(--white); }
+
     .st-none    { color: var(--grey-1); }
     .st-ask     { color: var(--blue-text); }
     .st-intro   { color: var(--blue-text); }
@@ -232,10 +237,24 @@
     .st-meeting { color: var(--green-text); }
     .st-passed  { color: var(--red-text); }
 
+    .mini-btn {
+      height: 26px; padding: 0 10px; background: var(--white);
+      border: 1px solid var(--border); border-radius: 7px;
+      font-size: 11px; font-weight: 600; color: var(--text-primary); white-space: nowrap;
+    }
+    .mini-btn:hover { background: var(--pill-bg); }
+    .inc-btn {
+      height: 24px; padding: 0 11px; border-radius: 12px;
+      border: 1px solid var(--border); background: var(--white);
+      font-size: 10.5px; font-weight: 700; color: var(--grey-1); white-space: nowrap;
+    }
+    .inc-btn.on { background: var(--green-bg); color: var(--green-text); border-color: transparent; }
+    .inc-btn:hover { border-color: var(--grey-1); }
+
     .empty-state { padding: 56px 36px; text-align: center; color: var(--grey-1); font-size: 13px; }
     .table-foot { padding: 12px 36px 20px; font-size: 11px; color: var(--grey-1); }
 
-    /* ── Connectors tab ── */
+    /* ── Section areas (connectors, templates, imports) ── */
     .section-pad { padding: 20px 36px 28px; display: flex; flex-direction: column; gap: 16px; }
     .sync-card {
       border: 1px dashed var(--border); border-radius: 14px; padding: 18px 20px;
@@ -245,6 +264,7 @@
     .sync-card__info { flex: 1; min-width: 240px; }
     .sync-card__title { font-size: 13.5px; font-weight: 700; margin-bottom: 3px; }
     .sync-card__sub { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+    .sync-card__sub b { color: var(--dark); }
     .sync-card__result { font-size: 12px; font-weight: 600; color: var(--green-text); margin-top: 6px; }
     .connector-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
     .connector-card {
@@ -270,7 +290,7 @@
     .pill--cst-agreed { background: var(--green-bg); color: var(--green-text); }
     .pill--cst-declined { background: var(--red-bg); color: var(--red-text); }
 
-    /* ── Templates tab ── */
+    /* Templates */
     .tpl-card {
       border: 1px solid var(--border-light); border-radius: 14px; padding: 16px;
       display: flex; flex-direction: column; gap: 10px;
@@ -279,6 +299,7 @@
     .tpl-name {
       flex: 1; border: 1px solid transparent; border-radius: 8px;
       font-size: 14px; font-weight: 700; padding: 6px 8px; outline: none; color: var(--dark);
+      min-width: 120px;
     }
     .tpl-name:hover, .tpl-name:focus { border-color: var(--border); }
     .tpl-body {
@@ -319,7 +340,7 @@
     .bulk-bar__close { background: none; border: none; color: rgba(255,255,255,0.5); font-size: 16px; padding: 0 4px; }
     .bulk-bar__close:hover { color: #fff; }
 
-    /* ── Drawer ── */
+    /* ── Drawer (side nav) ── */
     .drawer-overlay {
       position: fixed; inset: 0; z-index: 500; background: rgba(14,19,35,0.35);
       opacity: 0; pointer-events: none; transition: opacity 0.2s;
@@ -377,12 +398,6 @@
     .person-row__info { flex: 1; min-width: 0; }
     .person-row__name { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
     .person-row__sub { font-size: 11px; color: var(--grey-1); }
-    .mini-btn {
-      height: 26px; padding: 0 10px; background: var(--white);
-      border: 1px solid var(--border); border-radius: 7px;
-      font-size: 11px; font-weight: 600; color: var(--text-primary); white-space: nowrap;
-    }
-    .mini-btn:hover { background: var(--pill-bg); }
 
     .li-input {
       flex: 1; border: 1px solid var(--border); border-radius: 9px;
@@ -438,14 +453,14 @@
     .toast.show { transform: translateY(0); opacity: 1; }
 
     @media (max-width: 860px) {
-      .crm-header { flex-direction: column; gap: 20px; }
-      .crm-stats { width: 100%; }
       .hide-md { display: none; }
       thead th:first-child, tbody td:first-child { padding-left: 20px; }
       thead th:last-child, tbody td:last-child { padding-right: 20px; }
       .toolbar { padding: 14px 20px; }
-      .page-card__inner { padding: 24px 20px 0; }
+      .page-card__inner { padding: 20px 20px 0; }
       .section-pad { padding: 16px 20px 24px; }
+      .top-bar { padding: 0 16px; gap: 10px; }
+      .top-bar__title { display: none; }
     }
   </style>
 </head>
@@ -460,58 +475,63 @@
     </a>
     <span class="top-bar__title">Raise · VC outreach</span>
     <div class="top-bar__spacer"></div>
+    <button class="login-btn" id="tbPeople">People</button>
+    <button class="login-btn" id="tbConnectors">Connectors</button>
+    <button class="login-btn" id="tbTemplates">Templates</button>
     <a class="login-btn" href="/api/vc-login?signout=1">Lock</a>
   </div>
 
   <div class="page-card">
     <div class="page-card__inner">
-      <div class="crm-header">
-        <div class="crm-header__info">
-          <h1 class="crm-header__title">Seed round — VC CRM</h1>
-          <p class="crm-header__desc">Funds get graded, but outreach happens person by person. Pick the people at each fund, match them to connectors from your LinkedIn, and run the ask / forwardable / direct flows with copy-paste messages.</p>
-        </div>
-        <div class="crm-stats">
-          <div class="stat-box stat-box--light"><span class="stat-box__label">PEOPLE AT FUNDS</span><span class="stat-box__value" id="statPeople">0</span></div>
-          <div class="stat-box stat-box--light"><span class="stat-box__label">CONNECTOR PATHS</span><span class="stat-box__value" id="statPaths">0</span></div>
-          <div class="stat-box stat-box--light"><span class="stat-box__label">CONNECTORS</span><span class="stat-box__value" id="statConnectors">0</span></div>
-          <div class="stat-box stat-box--dark"><span class="stat-box__label">FOLLOW-UPS DUE</span><span class="stat-box__value" id="statFollowups">0</span></div>
-        </div>
-      </div>
-
-      <div class="pitch-strip">
-        <span class="pitch-strip__label">The play</span>
-        <span class="pitch-strip__text"><b>1.</b> Select the relevant funds &nbsp;<b>2.</b> Target the person at each fund, not the fund &nbsp;<b>3.</b> Sync LinkedIn to match your connectors to those people &nbsp;<b>4.</b> Ask each connector for intros with one copy-paste message &nbsp;<b>5.</b> Go direct on everyone else.</span>
-      </div>
-
+      <h1 class="crm-title">Seed round — VC CRM</h1>
       <div class="tab-row" id="tabRow">
-        <button class="tab active" data-tab="people">People <span class="count" id="cntPeople">0</span></button>
-        <button class="tab" data-tab="funds">Funds <span class="count" id="cntFunds">0</span></button>
-        <button class="tab" data-tab="connectors">Connectors <span class="count" id="cntConnectors">0</span></button>
+        <button class="tab active" data-tab="funds">All funds <span class="count" id="cntFunds">0</span></button>
+        <button class="tab" data-tab="targets">Targets <span class="count" id="cntTargets">0</span></button>
+        <button class="tab" data-tab="booked">Booked <span class="count" id="cntBooked">0</span></button>
+        <button class="tab" data-tab="pitching">Pitching <span class="count" id="cntPitching">0</span></button>
+        <button class="tab" data-tab="closed">Closed <span class="count" id="cntClosed">0</span></button>
         <button class="tab" data-tab="followups">Follow-ups <span class="count" id="cntFollowups">0</span></button>
-        <button class="tab" data-tab="templates">Templates</button>
       </div>
     </div>
 
-    <!-- Toolbar (people/funds/followups) -->
+    <!-- Toolbar (funds / people) -->
     <div class="toolbar" id="toolbar">
       <div class="search-box">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="color:var(--grey-1)"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        <input id="searchInput" placeholder="Search people, funds, thesis..." />
+        <input id="searchInput" placeholder="Search funds, people, thesis..." />
       </div>
       <div id="filterChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
       <button class="clear-filters" id="clearFilters" style="display:none">Clear</button>
       <div class="toolbar__right">
-        <select class="sort-select" id="sortSelect">
-          <option value="grade">Sort: Best fit</option>
-          <option value="name">Sort: A–Z</option>
-          <option value="path">Sort: Warmest path</option>
-          <option value="due">Sort: Follow-up due</option>
-        </select>
+        <span id="sortDD"></span>
         <button class="btn-ghost" style="height:32px;font-size:12px" id="exportBtn">Export CSV</button>
       </div>
     </div>
 
-    <!-- People / Funds / Follow-ups table -->
+    <!-- Fund list import (funds tab only) -->
+    <div class="section-pad" id="fundsImportView" style="display:none;padding-top:0;padding-bottom:8px">
+      <div class="sync-card">
+        <div class="sync-card__info">
+          <div class="sync-card__title">Upload your fund list</div>
+          <div class="sync-card__sub">CSV with columns like <b>Fund, Person, Title, LinkedIn, Type, Check size, Location, Notes</b> - only Fund is required, repeat rows for extra people. The list below started as a <b>sample seeded from public info</b>; replace it with yours. New funds get matched against your synced LinkedIn connections automatically.</div>
+          <div class="sync-card__result" id="fundImportResult"></div>
+        </div>
+        <input type="file" id="fundCsvInput" accept=".csv,.txt" style="display:none" />
+        <button class="btn-primary" id="fundUploadBtn">Upload funds CSV</button>
+        <button class="btn-ghost" id="fundPasteBtn">Paste rows</button>
+        <button class="btn-ghost" id="removeSamplesBtn">Remove sample funds</button>
+      </div>
+      <div id="fundPasteWrap" style="display:none">
+        <textarea class="tpl-body" id="fundPasteArea" placeholder="Fund, Person, Title, LinkedIn, Type, Check size, Location, Notes
+Acme Ventures, Jane Doe, Partner, https://linkedin.com/in/janedoe, Seed, $250k-$1M, New York, B2B marketplaces"></textarea>
+        <div class="d-row" style="margin-top:10px">
+          <button class="btn-primary" id="fundPasteImport">Import pasted rows</button>
+          <button class="btn-ghost" id="fundPasteCancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table (funds / people / follow-ups) -->
     <div class="table-wrap" id="tableView">
       <table>
         <thead id="tableHead"></thead>
@@ -520,12 +540,12 @@
       <div class="empty-state" id="emptyState" style="display:none"></div>
     </div>
 
-    <!-- Connectors view -->
+    <!-- Connectors -->
     <div class="section-pad" id="connectorsView" style="display:none">
       <div class="sync-card">
         <div class="sync-card__info">
           <div class="sync-card__title">Sync your LinkedIn connections</div>
-          <div class="sync-card__sub">Upload the LinkedIn export (Settings → Data privacy → Get a copy of your data → Connections). Anyone working at a target fund becomes a direct path; everyone else you know gets matched as a potential connector to the people at those funds.</div>
+          <div class="sync-card__sub">Upload the LinkedIn export (Settings → Data privacy → Get a copy of your data → Connections). Anyone working at a target fund becomes a direct path; everyone else you know gets matched as a potential connector to the people at those funds. Synced connections are kept and re-checked whenever you upload new funds.</div>
           <div class="sync-card__result" id="syncResult"></div>
         </div>
         <input type="file" id="csvInput" accept=".csv" style="display:none" />
@@ -537,7 +557,7 @@
       <div class="table-foot" style="padding:0">Connectors are the people you have rapport with who can open doors. Click one to pick which fund people to include and copy the ask.</div>
     </div>
 
-    <!-- Templates view -->
+    <!-- Templates -->
     <div class="section-pad" id="templatesView" style="display:none">
       <div class="tpl-card">
         <div class="tpl-card__head"><span style="font-size:14px;font-weight:700">Round variables</span></div>
@@ -577,9 +597,14 @@
   <!-- Bulk bar -->
   <div class="bulk-bar" id="bulkBar">
     <span class="bulk-bar__count" id="bulkCount">0 selected</span>
-    <button class="bulk-btn bulk-btn--coral" id="bulkTarget">Add to targets</button>
-    <button class="bulk-btn" id="bulkPaths">Find connector paths</button>
-    <button class="bulk-btn" id="bulkUntarget">Remove targets</button>
+    <button class="bulk-btn bulk-btn--coral bulk-fund" data-bulkstage="target">→ Targets</button>
+    <button class="bulk-btn bulk-fund" data-bulkstage="booked">→ Booked</button>
+    <button class="bulk-btn bulk-fund" data-bulkstage="pitching">→ Pitching</button>
+    <button class="bulk-btn bulk-fund" data-bulkstage="closed">→ Closed</button>
+    <button class="bulk-btn bulk-btn--coral bulk-people" id="bulkInclude">Include</button>
+    <button class="bulk-btn bulk-people" id="bulkExclude">Exclude</button>
+    <button class="bulk-btn bulk-people" id="bulkPaths">Find connector paths</button>
+    <button class="bulk-btn bulk-fund" id="bulkRemove">Remove funds</button>
     <button class="bulk-bar__close" id="bulkClear" title="Clear selection">✕</button>
   </div>
 
@@ -600,11 +625,10 @@
 
 <script>
 /* ══════════════════════════════════════════════════════════════
-   FUNDS + PEOPLE — seed data. Outreach is tracked per PERSON at
-   each fund; funds carry the pitch grade. People with tbd:true
-   still need the right partner mapped (the fund name alone is
-   not enough to run outreach). Check sizes / focus / names are
-   best-public-knowledge seed data: verify before real outreach.
+   FUND + PEOPLE SEED DATA. This started as a SAMPLE list (public
+   info, unverified) so the tool works day one - replace it via
+   the fund upload. Outreach is tracked per PERSON at each fund.
+   dims: thesis/stage/check/portfolio/geo 0-100 vs the pitch.
    ══════════════════════════════════════════════════════════════ */
 const PITCH_DIMS = [
   ['thesis',    'Thesis fit',          0.30],
@@ -614,7 +638,7 @@ const PITCH_DIMS = [
   ['geo',       'Reachability',        0.10]
 ];
 
-const FUNDS = [
+const SEED_FUNDS = [
   { id:'fjlabs', name:'FJ Labs', type:'Seed', region:'New York', check:[250,500], sectors:['Marketplaces'], site:'fjlabs.com',
     people:[{n:'Fabrice Grinda',t:'Founding Partner'},{n:'Jose Marin',t:'Founding Partner'}],
     looking:'Marketplaces, exclusively. Thousands of marketplace investments; they move fast, follow strong leads, and care about take rate, liquidity strategy, and unit economics.',
@@ -905,8 +929,7 @@ const FUNDS = [
     dims:{thesis:28,stage:75,check:70,portfolio:30,geo:96} }
 ];
 
-/* Seed connectors: people Cam has rapport with, matched to fund people.
-   LinkedIn sync adds more. matches = person ids. */
+/* Seed connectors: people Cam has rapport with, matched to fund people. */
 const SEED_CONNECTORS = [
   { id:'c_ericbahn', name:'Eric Bahn', role:'GP, Hustle Fund (existing investor)',
     rapport:'Warm. Existing investor, replies fast, generous with intros across the seed ecosystem.',
@@ -938,27 +961,51 @@ Leo,Martinez,https://www.linkedin.com/in/sample-leo-martinez,,Betaworks,Camp Dir
 Grace,Kim,https://www.linkedin.com/in/sample-grace-kim,,Craft Ventures,Talent Partner,27 May 2024
 Ben,Ashworth,https://www.linkedin.com/in/sample-ben-ashworth,,Nashville Entrepreneur Center,Director,08 Oct 2023`;
 
-/* ── Derived people list ── */
+/* ── Working lists (seed minus removed, plus uploads + edits) ── */
 function slug(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
-const PEOPLE = [];
-FUNDS.forEach(f => {
-  f.people.forEach(p => {
-    const pid = f.id + '_' + (p.tbd ? 'tbd-' + slug(p.t) : slug(p.n));
-    PEOPLE.push({ id: pid, fundId: f.id, name: p.n, title: p.t, tbd: !!p.tbd });
+let FUNDS = [], PEOPLE = [], PERSON_BY_ID = {}, FUND_BY_ID = {}, FUND_NORMS = [];
+function rebuild(){
+  FUNDS = SEED_FUNDS.filter(f => !(state.hiddenFunds||[]).includes(f.id)).concat(state.extraFunds||[]);
+  PEOPLE = [];
+  FUNDS.forEach(f => {
+    (f.people||[]).forEach(p => {
+      const pid = f.id + '_' + (p.tbd ? 'tbd-' + slug(p.t) : slug(p.n));
+      if (!PEOPLE.some(x => x.id === pid))
+        PEOPLE.push({ id: pid, fundId: f.id, name: p.n, title: p.t, tbd: !!p.tbd });
+    });
   });
-});
-const PERSON_BY_ID = Object.fromEntries(PEOPLE.map(p => [p.id, p]));
-const FUND_BY_ID = Object.fromEntries(FUNDS.map(f => [f.id, f]));
+  PERSON_BY_ID = Object.fromEntries(PEOPLE.map(p => [p.id, p]));
+  FUND_BY_ID = Object.fromEntries(FUNDS.map(f => [f.id, f]));
+  Object.entries(state.people||{}).forEach(([pid, st]) => {
+    if (st.added && !PERSON_BY_ID[pid]) {
+      const fundId = pid.split('_')[0];
+      if (!FUND_BY_ID[fundId]) return;
+      const person = { id: pid, fundId, name: st.added.name, title: st.added.title, tbd: false };
+      PEOPLE.push(person); PERSON_BY_ID[pid] = person;
+    }
+    if (st.customName && PERSON_BY_ID[pid]) {
+      PERSON_BY_ID[pid].name = st.customName;
+      PERSON_BY_ID[pid].tbd = false;
+    }
+  });
+  FUND_NORMS = FUNDS.map(f => ({ f, norm: normOrg(f.name) })).filter(x => x.norm);
+}
 
-function score(f){ return PITCH_DIMS.reduce((s,[k,,w]) => s + (f.dims[k]||0)*w, 0); }
+function score(f){ return f.dims ? PITCH_DIMS.reduce((s,[k,,w]) => s + (f.dims[k]||0)*w, 0) : -1; }
 function grade(f){
+  if (!f.dims) return '—';
   const s = score(f);
   if (s >= 90) return 'A+'; if (s >= 84) return 'A'; if (s >= 78) return 'A-';
   if (s >= 72) return 'B+'; if (s >= 65) return 'B'; return 'C';
 }
 function gradeClass(g){ return g[0]==='A' ? 'a' : (g[0]==='B' ? 'b' : 'c'); }
+function gradePillHtml(f){
+  if (!f.dims) return `<span class="pill pill--grade-c" title="Not graded against the pitch yet">Not graded</span>`;
+  const g = grade(f);
+  return `<span class="pill pill--grade-${gradeClass(g)}" title="Fit ${Math.round(score(f))}/100">${g} · ${Math.round(score(f))}</span>`;
+}
 
-/* ── Default templates ── */
+/* ── Default templates + round variables ── */
 const DEFAULT_TEMPLATES = [
   { id:'t_connector_ask', name:'Connector ask', audience:'connector',
     body:`Hey {{first}}, quick ask - we're kicking off our seed now. Do you know these people well enough to intro:
@@ -1013,7 +1060,7 @@ Still think SpotsNow is a fit for {{fund}}. {{why}}
 Cam` }
 ];
 const DEFAULT_VARS = {
-  spots_left: '$[X] ',
+  spots_left: '$[X]',
   weeks: 'September 7th, 14th, and 21st',
   blurb: 'SpotsNow is the default marketplace to advertise with long-form media creators. Brands research, buy, and measure host-read podcast campaigns in minutes instead of weeks, in a $32B market still bought over email. ~5 person team, backed by Brickyard and Hustle Fund.'
 };
@@ -1032,7 +1079,11 @@ if (!state || !state.people) {
       'precursor_charles-hudson': { status:'replied', notes:'Replied, wants the deck plus 3 network case studies. Send Tuesday.' },
       'nfx_james-currier':     { status:'ask' }
     },
-    funds: { fjlabs:{target:true}, nfx:{target:true}, aperiam:{target:true}, mathcapital:{target:true}, slow:{target:true}, precursor:{target:true}, overline:{target:true} },
+    funds: {
+      fjlabs:{stage:'target'}, aperiam:{stage:'target'}, slow:{stage:'target'},
+      mathcapital:{stage:'target'}, overline:{stage:'target'},
+      nfx:{stage:'booked'}, precursor:{stage:'pitching', warmth:'warm'}
+    },
     connectors: {},
     extraConnectors: [],
     templates: null,
@@ -1043,27 +1094,27 @@ if (!state || !state.people) {
   state.connectors['c_mattpatterson'] = { status:'agreed', notes:'Said yes to NFX + Overline. Send forwardables.' };
   save();
 }
+state.extraConnectors = state.extraConnectors || [];
+state.extraFunds = state.extraFunds || [];
+state.hiddenFunds = state.hiddenFunds || [];
+state.liConnections = state.liConnections || [];
+state.vars = state.vars || { ...DEFAULT_VARS };
+state.funds = state.funds || {};
+// Migrate the old target-list flag into the pipeline.
+Object.values(state.funds).forEach(fs => { if (fs.target && !fs.stage) fs.stage = 'target'; delete fs.target; });
 function save(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
 function PS(id){ return state.people[id] || (state.people[id] = {}); }
-function FS(id){ return state.funds[id] || (state.funds[id] = {}); }
 function CS(id){ return state.connectors[id] || (state.connectors[id] = {}); }
 
-/* Connectors = seed list + imported/added ones (stored in state.extraConnectors). */
-function allConnectors(){
-  return SEED_CONNECTORS.concat(state.extraConnectors || []);
-}
+function allConnectors(){ return SEED_CONNECTORS.concat(state.extraConnectors || []); }
 function connectorById(id){ return allConnectors().find(c => c.id === id); }
-function connectorsFor(personId){
-  return allConnectors().filter(c => (c.matches||[]).includes(personId));
-}
-
-/* Templates (stored copy wins; defaults seed it). */
+function connectorsFor(personId){ return allConnectors().filter(c => (c.matches||[]).includes(personId)); }
 function templates(){
   if (!state.templates) { state.templates = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES)); save(); }
   return state.templates;
 }
 
-/* ── LinkedIn URL per person: stored override, else prefilled search ── */
+/* LinkedIn URL per person: saved profile URL wins, else a prefilled search. */
 function personLi(p){
   const st = PS(p.id);
   if (st.li) return st.li;
@@ -1073,10 +1124,7 @@ function personLi(p){
 }
 
 /* ── Template rendering ── */
-function firstName(name){
-  if (!name) return 'there';
-  return name.split(' ')[0];
-}
+function firstName(name){ return name ? name.split(' ')[0] : 'there'; }
 function renderTemplate(body, ctx){
   return body
     .replace(/\{\{first\}\}/g, ctx.first ?? '[first name]')
@@ -1091,7 +1139,13 @@ function renderTemplate(body, ctx){
 }
 function personCtx(p){
   const f = FUND_BY_ID[p.fundId];
-  return { first: p.tbd ? '[first name]' : firstName(p.name), name: p.tbd ? '[name]' : p.name, fund: f.name, hook: f.hook, why: f.why };
+  return {
+    first: p.tbd ? '[first name]' : firstName(p.name),
+    name: p.tbd ? '[name]' : p.name,
+    fund: f.name,
+    hook: f.hook || ('[personal opener for ' + f.name + ']'),
+    why: f.why || '[why we fit their thesis]'
+  };
 }
 function peopleListFor(personIds){
   return personIds.map(pid => {
@@ -1103,13 +1157,26 @@ function peopleListFor(personIds){
   }).filter(Boolean).join('\n');
 }
 
-/* ── Status vocab ── */
+/* ── Status vocab + helpers ── */
 const P_STATUS = {
   none:'Not contacted', ask:'Connector asked', intro:'Intro in motion',
   direct:'Direct sent', replied:'Replied', meeting:'Meeting', passed:'Passed'
 };
 const C_STATUS = { none:'Not asked', draft:'Ask drafted', asked:'Asked', agreed:'Agreed', declined:'Declined' };
+/* Fund pipeline stages — the core CRM flow. */
+const F_STAGES = { none:'Backlog', target:'Target', booked:'Booked', pitching:'Pitching', closed:'Closed' };
+const STAGE_TABS = ['funds','targets','booked','pitching','closed'];
+const WARMTH = { na:'Warmth: not read', hot:'Hot', warm:'Warm', cool:'Cool', cold:'Cold' };
+function FS(id){ return state.funds[id] || (state.funds[id] = {}); }
+function fStage(f){ return FS(f.id).stage || 'none'; }
+function warmthPillHtml(f){
+  const w = FS(f.id).warmth;
+  if (!w || w === 'na') return '';
+  const cls = w === 'hot' ? 'pill--overdue' : w === 'warm' ? 'pill--due' : 'pill--nopath';
+  return `<span class="pill ${cls}">${WARMTH[w]}</span>`;
+}
 function pStatus(p){ return PS(p.id).status || 'none'; }
+function isExcluded(p){ return !!PS(p.id).excluded; }
 
 function followUpState(st){
   if (!st || !st.followUp) return null;
@@ -1140,35 +1207,37 @@ const CHECK_BUCKETS = [
   ['Up to $500k', 0, 500], ['$500k – $1.5M', 500, 1500], ['$1.5M+', 1500, 99999]
 ];
 const FILTER_DEFS = [
-  { key:'grade', label:'Grade', options:['A+','A','A-','B+','B','C'] },
-  { key:'type', label:'Type', options:[...new Set(FUNDS.map(f=>f.type))] },
+  { key:'grade', label:'Grade', options:['A+','A','A-','B+','B','C','Not graded'] },
+  { key:'type', label:'Type', options:() => [...new Set(FUNDS.map(f=>f.type||'—'))] },
   { key:'check', label:'Check size', options: CHECK_BUCKETS.map(b=>b[0]) },
-  { key:'region', label:'Location', options:[...new Set(FUNDS.map(f=>f.region))] },
-  { key:'path', label:'Path', options:['Connector path','Direct (1st°)','No path yet','Needs name'] },
-  { key:'status', label:'Status', options: Object.values(P_STATUS) },
-  { key:'target', label:'Targets', options:['On target list','Not targeted'] }
+  { key:'region', label:'Location', options:() => [...new Set(FUNDS.map(f=>f.region||'—'))] },
+  { key:'path', label:'Path', options:['Connector path','Direct (1st°)','No path yet','Needs name'], peopleOnly:true },
+  { key:'status', label:'Status', options: Object.values(P_STATUS), peopleOnly:true },
+  { key:'inc', label:'Included', options:['Included','Excluded'], peopleOnly:true }
+];
+const SORT_OPTS = [
+  { v:'grade', l:'Sort: Best fit' }, { v:'name', l:'Sort: A–Z' },
+  { v:'path', l:'Sort: Warmest path' }, { v:'due', l:'Sort: Follow-up due' }
 ];
 let activeFilters = {};
-let currentTab = 'people';
+let currentTab = 'funds';
 let searchQ = '';
 let sortBy = 'grade';
-let selected = new Set(); // person ids (people tab) or fund ids (funds tab)
+let selected = new Set();          // person ids (people) or fund ids (funds)
+let expandedFunds = new Set();
 
 function fundMatchesFilters(f){
   for (const def of FILTER_DEFS) {
     const sel = activeFilters[def.key];
     if (!sel || !sel.size) continue;
-    if (def.key === 'grade' && !sel.has(grade(f))) return false;
-    if (def.key === 'type' && !sel.has(f.type)) return false;
-    if (def.key === 'region' && !sel.has(f.region)) return false;
+    if (def.key === 'grade' && !sel.has(f.dims ? grade(f) : 'Not graded')) return false;
+    if (def.key === 'type' && !sel.has(f.type||'—')) return false;
+    if (def.key === 'region' && !sel.has(f.region||'—')) return false;
     if (def.key === 'check') {
       let hit = false;
-      for (const [label,lo,hi] of CHECK_BUCKETS) if (sel.has(label) && f.check[0] < hi && f.check[1] > lo) hit = true;
+      for (const [label,lo,hi] of CHECK_BUCKETS)
+        if (sel.has(label) && f.check && f.check[0] < hi && f.check[1] > lo) hit = true;
       if (!hit) return false;
-    }
-    if (def.key === 'target') {
-      const on = !!FS(f.id).target;
-      if (!( (sel.has('On target list') && on) || (sel.has('Not targeted') && !on) )) return false;
     }
   }
   return true;
@@ -1176,19 +1245,20 @@ function fundMatchesFilters(f){
 function personMatches(p){
   const f = FUND_BY_ID[p.fundId];
   if (!fundMatchesFilters(f)) return false;
-  const sel = activeFilters.path, ssel = activeFilters.status;
-  if (sel && sel.size) {
+  const psel = activeFilters.path, ssel = activeFilters.status, isel = activeFilters.inc;
+  if (psel && psel.size) {
     const pi = pathInfo(p);
     const tags = [];
     if (pi.kind === 'connector') tags.push('Connector path');
     if (pi.kind === 'direct') tags.push('Direct (1st°)');
     if (pi.kind === 'none') tags.push('No path yet');
     if (p.tbd) tags.push('Needs name');
-    if (![...sel].some(t => tags.includes(t))) return false;
+    if (![...psel].some(t => tags.includes(t))) return false;
   }
   if (ssel && ssel.size && !ssel.has(P_STATUS[pStatus(p)])) return false;
+  if (isel && isel.size && !isel.has(isExcluded(p) ? 'Excluded' : 'Included')) return false;
   if (searchQ) {
-    const hay = [p.name, p.title, f.name, f.sectors.join(' '), f.looking, f.region, f.type].join(' ').toLowerCase();
+    const hay = [p.name, p.title, f.name, (f.sectors||[]).join(' '), f.looking, f.region, f.type].join(' ').toLowerCase();
     if (!hay.includes(searchQ)) return false;
   }
   return true;
@@ -1209,8 +1279,12 @@ function visiblePeople(){
   return rows;
 }
 function visibleFunds(){
-  let rows = FUNDS.filter(f => fundMatchesFilters(f) && (!searchQ || [f.name,f.sectors.join(' '),f.looking,f.region,f.type,f.people.map(p=>p.n).join(' ')].join(' ').toLowerCase().includes(searchQ)));
-  rows.sort((a,b) => sortBy==='name' ? a.name.localeCompare(b.name) : score(b)-score(a));
+  let rows = FUNDS.filter(f => fundMatchesFilters(f) && (!searchQ || [f.name,(f.sectors||[]).join(' '),f.looking,f.region,f.type,(f.people||[]).map(p=>p.n).join(' ')].join(' ').toLowerCase().includes(searchQ)));
+  if (currentTab !== 'funds' && STAGE_TABS.includes(currentTab)) {
+    const want = currentTab === 'targets' ? 'target' : currentTab;
+    rows = rows.filter(f => fStage(f) === want);
+  }
+  rows.sort((a,b) => sortBy === 'name' ? a.name.localeCompare(b.name) : score(b) - score(a));
   return rows;
 }
 
@@ -1218,16 +1292,72 @@ function visibleFunds(){
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const checkFmt = f => {
+  if (!f.check || f.check[0] == null) return '—';
   const k = v => v >= 1000 ? ('$' + (v/1000).toFixed(v%1000?1:0) + 'M') : ('$' + v + 'k');
   return k(f.check[0]) + ' – ' + k(f.check[1]);
 };
 const LI_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>`;
+const CHEV = `<svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 6 6 6-6 6"/></svg>`;
 
-function statusSelectHtml(p){
+/* Custom dropdown component. ctx routes the change to the right handler. */
+function ddHtml(o){
+  const cur = o.options.find(x => x.v === o.value) || o.options[0];
+  return `<div class="dd ${o.quiet?'dd--quiet':''}" ${o.id?`id="${o.id}"`:''} data-ddctx="${esc(o.ctx)}" data-ddval="${esc(cur.v)}">
+    <button type="button" class="dd-btn ${cur.cls||''}">${esc(cur.l)}
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div class="dd-menu">${o.options.map(x => `<button type="button" class="dd-item ${x.v===cur.v?'on':''}" data-ddv="${esc(x.v)}">${esc(x.l)}</button>`).join('')}</div>
+  </div>`;
+}
+function ddVal(id){ const el = $(id); return el ? el.dataset.ddval : null; }
+function setPersonStatus(pid, v){
+  const st = PS(pid);
+  st.status = v;
+  if (v === 'direct') { st.sentAt = st.sentAt || Date.now(); st.followUp = st.followUp || (Date.now() + 6*DAY); }
+  if (['replied','meeting','passed','none'].includes(v)) delete st.followUp;
+  save(); render();
+}
+function onDdChange(ctx, v){
+  const i = ctx.indexOf(':');
+  const kind = i === -1 ? ctx : ctx.slice(0, i);
+  const arg = i === -1 ? null : ctx.slice(i + 1);
+  if (kind === 'sort') { sortBy = v; render(); return; }
+  if (kind === 'pstatus') { setPersonStatus(arg, v); return; }
+  if (kind === 'dstatus') {
+    setPersonStatus(arg, v);
+    openPerson(arg);
+    return;
+  }
+  if (kind === 'cstatus') {
+    const st = CS(arg);
+    st.status = v;
+    if (v !== 'asked') delete st.followUp;
+    if (v === 'agreed') toast('Nice. Send the forwardable and mark the people "Intro in motion".');
+    save(); render(); openConnector(arg);
+    return;
+  }
+  if (kind === 'taud') { templates()[+arg].audience = v; save(); return; }
+  if (kind === 'fstage') {
+    const fs = FS(arg);
+    if (v === 'none') delete fs.stage; else fs.stage = v;
+    save(); render();
+    if (drawerRef && drawerRef.kind === 'fund' && drawerRef.id === arg) openFund(arg);
+    return;
+  }
+  if (kind === 'fwarmth') {
+    const fs = FS(arg);
+    if (v === 'na') delete fs.warmth; else fs.warmth = v;
+    save(); render();
+    if (drawerRef && drawerRef.kind === 'fund' && drawerRef.id === arg) openFund(arg);
+    return;
+  }
+  /* kind === 'tpl' → value is read when Generate is clicked */
+}
+
+function statusDdHtml(p){
   const s = pStatus(p);
-  return `<select class="inline-status st-${s}" data-pstatus="${p.id}">
-    ${Object.entries(P_STATUS).map(([k,v]) => `<option value="${k}" ${s===k?'selected':''}>${v}</option>`).join('')}
-  </select>`;
+  return ddHtml({ ctx:'pstatus:'+p.id, value:s, quiet:true,
+    options: Object.entries(P_STATUS).map(([k,v]) => ({ v:k, l:v, cls:'st-'+k })) });
 }
 function pathCellHtml(p){
   const pi = pathInfo(p);
@@ -1241,109 +1371,160 @@ function pathCellHtml(p){
   }
   return `<span class="pill pill--nopath">No path yet</span>`;
 }
+function incBtnHtml(p){
+  const inc = !isExcluded(p);
+  return `<button class="inc-btn ${inc?'on':''}" data-inctoggle="${p.id}" title="${inc?'Included in outreach - click to exclude':'Excluded - click to include'}">${inc?'Included':'Excluded'}</button>`;
+}
 
 /* ── Main render ── */
 function render(){
-  const isTable = ['people','funds','followups'].includes(currentTab);
+  const isStageTab = STAGE_TABS.includes(currentTab);
+  const isTable = isStageTab || ['people','followups'].includes(currentTab);
   $('tableView').style.display = isTable ? 'block' : 'none';
-  $('toolbar').style.display = ['people','funds'].includes(currentTab) ? 'flex' : 'none';
+  $('toolbar').style.display = (isStageTab || currentTab === 'people') ? 'flex' : 'none';
+  $('fundsImportView').style.display = currentTab === 'funds' ? 'flex' : 'none';
   $('connectorsView').style.display = currentTab === 'connectors' ? 'flex' : 'none';
   $('templatesView').style.display = currentTab === 'templates' ? 'flex' : 'none';
 
-  if (currentTab === 'people') renderPeopleTable();
-  else if (currentTab === 'funds') renderFundsTable();
+  if (isStageTab) renderFundsTable();
+  else if (currentTab === 'people') renderPeopleTable();
   else if (currentTab === 'followups') renderFollowupsTable();
   else if (currentTab === 'connectors') renderConnectors();
   else if (currentTab === 'templates') renderTemplates();
 
-  // Stats + counts
-  const withPath = PEOPLE.filter(p => pathInfo(p).kind !== 'none').length;
   const dueP = PEOPLE.map(personFollowUp).filter(d => d && d.days <= 0).length;
   const dueC = allConnectors().map(connectorFollowUp).filter(d => d && d.days <= 0).length;
   const allFollow = PEOPLE.filter(personFollowUp).length + allConnectors().filter(connectorFollowUp).length;
-  $('statPeople').textContent = PEOPLE.length;
-  $('statPaths').textContent = withPath;
-  $('statConnectors').textContent = allConnectors().length;
-  $('statFollowups').innerHTML = (dueP+dueC) ? `<span class="due-red">${dueP+dueC}</span>` : '0';
-  $('cntPeople').textContent = PEOPLE.length;
   $('cntFunds').textContent = FUNDS.length;
-  $('cntConnectors').textContent = allConnectors().length;
+  const stageCount = s => FUNDS.filter(f => fStage(f) === s).length;
+  $('cntTargets').textContent = stageCount('target');
+  $('cntBooked').textContent = stageCount('booked');
+  $('cntPitching').textContent = stageCount('pitching');
+  $('cntClosed').textContent = stageCount('closed');
   const cf = $('cntFollowups');
   cf.textContent = allFollow;
-  cf.classList.toggle('hot', (dueP+dueC) > 0);
+  cf.classList.toggle('hot', (dueP + dueC) > 0);
+
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === currentTab));
+  $('tbPeople').classList.toggle('on', currentTab === 'people');
+  $('tbConnectors').classList.toggle('on', currentTab === 'connectors');
+  $('tbConnectors').textContent = `Connectors · ${allConnectors().length}`;
+  $('tbTemplates').classList.toggle('on', currentTab === 'templates');
+
+  if ($('sortDD')) $('sortDD').innerHTML = ddHtml({ id:'sortSel', ctx:'sort', value:sortBy, options:SORT_OPTS });
 
   const bar = $('bulkBar');
-  bar.classList.toggle('show', selected.size > 0 && ['people','funds'].includes(currentTab));
+  bar.classList.toggle('show', selected.size > 0 && (isStageTab || currentTab === 'people'));
   $('bulkCount').textContent = `${selected.size} selected`;
-  $('bulkPaths').style.display = currentTab === 'people' ? 'inline-block' : 'none';
+  document.querySelectorAll('.bulk-fund').forEach(b => b.style.display = isStageTab ? 'inline-block' : 'none');
+  document.querySelectorAll('.bulk-people').forEach(b => b.style.display = currentTab === 'people' ? 'inline-block' : 'none');
+
+  const allHidden = SEED_FUNDS.length && SEED_FUNDS.every(f => state.hiddenFunds.includes(f.id));
+  $('removeSamplesBtn').textContent = allHidden ? 'Restore sample funds' : 'Remove sample funds';
+  $('fundImportResult').textContent = state.fundImportMsg || '';
 
   renderFilterChips();
   save();
 }
 
-function renderPeopleTable(){
-  $('tableHead').innerHTML = `<tr>
-    <th style="width:34px"><input type="checkbox" class="row-check" id="checkAll"></th>
-    <th>Person</th><th>Fund fit</th><th class="hide-md">Check</th><th>Path in</th><th>Status</th><th style="width:30px"></th>
-  </tr>`;
-  const rows = visiblePeople();
-  $('tableBody').innerHTML = rows.map(p => {
-    const f = FUND_BY_ID[p.fundId];
-    const g = grade(f);
+function personSubRows(f){
+  const ppl = PEOPLE.filter(p => p.fundId === f.id);
+  return ppl.map(p => {
     const due = personFollowUp(p);
-    return `<tr data-person="${p.id}" class="${selected.has(p.id)?'selected':''}">
-      <td><input type="checkbox" class="row-check" data-check="${p.id}" ${selected.has(p.id)?'checked':''}></td>
-      <td><div class="fund-cell">
-        <span class="fund-name">${FS(f.id).target?'<span class="target-star" title="Fund on target list">★</span>':''}${p.tbd?`<span style="color:var(--grey-1)">${esc(p.title)}</span> <span class="pill pill--needs">Needs name</span>`:esc(p.name)}</span>
-        <span class="fund-sub">${p.tbd?'':esc(p.title)+' · '}${esc(f.name)}</span>
+    return `<tr class="sub-row ${isExcluded(p)?'excluded':''}" data-person="${p.id}">
+      <td class="sub-tick">↳</td>
+      <td><div class="fund-cell" style="min-width:140px">
+        <span class="fund-name" style="font-size:13px">${p.tbd
+          ? `<span style="color:var(--grey-1)">${esc(p.title)}</span> <span class="pill pill--needs">Needs name</span>`
+          : esc(p.name)}
+          <a class="li-link" href="${esc(personLi(p))}" target="_blank" rel="noopener" title="Open LinkedIn" data-noopen>${LI_ICON}</a>
+        </span>
+        <span class="fund-sub">${p.tbd ? 'Map the right partner' : esc(p.title)}</span>
       </div></td>
-      <td><span class="pill pill--grade-${gradeClass(g)}" title="Fit ${Math.round(score(f))}/100">${g} · ${Math.round(score(f))}</span></td>
-      <td class="hide-md" style="white-space:nowrap;font-weight:600">${checkFmt(f)}</td>
       <td>${pathCellHtml(p)}</td>
-      <td><div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start">
-        ${statusSelectHtml(p)}
+      <td colspan="3"><div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start">
+        ${statusDdHtml(p)}
         ${due ? `<span class="pill ${due.cls}">Follow up · ${due.label}</span>` : ''}
       </div></td>
-      <td><a class="li-link" href="${esc(personLi(p))}" target="_blank" rel="noopener" title="Open LinkedIn" data-noopen>${LI_ICON}</a></td>
+      <td class="hide-md">${incBtnHtml(p)}</td>
+      <td style="text-align:right"><button class="mini-btn" data-openperson="${p.id}">Details</button></td>
     </tr>`;
-  }).join('');
-  emptyState(rows.length, 'No people match these filters.');
-  $('tableFoot').textContent = `${rows.length} of ${PEOPLE.length} people shown. Outreach is per person - "Needs name" means the right partner still has to be mapped for that fund. Seed data from public info: verify before outreach.`;
-  wireCheckAll(rows.map(p=>p.id));
+  }).join('') + `
+    <tr class="sub-row add-person-row" data-addperson="${f.id}">
+      <td class="sub-tick"></td>
+      <td colspan="7"><button class="add-person-btn">+ Add person to ${esc(f.name)}</button></td>
+    </tr>`;
 }
 
 function renderFundsTable(){
   $('tableHead').innerHTML = `<tr>
     <th style="width:34px"><input type="checkbox" class="row-check" id="checkAll"></th>
-    <th>Fund</th><th>Fit</th><th>Check</th><th class="hide-md">Focus</th><th>People</th>
+    <th>Fund</th><th>Fit</th><th>Check</th><th class="hide-md">Why it fits</th><th>Stage</th><th>People</th><th style="text-align:right">Info</th>
   </tr>`;
   const rows = visibleFunds();
   $('tableBody').innerHTML = rows.map(f => {
-    const g = grade(f);
     const ppl = PEOPLE.filter(p => p.fundId === f.id);
     const tbd = ppl.filter(p => p.tbd).length;
-    return `<tr data-fund="${f.id}" class="${selected.has(f.id)?'selected':''}">
+    const open = expandedFunds.has(f.id);
+    return `<tr data-fundrow="${f.id}" class="${selected.has(f.id)?'selected':''} ${open?'expanded':''}">
       <td><input type="checkbox" class="row-check" data-check="${f.id}" ${selected.has(f.id)?'checked':''}></td>
       <td><div class="fund-cell">
-        <span class="fund-name">${FS(f.id).target?'<span class="target-star">★</span>':''}${esc(f.name)}</span>
-        <span class="fund-sub">${esc(f.type)} · ${esc(f.region)}</span>
+        <span class="fund-name">${CHEV}${esc(f.name)}</span>
+        <span class="fund-sub">${esc(f.type||'—')} · ${esc(f.region||'—')}${(f.sectors||[]).length ? ' · ' + esc(f.sectors.slice(0,2).join(', ')) : ''}</span>
       </div></td>
-      <td><span class="pill pill--grade-${gradeClass(g)}">${g} · ${Math.round(score(f))}</span></td>
+      <td>${gradePillHtml(f)}</td>
       <td style="white-space:nowrap;font-weight:600">${checkFmt(f)}</td>
-      <td class="hide-md"><div style="display:flex;gap:4px;flex-wrap:wrap;max-width:190px">${f.sectors.slice(0,2).map(s=>`<span class="pill pill--sector">${esc(s)}</span>`).join('')}</div></td>
+      <td class="hide-md"><div class="why-cell">${esc(f.why || 'Add a fit line - it feeds the intro messages.')}</div></td>
+      <td><div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start">
+        ${ddHtml({ ctx:'fstage:'+f.id, value:fStage(f), quiet:true, options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:v})) })}
+        ${warmthPillHtml(f)}
+      </div></td>
       <td><div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
         <span style="font-weight:700">${ppl.length}</span>
         ${tbd ? `<span class="pill pill--needs">${tbd} unmapped</span>` : ''}
       </div></td>
+      <td style="text-align:right"><button class="mini-btn" data-openfundinfo="${f.id}">More info</button></td>
+    </tr>
+    ${open ? personSubRows(f) : ''}`;
+  }).join('');
+  emptyState(rows.length, 'No funds match. Clear filters or upload your fund list above.');
+  $('tableFoot').textContent = `${rows.length} of ${FUNDS.length} funds. Click a fund to expand its people; each person carries their own outreach status. Sample data is unverified - replace it with your list.`;
+  wireCheckAll(rows.map(f => f.id));
+}
+
+function renderPeopleTable(){
+  $('tableHead').innerHTML = `<tr>
+    <th style="width:34px"><input type="checkbox" class="row-check" id="checkAll"></th>
+    <th>Person</th><th>Fund fit</th><th class="hide-md">Check</th><th>Path in</th><th>Status</th><th class="hide-md">Include</th><th style="width:30px"></th>
+  </tr>`;
+  const rows = visiblePeople();
+  $('tableBody').innerHTML = rows.map(p => {
+    const f = FUND_BY_ID[p.fundId];
+    const due = personFollowUp(p);
+    return `<tr data-person="${p.id}" class="${selected.has(p.id)?'selected':''} ${isExcluded(p)?'excluded sub-row':''}">
+      <td><input type="checkbox" class="row-check" data-check="${p.id}" ${selected.has(p.id)?'checked':''}></td>
+      <td><div class="fund-cell">
+        <span class="fund-name">${p.tbd?`<span style="color:var(--grey-1)">${esc(p.title)}</span> <span class="pill pill--needs">Needs name</span>`:esc(p.name)}</span>
+        <span class="fund-sub">${p.tbd?'':esc(p.title)+' · '}${esc(f.name)}</span>
+      </div></td>
+      <td>${gradePillHtml(f)}</td>
+      <td class="hide-md" style="white-space:nowrap;font-weight:600">${checkFmt(f)}</td>
+      <td>${pathCellHtml(p)}</td>
+      <td><div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start">
+        ${statusDdHtml(p)}
+        ${due ? `<span class="pill ${due.cls}">Follow up · ${due.label}</span>` : ''}
+      </div></td>
+      <td class="hide-md">${incBtnHtml(p)}</td>
+      <td><a class="li-link" href="${esc(personLi(p))}" target="_blank" rel="noopener" title="Open LinkedIn" data-noopen>${LI_ICON}</a></td>
     </tr>`;
   }).join('');
-  emptyState(rows.length, 'No funds match these filters.');
-  $('tableFoot').textContent = `${rows.length} of ${FUNDS.length} funds shown. Select funds and add to targets; their people carry the outreach.`;
-  wireCheckAll(rows.map(f=>f.id));
+  emptyState(rows.length, 'No people match these filters.');
+  $('tableFoot').textContent = `${rows.length} of ${PEOPLE.length} people. "Needs name" means the right partner still has to be mapped. Excluded people are skipped by connector asks.`;
+  wireCheckAll(rows.map(p => p.id));
 }
 
 function renderFollowupsTable(){
-  $('tableHead').innerHTML = `<tr><th style="padding-left:36px">Who</th><th>Kind</th><th>Last touch</th><th>Due</th><th>Next move</th></tr>`;
+  $('tableHead').innerHTML = `<tr><th style="padding-left:36px">Who</th><th>Kind</th><th class="hide-md">Last touch</th><th>Due</th><th>Next move</th></tr>`;
   const items = [];
   PEOPLE.forEach(p => {
     const d = personFollowUp(p);
@@ -1389,16 +1570,17 @@ function wireCheckAll(visIds){
 
 function renderFilterChips(){
   const host = $('filterChips');
-  const defs = currentTab === 'funds' ? FILTER_DEFS.filter(d => !['path','status'].includes(d.key)) : FILTER_DEFS;
+  const defs = currentTab === 'funds' ? FILTER_DEFS.filter(d => !d.peopleOnly) : FILTER_DEFS;
   host.innerHTML = defs.map(def => {
     const sel = activeFilters[def.key];
     const n = sel ? sel.size : 0;
+    const opts = typeof def.options === 'function' ? def.options() : def.options;
     return `<div style="position:relative" data-popwrap="${def.key}">
       <button class="filter-chip ${n?'on':''}" data-filter="${def.key}">${def.label}${n?` <span class="n">${n}</span>`:''}
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="popover" data-pop="${def.key}">
-        ${def.options.map(o => `<label><input type="checkbox" data-fkey="${def.key}" data-fval="${esc(o)}" ${sel && sel.has(o)?'checked':''}> ${esc(o)}</label>`).join('')}
+        ${opts.map(o => `<label><input type="checkbox" data-fkey="${def.key}" data-fval="${esc(o)}" ${sel && sel.has(o)?'checked':''}> ${esc(o)}</label>`).join('')}
       </div>
     </div>`;
   }).join('');
@@ -1448,10 +1630,10 @@ function renderTemplates(){
     <div class="tpl-card" data-tpl="${i}">
       <div class="tpl-card__head">
         <input class="tpl-name" data-tname="${i}" value="${esc(t.name)}" />
-        <select class="status-select" data-taud="${i}">
-          <option value="person" ${t.audience==='person'?'selected':''}>For a person at a fund</option>
-          <option value="connector" ${t.audience==='connector'?'selected':''}>For a connector</option>
-        </select>
+        ${ddHtml({ ctx:'taud:'+i, value:t.audience, options:[
+          { v:'person', l:'For a person at a fund' },
+          { v:'connector', l:'For a connector' }
+        ]})}
         <button class="mini-btn" data-tdel="${i}">Delete</button>
       </div>
       <textarea class="tpl-body" data-tbody="${i}">${esc(t.body)}</textarea>
@@ -1459,51 +1641,51 @@ function renderTemplates(){
   $('tableFoot').textContent = '';
 }
 
-/* ── LinkedIn CSV import + matching ── */
+/* ── CSV parsing (shared) ── */
+function csvLine(l){
+  const out = []; let cur = ''; let q = false;
+  for (let i = 0; i < l.length; i++) {
+    const ch = l[i];
+    if (q) {
+      if (ch === '"' && l[i+1] === '"') { cur += '"'; i++; }
+      else if (ch === '"') q = false;
+      else cur += ch;
+    } else {
+      if (ch === '"') q = true;
+      else if (ch === ',') { out.push(cur); cur = ''; }
+      else cur += ch;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+
+/* ── LinkedIn connections import + fund matching ── */
 const STOPWORDS = ['ventures','venture','capital','partners','partner','fund','vc','the','group','company','llc','lp'];
 function normOrg(s){
   return (s||'').toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(/\s+/)
     .filter(w => w && !STOPWORDS.includes(w)).join(' ').trim();
 }
-const FUND_NORMS = FUNDS.map(f => ({ f, norm: normOrg(f.name) })).filter(x => x.norm);
 function matchFunds(company, position){
   const nc = normOrg(company);
   const np = normOrg(position);
   return FUND_NORMS.filter(({norm}) => {
     if (!norm) return false;
-    if (nc && (nc === norm || nc.includes(norm) || norm.includes(nc) && nc.length > 1)) return true;
+    if (nc && (nc === norm || nc.includes(norm) || (norm.includes(nc) && nc.length > 1))) return true;
     if (np && np.includes(norm) && norm.length > 2) return true;
     return false;
   }).map(x => x.f);
 }
-function parseCsv(text){
-  // Find the real header row (LinkedIn exports prepend a Notes block).
+function parseConnectionsCsv(text){
   const lines = text.split(/\r?\n/);
   let start = lines.findIndex(l => l.toLowerCase().startsWith('first name'));
   if (start === -1) return [];
-  const parseLine = l => {
-    const out = []; let cur = ''; let q = false;
-    for (let i = 0; i < l.length; i++) {
-      const ch = l[i];
-      if (q) {
-        if (ch === '"' && l[i+1] === '"') { cur += '"'; i++; }
-        else if (ch === '"') q = false;
-        else cur += ch;
-      } else {
-        if (ch === '"') q = true;
-        else if (ch === ',') { out.push(cur); cur = ''; }
-        else cur += ch;
-      }
-    }
-    out.push(cur);
-    return out;
-  };
-  const head = parseLine(lines[start]).map(h => h.trim().toLowerCase());
+  const head = csvLine(lines[start]).map(h => h.trim().toLowerCase());
   const idx = k => head.indexOf(k);
   const rows = [];
   for (let i = start+1; i < lines.length; i++) {
     if (!lines[i].trim()) continue;
-    const c = parseLine(lines[i]);
+    const c = csvLine(lines[i]);
     rows.push({
       first: (c[idx('first name')]||'').trim(),
       last: (c[idx('last name')]||'').trim(),
@@ -1514,15 +1696,12 @@ function parseCsv(text){
   }
   return rows;
 }
-function importConnections(text){
-  const rows = parseCsv(text);
-  if (!rows.length) { toast('Could not read that file. Export Connections.csv from LinkedIn and try again.'); return; }
+function applyMatching(rows){
   let direct = 0, newConn = 0, updated = 0;
   rows.forEach(r => {
     const funds = matchFunds(r.company, r.position);
     if (!funds.length) return;
     const full = (r.first + ' ' + r.last).trim();
-    // Is this connection one of the listed people at a matched fund?
     let isListed = false;
     funds.forEach(f => {
       const person = PEOPLE.find(p => p.fundId === f.id && !p.tbd && p.name.toLowerCase() === full.toLowerCase());
@@ -1535,13 +1714,13 @@ function importConnections(text){
       }
     });
     if (isListed) return;
-    // Otherwise they become a connector matched to those funds' people.
     const matchIds = funds.flatMap(f => PEOPLE.filter(p => p.fundId === f.id).map(p => p.id));
     const cid = 'c_li_' + slug(full);
     const existing = connectorById(cid);
     if (existing) {
-      matchIds.forEach(id => { if (!existing.matches.includes(id)) existing.matches.push(id); });
-      updated++;
+      let grew = false;
+      matchIds.forEach(id => { if (!existing.matches.includes(id)) { existing.matches.push(id); grew = true; } });
+      if (grew) updated++;
     } else {
       state.extraConnectors.push({
         id: cid, name: full,
@@ -1552,27 +1731,125 @@ function importConnections(text){
       newConn++;
     }
   });
-  state.synced = `${rows.length} connections parsed · ${direct} direct paths to fund people · ${newConn} new connector${newConn===1?'':'s'}${updated?` · ${updated} updated`:''}`;
+  return { direct, newConn, updated };
+}
+function importConnections(text){
+  const rows = parseConnectionsCsv(text);
+  if (!rows.length) { toast('Could not read that file. Export Connections.csv from LinkedIn and try again.'); return; }
+  rows.forEach(r => {
+    const key = (r.url || (r.first + ' ' + r.last)).toLowerCase();
+    if (!state.liConnections.some(x => (x.url || (x.first + ' ' + x.last)).toLowerCase() === key))
+      state.liConnections.push(r);
+  });
+  const res = applyMatching(rows);
+  state.synced = `${rows.length} connections parsed · ${res.direct} direct paths to fund people · ${res.newConn} new connector${res.newConn===1?'':'s'}${res.updated?` · ${res.updated} updated`:''}`;
   save(); render();
   toast(state.synced);
 }
 
-/* ── Message composer (shared by person + connector drawers) ── */
+/* ── Fund list import ── */
+function parseCheckRange(s){
+  if (!s) return null;
+  const m = [...String(s).toLowerCase().matchAll(/([\d.]+)\s*(m|k)?/g)].filter(x => x[1]);
+  if (!m.length) return null;
+  const vals = m.slice(0,2).map(x => {
+    let v = parseFloat(x[1]);
+    if (x[2] === 'm') v *= 1000;
+    else if (!x[2] && v < 20) v *= 1000; // bare "1-3" reads as $M
+    return Math.round(v);
+  });
+  if (vals.length === 1) vals.push(vals[0]);
+  return [Math.min(vals[0], vals[1]), Math.max(vals[0], vals[1])];
+}
+function importFunds(text){
+  const lines = (text||'').split(/\r?\n/).filter(l => l.trim());
+  if (!lines.length) { toast('Nothing to import.'); return; }
+  let head = csvLine(lines[0]).map(h => h.trim().toLowerCase());
+  const col = names => { for (const n of names) { const i = head.indexOf(n); if (i >= 0) return i; } return -1; };
+  let ci = {
+    fund: col(['fund','fund name','firm','name','investor']),
+    person: col(['person','contact','partner','people']),
+    title: col(['title','role']),
+    li: col(['linkedin','linkedin url','profile']),
+    type: col(['type','stage']),
+    check: col(['check','check size','check_size','cheque','checksize']),
+    region: col(['location','region','city','geo']),
+    notes: col(['notes','thesis','focus','looking','about','why']),
+    site: col(['site','website','domain'])
+  };
+  let start = 1;
+  if (ci.fund === -1) { // headerless: positional columns
+    ci = { fund:0, person:1, title:2, li:3, type:4, check:5, region:6, notes:7, site:-1 };
+    start = 0;
+  }
+  let added = 0, mergedRows = 0, peopleAdded = 0;
+  const get = (c,k) => ci[k] >= 0 ? (c[ci[k]]||'').trim() : '';
+  for (let r = start; r < lines.length; r++) {
+    const c = csvLine(lines[r]);
+    const fname = get(c,'fund');
+    if (!fname) continue;
+    const norm = normOrg(fname);
+    let f = FUNDS.find(x => normOrg(x.name) === norm);
+    if (!f) {
+      let id = 'cf-' + slug(fname);
+      while (FUND_BY_ID[id]) id += '-x';
+      f = { id, name: fname, custom: true,
+        type: get(c,'type') || 'Seed', region: get(c,'region') || '—',
+        check: parseCheckRange(get(c,'check')), sectors: [], site: get(c,'site'),
+        looking: get(c,'notes') || '', people: [] };
+      state.extraFunds.push(f);
+      FUNDS.push(f); FUND_BY_ID[f.id] = f;
+      added++;
+    } else {
+      if (f.custom) {
+        if (!f.check) f.check = parseCheckRange(get(c,'check'));
+        if (!f.looking) f.looking = get(c,'notes') || '';
+      }
+      mergedRows++;
+    }
+    const person = get(c,'person');
+    if (person) {
+      const pid = f.id + '_' + slug(person);
+      if (!PERSON_BY_ID[pid]) {
+        if (f.custom) {
+          const ti = f.people.findIndex(x => x.tbd);
+          if (ti >= 0) f.people.splice(ti, 1);
+          f.people.push({ n: person, t: get(c,'title') || 'Partner' });
+        } else {
+          PS(pid).added = { name: person, title: get(c,'title') || 'Partner' };
+        }
+        peopleAdded++;
+      }
+      if (get(c,'li')) PS(pid).li = get(c,'li');
+    } else if (f.custom && !f.people.length) {
+      f.people.push({ n:'', t:'Partner', tbd:true });
+    }
+  }
+  save(); rebuild();
+  let rematch = '';
+  if (state.liConnections.length) {
+    const res = applyMatching(state.liConnections);
+    rematch = ` · rechecked ${state.liConnections.length} synced connections (${res.direct} direct, ${res.newConn} new connectors)`;
+  }
+  state.fundImportMsg = `${added} fund${added===1?'':'s'} added · ${peopleAdded} people${mergedRows?` · ${mergedRows} rows merged into existing funds`:''}${rematch}`;
+  save(); render();
+  toast(state.fundImportMsg);
+}
+
+/* ── Message composer (shared) ── */
 function composerHtml(audience, draft){
-  const opts = templates().map((t,i) => `<option value="${i}" ${t.audience===audience && !composerHtml._sel ? '' : ''}>${esc(t.name)}${t.audience!==audience?' (other)':''}</option>`);
   const ordered = templates().map((t,i)=>({t,i})).sort((a,b) => (a.t.audience===audience?0:1)-(b.t.audience===audience?0:1));
   return `
     <div class="d-row" style="flex-wrap:wrap">
-      <select class="status-select" id="dTplSel" style="flex:1;min-width:150px">
-        ${ordered.map(({t,i}) => `<option value="${i}">${esc(t.name)}</option>`).join('')}
-      </select>
-      <button class="btn-primary btn-primary--coral" id="dGen">Generate</button>
+      ${ddHtml({ id:'dTplSel', ctx:'tpl', value:String(ordered.length?ordered[0].i:0),
+        options: ordered.map(({t,i}) => ({ v:String(i), l:t.name + (t.audience!==audience?' (other)':'') })) })}
+      <button class="btn-primary btn-primary--coral" id="dGen" style="margin-left:auto">Generate</button>
     </div>
     <textarea class="msg-area" id="dMsg" placeholder="Pick a template and hit Generate, or write from scratch.">${esc(draft||'')}</textarea>
     <div class="d-row" style="flex-wrap:wrap">
       <button class="btn-ghost" id="dCopy">Copy message</button>
       <button class="btn-ghost" id="dSent">Mark sent</button>
-      <span class="ai-hint"><span class="ai-dot"></span>Templates are editable in the Templates tab</span>
+      <span class="ai-hint"><span class="ai-dot"></span>Templates are editable via the top menu</span>
     </div>`;
 }
 let typeTimer = null;
@@ -1590,26 +1867,26 @@ function typeInto(text, onDone){
   }, 14);
 }
 
-/* ── Person drawer ── */
-let drawerRef = null; // {kind:'person'|'fund'|'connector', id}
+/* ── Drawers (side nav) ── */
+let drawerRef = null;
 function openPerson(id){
   const p = PERSON_BY_ID[id];
   if (!p) return;
   drawerRef = { kind:'person', id };
   const f = FUND_BY_ID[p.fundId];
   const st = PS(id);
-  const g = grade(f);
   const pi = pathInfo(p);
   const due = personFollowUp(p);
   $('dTitle').textContent = p.tbd ? `${f.name} — ${p.title}` : p.name;
-  $('dMeta').innerHTML = `${p.tbd?'<span class="pill pill--needs">Needs name</span>':`<span class="pill pill--type">${esc(p.title)}</span>`} <a href="#" data-openfund="${f.id}" style="font-weight:700">${esc(f.name)}</a> · ${esc(f.region)} · ${checkFmt(f)}`;
+  $('dMeta').innerHTML = `${p.tbd?'<span class="pill pill--needs">Needs name</span>':`<span class="pill pill--type">${esc(p.title)}</span>`} <a href="#" data-openfund="${f.id}" style="font-weight:700">${esc(f.name)}</a> · ${esc(f.region||'—')} · ${checkFmt(f)}`;
   $('drawerBody').innerHTML = `
     <div class="d-row" style="justify-content:space-between;flex-wrap:wrap">
-      <select class="status-select" id="dStatus">
-        ${Object.entries(P_STATUS).map(([k,v]) => `<option value="${k}" ${pStatus(p)===k?'selected':''}>${v}</option>`).join('')}
-      </select>
-      ${due ? `<span class="pill ${due.cls}">Follow-up ${due.label.toLowerCase()}</span>` : ''}
-      ${p.tbd ? `<button class="btn-ghost" id="dNamePerson" style="height:34px;font-size:12px">Set name</button>` : ''}
+      ${ddHtml({ ctx:'dstatus:'+id, value:pStatus(p), options: Object.entries(P_STATUS).map(([k,v]) => ({v:k,l:v,cls:'st-'+k})) })}
+      <div class="d-row">
+        ${due ? `<span class="pill ${due.cls}">Follow-up ${due.label.toLowerCase()}</span>` : ''}
+        ${incBtnHtml(p)}
+        ${p.tbd ? `<button class="btn-ghost" id="dNamePerson" style="height:34px;font-size:12px">Set name</button>` : ''}
+      </div>
     </div>
 
     <div class="d-section">
@@ -1633,8 +1910,8 @@ function openPerson(id){
     </div>
 
     <div class="d-section">
-      <span class="d-label">Why ${esc(f.name)} fits (${g} · ${Math.round(score(f))}/100)</span>
-      <div class="info-card">${esc(f.looking)}<br><br><b>Our angle:</b> ${esc(f.why)}</div>
+      <span class="d-label">Why ${esc(f.name)} fits (${f.dims ? grade(f)+' · '+Math.round(score(f))+'/100' : 'not graded yet'})</span>
+      <div class="info-card">${esc(f.looking || 'No notes on this fund yet.')}<br><br><b>Our angle:</b> ${esc(f.why || '[add a fit line]')}</div>
     </div>
 
     <div class="d-section">
@@ -1647,31 +1924,20 @@ function openPerson(id){
       <textarea class="notes-area" id="dNotes" placeholder="Call notes, intro asks, terms...">${esc(st.notes||'')}</textarea>
     </div>`;
 
-  $('dStatus').onchange = e => {
-    st.status = e.target.value;
-    if (['replied','meeting','passed','none'].includes(st.status)) delete st.followUp;
-    save(); render(); openPerson(id);
-  };
   const nameBtn = $('dNamePerson');
   if (nameBtn) nameBtn.onclick = () => {
     const n = prompt('Who is the right person at ' + f.name + '?');
     if (!n) return;
-    p.name = n.trim(); p.tbd = false;
-    // note: name edits to seed people live in state so they survive reload
-    st.customName = p.name;
-    save(); render(); openPerson(id);
+    st.customName = n.trim();
+    save(); rebuild(); render(); openPerson(id);
   };
   $('dLi').onchange = e => { st.li = e.target.value.trim(); save(); };
   $('dLiOpen').onclick = () => window.open($('dLi').value, '_blank');
   $('dNotes').oninput = e => { st.notes = e.target.value; save(); };
-  wireComposerPerson(p);
-  showDrawer();
-}
-function wireComposerPerson(p){
-  const st = PS(p.id);
   $('dMsg').oninput = e => { st.draft = e.target.value; save(); };
   $('dGen').onclick = () => {
-    const t = templates()[+$('dTplSel').value];
+    const t = templates()[+ddVal('dTplSel')];
+    if (!t) return;
     const text = renderTemplate(t.body, personCtx(p));
     typeInto(text, () => { st.draft = text; save(); });
   };
@@ -1679,31 +1945,55 @@ function wireComposerPerson(p){
   $('dSent').onclick = () => {
     st.status = st.status === 'ask' ? 'ask' : 'direct';
     if (st.status === 'direct') { st.sentAt = Date.now(); st.followUp = Date.now() + 6*DAY; }
-    save(); render(); openPerson(p.id);
+    save(); render(); openPerson(id);
     toast('Marked sent. Follow-up queued in 6 days.');
   };
+  showDrawer();
 }
 
-/* ── Fund drawer ── */
+function addPersonTo(fundId, after){
+  const f = FUND_BY_ID[fundId];
+  if (!f) return;
+  const n = prompt('Person name at ' + f.name + ':');
+  if (!n) return;
+  const t = prompt('Their title:', 'Partner') || 'Partner';
+  const pid = f.id + '_' + slug(n);
+  if (!PERSON_BY_ID[pid]) {
+    if (f.custom) f.people.push({ n: n.trim(), t: t.trim() });
+    else PS(pid).added = { name: n.trim(), title: t.trim() };
+    save(); rebuild();
+  }
+  expandedFunds.add(fundId);
+  render();
+  if (after) after();
+}
+
 function openFund(id){
   const f = FUND_BY_ID[id];
   if (!f) return;
   drawerRef = { kind:'fund', id };
-  const g = grade(f);
   const ppl = PEOPLE.filter(p => p.fundId === id);
   $('dTitle').textContent = f.name;
-  $('dMeta').innerHTML = `<span class="pill pill--type">${esc(f.type)}</span> ${esc(f.region)} · ${checkFmt(f)} · <a href="https://${esc(f.site)}" target="_blank" rel="noopener" style="color:var(--text-secondary);font-weight:600">${esc(f.site)}</a>`;
+  $('dMeta').innerHTML = `<span class="pill pill--type">${esc(f.type||'—')}</span> ${esc(f.region||'—')} · ${checkFmt(f)}${f.site ? ` · <a href="https://${esc(f.site)}" target="_blank" rel="noopener" style="color:var(--text-secondary);font-weight:600">${esc(f.site)}</a>` : ''}`;
+  const meetings = FS(id).meetings || [];
   $('drawerBody').innerHTML = `
-    <div class="d-row" style="justify-content:space-between">
-      <button class="btn-ghost" id="dTargetFund" style="height:34px;font-size:12px">${FS(id).target?'★ On target list':'☆ Add to targets'}</button>
-      <button class="btn-ghost" id="dAddPerson" style="height:34px;font-size:12px">+ Add person</button>
+    <div class="d-row" style="justify-content:space-between;flex-wrap:wrap">
+      <div class="d-row">
+        ${ddHtml({ ctx:'fstage:'+id, value:fStage(f), options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:'Stage: '+v})) })}
+        ${ddHtml({ ctx:'fwarmth:'+id, value:FS(id).warmth || 'na', options: Object.entries(WARMTH).map(([k,v]) => ({v:k,l:k==='na'?v:'Warmth: '+v})) })}
+      </div>
+      <div class="d-row">
+        <button class="btn-ghost" id="dAddPerson" style="height:34px;font-size:12px">+ Add person</button>
+        <button class="btn-ghost" id="dRemoveFund" style="height:34px;font-size:12px;color:var(--red-text)">Remove</button>
+      </div>
     </div>
+    ${f.dims ? `
     <div class="grade-card">
       <div class="grade-card__top">
-        <div class="grade-big ${gradeClass(g)}">${g}</div>
+        <div class="grade-big ${gradeClass(grade(f))}">${grade(f)}</div>
         <div>
           <div class="grade-card__score">Pitch fit ${Math.round(score(f))}/100</div>
-          <div class="grade-card__note">${esc(f.why)}</div>
+          <div class="grade-card__note">${esc(f.why||'')}</div>
         </div>
       </div>
       ${PITCH_DIMS.map(([k,label]) => `
@@ -1712,43 +2002,73 @@ function openFund(id){
           <div class="dim-track"><div class="dim-fill" style="width:${f.dims[k]}%"></div></div>
           <span class="dim-val">${f.dims[k]}</span>
         </div>`).join('')}
-    </div>
+    </div>` : `
+    <div class="info-card"><b>Not graded yet.</b> This fund came from your upload. Share more pitch context and it can be graded against the deck like the others.</div>`}
     <div class="d-section">
       <span class="d-label">What they're looking for</span>
-      <div class="info-card">${esc(f.looking)}</div>
+      <div class="info-card">${esc(f.looking || 'No thesis notes yet.')}</div>
+    </div>
+    <div class="d-section">
+      <div class="d-row" style="justify-content:space-between">
+        <span class="d-label">Pitch meetings (Fathom)</span>
+        <button class="mini-btn" id="dSyncMeetings">Sync meetings</button>
+      </div>
+      ${meetings.length ? meetings.map(m => `
+        <div class="d-row" style="justify-content:space-between;border:1px solid var(--border-light);border-radius:12px;padding:10px 14px">
+          <div style="min-width:0">
+            <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(m.title || 'Untitled meeting')}</div>
+            <div style="font-size:11px;color:var(--grey-1)">${m.date ? new Date(m.date).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}) : '—'}</div>
+          </div>
+          <span class="pill pill--type">Cached</span>
+        </div>`).join('') : `<div class="info-card">No meetings synced yet. Sync pulls matches for ${esc(f.name)} and its people from the cached Fathom transcript store (same one the strategy center uses). Reading warmth from the transcripts automatically is the next step of the AI layer - for now set warmth above after you skim the summary.</div>`}
+      ${FS(id).meetingsSyncedAt ? `<span style="font-size:11px;color:var(--grey-1)">Last synced ${new Date(FS(id).meetingsSyncedAt).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>` : ''}
     </div>
     <div class="d-section">
       <span class="d-label">People (${ppl.length})</span>
       <div>
         ${ppl.map(p => `<div class="person-row">
-          <span class="partner-ava">${p.tbd?'?':esc(p.name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase())}</span>
+          <span class="partner-ava">${p.tbd?'?':esc((p.name||'?').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase())}</span>
           <div class="person-row__info">
             <div class="person-row__name">${p.tbd?`<span style="color:var(--grey-1)">${esc(p.title)}</span> <span class="pill pill--needs">Needs name</span>`:esc(p.name)}</div>
-            <div class="person-row__sub">${p.tbd?'Map the right partner':esc(p.title)} · ${P_STATUS[pStatus(p)]}</div>
+            <div class="person-row__sub">${p.tbd?'Map the right partner':esc(p.title)} · ${P_STATUS[pStatus(p)]}${isExcluded(p)?' · Excluded':''}</div>
           </div>
           <button class="mini-btn" data-openperson="${p.id}">Open</button>
         </div>`).join('')}
       </div>
     </div>`;
-  $('dTargetFund').onclick = () => { FS(id).target = !FS(id).target; save(); render(); openFund(id); };
-  $('dAddPerson').onclick = () => {
-    const n = prompt('Person name at ' + f.name + ':');
-    if (!n) return;
-    const t = prompt('Their title:', 'Partner') || 'Partner';
-    const pid = id + '_' + slug(n);
-    if (!PERSON_BY_ID[pid]) {
-      const person = { id: pid, fundId: id, name: n.trim(), title: t.trim(), tbd: false };
-      PEOPLE.push(person); PERSON_BY_ID[pid] = person;
-      f.people.push({ n: n.trim(), t: t.trim() });
-      state.people[pid] = { added: { name: n.trim(), title: t.trim() } };
-      save();
+  $('dAddPerson').onclick = () => addPersonTo(id, () => openFund(id));
+  $('dSyncMeetings').onclick = async () => {
+    const btn = $('dSyncMeetings');
+    btn.textContent = 'Syncing...'; btn.disabled = true;
+    try {
+      const terms = [f.name].concat(PEOPLE.filter(p => p.fundId === id && !p.tbd).map(p => p.name));
+      const r = await fetch('/api/vc-meetings', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'search', terms })
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+      FS(id).meetings = data.matches || [];
+      FS(id).meetingsSyncedAt = Date.now();
+      save(); render(); openFund(id);
+      toast(data.matches.length
+        ? `${data.matches.length} meeting${data.matches.length===1?'':'s'} matched out of ${data.total_cached} cached.`
+        : `No matches among ${data.total_cached} cached meetings. Ingest the call via the strategy center first.`);
+    } catch (err) {
+      btn.textContent = 'Sync meetings'; btn.disabled = false;
+      toast('Meeting sync runs on the deployed wiki (needs the transcript store). ' + String(err.message || err));
     }
-    render(); openFund(id);
+  };
+  $('dRemoveFund').onclick = () => {
+    if (!confirm('Remove ' + f.name + ' from the list?')) return;
+    if (SEED_FUNDS.some(x => x.id === id)) { if (!state.hiddenFunds.includes(id)) state.hiddenFunds.push(id); }
+    else state.extraFunds = state.extraFunds.filter(x => x.id !== id);
+    save(); rebuild(); render(); closeDrawer();
+    toast(f.name + ' removed.');
   };
   showDrawer();
 }
 
-/* ── Connector drawer ── */
 function openConnector(id, preselect){
   const c = connectorById(id);
   if (!c) return;
@@ -1756,15 +2076,14 @@ function openConnector(id, preselect){
   const st = CS(id);
   const cst = st.status || 'none';
   const matches = (c.matches||[]).map(pid => PERSON_BY_ID[pid]).filter(Boolean);
-  const checkedSet = new Set(preselect ? [preselect] : (st.included || matches.filter(p => !['replied','meeting','passed'].includes(pStatus(p))).map(p => p.id)));
+  const defaultIds = matches.filter(p => !isExcluded(p) && !['replied','meeting','passed'].includes(pStatus(p))).map(p => p.id);
+  const checkedSet = new Set(preselect ? [preselect] : (st.included || defaultIds));
   const due = connectorFollowUp(c);
   $('dTitle').textContent = c.name;
   $('dMeta').innerHTML = `<span class="pill pill--type">Connector</span> ${esc(c.role||'')}${c.li ? ` · <a href="${esc(c.li)}" target="_blank" rel="noopener" style="font-weight:600;color:#0a66c2">LinkedIn</a>` : ''}`;
   $('drawerBody').innerHTML = `
     <div class="d-row" style="justify-content:space-between;flex-wrap:wrap">
-      <select class="status-select" id="dCStatus">
-        ${Object.entries(C_STATUS).map(([k,v]) => `<option value="${k}" ${cst===k?'selected':''}>${v}</option>`).join('')}
-      </select>
+      ${ddHtml({ ctx:'cstatus:'+id, value:cst, options: Object.entries(C_STATUS).map(([k,v]) => ({v:k,l:v})) })}
       ${due ? `<span class="pill ${due.cls}">Follow-up ${due.label.toLowerCase()}</span>` : ''}
     </div>
     <div class="d-section">
@@ -1782,7 +2101,7 @@ function openConnector(id, preselect){
           return `<label class="check-row">
             <input type="checkbox" data-inc="${p.id}" ${checkedSet.has(p.id)?'checked':''}>
             <span><b>${p.tbd?esc(p.title):esc(firstName(p.name))}</b> from ${esc(f.name)}</span>
-            <span class="cr-sub">${grade(f)} · ${P_STATUS[pStatus(p)]}</span>
+            <span class="cr-sub">${grade(f)} · ${P_STATUS[pStatus(p)]}${isExcluded(p)?' · Excluded':''}</span>
           </label>`;
         }).join('') : '<div class="info-card">No matches yet. Add one, or sync LinkedIn to match automatically.</div>'}
       </div>
@@ -1801,12 +2120,6 @@ function openConnector(id, preselect){
   document.querySelectorAll('[data-inc]').forEach(cb => cb.addEventListener('change', () => { st.included = included(); save(); }));
   st.included = [...checkedSet]; save();
 
-  $('dCStatus').onchange = e => {
-    st.status = e.target.value;
-    if (st.status !== 'asked') delete st.followUp;
-    if (st.status === 'agreed') toast('Nice. Send the forwardable and mark the people "Intro in motion".');
-    save(); render(); openConnector(id);
-  };
   $('dAddMatch').onclick = () => {
     const q = prompt('Search a person or fund to match (e.g. "Fabrice" or "NFX"):');
     if (!q) return;
@@ -1814,12 +2127,14 @@ function openConnector(id, preselect){
     const hit = PEOPLE.find(p => (p.name && p.name.toLowerCase().includes(ql)) || FUND_BY_ID[p.fundId].name.toLowerCase().includes(ql));
     if (!hit) { toast('No person or fund matched "' + q + '".'); return; }
     if (!c.matches.includes(hit.id)) c.matches.push(hit.id);
-    save(); render(); openConnector(id);
+    if (state.extraConnectors.includes(c)) save();
+    render(); openConnector(id);
   };
   $('dNotes').oninput = e => { st.notes = e.target.value; save(); };
   $('dMsg').oninput = e => { st.draft = e.target.value; save(); };
   $('dGen').onclick = () => {
-    const t = templates()[+$('dTplSel').value];
+    const t = templates()[+ddVal('dTplSel')];
+    if (!t) return;
     const ids = included();
     if (!ids.length && t.body.includes('{{people_list}}')) { toast('Check at least one person to include in the ask.'); return; }
     const text = renderTemplate(t.body, { first: firstName(c.name), name: c.name, people_list: peopleListFor(ids) });
@@ -1851,22 +2166,6 @@ function closeDrawer(){
   clearInterval(typeTimer);
 }
 
-/* Restore custom names / added people from state on load. */
-(function restorePeopleEdits(){
-  Object.entries(state.people).forEach(([pid, st]) => {
-    if (st.added && !PERSON_BY_ID[pid]) {
-      const fundId = pid.split('_')[0];
-      if (!FUND_BY_ID[fundId]) return;
-      const person = { id: pid, fundId, name: st.added.name, title: st.added.title, tbd: false };
-      PEOPLE.push(person); PERSON_BY_ID[pid] = person;
-    }
-    if (st.customName && PERSON_BY_ID[pid]) {
-      PERSON_BY_ID[pid].name = st.customName;
-      PERSON_BY_ID[pid].tbd = false;
-    }
-  });
-})();
-
 /* ── Toast ── */
 let toastTimer = null;
 function toast(msg){
@@ -1877,28 +2176,50 @@ function toast(msg){
   toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
 }
 
-/* ── Global events ── */
+/* ── Events ── */
+function switchTab(tab){
+  currentTab = tab;
+  selected.clear();
+  render();
+}
 $('tabRow').addEventListener('click', e => {
   const tab = e.target.closest('.tab');
-  if (!tab) return;
-  currentTab = tab.dataset.tab;
-  selected.clear();
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
-  render();
+  if (tab) switchTab(tab.dataset.tab);
 });
+$('tbPeople').addEventListener('click', () => switchTab('people'));
+$('tbConnectors').addEventListener('click', () => switchTab('connectors'));
+$('tbTemplates').addEventListener('click', () => switchTab('templates'));
 $('searchInput').addEventListener('input', e => { searchQ = e.target.value.trim().toLowerCase(); render(); });
-$('sortSelect').addEventListener('change', e => { sortBy = e.target.value; render(); });
 $('clearFilters').addEventListener('click', () => { activeFilters = {}; render(); });
 
+/* One document-level click handler: custom dropdowns + filter popovers */
 document.addEventListener('click', e => {
+  const ddItem = e.target.closest('.dd-item');
+  if (ddItem) {
+    const wrap = ddItem.closest('.dd');
+    wrap.classList.remove('open');
+    wrap.dataset.ddval = ddItem.dataset.ddv;
+    onDdChange(wrap.dataset.ddctx, ddItem.dataset.ddv);
+    return;
+  }
+  const ddBtn = e.target.closest('.dd-btn');
+  if (ddBtn) {
+    const wrap = ddBtn.closest('.dd');
+    const wasOpen = wrap.classList.contains('open');
+    document.querySelectorAll('.dd.open').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.popover.open').forEach(p => p.classList.remove('open'));
+    if (!wasOpen) wrap.classList.add('open');
+    return;
+  }
   const chip = e.target.closest('[data-filter]');
-  const inPop = e.target.closest('.popover');
   if (chip) {
     const key = chip.dataset.filter;
+    document.querySelectorAll('.dd.open').forEach(d => d.classList.remove('open'));
     document.querySelectorAll('.popover').forEach(p => p.classList.toggle('open', p.dataset.pop === key && !p.classList.contains('open')));
     return;
   }
-  if (!inPop) document.querySelectorAll('.popover').forEach(p => p.classList.remove('open'));
+  if (!e.target.closest('.popover')) document.querySelectorAll('.popover.open').forEach(p => p.classList.remove('open'));
+  if (!e.target.closest('.dd')) document.querySelectorAll('.dd.open').forEach(d => d.classList.remove('open'));
 });
 document.addEventListener('change', e => {
   const cb = e.target.closest('[data-fkey]');
@@ -1913,8 +2234,8 @@ document.addEventListener('change', e => {
 
 /* Table interactions (delegated) */
 $('tableBody').addEventListener('click', e => {
-  if (e.target.closest('[data-noopen]')) { e.stopPropagation(); return; } // linkedin link
-  if (e.target.closest('.inline-status')) { e.stopPropagation(); return; }
+  if (e.target.closest('[data-noopen]')) { e.stopPropagation(); return; }
+  if (e.target.closest('.dd')) return;
   const chk = e.target.closest('[data-check]');
   if (chk) {
     e.stopPropagation();
@@ -1922,34 +2243,54 @@ $('tableBody').addEventListener('click', e => {
     render();
     return;
   }
+  const inc = e.target.closest('[data-inctoggle]');
+  if (inc) {
+    e.stopPropagation();
+    const st = PS(inc.dataset.inctoggle);
+    st.excluded = !st.excluded;
+    save(); render();
+    return;
+  }
+  const info = e.target.closest('[data-openfundinfo]');
+  if (info) { e.stopPropagation(); openFund(info.dataset.openfundinfo); return; }
+  const op = e.target.closest('[data-openperson]');
+  if (op) { e.stopPropagation(); openPerson(op.dataset.openperson); return; }
   const connChip = e.target.closest('[data-openconn]');
   if (connChip) { e.stopPropagation(); openConnector(connChip.dataset.openconn); return; }
+  const addRow = e.target.closest('[data-addperson]');
+  if (addRow) { addPersonTo(addRow.dataset.addperson); return; }
   const fu = e.target.closest('[data-fu]');
   if (fu) {
     e.stopPropagation();
-    const [kind, rid] = fu.dataset.fu.split(':');
-    if (kind === 'person') { openPerson(rid); setTimeout(() => { const sel=$('dTplSel'); if(sel){ const i=templates().findIndex(t=>t.id==='t_followup'); if(i>=0){sel.value=i;} $('dGen').click(); } }, 300); }
-    else openConnector(rid);
+    const [kind, ...rest] = fu.dataset.fu.split(':');
+    const rid = rest.join(':');
+    if (kind === 'person') {
+      openPerson(rid);
+      setTimeout(() => {
+        const w = $('dTplSel');
+        if (w) {
+          const i = templates().findIndex(t => t.id === 't_followup');
+          if (i >= 0) w.dataset.ddval = String(i);
+          $('dGen').click();
+        }
+      }, 300);
+    } else openConnector(rid);
+    return;
+  }
+  const fr = e.target.closest('tr[data-fundrow]');
+  if (fr) {
+    const id = fr.dataset.fundrow;
+    expandedFunds.has(id) ? expandedFunds.delete(id) : expandedFunds.add(id);
+    render();
     return;
   }
   const pr = e.target.closest('tr[data-person]');
   if (pr) { openPerson(pr.dataset.person); return; }
-  const fr = e.target.closest('tr[data-fund]');
-  if (fr) { openFund(fr.dataset.fund); return; }
   const cr = e.target.closest('tr[data-conn]');
   if (cr) { openConnector(cr.dataset.conn); return; }
 });
-$('tableBody').addEventListener('change', e => {
-  const sel = e.target.closest('[data-pstatus]');
-  if (!sel) return;
-  const st = PS(sel.dataset.pstatus);
-  st.status = sel.value;
-  if (sel.value === 'direct') { st.sentAt = st.sentAt || Date.now(); st.followUp = st.followUp || (Date.now() + 6*DAY); }
-  if (['replied','meeting','passed','none'].includes(sel.value)) delete st.followUp;
-  save(); render();
-});
 
-/* Connectors view interactions */
+/* Connectors view */
 $('connectorGrid').addEventListener('click', e => {
   const card = e.target.closest('[data-conn]');
   if (card) openConnector(card.dataset.conn);
@@ -1973,20 +2314,60 @@ $('addConnectorBtn').addEventListener('click', () => {
   save(); render(); openConnector(cid);
 });
 
-/* Person drawer: draft-ask-via buttons + open fund link (delegated on drawer) */
-$('drawerBody').addEventListener('click', e => {
-  const via = e.target.closest('[data-askvia]');
-  if (via && drawerRef && drawerRef.kind === 'person') {
-    openConnector(via.dataset.askvia, drawerRef.id);
+/* Fund import */
+$('fundUploadBtn').addEventListener('click', () => $('fundCsvInput').click());
+$('fundCsvInput').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => importFunds(reader.result);
+  reader.readAsText(file);
+  e.target.value = '';
+});
+$('fundPasteBtn').addEventListener('click', () => {
+  const w = $('fundPasteWrap');
+  w.style.display = w.style.display === 'none' ? 'block' : 'none';
+});
+$('fundPasteImport').addEventListener('click', () => {
+  importFunds($('fundPasteArea').value);
+  $('fundPasteArea').value = '';
+  $('fundPasteWrap').style.display = 'none';
+});
+$('fundPasteCancel').addEventListener('click', () => { $('fundPasteWrap').style.display = 'none'; });
+$('removeSamplesBtn').addEventListener('click', () => {
+  const allHidden = SEED_FUNDS.every(f => state.hiddenFunds.includes(f.id));
+  if (allHidden) {
+    state.hiddenFunds = [];
+    save(); rebuild(); render();
+    toast('Sample funds restored.');
     return;
   }
+  const n = SEED_FUNDS.filter(f => !state.hiddenFunds.includes(f.id)).length;
+  if (!confirm('Remove all ' + n + ' sample funds? Your uploaded funds stay, and you can restore the samples any time.')) return;
+  state.hiddenFunds = SEED_FUNDS.map(f => f.id);
+  save(); rebuild(); render();
+  toast('Sample funds removed. Upload your list above.');
+});
+
+/* Drawer inner navigation */
+$('drawerBody').addEventListener('click', e => {
+  const via = e.target.closest('[data-askvia]');
+  if (via && drawerRef && drawerRef.kind === 'person') { openConnector(via.dataset.askvia, drawerRef.id); return; }
   const of = e.target.closest('[data-openfund]');
   if (of) { e.preventDefault(); openFund(of.dataset.openfund); return; }
   const op = e.target.closest('[data-openperson]');
   if (op) { openPerson(op.dataset.openperson); return; }
+  const inc = e.target.closest('[data-inctoggle]');
+  if (inc) {
+    const st = PS(inc.dataset.inctoggle);
+    st.excluded = !st.excluded;
+    save(); render();
+    if (drawerRef && drawerRef.kind === 'person') openPerson(drawerRef.id);
+    return;
+  }
 });
 
-/* Templates view */
+/* Templates */
 $('templatesView').addEventListener('input', e => {
   if (e.target.id === 'varSpots') { state.vars.spots_left = e.target.value; save(); return; }
   if (e.target.id === 'varWeeks') { state.vars.weeks = e.target.value; save(); return; }
@@ -1995,10 +2376,6 @@ $('templatesView').addEventListener('input', e => {
   if (tn) { templates()[+tn.dataset.tname].name = tn.value; save(); return; }
   const tb = e.target.closest('[data-tbody]');
   if (tb) { templates()[+tb.dataset.tbody].body = tb.value; save(); return; }
-});
-$('templatesView').addEventListener('change', e => {
-  const ta = e.target.closest('[data-taud]');
-  if (ta) { templates()[+ta.dataset.taud].audience = ta.value; save(); }
 });
 $('templatesView').addEventListener('click', e => {
   const del = e.target.closest('[data-tdel]');
@@ -2021,31 +2398,51 @@ $('resetTplBtn').addEventListener('click', () => {
 });
 
 /* Bulk actions */
-$('bulkTarget').addEventListener('click', () => {
-  let n = 0;
-  selected.forEach(id => {
-    const fundId = currentTab === 'funds' ? id : (PERSON_BY_ID[id] ? PERSON_BY_ID[id].fundId : null);
-    if (fundId && !FS(fundId).target) { FS(fundId).target = true; n++; }
-  });
+function selectedPeopleIds(){
+  if (currentTab === 'people') return [...selected].filter(id => PERSON_BY_ID[id]);
+  return [...selected].flatMap(fid => PEOPLE.filter(p => p.fundId === fid).map(p => p.id));
+}
+$('bulkInclude').addEventListener('click', () => {
+  const ids = selectedPeopleIds();
+  ids.forEach(id => { delete PS(id).excluded; });
   save(); render();
-  toast(`${n} fund${n===1?'':'s'} added to the target list`);
+  toast(`${ids.length} people included in outreach`);
 });
-$('bulkUntarget').addEventListener('click', () => {
-  selected.forEach(id => {
-    const fundId = currentTab === 'funds' ? id : (PERSON_BY_ID[id] ? PERSON_BY_ID[id].fundId : null);
-    if (fundId) FS(fundId).target = false;
-  });
+$('bulkExclude').addEventListener('click', () => {
+  const ids = selectedPeopleIds();
+  ids.forEach(id => { PS(id).excluded = true; });
   save(); render();
-  toast('Removed from target list');
+  toast(`${ids.length} people excluded`);
 });
 $('bulkPaths').addEventListener('click', () => {
-  const ids = [...selected];
+  const ids = selectedPeopleIds();
   const withC = ids.filter(id => pathInfo(PERSON_BY_ID[id]).kind === 'connector').length;
   const direct = ids.filter(id => pathInfo(PERSON_BY_ID[id]).kind === 'direct').length;
   const cold = ids.length - withC - direct;
   toast(`${withC} have a connector path, ${direct} are direct, ${cold} have no path yet - sync LinkedIn or add connectors for those.`);
 });
+$('bulkRemove').addEventListener('click', () => {
+  if (!STAGE_TABS.includes(currentTab) || !selected.size) return;
+  if (!confirm('Remove ' + selected.size + ' fund' + (selected.size===1?'':'s') + ' from the list?')) return;
+  selected.forEach(id => {
+    if (SEED_FUNDS.some(f => f.id === id)) { if (!state.hiddenFunds.includes(id)) state.hiddenFunds.push(id); }
+    else state.extraFunds = state.extraFunds.filter(f => f.id !== id);
+  });
+  selected.clear();
+  save(); rebuild(); render();
+  toast('Removed.');
+});
 $('bulkClear').addEventListener('click', () => { selected.clear(); render(); });
+$('bulkBar').addEventListener('click', e => {
+  const b = e.target.closest('[data-bulkstage]');
+  if (!b || !STAGE_TABS.includes(currentTab)) return;
+  const stage = b.dataset.bulkstage;
+  let n = 0;
+  selected.forEach(id => { if (FUND_BY_ID[id]) { FS(id).stage = stage; n++; } });
+  selected.clear();
+  save(); render();
+  toast(`${n} fund${n===1?'':'s'} moved to ${F_STAGES[stage]}`);
+});
 
 /* Drawer close */
 $('drawerClose').addEventListener('click', closeDrawer);
@@ -2054,20 +2451,22 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(
 
 /* Export */
 $('exportBtn').addEventListener('click', () => {
-  const rows = currentTab === 'funds' ? visibleFunds() : visiblePeople();
   let lines;
   if (currentTab === 'funds') {
-    lines = [['fund','type','region','check_min_k','check_max_k','grade','fit','on_targets'].join(',')]
-      .concat(rows.map(f => [f.name,f.type,f.region,f.check[0],f.check[1],grade(f),Math.round(score(f)),FS(f.id).target?'yes':'no'].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')));
+    const rows = visibleFunds();
+    lines = [['fund','type','region','check_min_k','check_max_k','grade','fit','people','why_it_fits'].join(',')]
+      .concat(rows.map(f => [f.name, f.type||'', f.region||'', f.check?f.check[0]:'', f.check?f.check[1]:'', grade(f), f.dims?Math.round(score(f)):'', PEOPLE.filter(p=>p.fundId===f.id).length, f.why||''].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')));
   } else {
-    lines = [['person','title','fund','grade','fit','linkedin','path','connectors','status','follow_up_due','notes'].join(',')]
+    const rows = visiblePeople();
+    lines = [['person','title','fund','grade','fit','linkedin','path','connectors','status','included','follow_up_due','notes'].join(',')]
       .concat(rows.map(p => {
         const f = FUND_BY_ID[p.fundId];
         const st = PS(p.id);
         const pi = pathInfo(p);
-        return [p.tbd?('['+p.title+']'):p.name, p.title, f.name, grade(f), Math.round(score(f)), personLi(p),
+        return [p.tbd?('['+p.title+']'):p.name, p.title, f.name, grade(f), f.dims?Math.round(score(f)):'', personLi(p),
           pi.kind, pi.kind==='connector'?pi.connectors.map(c=>c.name).join('; '):'',
-          P_STATUS[pStatus(p)], st.followUp?new Date(st.followUp).toISOString().slice(0,10):'', st.notes||''
+          P_STATUS[pStatus(p)], isExcluded(p)?'no':'yes',
+          st.followUp?new Date(st.followUp).toISOString().slice(0,10):'', st.notes||''
         ].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
       }));
   }
@@ -2079,6 +2478,7 @@ $('exportBtn').addEventListener('click', () => {
   URL.revokeObjectURL(a.href);
 });
 
+rebuild();
 render();
 </script>
 </body>
