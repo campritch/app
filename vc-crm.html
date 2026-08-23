@@ -1847,7 +1847,7 @@ function composerHtml(audience, draft){
     </div>
     <textarea class="msg-area" id="dMsg" placeholder="Pick a template and hit Generate, or write from scratch.">${esc(draft||'')}</textarea>
     <div class="d-row" style="flex-wrap:wrap">
-      <button class="btn-ghost" id="dCopy">Copy message</button>
+      <button class="btn-primary" id="dCopy">Copy + open LinkedIn</button>
       <button class="btn-ghost" id="dSent">Mark sent</button>
       <span class="ai-hint"><span class="ai-dot"></span>Templates are editable via the top menu</span>
     </div>`;
@@ -1941,7 +1941,12 @@ function openPerson(id){
     const text = renderTemplate(t.body, personCtx(p));
     typeInto(text, () => { st.draft = text; save(); });
   };
-  $('dCopy').onclick = () => navigator.clipboard.writeText($('dMsg').value||'').then(() => toast('Copied. Paste it into LinkedIn or email.'));
+  $('dCopy').onclick = () => {
+    // Copy first (while the page still has focus), then open LinkedIn.
+    navigator.clipboard.writeText($('dMsg').value || '').catch(() => {});
+    window.open(personLi(p), '_blank');
+    toast('Copied. Paste it into the LinkedIn message.');
+  };
   $('dSent').onclick = () => {
     st.status = st.status === 'ask' ? 'ask' : 'direct';
     if (st.status === 'direct') { st.sentAt = Date.now(); st.followUp = Date.now() + 6*DAY; }
@@ -2140,7 +2145,16 @@ function openConnector(id, preselect){
     const text = renderTemplate(t.body, { first: firstName(c.name), name: c.name, people_list: peopleListFor(ids) });
     typeInto(text, () => { st.draft = text; if ((st.status||'none') === 'none') st.status = 'draft'; save(); render(); });
   };
-  $('dCopy').onclick = () => navigator.clipboard.writeText($('dMsg').value||'').then(() => toast('Copied. Paste it to ' + firstName(c.name) + '.'));
+  $('dCopy').onclick = () => {
+    navigator.clipboard.writeText($('dMsg').value || '').catch(() => {});
+    if (c.li) {
+      window.open(c.li, '_blank');
+      toast('Copied. Paste it into the LinkedIn message to ' + firstName(c.name) + '.');
+    } else {
+      window.open('https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(c.name), '_blank');
+      toast('Copied. No saved profile link for ' + firstName(c.name) + ' - opened a LinkedIn search instead.');
+    }
+  };
   $('dSent').onclick = () => {
     st.status = 'asked';
     st.sentAt = Date.now();
