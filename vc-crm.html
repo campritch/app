@@ -610,7 +610,7 @@
     </div>
     <button class="login-btn" id="tbPeople">People</button>
     <button class="login-btn" id="tbConnectors">Connectors</button>
-    <button class="login-btn" id="tbTemplates">Templates</button>
+    <button class="login-btn" id="tbTemplates">Settings</button>
     <a class="login-btn" href="/api/vc-login?signout=1">Lock</a>
   </div>
 
@@ -720,6 +720,14 @@ Acme Ventures, Jane Doe, Partner, https://linkedin.com/in/janedoe, Seed, $250k-$
           <label>Company blurb (used by {{blurb}})</label>
           <textarea id="varBlurb" rows="4" style="resize:vertical"></textarea>
         </div>
+      </div>
+      <div class="tpl-card">
+        <div class="tpl-card__head"><span style="font-size:14px;font-weight:700">Follow-up rules</span></div>
+        <div class="var-grid">
+          <div class="var-field"><label>After a direct send</label><span id="setFdDD"></span></div>
+          <div class="var-field"><label>After a connector ask</label><span id="setFaDD"></span></div>
+        </div>
+        <div class="token-hint">Off means nothing is scheduled automatically - use Schedule Follow Up in a row's \u22ef menu. Setting a rule auto-schedules every future send.</div>
       </div>
       <div id="tplList" style="display:flex;flex-direction:column;gap:12px"></div>
       <div class="d-row">
@@ -1244,6 +1252,7 @@ state.hiddenFunds = state.hiddenFunds || [];
 state.liConnections = state.liConnections || [];
 state.vars = state.vars || { ...DEFAULT_VARS };
 state.funds = state.funds || {};
+state.settings = state.settings || { autoFollowDirect: 0, autoFollowAsk: 0 };
 // Migrate the old target-list flag into the pipeline.
 Object.values(state.funds).forEach(fs => { if (fs.target && !fs.stage) fs.stage = 'target'; delete fs.target; });
 // v2: deck-aligned templates + round variables (real GMV/revenue numbers).
@@ -1336,9 +1345,7 @@ function followUpState(st){
   return { label: `Due in ${days}d`, cls: 'pill--due', days };
 }
 function personFollowUp(p){
-  const st = PS(p.id);
-  if (!['direct','intro','ask'].includes(st.status)) return null;
-  return followUpState(st);
+  return followUpState(PS(p.id));
 }
 function connectorFollowUp(c){
   const st = CS(c.id);
@@ -1502,7 +1509,11 @@ function ddVal(id){ const el = $(id); return el ? el.dataset.ddval : null; }
 function setPersonStatus(pid, v){
   const st = PS(pid);
   st.status = v;
-  if (v === 'direct') { st.sentAt = st.sentAt || Date.now(); st.followUp = st.followUp || (Date.now() + 6*DAY); }
+  if (v === 'direct') {
+    st.sentAt = st.sentAt || Date.now();
+    const rule = +state.settings.autoFollowDirect || 0;
+    if (rule && !st.followUp) st.followUp = Date.now() + rule*DAY;
+  }
   if (['replied','meeting','passed','none'].includes(v)) delete st.followUp;
   save(); render();
 }
@@ -1526,6 +1537,8 @@ function onDdChange(ctx, v){
     return;
   }
   if (kind === 'taud') { templates()[+arg].audience = v; save(); return; }
+  if (kind === 'setfd') { state.settings.autoFollowDirect = +v; save(); return; }
+  if (kind === 'setfa') { state.settings.autoFollowAsk = +v; save(); return; }
   if (kind === 'fstage') {
     const fs = FS(arg);
     if (v === 'none') delete fs.stage; else fs.stage = v;
@@ -1559,6 +1572,28 @@ function pathCellHtml(p){
     </div>`;
   }
   return `<span class="pill pill--nopath">No path yet</span>`;
+}
+function personMenuHtml(p){
+  return `<div class="dd dd--row">
+    <button type="button" class="dd-btn icon-sq" title="Actions">${DOTS_ICON}</button>
+    <div class="dd-menu" style="left:auto;right:0;min-width:200px">
+      <button type="button" class="dd-item" data-rowact="fusub:${p.id}">Schedule Follow Up <span style="margin-left:auto;color:var(--muted-foreground)">\u203a</span></button>
+      <button type="button" class="dd-item" data-rowact="psent:${p.id}">Mark as Sent</button>
+      <button type="button" class="dd-item" data-rowact="pdone:${p.id}">Mark as Done</button>
+      <button type="button" class="dd-item" data-rowact="pbacklog:${p.id}">Move to Backlog</button>
+      <button type="button" class="dd-item" data-rowact="parchm:${p.id}">Archive</button>
+    </div>
+  </div>`;
+}
+function followSubHtml(pid){
+  const fmt = d => new Date(Date.now() + d*DAY).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+  return `
+    <div style="padding:6px 8px 4px;font-size:10.5px;font-weight:600;letter-spacing:0.4px;color:var(--muted-foreground)">FOLLOW UP ON</div>
+    <button type="button" class="dd-item" data-rowact="fudate:${pid}:0">Today <span style="margin-left:auto;color:var(--muted-foreground);font-size:11.5px">${fmt(0)}</span></button>
+    <button type="button" class="dd-item" data-rowact="fudate:${pid}:1">Tomorrow <span style="margin-left:auto;color:var(--muted-foreground);font-size:11.5px">${fmt(1)}</span></button>
+    <button type="button" class="dd-item" data-rowact="fudate:${pid}:3">In 3 days <span style="margin-left:auto;color:var(--muted-foreground);font-size:11.5px">${fmt(3)}</span></button>
+    <button type="button" class="dd-item" data-rowact="fudate:${pid}:7">Next week <span style="margin-left:auto;color:var(--muted-foreground);font-size:11.5px">${fmt(7)}</span></button>
+    <button type="button" class="dd-item" data-rowact="fupick:${pid}">Pick a date...</button>`;
 }
 function pArchBtnHtml(p){
   return isExcluded(p)
@@ -1653,8 +1688,11 @@ function personSubRows(f){
         ${statusDdHtml(p)}
         ${due ? `<span class="pill ${due.cls}">Follow up · ${due.label}</span>` : ''}
       </div></td>
-      <td class="hide-md">${pArchBtnHtml(p)}</td>
-      <td style="text-align:right"><button class="icon-sq" data-openperson="${p.id}" title="Open person">${OPEN_ICON}</button></td>
+      <td class="hide-md"></td>
+      <td style="text-align:right"><div class="row-actions">
+        ${personMenuHtml(p)}
+        <button class="icon-sq" data-openperson="${p.id}" title="Open person">${OPEN_ICON}</button>
+      </div></td>
     </tr>`;
   }).join('') + `
     <tr class="sub-row add-person-row" data-addperson="${f.id}">
@@ -1748,7 +1786,7 @@ function renderPeopleTable(){
         ${statusDdHtml(p)}
         ${due ? `<span class="pill ${due.cls}">Follow up · ${due.label}</span>` : ''}
       </div></td>
-      <td>${pArchBtnHtml(p)}</td>
+      <td><div class="row-actions">${fundArchiveView ? pArchBtnHtml(p) : personMenuHtml(p)}</div></td>
       <td><a class="li-link" href="${esc(personLi(p))}" target="_blank" rel="noopener" title="Open LinkedIn" data-noopen>${LI_ICON}</a></td>
     </tr>`;
   }).join('');
@@ -1784,7 +1822,7 @@ function renderFollowupsTable(){
     </tr>`;
   }).join('');
   emptyState(items.length, 'Nothing due. Send asks and directs and the follow-ups queue here.');
-  $('tableFoot').textContent = 'Direct sends queue a follow-up in 6 days; connector asks in 4. Marking Replied clears the follow-up.';
+  $('tableFoot').textContent = 'Follow-ups are scheduled from the \u22ef menu on any row (or by an auto-rule in Settings). Marking Replied or Done clears them.';
 }
 
 function emptyState(n, msg){
@@ -1883,7 +1921,12 @@ function renderConnectors(){
 }
 
 /* ── Templates view ── */
+const FOLLOW_RULE_OPTS = [
+  { v:'0', l:'Off (manual)' }, { v:'3', l:'After 3 days' }, { v:'5', l:'After 5 days' }, { v:'7', l:'After 7 days' }
+];
 function renderTemplates(){
+  $('setFdDD').innerHTML = ddHtml({ ctx:'setfd', value:String(state.settings.autoFollowDirect || 0), options: FOLLOW_RULE_OPTS });
+  $('setFaDD').innerHTML = ddHtml({ ctx:'setfa', value:String(state.settings.autoFollowAsk || 0), options: FOLLOW_RULE_OPTS });
   $('varSpots').value = state.vars.spots_left || '';
   $('varWeeks').value = state.vars.weeks || '';
   $('varBlurb').value = state.vars.blurb || '';
@@ -2223,9 +2266,14 @@ function openPerson(id){
   };
   $('dSent').onclick = () => {
     st.status = st.status === 'ask' ? 'ask' : 'direct';
-    if (st.status === 'direct') { st.sentAt = Date.now(); st.followUp = Date.now() + 6*DAY; }
+    if (st.status === 'direct') {
+      st.sentAt = Date.now();
+      const rule = +state.settings.autoFollowDirect || 0;
+      if (rule && !st.followUp) st.followUp = Date.now() + rule*DAY;
+    }
     save(); render(); openPerson(id);
-    toast('Marked sent. Follow-up queued in 6 days.');
+    const rule = +state.settings.autoFollowDirect || 0;
+    toast(rule ? `Marked sent. Follow-up auto-scheduled in ${rule} days (rule in Settings).` : 'Marked sent. Schedule a follow-up from the row menu when you want one.');
   };
   showDrawer();
 }
@@ -2434,13 +2482,14 @@ function openConnector(id, preselect){
   $('dSent').onclick = () => {
     st.status = 'asked';
     st.sentAt = Date.now();
-    st.followUp = Date.now() + 4*DAY;
+    const rule = +state.settings.autoFollowAsk || 0;
+    if (rule) st.followUp = Date.now() + rule*DAY; else delete st.followUp;
     included().forEach(pid => {
       const ps = PS(pid);
       if (['none','ask'].includes(ps.status || 'none')) ps.status = 'ask';
     });
     save(); render(); openConnector(id);
-    toast('Marked asked. People moved to "Connector asked"; follow-up in 4 days.');
+    toast('Marked asked. People moved to "Connector asked".' + (rule ? ` Follow-up auto-scheduled in ${rule} days.` : ''));
   };
   showDrawer();
 }
@@ -2496,12 +2545,45 @@ $('tableHead').addEventListener('click', e => {
 document.addEventListener('click', e => {
   const ract = e.target.closest('[data-rowact]');
   if (ract) {
-    document.querySelectorAll('.dd.open').forEach(d => d.classList.remove('open'));
     const i = ract.dataset.rowact.indexOf(':');
     const act = ract.dataset.rowact.slice(0, i), id = ract.dataset.rowact.slice(i + 1);
+    if (act === 'fusub') {
+      // swap this menu to the date submenu, keep it open
+      ract.closest('.dd-menu').innerHTML = followSubHtml(id);
+      return;
+    }
+    document.querySelectorAll('.dd.open').forEach(d => d.classList.remove('open'));
     if (act === 'info') openFund(id);
     if (act === 'addperson') addPersonTo(id);
     if (act === 'remove') removeFund(id);
+    if (act === 'fudate') {
+      const j = id.lastIndexOf(':');
+      const pid = id.slice(0, j), days = +id.slice(j + 1);
+      PS(pid).followUp = Date.now() + days*DAY;
+      save(); render();
+      toast('Follow-up scheduled.');
+    }
+    if (act === 'fupick') {
+      const d = prompt('Follow up on (YYYY-MM-DD):');
+      if (d) {
+        const t = new Date(d + 'T12:00:00').getTime();
+        if (!isNaN(t)) { PS(id).followUp = t; save(); render(); toast('Follow-up scheduled.'); }
+        else toast('Could not read that date. Use YYYY-MM-DD.');
+      }
+    }
+    if (act === 'psent') { setPersonStatus(id, 'direct'); toast('Marked as sent.'); }
+    if (act === 'pdone') {
+      const st = PS(id);
+      delete st.followUp;
+      if (['none','ask','intro','direct'].includes(st.status || 'none')) st.status = 'replied';
+      save(); render();
+      toast('Done - follow-up cleared.');
+    }
+    if (act === 'pbacklog') {
+      const person = PERSON_BY_ID[id];
+      if (person) { delete FS(person.fundId).stage; save(); render(); toast('Fund moved to Backlog.'); }
+    }
+    if (act === 'parchm') { PS(id).excluded = true; save(); render(); toast('Archived.'); }
     return;
   }
   const fact = e.target.closest('[data-fundact]');
