@@ -237,6 +237,23 @@
     }
     .fund-site:hover { color: var(--foreground); text-decoration: underline; text-underline-offset: 2px; }
     .st-backlog { color: var(--text-secondary); }
+    .icon-sq {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; border: 1px solid var(--input); border-radius: 6px;
+      background: var(--background); color: var(--muted-foreground);
+      box-shadow: var(--shadow-sm); padding: 0; flex-shrink: 0;
+    }
+    .icon-sq:hover { background: var(--accent); color: var(--foreground); }
+    .icon-sq--on { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+    .icon-sq--on:hover { background: var(--primary); color: var(--primary-foreground); opacity: 0.85; }
+    .row-actions { display: inline-flex; gap: 6px; align-items: center; justify-content: flex-end; }
+    .add-ava {
+      width: 24px; height: 24px; border: 1px dashed var(--input); border-radius: 9999px;
+      background: none; color: var(--muted-foreground);
+      display: inline-flex; align-items: center; justify-content: center; padding: 0;
+    }
+    .add-ava:hover { color: var(--foreground); border-color: var(--muted-foreground); }
+    .dd--row .dd-menu { left: auto; right: 0; }
     .read-more {
       background: none; border: none; padding: 0; margin-left: 4px;
       font-size: 12px; font-weight: 500; color: var(--foreground);
@@ -1466,6 +1483,9 @@ const ARCHIVE_ICON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none
 const UNARCHIVE_ICON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="m9.5 15 2.5-2.5 2.5 2.5"/><path d="M12 12.5V17"/></svg>`;
 const DONE_ICON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>`;
 const RESTORE_ICON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>`;
+const DOTS_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>`;
+const OPEN_ICON = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>`;
+const PLUS_ICON = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`;
 const CHEV = `<svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 6 6 6-6 6"/></svg>`;
 
 /* Custom dropdown component. ctx routes the change to the right handler. */
@@ -1542,8 +1562,17 @@ function pathCellHtml(p){
 }
 function pArchBtnHtml(p){
   return isExcluded(p)
-    ? `<button class="card-icon-btn" data-prestore="${p.id}" title="Restore to outreach">${RESTORE_ICON}</button>`
-    : `<button class="card-icon-btn" data-parch="${p.id}" title="Archive - hides them from outreach">${ARCHIVE_ICON}</button>`;
+    ? `<button class="icon-sq" data-prestore="${p.id}" title="Restore to outreach">${RESTORE_ICON}</button>`
+    : `<button class="icon-sq" data-parch="${p.id}" title="Archive - hides them from outreach">${ARCHIVE_ICON}</button>`;
+}
+function removeFund(id){
+  const f = FUND_BY_ID[id];
+  if (!f || !confirm('Remove ' + f.name + ' from the list?')) return;
+  if (SEED_FUNDS.some(x => x.id === id)) { if (!state.hiddenFunds.includes(id)) state.hiddenFunds.push(id); }
+  else state.extraFunds = state.extraFunds.filter(x => x.id !== id);
+  save(); rebuild(); render();
+  if (drawerRef && drawerRef.kind === 'fund' && drawerRef.id === id) closeDrawer();
+  toast(f.name + ' removed.');
 }
 
 /* ── Main render ── */
@@ -1625,7 +1654,7 @@ function personSubRows(f){
         ${due ? `<span class="pill ${due.cls}">Follow up · ${due.label}</span>` : ''}
       </div></td>
       <td class="hide-md">${pArchBtnHtml(p)}</td>
-      <td style="text-align:right"><button class="mini-btn" data-openperson="${p.id}">Details</button></td>
+      <td style="text-align:right"><button class="icon-sq" data-openperson="${p.id}" title="Open person">${OPEN_ICON}</button></td>
     </tr>`;
   }).join('') + `
     <tr class="sub-row add-person-row" data-addperson="${f.id}">
@@ -1665,16 +1694,25 @@ function renderFundsTable(){
         ${ddHtml({ ctx:'fstage:'+f.id, value:fStage(f), quiet:true, options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:v,cls:k==='none'?'st-backlog':''})) })}
         ${warmthPillHtml(f)}
       </div></td>
-      <td><div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
+      <td><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
         <span style="font-weight:700">${ppl.length}</span>
+        <button class="add-ava" data-addperson="${f.id}" title="Add person to ${esc(f.name)}">${PLUS_ICON}</button>
         ${tbd ? `<span class="pill pill--needs">${tbd} unmapped</span>` : ''}
       </div></td>
-      <td style="text-align:right;white-space:nowrap">
+      <td style="text-align:right;white-space:nowrap"><div class="row-actions">
         ${fundArchiveView
-          ? `<button class="card-icon-btn" data-fundrestore="${f.id}" title="Restore to pipeline">${RESTORE_ICON}</button>`
-          : `<button class="card-icon-btn" data-funddone="${f.id}" title="Mark done & archive">${DONE_ICON}</button>`}
-        <button class="mini-btn" data-openfundinfo="${f.id}">More info</button>
-      </td>
+          ? `<button class="icon-sq icon-sq--on" data-fundrestore="${f.id}" title="Done - click to restore">${DONE_ICON}</button>`
+          : `<button class="icon-sq" data-funddone="${f.id}" title="Mark done">${DONE_ICON}</button>`}
+        <div class="dd dd--row">
+          <button type="button" class="dd-btn icon-sq" title="More actions">${DOTS_ICON}</button>
+          <div class="dd-menu">
+            <button type="button" class="dd-item" data-rowact="info:${f.id}">More info</button>
+            <button type="button" class="dd-item" data-rowact="addperson:${f.id}">+ Add person</button>
+            <button type="button" class="dd-item" data-rowact="remove:${f.id}" style="color:var(--destructive)">Remove fund</button>
+          </div>
+        </div>
+        <button class="icon-sq" data-openfundinfo="${f.id}" title="Open fund">${OPEN_ICON}</button>
+      </div></td>
     </tr>
     ${open ? personSubRows(f) : ''}`;
   }).join('');
@@ -2308,13 +2346,7 @@ function openFund(id){
       toast('Meeting sync runs on the deployed wiki (needs the transcript store). ' + String(err.message || err));
     }
   };
-  $('dRemoveFund').onclick = () => {
-    if (!confirm('Remove ' + f.name + ' from the list?')) return;
-    if (SEED_FUNDS.some(x => x.id === id)) { if (!state.hiddenFunds.includes(id)) state.hiddenFunds.push(id); }
-    else state.extraFunds = state.extraFunds.filter(x => x.id !== id);
-    save(); rebuild(); render(); closeDrawer();
-    toast(f.name + ' removed.');
-  };
+  $('dRemoveFund').onclick = () => removeFund(id);
   showDrawer();
 }
 
@@ -2462,6 +2494,16 @@ $('tableHead').addEventListener('click', e => {
 
 /* One document-level click handler: custom dropdowns + filter popovers */
 document.addEventListener('click', e => {
+  const ract = e.target.closest('[data-rowact]');
+  if (ract) {
+    document.querySelectorAll('.dd.open').forEach(d => d.classList.remove('open'));
+    const i = ract.dataset.rowact.indexOf(':');
+    const act = ract.dataset.rowact.slice(0, i), id = ract.dataset.rowact.slice(i + 1);
+    if (act === 'info') openFund(id);
+    if (act === 'addperson') addPersonTo(id);
+    if (act === 'remove') removeFund(id);
+    return;
+  }
   const fact = e.target.closest('[data-fundact]');
   if (fact) {
     document.querySelectorAll('.dd.open').forEach(d => d.classList.remove('open'));
@@ -2546,7 +2588,7 @@ $('tableBody').addEventListener('click', e => {
     FS(fdone.dataset.funddone).archived = true;
     selected.delete(fdone.dataset.funddone);
     save(); render();
-    toast('Done. Archived - use View Archive to restore.');
+    toast('Done \u2713 - moved to the archive. View Archive to bring it back.');
     return;
   }
   const frestore = e.target.closest('[data-fundrestore]');
