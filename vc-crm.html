@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>SpotsNow — Raise</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=3" />
+  <link rel="icon" type="image/png" href="/favicon.png?v=3" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --dark: #0e1323;
+      --grey-1: #707481;
+      --text-primary: #252733;
+      --text-secondary: #5a5f6e;
+      --border: #dee0e4;
+      --border-light: #e8e8e8;
+      --white: #ffffff;
+      --coral: #ff6b6b;
+      --btn-dark: #111111;
+      --green-bg: #d6f0e0;
+      --green-text: #0d6832;
+      --amber-bg: #fdf0d5;
+      --amber-text: #8a6100;
+      --red-bg: #fde3e3;
+      --red-text: #b42318;
+      --blue-bg: #e3edfd;
+      --blue-text: #1d4fb4;
+      --pill-bg: #f3f4f6;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px; line-height: 1.4;
+      color: var(--dark); background: #f5f5f3;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font-family: inherit; cursor: pointer; }
+    input, select, textarea { font-family: inherit; }
+
+    /* ── Top bar ── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 200;
+      height: 56px; display: flex; align-items: center; gap: 16px;
+      padding: 0 28px; background: var(--white);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .top-bar__logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 800; font-size: 15px; color: var(--dark);
+      text-decoration: none; flex-shrink: 0; letter-spacing: -0.3px;
+    }
+    .logo-mark {
+      width: 22px; height: 22px; border-radius: 6px;
+      background: var(--coral); display: flex; align-items: center; justify-content: center;
+    }
+    .logo-mark svg { display: block; }
+    .top-bar__title { font-size: 13px; font-weight: 600; color: var(--grey-1); }
+    .top-bar__spacer { flex: 1; }
+    .login-btn {
+      padding: 6px 14px; background: none;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; font-weight: 600; color: var(--text-primary);
+      text-decoration: none;
+    }
+    .login-btn:hover { background: var(--pill-bg); }
+
+    /* ── Page card ── */
+    .page-card {
+      background: var(--white);
+      max-width: 1136px; margin: 24px auto 0; width: calc(100% - 48px);
+      border-radius: 20px;
+      border: 1px solid var(--border-light);
+      overflow: hidden;
+    }
+    .page-card__inner { padding: 32px 36px 0; }
+
+    .crm-header { display: flex; align-items: flex-start; gap: 36px; margin-bottom: 24px; }
+    .crm-header__info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+    .crm-header__title { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.6px; color: var(--dark); line-height: 1.1; }
+    .crm-header__desc { margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 520px; }
+
+    .crm-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex-shrink: 0; width: 290px; }
+    .stat-box { border-radius: 12px; padding: 14px 18px; display: flex; flex-direction: column; gap: 5px; }
+    .stat-box--light { background: #f8f8f8; border: 1px solid var(--border-light); }
+    .stat-box--dark  { background: var(--btn-dark); }
+    .stat-box__label { font-size: 10px; font-weight: 600; letter-spacing: 0.2px; }
+    .stat-box--light .stat-box__label { color: var(--grey-1); }
+    .stat-box--dark  .stat-box__label { color: rgba(255,255,255,0.55); }
+    .stat-box__value { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
+    .stat-box--light .stat-box__value { color: var(--dark); }
+    .stat-box--dark  .stat-box__value { color: white; }
+    .stat-box__value .due-red { color: var(--coral); }
+
+    /* Pitch strip */
+    .pitch-strip {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--btn-dark); border-radius: 12px;
+      padding: 12px 18px; margin-bottom: 24px;
+    }
+    .pitch-strip__label {
+      flex-shrink: 0; font-size: 9px; font-weight: 700; letter-spacing: 0.8px;
+      text-transform: uppercase; color: rgba(255,255,255,0.45);
+    }
+    .pitch-strip__text { font-size: 12px; color: rgba(255,255,255,0.85); line-height: 1.5; }
+    .pitch-strip__text b { color: #fff; }
+
+    /* Tabs */
+    .tab-row { display: flex; gap: 4px; border-bottom: 1px solid var(--border-light); }
+    .tab {
+      background: none; border: none; padding: 10px 14px 12px;
+      font-size: 13px; font-weight: 600; color: var(--grey-1);
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .tab:hover { color: var(--dark); }
+    .tab.active { color: var(--dark); border-bottom-color: var(--dark); }
+    .tab .count {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+      background: var(--pill-bg); color: var(--text-secondary);
+      font-size: 10px; font-weight: 700;
+    }
+    .tab .count.hot { background: var(--coral); color: #fff; }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      padding: 16px 36px;
+    }
+    .search-box {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--pill-bg); border-radius: 9px; padding: 8px 12px;
+      width: 230px;
+    }
+    .search-box input { background: none; border: none; outline: none; font-size: 13px; width: 100%; color: var(--dark); }
+    .search-box input::placeholder { color: var(--grey-1); }
+
+    .filter-chip {
+      position: relative;
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--white); border: 1px solid var(--border); border-radius: 9px;
+      padding: 7px 12px; font-size: 12px; font-weight: 600; color: var(--text-primary);
+    }
+    .filter-chip:hover { background: var(--pill-bg); }
+    .filter-chip.on { border-color: var(--dark); background: var(--dark); color: #fff; }
+    .filter-chip .n {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px;
+      background: var(--coral); color: #fff; font-size: 9px; font-weight: 700;
+    }
+    .clear-filters { background: none; border: none; font-size: 12px; font-weight: 600; color: var(--grey-1); text-decoration: underline; }
+    .toolbar__right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .sort-select {
+      border: 1px solid var(--border); border-radius: 9px; background: var(--white);
+      font-size: 12px; font-weight: 600; color: var(--text-primary); padding: 7px 10px; outline: none;
+    }
+
+    /* Filter popover */
+    .popover {
+      position: absolute; top: calc(100% + 6px); left: 0; z-index: 300;
+      background: var(--white); border: 1px solid var(--border); border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(14,19,35,0.12);
+      padding: 8px; min-width: 190px; display: none;
+    }
+    .popover.open { display: block; }
+    .popover label {
+      display: flex; align-items: center; gap: 9px;
+      padding: 7px 10px; border-radius: 8px; font-size: 12.5px; font-weight: 500;
+      color: var(--text-primary); cursor: pointer; user-select: none;
+    }
+    .popover label:hover { background: var(--pill-bg); }
+    .popover input[type=checkbox] { accent-color: var(--dark); width: 14px; height: 14px; margin: 0; }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+      text-transform: uppercase; color: var(--grey-1);
+      padding: 10px 12px; border-top: 1px solid var(--border-light);
+      border-bottom: 1px solid var(--border-light);
+      white-space: nowrap; background: #fafafa;
+    }
+    thead th:first-child, tbody td:first-child { padding-left: 36px; width: 34px; }
+    thead th:last-child, tbody td:last-child { padding-right: 36px; }
+    tbody td { padding: 12px; border-bottom: 1px solid var(--border-light); vertical-align: middle; font-size: 13px; }
+    tbody tr { cursor: pointer; }
+    tbody tr:hover { background: #fafafa; }
+    tbody tr.selected { background: #f6f8ff; }
+    tbody tr:last-child td { border-bottom: none; }
+    .row-check { accent-color: var(--dark); width: 15px; height: 15px; cursor: pointer; }
+
+    .fund-cell { display: flex; flex-direction: column; gap: 2px; min-width: 170px; }
+    .fund-name { font-weight: 700; color: var(--dark); display: flex; align-items: center; gap: 6px; }
+    .fund-sub { font-size: 11px; color: var(--grey-1); }
+    .target-star { color: var(--coral); font-size: 12px; }
+
+    .pill {
+      display: inline-flex; align-items: center; height: 20px; padding: 0 8px;
+      border-radius: 5px; font-size: 10px; font-weight: 700; white-space: nowrap;
+    }
+    .pill--grade-a  { background: var(--green-bg); color: var(--green-text); }
+    .pill--grade-b  { background: var(--amber-bg); color: var(--amber-text); }
+    .pill--grade-c  { background: var(--pill-bg); color: var(--grey-1); }
+    .pill--type     { background: var(--pill-bg); color: var(--text-secondary); }
+    .pill--sector   { background: var(--pill-bg); color: var(--text-secondary); font-weight: 600; }
+    .pill--status-none    { background: var(--pill-bg); color: var(--grey-1); }
+    .pill--status-targeted{ background: var(--blue-bg); color: var(--blue-text); }
+    .pill--status-draft   { background: var(--amber-bg); color: var(--amber-text); }
+    .pill--status-sent    { background: var(--blue-bg); color: var(--blue-text); }
+    .pill--status-replied { background: var(--green-bg); color: var(--green-text); }
+    .pill--status-meeting { background: var(--green-bg); color: var(--green-text); }
+    .pill--status-passed  { background: var(--red-bg); color: var(--red-text); }
+    .pill--due { background: var(--amber-bg); color: var(--amber-text); }
+    .pill--overdue { background: var(--red-bg); color: var(--red-text); }
+
+    .sector-cell { display: flex; gap: 4px; flex-wrap: wrap; max-width: 190px; }
+
+    .conn-cell { min-width: 150px; }
+    .conn-strength { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
+    .conn-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .conn-dot--strong { background: #16a34a; }
+    .conn-dot--warm   { background: #eab308; }
+    .conn-dot--cold   { background: #cbd5e1; }
+    .conn-sub { font-size: 11px; color: var(--grey-1); margin-top: 2px; }
+    .scan-btn {
+      height: 26px; padding: 0 10px; background: var(--white);
+      border: 1px solid var(--border); border-radius: 7px;
+      font-size: 11px; font-weight: 600; color: var(--text-primary);
+    }
+    .scan-btn:hover { background: var(--pill-bg); }
+    .scan-btn.scanning { color: var(--grey-1); pointer-events: none; }
+
+    .empty-state { padding: 56px 36px; text-align: center; color: var(--grey-1); font-size: 13px; }
+    .table-foot { padding: 12px 36px 20px; font-size: 11px; color: var(--grey-1); }
+
+    /* ── Bulk bar ── */
+    .bulk-bar {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      z-index: 400; display: flex; align-items: center; gap: 10px;
+      background: var(--btn-dark); border-radius: 14px;
+      padding: 10px 12px 10px 18px;
+      box-shadow: 0 16px 40px rgba(14,19,35,0.35);
+      transition: transform 0.2s ease; opacity: 0; pointer-events: none;
+    }
+    .bulk-bar.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+    .bulk-bar__count { font-size: 13px; font-weight: 700; color: #fff; margin-right: 4px; white-space: nowrap; }
+    .bulk-btn {
+      height: 34px; padding: 0 14px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.1); color: #fff; font-size: 12px; font-weight: 600; white-space: nowrap;
+    }
+    .bulk-btn:hover { background: rgba(255,255,255,0.2); }
+    .bulk-btn--coral { background: var(--coral); border-color: var(--coral); }
+    .bulk-btn--coral:hover { background: #ff5252; }
+    .bulk-bar__close { background: none; border: none; color: rgba(255,255,255,0.5); font-size: 16px; padding: 0 4px; }
+    .bulk-bar__close:hover { color: #fff; }
+
+    /* ── Drawer ── */
+    .drawer-overlay {
+      position: fixed; inset: 0; z-index: 500; background: rgba(14,19,35,0.35);
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .drawer-overlay.show { opacity: 1; pointer-events: auto; }
+    .drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; z-index: 501;
+      width: 480px; max-width: 94vw; background: var(--white);
+      box-shadow: -16px 0 48px rgba(14,19,35,0.18);
+      transform: translateX(100%); transition: transform 0.25s ease;
+      display: flex; flex-direction: column;
+    }
+    .drawer.show { transform: translateX(0); }
+    .drawer__head {
+      padding: 24px 28px 18px; border-bottom: 1px solid var(--border-light);
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .drawer__head-info { flex: 1; min-width: 0; }
+    .drawer__title { margin: 0 0 4px; font-size: 20px; font-weight: 800; letter-spacing: -0.4px; }
+    .drawer__meta { font-size: 12px; color: var(--grey-1); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .drawer__close { background: none; border: none; font-size: 20px; color: var(--grey-1); padding: 2px 6px; }
+    .drawer__close:hover { color: var(--dark); }
+    .drawer__body { flex: 1; overflow-y: auto; padding: 20px 28px 40px; display: flex; flex-direction: column; gap: 20px; }
+
+    .d-section { display: flex; flex-direction: column; gap: 10px; }
+    .d-label { font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--grey-1); }
+    .d-row { display: flex; align-items: center; gap: 10px; }
+
+    .grade-card {
+      border: 1px solid var(--border-light); border-radius: 14px; padding: 16px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .grade-card__top { display: flex; align-items: center; gap: 12px; }
+    .grade-big {
+      width: 52px; height: 52px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 800;
+    }
+    .grade-big.a { background: var(--green-bg); color: var(--green-text); }
+    .grade-big.b { background: var(--amber-bg); color: var(--amber-text); }
+    .grade-big.c { background: var(--pill-bg); color: var(--grey-1); }
+    .grade-card__score { font-size: 13px; font-weight: 700; }
+    .grade-card__note { font-size: 11.5px; color: var(--text-secondary); line-height: 1.5; }
+    .dim-row { display: flex; align-items: center; gap: 10px; }
+    .dim-name { width: 118px; flex-shrink: 0; font-size: 11px; font-weight: 600; color: var(--text-secondary); }
+    .dim-track { flex: 1; height: 6px; border-radius: 3px; background: var(--pill-bg); overflow: hidden; }
+    .dim-fill { height: 100%; border-radius: 3px; background: var(--dark); }
+    .dim-val { width: 26px; text-align: right; font-size: 11px; font-weight: 700; color: var(--dark); }
+
+    .info-card { border: 1px solid var(--border-light); border-radius: 14px; padding: 14px 16px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; }
+    .info-card b { color: var(--dark); }
+
+    .partner-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border-light); }
+    .partner-row:last-child { border-bottom: none; }
+    .partner-ava {
+      width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+      background: var(--pill-bg); color: var(--text-secondary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700;
+    }
+    .partner-name { font-size: 13px; font-weight: 600; }
+
+    .conn-card { border: 1px solid var(--border-light); border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+    .conn-card__main { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
+    .conn-card__sub { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+    .msg-area {
+      width: 100%; min-height: 200px; resize: vertical;
+      border: 1px solid var(--border); border-radius: 12px; padding: 14px;
+      font-size: 13px; line-height: 1.6; color: var(--dark); outline: none;
+    }
+    .msg-area:focus { border-color: var(--dark); }
+    .btn-primary {
+      height: 38px; padding: 0 16px; border: none; border-radius: 9px;
+      background: var(--btn-dark); color: #fff; font-size: 12.5px; font-weight: 700;
+    }
+    .btn-primary:hover { background: #000; }
+    .btn-primary:disabled { opacity: 0.5; cursor: default; }
+    .btn-primary--coral { background: var(--coral); }
+    .btn-primary--coral:hover { background: #ff5252; }
+    .btn-ghost {
+      height: 38px; padding: 0 14px; border: 1px solid var(--border); border-radius: 9px;
+      background: var(--white); color: var(--text-primary); font-size: 12.5px; font-weight: 600;
+    }
+    .btn-ghost:hover { background: var(--pill-bg); }
+    .ai-hint { font-size: 11px; color: var(--grey-1); display: flex; align-items: center; gap: 6px; }
+    .ai-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--coral); animation: pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .status-select {
+      border: 1px solid var(--border); border-radius: 9px; background: var(--white);
+      font-size: 12px; font-weight: 600; color: var(--text-primary); padding: 7px 10px; outline: none;
+    }
+    .notes-area {
+      width: 100%; min-height: 70px; resize: vertical;
+      border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px;
+      font-size: 12.5px; line-height: 1.5; color: var(--dark); outline: none;
+    }
+    .notes-area:focus { border-color: var(--dark); }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 600;
+      background: var(--btn-dark); color: #fff; font-size: 13px; font-weight: 600;
+      border-radius: 10px; padding: 12px 18px;
+      transform: translateY(80px); opacity: 0; transition: all 0.25s;
+      box-shadow: 0 12px 32px rgba(14,19,35,0.3);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    @media (max-width: 860px) {
+      .crm-header { flex-direction: column; gap: 20px; }
+      .crm-stats { width: 100%; }
+      .hide-md { display: none; }
+      thead th:first-child, tbody td:first-child { padding-left: 20px; }
+      thead th:last-child, tbody td:last-child { padding-right: 20px; }
+      .toolbar { padding: 14px 20px; }
+      .page-card__inner { padding: 24px 20px 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <a class="top-bar__logo" href="/raise">
+      <span class="logo-mark">
+        <svg width="12" height="12" viewBox="0 0 78.1 73.2" fill="none"><path d="M78.078 1.79314L75.3917 22.0607C75.3043 22.6722 74.9112 23.1527 74.3434 23.3492C74.1686 23.4147 73.9939 23.4584 73.8192 23.4584C73.4042 23.4584 73.0111 23.3055 72.7272 23.0216L66.6994 17.3214L39.1154 47.1767C38.351 48.0066 37.2809 48.4652 36.2107 48.4652C35.5774 48.4652 34.944 48.3123 34.3543 48.0066L18.6514 39.7074C16.7076 38.6809 15.965 36.2785 16.9915 34.3347C18.018 32.391 20.3986 31.6484 22.3423 32.6749L35.359 39.5545L60.9336 11.8614L55.3207 6.55425C54.9058 6.13929 54.731 5.52778 54.9058 4.95994C55.0586 4.3921 55.5391 3.95529 56.1288 3.84609L76.2216 0.0240946C76.7239 -0.0632654 77.2262 0.0896158 77.5975 0.439056C77.9688 0.788496 78.1435 1.29082 78.078 1.79314ZM0.0218405 38.4188C0.0218405 57.5725 15.5501 73.1007 34.7038 73.1007C53.8574 73.1007 69.3857 57.5725 69.3857 38.4188C69.3857 33.7887 68.4684 29.3771 66.8304 25.3585L59.0772 33.7451C59.3611 35.252 59.514 36.8245 59.514 38.4188C59.514 52.1343 48.3974 63.2509 34.6819 63.2509C20.9664 63.2509 9.84984 52.1343 9.84984 38.4188C9.84984 24.7033 20.9664 13.5867 34.6819 13.5867C39.5959 13.5867 44.1823 15.0282 48.048 17.4961L54.8184 10.1579C49.14 6.09562 42.1949 3.71506 34.6819 3.71506C15.5282 3.71506 0 19.2433 0 38.397L0.0218405 38.4188Z" fill="#fff"/></svg>
+      </span>
+      SpotsNow
+    </a>
+    <span class="top-bar__title">Raise · VC outreach</span>
+    <div class="top-bar__spacer"></div>
+    <a class="login-btn" href="/api/vc-login?signout=1">Lock</a>
+  </div>
+
+  <div class="page-card">
+    <div class="page-card__inner">
+      <div class="crm-header">
+        <div class="crm-header__info">
+          <h1 class="crm-header__title">Seed round — VC CRM</h1>
+          <p class="crm-header__desc">Every fund graded against the SpotsNow pitch. Filter, pick targets, check how connected we are on LinkedIn, draft a personalized intro, and stay on top of follow-ups.</p>
+        </div>
+        <div class="crm-stats">
+          <div class="stat-box stat-box--light"><span class="stat-box__label">FUNDS TRACKED</span><span class="stat-box__value" id="statTotal">0</span></div>
+          <div class="stat-box stat-box--light"><span class="stat-box__label">A-GRADE FITS</span><span class="stat-box__value" id="statAGrade">0</span></div>
+          <div class="stat-box stat-box--light"><span class="stat-box__label">ON TARGET LIST</span><span class="stat-box__value" id="statTargets">0</span></div>
+          <div class="stat-box stat-box--dark"><span class="stat-box__label">FOLLOW-UPS DUE</span><span class="stat-box__value" id="statFollowups">0</span></div>
+        </div>
+      </div>
+
+      <div class="pitch-strip">
+        <span class="pitch-strip__label">Graded against</span>
+        <span class="pitch-strip__text"><b>SpotsNow seed pitch</b> — the default marketplace to advertise with long-form media creators. Brands research, buy, and measure host-read podcast campaigns in minutes instead of weeks, in a $32B market still bought over email. Grades weigh thesis fit, stage, check size, portfolio adjacency, and reachability.</span>
+      </div>
+
+      <div class="tab-row" id="tabRow">
+        <button class="tab active" data-tab="all">All VCs <span class="count" id="cntAll">0</span></button>
+        <button class="tab" data-tab="targets">Target list <span class="count" id="cntTargets">0</span></button>
+        <button class="tab" data-tab="outreach">Outreach <span class="count" id="cntOutreach">0</span></button>
+        <button class="tab" data-tab="followups">Follow-ups <span class="count" id="cntFollowups">0</span></button>
+      </div>
+    </div>
+
+    <div class="toolbar" id="toolbar">
+      <div class="search-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="color:var(--grey-1)"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="searchInput" placeholder="Search funds, partners, thesis..." />
+      </div>
+      <div id="filterChips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      <button class="clear-filters" id="clearFilters" style="display:none">Clear</button>
+      <div class="toolbar__right">
+        <select class="sort-select" id="sortSelect">
+          <option value="grade">Sort: Best fit</option>
+          <option value="name">Sort: Fund A–Z</option>
+          <option value="check">Sort: Check size</option>
+          <option value="conn">Sort: Connection</option>
+          <option value="due">Sort: Follow-up due</option>
+        </select>
+        <button class="btn-ghost" style="height:32px;font-size:12px" id="exportBtn">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th><input type="checkbox" class="row-check" id="checkAll" /></th>
+            <th>Fund</th>
+            <th>Fit</th>
+            <th>Check</th>
+            <th class="hide-md">Focus</th>
+            <th>Connection</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none"></div>
+    </div>
+    <div class="table-foot" id="tableFoot"></div>
+  </div>
+  <div style="height:60px"></div>
+
+  <!-- Bulk bar -->
+  <div class="bulk-bar" id="bulkBar">
+    <span class="bulk-bar__count" id="bulkCount">0 selected</span>
+    <button class="bulk-btn bulk-btn--coral" id="bulkTarget">Add to target list</button>
+    <button class="bulk-btn" id="bulkUntarget">Remove from targets</button>
+    <button class="bulk-btn" id="bulkScan">Scan LinkedIn</button>
+    <button class="bulk-bar__close" id="bulkClear" title="Clear selection">✕</button>
+  </div>
+
+  <!-- Drawer -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer__head">
+      <div class="drawer__head-info">
+        <h2 class="drawer__title" id="dTitle"></h2>
+        <div class="drawer__meta" id="dMeta"></div>
+      </div>
+      <button class="drawer__close" id="drawerClose">✕</button>
+    </div>
+    <div class="drawer__body" id="drawerBody"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   DATA — seed list of funds relevant to a seed-stage podcast-ad
+   marketplace. Check sizes / focus are best-public-knowledge seed
+   data: verify before wiring real outreach, and swap in the master
+   list (CSV import) when ready.
+   dims: thesis / stage / check / portfolio / geo, 0–100.
+   conn: LinkedIn seed — deg (1st/2nd/3rd), mutuals, warm path.
+   ══════════════════════════════════════════════════════════════ */
+const PITCH_DIMS = [
+  ['thesis',    'Thesis fit',        0.30],
+  ['stage',     'Stage fit',         0.25],
+  ['check',     'Check size fit',    0.20],
+  ['portfolio', 'Portfolio adjacency', 0.15],
+  ['geo',       'Reachability',      0.10]
+];
+
+const FUNDS = [
+  { id:'fjlabs', name:'FJ Labs', type:'Seed', region:'New York', check:[250,500], sectors:['Marketplaces'],
+    partners:['Fabrice Grinda','Jose Marin'], site:'fjlabs.com',
+    looking:'Marketplaces, exclusively. Thousands of marketplace investments; they move fast, follow strong leads, and care about take rate, liquidity strategy, and unit economics.',
+    hook:'You have seen more marketplace models than anyone, so you will read the shape of this one fast.',
+    why:'We are a classic managed-to-self-serve marketplace play in a category that never got one.',
+    dims:{thesis:98,stage:92,check:95,portfolio:95,geo:80},
+    conn:{deg:2,mutuals:12,path:'Eric Bahn (Hustle Fund)'} },
+
+  { id:'nfx', name:'NFX', type:'Pre-seed', region:'SF Bay Area', check:[1000,3000], sectors:['Marketplaces','Network effects'],
+    partners:['James Currier','Pete Flint'], site:'nfx.com',
+    looking:'Pre-seed and seed companies with network effects. Marketplaces are their home turf; they publish the playbooks everyone else quotes.',
+    hook:'SpotsNow is a two-sided liquidity story with a data moat that compounds per campaign, which is squarely your lane.',
+    why:'Every booked campaign makes our pricing and performance data harder to replicate, which is the network-effects story you back.',
+    dims:{thesis:96,stage:95,check:90,portfolio:90,geo:75},
+    conn:{deg:2,mutuals:9,path:'Matt Patterson (Brickyard)'} },
+
+  { id:'aperiam', name:'Aperiam Ventures', type:'Seed', region:'New York', check:[250,750], sectors:['Adtech','Media'],
+    partners:['Eric Franchi'], site:'aperiam.vc',
+    looking:'Early-stage advertising and media tech, run by adtech operators. They want founders fixing broken ad workflows they have lived themselves.',
+    hook:'You back operators fixing ad workflows, and we live the host-read buying mess every day.',
+    why:'Host-read is the last big ad channel with no real buying platform, which is your exact thesis.',
+    dims:{thesis:98,stage:90,check:92,portfolio:92,geo:82},
+    conn:{deg:2,mutuals:7,path:'Wally Stefanides (SpotsNow)'} },
+
+  { id:'mathcapital', name:'MathCapital', type:'Seed', region:'New York', check:[250,1000], sectors:['Adtech','Madtech'],
+    partners:['Partner team'], site:'math.capital',
+    looking:'Madtech infrastructure, backed by the ex-MediaMath network. Deep programmatic DNA; they get why a channel without a transaction layer is an opportunity.',
+    hook:'Host-read podcast ads are the last channel still bought like it is 2005, which felt like a MathCapital conversation.',
+    why:'We are building the transaction layer for a channel programmatic never cracked.',
+    dims:{thesis:95,stage:88,check:90,portfolio:85,geo:70},
+    conn:{deg:3,mutuals:3,path:null} },
+
+  { id:'progress', name:'Progress Ventures', type:'Seed', region:'Boston', check:[500,2000], sectors:['Media','Adtech','Data'],
+    partners:['Nick MacShane'], site:'progressventures.com',
+    looking:'B2B media, adtech, and data companies at seed and A. Operator-heavy team out of media investment banking.',
+    hook:'You sit at the intersection of media and adtech B2B, which is exactly where we are building.',
+    why:'We monetize the workflow between brands and long-form audio, a wedge into the broader media buying stack.',
+    dims:{thesis:90,stage:85,check:82,portfolio:80,geo:68},
+    conn:{deg:3,mutuals:2,path:null} },
+
+  { id:'susa', name:'Susa Ventures', type:'Seed', region:'SF Bay Area', check:[500,1500], sectors:['B2B','Data moats'],
+    partners:['Chad Byers'], site:'susaventures.com',
+    looking:'Seed companies with compounding moats, especially proprietary data. They write about data network effects constantly.',
+    hook:'Your data-moat thesis is basically our pitch: every campaign booked feeds pricing and performance data nobody else has.',
+    why:'The moat is the transaction data, and it compounds with every buy on the platform.',
+    dims:{thesis:84,stage:88,check:85,portfolio:78,geo:72},
+    conn:{deg:2,mutuals:5,path:'Eric Bahn (Hustle Fund)'} },
+
+  { id:'slow', name:'Slow Ventures', type:'Seed', region:'SF Bay Area', check:[500,1500], sectors:['Creator economy','Consumer'],
+    partners:['Sam Lessin'], site:'slow.co',
+    looking:'Contrarian seed bets; they have gone deepest on creators as investable businesses. Long-form creators monetizing better is core to their worldview.',
+    hook:'You have argued creators are the new small businesses. We are the rails for the biggest revenue line long-form creators have.',
+    why:'Host-read ads are how long-form creators actually get paid, and we make that market liquid.',
+    dims:{thesis:80,stage:88,check:85,portfolio:82,geo:75},
+    conn:{deg:2,mutuals:6,path:'Eric Bahn (Hustle Fund)'} },
+
+  { id:'mac', name:'MaC Venture Capital', type:'Seed', region:'Los Angeles', check:[500,2000], sectors:['Media','Culture','Consumer'],
+    partners:['Marlon Nichols'], site:'macventurecapital.com',
+    looking:'Seed companies at the intersection of culture, media, and technology. Strong on where attention shifts before the rest of the market sees it.',
+    hook:'You invest where culture moves attention, and attention has moved to long-form audio faster than ad dollars have.',
+    why:'Ad spend always lags attention, and we are the platform that closes that gap for podcasts.',
+    dims:{thesis:80,stage:88,check:82,portfolio:78,geo:70},
+    conn:{deg:3,mutuals:2,path:null} },
+
+  { id:'lererhippeau', name:'Lerer Hippeau', type:'Seed', region:'New York', check:[500,1500], sectors:['Consumer','Media','B2B'],
+    partners:['Ben Lerer'], site:'lererhippeau.com',
+    looking:'NYC seed fund with deep media DNA (BuzzFeed, Group Nine roots). They understand ad-supported media economics natively.',
+    hook:'You have built and backed ad-supported media businesses, so you know exactly why host-read buying being stuck in email is a problem worth solving.',
+    why:'We take the highest-performing ad format in audio and make it buyable like search.',
+    dims:{thesis:82,stage:88,check:85,portfolio:80,geo:78},
+    conn:{deg:3,mutuals:4,path:null} },
+
+  { id:'craft', name:'Craft Ventures', type:'Seed', region:'SF Bay Area', check:[1000,3000], sectors:['SaaS','Marketplaces'],
+    partners:['Jeff Fluhr'], site:'craftventures.com',
+    looking:'SaaS and marketplace companies at seed and A. Jeff Fluhr founded StubHub, so two-sided ticket-style liquidity problems are home turf.',
+    hook:'StubHub made an illiquid inventory market liquid. We are doing the same for host-read podcast inventory.',
+    why:'Same marketplace physics as ticketing: perishable inventory, fragmented sellers, buyers who want speed and trust.',
+    dims:{thesis:85,stage:82,check:80,portfolio:85,geo:72},
+    conn:{deg:3,mutuals:3,path:null} },
+
+  { id:'versionone', name:'Version One Ventures', type:'Seed', region:'Remote', check:[500,1000], sectors:['Marketplaces','Network effects'],
+    partners:['Boris Wertz'], site:'versionone.vc',
+    looking:'Marketplaces and network-effect businesses at seed. Boris literally wrote the guide to marketplaces most founders read.',
+    hook:'Your marketplace guide shaped how we think about liquidity, so this note felt overdue.',
+    why:'We concentrate fragmented supply (shows) and demand (brands) into one liquid market with real measurement.',
+    dims:{thesis:88,stage:85,check:80,portfolio:82,geo:70},
+    conn:{deg:3,mutuals:2,path:null} },
+
+  { id:'precursor', name:'Precursor Ventures', type:'Pre-seed', region:'SF Bay Area', check:[100,500], sectors:['Generalist'],
+    partners:['Charles Hudson'], site:'precursorvc.com',
+    looking:'People-first pre-seed. Charles backs founders before the metrics exist and is one of the most accessible institutional pre-seed investors.',
+    hook:'You back founders before the graphs go up and to the right, and we are early but moving fast.',
+    why:'Classic Precursor shape: big unglamorous market, working product, founder who has lived the problem.',
+    dims:{thesis:70,stage:95,check:90,portfolio:72,geo:75},
+    conn:{deg:2,mutuals:8,path:'Eric Bahn (Hustle Fund)'} },
+
+  { id:'betaworks', name:'Betaworks', type:'Seed', region:'New York', check:[250,750], sectors:['Media','AI','Audio'],
+    partners:['John Borthwick'], site:'betaworks.com',
+    looking:'Media and AI at seed, with repeated bets on audio (they ran audio-focused Camp cohorts). Like products at the media/AI intersection.',
+    hook:'You ran an entire camp on audio, so you already believe what we are betting on.',
+    why:'We pair an audio marketplace with an AI layer for campaign creation and measurement.',
+    dims:{thesis:74,stage:80,check:80,portfolio:82,geo:76},
+    conn:{deg:3,mutuals:3,path:null} },
+
+  { id:'night', name:'Night Ventures', type:'Solo GP / Angel', region:'Los Angeles', check:[100,500], sectors:['Creator economy'],
+    partners:['Reed Duchscher'], site:'night.co',
+    looking:'Creator-economy investments from the team behind Night (MrBeast’s management company). They know creator monetization from the inside.',
+    hook:'You manage the biggest creators in the world, so you know host-read revenue is the engine for long-form.',
+    why:'We are the buying platform for the ad format your talent already lives on.',
+    dims:{thesis:78,stage:82,check:85,portfolio:80,geo:68},
+    conn:{deg:3,mutuals:1,path:null} },
+
+  { id:'advancit', name:'Advancit Capital', type:'Seed', region:'New York', check:[250,1000], sectors:['Media','Entertainment'],
+    partners:['Partner team'], site:'advancitcapital.com',
+    looking:'Early-stage media, entertainment, and technology. Deep ties into traditional media ownership; strategic reach into content businesses.',
+    hook:'You sit closer to content owners than almost any early-stage fund, and our supply side is content owners.',
+    why:'We give shows and networks a storefront, so a media-native cap table helps both sides of our market.',
+    dims:{thesis:78,stage:82,check:82,portfolio:78,geo:72},
+    conn:{deg:3,mutuals:2,path:null} },
+
+  { id:'bdmi', name:'BDMI', type:'Strategic / CVC', region:'New York', check:[500,2000], sectors:['Digital media'],
+    partners:['Partner team'], site:'bdmifund.com',
+    looking:'Bertelsmann’s digital media fund. Early-stage digital media and media-tech; strategic value through one of the largest media groups in the world.',
+    hook:'You invest where media and technology meet for one of the biggest media companies on earth.',
+    why:'A media-strategic investor helps us sign networks faster, and podcast ad infrastructure fits your mandate.',
+    dims:{thesis:78,stage:78,check:80,portfolio:76,geo:70},
+    conn:{deg:3,mutuals:2,path:null} },
+
+  { id:'greycroft', name:'Greycroft', type:'Multi-stage', region:'New York', check:[1000,3000], sectors:['Consumer','Media'],
+    partners:['Partner team'], site:'greycroft.com',
+    looking:'Multi-stage with real media heritage (Alan Patricof). Seed checks happen when the team and market story are sharp.',
+    hook:'Greycroft has media in its DNA, and this is a media infrastructure story.',
+    why:'A fund that understands both ad markets and consumer attention is the right partner for this round and the next.',
+    dims:{thesis:76,stage:72,check:80,portfolio:80,geo:74},
+    conn:{deg:3,mutuals:4,path:null} },
+
+  { id:'eniac', name:'Eniac Ventures', type:'Pre-seed', region:'New York', check:[500,1500], sectors:['B2B','Generalist'],
+    partners:['Nihal Mehta','Hadley Harris'], site:'eniac.vc',
+    looking:'Lead pre-seed checks in technical founders. Nihal came up through mobile advertising, so ad infrastructure is familiar ground.',
+    hook:'Nihal, you built in mobile ads when that market was maturing. Podcast ads are at that exact moment now.',
+    why:'Same playbook as mobile a decade ago: attention arrived first, infrastructure is arriving now, and we are that infrastructure.',
+    dims:{thesis:74,stage:88,check:85,portfolio:74,geo:74},
+    conn:{deg:3,mutuals:3,path:null} },
+
+  { id:'uncork', name:'Uncork Capital', type:'Seed', region:'SF Bay Area', check:[1000,2500], sectors:['SaaS','Marketplaces'],
+    partners:['Jeff Clavier','Andy McLoughlin'], site:'uncorkcapital.com',
+    looking:'Classic seed: SaaS and marketplaces, first institutional check, hands-on for the messy early years.',
+    hook:'You have seeded marketplaces through the messy zero-to-liquidity years, which is exactly where we are.',
+    why:'We fit the Uncork pattern: unsexy market, real revenue mechanics, software eating a manual workflow.',
+    dims:{thesis:78,stage:85,check:78,portfolio:75,geo:72},
+    conn:{deg:3,mutuals:3,path:null} },
+
+  { id:'bowery', name:'Bowery Capital', type:'Seed', region:'New York', check:[500,1500], sectors:['B2B SaaS','Vertical software'],
+    partners:['Michael Brown'], site:'bowerycap.com',
+    looking:'B2B software at seed, with published depth on vertical SaaS and marketplace revenue models.',
+    hook:'You write some of the best material on vertical software going deep in one industry, and we are doing that for podcast advertising.',
+    why:'Vertical marketplace plus workflow software for a $32B category, which is the model your portfolio keeps proving.',
+    dims:{thesis:78,stage:85,check:82,portfolio:74,geo:74},
+    conn:{deg:3,mutuals:2,path:null} },
+
+  { id:'primary', name:'Primary Venture Partners', type:'Seed', region:'New York', check:[1000,3000], sectors:['B2B','Marketplaces'],
+    partners:['Ben Sun','Brad Svrluga'], site:'primary.vc',
+    looking:'NYC-focused seed leads with a big impact team. Marketplaces and B2B are core; they like being the first lead.',
+    hook:'You lead NYC-style seed rounds in marketplaces with real operations, and that is our shape.',
+    why:'We need a lead who has operated through marketplace cold-start, and that is Primary’s track record.',
+    dims:{thesis:78,stage:85,check:78,portfolio:74,geo:72},
+    conn:{deg:3,mutuals:3,path:null} },
+
+  { id:'initialized', name:'Initialized Capital', type:'Seed', region:'SF Bay Area', check:[1000,3000], sectors:['Generalist'],
+    partners:['Partner team'], site:'initialized.com',
+    looking:'Seed-stage generalists with strong founder brand. Back weird-but-working products early.',
+    hook:'We are the kind of unglamorous-market bet Initialized keeps winning on.',
+    why:'Working product, real buyers, huge lazy incumbent workflow to displace.',
+    dims:{thesis:72,stage:85,check:78,portfolio:72,geo:72},
+    conn:{deg:3,mutuals:2,path:null} },
+
+  { id:'haystack', name:'Haystack', type:'Pre-seed', region:'SF Bay Area', check:[250,1000], sectors:['Generalist'],
+    partners:['Semil Shah'], site:'haystack.vc',
+    looking:'Early pre-seed and seed, often the first believer check alongside bigger funds. Semil is one of the best-networked seed investors in the valley.',
+    hook:'You are usually the first believer check before the big logos arrive, and that is the check we are filling now.',
+    why:'Small check, huge network, and a market big enough to matter.',
+    dims:{thesis:70,stage:88,check:85,portfolio:70,geo:72},
+    conn:{deg:3,mutuals:4,path:null} },
+
+  { id:'pear', name:'Pear VC', type:'Pre-seed', region:'SF Bay Area', check:[500,2000], sectors:['Generalist'],
+    partners:['Mar Hershenson'], site:'pear.vc',
+    looking:'Pre-seed and seed with heavy company-building support. Like technical, gritty founding teams pre-metrics.',
+    hook:'Pear backs gritty teams before the metrics chart exists, and we are shipping weekly.',
+    why:'We are early enough for Pear to shape and late enough to show real transactions.',
+    dims:{thesis:70,stage:88,check:82,portfolio:70,geo:70},
+    conn:{deg:3,mutuals:2,path:null} },
+
+  { id:'bling', name:'Bling Capital', type:'Seed', region:'Remote', check:[250,1000], sectors:['Product-led','Consumer','B2B'],
+    partners:['Ben Ling'], site:'bling.vc',
+    looking:'Product-obsessed seed checks. Ben goes deep on product craft and speed of iteration.',
+    hook:'You back product speed, and our whole pitch is collapsing a six-week media plan into minutes.',
+    why:'The product is the moat here: buying host-read should feel like booking a flight, and ours already does.',
+    dims:{thesis:72,stage:85,check:85,portfolio:70,geo:70},
+    conn:{deg:3,mutuals:2,path:null} },
+
+  { id:'weekend', name:'Weekend Fund', type:'Solo GP / Angel', region:'Remote', check:[100,400], sectors:['Product','Community'],
+    partners:['Ryan Hoover'], site:'weekend.fund',
+    looking:'Small early checks from the Product Hunt founder. Loves products with obvious daily utility and community pull.',
+    hook:'This is a Product Hunt-shaped product for a market that never gets them: media buying.',
+    why:'Small check, loud distribution network, and a launch-friendly product story.',
+    dims:{thesis:70,stage:85,check:88,portfolio:70,geo:70},
+    conn:{deg:2,mutuals:5,path:'Eric Bahn (Hustle Fund)'} },
+
+  { id:'afore', name:'Afore Capital', type:'Pre-seed', region:'SF Bay Area', check:[500,1500], sectors:['Pre-seed only'],
+    partners:['Anamitra Banerji','Gaurav Jain'], site:'afore.vc',
+    looking:'Pre-seed only, by design. If the round is priced as a true seed they may see us as slightly late.',
+    hook:'You built ads at Twitter from zero, so you know what happens when an ad channel gets real infrastructure.',
+    why:'We are early enough on the revenue curve to be an Afore-shaped bet on a giant market.',
+    dims:{thesis:70,stage:75,check:82,portfolio:74,geo:70},
+    conn:{deg:3,mutuals:2,path:null} },
+
+  { id:'freestyle', name:'Freestyle Capital', type:'Seed', region:'SF Bay Area', check:[1000,2500], sectors:['Generalist'],
+    partners:['Partner team'], site:'freestyle.vc',
+    looking:'Concentrated seed portfolio, lead checks, very hands-on with a small number of companies per year.',
+    hook:'You run concentrated and hands-on, and we want fewer, closer investors this round.',
+    why:'A concentrated lead who goes deep beats ten passive logos for where we are.',
+    dims:{thesis:68,stage:85,check:78,portfolio:68,geo:70},
+    conn:{deg:3,mutuals:1,path:null} },
+
+  { id:'charge', name:'Charge Ventures', type:'Pre-seed', region:'New York', check:[250,750], sectors:['B2B'],
+    partners:['Brett Martin'], site:'charge.vc',
+    looking:'NYC pre-seed B2B. Data-driven sourcing, quick process, comfortable pre-traction.',
+    hook:'You move quickly on B2B pre-seed, and our round is moving.',
+    why:'B2B marketplace with SaaS-like margins in a category with no incumbent platform.',
+    dims:{thesis:70,stage:85,check:85,portfolio:66,geo:72},
+    conn:{deg:3,mutuals:1,path:null} },
+
+  { id:'645', name:'645 Ventures', type:'Seed', region:'New York', check:[1000,3000], sectors:['Data-driven','B2B'],
+    partners:['Partner team'], site:'645ventures.com',
+    looking:'Data-driven seed and A. They model markets before they invest, so a clean bottoms-up on podcast ad spend lands well.',
+    hook:'You underwrite with data, and the host-read numbers are the best-kept secret in advertising.',
+    why:'The category math is wild: top-quartile response rates, near-zero platform penetration.',
+    dims:{thesis:72,stage:80,check:78,portfolio:68,geo:72},
+    conn:{deg:3,mutuals:2,path:null} },
+
+  { id:'pointnine', name:'Point Nine', type:'Seed', region:'Europe', check:[500,2000], sectors:['B2B SaaS','Marketplaces'],
+    partners:['Christoph Janz'], site:'pointnine.com',
+    looking:'B2B SaaS and marketplaces at seed, famous for the SaaS napkin. Invest globally from Berlin.',
+    hook:'Your napkin math for marketplaces is pinned above my desk, so here is ours.',
+    why:'B2B marketplace with SaaS-grade retention on the brand side, which is the Point Nine sweet spot.',
+    dims:{thesis:82,stage:85,check:82,portfolio:74,geo:52},
+    conn:{deg:3,mutuals:2,path:null} },
+
+  { id:'speedinvest', name:'Speedinvest', type:'Seed', region:'Europe', check:[500,1500], sectors:['Marketplaces','Network effects'],
+    partners:['Partner team'], site:'speedinvest.com',
+    looking:'European seed fund with a dedicated marketplaces and consumer team. Invest outside Europe selectively.',
+    hook:'Your marketplace team publishes the best liquidity frameworks in Europe, and we would love their read on ours.',
+    why:'Two-sided liquidity in an underserved vertical, with US market lead and global supply.',
+    dims:{thesis:78,stage:82,check:80,portfolio:70,geo:48},
+    conn:{deg:3,mutuals:1,path:null} },
+
+  { id:'forum', name:'Forum Ventures', type:'Pre-seed', region:'New York', check:[100,500], sectors:['B2B SaaS'],
+    partners:['Partner team'], site:'forumvc.com',
+    looking:'B2B SaaS pre-seed fund and accelerator. High volume, founder-friendly, strong on early GTM.',
+    hook:'You spend all day on early B2B GTM, and our GTM is the interesting part of the story.',
+    why:'Self-serve motion in a market used to being sold over steak dinners.',
+    dims:{thesis:66,stage:82,check:82,portfolio:62,geo:72},
+    conn:{deg:3,mutuals:1,path:null} },
+
+  { id:'conviction', name:'Conviction', type:'Seed', region:'SF Bay Area', check:[1000,3000], sectors:['AI-native'],
+    partners:['Sarah Guo'], site:'conviction.com',
+    looking:'AI-native software companies. The bet has to be that AI changes the product, not decorates it.',
+    hook:'The AI layer is not decoration here: it plans, prices, and grades campaigns that used to take an agency three weeks.',
+    why:'AI-native workflow on top of proprietary transaction data, in a market with no software incumbent.',
+    dims:{thesis:68,stage:80,check:78,portfolio:66,geo:72},
+    conn:{deg:3,mutuals:2,path:null} },
+
+  { id:'wndrco', name:'WndrCo', type:'Multi-stage', region:'Los Angeles', check:[1000,3000], sectors:['Media','Consumer tech'],
+    partners:['Partner team'], site:'wndrco.com',
+    looking:'Jeffrey Katzenberg’s firm. Media and consumer technology across stages; deep entertainment relationships.',
+    hook:'WndrCo knows better than anyone how media buying and content economics actually work.',
+    why:'Entertainment-grade relationships on our supply side would compound fast.',
+    dims:{thesis:70,stage:70,check:76,portfolio:74,geo:68},
+    conn:{deg:3,mutuals:1,path:null} },
+
+  { id:'raine', name:'Raine Ventures', type:'Seed', region:'New York', check:[500,2000], sectors:['Media','Gaming'],
+    partners:['Partner team'], site:'raine.com',
+    looking:'Early-stage arm of the Raine Group merchant bank. Media, entertainment, and gaming; strategic reach into big media M&A.',
+    hook:'Raine sits inside every big media deal, so you know how badly audio needs transaction infrastructure.',
+    why:'We are building the pipes a consolidating audio market will run on.',
+    dims:{thesis:72,stage:76,check:78,portfolio:70,geo:66},
+    conn:{deg:3,mutuals:1,path:null} },
+
+  { id:'tcg', name:'The Chernin Group', type:'Multi-stage', region:'Los Angeles', check:[3000,10000], sectors:['Media','Consumer'],
+    partners:['Partner team'], site:'tcg.co',
+    looking:'Consumer and media, usually growth-stage with real scale. Likely a Series A/B conversation for us, worth a relationship now.',
+    hook:'Likely early for TCG today, but audio infrastructure will be a growth story soon and I would rather you know us now.',
+    why:'Relationship seed for the A: they go deep on audio (Crooked Media, podcast roll-ups).',
+    dims:{thesis:70,stage:45,check:40,portfolio:80,geo:66},
+    conn:{deg:3,mutuals:2,path:null} },
+
+  { id:'siriusxm', name:'SiriusXM (strategic)', type:'Strategic / CVC', region:'New York', check:[500,2000], sectors:['Audio'],
+    partners:['Corp dev team'], site:'siriusxm.com',
+    looking:'Owns major podcast networks and ad tech (AdsWizz). Strategic capital with obvious synergy and obvious signaling risk: a strategic on the cap table can spook other networks.',
+    hook:'You own more of the podcast ad stack than anyone, and we are growing the buyer side of it.',
+    why:'Strategic distribution, but weigh the neutrality signal before taking the meeting far.',
+    dims:{thesis:74,stage:62,check:76,portfolio:80,geo:60},
+    conn:{deg:3,mutuals:2,path:null} },
+
+  { id:'iheart', name:'iHeart Ventures', type:'Strategic / CVC', region:'New York', check:[250,1000], sectors:['Audio','Media'],
+    partners:['Corp dev team'], site:'iheartmedia.com',
+    looking:'Strategic investments around the iHeart audio empire. Same synergy and same neutrality-signal risk as any network-owner strategic.',
+    hook:'iHeart sells more audio ads than anyone, and we make the long tail of that market buyable.',
+    why:'Useful strategic conversation, but keep the marketplace neutral story front and center.',
+    dims:{thesis:72,stage:60,check:78,portfolio:78,geo:60},
+    conn:{deg:3,mutuals:1,path:null} },
+
+  { id:'comcast', name:'Comcast Ventures', type:'Strategic / CVC', region:'New York', check:[1000,5000], sectors:['Media','Enterprise'],
+    partners:['Corp dev team'], site:'comcastventures.com',
+    looking:'Corporate venture arm; typically A and later with strategic angle to Comcast/NBCU advertising.',
+    hook:'NBCU’s ad business knows the measurement gap in audio better than most.',
+    why:'Probably a Series A conversation, worth a light touch now.',
+    dims:{thesis:66,stage:52,check:60,portfolio:72,geo:60},
+    conn:{deg:3,mutuals:1,path:null} },
+
+  { id:'sony', name:'Sony Innovation Fund', type:'Strategic / CVC', region:'New York', check:[500,2000], sectors:['Entertainment'],
+    partners:['Corp dev team'], site:'sonyinnovationfund.com',
+    looking:'Corporate VC across entertainment and deep tech. Sony owns major podcast studios; process tends to be slow.',
+    hook:'Sony’s podcast studios live off host-read revenue, and we grow that line.',
+    why:'Strategic optionality, slow clock. Low priority unless a champion appears.',
+    dims:{thesis:62,stage:55,check:70,portfolio:70,geo:56},
+    conn:{deg:3,mutuals:1,path:null} },
+
+  { id:'overline', name:'Overline', type:'Seed', region:'Southeast', check:[250,1000], sectors:['Generalist','Southeast'],
+    partners:['Sean O’Brien','Michael Cohn'], site:'overline.vc',
+    looking:'Atlanta-based seed fund backing Southeast founders first. Operator GPs, fast process, proud of being the first institutional check in the region.',
+    hook:'You back Southeast founders before the coasts notice them, and we are building this from Nashville.',
+    why:'Southeast seed with national market, which is your exact wheelhouse.',
+    dims:{thesis:68,stage:85,check:85,portfolio:64,geo:95},
+    conn:{deg:2,mutuals:6,path:'Matt Patterson (Brickyard)'} },
+
+  { id:'atlantaventures', name:'Atlanta Ventures', type:'Seed', region:'Southeast', check:[250,1000], sectors:['SaaS'],
+    partners:['David Cummings'], site:'atlantaventures.com',
+    looking:'Atlanta studio and seed fund from the Pardot founder. SaaS-first, recurring-revenue focused, long holding mindset.',
+    hook:'You built and sold Pardot on disciplined SaaS fundamentals, and our brand side runs on the same motion.',
+    why:'Southeast capital plus SaaS discipline fits how we run the company.',
+    dims:{thesis:64,stage:82,check:82,portfolio:60,geo:92},
+    conn:{deg:2,mutuals:4,path:'Matt Patterson (Brickyard)'} },
+
+  { id:'techsquare', name:'Tech Square Ventures', type:'Seed', region:'Southeast', check:[500,1500], sectors:['Generalist','B2B'],
+    partners:['Blake Patton'], site:'techsquareventures.com',
+    looking:'Atlanta seed fund around the Georgia Tech ecosystem. B2B lean, likes technical moats and university ties.',
+    hook:'You anchor the Atlanta ecosystem we keep bumping into, and our round has room for Southeast conviction.',
+    why:'Regional anchor investor with B2B depth.',
+    dims:{thesis:60,stage:82,check:80,portfolio:56,geo:90},
+    conn:{deg:3,mutuals:3,path:null} },
+
+  { id:'valor', name:'Valor Ventures', type:'Seed', region:'Southeast', check:[250,750], sectors:['B2B'],
+    partners:['Lisa Calhoun'], site:'valor.vc',
+    looking:'Atlanta seed fund, B2B software, first-check lead for Southern founders. Smaller fund, concentrated.',
+    hook:'You lead first checks for Southern B2B founders, and that is us.',
+    why:'Regional fit, generalist B2B thesis.',
+    dims:{thesis:56,stage:80,check:82,portfolio:52,geo:90},
+    conn:{deg:3,mutuals:2,path:null} },
+
+  { id:'dynamo', name:'Dynamo Ventures', type:'Seed', region:'Southeast', check:[250,1000], sectors:['Supply chain','Mobility'],
+    partners:['Partner team'], site:'dynamo.vc',
+    looking:'Chattanooga fund focused on supply chain and mobility. Thesis mismatch for us, but the Brickyard relationship makes them our warmest door in the region.',
+    hook:'We are outside your supply-chain lane, but Brickyard vouches loudly and you know everyone in Chattanooga.',
+    why:'Strong network, weak thesis fit. Ask for intros, not a check.',
+    dims:{thesis:35,stage:82,check:82,portfolio:40,geo:96},
+    conn:{deg:1,mutuals:18,path:'Matt Patterson (Brickyard)'} },
+
+  { id:'jumpstart', name:'Jumpstart Foundry', type:'Pre-seed', region:'Southeast', check:[150,500], sectors:['Healthcare'],
+    partners:['Partner team'], site:'jsf.co',
+    looking:'Nashville pre-seed fund, healthcare only. Wrong thesis, but deeply wired into the Nashville founder and capital scene.',
+    hook:'We are not healthcare, but you know every check-writer in Nashville and we are a Nashville company.',
+    why:'Network node, not a target. Coffee, not a pitch.',
+    dims:{thesis:20,stage:80,check:80,portfolio:25,geo:98},
+    conn:{deg:1,mutuals:14,path:'Nashville founder network'} },
+
+  { id:'fintop', name:'FINTOP Capital', type:'Seed', region:'Southeast', check:[1000,3000], sectors:['Fintech'],
+    partners:['Partner team'], site:'fintopcapital.com',
+    looking:'Nashville fund, fintech only, operator GPs. Thesis mismatch; local relationship value only.',
+    hook:'Outside your fintech lane, but we are fellow Nashville operators and our payments layer may interest you someday.',
+    why:'Long-shot thesis fit. Keep warm locally.',
+    dims:{thesis:28,stage:75,check:70,portfolio:30,geo:96},
+    conn:{deg:2,mutuals:7,path:'Nashville founder network'} }
+];
+
+/* ── Grading ── */
+function score(f){
+  return PITCH_DIMS.reduce((s,[k,,w]) => s + (f.dims[k]||0)*w, 0);
+}
+function grade(f){
+  const s = score(f);
+  if (s >= 90) return 'A+';
+  if (s >= 84) return 'A';
+  if (s >= 78) return 'A-';
+  if (s >= 72) return 'B+';
+  if (s >= 65) return 'B';
+  return 'C';
+}
+function gradeClass(g){ return g[0]==='A' ? 'a' : (g[0]==='B' ? 'b' : 'c'); }
+
+/* ── State ── */
+const LS_KEY = 'sn_vc_crm_v1';
+const DAY = 86400000;
+let state = {};
+try { state = JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch(e) { state = {}; }
+
+// First run: seed a believable in-progress pipeline.
+if (!Object.keys(state).length) {
+  const now = Date.now();
+  state = {
+    fjlabs:    { target:true, scanned:true, status:'sent', sentAt: now-3*DAY, followUp: now+2*DAY },
+    slow:      { target:true, scanned:true, status:'sent', sentAt: now-9*DAY, followUp: now-3*DAY },
+    nfx:       { target:true, scanned:true, status:'draft' },
+    precursor: { target:true, scanned:true, status:'replied', sentAt: now-6*DAY, notes:'Charles replied, wants to see the deck plus 3 network case studies. Send Tuesday.' },
+    aperiam:   { target:true, scanned:true, status:'targeted' },
+    mathcapital:{ target:true, status:'targeted' },
+    overline:  { target:true, scanned:true, status:'targeted' }
+  };
+  save();
+}
+function S(id){ return state[id] || (state[id] = {}); }
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+
+/* ── Message generation (the "AI layer") ── */
+function firstName(f){
+  const p = (f.partners && f.partners[0]) || '';
+  if (!p || /team|corp dev/i.test(p)) return 'there';
+  return p.split(' ')[0];
+}
+function genIntro(f){
+  return `Hey ${firstName(f)},
+
+${f.hook}
+
+I'm building SpotsNow, the marketplace where brands research, buy, and measure host-read podcast campaigns in minutes instead of weeks. It's a $32B market that still mostly runs on email and spreadsheets.
+
+We're raising our seed. ${f.why} Deck's here: spotsnow.wiki/investors
+
+Worth 15 minutes?
+
+Cam`;
+}
+function genFollowUp(f){
+  return `Hey ${firstName(f)},
+
+Floating this back up. Since I last wrote: [1-line traction update].
+
+Still think SpotsNow is a fit for ${f.name}. ${f.why}
+
+15 minutes this week? I'm free [times].
+
+Cam`;
+}
+
+/* ── Filters ── */
+const CHECK_BUCKETS = [
+  ['u500', 'Up to $500k', 0, 500],
+  ['b500_1500', '$500k – $1.5M', 500, 1500],
+  ['o1500', '$1.5M+', 1500, 99999]
+];
+const FILTER_DEFS = [
+  { key:'type',  label:'Type',   options: [...new Set(FUNDS.map(f=>f.type))] },
+  { key:'check', label:'Check size', options: CHECK_BUCKETS.map(b=>b[1]) },
+  { key:'region',label:'Location', options: [...new Set(FUNDS.map(f=>f.region))] },
+  { key:'grade', label:'Grade',  options: ['A+','A','A-','B+','B','C'] },
+  { key:'conn',  label:'Connection', options: ['Strong','Warm','Cold','Not scanned'] },
+  { key:'status',label:'Status', options: ['Not contacted','Targeted','Draft ready','Sent','Replied','Meeting','Passed'] }
+];
+const STATUS_LABELS = {
+  none:'Not contacted', targeted:'Targeted', draft:'Draft ready',
+  sent:'Sent', replied:'Replied', meeting:'Meeting', passed:'Passed'
+};
+const STATUS_KEYS = Object.keys(STATUS_LABELS);
+let activeFilters = {}; // key -> Set of selected option labels
+let currentTab = 'all';
+let searchQ = '';
+let sortBy = 'grade';
+let selected = new Set();
+
+function fundStatus(f){ return S(f.id).status || 'none'; }
+function connStrength(f){
+  if (!S(f.id).scanned) return 'Not scanned';
+  if (f.conn.deg === 1) return 'Strong';
+  if (f.conn.deg === 2) return 'Warm';
+  return 'Cold';
+}
+function followUpDueState(f){
+  const st = S(f.id);
+  if (!st.followUp || st.status !== 'sent') return null;
+  const days = Math.ceil((st.followUp - Date.now()) / DAY);
+  if (days < 0) return { label: `Overdue ${-days}d`, cls: 'pill--overdue', days };
+  if (days === 0) return { label: 'Due today', cls: 'pill--overdue', days };
+  if (days <= 3) return { label: `Due in ${days}d`, cls: 'pill--due', days };
+  return { label: `Due in ${days}d`, cls: 'pill--due', days };
+}
+
+function matchesFilters(f){
+  if (searchQ) {
+    const hay = [f.name, f.partners.join(' '), f.sectors.join(' '), f.looking, f.region, f.type].join(' ').toLowerCase();
+    if (!hay.includes(searchQ)) return false;
+  }
+  for (const def of FILTER_DEFS) {
+    const sel = activeFilters[def.key];
+    if (!sel || !sel.size) continue;
+    let val;
+    if (def.key === 'type') val = f.type;
+    else if (def.key === 'region') val = f.region;
+    else if (def.key === 'grade') val = grade(f);
+    else if (def.key === 'conn') val = connStrength(f);
+    else if (def.key === 'status') val = STATUS_LABELS[fundStatus(f)];
+    else if (def.key === 'check') {
+      let hit = false;
+      for (const [,label,lo,hi] of CHECK_BUCKETS) {
+        if (sel.has(label) && f.check[0] < hi && f.check[1] > lo) { hit = true; break; }
+      }
+      if (!hit) return false;
+      continue;
+    }
+    if (!sel.has(val)) return false;
+  }
+  return true;
+}
+function matchesTab(f){
+  const st = S(f.id);
+  if (currentTab === 'targets') return !!st.target;
+  if (currentTab === 'outreach') return ['draft','sent','replied','meeting'].includes(fundStatus(f));
+  if (currentTab === 'followups') return !!followUpDueState(f);
+  return true;
+}
+function visibleFunds(){
+  let rows = FUNDS.filter(f => matchesTab(f) && matchesFilters(f));
+  const connRank = f => S(f.id).scanned ? f.conn.deg : 9;
+  rows.sort((a,b)=>{
+    if (sortBy === 'name') return a.name.localeCompare(b.name);
+    if (sortBy === 'check') return b.check[1] - a.check[1];
+    if (sortBy === 'conn') return connRank(a) - connRank(b) || score(b) - score(a);
+    if (sortBy === 'due') {
+      const da = followUpDueState(a), db = followUpDueState(b);
+      if (da && db) return da.days - db.days;
+      if (da) return -1; if (db) return 1;
+      return score(b) - score(a);
+    }
+    return score(b) - score(a);
+  });
+  return rows;
+}
+
+/* ── Rendering ── */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const checkFmt = f => {
+  const k = v => v >= 1000 ? ('$' + (v/1000).toFixed(v%1000?1:0) + 'M') : ('$' + v + 'k');
+  return k(f.check[0]) + ' – ' + k(f.check[1]);
+};
+
+function connCellHtml(f){
+  const st = S(f.id);
+  if (st.scanning) return `<button class="scan-btn scanning">Scanning LinkedIn...</button>`;
+  if (!st.scanned) return `<button class="scan-btn" data-scan="${f.id}">Scan LinkedIn</button>`;
+  const c = f.conn;
+  const strength = connStrength(f);
+  const dot = strength === 'Strong' ? 'strong' : strength === 'Warm' ? 'warm' : 'cold';
+  const degTxt = c.deg === 1 ? '1st' : c.deg === 2 ? '2nd' : '3rd';
+  return `<div class="conn-strength"><span class="conn-dot conn-dot--${dot}"></span>${strength} · ${degTxt} · ${c.mutuals} mutual${c.mutuals===1?'':'s'}</div>
+    ${c.path ? `<div class="conn-sub">via ${esc(c.path)}</div>` : ''}`;
+}
+
+function statusCellHtml(f){
+  const s = fundStatus(f);
+  const due = followUpDueState(f);
+  return `<div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">
+    <span class="pill pill--status-${s}">${STATUS_LABELS[s]}</span>
+    ${due ? `<span class="pill ${due.cls}">Follow up · ${due.label}</span>` : ''}
+  </div>`;
+}
+
+function render(){
+  const rows = visibleFunds();
+  const tbody = $('tableBody');
+  tbody.innerHTML = rows.map(f => {
+    const g = grade(f);
+    const st = S(f.id);
+    return `<tr data-id="${f.id}" class="${selected.has(f.id)?'selected':''}">
+      <td><input type="checkbox" class="row-check" data-check="${f.id}" ${selected.has(f.id)?'checked':''}></td>
+      <td><div class="fund-cell">
+        <span class="fund-name">${st.target?'<span class="target-star" title="On target list">★</span>':''}${esc(f.name)}</span>
+        <span class="fund-sub">${esc(f.type)} · ${esc(f.region)}</span>
+      </div></td>
+      <td><span class="pill pill--grade-${gradeClass(g)}" title="Fit score ${Math.round(score(f))}/100">${g} · ${Math.round(score(f))}</span></td>
+      <td style="white-space:nowrap;font-weight:600">${checkFmt(f)}</td>
+      <td class="hide-md"><div class="sector-cell">${f.sectors.slice(0,2).map(s=>`<span class="pill pill--sector">${esc(s)}</span>`).join('')}</div></td>
+      <td class="conn-cell">${connCellHtml(f)}</td>
+      <td>${statusCellHtml(f)}</td>
+    </tr>`;
+  }).join('');
+
+  const empty = $('emptyState');
+  if (!rows.length) {
+    empty.style.display = 'block';
+    empty.textContent = currentTab === 'followups'
+      ? 'No follow-ups due. Send some intros and they will queue up here.'
+      : currentTab === 'targets'
+        ? 'No funds on the target list yet. Select funds in All VCs and add them.'
+        : 'No funds match these filters.';
+  } else empty.style.display = 'none';
+
+  // Stats + tab counts
+  const targets = FUNDS.filter(f => S(f.id).target).length;
+  const aGrades = FUNDS.filter(f => ['A+','A'].includes(grade(f))).length;
+  const dues = FUNDS.map(followUpDueState).filter(d => d && d.days <= 0).length;
+  const outreach = FUNDS.filter(f => ['draft','sent','replied','meeting'].includes(fundStatus(f))).length;
+  const allFollow = FUNDS.filter(f => followUpDueState(f)).length;
+  $('statTotal').textContent = FUNDS.length;
+  $('statAGrade').textContent = aGrades;
+  $('statTargets').textContent = targets;
+  $('statFollowups').innerHTML = dues ? `<span class="due-red">${dues}</span>` : '0';
+  $('cntAll').textContent = FUNDS.length;
+  $('cntTargets').textContent = targets;
+  $('cntOutreach').textContent = outreach;
+  const cf = $('cntFollowups');
+  cf.textContent = allFollow;
+  cf.classList.toggle('hot', dues > 0);
+
+  $('tableFoot').textContent = `${rows.length} of ${FUNDS.length} funds shown. Fit grades are scored against the current pitch. Check sizes and focus areas are seeded from public info: verify before outreach.`;
+
+  // Bulk bar
+  const bar = $('bulkBar');
+  bar.classList.toggle('show', selected.size > 0);
+  $('bulkCount').textContent = `${selected.size} selected`;
+
+  // header check state
+  const visIds = rows.map(f=>f.id);
+  $('checkAll').checked = visIds.length > 0 && visIds.every(id => selected.has(id));
+
+  renderFilterChips();
+  save();
+}
+
+function renderFilterChips(){
+  const host = $('filterChips');
+  host.innerHTML = FILTER_DEFS.map(def => {
+    const sel = activeFilters[def.key];
+    const n = sel ? sel.size : 0;
+    return `<div style="position:relative" data-popwrap="${def.key}">
+      <button class="filter-chip ${n?'on':''}" data-filter="${def.key}">${def.label}${n?` <span class="n">${n}</span>`:''}
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="popover" data-pop="${def.key}">
+        ${def.options.map(o => `<label><input type="checkbox" data-fkey="${def.key}" data-fval="${esc(o)}" ${sel && sel.has(o)?'checked':''}> ${esc(o)}</label>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  const any = Object.values(activeFilters).some(s => s && s.size);
+  $('clearFilters').style.display = any ? 'inline' : 'none';
+}
+
+/* ── LinkedIn scan simulation ── */
+function scanFund(id, delay){
+  const st = S(id);
+  if (st.scanned || st.scanning) return;
+  st.scanning = true;
+  render();
+  setTimeout(() => {
+    st.scanning = false;
+    st.scanned = true;
+    save(); render();
+    if ($('drawer').classList.contains('show') && drawerId === id) openDrawer(id);
+  }, 900 + (delay || 0));
+}
+
+/* ── Drawer ── */
+let drawerId = null;
+function openDrawer(id){
+  const f = FUNDS.find(x => x.id === id);
+  if (!f) return;
+  drawerId = id;
+  const st = S(id);
+  const g = grade(f);
+  $('dTitle').textContent = f.name;
+  $('dMeta').innerHTML = `<span class="pill pill--type">${esc(f.type)}</span> ${esc(f.region)} · ${checkFmt(f)} · <a href="https://${esc(f.site)}" target="_blank" rel="noopener" style="color:var(--text-secondary);font-weight:600">${esc(f.site)}</a>`;
+
+  const dueState = followUpDueState(f);
+  const body = $('drawerBody');
+  body.innerHTML = `
+    <div class="d-row" style="justify-content:space-between">
+      <select class="status-select" id="dStatus">
+        ${STATUS_KEYS.map(k=>`<option value="${k}" ${fundStatus(f)===k?'selected':''}>${STATUS_LABELS[k]}</option>`).join('')}
+      </select>
+      <button class="btn-ghost" id="dTarget" style="height:34px;font-size:12px">${st.target?'★ On target list':'☆ Add to targets'}</button>
+    </div>
+
+    <div class="grade-card">
+      <div class="grade-card__top">
+        <div class="grade-big ${gradeClass(g)}">${g}</div>
+        <div>
+          <div class="grade-card__score">Pitch fit ${Math.round(score(f))}/100</div>
+          <div class="grade-card__note">${esc(f.why)}</div>
+        </div>
+      </div>
+      ${PITCH_DIMS.map(([k,label]) => `
+        <div class="dim-row">
+          <span class="dim-name">${label}</span>
+          <div class="dim-track"><div class="dim-fill" style="width:${f.dims[k]}%"></div></div>
+          <span class="dim-val">${f.dims[k]}</span>
+        </div>`).join('')}
+    </div>
+
+    <div class="d-section">
+      <span class="d-label">What they're looking for</span>
+      <div class="info-card">${esc(f.looking)}</div>
+    </div>
+
+    <div class="d-section">
+      <span class="d-label">LinkedIn connection</span>
+      <div class="conn-card" id="dConn">
+        ${st.scanned ? `
+          <div class="conn-card__main">${connCellHtml(f).replace(/<button[^>]*>.*?<\/button>/,'')}</div>
+          <div class="conn-card__sub">${f.conn.path
+            ? `Best route: ask <b>${esc(f.conn.path.split(' (')[0])}</b> for a double-opt-in intro. Warm intros convert far better than cold email here.`
+            : (f.conn.deg === 1 ? 'Direct connection. Message them on LinkedIn or email straight away.'
+              : 'No warm path found. Cold email with a sharp subject line, or hunt for a second-degree route through portfolio founders.')}</div>
+        ` : `
+          <div class="conn-card__sub">Not scanned yet. Runs the LinkedIn automation against Cam's network and maps the warmest path in.</div>
+          <div><button class="btn-primary" id="dScanBtn" style="height:34px">${st.scanning?'Scanning...':'Scan LinkedIn'}</button></div>
+        `}
+      </div>
+    </div>
+
+    <div class="d-section">
+      <span class="d-label">Partners</span>
+      <div>
+        ${f.partners.map(p => `<div class="partner-row">
+          <span class="partner-ava">${esc(p.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase())}</span>
+          <span class="partner-name">${esc(p)}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="d-section">
+      <div class="d-row" style="justify-content:space-between">
+        <span class="d-label">Personalized message</span>
+        <span class="ai-hint"><span class="ai-dot"></span>AI drafts from their thesis + our pitch</span>
+      </div>
+      <textarea class="msg-area" id="dMsg" placeholder="No draft yet. Hit Write intro and the AI layer drafts a personalized note from ${esc(f.name)}'s thesis.">${esc(st.draft || '')}</textarea>
+      <div class="d-row" style="flex-wrap:wrap">
+        <button class="btn-primary btn-primary--coral" id="dGen">${st.draft ? 'Rewrite intro' : 'Write intro'}</button>
+        ${dueState || fundStatus(f)==='sent' ? `<button class="btn-primary" id="dGenFu">Write follow-up</button>` : ''}
+        <button class="btn-ghost" id="dCopy">Copy</button>
+        <button class="btn-ghost" id="dSent">Mark sent</button>
+      </div>
+      ${dueState ? `<span class="pill ${dueState.cls}" style="align-self:flex-start">Follow-up ${dueState.label.toLowerCase()}</span>` : ''}
+    </div>
+
+    <div class="d-section">
+      <span class="d-label">Notes</span>
+      <textarea class="notes-area" id="dNotes" placeholder="Call notes, intro asks, terms...">${esc(st.notes || '')}</textarea>
+    </div>
+  `;
+
+  // Wire drawer controls
+  $('dStatus').onchange = e => { S(id).status = e.target.value; if (e.target.value !== 'sent') delete S(id).followUp; save(); render(); openDrawer(id); };
+  $('dTarget').onclick = () => { S(id).target = !S(id).target; save(); render(); openDrawer(id); };
+  const scanBtn = $('dScanBtn');
+  if (scanBtn) scanBtn.onclick = () => scanFund(id);
+  $('dMsg').oninput = e => { S(id).draft = e.target.value; save(); };
+  $('dNotes').oninput = e => { S(id).notes = e.target.value; save(); };
+  $('dGen').onclick = () => typeInto(id, genIntro(f), () => {
+    const st2 = S(id);
+    if (!st2.status || st2.status === 'none' || st2.status === 'targeted') st2.status = 'draft';
+    save(); render();
+  });
+  const fuBtn = $('dGenFu');
+  if (fuBtn) fuBtn.onclick = () => typeInto(id, genFollowUp(f));
+  $('dCopy').onclick = () => {
+    navigator.clipboard.writeText($('dMsg').value || '').then(() => toast('Copied to clipboard'));
+  };
+  $('dSent').onclick = () => {
+    const st2 = S(id);
+    st2.status = 'sent';
+    st2.sentAt = Date.now();
+    st2.followUp = Date.now() + 6*DAY;
+    save(); render(); openDrawer(id);
+    toast('Marked sent. Follow-up queued in 6 days.');
+  };
+
+  $('drawer').classList.add('show');
+  $('drawerOverlay').classList.add('show');
+}
+
+let typeTimer = null;
+function typeInto(id, text, done){
+  const ta = $('dMsg');
+  if (!ta) return;
+  clearInterval(typeTimer);
+  ta.value = '';
+  let i = 0;
+  typeTimer = setInterval(() => {
+    i = Math.min(text.length, i + 7);
+    ta.value = text.slice(0, i);
+    ta.scrollTop = ta.scrollHeight;
+    if (i >= text.length) {
+      clearInterval(typeTimer);
+      S(id).draft = text;
+      save();
+      if (done) done();
+    }
+  }, 16);
+}
+
+function closeDrawer(){
+  $('drawer').classList.remove('show');
+  $('drawerOverlay').classList.remove('show');
+  drawerId = null;
+  clearInterval(typeTimer);
+}
+
+/* ── Toast ── */
+let toastTimer = null;
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* ── Events ── */
+$('tabRow').addEventListener('click', e => {
+  const tab = e.target.closest('.tab');
+  if (!tab) return;
+  currentTab = tab.dataset.tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+  render();
+});
+$('searchInput').addEventListener('input', e => { searchQ = e.target.value.trim().toLowerCase(); render(); });
+$('sortSelect').addEventListener('change', e => { sortBy = e.target.value; render(); });
+$('clearFilters').addEventListener('click', () => { activeFilters = {}; render(); });
+
+// Filter chip popovers (delegated; chips re-render)
+document.addEventListener('click', e => {
+  const chip = e.target.closest('[data-filter]');
+  const inPop = e.target.closest('.popover');
+  if (chip) {
+    const key = chip.dataset.filter;
+    document.querySelectorAll('.popover').forEach(p => p.classList.toggle('open', p.dataset.pop === key && !p.classList.contains('open')));
+    return;
+  }
+  if (!inPop) document.querySelectorAll('.popover').forEach(p => p.classList.remove('open'));
+});
+document.addEventListener('change', e => {
+  const cb = e.target.closest('[data-fkey]');
+  if (!cb) return;
+  const key = cb.dataset.fkey, val = cb.dataset.fval;
+  activeFilters[key] = activeFilters[key] || new Set();
+  cb.checked ? activeFilters[key].add(val) : activeFilters[key].delete(val);
+  const openKey = key;
+  render();
+  // keep this popover open after re-render
+  const pop = document.querySelector(`.popover[data-pop="${openKey}"]`);
+  if (pop) pop.classList.add('open');
+});
+
+// Table interactions
+$('tableBody').addEventListener('click', e => {
+  const scan = e.target.closest('[data-scan]');
+  if (scan) { e.stopPropagation(); scanFund(scan.dataset.scan); return; }
+  const check = e.target.closest('[data-check]');
+  if (check) {
+    e.stopPropagation();
+    const id = check.dataset.check;
+    check.checked ? selected.add(id) : selected.delete(id);
+    render();
+    return;
+  }
+  const row = e.target.closest('tr[data-id]');
+  if (row) openDrawer(row.dataset.id);
+});
+$('checkAll').addEventListener('change', e => {
+  const vis = visibleFunds().map(f => f.id);
+  if (e.target.checked) vis.forEach(id => selected.add(id));
+  else vis.forEach(id => selected.delete(id));
+  render();
+});
+
+// Bulk actions
+$('bulkTarget').addEventListener('click', () => {
+  let n = 0;
+  selected.forEach(id => { const st = S(id); if (!st.target) { st.target = true; n++; } if (!st.status || st.status === 'none') st.status = 'targeted'; });
+  save(); render();
+  toast(`${n} fund${n===1?'':'s'} added to target list`);
+});
+$('bulkUntarget').addEventListener('click', () => {
+  selected.forEach(id => { S(id).target = false; });
+  save(); render();
+  toast('Removed from target list');
+});
+$('bulkScan').addEventListener('click', () => {
+  let i = 0;
+  selected.forEach(id => { if (!S(id).scanned) scanFund(id, i++ * 350); });
+  toast('Scanning LinkedIn for warm paths...');
+});
+$('bulkClear').addEventListener('click', () => { selected.clear(); render(); });
+
+// Drawer close
+$('drawerClose').addEventListener('click', closeDrawer);
+$('drawerOverlay').addEventListener('click', closeDrawer);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+// Export current view
+$('exportBtn').addEventListener('click', () => {
+  const rows = visibleFunds();
+  const head = ['fund','type','region','check_min_k','check_max_k','grade','fit_score','sectors','partners','connection','warm_path','status','follow_up_due','notes'];
+  const lines = [head.join(',')].concat(rows.map(f => {
+    const st = S(f.id);
+    const due = st.followUp ? new Date(st.followUp).toISOString().slice(0,10) : '';
+    return [f.name, f.type, f.region, f.check[0], f.check[1], grade(f), Math.round(score(f)),
+      f.sectors.join('; '), f.partners.join('; '), connStrength(f), f.conn.path || '',
+      STATUS_LABELS[fundStatus(f)], due, st.notes || ''
+    ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(',');
+  }));
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'spotsnow-vc-targets.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+render();
+</script>
+</body>
+</html>
