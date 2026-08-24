@@ -612,6 +612,7 @@
     </a>
     <span class="top-bar__title">Raise · VC outreach</span>
     <div class="top-bar__spacer"></div>
+    <span class="top-bar__title" id="syncStatus" style="font-size:11.5px"></span>
     <div class="dd dd--menu">
       <button type="button" class="dd-btn">Add funds
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>
@@ -984,6 +985,7 @@ if (!state || !state.people) {
   };
   save();
 }
+function applyStateDefaults(){
 state.extraConnectors = state.extraConnectors || [];
 state.extraFunds = state.extraFunds || [];
 state.hiddenFunds = state.hiddenFunds || [];
@@ -1001,7 +1003,70 @@ if ((state.tplVersion || 1) < 2) {
   state.vars = { ...DEFAULT_VARS };
   state.tplVersion = 2;
 }
-function save(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+}
+applyStateDefaults();
+function persistLocal(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+var syncTimer = null;
+function setSyncUI(mode){
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+  if (mode === 'saving') el.textContent = 'Saving...';
+  else if (mode === 'saved') el.textContent = 'Cloud \u00b7 saved ' + new Date().toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  else if (mode === 'local') el.textContent = 'Local only';
+  else el.textContent = '';
+}
+function save(){
+  state._dirty = true;
+  persistLocal();
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(pushState, 2500);
+  setSyncUI('saving');
+}
+async function pushState(){
+  if (!state._dirty) return;
+  try {
+    const r = await fetch('/api/vc-state', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ state })
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || ('HTTP ' + r.status));
+    state._rev = d.rev;
+    state._dirty = false;
+    persistLocal();
+    setSyncUI('saved');
+  } catch (e) {
+    setSyncUI('local');
+  }
+}
+/* Boot: adopt the shared cloud copy unless this browser holds newer unsent edits. */
+async function bootSync(){
+  try {
+    const r = await fetch('/api/vc-state');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    const server = d.state;
+    if (!server) {
+      if (state._dirty || Object.keys(state.people).length || state.extraConnectors.length) pushState();
+      else setSyncUI('saved');
+      return;
+    }
+    if (state._dirty && (Number(state._rev) || 0) >= (Number(server._rev) || 0)) { pushState(); return; }
+    state = server;
+    applyStateDefaults();
+    state._dirty = false;
+    persistLocal();
+    rebuild(); render();
+    setSyncUI('saved');
+  } catch (e) {
+    setSyncUI('local');
+  }
+}
+window.addEventListener('pagehide', () => {
+  if (state._dirty && navigator.sendBeacon) {
+    navigator.sendBeacon('/api/vc-state', new Blob([JSON.stringify({ state })], { type: 'application/json' }));
+  }
+});
 function PS(id){ return state.people[id] || (state.people[id] = {}); }
 function CS(id){ return state.connectors[id] || (state.connectors[id] = {}); }
 
@@ -1505,7 +1570,7 @@ function render(){
   $('fundImportResult').textContent = state.fundImportMsg || '';
 
   renderFilterChips();
-  save();
+  persistLocal();
 }
 
 function personSubRows(f){
@@ -2965,6 +3030,7 @@ $('exportBtn').addEventListener('click', () => {
 
 rebuild();
 render();
+bootSync();
 </script>
 </body>
 </html>
