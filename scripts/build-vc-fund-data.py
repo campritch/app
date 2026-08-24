@@ -223,8 +223,10 @@ for r in rows:
     elif status in ('Scheduled', 'Engaged 🔥'): stage0 = 'booked'
     elif tier_n == 1: stage0 = 'pitching'
     elif tier_n == 2 or crm in ('Targets 🎯', 'To Send', 'Waiting', 'Try Recover') or status in ('Todo', 'Get Intro', 'Waiting', 'Contacted'): stage0 = 'target'
+    # Passes and not-relevant funds are pipeline history, not trash: they land
+    # in the Closed stage, visible, never pre-archived (per Cam).
     if tier_n == 9 or status in ('Not Relevant', 'Pass / Update list') or ('Passed' in status and tier_n not in (1, 2, 3)) or 'Competitive' in status:
-        archived0 = True; stage0 = None
+        stage0 = 'closed'
     if stage0: counts['staged'] += 1
     if archived0: counts['archived'] += 1
 
@@ -243,13 +245,36 @@ for r in rows:
     addctx('Re-approach', 'Re-approach Verdict', 'Verdict Confidence', 'Re-approach Angle')
     addctx('Pass reason', 'Pass Reason', 'Structural or Fixable', 'Disqualifier')
     # structured intro paths (synthesized 'ways in')
+    # Guard: sheet warm-path columns sometimes hold the TARGET's own LinkedIn
+    # (the partner at the fund), which is a contact, not a relationship. Detect
+    # that, attach the URL to the person instead, and drop the bogus path.
     paths = []
+    def _person_key_of(via):
+        m = re.search(r'linkedin\.com/in/([^/?#]+)', via, re.I)
+        cand = slug(m.group(1)) if m else slug(via)
+        cand = cand.replace('-', '')
+        if not cand: return None
+        for k in pseen:
+            kk = k.replace('-', '')
+            if kk and (kk == cand or kk in cand or cand in kk):
+                return k
+        return None
+    def add_path(via, kind, note):
+        pk = _person_key_of(via)
+        if pk:
+            m = re.search(r'https?://\S+', via)
+            if m:
+                for p0 in ppl:
+                    if not p0.get('tbd') and slug(p0['n']) == pk and not p0.get('li'):
+                        p0['li'] = m.group(0).rstrip('|,; ')
+            return
+        paths.append({'via': via[:120], 'kind': kind, 'note': note})
     wip = col(r, 'Warm Intro Paths')
-    if wip: paths.append({'via': wip[:120], 'kind': 'warm', 'note': 'from pipeline sheet'})
+    if wip: add_path(wip, 'warm', 'listed as a warm intro path in the sheet')
     intro_from = col(r, 'Intro From (existing)')
-    if intro_from: paths.append({'via': intro_from[:120], 'kind': 'existing', 'note': 'has introduced us before'})
+    if intro_from: add_path(intro_from, 'existing', 'has introduced us before')
     crm_conn = col(r, 'CRM Connector')
-    if crm_conn: paths.append({'via': crm_conn[:120], 'kind': 'existing', 'note': 'connector in Cams CRM'})
+    if crm_conn: add_path(crm_conn, 'existing', 'connector in Cams CRM')
     nfx_conn_col = col(r, 'NFX Connector')
     nfx_strength_col = col(r, 'NFX Intro Strength')
     if nfx_conn_col and not nfx:
