@@ -1355,7 +1355,7 @@ function pathCellHtml(p){
 function personMenuHtml(p){
   return `<div class="dd dd--row">
     <button type="button" class="dd-btn icon-sq" title="Actions">${DOTS_ICON}</button>
-    <div class="dd-menu" style="min-width:200px">
+    <div class="dd-menu" style="left:auto;right:0;min-width:200px">
       <button type="button" class="dd-item" data-rowact="fusub:${p.id}">Schedule Follow Up <span style="margin-left:auto;color:var(--muted-foreground)">\u203a</span></button>
       <button type="button" class="dd-item" data-rowact="psent:${p.id}">Mark as Sent</button>
       <button type="button" class="dd-item" data-rowact="pdone:${p.id}">Mark as Done</button>
@@ -1452,10 +1452,6 @@ function personSubRows(f){
     const due = personFollowUp(p);
     return `<tr class="sub-row ${isExcluded(p)?'excluded':''}" data-person="${p.id}">
       <td class="sub-tick">↳</td>
-      <td><div class="row-actions" style="justify-content:flex-start">
-        ${personMenuHtml(p)}
-        <button class="icon-sq" data-openperson="${p.id}" title="Open person">${OPEN_ICON}</button>
-      </div></td>
       <td><div class="fund-cell" style="min-width:140px">
         <span class="fund-name" style="font-size:13px">${p.tbd
           ? `<span style="color:var(--grey-1)">${esc(p.title)}</span> <span class="pill pill--needs">Needs name</span>`
@@ -1470,6 +1466,10 @@ function personSubRows(f){
         ${due ? `<span class="pill ${due.cls}">Follow up · ${due.label}</span>` : ''}
       </div></td>
       <td class="hide-md"></td>
+      <td style="text-align:right"><div class="row-actions">
+        ${personMenuHtml(p)}
+        <button class="icon-sq" data-openperson="${p.id}" title="Open person">${OPEN_ICON}</button>
+      </div></td>
     </tr>`;
   }).join('') + `
     <tr class="sub-row add-person-row" data-addperson="${f.id}">
@@ -1481,7 +1481,6 @@ function personSubRows(f){
 function renderFundsTable(){
   $('tableHead').innerHTML = `<tr>
     <th style="width:34px"><input type="checkbox" class="row-check" id="checkAll"></th>
-    <th style="width:112px"></th>
     <th class="sortable" data-hsort="name">Fund${hArrow('name')}</th>
     <th class="sortable hide-md" data-hsort="profile">Profile${hArrow('profile')}</th>
     <th class="sortable" data-hsort="fit">Fit${hArrow('fit')}</th>
@@ -1489,6 +1488,7 @@ function renderFundsTable(){
     <th class="hide-md">Why it fits</th>
     <th class="sortable" data-hsort="stage">Stage${hArrow('stage')}</th>
     <th class="sortable" data-hsort="people">People${hArrow('people')}</th>
+    <th style="width:112px"></th>
   </tr>`;
   const rows = visibleFunds();
   const shown = rows.slice(0, renderCap);
@@ -1498,20 +1498,6 @@ function renderFundsTable(){
     const open = expandedFunds.has(f.id);
     return `<tr data-fundrow="${f.id}" class="${selected.has(f.id)?'selected':''} ${open?'expanded':''} ${fundArchiveView?'arch-dim':''}">
       <td><input type="checkbox" class="row-check" data-check="${f.id}" ${selected.has(f.id)?'checked':''}></td>
-      <td><div class="row-actions" style="justify-content:flex-start">
-        ${fundArchiveView
-          ? `<button class="icon-sq icon-sq--on" data-fundrestore="${f.id}" title="Done - click to restore">${DONE_ICON}</button>`
-          : `<button class="icon-sq" data-funddone="${f.id}" title="Mark done">${DONE_ICON}</button>`}
-        <div class="dd dd--row">
-          <button type="button" class="dd-btn icon-sq" title="More actions">${DOTS_ICON}</button>
-          <div class="dd-menu" style="left:0;right:auto">
-            <button type="button" class="dd-item" data-rowact="info:${f.id}">More info</button>
-            <button type="button" class="dd-item" data-rowact="addperson:${f.id}">+ Add person</button>
-            <button type="button" class="dd-item" data-rowact="remove:${f.id}" style="color:var(--destructive)">Remove fund</button>
-          </div>
-        </div>
-        <button class="icon-sq" data-openfundinfo="${f.id}" title="Open fund">${OPEN_ICON}</button>
-      </div></td>
       <td><div class="fund-cell">
         <span class="fund-name">${CHEV}${esc(f.name)}</span>
         ${f.site ? `<a class="fund-site" href="https://${esc(f.site)}" target="_blank" rel="noopener" data-noopen title="Open website">${esc(f.site)}</a>` : ''}
@@ -1529,6 +1515,20 @@ function renderFundsTable(){
         <button class="add-ava" data-addperson="${f.id}" title="Add person to ${esc(f.name)}">${PLUS_ICON}</button>
         ${tbd ? `<span class="pill pill--needs">${tbd} unmapped</span>` : ''}
       </div></td>
+      <td style="text-align:right"><div class="row-actions">
+        ${fundArchiveView
+          ? `<button class="icon-sq icon-sq--on" data-fundrestore="${f.id}" title="Done - click to restore">${DONE_ICON}</button>`
+          : `<button class="icon-sq" data-funddone="${f.id}" title="Mark done">${DONE_ICON}</button>`}
+        <div class="dd dd--row">
+          <button type="button" class="dd-btn icon-sq" title="More actions">${DOTS_ICON}</button>
+          <div class="dd-menu">
+            <button type="button" class="dd-item" data-rowact="info:${f.id}">More info</button>
+            <button type="button" class="dd-item" data-rowact="addperson:${f.id}">+ Add person</button>
+            <button type="button" class="dd-item" data-rowact="remove:${f.id}" style="color:var(--destructive)">Remove fund</button>
+          </div>
+        </div>
+        <button class="icon-sq" data-openfundinfo="${f.id}" title="Open fund">${OPEN_ICON}</button>
+      </div></td>
     </tr>
     ${open ? personSubRows(f) : ''}`;
   }).join('');
@@ -1542,12 +1542,12 @@ function renderFundsTable(){
 function renderPeopleTable(){
   $('tableHead').innerHTML = `<tr>
     <th style="width:34px"><input type="checkbox" class="row-check" id="checkAll"></th>
-    <th style="width:76px"></th>
     <th class="sortable" data-hsort="name">Person${hArrow('name')}</th>
     <th class="sortable" data-hsort="fit">Fund fit${hArrow('fit')}</th>
     <th class="sortable hide-md" data-hsort="check">Check${hArrow('check')}</th>
     <th class="sortable" data-hsort="path">Path in${hArrow('path')}</th>
     <th class="sortable" data-hsort="status">Status${hArrow('status')}</th>
+    <th style="width:76px"></th>
     <th style="width:30px"></th>
   </tr>`;
   const rows = visiblePeople();
@@ -1557,7 +1557,6 @@ function renderPeopleTable(){
     const due = personFollowUp(p);
     return `<tr data-person="${p.id}" class="${selected.has(p.id)?'selected':''} ${fundArchiveView?'arch-dim':''}">
       <td><input type="checkbox" class="row-check" data-check="${p.id}" ${selected.has(p.id)?'checked':''}></td>
-      <td><div class="row-actions" style="justify-content:flex-start">${fundArchiveView ? pArchBtnHtml(p) : personMenuHtml(p)}</div></td>
       <td><div class="fund-cell">
         <span class="fund-name">${p.tbd?`<span style="color:var(--grey-1)">${esc(p.title)}</span> <span class="pill pill--needs">Needs name</span>`:esc(p.name)}</span>
         <span class="fund-sub">${p.tbd?'':esc(p.title)+' · '}${esc(f.name)}</span>
@@ -1569,6 +1568,7 @@ function renderPeopleTable(){
         ${statusDdHtml(p)}
         ${due ? `<span class="pill ${due.cls}">Follow up · ${due.label}</span>` : ''}
       </div></td>
+      <td><div class="row-actions">${fundArchiveView ? pArchBtnHtml(p) : personMenuHtml(p)}</div></td>
       <td><a class="li-link" href="${esc(personLi(p))}" target="_blank" rel="noopener" title="Open LinkedIn" data-noopen>${LI_ICON}</a></td>
     </tr>`;
   }).join('');
