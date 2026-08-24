@@ -242,7 +242,19 @@ for r in rows:
     addctx('Action needed', 'ACTION NEEDED', 'Next Action')
     addctx('Re-approach', 'Re-approach Verdict', 'Verdict Confidence', 'Re-approach Angle')
     addctx('Pass reason', 'Pass Reason', 'Structural or Fixable', 'Disqualifier')
-    addctx('Warm paths', 'Warm Intro Paths', 'Intro From (existing)', 'CRM Connector')
+    # structured intro paths (synthesized 'ways in')
+    paths = []
+    wip = col(r, 'Warm Intro Paths')
+    if wip: paths.append({'via': wip[:120], 'kind': 'warm', 'note': 'from pipeline sheet'})
+    intro_from = col(r, 'Intro From (existing)')
+    if intro_from: paths.append({'via': intro_from[:120], 'kind': 'existing', 'note': 'has introduced us before'})
+    crm_conn = col(r, 'CRM Connector')
+    if crm_conn: paths.append({'via': crm_conn[:120], 'kind': 'existing', 'note': 'connector in Cams CRM'})
+    nfx_conn_col = col(r, 'NFX Connector')
+    nfx_strength_col = col(r, 'NFX Intro Strength')
+    if nfx_conn_col and not nfx:
+        note = ('NFX strength ' + nfx_strength_col.rstrip('.0')) if nfx_strength_col else 'NFX Signal'
+        paths.append({'via': nfx_conn_col[:120], 'kind': 'nfx', 'note': note})
     addctx('Pitched as', 'Pitched As (era)', 'Email Round')
     addctx('New fund', 'New Fund 2025-26', 'New Fund Detail')
     addctx('Sheet notes', 'Notes')
@@ -268,6 +280,7 @@ for r in rows:
         if not f.get('check') and cf.get('check'): f['check'] = cf['check']
         if cf.get('region') and f['region'] in ('—', ''): f['region'] = cf['region']
         if cf.get('type'): f['type'] = cf['type']
+    if paths: f['paths'] = paths
     if stage0: f['stage0'] = stage0
     if archived0: f['archived0'] = True
     f['_nn'] = nn; f['_slug'] = slug(name); f['_tier_n'] = tier_n
@@ -316,6 +329,10 @@ for f in funds:
             if f.get('stage0') and not surv.get('stage0'): surv['stage0'] = f['stage0']
             if surv.get('stage0'): surv.pop('archived0', None)
             elif f.get('archived0'): surv['archived0'] = True
+            pv = {(x['via'], x['kind']) for x in surv.get('paths', [])}
+            for x in f.get('paths', []):
+                if (x['via'], x['kind']) not in pv:
+                    surv.setdefault('paths', []).append(x); pv.add((x['via'], x['kind']))
             sec = list(dict.fromkeys((surv.get('sectors') or []) + (f.get('sectors') or [])))[:3]
             surv['sectors'] = sec
             have = {slug(p0['n']) for p0 in surv['people'] if not p0.get('tbd')}
