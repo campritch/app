@@ -678,6 +678,20 @@ Acme Ventures, Jane Doe, Partner, https://linkedin.com/in/janedoe, Seed, $250k-$
         <button class="btn-primary" id="uploadBtn">Upload Connections.csv</button>
         <button class="btn-ghost" id="sampleBtn">Try with sample data</button>
         <button class="btn-ghost" id="addConnectorBtn">+ Add connector</button>
+        <button class="btn-ghost" id="scanImportBtn">Import scan results</button>
+      </div>
+      <div id="scanWrap" style="display:none">
+        <div class="tpl-card" style="gap:10px">
+          <span class="d-label">Paste connection-scan results</span>
+          <textarea class="tpl-body" id="scanArea" style="min-height:120px" placeholder="Connector, Target person or fund, Note, Connector LinkedIn
+Eric Bahn, James Currier, 14 mutuals, https://linkedin.com/in/ericbahn
+Dana Whitfield, Overline, worked together at Techstars,"></textarea>
+          <div class="token-hint">One row per connector-to-target edge. Targets resolve by person name first, then fund name (matching the whole fund's people). Unknown connectors are created automatically.</div>
+          <div class="d-row">
+            <button class="btn-primary" id="scanImport">Import edges</button>
+            <button class="btn-ghost" id="scanCancel">Cancel</button>
+          </div>
+        </div>
       </div>
       <div id="connAddWrap" style="display:none">
         <div class="tpl-card" style="gap:12px">
@@ -1141,6 +1155,12 @@ function rebuild(){
     }
   });
   FUND_NORMS = FUNDS.map(f => ({ f, norm: normOrg(f.name) })).filter(x => x.norm);
+  // Persisted match additions for the built-in connectors (their objects are code constants).
+  Object.entries(state.connMatchExtra || {}).forEach(([cid, ov]) => {
+    const c = SEED_CONNECTORS.find(x => x.id === cid);
+    if (!c) return;
+    (ov.matches || []).forEach(pid => { if (!c.matches.includes(pid)) c.matches.push(pid); });
+  });
 }
 
 function score(f){ return f.dims ? PITCH_DIMS.reduce((s,[k,,w]) => s + (f.dims[k]||0)*w, 0) : -1; }
@@ -1253,6 +1273,7 @@ state.liConnections = state.liConnections || [];
 state.vars = state.vars || { ...DEFAULT_VARS };
 state.funds = state.funds || {};
 state.settings = state.settings || { autoFollowDirect: 0, autoFollowAsk: 0 };
+state.connMatchExtra = state.connMatchExtra || {};
 // Migrate the old target-list flag into the pipeline.
 Object.values(state.funds).forEach(fs => { if (fs.target && !fs.stage) fs.stage = 'target'; delete fs.target; });
 // v2: deck-aligned templates + round variables (real GMV/revenue numbers).
@@ -1268,6 +1289,22 @@ function CS(id){ return state.connectors[id] || (state.connectors[id] = {}); }
 
 function allConnectors(){ return SEED_CONNECTORS.concat(state.extraConnectors || []); }
 function connectorById(id){ return allConnectors().find(c => c.id === id); }
+function isSeedConnector(id){ return SEED_CONNECTORS.some(c => c.id === id); }
+function addMatch(c, pid, note){
+  if (!c.matches.includes(pid)) c.matches.push(pid);
+  if (isSeedConnector(c.id)) {
+    const ov = state.connMatchExtra[c.id] || (state.connMatchExtra[c.id] = { matches: [], notes: {} });
+    if (!ov.matches.includes(pid)) ov.matches.push(pid);
+    if (note) { ov.notes = ov.notes || {}; ov.notes[pid] = note; }
+  } else if (note) {
+    c.matchNotes = c.matchNotes || {};
+    c.matchNotes[pid] = note;
+  }
+}
+function matchNote(c, pid){
+  const ov = state.connMatchExtra[c.id];
+  return (ov && ov.notes && ov.notes[pid]) || (c.matchNotes && c.matchNotes[pid]) || '';
+}
 function connectorsFor(personId){ return allConnectors().filter(c => (c.matches||[]).includes(personId)); }
 function templates(){
   if (!state.templates) { state.templates = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES)); save(); }
@@ -2430,7 +2467,7 @@ function openConnector(id, preselect){
           return `<label class="check-row">
             <input type="checkbox" data-inc="${p.id}" ${checkedSet.has(p.id)?'checked':''}>
             <span><b>${p.tbd?esc(p.title):esc(firstName(p.name))}</b> from ${esc(f.name)}</span>
-            <span class="cr-sub">${grade(f)} · ${P_STATUS[pStatus(p)]}${isExcluded(p)?' · Archived':''}</span>
+            <span class="cr-sub">${grade(f)} · ${P_STATUS[pStatus(p)]}${matchNote(c, p.id) ? ' · ' + esc(matchNote(c, p.id)) : ''}${isExcluded(p)?' · Archived':''}</span>
           </label>`;
         }).join('') : '<div class="info-card">No matches yet. Add one, or sync LinkedIn to match automatically.</div>'}
       </div>
@@ -2455,9 +2492,8 @@ function openConnector(id, preselect){
     const ql = q.toLowerCase();
     const hit = PEOPLE.find(p => (p.name && p.name.toLowerCase().includes(ql)) || FUND_BY_ID[p.fundId].name.toLowerCase().includes(ql));
     if (!hit) { toast('No person or fund matched "' + q + '".'); return; }
-    if (!c.matches.includes(hit.id)) c.matches.push(hit.id);
-    if (state.extraConnectors.includes(c)) save();
-    render(); openConnector(id);
+    addMatch(c, hit.id);
+    save(); render(); openConnector(id);
   };
   $('dNotes').oninput = e => { st.notes = e.target.value; save(); };
   $('dMsg').oninput = e => { st.draft = e.target.value; save(); };
@@ -2764,6 +2800,16 @@ $('addConnectorBtn').addEventListener('click', () => {
   if (w.style.display === 'block') $('cnName').focus();
 });
 $('cnCancel').addEventListener('click', () => { $('connAddWrap').style.display = 'none'; });
+$('scanImportBtn').addEventListener('click', () => {
+  const w = $('scanWrap');
+  w.style.display = w.style.display === 'none' ? 'block' : 'none';
+});
+$('scanCancel').addEventListener('click', () => { $('scanWrap').style.display = 'none'; });
+$('scanImport').addEventListener('click', () => {
+  importScanEdges($('scanArea').value);
+  $('scanArea').value = '';
+  $('scanWrap').style.display = 'none';
+});
 $('cnCreate').addEventListener('click', () => {
   let name = $('cnName').value.trim();
   const li = $('cnLi').value.trim();
@@ -2781,6 +2827,42 @@ $('cnCreate').addEventListener('click', () => {
   save(); render(); openConnector(cid);
   toast(name + ' added. Use "+ Add match" to map who they can intro.');
 });
+
+/* Connection-scan edge import: rows of connector -> target (person or fund), with notes */
+function importScanEdges(text){
+  const lines = (text||'').split(/\r?\n/).filter(l => l.trim());
+  if (!lines.length) { toast('Nothing to import.'); return; }
+  let start = 0;
+  const h0 = csvLine(lines[0]).map(x => x.trim().toLowerCase());
+  if (h0[0] === 'connector') start = 1;
+  let edges = 0, newConn = 0;
+  const unresolved = [];
+  for (let i = start; i < lines.length; i++) {
+    const c = csvLine(lines[i]).map(x => x.trim());
+    const [connName, target, note, li] = c;
+    if (!connName || !target) continue;
+    let conn = allConnectors().find(x => x.name.toLowerCase() === connName.toLowerCase());
+    if (!conn) {
+      conn = { id: 'c_scan_' + slug(connName), name: connName, role: 'Connector', rapport: note || '', li: li || '', matches: [], source: 'scan' };
+      state.extraConnectors.push(conn);
+      newConn++;
+    } else if (li && !conn.li && !isSeedConnector(conn.id)) conn.li = li;
+    const tl = target.toLowerCase();
+    let pids = PEOPLE.filter(p => p.name && p.name.toLowerCase() === tl).map(p => p.id);
+    if (!pids.length) pids = PEOPLE.filter(p => p.name && p.name.toLowerCase().includes(tl)).map(p => p.id);
+    if (!pids.length) {
+      const f = FUNDS.find(x => normOrg(x.name) === normOrg(target));
+      if (f) pids = PEOPLE.filter(p => p.fundId === f.id).map(p => p.id);
+    }
+    if (!pids.length) { unresolved.push(target); continue; }
+    pids.forEach(pid => { addMatch(conn, pid, note || ''); edges++; });
+  }
+  const msg = `${edges} edge${edges===1?'':'s'} imported · ${newConn} new connector${newConn===1?'':'s'}` +
+    (unresolved.length ? ` · ${unresolved.length} unresolved: ${unresolved.slice(0,3).join(', ')}${unresolved.length>3?'...':''}` : '');
+  state.synced = msg;
+  save(); render();
+  toast(msg);
+}
 
 /* Fund import */
 $('fundCsvInput').addEventListener('change', e => {
