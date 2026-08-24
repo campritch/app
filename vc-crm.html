@@ -212,8 +212,8 @@
     .dd-item.on::after { content: '✓'; margin-left: auto; font-size: 12px; color: var(--muted-foreground); }
 
     /* ── Table ── */
-    .table-wrap { overflow-x: visible; }
-    table { width: 100%; border-collapse: collapse; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; min-width: 1160px; border-collapse: collapse; }
     thead th {
       text-align: left; font-size: 12.5px; font-weight: 500;
       color: var(--muted-foreground); text-transform: none; letter-spacing: 0;
@@ -300,6 +300,11 @@
       border-radius: 9999px; font-size: 11px; font-weight: 500;
       background: var(--secondary); color: var(--foreground); white-space: nowrap;
     }
+    .fit-brief { display: flex; gap: 14px; align-items: flex-start; padding: 6px 4px 6px 0; }
+    .fit-brief__text { font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; max-width: 760px; }
+    .fit-brief__text b { color: var(--foreground); }
+    .fit-brief__ai { margin-top: 8px; padding: 10px 12px; background: rgb(244 244 245 / 0.6); border-radius: 8px; }
+    .fit-brief button { margin-left: auto; }
     .path-text { font-size: 12px; font-weight: 500; color: var(--foreground); line-height: 1.4; white-space: nowrap; }
     .path-text b { font-weight: 600; }
     .path-text .sub { color: var(--muted-foreground); font-weight: 400; font-size: 11.5px; }
@@ -879,6 +884,11 @@ function rebuild(){
     }
   });
   FUND_NORMS = FUNDS.map(f => ({ f, norm: normOrg(f.name) })).filter(x => x.norm);
+  // AI-proposed dims for previously ungraded funds, persisted in state.
+  FUNDS.forEach(f => {
+    const st = state.funds && state.funds[f.id];
+    if (!f.dims && st && st.aiDims) f.dims = st.aiDims;
+  });
   // Persisted match additions for the built-in connectors (their objects are code constants).
   Object.entries(state.connMatchExtra || {}).forEach(([cid, ov]) => {
     const c = SEED_CONNECTORS.concat(DATA_CONNECTORS).find(x => x.id === cid);
@@ -1109,10 +1119,16 @@ function pathInfo(p){
   const f = FUND_BY_ID[p.fundId] || {};
   const existing = (f.paths || []).filter(x => x.kind !== 'nfx');
   const nfxPaths = (f.paths || []).filter(x => x.kind === 'nfx');
-  const connectors = connectorsFor(p.id).slice().sort((a,b) => nfxStrengthOf(b, p.id) - nfxStrengthOf(a, p.id));
+  const all = connectorsFor(p.id);
+  const connectors = all.filter(c => c.source !== 'nfx');
+  const nfxConnectors = all.filter(c => c.source === 'nfx').sort((a,b) => nfxStrengthOf(b, p.id) - nfxStrengthOf(a, p.id));
   const direct = !!PS(p.id).direct1st;
-  const kind = direct ? 'direct' : existing.length ? 'existing' : (connectors.length || nfxPaths.length) ? 'connector' : 'none';
-  return { kind, direct, existing, connectors, nfxPaths };
+  const kind = direct ? 'direct'
+    : existing.length ? 'existing'
+    : connectors.length ? 'connector'
+    : (nfxConnectors.length || nfxPaths.length) ? 'nfx'
+    : 'none';
+  return { kind, direct, existing, connectors, nfxConnectors, nfxPaths };
 }
 function prettyVia(via){
   const m = (via || '').match(/linkedin\.com\/in\/([^/?#]+)/i);
@@ -1133,9 +1149,11 @@ function fundConnMap(){
   allConnectors().forEach(c => (c.matches || []).forEach(m => {
     const p = PERSON_BY_ID[m];
     if (!p) return;
+    const slot = c.source === 'nfx' ? 'nfx' : 'real';
     const st = nfxStrengthOf(c, m);
-    const cur = fundConnMemo[p.fundId];
-    if (!cur) fundConnMemo[p.fundId] = { c, st, n: 1 };
+    const entry = fundConnMemo[p.fundId] || (fundConnMemo[p.fundId] = {});
+    const cur = entry[slot];
+    if (!cur) entry[slot] = { c, st, n: 1 };
     else { cur.n++; if (st > cur.st) { cur.c = c; cur.st = st; } }
   }));
   return fundConnMemo;
@@ -1145,25 +1163,23 @@ function fundPathInfo(f){
   if (ppl.some(p => PS(p.id).direct1st)) return { kind: 'direct' };
   const existing = (f.paths || []).filter(x => x.kind !== 'nfx');
   if (existing.length) return { kind: 'existing', e: existing[0], extra: existing.length - 1 };
-  const cm = fundConnMap()[f.id];
-  if (cm) return { kind: 'connector', c: cm.c, st: cm.st, n: cm.n };
+  const cm = fundConnMap()[f.id] || {};
+  if (cm.real) return { kind: 'connector', c: cm.real.c, n: cm.real.n };
   const nfxOnly = (f.paths || []).filter(x => x.kind === 'nfx');
-  if (nfxOnly.length) return { kind: 'connector', via: nfxOnly[0].via, note: nfxOnly[0].note };
+  if (cm.nfx || nfxOnly.length) return { kind: 'nfx' };
   return { kind: 'none' };
 }
 function fundPathCellHtml(f){
   const pi = fundPathInfo(f);
   if (pi.kind === 'direct') return `<div class="path-text"><b>Direct · 1st°</b></div>`;
   if (pi.kind === 'existing') return `<div class="path-text" title="${esc(pi.e.via)} — ${esc(pi.e.note)}">${pi.e.kind === 'existing' ? 'Existing' : 'Warm path'} · ${esc(prettyVia(pi.e.via)).slice(0, 34)}</div>`;
-  if (pi.kind === 'connector') {
-    if (pi.c) return `<div class="path-text"><span class="link" data-openconn="${pi.c.id}">via ${esc(firstName(pi.c.name))}</span>${pi.st ? ' · NFX ' + pi.st : ''}</div>`;
-    return `<div class="path-text" title="${esc(pi.note || '')}">via ${esc(prettyVia(pathShort(pi.via)))} · NFX</div>`;
-  }
+  if (pi.kind === 'connector') return `<div class="path-text"><span class="link" data-openconn="${pi.c.id}">via ${esc(pi.c.name)}</span></div>`;
+  if (pi.kind === 'nfx') return `<div class="path-text muted" title="Investor intro routes via NFX Signal - open the side panel">NFX only</div>`;
   return `<div class="path-text muted">No path</div>`;
 }
 function fundPathRank(f){
   const k = fundPathInfo(f).kind;
-  return k === 'direct' ? 0 : k === 'existing' ? 1 : k === 'connector' ? 2 : 3;
+  return k === 'direct' ? 0 : k === 'existing' ? 1 : k === 'connector' ? 2 : k === 'nfx' ? 3 : 4;
 }
 function pathShort(via){
   return prettyVia(via || '').split(/[(,/;+&]| and /)[0].trim().split(' ').slice(0, 2).join(' ');
@@ -1179,8 +1195,8 @@ const FILTER_DEFS = [
   { key:'check', label:'Check size', options: CHECK_BUCKETS.map(b=>b[0]) },
   { key:'region', label:'Location', options:() => [...new Set(FUNDS.map(f=>f.region||'—'))].sort() },
   { key:'tier', label:'Tier', options:() => [...new Set(FUNDS.map(f=>f.tier||'—'))].sort() },
-  { key:'fpath', label:'Way in', options:['Direct (1st°)','Existing relationship','Connector / NFX path','No path'], fundsOnly:true },
-  { key:'path', label:'Path', options:['Direct (1st°)','Existing relationship','Connector path','No path yet','Needs name'], peopleOnly:true },
+  { key:'fpath', label:'Way in', options:['Direct (1st°)','Existing relationship','LinkedIn connector','NFX only','No path'], fundsOnly:true },
+  { key:'path', label:'Path', options:['Direct (1st°)','Existing relationship','Connector path','NFX only','No path yet','Needs name'], peopleOnly:true },
   { key:'status', label:'Status', options: Object.values(P_STATUS), peopleOnly:true }
 ];
 const SORT_OPTS = [
@@ -1210,7 +1226,7 @@ function fundMatchesFilters(f){
     if (def.key === 'tier' && !sel.has(f.tier||'—')) return false;
     if (def.key === 'fpath') {
       const k = fundPathInfo(f).kind;
-      const label = k === 'direct' ? 'Direct (1st°)' : k === 'existing' ? 'Existing relationship' : k === 'connector' ? 'Connector / NFX path' : 'No path';
+      const label = k === 'direct' ? 'Direct (1st°)' : k === 'existing' ? 'Existing relationship' : k === 'connector' ? 'LinkedIn connector' : k === 'nfx' ? 'NFX only' : 'No path';
       if (!sel.has(label)) return false;
     }
     if (def.key === 'check') {
@@ -1230,6 +1246,7 @@ function personMatches(p){
     const pi = pathInfo(p);
     const tags = [];
     if (pi.kind === 'connector') tags.push('Connector path');
+    if (pi.kind === 'nfx') tags.push('NFX only');
     if (pi.kind === 'existing') tags.push('Existing relationship');
     if (pi.kind === 'direct') tags.push('Direct (1st°)');
     if (pi.kind === 'none') tags.push('No path yet');
@@ -1245,7 +1262,7 @@ function personMatches(p){
 }
 function visiblePeople(){
   let rows = PEOPLE.filter(p => personMatches(p) && !isFundArchived(FUND_BY_ID[p.fundId]) && isExcluded(p) === fundArchiveView);
-  const pathRank = p => { const pi = pathInfo(p); return pi.kind==='direct'?0:pi.kind==='existing'?1:pi.kind==='connector'?2:3; };
+  const pathRank = p => { const pi = pathInfo(p); return pi.kind==='direct'?0:pi.kind==='existing'?1:pi.kind==='connector'?2:pi.kind==='nfx'?3:4; };
   if (headSort.key) {
     const k = headSort.key, d = headSort.dir;
     const stOrder = Object.keys(P_STATUS);
@@ -1390,14 +1407,10 @@ function pathCellHtml(p){
     return `<div class="path-text" title="${esc(e.via)} — ${esc(e.note)}">${e.kind === 'existing' ? 'Existing' : 'Warm path'} · ${esc(prettyVia(e.via)).slice(0, 34)}${extra > 0 ? `<div class="sub">+${extra} more</div>` : ''}</div>`;
   }
   if (pi.kind === 'connector') {
-    if (pi.connectors.length) {
-      const c = pi.connectors[0];
-      const stg = nfxStrengthOf(c, p.id);
-      return `<div class="path-text"><span class="link" data-openconn="${c.id}">via ${esc(firstName(c.name))}</span>${stg ? ' · NFX ' + stg : ''}${pi.connectors.length > 1 ? `<div class="sub">+${pi.connectors.length - 1} more</div>` : ''}</div>`;
-    }
-    const n = pi.nfxPaths[0];
-    return `<div class="path-text" title="${esc(n.note)}">via ${esc(prettyVia(pathShort(n.via)))} · NFX</div>`;
+    const c = pi.connectors[0];
+    return `<div class="path-text"><span class="link" data-openconn="${c.id}">via ${esc(c.name)}</span>${pi.connectors.length > 1 ? `<div class="sub">+${pi.connectors.length - 1} more</div>` : ''}</div>`;
   }
+  if (pi.kind === 'nfx') return `<div class="path-text muted" title="Investor intro routes via NFX Signal - open the side panel">NFX only</div>`;
   return `<div class="path-text muted">No path yet</div>`;
 }
 function personMenuHtml(p){
@@ -1497,7 +1510,19 @@ function render(){
 
 function personSubRows(f){
   const ppl = PEOPLE.filter(p => p.fundId === f.id && !isExcluded(p));
-  return ppl.map(p => {
+  const st = FS(f.id);
+  const brief = `<tr class="sub-row fit-brief-row">
+    <td class="sub-tick"></td>
+    <td colspan="9"><div class="fit-brief">
+      <div class="fit-brief__text">
+        ${f.dims ? `<b>${grade(f)} · ${Math.round(score(f))}/100.</b> ` : `<b>Not graded yet.</b> `}${esc(f.looking || 'No thesis notes on this fund yet.')} ${esc(fundFitLine(f))}
+        ${f.why ? `<br><b>Our angle:</b> ${esc(f.why)}` : ''}
+        ${st.aiBrief ? `<div class="fit-brief__ai"><b>AI read${st.aiOneLiner ? ' - ' + esc(st.aiOneLiner) : ''}:</b> ${esc(st.aiBrief)}</div>` : ''}
+      </div>
+      <button class="mini-btn" data-aifit="${f.id}" style="flex-shrink:0">${st.aiBrief ? 'Re-run AI fit read' : 'Run AI fit read'}</button>
+    </div></td>
+  </tr>`;
+  return brief + ppl.map(p => {
     const due = personFollowUp(p);
     return `<tr class="sub-row ${isExcluded(p)?'excluded':''}" data-person="${p.id}">
       <td class="sub-tick">↳</td>
@@ -1985,6 +2010,35 @@ function importFunds(text){
   toast(state.fundImportMsg);
 }
 
+/* ── AI fit read (calls api/vc-fit, Claude-backed on the deployed wiki) ── */
+async function runAiFit(fid, btn){
+  const f = FUND_BY_ID[fid];
+  if (!f) return;
+  if (btn) { btn.textContent = 'Thinking...'; btn.disabled = true; }
+  try {
+    const r = await fetch('/api/vc-fit', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fund: {
+        name: f.name, site: f.site, type: f.type, region: f.region, check: f.check,
+        sectors: f.sectors, tier: f.tier, looking: f.looking, dims: f.dims || null,
+        people: (PEOPLE_BY_FUND[fid] || []).map(p => ({ n: p.name, t: p.title })),
+        ctx: f.ctx || [], paths: f.paths || []
+      }})
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    const st = FS(fid);
+    st.aiBrief = data.brief || '';
+    st.aiOneLiner = data.one_liner || '';
+    if (!f.dims && data.dims) { f.dims = data.dims; st.aiDims = data.dims; }
+    save(); render();
+    toast('AI fit read done' + (data.one_liner ? ': ' + data.one_liner : '.'));
+  } catch (err) {
+    if (btn) { btn.textContent = 'Run AI fit read'; btn.disabled = false; }
+    toast('AI fit read runs on the deployed wiki (needs the API key). ' + String(err.message || err));
+  }
+}
+
 /* ── Message composer (shared) ── */
 function composerHtml(audience, draft){
   const ordered = templates().map((t,i)=>({t,i})).sort((a,b) => (a.t.audience===audience?0:1)-(b.t.audience===audience?0:1));
@@ -2063,14 +2117,19 @@ function openPerson(id){
       <span class="d-label">Ways in${pi.kind !== 'none' ? ' (best first)' : ''}</span>
       ${pi.direct ? `<div class="info-card"><b>Direct connection (1st°).</b> Message them on LinkedIn or email straight away - no intro needed.</div>` : ''}
       ${pi.existing.map(e => `<div class="info-card"><b>${esc(prettyVia(e.via))}</b> <span class="pill pill--type" style="margin-left:4px">${e.kind === 'existing' ? 'Existing' : 'Warm path'}</span>${viaUrl(e.via) ? ` · <a href="${esc(viaUrl(e.via))}" target="_blank" rel="noopener" style="text-decoration:underline">profile</a>` : ''}<br>${esc(e.note)}</div>`).join('')}
-      ${pi.connectors.map(c => {
+      ${pi.connectors.map(c => `<div class="d-row" style="justify-content:space-between;border:1px solid var(--border);border-radius:10px;padding:10px 14px">
+          <div><div style="font-weight:600;font-size:13px">${esc(c.name)}</div><div style="font-size:11.5px;color:var(--muted-foreground)">${esc(c.role||'')}</div></div>
+          <button class="mini-btn" data-askvia="${c.id}">Draft ask</button>
+        </div>`).join('')}
+      ${(pi.nfxConnectors.length || pi.nfxPaths.length) ? `<span class="d-label" style="color:var(--muted-foreground);margin-top:4px">NFX Signal routes - other investors who can intro (weakest option; use only if nothing warmer exists)</span>` : ''}
+      ${pi.nfxConnectors.map(c => {
         const stg = nfxStrengthOf(c, p.id);
-        return `<div class="d-row" style="justify-content:space-between;border:1px solid var(--border);border-radius:10px;padding:10px 14px">
-          <div><div style="font-weight:600;font-size:13px">${esc(c.name)}</div><div style="font-size:11.5px;color:var(--muted-foreground)">${esc(c.role||'')}${stg ? ' · NFX strength ' + stg : ''}</div></div>
+        return `<div class="d-row" style="justify-content:space-between;border:1px solid var(--border);border-radius:10px;padding:10px 14px;opacity:0.75">
+          <div><div style="font-weight:600;font-size:13px">${esc(c.name)}</div><div style="font-size:11.5px;color:var(--muted-foreground)">${esc(c.role||'')}${stg ? ' · strength ' + stg : ''}</div></div>
           <button class="mini-btn" data-askvia="${c.id}">Draft ask</button>
         </div>`;
       }).join('')}
-      ${(!pi.direct && !pi.existing.length && !pi.connectors.length) ? pi.nfxPaths.map(e => `<div class="info-card"><b>${esc(e.via)}</b> · NFX — ${esc(e.note)}</div>`).join('') : ''}
+      ${pi.nfxPaths.map(e => `<div class="info-card" style="opacity:0.75"><b>${esc(prettyVia(e.via))}</b> · NFX — ${esc(e.note)}</div>`).join('')}
       ${pi.kind === 'none' ? `<div class="info-card">No path found yet. Sync your LinkedIn, add a connector, or go direct below.</div>` : ''}
     </div>
 
@@ -2185,21 +2244,26 @@ function openFund(id){
     ${f.looking ? `<div class="d-section"><span class="d-label">About the fund</span><div class="info-card">${esc(f.looking)}</div></div>` : ''}`}
     ${(() => {
       const pids = ppl.map(x => x.id);
-      const conns = allConnectors().filter(c => (c.matches||[]).some(m => pids.includes(m)));
+      const allc = allConnectors().filter(c => (c.matches||[]).some(m => pids.includes(m)));
+      const conns = allc.filter(c => c.source !== 'nfx');
+      const nfxConns = allc.filter(c => c.source === 'nfx');
       const ex = (f.paths||[]).filter(x => x.kind !== 'nfx');
       const nfxOnly = (f.paths||[]).filter(x => x.kind === 'nfx');
-      if (!conns.length && !ex.length && !nfxOnly.length) return '';
+      if (!allc.length && !ex.length && !nfxOnly.length) return '';
+      const connRow = (c, dim) => {
+        const pid = (c.matches||[]).find(m => pids.includes(m));
+        const stg = nfxStrengthOf(c, pid);
+        return `<div class="d-row" style="justify-content:space-between;border:1px solid var(--border);border-radius:10px;padding:10px 14px${dim?';opacity:0.75':''}">
+          <div><div style="font-weight:600;font-size:13px">${esc(c.name)}</div><div style="font-size:11.5px;color:var(--muted-foreground)">${esc(c.role||'')}${stg ? ' · strength ' + stg : ''}</div></div>
+          <button class="mini-btn" data-askvia2="${c.id}:${pid}">Draft ask</button>
+        </div>`;
+      };
       return `<div class="d-section"><span class="d-label">Ways in (best first)</span>
         ${ex.map(e => `<div class="info-card"><b>${esc(prettyVia(e.via))}</b> <span class="pill pill--type" style="margin-left:4px">${e.kind === 'existing' ? 'Existing' : 'Warm path'}</span>${viaUrl(e.via) ? ` · <a href="${esc(viaUrl(e.via))}" target="_blank" rel="noopener" style="text-decoration:underline">profile</a>` : ''}<br>${esc(e.note)}</div>`).join('')}
-        ${conns.map(c => {
-          const pid = (c.matches||[]).find(m => pids.includes(m));
-          const stg = nfxStrengthOf(c, pid);
-          return `<div class="d-row" style="justify-content:space-between;border:1px solid var(--border);border-radius:10px;padding:10px 14px">
-            <div><div style="font-weight:600;font-size:13px">${esc(c.name)}</div><div style="font-size:11.5px;color:var(--muted-foreground)">${esc(c.role||'')}${stg ? ' · NFX strength ' + stg : ''}</div></div>
-            <button class="mini-btn" data-askvia2="${c.id}:${pid}">Draft ask</button>
-          </div>`;
-        }).join('')}
-        ${(!ex.length && !conns.length) ? nfxOnly.map(e => `<div class="info-card"><b>${esc(e.via)}</b> · NFX — ${esc(e.note)}</div>`).join('') : ''}
+        ${conns.map(c => connRow(c, false)).join('')}
+        ${(nfxConns.length || nfxOnly.length) ? `<span class="d-label" style="color:var(--muted-foreground);margin-top:4px">NFX Signal routes - other investors who can intro (weakest option)</span>` : ''}
+        ${nfxConns.map(c => connRow(c, true)).join('')}
+        ${nfxOnly.map(e => `<div class="info-card" style="opacity:0.75"><b>${esc(prettyVia(e.via))}</b> · NFX — ${esc(e.note)}</div>`).join('')}
       </div>`;
     })()}
     ${(f.ctx && f.ctx.length) ? `
@@ -2516,7 +2580,21 @@ document.addEventListener('click', e => {
     const wasOpen = wrap.classList.contains('open');
     document.querySelectorAll('.dd.open').forEach(d => d.classList.remove('open'));
     document.querySelectorAll('.popover.open').forEach(p => p.classList.remove('open'));
-    if (!wasOpen) wrap.classList.add('open');
+    if (!wasOpen) {
+      wrap.classList.add('open');
+      // Fixed positioning so menus escape the table's horizontal scroll container.
+      const menu = wrap.querySelector('.dd-menu');
+      if (menu) {
+        const r = ddBtn.getBoundingClientRect();
+        menu.style.position = 'fixed';
+        menu.style.right = 'auto';
+        menu.style.top = (r.bottom + 6) + 'px';
+        const mw = menu.offsetWidth;
+        menu.style.left = Math.max(8, Math.min(window.innerWidth - mw - 8, r.right - mw)) + 'px';
+        const mh = menu.offsetHeight;
+        if (r.bottom + 6 + mh > window.innerHeight - 8) menu.style.top = Math.max(8, r.top - mh - 6) + 'px';
+      }
+    }
     return;
   }
   const chip = e.target.closest('[data-filter]');
@@ -2568,6 +2646,8 @@ $('tableBody').addEventListener('click', e => {
   }
   const info = e.target.closest('[data-openfundinfo]');
   if (info) { e.stopPropagation(); openFund(info.dataset.openfundinfo); return; }
+  const aifit = e.target.closest('[data-aifit]');
+  if (aifit) { e.stopPropagation(); runAiFit(aifit.dataset.aifit, aifit); return; }
   const msgf = e.target.closest('[data-msgfund]');
   if (msgf) {
     e.stopPropagation();
@@ -2822,9 +2902,9 @@ $('bulkArchiveP').addEventListener('click', () => {
 });
 $('bulkPaths').addEventListener('click', () => {
   const ids = selectedPeopleIds();
-  const kinds = { direct: 0, existing: 0, connector: 0, none: 0 };
+  const kinds = { direct: 0, existing: 0, connector: 0, nfx: 0, none: 0 };
   ids.forEach(id => kinds[pathInfo(PERSON_BY_ID[id]).kind]++);
-  toast(`${kinds.direct} direct · ${kinds.existing} existing relationships · ${kinds.connector} connector paths · ${kinds.none} no path yet.`);
+  toast(`${kinds.direct} direct · ${kinds.existing} existing · ${kinds.connector} LinkedIn connector · ${kinds.nfx} NFX only · ${kinds.none} no path.`);
 });
 $('bulkRemove').addEventListener('click', () => {
   if (!STAGE_TABS.includes(currentTab) || !selected.size) return;
