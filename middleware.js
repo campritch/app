@@ -44,12 +44,13 @@ const DEMO_PATHS = new Set([
 // VC outreach workspace: its own shared password (sn_vc cookie), separate
 // from the client-demo password so fundraising data never leaks through it.
 const VC_PATHS = new Set([
-  '/raise', '/vc-crm', '/vc-crm.html'
+  '/raise', '/vc-crm', '/vc-crm.html',
+  '/vc-fund-data.js' // real investor pipeline data - must never be open
 ]);
 
 export const config = {
   matcher: [
-    '/raise', '/vc-crm', '/vc-crm.html',
+    '/raise', '/vc-crm', '/vc-crm.html', '/vc-fund-data.js',
     '/nav', '/nav.html',
     '/strategy', '/strategy.html',
     '/ceo-dashboard', '/ceo-dashboard.html',

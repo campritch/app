@@ -605,7 +605,6 @@
       <div class="dd-menu" style="left:auto;right:0">
         <button type="button" class="dd-item" data-fundact="upload">Upload CSV file</button>
         <button type="button" class="dd-item" data-fundact="paste">Paste rows</button>
-        <button type="button" class="dd-item" data-fundact="samples" id="removeSamplesBtn">Remove sample funds</button>
       </div>
     </div>
     <button class="login-btn" id="tbPeople">People</button>
@@ -789,12 +788,14 @@ Dana Whitfield, Overline, worked together at Techstars,"></textarea>
 
   <div class="toast" id="toast"></div>
 
+<script src="/vc-fund-data.js"></script>
 <script>
 /* ══════════════════════════════════════════════════════════════
-   FUND + PEOPLE SEED DATA. This started as a SAMPLE list (public
-   info, unverified) so the tool works day one - replace it via
-   the fund upload. Outreach is tracked per PERSON at each fund.
-   dims: thesis/stage/check/portfolio/geo 0-100 vs the pitch.
+   FUND + PEOPLE DATA comes from /vc-fund-data.js, generated from
+   Cam's SpotsNow_Investor_Pipeline.xlsx (3,660 funds; Specialist
+   tab excluded; NFX Signal intro paths as connectors). Regenerate
+   with scratchpad/build_fund_data.py. Curated hand-grades merge
+   over the sheet; the rest carry rubric first-pass grades.
    ══════════════════════════════════════════════════════════════ */
 const PITCH_DIMS = [
   ['thesis',    'Thesis fit',          0.30],
@@ -804,308 +805,20 @@ const PITCH_DIMS = [
   ['geo',       'Reachability',        0.10]
 ];
 
-const SEED_FUNDS = [
-  { id:'fjlabs', name:'FJ Labs', type:'Seed', region:'New York', check:[250,500], sectors:['Marketplaces'], site:'fjlabs.com',
-    people:[{n:'Fabrice Grinda',t:'Founding Partner'},{n:'Jose Marin',t:'Founding Partner'}],
-    looking:'Marketplaces, exclusively. Thousands of marketplace investments; they move fast, follow strong leads, and care about take rate, liquidity strategy, and unit economics.',
-    hook:'You have seen more marketplace models than anyone, so you will read the shape of this one fast.',
-    why:'We are the Hotel Tonight-style marketplace for host-read ads: $500K GMV in our first months at a 10-15% take rate.',
-    dims:{thesis:98,stage:92,check:95,portfolio:95,geo:80} },
-  { id:'nfx', name:'NFX', type:'Pre-seed', region:'SF Bay Area', check:[1000,3000], sectors:['Marketplaces','Network effects'], site:'nfx.com',
-    people:[{n:'James Currier',t:'General Partner'},{n:'Pete Flint',t:'General Partner'}],
-    looking:'Pre-seed and seed companies with network effects. Marketplaces are their home turf; they publish the playbooks everyone else quotes.',
-    hook:'SpotsNow is a two-sided liquidity story with a data moat that compounds per campaign, which is squarely your lane.',
-    why:'Every campaign builds the only labeled dataset of what converts in creator media, which is the compounding-data network effect you back.',
-    dims:{thesis:96,stage:95,check:90,portfolio:90,geo:75} },
-  { id:'aperiam', name:'Aperiam Ventures', type:'Seed', region:'New York', check:[250,750], sectors:['Adtech','Media'], site:'aperiam.vc',
-    people:[{n:'Eric Franchi',t:'General Partner'}],
-    looking:'Early-stage advertising and media tech, run by adtech operators. They want founders fixing broken ad workflows they have lived themselves.',
-    hook:'You back operators fixing ad workflows, and we live the host-read buying mess every day.',
-    why:'Host-read is the last big ad channel with no real buying platform, which is your exact thesis.',
-    dims:{thesis:98,stage:90,check:92,portfolio:92,geo:82} },
-  { id:'mathcapital', name:'MathCapital', type:'Seed', region:'New York', check:[250,1000], sectors:['Adtech','Madtech'], site:'math.capital',
-    people:[{n:'',t:'Partner',tbd:true}],
-    looking:'Madtech infrastructure, backed by the ex-MediaMath network. Deep programmatic DNA; they get why a channel without a transaction layer is an opportunity.',
-    hook:'Host-read podcast ads are the last channel still bought like it is 2005, which felt like a MathCapital conversation.',
-    why:'We are building the transaction layer for a channel programmatic never cracked.',
-    dims:{thesis:95,stage:88,check:90,portfolio:85,geo:70} },
-  { id:'progress', name:'Progress Ventures', type:'Seed', region:'Boston', check:[500,2000], sectors:['Media','Adtech','Data'], site:'progressventures.com',
-    people:[{n:'Nick MacShane',t:'Founding Partner'}],
-    looking:'B2B media, adtech, and data companies at seed and A. Operator-heavy team out of media investment banking.',
-    hook:'You sit at the intersection of media and adtech B2B, which is exactly where we are building.',
-    why:'We monetize the workflow between brands and long-form audio, a wedge into the broader media buying stack.',
-    dims:{thesis:90,stage:85,check:82,portfolio:80,geo:68} },
-  { id:'susa', name:'Susa Ventures', type:'Seed', region:'SF Bay Area', check:[500,1500], sectors:['B2B','Data moats'], site:'susaventures.com',
-    people:[{n:'Chad Byers',t:'General Partner'}],
-    looking:'Seed companies with compounding moats, especially proprietary data. They write about data network effects constantly.',
-    hook:'Your data-moat thesis is basically our pitch: every campaign booked feeds pricing and performance data nobody else has.',
-    why:'The moat is the transaction data: each of our campaigns feeds the only labeled dataset of what converts in creator media.',
-    dims:{thesis:90,stage:88,check:85,portfolio:82,geo:72} },
-  { id:'slow', name:'Slow Ventures', type:'Seed', region:'SF Bay Area', check:[500,1500], sectors:['Creator economy','Consumer'], site:'slow.co',
-    people:[{n:'Sam Lessin',t:'General Partner'}],
-    looking:'Contrarian seed bets; they have gone deepest on creators as investable businesses. Long-form creators monetizing better is core to their worldview.',
-    hook:'You have argued creators are the new small businesses. We are the rails for the biggest revenue line long-form creators have.',
-    why:'Host-read ads are how long-form creators actually get paid, and 800+ shows handed us that revenue line in our first months.',
-    dims:{thesis:86,stage:88,check:85,portfolio:82,geo:75} },
-  { id:'mac', name:'MaC Venture Capital', type:'Seed', region:'Los Angeles', check:[500,2000], sectors:['Media','Culture','Consumer'], site:'macventurecapital.com',
-    people:[{n:'Marlon Nichols',t:'Managing General Partner'}],
-    looking:'Seed companies at the intersection of culture, media, and technology. Strong on where attention shifts before the rest of the market sees it.',
-    hook:'You invest where culture moves attention, and attention has moved to long-form audio faster than ad dollars have.',
-    why:'Ad spend always lags attention, and we are the platform that closes that gap for podcasts.',
-    dims:{thesis:85,stage:88,check:82,portfolio:78,geo:70} },
-  { id:'lererhippeau', name:'Lerer Hippeau', type:'Seed', region:'New York', check:[500,1500], sectors:['Consumer','Media','B2B'], site:'lererhippeau.com',
-    people:[{n:'Ben Lerer',t:'Managing Partner'}],
-    looking:'NYC seed fund with deep media DNA (BuzzFeed, Group Nine roots). They understand ad-supported media economics natively.',
-    hook:'You have built and backed ad-supported media businesses, so you know exactly why host-read buying being stuck in email is a problem worth solving.',
-    why:'We take the highest-performing ad format in audio and make it buyable like search.',
-    dims:{thesis:85,stage:88,check:85,portfolio:80,geo:78} },
-  { id:'craft', name:'Craft Ventures', type:'Seed', region:'SF Bay Area', check:[1000,3000], sectors:['SaaS','Marketplaces'], site:'craftventures.com',
-    people:[{n:'Jeff Fluhr',t:'General Partner'}],
-    looking:'SaaS and marketplace companies at seed and A. Jeff Fluhr founded StubHub, so two-sided ticket-style liquidity problems are home turf.',
-    hook:'StubHub made an illiquid inventory market liquid. We are doing the same for host-read podcast inventory.',
-    why:'Same marketplace physics as ticketing: perishable inventory, fragmented sellers, buyers who want speed and trust.',
-    dims:{thesis:85,stage:82,check:80,portfolio:85,geo:72} },
-  { id:'versionone', name:'Version One Ventures', type:'Seed', region:'Remote', check:[500,1000], sectors:['Marketplaces','Network effects'], site:'versionone.vc',
-    people:[{n:'Boris Wertz',t:'Founding Partner'}],
-    looking:'Marketplaces and network-effect businesses at seed. Boris literally wrote the guide to marketplaces most founders read.',
-    hook:'Your marketplace guide shaped how we think about liquidity, so this note felt overdue.',
-    why:'We concentrate fragmented supply (shows) and demand (brands) into one liquid market with real measurement.',
-    dims:{thesis:88,stage:85,check:80,portfolio:82,geo:70} },
-  { id:'precursor', name:'Precursor Ventures', type:'Pre-seed', region:'SF Bay Area', check:[100,500], sectors:['Generalist'], site:'precursorvc.com',
-    people:[{n:'Charles Hudson',t:'Managing Partner'}],
-    looking:'People-first pre-seed. Charles backs founders before the metrics exist and is one of the most accessible institutional pre-seed investors.',
-    hook:'You back founders before the graphs go up and to the right, and we are early but moving fast.',
-    why:'Classic Precursor shape: big unglamorous market, working product, founder who has lived the problem.',
-    dims:{thesis:70,stage:95,check:90,portfolio:72,geo:75} },
-  { id:'betaworks', name:'Betaworks', type:'Seed', region:'New York', check:[250,750], sectors:['Media','AI','Audio'], site:'betaworks.com',
-    people:[{n:'John Borthwick',t:'CEO / Founder'}],
-    looking:'Media and AI at seed, with repeated bets on audio (they ran audio-focused Camp cohorts). Like products at the media/AI intersection.',
-    hook:'You ran an entire camp on audio, so you already believe what we are betting on.',
-    why:'We pair an audio marketplace with an AI layer for campaign creation and measurement.',
-    dims:{thesis:88,stage:80,check:80,portfolio:88,geo:76} },
-  { id:'night', name:'Night Ventures', type:'Solo GP / Angel', region:'Los Angeles', check:[100,500], sectors:['Creator economy'], site:'night.co',
-    people:[{n:'Reed Duchscher',t:'Partner'}],
-    looking:'Creator-economy investments from the team behind Night (MrBeast’s management company). They know creator monetization from the inside.',
-    hook:'You manage the biggest creators in the world, so you know host-read revenue is the engine for long-form.',
-    why:'We are the buying platform for the ad format your talent already lives on.',
-    dims:{thesis:85,stage:82,check:85,portfolio:80,geo:68} },
-  { id:'advancit', name:'Advancit Capital', type:'Seed', region:'New York', check:[250,1000], sectors:['Media','Entertainment'], site:'advancitcapital.com',
-    people:[{n:'',t:'Partner',tbd:true}],
-    looking:'Early-stage media, entertainment, and technology. Deep ties into traditional media ownership; strategic reach into content businesses.',
-    hook:'You sit closer to content owners than almost any early-stage fund, and our supply side is content owners.',
-    why:'We give shows and networks a storefront, so a media-native cap table helps both sides of our market.',
-    dims:{thesis:82,stage:82,check:82,portfolio:78,geo:72} },
-  { id:'bdmi', name:'BDMI', type:'Strategic / CVC', region:'New York', check:[500,2000], sectors:['Digital media'], site:'bdmifund.com',
-    people:[{n:'',t:'Partner',tbd:true}],
-    looking:'Bertelsmann’s digital media fund. Early-stage digital media and media-tech; strategic value through one of the largest media groups in the world.',
-    hook:'You invest where media and technology meet for one of the biggest media companies on earth.',
-    why:'A media-strategic investor helps us sign networks faster, and podcast ad infrastructure fits your mandate.',
-    dims:{thesis:82,stage:78,check:80,portfolio:76,geo:70} },
-  { id:'greycroft', name:'Greycroft', type:'Multi-stage', region:'New York', check:[1000,3000], sectors:['Consumer','Media'], site:'greycroft.com',
-    people:[{n:'',t:'Partner',tbd:true}],
-    looking:'Multi-stage with real media heritage (Alan Patricof). Seed checks happen when the team and market story are sharp.',
-    hook:'Greycroft has media in its DNA, and this is a media infrastructure story.',
-    why:'A fund that understands both ad markets and consumer attention is the right partner for this round and the next.',
-    dims:{thesis:80,stage:72,check:80,portfolio:80,geo:74} },
-  { id:'eniac', name:'Eniac Ventures', type:'Pre-seed', region:'New York', check:[500,1500], sectors:['B2B','Generalist'], site:'eniac.vc',
-    people:[{n:'Nihal Mehta',t:'Founding General Partner'},{n:'Hadley Harris',t:'Founding General Partner'}],
-    looking:'Lead pre-seed checks in technical founders. Nihal came up through mobile advertising, so ad infrastructure is familiar ground.',
-    hook:'Nihal, you built in mobile ads when that market was maturing. Podcast ads are at that exact moment now.',
-    why:'Same playbook as mobile a decade ago: attention arrived first, infrastructure is arriving now, and we are that infrastructure.',
-    dims:{thesis:74,stage:88,check:85,portfolio:74,geo:74} },
-  { id:'uncork', name:'Uncork Capital', type:'Seed', region:'SF Bay Area', check:[1000,2500], sectors:['SaaS','Marketplaces'], site:'uncorkcapital.com',
-    people:[{n:'Jeff Clavier',t:'Founder & Managing Partner'},{n:'Andy McLoughlin',t:'Managing Partner'}],
-    looking:'Classic seed: SaaS and marketplaces, first institutional check, hands-on for the messy early years.',
-    hook:'You have seeded marketplaces through the messy zero-to-liquidity years, which is exactly where we are.',
-    why:'We fit the Uncork pattern: unsexy market, real revenue mechanics, software eating a manual workflow.',
-    dims:{thesis:78,stage:85,check:78,portfolio:75,geo:72} },
-  { id:'bowery', name:'Bowery Capital', type:'Seed', region:'New York', check:[500,1500], sectors:['B2B SaaS','Vertical software'], site:'bowerycap.com',
-    people:[{n:'Michael Brown',t:'General Partner'}],
-    looking:'B2B software at seed, with published depth on vertical SaaS and marketplace revenue models.',
-    hook:'You write some of the best material on vertical software going deep in one industry, and we are doing that for podcast advertising.',
-    why:'Vertical marketplace plus workflow software for a $32B category, which is the model your portfolio keeps proving.',
-    dims:{thesis:78,stage:85,check:82,portfolio:74,geo:74} },
-  { id:'primary', name:'Primary Venture Partners', type:'Seed', region:'New York', check:[1000,3000], sectors:['B2B','Marketplaces'], site:'primary.vc',
-    people:[{n:'Ben Sun',t:'Co-Founder & General Partner'},{n:'Brad Svrluga',t:'Co-Founder & General Partner'}],
-    looking:'NYC-focused seed leads with a big impact team. Marketplaces and B2B are core; they like being the first lead.',
-    hook:'You lead NYC-style seed rounds in marketplaces with real operations, and that is our shape.',
-    why:'We need a lead who has operated through marketplace cold-start, and that is Primary’s track record.',
-    dims:{thesis:78,stage:85,check:78,portfolio:74,geo:72} },
-  { id:'initialized', name:'Initialized Capital', type:'Seed', region:'SF Bay Area', check:[1000,3000], sectors:['Generalist'], site:'initialized.com',
-    people:[{n:'',t:'Partner',tbd:true}],
-    looking:'Seed-stage generalists with strong founder brand. Back weird-but-working products early.',
-    hook:'We are the kind of unglamorous-market bet Initialized keeps winning on.',
-    why:'Working product, real buyers, huge lazy incumbent workflow to displace.',
-    dims:{thesis:72,stage:85,check:78,portfolio:72,geo:72} },
-  { id:'haystack', name:'Haystack', type:'Pre-seed', region:'SF Bay Area', check:[250,1000], sectors:['Generalist'], site:'haystack.vc',
-    people:[{n:'Semil Shah',t:'Founder & General Partner'}],
-    looking:'Early pre-seed and seed, often the first believer check alongside bigger funds. Semil is one of the best-networked seed investors in the valley.',
-    hook:'You are usually the first believer check before the big logos arrive, and that is the check we are filling now.',
-    why:'Small check, huge network, and a market big enough to matter.',
-    dims:{thesis:70,stage:88,check:85,portfolio:70,geo:72} },
-  { id:'pear', name:'Pear VC', type:'Pre-seed', region:'SF Bay Area', check:[500,2000], sectors:['Generalist'], site:'pear.vc',
-    people:[{n:'Mar Hershenson',t:'Founding Managing Partner'}],
-    looking:'Pre-seed and seed with heavy company-building support. Like technical, gritty founding teams pre-metrics.',
-    hook:'Pear backs gritty teams before the metrics chart exists, and we are shipping weekly.',
-    why:'We are early enough for Pear to shape and late enough to show real transactions.',
-    dims:{thesis:70,stage:88,check:82,portfolio:70,geo:70} },
-  { id:'bling', name:'Bling Capital', type:'Seed', region:'Remote', check:[250,1000], sectors:['Product-led','Consumer','B2B'], site:'bling.vc',
-    people:[{n:'Ben Ling',t:'Founder & General Partner'}],
-    looking:'Product-obsessed seed checks. Ben goes deep on product craft and speed of iteration.',
-    hook:'You back product speed, and our whole pitch is collapsing a six-week media plan into minutes.',
-    why:'The product is the moat here: buying host-read should feel like booking a flight, and ours already does.',
-    dims:{thesis:72,stage:85,check:85,portfolio:70,geo:70} },
-  { id:'weekend', name:'Weekend Fund', type:'Solo GP / Angel', region:'Remote', check:[100,400], sectors:['Product','Community'], site:'weekend.fund',
-    people:[{n:'Ryan Hoover',t:'Founder'}],
-    looking:'Small early checks from the Product Hunt founder. Loves products with obvious daily utility and community pull.',
-    hook:'This is a Product Hunt-shaped product for a market that never gets them: media buying.',
-    why:'Small check, loud distribution network, and a launch-friendly product story.',
-    dims:{thesis:70,stage:85,check:88,portfolio:70,geo:70} },
-  { id:'afore', name:'Afore Capital', type:'Pre-seed', region:'SF Bay Area', check:[500,1500], sectors:['Pre-seed only'], site:'afore.vc',
-    people:[{n:'Anamitra Banerji',t:'Co-Founder & Managing Partner'},{n:'Gaurav Jain',t:'Co-Founder & Managing Partner'}],
-    looking:'Pre-seed only, by design. If the round is priced as a true seed they may see us as slightly late.',
-    hook:'You built ads at Twitter from zero, so you know what happens when an ad channel gets real infrastructure.',
-    why:'We are early enough on the revenue curve to be an Afore-shaped bet on a giant market.',
-    dims:{thesis:70,stage:75,check:82,portfolio:74,geo:70} },
-  { id:'freestyle', name:'Freestyle Capital', type:'Seed', region:'SF Bay Area', check:[1000,2500], sectors:['Generalist'], site:'freestyle.vc',
-    people:[{n:'',t:'Partner',tbd:true}],
-    looking:'Concentrated seed portfolio, lead checks, very hands-on with a small number of companies per year.',
-    hook:'You run concentrated and hands-on, and we want fewer, closer investors this round.',
-    why:'A concentrated lead who goes deep beats ten passive logos for where we are.',
-    dims:{thesis:68,stage:85,check:78,portfolio:68,geo:70} },
-  { id:'charge', name:'Charge Ventures', type:'Pre-seed', region:'New York', check:[250,750], sectors:['B2B'], site:'charge.vc',
-    people:[{n:'Brett Martin',t:'Co-Founder & General Partner'}],
-    looking:'NYC pre-seed B2B. Data-driven sourcing, quick process, comfortable pre-traction.',
-    hook:'You move quickly on B2B pre-seed, and our round is moving.',
-    why:'B2B marketplace with SaaS-like margins in a category with no incumbent platform.',
-    dims:{thesis:70,stage:85,check:85,portfolio:66,geo:72} },
-  { id:'645', name:'645 Ventures', type:'Seed', region:'New York', check:[1000,3000], sectors:['Data-driven','B2B'], site:'645ventures.com',
-    people:[{n:'',t:'Partner',tbd:true}],
-    looking:'Data-driven seed and A. They model markets before they invest, so a clean bottoms-up on podcast ad spend lands well.',
-    hook:'You underwrite with data, and the host-read numbers are the best-kept secret in advertising.',
-    why:'The category math is wild: top-quartile response rates, near-zero platform penetration.',
-    dims:{thesis:72,stage:80,check:78,portfolio:68,geo:72} },
-  { id:'pointnine', name:'Point Nine', type:'Seed', region:'Europe', check:[500,2000], sectors:['B2B SaaS','Marketplaces'], site:'pointnine.com',
-    people:[{n:'Christoph Janz',t:'Managing Partner'}],
-    looking:'B2B SaaS and marketplaces at seed, famous for the SaaS napkin. Invest globally from Berlin.',
-    hook:'Your napkin math for marketplaces is pinned above my desk, so here is ours.',
-    why:'B2B marketplace with SaaS-grade retention on the brand side, which is the Point Nine sweet spot.',
-    dims:{thesis:82,stage:85,check:82,portfolio:74,geo:52} },
-  { id:'speedinvest', name:'Speedinvest', type:'Seed', region:'Europe', check:[500,1500], sectors:['Marketplaces','Network effects'], site:'speedinvest.com',
-    people:[{n:'',t:'Marketplaces team',tbd:true}],
-    looking:'European seed fund with a dedicated marketplaces and consumer team. Invest outside Europe selectively.',
-    hook:'Your marketplace team publishes the best liquidity frameworks in Europe, and we would love their read on ours.',
-    why:'Two-sided liquidity in an underserved vertical, with US market lead and global supply.',
-    dims:{thesis:78,stage:82,check:80,portfolio:70,geo:48} },
-  { id:'forum', name:'Forum Ventures', type:'Pre-seed', region:'New York', check:[100,500], sectors:['B2B SaaS'], site:'forumvc.com',
-    people:[{n:'',t:'Partner',tbd:true}],
-    looking:'B2B SaaS pre-seed fund and accelerator. High volume, founder-friendly, strong on early GTM.',
-    hook:'You spend all day on early B2B GTM, and our GTM is the interesting part of the story.',
-    why:'Self-serve motion in a market used to being sold over steak dinners.',
-    dims:{thesis:66,stage:82,check:82,portfolio:62,geo:72} },
-  { id:'conviction', name:'Conviction', type:'Seed', region:'SF Bay Area', check:[1000,3000], sectors:['AI-native'], site:'conviction.com',
-    people:[{n:'Sarah Guo',t:'Founder & General Partner'}],
-    looking:'AI-native software companies. The bet has to be that AI changes the product, not decorates it.',
-    hook:'The AI here is not decoration: it screens 59,000 shows and builds a full media plan in 60 seconds, and our conversion data is already callable live inside Claude.',
-    why:'AI-native workflow on top of proprietary transaction data, in a market with no software incumbent.',
-    dims:{thesis:82,stage:80,check:78,portfolio:74,geo:72} },
-  { id:'wndrco', name:'WndrCo', type:'Multi-stage', region:'Los Angeles', check:[1000,3000], sectors:['Media','Consumer tech'], site:'wndrco.com',
-    people:[{n:'',t:'Partner',tbd:true}],
-    looking:'Jeffrey Katzenberg’s firm. Media and consumer technology across stages; deep entertainment relationships.',
-    hook:'WndrCo knows better than anyone how media buying and content economics actually work.',
-    why:'Entertainment-grade relationships on our supply side would compound fast.',
-    dims:{thesis:76,stage:70,check:76,portfolio:74,geo:68} },
-  { id:'raine', name:'Raine Ventures', type:'Seed', region:'New York', check:[500,2000], sectors:['Media','Gaming'], site:'raine.com',
-    people:[{n:'',t:'Partner',tbd:true}],
-    looking:'Early-stage arm of the Raine Group merchant bank. Media, entertainment, and gaming; strategic reach into big media M&A.',
-    hook:'Raine sits inside every big media deal, so you know how badly audio needs transaction infrastructure.',
-    why:'We are building the pipes a consolidating audio market will run on.',
-    dims:{thesis:76,stage:76,check:78,portfolio:70,geo:66} },
-  { id:'tcg', name:'The Chernin Group', type:'Multi-stage', region:'Los Angeles', check:[3000,10000], sectors:['Media','Consumer'], site:'tcg.co',
-    people:[{n:'',t:'Partner',tbd:true}],
-    looking:'Consumer and media, usually growth-stage with real scale. Likely a Series A/B conversation for us, worth a relationship now.',
-    hook:'Likely early for TCG today, but audio infrastructure will be a growth story soon and I would rather you know us now.',
-    why:'Relationship seed for the A: they go deep on audio (Crooked Media, podcast roll-ups).',
-    dims:{thesis:74,stage:45,check:40,portfolio:80,geo:66} },
-  { id:'siriusxm', name:'SiriusXM (strategic)', type:'Strategic / CVC', region:'New York', check:[500,2000], sectors:['Audio'], site:'siriusxm.com',
-    people:[{n:'',t:'Corp dev',tbd:true}],
-    looking:'Owns major podcast networks and ad tech (AdsWizz). Strategic capital with obvious synergy and obvious signaling risk: a strategic on the cap table can spook other networks.',
-    hook:'You own more of the podcast ad stack than anyone, and we are growing the buyer side of it.',
-    why:'Strategic distribution, but weigh the neutrality signal before taking the meeting far.',
-    dims:{thesis:74,stage:62,check:76,portfolio:80,geo:60} },
-  { id:'iheart', name:'iHeart Ventures', type:'Strategic / CVC', region:'New York', check:[250,1000], sectors:['Audio','Media'], site:'iheartmedia.com',
-    people:[{n:'',t:'Corp dev',tbd:true}],
-    looking:'Strategic investments around the iHeart audio empire. Same synergy and same neutrality-signal risk as any network-owner strategic.',
-    hook:'iHeart sells more audio ads than anyone, and we make the long tail of that market buyable.',
-    why:'Useful strategic conversation, but keep the marketplace neutral story front and center.',
-    dims:{thesis:72,stage:60,check:78,portfolio:78,geo:60} },
-  { id:'comcast', name:'Comcast Ventures', type:'Strategic / CVC', region:'New York', check:[1000,5000], sectors:['Media','Enterprise'], site:'comcastventures.com',
-    people:[{n:'',t:'Corp dev',tbd:true}],
-    looking:'Corporate venture arm; typically A and later with strategic angle to Comcast/NBCU advertising.',
-    hook:'NBCU’s ad business knows the measurement gap in audio better than most.',
-    why:'Probably a Series A conversation, worth a light touch now.',
-    dims:{thesis:66,stage:52,check:60,portfolio:72,geo:60} },
-  { id:'sony', name:'Sony Innovation Fund', type:'Strategic / CVC', region:'New York', check:[500,2000], sectors:['Entertainment'], site:'sonyinnovationfund.com',
-    people:[{n:'',t:'Corp dev',tbd:true}],
-    looking:'Corporate VC across entertainment and deep tech. Sony owns major podcast studios; process tends to be slow.',
-    hook:'Sony’s podcast studios live off host-read revenue, and we grow that line.',
-    why:'Strategic optionality, slow clock. Low priority unless a champion appears.',
-    dims:{thesis:62,stage:55,check:70,portfolio:70,geo:56} },
-  { id:'overline', name:'Overline', type:'Seed', region:'Southeast', check:[250,1000], sectors:['Generalist','Southeast'], site:'overline.vc',
-    people:[{n:'Sean O’Brien',t:'Co-Founder & Managing Partner'},{n:'Michael Cohn',t:'Co-Founder & General Partner'}],
-    looking:'Atlanta-based seed fund backing Southeast founders first. Operator GPs, fast process, proud of being the first institutional check in the region.',
-    hook:'You back Southeast founders before the coasts notice them, and we are building this from Nashville.',
-    why:'Southeast seed with national market, which is your exact wheelhouse.',
-    dims:{thesis:68,stage:85,check:85,portfolio:64,geo:95} },
-  { id:'atlantaventures', name:'Atlanta Ventures', type:'Seed', region:'Southeast', check:[250,1000], sectors:['SaaS'], site:'atlantaventures.com',
-    people:[{n:'David Cummings',t:'Partner'}],
-    looking:'Atlanta studio and seed fund from the Pardot founder. SaaS-first, recurring-revenue focused, long holding mindset.',
-    hook:'You built and sold Pardot on disciplined SaaS fundamentals, and our brand side runs on the same motion.',
-    why:'Southeast capital plus SaaS discipline fits how we run the company.',
-    dims:{thesis:64,stage:82,check:82,portfolio:60,geo:92} },
-  { id:'techsquare', name:'Tech Square Ventures', type:'Seed', region:'Southeast', check:[500,1500], sectors:['Generalist','B2B'], site:'techsquareventures.com',
-    people:[{n:'Blake Patton',t:'Managing Partner'}],
-    looking:'Atlanta seed fund around the Georgia Tech ecosystem. B2B lean, likes technical moats and university ties.',
-    hook:'You anchor the Atlanta ecosystem we keep bumping into, and our round has room for Southeast conviction.',
-    why:'Regional anchor investor with B2B depth.',
-    dims:{thesis:60,stage:82,check:80,portfolio:56,geo:90} },
-  { id:'valor', name:'Valor Ventures', type:'Seed', region:'Southeast', check:[250,750], sectors:['B2B'], site:'valor.vc',
-    people:[{n:'Lisa Calhoun',t:'Founding General Partner'}],
-    looking:'Atlanta seed fund, B2B software, first-check lead for Southern founders. Smaller fund, concentrated.',
-    hook:'You lead first checks for Southern B2B founders, and that is us.',
-    why:'Regional fit, generalist B2B thesis.',
-    dims:{thesis:56,stage:80,check:82,portfolio:52,geo:90} },
-  { id:'dynamo', name:'Dynamo Ventures', type:'Seed', region:'Southeast', check:[250,1000], sectors:['Supply chain','Mobility'], site:'dynamo.vc',
-    people:[{n:'',t:'Partner',tbd:true}],
-    looking:'Chattanooga fund focused on supply chain and mobility. Thesis mismatch for us, but the Brickyard relationship makes them our warmest door in the region.',
-    hook:'We are outside your supply-chain lane, but Brickyard vouches loudly and you know everyone in Chattanooga.',
-    why:'Strong network, weak thesis fit. Ask for intros, not a check.',
-    dims:{thesis:35,stage:82,check:82,portfolio:40,geo:96} },
-  { id:'jumpstart', name:'Jumpstart Foundry', type:'Pre-seed', region:'Southeast', check:[150,500], sectors:['Healthcare'], site:'jsf.co',
-    people:[{n:'',t:'Partner',tbd:true}],
-    looking:'Nashville pre-seed fund, healthcare only. Wrong thesis, but deeply wired into the Nashville founder and capital scene.',
-    hook:'We are not healthcare, but you know every check-writer in Nashville and we are a Nashville company.',
-    why:'Network node, not a target. Coffee, not a pitch.',
-    dims:{thesis:20,stage:80,check:80,portfolio:25,geo:98} },
-  { id:'fintop', name:'FINTOP Capital', type:'Seed', region:'Southeast', check:[1000,3000], sectors:['Fintech'], site:'fintopcapital.com',
-    people:[{n:'',t:'Partner',tbd:true}],
-    looking:'Nashville fund, fintech only, operator GPs. Thesis mismatch; local relationship value only.',
-    hook:'Outside your fintech lane, but we are fellow Nashville operators and our payments layer may interest you someday.',
-    why:'Long-shot thesis fit. Keep warm locally.',
-    dims:{thesis:28,stage:75,check:70,portfolio:30,geo:96} }
-];
+const SEED_FUNDS = (window.SN_DATA && window.SN_DATA.funds) || [];
+const DATA_CONNECTORS = (window.SN_DATA && window.SN_DATA.connectors) || [];
 
 /* Seed connectors: people Cam has rapport with, matched to fund people. */
 const SEED_CONNECTORS = [
   { id:'c_ericbahn', name:'Eric Bahn', role:'GP, Hustle Fund (existing investor)',
     rapport:'Warm. Existing investor, replies fast, generous with intros across the seed ecosystem.',
-    matches:['fjlabs_fabrice-grinda','precursor_charles-hudson','slow_sam-lessin','susa_chad-byers','weekend_ryan-hoover'] },
+    matches:[] },
   { id:'c_mattpatterson', name:'Matt Patterson', role:'Brickyard (existing investor)',
     rapport:'Very warm. 1.5 years building alongside at Brickyard. Direct and terse; ask with a tight list.',
-    matches:['nfx_james-currier','overline_sean-o-brien','atlantaventures_david-cummings','techsquare_blake-patton'] },
+    matches:[] },
   { id:'c_wally', name:'Wally Stefanides', role:'Partnerships, SpotsNow',
     rapport:'Internal. Knows the NYC adtech crowd from partnerships work.',
-    matches:['aperiam_eric-franchi'] },
+    matches:[] },
   { id:'c_abhishek', name:'Abhishek Thory', role:'Co-Founder, SpotsNow',
     rapport:'Internal. Eng network; useful for technical-founder-friendly funds.',
     matches:[] }
@@ -1137,7 +850,7 @@ function rebuild(){
     (f.people||[]).forEach(p => {
       const pid = f.id + '_' + (p.tbd ? 'tbd-' + slug(p.t) : slug(p.n));
       if (!PEOPLE.some(x => x.id === pid))
-        PEOPLE.push({ id: pid, fundId: f.id, name: p.n, title: p.t, tbd: !!p.tbd });
+        PEOPLE.push({ id: pid, fundId: f.id, name: p.n, title: p.t, tbd: !!p.tbd, li0: p.li || '' });
     });
   });
   PERSON_BY_ID = Object.fromEntries(PEOPLE.map(p => [p.id, p]));
@@ -1157,7 +870,7 @@ function rebuild(){
   FUND_NORMS = FUNDS.map(f => ({ f, norm: normOrg(f.name) })).filter(x => x.norm);
   // Persisted match additions for the built-in connectors (their objects are code constants).
   Object.entries(state.connMatchExtra || {}).forEach(([cid, ov]) => {
-    const c = SEED_CONNECTORS.find(x => x.id === cid);
+    const c = SEED_CONNECTORS.concat(DATA_CONNECTORS).find(x => x.id === cid);
     if (!c) return;
     (ov.matches || []).forEach(pid => { if (!c.matches.includes(pid)) c.matches.push(pid); });
   });
@@ -1245,25 +958,9 @@ try { state = JSON.parse(localStorage.getItem(LS_KEY)); } catch(e) {}
 if (!state || !state.people) {
   const now = Date.now();
   state = {
-    people: {
-      'fjlabs_fabrice-grinda': { status:'direct', sentAt: now-3*DAY, followUp: now+2*DAY },
-      'slow_sam-lessin':       { status:'direct', sentAt: now-9*DAY, followUp: now-3*DAY },
-      'precursor_charles-hudson': { status:'replied', notes:'Replied, wants the deck plus 3 network case studies. Send Tuesday.' },
-      'nfx_james-currier':     { status:'ask' }
-    },
-    funds: {
-      fjlabs:{stage:'target'}, aperiam:{stage:'target'}, slow:{stage:'target'},
-      mathcapital:{stage:'target'}, overline:{stage:'target'},
-      nfx:{stage:'booked'}, precursor:{stage:'pitching', warmth:'warm'}
-    },
-    connectors: {},
-    extraConnectors: [],
-    templates: null,
-    vars: { ...DEFAULT_VARS },
-    synced: null
+    people: {}, funds: {}, connectors: {},
+    extraConnectors: [], templates: null, vars: { ...DEFAULT_VARS }, synced: null
   };
-  state.connectors['c_ericbahn'] = { status:'asked', sentAt: now-2*DAY, followUp: now+2*DAY };
-  state.connectors['c_mattpatterson'] = { status:'agreed', notes:'Said yes to NFX + Overline. Send forwardables.' };
   save();
 }
 state.extraConnectors = state.extraConnectors || [];
@@ -1287,9 +984,9 @@ function save(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
 function PS(id){ return state.people[id] || (state.people[id] = {}); }
 function CS(id){ return state.connectors[id] || (state.connectors[id] = {}); }
 
-function allConnectors(){ return SEED_CONNECTORS.concat(state.extraConnectors || []); }
+function allConnectors(){ return SEED_CONNECTORS.concat(DATA_CONNECTORS, state.extraConnectors || []); }
 function connectorById(id){ return allConnectors().find(c => c.id === id); }
-function isSeedConnector(id){ return SEED_CONNECTORS.some(c => c.id === id); }
+function isSeedConnector(id){ return SEED_CONNECTORS.some(c => c.id === id) || DATA_CONNECTORS.some(c => c.id === id); }
 function addMatch(c, pid, note){
   if (!c.matches.includes(pid)) c.matches.push(pid);
   if (isSeedConnector(c.id)) {
@@ -1315,6 +1012,7 @@ function templates(){
 function personLi(p){
   const st = PS(p.id);
   if (st.li) return st.li;
+  if (p.li0) return p.li0;
   const f = FUND_BY_ID[p.fundId];
   const q = encodeURIComponent(((p.tbd ? '' : p.name + ' ') + f.name).trim());
   return 'https://www.linkedin.com/search/results/people/?keywords=' + q;
@@ -1365,7 +1063,8 @@ const F_STAGES = { none:'Backlog', target:'\ud83c\udfaf Target', booked:'\u2705 
 const STAGE_TABS = ['funds','targets','booked','pitching','closed'];
 const WARMTH = { na:'Warmth: not read', hot:'Hot', warm:'Warm', cool:'Cool', cold:'Cold' };
 function FS(id){ return state.funds[id] || (state.funds[id] = {}); }
-function fStage(f){ return FS(f.id).stage || 'none'; }
+function fStage(f){ const v = FS(f.id).stage; return v !== undefined ? v : (f.stage0 || 'none'); }
+function isFundArchived(f){ const a = FS(f.id).archived; return a !== undefined ? !!a : !!f.archived0; }
 function warmthPillHtml(f){
   const w = FS(f.id).warmth;
   if (!w || w === 'na') return '';
@@ -1405,7 +1104,8 @@ const FILTER_DEFS = [
   { key:'grade', label:'Grade', options:['A+','A','A-','B+','B','C','Not graded'] },
   { key:'type', label:'Type', options:() => [...new Set(FUNDS.map(f=>f.type||'—'))] },
   { key:'check', label:'Check size', options: CHECK_BUCKETS.map(b=>b[0]) },
-  { key:'region', label:'Location', options:() => [...new Set(FUNDS.map(f=>f.region||'—'))] },
+  { key:'region', label:'Location', options:() => [...new Set(FUNDS.map(f=>f.region||'—'))].sort() },
+  { key:'tier', label:'Tier', options:() => [...new Set(FUNDS.map(f=>f.tier||'—'))].sort() },
   { key:'path', label:'Path', options:['Connector path','Direct (1st°)','No path yet','Needs name'], peopleOnly:true },
   { key:'status', label:'Status', options: Object.values(P_STATUS), peopleOnly:true }
 ];
@@ -1416,6 +1116,7 @@ const SORT_OPTS = [
 let activeFilters = {};
 let fundArchiveView = false;
 let headSort = { key: null, dir: 1 };
+let renderCap = 150;
 const HSORT_DEFAULT_DIR = { name:1, profile:1, fit:-1, check:-1, stage:1, people:-1, path:1, status:1 };
 const STAGE_ORDER = { none:0, target:1, booked:2, pitching:3, closed:4 };
 const hArrow = k => headSort.key === k ? (headSort.dir === 1 ? ' \u2191' : ' \u2193') : '';
@@ -1432,6 +1133,7 @@ function fundMatchesFilters(f){
     if (def.key === 'grade' && !sel.has(f.dims ? grade(f) : 'Not graded')) return false;
     if (def.key === 'type' && !sel.has(f.type||'—')) return false;
     if (def.key === 'region' && !sel.has(f.region||'—')) return false;
+    if (def.key === 'tier' && !sel.has(f.tier||'—')) return false;
     if (def.key === 'check') {
       let hit = false;
       for (const [label,lo,hi] of CHECK_BUCKETS)
@@ -1462,7 +1164,7 @@ function personMatches(p){
   return true;
 }
 function visiblePeople(){
-  let rows = PEOPLE.filter(p => personMatches(p) && !FS(p.fundId).archived && isExcluded(p) === fundArchiveView);
+  let rows = PEOPLE.filter(p => personMatches(p) && !isFundArchived(FUND_BY_ID[p.fundId]) && isExcluded(p) === fundArchiveView);
   const pathRank = p => { const pi = pathInfo(p); return pi.kind==='direct'?0:pi.kind==='connector'?1:2; };
   if (headSort.key) {
     const k = headSort.key, d = headSort.dir;
@@ -1491,7 +1193,7 @@ function visiblePeople(){
 }
 function visibleFunds(){
   let rows = FUNDS.filter(f => fundMatchesFilters(f) && (!searchQ || [f.name,(f.sectors||[]).join(' '),f.looking,f.region,f.type,(f.people||[]).map(p=>p.n).join(' ')].join(' ').toLowerCase().includes(searchQ)));
-  rows = rows.filter(f => !!FS(f.id).archived === fundArchiveView);
+  rows = rows.filter(f => isFundArchived(f) === fundArchiveView);
   if (!fundArchiveView && currentTab !== 'funds' && STAGE_TABS.includes(currentTab)) {
     const want = currentTab === 'targets' ? 'target' : currentTab;
     rows = rows.filter(f => fStage(f) === want);
@@ -1578,7 +1280,7 @@ function onDdChange(ctx, v){
   if (kind === 'setfa') { state.settings.autoFollowAsk = +v; save(); return; }
   if (kind === 'fstage') {
     const fs = FS(arg);
-    if (v === 'none') delete fs.stage; else fs.stage = v;
+    fs.stage = v;
     save(); render();
     if (drawerRef && drawerRef.kind === 'fund' && drawerRef.id === arg) openFund(arg);
     return;
@@ -1613,7 +1315,7 @@ function pathCellHtml(p){
 function personMenuHtml(p){
   return `<div class="dd dd--row">
     <button type="button" class="dd-btn icon-sq" title="Actions">${DOTS_ICON}</button>
-    <div class="dd-menu" style="left:auto;right:0;min-width:200px">
+    <div class="dd-menu" style="min-width:200px">
       <button type="button" class="dd-item" data-rowact="fusub:${p.id}">Schedule Follow Up <span style="margin-left:auto;color:var(--muted-foreground)">\u203a</span></button>
       <button type="button" class="dd-item" data-rowact="psent:${p.id}">Mark as Sent</button>
       <button type="button" class="dd-item" data-rowact="pdone:${p.id}">Mark as Done</button>
@@ -1666,7 +1368,7 @@ function render(){
   const dueP = PEOPLE.map(personFollowUp).filter(d => d && d.days <= 0).length;
   const dueC = allConnectors().map(connectorFollowUp).filter(d => d && d.days <= 0).length;
   const allFollow = PEOPLE.filter(personFollowUp).length + allConnectors().filter(connectorFollowUp).length;
-  const activeFunds = FUNDS.filter(f => !FS(f.id).archived);
+  const activeFunds = FUNDS.filter(f => !isFundArchived(f));
   $('cntFunds').textContent = activeFunds.length;
   const stageCount = s => activeFunds.filter(f => fStage(f) === s).length;
   $('cntTargets').textContent = stageCount('target');
@@ -1685,8 +1387,8 @@ function render(){
 
   if ($('sortDD')) $('sortDD').innerHTML = ddHtml({ id:'sortSel', ctx:'sort', value:sortBy, options:SORT_OPTS });
   const archN = currentTab === 'people'
-    ? PEOPLE.filter(p => isExcluded(p) && !FS(p.fundId).archived).length
-    : FUNDS.filter(f => FS(f.id).archived).length;
+    ? PEOPLE.filter(p => isExcluded(p) && !isFundArchived(FUND_BY_ID[p.fundId])).length
+    : FUNDS.filter(f => isFundArchived(f)).length;
   const vab = $('viewArchiveBtn');
   vab.style.display = (isStageTab || currentTab === 'people') ? 'inline-flex' : 'none';
   vab.textContent = fundArchiveView ? '\u2190 Back' : ('View Archive' + (archN ? ' \u00b7 ' + archN : ''));
@@ -1698,8 +1400,6 @@ function render(){
   document.querySelectorAll('.bulk-people').forEach(b => b.style.display = currentTab === 'people' ? 'inline-block' : 'none');
   $('bulkArchiveP').textContent = fundArchiveView ? 'Restore' : 'Archive';
 
-  const allHidden = SEED_FUNDS.length && SEED_FUNDS.every(f => state.hiddenFunds.includes(f.id));
-  $('removeSamplesBtn').textContent = allHidden ? 'Restore sample funds' : 'Remove sample funds';
   $('fundImportResult').textContent = state.fundImportMsg || '';
 
   renderFilterChips();
@@ -1712,6 +1412,10 @@ function personSubRows(f){
     const due = personFollowUp(p);
     return `<tr class="sub-row ${isExcluded(p)?'excluded':''}" data-person="${p.id}">
       <td class="sub-tick">↳</td>
+      <td><div class="row-actions" style="justify-content:flex-start">
+        ${personMenuHtml(p)}
+        <button class="icon-sq" data-openperson="${p.id}" title="Open person">${OPEN_ICON}</button>
+      </div></td>
       <td><div class="fund-cell" style="min-width:140px">
         <span class="fund-name" style="font-size:13px">${p.tbd
           ? `<span style="color:var(--grey-1)">${esc(p.title)}</span> <span class="pill pill--needs">Needs name</span>`
@@ -1726,21 +1430,18 @@ function personSubRows(f){
         ${due ? `<span class="pill ${due.cls}">Follow up · ${due.label}</span>` : ''}
       </div></td>
       <td class="hide-md"></td>
-      <td style="text-align:right"><div class="row-actions">
-        ${personMenuHtml(p)}
-        <button class="icon-sq" data-openperson="${p.id}" title="Open person">${OPEN_ICON}</button>
-      </div></td>
     </tr>`;
   }).join('') + `
     <tr class="sub-row add-person-row" data-addperson="${f.id}">
       <td class="sub-tick"></td>
-      <td colspan="8"><button class="add-person-btn">+ Add person to ${esc(f.name)}</button></td>
+      <td colspan="8" style="padding-left:12px"><button class="add-person-btn">+ Add person to ${esc(f.name)}</button></td>
     </tr>`;
 }
 
 function renderFundsTable(){
   $('tableHead').innerHTML = `<tr>
     <th style="width:34px"><input type="checkbox" class="row-check" id="checkAll"></th>
+    <th style="width:112px"></th>
     <th class="sortable" data-hsort="name">Fund${hArrow('name')}</th>
     <th class="sortable hide-md" data-hsort="profile">Profile${hArrow('profile')}</th>
     <th class="sortable" data-hsort="fit">Fit${hArrow('fit')}</th>
@@ -1748,15 +1449,29 @@ function renderFundsTable(){
     <th class="hide-md">Why it fits</th>
     <th class="sortable" data-hsort="stage">Stage${hArrow('stage')}</th>
     <th class="sortable" data-hsort="people">People${hArrow('people')}</th>
-    <th style="text-align:right">Info</th>
   </tr>`;
   const rows = visibleFunds();
-  $('tableBody').innerHTML = rows.map(f => {
+  const shown = rows.slice(0, renderCap);
+  $('tableBody').innerHTML = shown.map(f => {
     const ppl = PEOPLE.filter(p => p.fundId === f.id && !isExcluded(p));
     const tbd = ppl.filter(p => p.tbd).length;
     const open = expandedFunds.has(f.id);
     return `<tr data-fundrow="${f.id}" class="${selected.has(f.id)?'selected':''} ${open?'expanded':''} ${fundArchiveView?'arch-dim':''}">
       <td><input type="checkbox" class="row-check" data-check="${f.id}" ${selected.has(f.id)?'checked':''}></td>
+      <td><div class="row-actions" style="justify-content:flex-start">
+        ${fundArchiveView
+          ? `<button class="icon-sq icon-sq--on" data-fundrestore="${f.id}" title="Done - click to restore">${DONE_ICON}</button>`
+          : `<button class="icon-sq" data-funddone="${f.id}" title="Mark done">${DONE_ICON}</button>`}
+        <div class="dd dd--row">
+          <button type="button" class="dd-btn icon-sq" title="More actions">${DOTS_ICON}</button>
+          <div class="dd-menu" style="left:0;right:auto">
+            <button type="button" class="dd-item" data-rowact="info:${f.id}">More info</button>
+            <button type="button" class="dd-item" data-rowact="addperson:${f.id}">+ Add person</button>
+            <button type="button" class="dd-item" data-rowact="remove:${f.id}" style="color:var(--destructive)">Remove fund</button>
+          </div>
+        </div>
+        <button class="icon-sq" data-openfundinfo="${f.id}" title="Open fund">${OPEN_ICON}</button>
+      </div></td>
       <td><div class="fund-cell">
         <span class="fund-name">${CHEV}${esc(f.name)}</span>
         ${f.site ? `<a class="fund-site" href="https://${esc(f.site)}" target="_blank" rel="noopener" data-noopen title="Open website">${esc(f.site)}</a>` : ''}
@@ -1774,44 +1489,35 @@ function renderFundsTable(){
         <button class="add-ava" data-addperson="${f.id}" title="Add person to ${esc(f.name)}">${PLUS_ICON}</button>
         ${tbd ? `<span class="pill pill--needs">${tbd} unmapped</span>` : ''}
       </div></td>
-      <td style="text-align:right;white-space:nowrap"><div class="row-actions">
-        ${fundArchiveView
-          ? `<button class="icon-sq icon-sq--on" data-fundrestore="${f.id}" title="Done - click to restore">${DONE_ICON}</button>`
-          : `<button class="icon-sq" data-funddone="${f.id}" title="Mark done">${DONE_ICON}</button>`}
-        <div class="dd dd--row">
-          <button type="button" class="dd-btn icon-sq" title="More actions">${DOTS_ICON}</button>
-          <div class="dd-menu">
-            <button type="button" class="dd-item" data-rowact="info:${f.id}">More info</button>
-            <button type="button" class="dd-item" data-rowact="addperson:${f.id}">+ Add person</button>
-            <button type="button" class="dd-item" data-rowact="remove:${f.id}" style="color:var(--destructive)">Remove fund</button>
-          </div>
-        </div>
-        <button class="icon-sq" data-openfundinfo="${f.id}" title="Open fund">${OPEN_ICON}</button>
-      </div></td>
     </tr>
     ${open ? personSubRows(f) : ''}`;
   }).join('');
-  emptyState(rows.length, fundArchiveView ? 'Archive is empty. The check icon on a fund row sends it here.' : 'No funds match. Clear filters or upload your fund list via Add funds in the top menu.');
-  $('tableFoot').textContent = `${rows.length} of ${FUNDS.length} funds. Click a fund to expand its people; each person carries their own outreach status. Sample data is unverified - replace it with your list.`;
-  wireCheckAll(rows.map(f => f.id));
+  emptyState(rows.length, fundArchiveView ? 'Archive is empty. The check icon on a fund row sends it here.' : 'No funds match. Clear filters or upload more via Add funds in the top menu.');
+  $('tableFoot').innerHTML = `Showing ${shown.length} of ${rows.length} funds` +
+    (rows.length > shown.length ? ` — <button class="read-more" data-showmore>Show 300 more</button> <button class="read-more" data-showall>Show all ${rows.length}</button>` : '') +
+    `. Click a fund to expand its people. Grades: hand-graded where curated, rubric first-pass otherwise.`;
+  wireCheckAll(shown.map(f => f.id));
 }
 
 function renderPeopleTable(){
   $('tableHead').innerHTML = `<tr>
     <th style="width:34px"><input type="checkbox" class="row-check" id="checkAll"></th>
+    <th style="width:76px"></th>
     <th class="sortable" data-hsort="name">Person${hArrow('name')}</th>
     <th class="sortable" data-hsort="fit">Fund fit${hArrow('fit')}</th>
     <th class="sortable hide-md" data-hsort="check">Check${hArrow('check')}</th>
     <th class="sortable" data-hsort="path">Path in${hArrow('path')}</th>
     <th class="sortable" data-hsort="status">Status${hArrow('status')}</th>
-    <th style="width:36px"></th><th style="width:30px"></th>
+    <th style="width:30px"></th>
   </tr>`;
   const rows = visiblePeople();
-  $('tableBody').innerHTML = rows.map(p => {
+  const shown = rows.slice(0, renderCap);
+  $('tableBody').innerHTML = shown.map(p => {
     const f = FUND_BY_ID[p.fundId];
     const due = personFollowUp(p);
     return `<tr data-person="${p.id}" class="${selected.has(p.id)?'selected':''} ${fundArchiveView?'arch-dim':''}">
       <td><input type="checkbox" class="row-check" data-check="${p.id}" ${selected.has(p.id)?'checked':''}></td>
+      <td><div class="row-actions" style="justify-content:flex-start">${fundArchiveView ? pArchBtnHtml(p) : personMenuHtml(p)}</div></td>
       <td><div class="fund-cell">
         <span class="fund-name">${p.tbd?`<span style="color:var(--grey-1)">${esc(p.title)}</span> <span class="pill pill--needs">Needs name</span>`:esc(p.name)}</span>
         <span class="fund-sub">${p.tbd?'':esc(p.title)+' · '}${esc(f.name)}</span>
@@ -1823,20 +1529,21 @@ function renderPeopleTable(){
         ${statusDdHtml(p)}
         ${due ? `<span class="pill ${due.cls}">Follow up · ${due.label}</span>` : ''}
       </div></td>
-      <td><div class="row-actions">${fundArchiveView ? pArchBtnHtml(p) : personMenuHtml(p)}</div></td>
       <td><a class="li-link" href="${esc(personLi(p))}" target="_blank" rel="noopener" title="Open LinkedIn" data-noopen>${LI_ICON}</a></td>
     </tr>`;
   }).join('');
   emptyState(rows.length, 'No people match these filters.');
-  $('tableFoot').textContent = fundArchiveView ? `${rows.length} archived people. Restore anyone with the arrow icon.` : `${rows.length} people. "Needs name" means the right partner still has to be mapped. Archived people are hidden and skipped by connector asks.`;
-  wireCheckAll(rows.map(p => p.id));
+  $('tableFoot').innerHTML = `Showing ${shown.length} of ${rows.length} people` +
+    (rows.length > shown.length ? ` — <button class="read-more" data-showmore>Show 300 more</button> <button class="read-more" data-showall>Show all ${rows.length}</button>` : '') +
+    (fundArchiveView ? '. Archived people - restore with the arrow icon.' : '. Archived people are hidden and skipped by connector asks.');
+  wireCheckAll(shown.map(p => p.id));
 }
 
 function renderFollowupsTable(){
   $('tableHead').innerHTML = `<tr><th style="padding-left:36px">Who</th><th>Kind</th><th class="hide-md">Last touch</th><th>Due</th><th>Next move</th></tr>`;
   const items = [];
   PEOPLE.forEach(p => {
-    if (FS(p.fundId).archived) return;
+    if (isFundArchived(FUND_BY_ID[p.fundId])) return;
     const d = personFollowUp(p);
     if (d) items.push({ kind:'person', ref:p, due:d, st: PS(p.id) });
   });
@@ -2217,9 +1924,9 @@ function fundFitLine(f){
   if (!f.dims) return '';
   const because = { thesis:'the thesis overlap is direct', stage:'they invest at exactly our stage', check:'their check size fits the round', portfolio:'their portfolio pattern-matches us', geo:'they are warm to reach' };
   const names = { thesis:'thesis fit', stage:'stage', check:'check size', portfolio:'portfolio adjacency', geo:'reachability' };
-  const sorted = PITCH_DIMS.map(([k]) => [k, f.dims[k]]).sort((a,b) => b[1]-a[1]);
-  let line = 'Good fit because ' + because[sorted[0][0]] + ' and ' + because[sorted[1][0]] + '.';
-  const low = sorted[sorted.length-1];
+  const sorted = PITCH_DIMS.map(([k,,w]) => [k, f.dims[k], f.dims[k]*w]).sort((a,b) => b[2]-a[2]);
+  let line = 'Good fit: ' + because[sorted[0][0]] + ' and ' + because[sorted[1][0]] + '.';
+  const low = PITCH_DIMS.map(([k]) => [k, f.dims[k]]).sort((a,b) => a[1]-b[1])[0];
   if (low[1] < 70) line += ' Weak spot: ' + names[low[0]] + '.';
   return line;
 }
@@ -2372,6 +2079,17 @@ function openFund(id){
     </div>` : `
     <div class="info-card"><b>Not graded yet.</b> This fund came from your upload - it gets scored against the deck rubric (marketplaces, creator media, adtech, AI + data moat, media SaaS) on the next grading pass.</div>
     ${f.looking ? `<div class="d-section"><span class="d-label">About the fund</span><div class="info-card">${esc(f.looking)}</div></div>` : ''}`}
+    ${(f.ctx && f.ctx.length) ? `
+    <div class="d-section">
+      <span class="d-label">History & context (from the pipeline sheet)</span>
+      ${f.ctx.map(cx => `<div class="info-card"><b>${esc(cx[0])}:</b> ${cx[0]==='Notion'
+        ? `<a href="${esc(cx[1])}" target="_blank" rel="noopener" style="text-decoration:underline">open in Notion</a>`
+        : esc(cx[1])}</div>`).join('')}
+    </div>` : ''}
+    <div class="d-section">
+      <span class="d-label">Notes</span>
+      <textarea class="notes-area" id="dFundNotes" placeholder="Your working notes on this fund...">${esc(FS(id).notes || '')}</textarea>
+    </div>
     <div class="d-section">
       <div class="d-row" style="justify-content:space-between">
         <span class="d-label">Pitch meetings (Fathom)</span>
@@ -2409,6 +2127,7 @@ function openFund(id){
     rm.textContent = open ? 'Read more' : 'Read less';
   };
   $('dAddPerson').onclick = () => addPersonTo(id, () => openFund(id));
+  $('dFundNotes').oninput = e => { FS(id).notes = e.target.value; save(); };
   $('dSyncMeetings').onclick = async () => {
     const btn = $('dSyncMeetings');
     btn.textContent = 'Syncing...'; btn.disabled = true;
@@ -2556,6 +2275,7 @@ function switchTab(tab){
   currentTab = tab;
   selected.clear();
   fundArchiveView = false;
+  renderCap = 150;
   render();
 }
 $('tabRow').addEventListener('click', e => {
@@ -2565,9 +2285,13 @@ $('tabRow').addEventListener('click', e => {
 $('tbPeople').addEventListener('click', () => switchTab('people'));
 $('tbConnectors').addEventListener('click', () => switchTab('connectors'));
 $('tbTemplates').addEventListener('click', () => switchTab('templates'));
-$('searchInput').addEventListener('input', e => { searchQ = e.target.value.trim().toLowerCase(); render(); });
-$('clearFilters').addEventListener('click', () => { activeFilters = {}; render(); });
+$('searchInput').addEventListener('input', e => { searchQ = e.target.value.trim().toLowerCase(); renderCap = 150; render(); });
+$('clearFilters').addEventListener('click', () => { activeFilters = {}; renderCap = 150; render(); });
 $('viewArchiveBtn').addEventListener('click', () => { fundArchiveView = !fundArchiveView; selected.clear(); render(); });
+$('tableFoot').addEventListener('click', e => {
+  if (e.target.closest('[data-showmore]')) { renderCap += 300; render(); }
+  else if (e.target.closest('[data-showall]')) { renderCap = 1e9; render(); }
+});
 $('tableHead').addEventListener('click', e => {
   const th = e.target.closest('[data-hsort]');
   if (!th) return;
@@ -2712,7 +2436,7 @@ $('tableBody').addEventListener('click', e => {
   const frestore = e.target.closest('[data-fundrestore]');
   if (frestore) {
     e.stopPropagation();
-    delete FS(frestore.dataset.fundrestore).archived;
+    FS(frestore.dataset.fundrestore).archived = false;
     save(); render();
     toast('Restored to the pipeline.');
     return;
@@ -2879,20 +2603,6 @@ $('fundPasteImport').addEventListener('click', () => {
   $('fundPasteWrap').style.display = 'none';
 });
 $('fundPasteCancel').addEventListener('click', () => { $('fundPasteWrap').style.display = 'none'; });
-$('removeSamplesBtn').addEventListener('click', () => {
-  const allHidden = SEED_FUNDS.every(f => state.hiddenFunds.includes(f.id));
-  if (allHidden) {
-    state.hiddenFunds = [];
-    save(); rebuild(); render();
-    toast('Sample funds restored.');
-    return;
-  }
-  const n = SEED_FUNDS.filter(f => !state.hiddenFunds.includes(f.id)).length;
-  if (!confirm('Remove all ' + n + ' sample funds? Your uploaded funds stay, and you can restore the samples any time.')) return;
-  state.hiddenFunds = SEED_FUNDS.map(f => f.id);
-  save(); rebuild(); render();
-  toast('Sample funds removed. Upload your list above.');
-});
 
 /* Drawer inner navigation */
 $('drawerBody').addEventListener('click', e => {
@@ -2985,7 +2695,7 @@ $('bulkBar').addEventListener('click', e => {
   if (!b || !STAGE_TABS.includes(currentTab)) return;
   const stage = b.dataset.bulkstage;
   let n = 0;
-  selected.forEach(id => { if (FUND_BY_ID[id]) { const fs = FS(id); fs.stage = stage; delete fs.archived; n++; } });
+  selected.forEach(id => { if (FUND_BY_ID[id]) { const fs = FS(id); fs.stage = stage; fs.archived = false; n++; } });
   selected.clear();
   save(); render();
   toast(`${n} fund${n===1?'':'s'} moved to ${F_STAGES[stage]}`);
