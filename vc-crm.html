@@ -1166,8 +1166,8 @@ function peopleListFor(personIds){
     const p = PERSON_BY_ID[pid];
     if (!p) return null;
     const f = FUND_BY_ID[p.fundId];
-    const who = p.tbd ? `[name] (${p.title})` : firstName(p.name);
-    return `• ${who} from ${f.name} - ${personLi(p)}`;
+    if (p.tbd) return `• Anyone at ${f.name} - ${personLi(p)}`;
+    return `• ${firstName(p.name)} from ${f.name} - ${personLi(p)}`;
   }).filter(Boolean).join('\n');
 }
 
@@ -2503,9 +2503,30 @@ function openConnector(id, preselect){
   drawerRef = { kind:'connector', id, preselect };
   const st = CS(id);
   const cst = st.status || 'none';
-  const matches = (c.matches||[]).map(pid => PERSON_BY_ID[pid]).filter(Boolean);
-  const defaultIds = matches.filter(p => !isExcluded(p) && !['replied','meeting','passed'].includes(pStatus(p))).map(p => p.id);
-  const checkedSet = new Set(preselect ? [preselect] : (st.included || defaultIds));
+  const seenM = new Set();
+  const matches = (c.matches||[]).map(pid => PERSON_BY_ID[pid]).filter(Boolean)
+    // prefer records with a real profile URL / fuller name, then dedupe by
+    // first name within a fund (near-duplicates from merged sources)
+    .sort((a,b) => ((b.li0?1:0) - (a.li0?1:0)) || ((b.name||'').length - (a.name||'').length))
+    .filter(p => {
+      const key = p.fundId + '|' + (p.tbd ? 'tbd' : firstName(p.name).toLowerCase().slice(0, 4));
+      if (seenM.has(key)) return false;
+      seenM.add(key);
+      return true;
+    })
+    .sort((a,b) => score(FUND_BY_ID[b.fundId]) - score(FUND_BY_ID[a.fundId]));
+  const eligible = matches.filter(p => !isExcluded(p) && !['replied','meeting','passed'].includes(pStatus(p)));
+  const usedFunds = new Set();
+  const defaultIds = [];
+  for (const p of eligible) {
+    if (usedFunds.has(p.fundId)) continue;
+    usedFunds.add(p.fundId);
+    defaultIds.push(p.id);
+    if (defaultIds.length >= 6) break;
+  }
+  // stored selections count only when hand-curated (small); stale auto-lists are ignored
+  const stored = (st.included && st.included.length && st.included.length <= 12) ? st.included : null;
+  const checkedSet = new Set(preselect ? [preselect] : (stored || defaultIds));
   const due = connectorFollowUp(c);
   $('dTitle').textContent = c.name;
   $('dMeta').innerHTML = `<span class="pill pill--type">Connector</span> ${esc(c.role||'')}${c.li ? ` · <a href="${esc(c.li)}" target="_blank" rel="noopener" style="font-weight:600;color:#0a66c2">LinkedIn</a>` : ''}`;
@@ -2528,12 +2549,12 @@ function openConnector(id, preselect){
           const f = FUND_BY_ID[p.fundId];
           return `<label class="check-row">
             <input type="checkbox" data-inc="${p.id}" ${checkedSet.has(p.id)?'checked':''}>
-            <span><b>${p.tbd?esc(p.title):esc(firstName(p.name))}</b> from ${esc(f.name)}</span>
-            <span class="cr-sub">${grade(f)} · ${P_STATUS[pStatus(p)]}${matchNote(c, p.id) ? ' · ' + esc(matchNote(c, p.id)) : ''}${isExcluded(p)?' · Archived':''}</span>
+            <span><b>${p.tbd ? esc(f.name) : esc(p.name)}</b>${p.tbd ? ' <span style="color:var(--muted-foreground)">· any partner</span>' : ' <span style="color:var(--muted-foreground)">· ' + esc(f.name) + '</span>'}</span>
+            <span class="cr-sub">${grade(f)}${matchNote(c, p.id) ? ' · ' + esc(matchNote(c, p.id)) : ' · ' + P_STATUS[pStatus(p)]}${isExcluded(p)?' · Archived':''}</span>
           </label>`;
         }).join('') : '<div class="info-card">No matches yet. Add one, or sync LinkedIn to match automatically.</div>'}
       </div>
-      <span style="font-size:11px;color:var(--grey-1)">Checked people go into the ask below as the bulleted list with LinkedIn links.</span>
+      <span style="font-size:11px;color:var(--grey-1)">Sorted by fund fit; the top 6 are pre-checked. Checked people become the bulleted list in the ask below - keep it short.</span>
     </div>
     <div class="d-section">
       <span class="d-label">Ask message</span>
