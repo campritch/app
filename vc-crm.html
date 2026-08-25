@@ -394,7 +394,7 @@
     .connector-card__matches { display: flex; flex-wrap: wrap; gap: 4px; }
     .connector-card__foot { display: flex; align-items: center; justify-content: space-between; margin-top: 2px; }
     .connector-card.selected-card, .arch-row.selected-card { border-color: var(--foreground); }
-    .arch-row__name { min-width: 170px; }
+    .arch-row__name { min-width: 170px; display: inline-flex; align-items: center; gap: 6px; }
     .card-icon-btn {
       display: inline-flex; align-items: center; justify-content: center;
       width: 28px; height: 28px; border: none; border-radius: 6px;
@@ -895,6 +895,23 @@ function rebuild(){
     }
   });
   FUND_NORMS = FUNDS.map(f => ({ f, norm: normOrg(f.name) })).filter(x => x.norm);
+  // Enrich connectors from Cam's imported LinkedIn connections: real current
+  // position + profile URL replace generic roles like "NFX Signal connector".
+  if ((state.liConnections || []).length) {
+    const byName = {};
+    state.liConnections.forEach(r => {
+      const k = (r.first + ' ' + r.last).trim().toLowerCase();
+      if (k && !byName[k]) byName[k] = r;
+    });
+    SEED_CONNECTORS.concat(DATA_CONNECTORS, state.extraConnectors || []).forEach(c => {
+      const row = byName[(c.name || '').toLowerCase()];
+      if (!row) return;
+      if (!c.li && row.url) c.li = row.url;
+      if ((!c.role || c.role === 'NFX Signal connector' || c.role === 'Connector') && (row.position || row.company)) {
+        c.role = [row.position, row.company].filter(Boolean).join(', ');
+      }
+    });
+  }
   // AI-proposed dims for previously ungraded funds, persisted in state.
   FUNDS.forEach(f => {
     const st = state.funds && state.funds[f.id];
@@ -1884,8 +1901,9 @@ function renderConnectors(){
       const cst = st.status || 'none';
       const due = connectorFollowUp(c);
       const n = (c.matches || []).filter(pid => PERSON_BY_ID[pid]).length;
+      const liUrl = c.li || ('https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(c.name));
       return `<div class="arch-row ${connSelected.has(c.id)?'selected-card':''}" data-conn="${c.id}">
-        <span class="arch-row__name">${esc(c.name)}</span>
+        <span class="arch-row__name">${esc(c.name)} <a class="li-link" href="${esc(liUrl)}" target="_blank" rel="noopener" title="Open LinkedIn">${LI_ICON}</a></span>
         <span class="arch-row__role">${esc(c.role||'')} · ${n} match${n===1?'':'es'}</span>
         ${cst !== 'none' ? `<span class="pill pill--cst-${cst}">${C_STATUS[cst]}</span>` : ''}
         ${due ? `<span class="pill ${due.cls}">${due.label}</span>` : ''}
@@ -1898,8 +1916,9 @@ function renderConnectors(){
     host.innerHTML = '';
     $('archivedStrip').innerHTML = archived.length ? archived.map(c => {
       const matches = (c.matches||[]).filter(pid => PERSON_BY_ID[pid]).length;
+      const liUrl = c.li || ('https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(c.name));
       return `<div class="arch-row ${connSelected.has(c.id)?'selected-card':''}" data-conn="${c.id}">
-        <span class="arch-row__name">${esc(c.name)}</span>
+        <span class="arch-row__name">${esc(c.name)} <a class="li-link" href="${esc(liUrl)}" target="_blank" rel="noopener" title="Open LinkedIn">${LI_ICON}</a></span>
         <span class="arch-row__role">${esc(c.role||'')} · ${matches} match${matches===1?'':'es'}</span>
         <button class="card-icon-btn" data-connunarch="${c.id}" title="Restore to active">${UNARCHIVE_ICON}</button>
         <input type="checkbox" class="done-check" data-connsel="${c.id}" ${connSelected.has(c.id)?'checked':''} title="Select for bulk actions">
@@ -2850,6 +2869,7 @@ $('tableBody').addEventListener('click', e => {
 
 /* Connectors view */
 $('connectorsView').addEventListener('click', e => {
+  if (e.target.closest('a.li-link')) return; // let the LinkedIn link navigate
   const sel = e.target.closest('[data-connsel]');
   if (sel) {
     e.stopPropagation();
