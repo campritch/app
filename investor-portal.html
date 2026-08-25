@@ -6,9 +6,9 @@
 <meta name="robots" content="noindex, nofollow">
 <!-- deploy env refresh -->
 <title>SpotsNow — Investor Portal</title>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />
-  <link rel="icon" type="image/png" href="/favicon.png?v=2" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=3" />
+  <link rel="icon" type="image/png" href="/favicon.png?v=3" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Parkinsans:wght@600;700;800&display=swap" rel="stylesheet">
@@ -67,7 +67,7 @@ const CONTENT = {
     highlights: [
       "Sebastian and Nicole are leading an SPV into SpotsNow.",
       "SpotsNow is Hotel Tonight for podcast ads: discover shows, build a plan, book, and track it yourself.",
-      "Already $280K+ in GMV and millions of impressions, with brands like TurboTax, Toyota, Peloton, and Liquid IV.",
+      "Already $280K+ in GMV and millions of impressions, running campaigns for TurboTax, Toyota, Peloton, and Liquid IV.",
       "They're backing the product and the founder, and can open doors to brands, agencies, and networks.",
       "$500K allocation secured at a discounted entry point ahead of the priced seed round.",
       "Looking for people close to brands, agencies, media buyers, podcast networks, and creators.",
@@ -76,16 +76,18 @@ const CONTENT = {
 
   // ---- Key metrics (all confirmed in the seed deck) ----
   metrics: [
-    { value: "59,000+", label: "Shows in marketplace", sub: "Searchable host-read inventory" },
+    { value: "59,000+", label: "Profiles in Marketplace", sub: "Searchable host-read inventory" },
+    { value: "800+",    label: "Shows onboarded", sub: "Signed to the platform" },
+    { value: "55,000",  label: "Platform searches", sub: "Run across the marketplace" },
+    { value: "8.7M",    label: "Impressions bought", sub: "Across 20+ networks" },
     { value: "$280K+",  label: "Cumulative GMV", sub: "20x from Oct to Mar" },
-    { value: "4M+",     label: "Impressions bought", sub: "Across 20+ networks" },
-    { value: "3x+",     label: "Avg test ROAS", sub: "Tesbros hit 5x on its top show" },
+    { value: "$12.5K",  label: "Monthly revenue", sub: "As of September" },
   ],
 
   // ---- Deal terms (RAISE + RUNWAY confirmed in deck; rest TODO; CLOSING is the scarcity lever) ----
   terms: [
     { label: "STRUCTURE",            value: "SAFE Note" },
-    { label: "POST-MONEY VALUATION", value: "$10M" },
+    { label: "POST-MONEY VALUATION", value: "$10.5M" },
     { label: "ALLOCATION",           value: "$500K" },
   ],
 
@@ -102,7 +104,7 @@ const CONTENT = {
         "Enter your brand website",
         "Generate a campaign and see your highest-converting shows",
       ],
-      image: "",  // Cam to supply a preview image later; empty shows a placeholder
+      image: "/brand-demo.webp",
       primary: { label: "Get started", url: "https://spotsnow.io" },
       howto: [
         "Head to SpotsNow.io.",
@@ -113,13 +115,13 @@ const CONTENT = {
     },
     show: {
       tab: "I'm a podcast / show",
-      summary: "Search your show to see every metric: who's advertising, who isn't, and your perfect-fit sponsors.",
+      summary: "Search your show to see every metric: who's advertising, who isn't, and which sponsors are seeing the most success.",
       steps: [
         "Search your show on SpotsNow",
         "See your metrics and who's advertising",
         "Get 50 best-fit sponsors, instantly",
       ],
-      image: "",  // Cam to supply a show-side preview image later; empty shows a placeholder
+      image: "/show-demo.webp",
       primary: { label: "Demo on SpotsNow", url: "https://spotsnow.io" },
       howto: [
         "Search your show on SpotsNow to pull its full profile.",
@@ -296,7 +298,7 @@ const CONTENT = {
   .metric .sub{font-size:12.5px;color:var(--mute);margin-top:3px;line-height:1.4}
 
   /* deal terms */
-  .terms{display:grid;grid-template-columns:1fr 1fr;gap:24px 28px}
+  .terms{display:flex;flex-wrap:wrap;gap:14px 44px}
   .term .k{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--mute-2)}
   .term .v{font-size:19px;font-weight:700;margin-top:5px}
   .closing{
@@ -353,14 +355,21 @@ const CONTENT = {
     .ov h2{font-size:25px}
   }
   /* ---------------- VIDEO HIGHLIGHTS ---------------- */
-  .vid-highlights{margin-top:14px;text-align:left}
-  .vid-highlights summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--salmon);
-    list-style:none;display:inline-flex;align-items:center;gap:6px}
+  .vid-highlights{margin-top:16px;text-align:left}
+  .vid-highlights summary{cursor:pointer;list-style:none;
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    font-size:14.5px;font-weight:700;color:var(--text);
+    background:var(--navy-3);border:1px solid var(--line-2);border-radius:11px;
+    padding:13px 16px;transition:.15s}
+  .vid-highlights summary:hover{border-color:var(--salmon);color:var(--salmon)}
   .vid-highlights summary::-webkit-details-marker{display:none}
-  .vid-highlights summary::after{content:"▾";font-size:10px;transition:transform .15s}
-  .vid-highlights[open] summary::after{transform:rotate(180deg)}
-  .vid-highlights ul{margin:12px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:8px}
-  .vid-highlights li{color:var(--mute);font-size:13.5px;line-height:1.5}
+  .vid-highlights .vh-chev{width:18px;height:18px;color:#fff;flex:0 0 auto;transition:transform .2s}
+  .vid-highlights summary:hover .vh-chev{color:var(--salmon)}
+  .vid-highlights[open] summary{border-color:var(--salmon);border-bottom-left-radius:0;border-bottom-right-radius:0}
+  .vid-highlights[open] .vh-chev{transform:rotate(180deg)}
+  .vid-highlights ul{margin:0;padding:16px 18px 16px 36px;display:flex;flex-direction:column;gap:10px;
+    background:var(--navy-3);border:1px solid var(--line-2);border-top:0;border-radius:0 0 11px 11px}
+  .vid-highlights li{color:var(--mute);font-size:14px;line-height:1.55}
 
   /* ---------------- TRY IT YOURSELF (demo) ---------------- */
   .demo-h{font-size:26px;font-weight:800;letter-spacing:-.01em;margin-top:2px}
@@ -463,14 +472,14 @@ const CONTENT = {
     </div>
 
     <!-- METRICS + TERMS (left, stacked) | INVESTOR VIDEO (right) -->
-    <div class="grid2" style="margin-top:22px;align-items:start">
+    <div class="grid2" style="margin-top:22px;align-items:stretch">
       <div style="display:flex;flex-direction:column;gap:22px">
         <section class="card">
           <div class="eyebrow">KEY METRICS</div>
           <div class="metricgrid" id="metrics"></div>
         </section>
 
-        <section class="card">
+        <section class="card" style="padding-top:26px;padding-bottom:26px;flex:1">
           <div class="eyebrow">DEAL TERMS</div>
           <div class="terms" id="terms"></div>
         </section>
@@ -576,7 +585,7 @@ document.addEventListener("click", (e)=>{
 });
 function vidCap(cfg){
   const hl = (cfg.highlights && cfg.highlights.length)
-    ? `<details class="vid-highlights"><summary>View Summary</summary><ul>${cfg.highlights.map(h=>`<li>${h}</li>`).join("")}</ul></details>`
+    ? `<details class="vid-highlights"><summary>View Summary<svg class="vh-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></summary><ul>${cfg.highlights.map(h=>`<li>${h}</li>`).join("")}</ul></details>`
     : "";
   return `<b>${cfg.caption}</b><small>${cfg.sub}</small>${hl}`;
 }
