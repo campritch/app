@@ -3,69 +3,220 @@
   "outputDirectory": "dist",
   "framework": null,
   "functions": {
-    "api/transcript.py": { "maxDuration": 10, "excludeFiles": "{*.html,*.png,*.jpg,*.jpeg,*.pdf,*.svg,cutouts/**,fonts/**,api/_tools/**,api/*.js,dist/**,node_modules/**,.vercel_python_packages/**,claude-chief-of-staff/**}" },
-    "api/thumbnail.py": { "maxDuration": 10, "includeFiles": "{cutouts,fonts}/**", "excludeFiles": "{*.html,*.pdf,*.svg,api/_tools/**,api/*.js,dist/**,node_modules/**,.vercel_python_packages/**,claude-chief-of-staff/**}" },
-    "api/generate.py": { "maxDuration": 10, "excludeFiles": "{*.html,*.png,*.jpg,*.jpeg,*.pdf,*.svg,cutouts/**,fonts/**,api/_tools/**,api/*.js,dist/**,node_modules/**,.vercel_python_packages/**,claude-chief-of-staff/**}" },
-    "api/gtm-data.js": { "includeFiles": "data/**" },
-    "api/strategy-chat.js": { "maxDuration": 300, "includeFiles": "data/**" },
-    "api/youtube-generate.js": { "maxDuration": 120 },
-    "api/burn-upload.js": { "maxDuration": 10 },
-    "api/fathom-ingest.js": { "maxDuration": 300 },
-    "api/fathom-list.js": { "maxDuration": 60 },
-    "api/fathom-cache.js": { "maxDuration": 60 },
-    "api/notion-publish.js": { "maxDuration": 60 },
-    "api/strategy-state.js": { "maxDuration": 30 },
-    "api/kb-upload.js": { "maxDuration": 30 },
-    "api/kb-manage.js": { "maxDuration": 30 },
-    "api/supadata.js": { "maxDuration": 15 },
-    "api/investor-access.js": { "maxDuration": 10 },
-    "api/vc-meetings.js": { "maxDuration": 30 },
-    "api/vc-fit.js": { "maxDuration": 60 },
-    "api/vc-state.js": { "maxDuration": 30 },
-    "api/investor-leads.js": { "maxDuration": 10 }
+    "api/transcript.py": {
+      "maxDuration": 10,
+      "excludeFiles": "{*.html,*.png,*.jpg,*.jpeg,*.pdf,*.svg,cutouts/**,fonts/**,api/_tools/**,api/*.js,dist/**,node_modules/**,.vercel_python_packages/**,claude-chief-of-staff/**}"
+    },
+    "api/thumbnail.py": {
+      "maxDuration": 10,
+      "includeFiles": "{cutouts,fonts}/**",
+      "excludeFiles": "{*.html,*.pdf,*.svg,api/_tools/**,api/*.js,dist/**,node_modules/**,.vercel_python_packages/**,claude-chief-of-staff/**}"
+    },
+    "api/generate.py": {
+      "maxDuration": 10,
+      "excludeFiles": "{*.html,*.png,*.jpg,*.jpeg,*.pdf,*.svg,cutouts/**,fonts/**,api/_tools/**,api/*.js,dist/**,node_modules/**,.vercel_python_packages/**,claude-chief-of-staff/**}"
+    },
+    "api/gtm-data.js": {
+      "includeFiles": "data/**"
+    },
+    "api/strategy-chat.js": {
+      "maxDuration": 300,
+      "includeFiles": "data/**"
+    },
+    "api/youtube-generate.js": {
+      "maxDuration": 120
+    },
+    "api/burn-upload.js": {
+      "maxDuration": 10
+    },
+    "api/fathom-ingest.js": {
+      "maxDuration": 300
+    },
+    "api/fathom-list.js": {
+      "maxDuration": 60
+    },
+    "api/fathom-cache.js": {
+      "maxDuration": 60
+    },
+    "api/notion-publish.js": {
+      "maxDuration": 60
+    },
+    "api/strategy-state.js": {
+      "maxDuration": 30
+    },
+    "api/kb-upload.js": {
+      "maxDuration": 30
+    },
+    "api/kb-manage.js": {
+      "maxDuration": 30
+    },
+    "api/supadata.js": {
+      "maxDuration": 15
+    },
+    "api/investor-access.js": {
+      "maxDuration": 10
+    },
+    "api/vc-meetings.js": {
+      "maxDuration": 30
+    },
+    "api/vc-fit.js": {
+      "maxDuration": 60
+    },
+    "api/vc-state.js": {
+      "maxDuration": 30
+    },
+    "api/investor-leads.js": {
+      "maxDuration": 10
+    }
   },
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
       ]
     }
   ],
   "rewrites": [
-    { "source": "/nav", "destination": "/nav.html" },
-    { "source": "/demos", "destination": "/demos.html" },
-    { "source": "/acme", "destination": "/acme-os.html" },
-    { "source": "/outbound", "destination": "/acme-outbound.html" },
-    { "source": "/financialdashboard", "destination": "/financial-dashboard-preview.html" },
-    { "source": "/investors", "destination": "/pitch-deck.html" },
-    { "source": "/talking-points", "destination": "/talking-points.html" },
-    { "source": "/youtube-article", "destination": "/youtube-article.html" },
-    { "source": "/bi", "destination": "/bi.html" },
-    { "source": "/ad-ops", "destination": "/ad-ops.html" },
-    { "source": "/managed", "destination": "/managed.html" },
-    { "source": "/chat", "destination": "/chat-ui.html" },
-    { "source": "/intelligence", "destination": "/intelligence.html" },
-    { "source": "/intelligence-app", "destination": "/intelligence-app.html" },
-    { "source": "/ear-check", "destination": "/ear-check.html" },
-    { "source": "/proposal", "destination": "/proposal.html" },
-    { "source": "/strategy", "destination": "/strategy.html" },
-    { "source": "/brand", "destination": "/brand.html" },
-    { "source": "/titans", "destination": "/titans-of-advertising.html" },
-    { "source": "/vc-offer", "destination": "/vc-offer.html" },
-    { "source": "/vcfounderprogram", "destination": "/vcfounderprogram.html" },
-    { "source": "/vcoffer", "destination": "/vcoffer.html" },
-    { "source": "/partners", "destination": "/partners.html" },
-    { "source": "/webinar", "destination": "/webinar.html" },
-    { "source": "/spv", "destination": "/investor-portal.html" },
-    { "source": "/portal", "destination": "/investor-portal.html" },
-    { "source": "/investor-list", "destination": "/investor-list.html" },
-    { "source": "/os", "destination": "/os.html" },
-    { "source": "/os-demo", "destination": "/os.html" },
-    { "source": "/marketplace", "destination": "/marketplace.html" },
-    { "source": "/platforms", "destination": "/platforms.html" },
-    { "source": "/network-ops", "destination": "/network-ops.html" },
-    { "source": "/raise", "destination": "/vc-crm.html" },
-    { "source": "/vc-crm", "destination": "/vc-crm.html" }
-  ]
+    {
+      "source": "/nav",
+      "destination": "/nav.html"
+    },
+    {
+      "source": "/demos",
+      "destination": "/demos.html"
+    },
+    {
+      "source": "/acme",
+      "destination": "/acme-os.html"
+    },
+    {
+      "source": "/outbound",
+      "destination": "/acme-outbound.html"
+    },
+    {
+      "source": "/financialdashboard",
+      "destination": "/financial-dashboard-preview.html"
+    },
+    {
+      "source": "/investors",
+      "destination": "/pitch-deck.html"
+    },
+    {
+      "source": "/talking-points",
+      "destination": "/talking-points.html"
+    },
+    {
+      "source": "/youtube-article",
+      "destination": "/youtube-article.html"
+    },
+    {
+      "source": "/bi",
+      "destination": "/bi.html"
+    },
+    {
+      "source": "/ad-ops",
+      "destination": "/ad-ops.html"
+    },
+    {
+      "source": "/managed",
+      "destination": "/managed.html"
+    },
+    {
+      "source": "/chat",
+      "destination": "/chat-ui.html"
+    },
+    {
+      "source": "/intelligence",
+      "destination": "/intelligence.html"
+    },
+    {
+      "source": "/intelligence-app",
+      "destination": "/intelligence-app.html"
+    },
+    {
+      "source": "/ear-check",
+      "destination": "/ear-check.html"
+    },
+    {
+      "source": "/proposal",
+      "destination": "/proposal.html"
+    },
+    {
+      "source": "/strategy",
+      "destination": "/strategy.html"
+    },
+    {
+      "source": "/brand",
+      "destination": "/brand.html"
+    },
+    {
+      "source": "/titans",
+      "destination": "/titans-of-advertising.html"
+    },
+    {
+      "source": "/vc-offer",
+      "destination": "/vc-offer.html"
+    },
+    {
+      "source": "/vcfounderprogram",
+      "destination": "/vcfounderprogram.html"
+    },
+    {
+      "source": "/vcoffer",
+      "destination": "/vcoffer.html"
+    },
+    {
+      "source": "/partners",
+      "destination": "/partners.html"
+    },
+    {
+      "source": "/webinar",
+      "destination": "/webinar.html"
+    },
+    {
+      "source": "/spv",
+      "destination": "/investor-portal.html"
+    },
+    {
+      "source": "/portal",
+      "destination": "/investor-portal.html"
+    },
+    {
+      "source": "/investor-list",
+      "destination": "/investor-list.html"
+    },
+    {
+      "source": "/os",
+      "destination": "/os.html"
+    },
+    {
+      "source": "/os-demo",
+      "destination": "/os.html"
+    },
+    {
+      "source": "/marketplace",
+      "destination": "/marketplace.html"
+    },
+    {
+      "source": "/platforms",
+      "destination": "/platforms.html"
+    },
+    {
+      "source": "/network-ops",
+      "destination": "/network-ops.html"
+    },
+    {
+      "source": "/raise",
+      "destination": "/vc-crm.html"
+    },
+    {
+      "source": "/vc-crm",
+      "destination": "/vc-crm.html"
+    }
+  ],
+  "devCommand": "python3 -m http.server $PORT"
 }
