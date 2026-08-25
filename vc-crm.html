@@ -393,7 +393,8 @@
     .connector-card__role { font-size: 12.5px; color: var(--muted-foreground); }
     .connector-card__matches { display: flex; flex-wrap: wrap; gap: 4px; }
     .connector-card__foot { display: flex; align-items: center; justify-content: space-between; margin-top: 2px; }
-    .connector-card.selected-card { border-color: var(--foreground); }
+    .connector-card.selected-card, .arch-row.selected-card { border-color: var(--foreground); }
+    .arch-row__name { min-width: 170px; }
     .card-icon-btn {
       display: inline-flex; align-items: center; justify-content: center;
       width: 28px; height: 28px; border: none; border-radius: 6px;
@@ -734,7 +735,7 @@ Dana Whitfield, Overline, worked together at Techstars,"></textarea>
       </div>
       <div class="connector-grid" id="connectorGrid"></div>
       <div id="archivedStrip"></div>
-      <div class="table-foot" style="padding:0">Connectors are the people you have rapport with who can open doors. Click one to pick which fund people to include and copy the ask. The checkbox marks a connector done; the box icon archives them.</div>
+      <div class="table-foot" style="padding:0">Connectors are the people you have rapport with who can open doors. Click one to pick which fund people to include and copy the ask. Checkboxes select connectors for bulk archive; click a row to open the ask.</div>
     </div>
 
     <!-- Templates -->
@@ -1873,20 +1874,35 @@ function renderConnectors(){
   if (bac) bac.textContent = connView === 'archived' ? 'Restore selected' : 'Archive selected';
 
   const host = $('connectorGrid');
+  host.style.display = 'flex'; host.style.flexDirection = 'column'; host.style.gap = '8px';
   if (connView === 'active') {
-    const sorted = active.slice().sort((a,b) => (CS(a.id).done?1:0) - (CS(b.id).done?1:0));
-    host.innerHTML = sorted.map(connectorCardHtml).join('') ||
-      '<div class="info-card">No active connectors. Sync LinkedIn or add one above.</div>';
+    const sorted = active.slice().sort((a,b) =>
+      ((a.source === 'nfx' ? 1 : 0) - (b.source === 'nfx' ? 1 : 0)) ||
+      ((b.matches || []).length - (a.matches || []).length));
+    host.innerHTML = sorted.map(c => {
+      const st = CS(c.id);
+      const cst = st.status || 'none';
+      const due = connectorFollowUp(c);
+      const n = (c.matches || []).filter(pid => PERSON_BY_ID[pid]).length;
+      return `<div class="arch-row ${connSelected.has(c.id)?'selected-card':''}" data-conn="${c.id}">
+        <span class="arch-row__name">${esc(c.name)}</span>
+        <span class="arch-row__role">${esc(c.role||'')} · ${n} match${n===1?'':'es'}</span>
+        ${cst !== 'none' ? `<span class="pill pill--cst-${cst}">${C_STATUS[cst]}</span>` : ''}
+        ${due ? `<span class="pill ${due.cls}">${due.label}</span>` : ''}
+        <input type="checkbox" class="done-check" data-connsel="${c.id}" ${connSelected.has(c.id)?'checked':''} title="Select for bulk actions">
+      </div>`;
+    }).join('') || '<div class="info-card">No active connectors. Sync LinkedIn or add one above.</div>';
     $('archivedStrip').innerHTML = archived.length
       ? `<button class="arch-strip" data-connview="archived">${ARCHIVE_ICON} Archived · ${archived.length}</button>` : '';
   } else {
     host.innerHTML = '';
     $('archivedStrip').innerHTML = archived.length ? archived.map(c => {
       const matches = (c.matches||[]).filter(pid => PERSON_BY_ID[pid]).length;
-      return `<div class="arch-row" data-conn="${c.id}" style="margin-bottom:8px">
+      return `<div class="arch-row ${connSelected.has(c.id)?'selected-card':''}" data-conn="${c.id}">
         <span class="arch-row__name">${esc(c.name)}</span>
         <span class="arch-row__role">${esc(c.role||'')} · ${matches} match${matches===1?'':'es'}</span>
         <button class="card-icon-btn" data-connunarch="${c.id}" title="Restore to active">${UNARCHIVE_ICON}</button>
+        <input type="checkbox" class="done-check" data-connsel="${c.id}" ${connSelected.has(c.id)?'checked':''} title="Select for bulk actions">
       </div>`;
     }).join('') : '<div class="info-card">Nothing archived yet.</div>';
   }
@@ -2840,7 +2856,7 @@ $('connectorsView').addEventListener('click', e => {
     const id = sel.dataset.connsel;
     connSelected.has(id) ? connSelected.delete(id) : connSelected.add(id);
     // in-place update: no full re-render on every checkbox tick
-    sel.closest('.connector-card').classList.toggle('selected-card', connSelected.has(id));
+    sel.closest('.connector-card, .arch-row').classList.toggle('selected-card', connSelected.has(id));
     $('bulkBar').classList.toggle('show', connSelected.size > 0);
     $('bulkCount').textContent = `${connSelected.size} selected`;
     document.querySelectorAll('.bulk-conn').forEach(b => b.style.display = 'inline-block');
