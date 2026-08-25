@@ -633,6 +633,7 @@
         <button class="tab" data-tab="booked">Booked <span class="count" id="cntBooked">0</span></button>
         <button class="tab" data-tab="pitching">Pitching <span class="count" id="cntPitching">0</span></button>
         <button class="tab" data-tab="closed">Closed <span class="count" id="cntClosed">0</span></button>
+        <button class="tab" data-tab="disqualified">Disqualified <span class="count" id="cntDisqualified">0</span></button>
         <button class="tab" data-tab="followups">Follow-ups <span class="count" id="cntFollowups">0</span></button>
       </div>
     </div>
@@ -778,6 +779,7 @@ Dana Whitfield, Overline, worked together at Techstars,"></textarea>
     <button class="bulk-btn bulk-fund" data-bulkstage="booked">→ Booked</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="pitching">→ Pitching</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="closed">→ Closed</button>
+    <button class="bulk-btn bulk-fund" data-bulkstage="disqualified">→ Disqualified</button>
     <button class="bulk-btn bulk-people" id="bulkArchiveP">Archive</button>
     <button class="bulk-btn bulk-people" id="bulkPaths">Find connector paths</button>
     <button class="bulk-btn bulk-fund" id="bulkRemove">Remove funds</button>
@@ -1147,8 +1149,8 @@ const P_STATUS = {
 };
 const C_STATUS = { none:'Not asked', draft:'Ask drafted', asked:'Asked', agreed:'Agreed', declined:'Declined' };
 /* Fund pipeline stages — the core CRM flow. */
-const F_STAGES = { none:'Backlog', target:'\ud83c\udfaf Target', booked:'\u2705 Booked', pitching:'\ud83c\udfa4 Pitching', closed:'\u274c Closed' };
-const STAGE_TABS = ['funds','targets','booked','pitching','closed'];
+const F_STAGES = { none:'Backlog', target:'\ud83c\udfaf Target', booked:'\u2705 Booked', pitching:'\ud83c\udfa4 Pitching', closed:'\u274c Closed', disqualified:'\ud83d\udeab Disqualified' };
+const STAGE_TABS = ['funds','targets','booked','pitching','closed','disqualified'];
 const WARMTH = { na:'Warmth: not read', hot:'Hot', warm:'Warm', cool:'Cool', cold:'Cold' };
 function FS(id){ return state.funds[id] || (state.funds[id] = {}); }
 function fStage(f){ const v = FS(f.id).stage; return v !== undefined ? v : (f.stage0 || 'none'); }
@@ -1275,7 +1277,7 @@ let fundArchiveView = false;
 let headSort = { key: null, dir: 1 };
 let renderCap = 150;
 const HSORT_DEFAULT_DIR = { name:1, profile:1, fit:-1, check:-1, stage:1, people:-1, path:1, status:1, wayin:1 };
-const STAGE_ORDER = { none:0, target:1, booked:2, pitching:3, closed:4 };
+const STAGE_ORDER = { none:0, target:1, booked:2, pitching:3, closed:4, disqualified:5 };
 const hArrow = k => headSort.key === k ? (headSort.dir === 1 ? ' \u2191' : ' \u2193') : '';
 let currentTab = 'funds';
 let searchQ = '';
@@ -1544,6 +1546,7 @@ function render(){
   $('cntBooked').textContent = stageCount('booked');
   $('cntPitching').textContent = stageCount('pitching');
   $('cntClosed').textContent = stageCount('closed');
+  $('cntDisqualified').textContent = stageCount('disqualified');
   const cf = $('cntFollowups');
   cf.textContent = allFollow;
   cf.classList.toggle('hot', (dueP + dueC) > 0);
@@ -1668,6 +1671,7 @@ function renderFundsTable(){
             <button type="button" class="dd-item" data-rowact="reachedout:${f.id}">Reached out - message sent</button>
             <button type="button" class="dd-item" data-rowact="bookedq:${f.id}">Meeting booked</button>
             <button type="button" class="dd-item" data-rowact="passedq:${f.id}">They passed - move to Closed</button>
+            <button type="button" class="dd-item" data-rowact="dqq:${f.id}">Not a fit - disqualify</button>
             <button type="button" class="dd-item" data-rowact="archiveq:${f.id}">Done - archive</button>
           </div>
         </div>`}
@@ -2609,6 +2613,7 @@ document.addEventListener('click', e => {
     }
     if (act === 'bookedq') { FS(id).stage = 'booked'; save(); render(); toast('Logged: meeting booked \u2705'); }
     if (act === 'passedq') { FS(id).stage = 'closed'; save(); render(); toast('Logged: they passed - moved to Closed.'); }
+    if (act === 'dqq') { FS(id).stage = 'disqualified'; save(); render(); toast('Disqualified - filed with the bad VCs.'); }
     if (act === 'archiveq') {
       FS(id).archived = true;
       selected.delete(id);

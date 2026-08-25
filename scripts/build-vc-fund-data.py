@@ -225,7 +225,9 @@ for r in rows:
     elif tier_n == 2 or crm in ('Targets 🎯', 'To Send', 'Waiting', 'Try Recover') or status in ('Todo', 'Get Intro', 'Waiting', 'Contacted'): stage0 = 'target'
     # Passes and not-relevant funds are pipeline history, not trash: they land
     # in the Closed stage, visible, never pre-archived (per Cam).
-    if tier_n == 9 or status in ('Not Relevant', 'Pass / Update list') or ('Passed' in status and tier_n not in (1, 2, 3)) or 'Competitive' in status:
+    if tier_n == 9 or status == 'Not Relevant':
+        stage0 = 'disqualified'   # genuinely bad fits, per Cam's Disqualified bucket
+    elif status in ('Pass / Update list',) or ('Passed' in status and tier_n not in (1, 2, 3)) or 'Competitive' in status:
         stage0 = 'closed'
     if stage0: counts['staged'] += 1
     if archived0: counts['archived'] += 1
