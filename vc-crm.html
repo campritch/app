@@ -1862,7 +1862,8 @@ function connectorCardHtml(c){
     <div class="connector-card__top">
       <span class="partner-ava">${esc((c.name||'?').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase())}</span>
       <div style="min-width:0;flex:1">
-        <div class="connector-card__name">${esc(c.name)}</div>
+        <div class="connector-card__name" style="display:flex;align-items:center;gap:6px">${esc(c.name)}
+          <a class="li-link" href="${esc(c.li || ('https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(c.name)))}" target="_blank" rel="noopener" title="Open LinkedIn">${LI_ICON}</a></div>
         <div class="connector-card__role">${esc(c.role||'')}</div>
       </div>
       <input type="checkbox" class="done-check" data-connsel="${c.id}" ${connSelected.has(c.id)?'checked':''} title="Select for bulk actions">
@@ -1891,28 +1892,17 @@ function renderConnectors(){
   if (bac) bac.textContent = connView === 'archived' ? 'Restore selected' : 'Archive selected';
 
   const host = $('connectorGrid');
-  host.style.display = 'flex'; host.style.flexDirection = 'column'; host.style.gap = '8px';
   if (connView === 'active') {
+    host.style.display = ''; host.style.flexDirection = ''; host.style.gap = '';
     const sorted = active.slice().sort((a,b) =>
       ((a.source === 'nfx' ? 1 : 0) - (b.source === 'nfx' ? 1 : 0)) ||
       ((b.matches || []).length - (a.matches || []).length));
-    host.innerHTML = sorted.map(c => {
-      const st = CS(c.id);
-      const cst = st.status || 'none';
-      const due = connectorFollowUp(c);
-      const n = (c.matches || []).filter(pid => PERSON_BY_ID[pid]).length;
-      const liUrl = c.li || ('https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(c.name));
-      return `<div class="arch-row ${connSelected.has(c.id)?'selected-card':''}" data-conn="${c.id}">
-        <span class="arch-row__name">${esc(c.name)} <a class="li-link" href="${esc(liUrl)}" target="_blank" rel="noopener" title="Open LinkedIn">${LI_ICON}</a></span>
-        <span class="arch-row__role">${esc(c.role||'')} · ${n} match${n===1?'':'es'}</span>
-        ${cst !== 'none' ? `<span class="pill pill--cst-${cst}">${C_STATUS[cst]}</span>` : ''}
-        ${due ? `<span class="pill ${due.cls}">${due.label}</span>` : ''}
-        <input type="checkbox" class="done-check" data-connsel="${c.id}" ${connSelected.has(c.id)?'checked':''} title="Select for bulk actions">
-      </div>`;
-    }).join('') || '<div class="info-card">No active connectors. Sync LinkedIn or add one above.</div>';
+    host.innerHTML = sorted.map(connectorCardHtml).join('') ||
+      '<div class="info-card">No active connectors. Sync LinkedIn or add one above.</div>';
     $('archivedStrip').innerHTML = archived.length
       ? `<button class="arch-strip" data-connview="archived">${ARCHIVE_ICON} Archived · ${archived.length}</button>` : '';
   } else {
+    host.style.display = 'flex'; host.style.flexDirection = 'column'; host.style.gap = '8px';
     host.innerHTML = '';
     $('archivedStrip').innerHTML = archived.length ? archived.map(c => {
       const matches = (c.matches||[]).filter(pid => PERSON_BY_ID[pid]).length;
