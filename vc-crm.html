@@ -51,6 +51,7 @@
       --pill-bg: var(--muted);
     }
     *, *::before, *::after { box-sizing: border-box; }
+    html { overflow-y: scroll; }
     body {
       margin: 0;
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -185,6 +186,13 @@
     .dd-btn svg { color: var(--muted-foreground); opacity: 0.7; flex-shrink: 0; }
     .dd--quiet .dd-btn { border-color: transparent; background: transparent; box-shadow: none; height: 26px; padding: 0 7px; border-radius: 6px; font-size: 12px; }
     .dd--quiet .dd-btn:hover { background: var(--accent); }
+    .warmth-btn {
+      border: none !important; box-shadow: none !important; background: none !important;
+      width: 30px; height: 30px; padding: 0 !important; justify-content: center;
+      font-size: 15px; border-radius: 6px;
+    }
+    .warmth-btn:hover { background: var(--accent) !important; }
+    .warmth-btn--empty { color: var(--input); font-size: 17px; }
     .dd--menu .dd-btn {
       border: none; box-shadow: none; background: none;
       color: var(--muted-foreground); font-size: 13.5px; padding: 0 12px;
@@ -210,7 +218,7 @@
 
     /* ── Table ── */
     .table-wrap { overflow-x: auto; }
-    table { width: 100%; min-width: 1160px; border-collapse: collapse; }
+    table { width: 100%; min-width: 1160px; border-collapse: collapse; table-layout: fixed; }
     thead th {
       text-align: left; font-size: 12.5px; font-weight: 500;
       color: var(--muted-foreground); text-transform: none; letter-spacing: 0;
@@ -1151,7 +1159,18 @@ const C_STATUS = { none:'Not asked', draft:'Ask drafted', asked:'Asked', agreed:
 /* Fund pipeline stages — the core CRM flow. */
 const F_STAGES = { none:'Backlog', target:'\ud83c\udfaf Target', booked:'\u2705 Booked', pitching:'\ud83c\udfa4 Pitching', closed:'\u274c Closed', disqualified:'\ud83d\udeab Disqualified' };
 const STAGE_TABS = ['funds','targets','booked','pitching','closed','disqualified'];
-const WARMTH = { na:'Warmth: not read', hot:'Hot', warm:'Warm', cool:'Cool', cold:'Cold' };
+const WARMTH = { hot:'\ud83d\udd25 Hot', warm:'\u2600\ufe0f Warm', cool:'\ud83d\udd35 Cool', cold:'\ud83e\udd76 Cold', na:'\u2014 Not set' };
+const WARMTH_ICON = { na:'\u25cb', hot:'\ud83d\udd25', warm:'\u2600\ufe0f', cool:'\ud83d\udd35', cold:'\ud83e\udd76' };
+function warmthCellHtml(f){
+  const w = FS(f.id).warmth || 'na';
+  return `<div class="dd dd--row" data-ddctx="fwarmth:${f.id}" data-ddval="${w}">
+    <button type="button" class="dd-btn warmth-btn ${w==='na'?'warmth-btn--empty':''}" title="Interest level">${WARMTH_ICON[w]}</button>
+    <div class="dd-menu">
+      <div class="dd-head">Interest</div>
+      ${Object.entries(WARMTH).map(([k,v]) => `<button type="button" class="dd-item ${k===w?'on':''}" data-ddv="${k}">${v}</button>`).join('')}
+    </div>
+  </div>`;
+}
 function FS(id){ return state.funds[id] || (state.funds[id] = {}); }
 function fStage(f){ const v = FS(f.id).stage; return v !== undefined ? v : (f.stage0 || 'none'); }
 function isFundArchived(f){ const a = FS(f.id).archived; return a !== undefined ? !!a : !!f.archived0; }
@@ -1265,6 +1284,7 @@ const FILTER_DEFS = [
   { key:'region', label:'Location', options:() => [...new Set(FUNDS.map(f=>f.region||'—'))].sort() },
   { key:'tier', label:'Tier', options:() => [...new Set(FUNDS.map(f=>f.tier||'—'))].sort() },
   { key:'fpath', label:'Way in', options:['Direct (1st°)','Existing relationship','LinkedIn connector','NFX only','No path'], fundsOnly:true },
+  { key:'warmth', label:'Interest', options:() => Object.entries(WARMTH).map(([k,v]) => k==='na' ? 'Not set' : v), fundsOnly:true },
   { key:'path', label:'Path', options:['Direct (1st°)','Existing relationship','Connector path','NFX only','No path yet','Needs name'], peopleOnly:true },
   { key:'status', label:'Status', options: Object.values(P_STATUS), peopleOnly:true }
 ];
@@ -1293,6 +1313,10 @@ function fundMatchesFilters(f){
     if (def.key === 'type' && !sel.has(f.type||'—')) return false;
     if (def.key === 'region' && !sel.has(f.region||'—')) return false;
     if (def.key === 'tier' && !sel.has(f.tier||'—')) return false;
+    if (def.key === 'warmth') {
+      const w = FS(f.id).warmth;
+      if (!sel.has(w && w !== 'na' ? WARMTH[w] : 'Not set')) return false;
+    }
     if (def.key === 'fpath') {
       const k = fundPathInfo(f).kind;
       const label = k === 'direct' ? 'Direct (1st°)' : k === 'existing' ? 'Existing relationship' : k === 'connector' ? 'LinkedIn connector' : k === 'nfx' ? 'NFX only' : 'No path';
@@ -1583,7 +1607,7 @@ function personSubRows(f){
   const st = FS(f.id);
   const brief = `<tr class="sub-row fit-brief-row">
     <td class="sub-tick"></td>
-    <td colspan="9"><div class="fit-brief">
+    <td colspan="10"><div class="fit-brief">
       <div class="fit-brief__text">
         ${f.dims ? `<b>${grade(f)} · ${Math.round(score(f))}/100.</b> ` : `<b>Not graded yet.</b> `}${esc(f.looking || 'No thesis notes on this fund yet.')} ${esc(fundFitLine(f))}
         ${f.why ? `<br><b>Our angle:</b> ${esc(f.why)}` : ''}
@@ -1605,7 +1629,7 @@ function personSubRows(f){
         <span class="fund-sub">${p.tbd ? 'Map the right partner' : esc(p.title)}</span>
       </div></td>
       <td>${pathCellHtml(p)}</td>
-      <td colspan="5"><div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start">
+      <td colspan="6"><div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start">
         ${statusDdHtml(p)}
         ${due ? `<span class="pill ${due.cls}">Follow up · ${due.label}</span>` : ''}
       </div></td>
@@ -1618,22 +1642,23 @@ function personSubRows(f){
   }).join('') + `
     <tr class="sub-row add-person-row" data-addperson="${f.id}">
       <td class="sub-tick"></td>
-      <td colspan="9" style="padding-left:12px"><button class="add-person-btn">+ Add person to ${esc(f.name)}</button></td>
+      <td colspan="10" style="padding-left:12px"><button class="add-person-btn">+ Add person to ${esc(f.name)}</button></td>
     </tr>`;
 }
 
 function renderFundsTable(){
   $('tableHead').innerHTML = `<tr>
     <th style="width:34px"><input type="checkbox" class="row-check" id="checkAll"></th>
-    <th class="sortable" data-hsort="name">Fund${hArrow('name')}</th>
-    <th class="sortable hide-md" data-hsort="profile">Profile${hArrow('profile')}</th>
-    <th class="sortable" data-hsort="fit">Fit${hArrow('fit')}</th>
-    <th class="sortable" data-hsort="check">Check${hArrow('check')}</th>
-    <th class="sortable" data-hsort="wayin">Way in${hArrow('wayin')}</th>
+    <th class="sortable" data-hsort="name" style="width:180px">Fund${hArrow('name')}</th>
+    <th class="sortable hide-md" data-hsort="profile" style="width:150px">Profile${hArrow('profile')}</th>
+    <th class="sortable" data-hsort="fit" style="width:86px">Fit${hArrow('fit')}</th>
+    <th class="sortable" data-hsort="check" style="width:110px">Check${hArrow('check')}</th>
+    <th class="sortable" data-hsort="wayin" style="width:170px">Way in${hArrow('wayin')}</th>
     <th class="hide-md">Why it fits</th>
-    <th class="sortable" data-hsort="stage">Stage${hArrow('stage')}</th>
-    <th class="sortable" data-hsort="people">People${hArrow('people')}</th>
-    <th style="width:112px"></th>
+    <th class="sortable" data-hsort="stage" style="width:112px">Stage${hArrow('stage')}</th>
+    <th class="sortable" data-hsort="people" style="width:76px">People${hArrow('people')}</th>
+    <th style="width:38px"></th>
+    <th style="width:118px"></th>
   </tr>`;
   const rows = visibleFunds();
   const shown = rows.slice(0, renderCap);
@@ -1652,15 +1677,13 @@ function renderFundsTable(){
       <td style="white-space:nowrap;font-weight:600">${checkFmt(f)}</td>
       <td>${fundPathCellHtml(f)}</td>
       <td class="hide-md"><div class="why-cell" title="${esc(((f.looking||'') + ' ' + fundFitLine(f)).trim())}">${esc((firstSentence(f.looking) + ' ' + fundFitLine(f)).trim() || 'Add fund notes - they feed the fit read.')}</div></td>
-      <td><div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start">
-        ${ddHtml({ ctx:'fstage:'+f.id, value:fStage(f), quiet:true, options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:v,cls:k==='none'?'st-backlog':''})) })}
-        ${warmthPillHtml(f)}
-      </div></td>
+      <td>${ddHtml({ ctx:'fstage:'+f.id, value:fStage(f), quiet:true, options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:v,cls:k==='none'?'st-backlog':''})) })}</td>
       <td><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
         <span style="font-weight:700">${ppl.length}</span>
         <button class="add-ava" data-addperson="${f.id}" title="Add person to ${esc(f.name)}">${PLUS_ICON}</button>
         ${tbd ? `<span class="pill pill--needs">${tbd} unmapped</span>` : ''}
       </div></td>
+      <td>${warmthCellHtml(f)}</td>
       <td style="text-align:right"><div class="row-actions">
         ${fundArchiveView
           ? `<button class="icon-sq icon-sq--on" data-fundrestore="${f.id}" title="Restore to pipeline">${DONE_ICON}</button>`
@@ -2309,7 +2332,7 @@ function openFund(id){
     <div class="d-row" style="justify-content:space-between;flex-wrap:wrap">
       <div class="d-row">
         ${ddHtml({ ctx:'fstage:'+id, value:fStage(f), options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:'Stage: '+v,cls:k==='none'?'st-backlog':''})) })}
-        ${ddHtml({ ctx:'fwarmth:'+id, value:FS(id).warmth || 'na', options: Object.entries(WARMTH).map(([k,v]) => ({v:k,l:k==='na'?v:'Warmth: '+v})) })}
+        ${ddHtml({ ctx:'fwarmth:'+id, value:FS(id).warmth || 'na', options: Object.entries(WARMTH).map(([k,v]) => ({v:k,l:k==='na'?'Interest: not set':'Interest: '+v})) })}
       </div>
       <div class="d-row">
         <button class="btn-ghost" id="dAddPerson" style="height:34px;font-size:12px">+ Add person</button>
