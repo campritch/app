@@ -878,7 +878,7 @@ function rebuild(){
     (f.people||[]).forEach(p => {
       const pid = f.id + '_' + (p.tbd ? 'tbd-' + slug(p.t) : slug(p.n));
       if (!PEOPLE.some(x => x.id === pid))
-        PEOPLE.push({ id: pid, fundId: f.id, name: p.n, title: p.t, tbd: !!p.tbd, li0: p.li || '' });
+        PEOPLE.push({ id: pid, fundId: f.id, name: p.n, title: p.t, tbd: !!p.tbd, li0: p.li || '', email0: p.email || '' });
     });
   });
   PERSON_BY_ID = Object.fromEntries(PEOPLE.map(p => [p.id, p]));
@@ -2259,6 +2259,15 @@ function openPerson(id){
       <span style="font-size:11px;color:var(--grey-1)">${st.li ? 'Saved profile link.' : 'Prefilled search - paste the real profile URL when you have it and it saves.'}</span>
     </div>
 
+    ${p.email0 ? `<div class="d-section">
+      <span class="d-label">Email</span>
+      <div class="d-row">
+        <input class="li-input" id="dEmail" value="${esc(p.email0)}" readonly />
+        <button class="mini-btn" id="dEmailCopy">Copy</button>
+        <a class="mini-btn" href="mailto:${esc(p.email0)}" style="text-decoration:none;display:inline-flex;align-items:center">Open</a>
+      </div>
+    </div>` : ''}
+
     <div class="d-section">
       <span class="d-label">Ways in${pi.kind !== 'none' ? ' (best first)' : ''}</span>
       ${pi.direct ? `<div class="info-card"><b>Direct connection (1st°).</b> Message them on LinkedIn or email straight away - no intro needed.</div>` : ''}
@@ -2303,6 +2312,10 @@ function openPerson(id){
   };
   $('dLi').onchange = e => { st.li = e.target.value.trim(); save(); };
   $('dLiOpen').onclick = () => window.open($('dLi').value, '_blank');
+  if ($('dEmailCopy')) $('dEmailCopy').onclick = e => {
+    navigator.clipboard.writeText(p.email0);
+    e.target.textContent = 'Copied'; setTimeout(() => { e.target.textContent = 'Copy'; }, 1200);
+  };
   $('dNotes').oninput = e => { st.notes = e.target.value; save(); };
   const updateCount = () => {
     const el = $('dCharCount');
@@ -2461,7 +2474,7 @@ function openFund(id){
           <span class="partner-ava">${p.tbd?'?':esc((p.name||'?').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase())}</span>
           <div class="person-row__info">
             <div class="person-row__name">${p.tbd?`<span style="color:var(--grey-1)">${esc(p.title)}</span> <span class="pill pill--needs">Needs name</span>`:esc(p.name)}</div>
-            <div class="person-row__sub">${p.tbd?'Map the right partner':esc(p.title)} · ${P_STATUS[pStatus(p)]}${isExcluded(p)?' · Archived':''}</div>
+            <div class="person-row__sub">${p.tbd?'Map the right partner':esc(p.title)} · ${P_STATUS[pStatus(p)]}${isExcluded(p)?' · Archived':''}${p.email0?` · <a href="mailto:${esc(p.email0)}" style="text-decoration:underline" title="${esc(p.email0)}">email</a>`:''}</div>
           </div>
           <button class="mini-btn" data-openperson="${p.id}">Open</button>
         </div>`).join('')}
