@@ -96,7 +96,7 @@
     /* ── Page card ── */
     .page-card {
       background: var(--card);
-      max-width: 1136px; margin: 24px auto 0; width: calc(100% - 48px);
+      max-width: 1800px; margin: 24px auto 0; width: calc(100% - 48px);
       border-radius: 12px;
       border: 1px solid var(--border);
       box-shadow: var(--shadow-sm);
@@ -1042,7 +1042,7 @@ async function pushState(){
 /* Boot: adopt the shared cloud copy unless this browser holds newer unsent edits. */
 async function bootSync(){
   try {
-    const r = await fetch('/api/vc-state');
+    const r = await fetch('/api/vc-state?t=' + Date.now(), { cache: 'no-store' });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
     const server = d.state;
@@ -1050,6 +1050,11 @@ async function bootSync(){
       if (state._dirty || Object.keys(state.people).length || state.extraConnectors.length) pushState();
       else setSyncUI('saved');
       return;
+    }
+    // Never adopt a server copy older than what this browser already has
+    // (blob reads can briefly lag writes) - push local forward instead.
+    if ((Number(server._rev) || 0) < (Number(state._rev) || 0)) {
+      state._dirty = true; pushState(); return;
     }
     if (state._dirty && (Number(state._rev) || 0) >= (Number(server._rev) || 0)) { pushState(); return; }
     state = server;
@@ -1906,12 +1911,19 @@ function normOrg(s){
     .filter(w => w && !STOPWORDS.includes(w)).join(' ').trim();
 }
 function matchFunds(company, position){
+  // Precision over recall: at 4k connections x 3.4k funds, loose containment
+  // matching floods the connector list with noise. Company must equal the
+  // fund's normalized name exactly; position may word-boundary-match longer
+  // fund names ("Partner at NFX" style).
   const nc = normOrg(company);
-  const np = normOrg(position);
-  return FUND_NORMS.filter(({norm}) => {
+  const np = (position || '').toLowerCase();
+  return FUND_NORMS.filter(({f, norm}) => {
     if (!norm) return false;
-    if (nc && (nc === norm || nc.includes(norm) || (norm.includes(nc) && nc.length > 1))) return true;
-    if (np && np.includes(norm) && norm.length > 2) return true;
+    if (nc && nc === norm) return true;
+    if (np && f.name.length >= 4) {
+      const esc = f.name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      if (new RegExp('(^|[^a-z0-9])' + esc + '($|[^a-z0-9])').test(np)) return true;
+    }
     return false;
   }).map(x => x.f);
 }
