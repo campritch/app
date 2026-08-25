@@ -8,9 +8,6 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=3" />
   <link rel="icon" type="image/png" href="/favicon.png?v=3" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
 
     /* ── shadcn/ui (zinc) design tokens ── */
@@ -56,7 +53,7 @@
     *, *::before, *::after { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       font-size: 14px; line-height: 1.45;
       color: var(--foreground); background: #fafafa;
       -webkit-font-smoothing: antialiased;
@@ -102,7 +99,7 @@
       box-shadow: var(--shadow-sm);
       overflow: visible;
     }
-    .page-card__inner { padding: 24px 24px 16px; }
+    .page-card__inner { padding: 20px 24px 14px; }
     .crm-title { margin: 0 0 16px; font-size: 20px; font-weight: 600; letter-spacing: -0.4px; }
 
     /* ── Tabs (shadcn segmented) ── */
@@ -630,7 +627,6 @@
 
   <div class="page-card">
     <div class="page-card__inner">
-      <h1 class="crm-title">Seed round — VC CRM</h1>
       <div class="tab-row" id="tabRow">
         <button class="tab active" data-tab="funds">All funds <span class="count" id="cntFunds">0</span></button>
         <button class="tab" data-tab="targets">Targets <span class="count" id="cntTargets">0</span></button>
@@ -933,6 +929,8 @@ We're raising our seed with {{spots_left}} left, booking meetings for the weeks 
 
 Happy to jump on a call with anyone interested. Appreciate you!
 Cam` },
+  { id:'t_li_invite', name:'LinkedIn invite (300 char)', audience:'person',
+    body:`Hey {{first}} - we just kicked off SpotsNow's seed ({{spots_left}} left). We're the marketplace for host-read podcast ads: $500K GMV in months, backed by Brickyard + Hustle Fund. Booking meetings for {{weeks}}. Keen to connect and share the deck.` },
   { id:'t_direct', name:'Direct message', audience:'person',
     body:`Hey {{first}},
 
@@ -996,12 +994,11 @@ state.settings = state.settings || { autoFollowDirect: 0, autoFollowAsk: 0 };
 state.connMatchExtra = state.connMatchExtra || {};
 // Migrate the old target-list flag into the pipeline.
 Object.values(state.funds).forEach(fs => { if (fs.target && !fs.stage) fs.stage = 'target'; delete fs.target; });
-// v2: deck-aligned templates + round variables (real GMV/revenue numbers).
+// v3: adds the 300-char LinkedIn invite template.
 // Re-seeds stored copies once; edits made before this refresh are replaced.
-if ((state.tplVersion || 1) < 2) {
+if ((state.tplVersion || 1) < 3) {
   state.templates = null;
-  state.vars = { ...DEFAULT_VARS };
-  state.tplVersion = 2;
+  state.tplVersion = 3;
 }
 }
 applyStateDefaults();
@@ -2117,8 +2114,10 @@ async function runAiFit(fid, btn){
 }
 
 /* ── Message composer (shared) ── */
-function composerHtml(audience, draft){
-  const ordered = templates().map((t,i)=>({t,i})).sort((a,b) => (a.t.audience===audience?0:1)-(b.t.audience===audience?0:1));
+function composerHtml(audience, draft, preferId){
+  const ordered = templates().map((t,i)=>({t,i})).sort((a,b) =>
+    ((a.t.id === preferId ? -1 : 0) - (b.t.id === preferId ? -1 : 0)) ||
+    ((a.t.audience === audience ? 0 : 1) - (b.t.audience === audience ? 0 : 1)));
   return `
     <div class="d-row" style="flex-wrap:wrap">
       ${ddHtml({ id:'dTplSel', ctx:'tpl', value:String(ordered.length?ordered[0].i:0),
@@ -2126,6 +2125,7 @@ function composerHtml(audience, draft){
       <button class="btn-primary btn-primary--coral" id="dGen" style="margin-left:auto">Generate</button>
     </div>
     <textarea class="msg-area" id="dMsg" placeholder="Pick a template and hit Generate, or write from scratch.">${esc(draft||'')}</textarea>
+    <div id="dCharCount" style="font-size:11.5px;color:var(--muted-foreground)"></div>
     <div class="d-row" style="flex-wrap:wrap">
       <button class="btn-primary" id="dCopy">Copy + open LinkedIn</button>
       <button class="btn-ghost" id="dSent">Mark sent</button>
@@ -2217,7 +2217,7 @@ function openPerson(id){
 
     <div class="d-section">
       <span class="d-label">Message</span>
-      ${composerHtml('person', st.draft)}
+      ${composerHtml('person', st.draft, st.direct1st ? 't_direct' : 't_li_invite')}
     </div>
 
     <div class="d-section">
@@ -2235,12 +2235,26 @@ function openPerson(id){
   $('dLi').onchange = e => { st.li = e.target.value.trim(); save(); };
   $('dLiOpen').onclick = () => window.open($('dLi').value, '_blank');
   $('dNotes').oninput = e => { st.notes = e.target.value; save(); };
-  $('dMsg').oninput = e => { st.draft = e.target.value; save(); };
+  const updateCount = () => {
+    const el = $('dCharCount');
+    if (!el) return;
+    const len = ($('dMsg').value || '').length;
+    if (st.direct1st) {
+      el.textContent = `1st-degree connection - full-length LinkedIn messages OK (${len} chars)`;
+      el.style.color = 'var(--muted-foreground)'; el.style.fontWeight = '400';
+    } else {
+      el.textContent = `${len} / 300 - LinkedIn connection-request note limit (not connected yet)`;
+      el.style.color = len > 300 ? 'var(--destructive)' : 'var(--muted-foreground)';
+      el.style.fontWeight = len > 300 ? '600' : '400';
+    }
+  };
+  updateCount();
+  $('dMsg').oninput = e => { st.draft = e.target.value; save(); updateCount(); };
   $('dGen').onclick = () => {
     const t = templates()[+ddVal('dTplSel')];
     if (!t) return;
     const text = renderTemplate(t.body, personCtx(p));
-    typeInto(text, () => { st.draft = text; save(); });
+    typeInto(text, () => { st.draft = text; save(); updateCount(); });
   };
   $('dCopy').onclick = () => {
     // Copy first (while the page still has focus), then open LinkedIn.
