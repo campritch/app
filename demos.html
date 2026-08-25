@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpotsNow — Demos</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #17212B; --ink: #1D2027; --grey: #707481; --grey-2: #9CA3AF;
+      --border: #E4E6ED; --border-2: #EDEEF1; --bg: #F9FAFB; --white: #fff;
+      --green-t: #0E6832; --green-b: #D6F1E0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+      background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased;
+      line-height: 1.45; min-height: 100vh; letter-spacing: -.01em;
+    }
+    .wrap { max-width: 940px; margin: 0 auto; padding: 56px 28px 80px; }
+    .brand { display: flex; align-items: center; gap: 11px; }
+    .brand svg { width: 30px; height: 28px; }
+    .brand b { font-size: 16px; font-weight: 800; letter-spacing: -.02em; }
+    .head { margin-top: 34px; }
+    .head h1 { font-size: 30px; font-weight: 800; letter-spacing: -.04em; }
+    .head p { color: var(--grey); font-size: 15px; margin-top: 6px; font-weight: 500; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 30px; }
+    a.tile {
+      display: flex; flex-direction: column; text-decoration: none; color: inherit;
+      background: var(--white); border: 1px solid var(--border); border-radius: 16px;
+      padding: 22px; box-shadow: 0 1px 2px rgba(166,175,195,.18);
+      transition: box-shadow .16s, transform .16s, border-color .16s;
+    }
+    a.tile:hover { box-shadow: 0 14px 34px rgba(120,130,150,.18); transform: translateY(-2px); border-color: #C5CBD5; }
+    a.tile.soon { cursor: default; }
+    a.tile.soon:hover { box-shadow: 0 1px 2px rgba(166,175,195,.18); transform: none; border-color: var(--border); }
+    .tile__icon { width: 46px; height: 46px; border-radius: 12px; background: var(--navy); color: #fff; display: grid; place-items: center; }
+    .tile__top { display: flex; align-items: center; gap: 13px; }
+    .tile__name { font-size: 17px; font-weight: 700; letter-spacing: -.03em; }
+    .tag { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; margin-left: auto; }
+    .tag--live { background: var(--green-b); color: var(--green-t); }
+    .tag--soon { background: #F3F4F6; color: var(--grey); }
+    .tile__desc { font-size: 13.5px; color: var(--grey); line-height: 1.5; margin-top: 15px; flex: 1; font-weight: 500; }
+    .tile__go { margin-top: 16px; font-size: 13px; font-weight: 700; color: var(--navy); display: inline-flex; align-items: center; gap: 6px; }
+    a.tile.soon .tile__go { color: var(--grey-2); }
+    .foot { margin-top: 40px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--grey-2); font-weight: 600; }
+    .foot .sep { flex: 1; }
+    .foot a { color: var(--grey); text-decoration: none; font-weight: 600; }
+    .foot a:hover { color: var(--ink); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">
+      <svg viewBox="0 0 78.1 73.2" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M78.078 1.79314L75.3917 22.0607C75.3043 22.6722 74.9112 23.1527 74.3434 23.3492C74.1686 23.4147 73.9939 23.4584 73.8192 23.4584C73.4042 23.4584 73.0111 23.3055 72.7272 23.0216L66.6994 17.3214L39.1154 47.1767C38.351 48.0066 37.2809 48.4652 36.2107 48.4652C35.5774 48.4652 34.944 48.3123 34.3543 48.0066L18.6514 39.7074C16.7076 38.6809 15.965 36.2785 16.9915 34.3347C18.018 32.391 20.3986 31.6484 22.3423 32.6749L35.359 39.5545L60.9336 11.8614L55.3207 6.55425C54.9058 6.13929 54.731 5.52778 54.9058 4.95994C55.0586 4.3921 55.5391 3.95529 56.1288 3.84609L76.2216 0.0240946C76.7239 -0.0632654 77.2262 0.0896158 77.5975 0.439056C77.9688 0.788496 78.1435 1.29082 78.078 1.79314ZM0.0218405 38.4188C0.0218405 57.5725 15.5501 73.1007 34.7038 73.1007C53.8574 73.1007 69.3857 57.5725 69.3857 38.4188C69.3857 33.7887 68.4684 29.3771 66.8304 25.3585L59.0772 33.7451C59.3611 35.252 59.514 36.8245 59.514 38.4188C59.514 52.1343 48.3974 63.2509 34.6819 63.2509C20.9664 63.2509 9.84984 52.1343 9.84984 38.4188C9.84984 24.7033 20.9664 13.5867 34.6819 13.5867C39.5959 13.5867 44.1823 15.0282 48.048 17.4961L54.8184 10.1579C49.14 6.09562 42.1949 3.71506 34.6819 3.71506C15.5282 3.71506 0 19.2433 0 38.397L0.0218405 38.4188Z" fill="#17212B"/></svg>
+      <b>SpotsNow</b>
+    </div>
+
+    <div class="head">
+      <h1>Product demos</h1>
+      <p>Pick a demo to show. Everything here is a live, clickable mock.</p>
+    </div>
+
+    <div class="grid">
+      <a class="tile" href="/acme">
+        <div class="tile__top">
+          <div class="tile__icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></div>
+          <div class="tile__name">Acme Network OS</div>
+          <span class="tag tag--live">Live</span>
+        </div>
+        <div class="tile__desc">The full network operating system — Network HQ, Inventory, Vetting Agent, and Outbound, on one shell.</div>
+        <span class="tile__go">Open demo <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="tile" href="/outbound">
+        <div class="tile__top">
+          <div class="tile__icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></div>
+          <div class="tile__name">Outbound Agent</div>
+          <span class="tag tag--live">Live</span>
+        </div>
+        <div class="tile__desc">Brands matched to open inventory off real buying signals, with the LinkedIn note, email, and leave-behind drafted.</div>
+        <span class="tile__go">Open demo <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="tile" href="/financialdashboard">
+        <div class="tile__top">
+          <div class="tile__icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></div>
+          <div class="tile__name">Financial Dashboard</div>
+          <span class="tag tag--soon">Preview</span>
+        </div>
+        <div class="tile__desc">Network financials at a glance — billing, payouts, and margin. Being wired into the hub.</div>
+        <span class="tile__go">Open demo <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+    </div>
+
+    <div class="foot">
+      Powered by SpotsNow
+      <span class="sep"></span>
+      <a href="/api/demo-login?signout=1">Sign out</a>
+    </div>
+  </div>
+</body>
+</html>

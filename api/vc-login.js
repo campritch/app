@@ -15,8 +15,8 @@ export const GATE_OPTS = {
 };
 
 function safeNext(next) {
-  const n = (next || '/raise').toString();
-  return n.startsWith('/') && !n.startsWith('//') ? n : '/raise';
+  const n = (next || '/investorcrm').toString();
+  return n.startsWith('/') && !n.startsWith('//') ? n : '/investorcrm';
 }
 
 export default async function handler(req, res) {
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   // Sign out
   if (req.method === 'GET' && req.query?.signout !== undefined) {
     res.setHeader('Set-Cookie', `${COOKIE}=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax; Secure`);
-    res.writeHead(302, { Location: '/raise' });
+    res.writeHead(302, { Location: '/investorcrm' });
     return res.end();
   }
 

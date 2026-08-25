@@ -394,6 +394,9 @@
     .connector-card__matches { display: flex; flex-wrap: wrap; gap: 4px; }
     .connector-card__foot { display: flex; align-items: center; justify-content: space-between; margin-top: 2px; }
     .connector-card.selected-card, .arch-row.selected-card { border-color: var(--foreground); }
+    .connector-card.superc { border: 1.5px solid var(--destructive); }
+    .superc-btn { color: var(--muted-foreground); }
+    .superc-btn.on { color: var(--destructive); font-weight: 600; }
     .arch-row__name { min-width: 170px; display: inline-flex; align-items: center; gap: 6px; }
     .card-icon-btn {
       display: inline-flex; align-items: center; justify-content: center;
@@ -894,7 +897,7 @@ function rebuild(){
       PERSON_BY_ID[pid].tbd = false;
     }
   });
-  FUND_NORMS = FUNDS.map(f => ({ f, norm: normOrg(f.name) })).filter(x => x.norm);
+  FUND_NORMS = FUNDS.map(f => ({ f, norm: normOrg(f.name) })).filter(x => x.norm && !JUNK_NORMS.has(x.norm));
   // Enrich connectors from Cam's imported LinkedIn connections: real current
   // position + profile URL replace generic roles like "NFX Signal connector".
   if ((state.liConnections || []).length) {
@@ -1858,7 +1861,7 @@ function connectorCardHtml(c){
   const cst = st.status || 'none';
   const due = connectorFollowUp(c);
   const matches = (c.matches||[]).map(pid => PERSON_BY_ID[pid]).filter(Boolean);
-  return `<div class="connector-card ${connSelected.has(c.id)?'selected-card':''}" data-conn="${c.id}">
+  return `<div class="connector-card ${connSelected.has(c.id)?'selected-card':''} ${st.superc?'superc':''}" data-conn="${c.id}">
     <div class="connector-card__top">
       <span class="partner-ava">${esc((c.name||'?').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase())}</span>
       <div style="min-width:0;flex:1">
@@ -1877,6 +1880,7 @@ function connectorCardHtml(c){
     </div>
     <div class="connector-card__foot">
       <span class="pill pill--cst-${cst}">${C_STATUS[cst]}</span>
+      <button type="button" class="mini-btn superc-btn ${st.superc?'on':''}" data-supertoggle="${c.id}" style="border:none;box-shadow:none;background:none;padding:0 4px">${st.superc ? 'Super connector \u2713' : 'Mark super connector'}</button>
       ${due ? `<span class="pill ${due.cls}">${due.label}</span>` : `<span style="font-size:12px;color:var(--muted-foreground)">${matches.length} match${matches.length===1?'':'es'}</span>`}
     </div>
   </div>`;
@@ -1895,6 +1899,7 @@ function renderConnectors(){
   if (connView === 'active') {
     host.style.display = ''; host.style.flexDirection = ''; host.style.gap = '';
     const sorted = active.slice().sort((a,b) =>
+      ((CS(b.id).superc ? 1 : 0) - (CS(a.id).superc ? 1 : 0)) ||
       ((a.source === 'nfx' ? 1 : 0) - (b.source === 'nfx' ? 1 : 0)) ||
       ((b.matches || []).length - (a.matches || []).length));
     host.innerHTML = sorted.map(connectorCardHtml).join('') ||
@@ -1966,6 +1971,7 @@ function csvLine(l){
 
 /* ── LinkedIn connections import + fund matching ── */
 const STOPWORDS = ['ventures','venture','capital','partners','partner','fund','vc','the','group','company','llc','lp'];
+const JUNK_NORMS = new Set(['self employed','self','employed','freelance','freelancer','independent','stealth','angel','angels','investor','investors','none','n a','na','various','advisor','advisors','consulting','consultant']);
 function normOrg(s){
   return (s||'').toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(/\s+/)
     .filter(w => w && !STOPWORDS.includes(w)).join(' ').trim();
@@ -2529,7 +2535,7 @@ function openConnector(id, preselect){
   const checkedSet = new Set(preselect ? [preselect] : (stored || defaultIds));
   const due = connectorFollowUp(c);
   $('dTitle').textContent = c.name;
-  $('dMeta').innerHTML = `<span class="pill pill--type">Connector</span> ${esc(c.role||'')}${c.li ? ` · <a href="${esc(c.li)}" target="_blank" rel="noopener" style="font-weight:600;color:#0a66c2">LinkedIn</a>` : ''}`;
+  $('dMeta').innerHTML = `<span class="pill pill--type">Connector</span>${st.superc ? ' <span class="pill" style="background:var(--red-bg);color:var(--red-text)">Super connector</span>' : ''} ${esc(c.role||'')}${c.li ? ` · <a href="${esc(c.li)}" target="_blank" rel="noopener" style="font-weight:600;color:#0a66c2">LinkedIn</a>` : ''}`;
   $('drawerBody').innerHTML = `
     <div class="d-row" style="justify-content:space-between;flex-wrap:wrap">
       ${ddHtml({ ctx:'cstatus:'+id, value:cst, options: Object.entries(C_STATUS).map(([k,v]) => ({v:k,l:v})) })}
@@ -2906,6 +2912,15 @@ $('connectorsView').addEventListener('click', e => {
     e.stopPropagation();
     delete CS(unarch.dataset.connunarch).archived;
     save(); render();
+    return;
+  }
+  const sup = e.target.closest('[data-supertoggle]');
+  if (sup) {
+    e.stopPropagation();
+    const st = CS(sup.dataset.supertoggle);
+    st.superc = !st.superc;
+    save(); render();
+    if (st.superc) toast('Super connector - flagged for a deep network scan.');
     return;
   }
   const view = e.target.closest('[data-connview]');
