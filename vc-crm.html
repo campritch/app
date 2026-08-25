@@ -393,8 +393,7 @@
     .connector-card__role { font-size: 12.5px; color: var(--muted-foreground); }
     .connector-card__matches { display: flex; flex-wrap: wrap; gap: 4px; }
     .connector-card__foot { display: flex; align-items: center; justify-content: space-between; margin-top: 2px; }
-    .connector-card.done { opacity: 0.5; }
-    .connector-card.done:hover { opacity: 0.75; }
+    .connector-card.selected-card { border-color: var(--foreground); }
     .card-icon-btn {
       display: inline-flex; align-items: center; justify-content: center;
       width: 28px; height: 28px; border: none; border-radius: 6px;
@@ -726,9 +725,12 @@ Dana Whitfield, Overline, worked together at Techstars,"></textarea>
           </div>
         </div>
       </div>
-      <div class="tab-row" id="connFilter" style="align-self:flex-start">
-        <button class="tab active" data-connview="active">Active <span class="count" id="cntConnActive">0</span></button>
-        <button class="tab" data-connview="archived">Archived <span class="count" id="cntConnArchived">0</span></button>
+      <div class="d-row" style="justify-content:space-between;flex-wrap:wrap">
+        <div class="tab-row" id="connFilter">
+          <button class="tab active" data-connview="active">Active <span class="count" id="cntConnActive">0</span></button>
+          <button class="tab" data-connview="archived">Archived <span class="count" id="cntConnArchived">0</span></button>
+        </div>
+        <button class="mini-btn" id="connSelectAll">Select all shown</button>
       </div>
       <div class="connector-grid" id="connectorGrid"></div>
       <div id="archivedStrip"></div>
@@ -791,6 +793,7 @@ Dana Whitfield, Overline, worked together at Techstars,"></textarea>
     <button class="bulk-btn bulk-people" id="bulkArchiveP">Archive</button>
     <button class="bulk-btn bulk-people" id="bulkPaths">Find connector paths</button>
     <button class="bulk-btn bulk-fund" id="bulkRemove">Remove funds</button>
+    <button class="bulk-btn bulk-btn--coral bulk-conn" id="bulkArchiveConn">Archive selected</button>
     <button class="bulk-bar__close" id="bulkClear" title="Clear selection">✕</button>
   </div>
 
@@ -1100,7 +1103,7 @@ function matchNote(c, pid){
   const ov = state.connMatchExtra[c.id];
   return (ov && ov.notes && ov.notes[pid]) || (c.matchNotes && c.matchNotes[pid]) || '';
 }
-function connectorsFor(personId){ return allConnectors().filter(c => (c.matches||[]).includes(personId)); }
+function connectorsFor(personId){ return allConnectors().filter(c => !CS(c.id).archived && (c.matches||[]).includes(personId)); }
 function templates(){
   if (!state.templates) { state.templates = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES)); save(); }
   return state.templates;
@@ -1234,7 +1237,9 @@ let fundConnMemo = null;
 function fundConnMap(){
   if (fundConnMemo) return fundConnMemo;
   fundConnMemo = {};
-  allConnectors().forEach(c => (c.matches || []).forEach(m => {
+  allConnectors().forEach(c => {
+    if (CS(c.id).archived) return;
+    (c.matches || []).forEach(m => {
     const p = PERSON_BY_ID[m];
     if (!p) return;
     const slot = c.source === 'nfx' ? 'nfx' : 'real';
@@ -1243,7 +1248,8 @@ function fundConnMap(){
     const cur = entry[slot];
     if (!cur) entry[slot] = { c, st, n: 1 };
     else { cur.n++; if (st > cur.st) { cur.c = c; cur.st = st; } }
-  }));
+  });
+  });
   return fundConnMemo;
 }
 function fundPathInfo(f){
@@ -1590,8 +1596,10 @@ function render(){
   vab.textContent = fundArchiveView ? '\u2190 Back' : ('View Archive' + (archN ? ' \u00b7 ' + archN : ''));
 
   const bar = $('bulkBar');
-  bar.classList.toggle('show', selected.size > 0 && (isStageTab || currentTab === 'people'));
-  $('bulkCount').textContent = `${selected.size} selected`;
+  const connMode = currentTab === 'connectors';
+  bar.classList.toggle('show', (selected.size > 0 && (isStageTab || currentTab === 'people')) || (connMode && connSelected.size > 0));
+  $('bulkCount').textContent = `${connMode ? connSelected.size : selected.size} selected`;
+  document.querySelectorAll('.bulk-conn').forEach(b => b.style.display = connMode ? 'inline-block' : 'none');
   document.querySelectorAll('.bulk-fund').forEach(b => b.style.display = isStageTab ? 'inline-block' : 'none');
   document.querySelectorAll('.bulk-people').forEach(b => b.style.display = currentTab === 'people' ? 'inline-block' : 'none');
   $('bulkArchiveP').textContent = fundArchiveView ? 'Restore' : 'Archive';
@@ -1826,19 +1834,20 @@ function renderFilterChips(){
 
 /* ── Connectors view ── */
 let connView = 'active';
+let connSelected = new Set();
 function connectorCardHtml(c){
   const st = CS(c.id);
   const cst = st.status || 'none';
   const due = connectorFollowUp(c);
   const matches = (c.matches||[]).map(pid => PERSON_BY_ID[pid]).filter(Boolean);
-  return `<div class="connector-card ${st.done?'done':''}" data-conn="${c.id}">
+  return `<div class="connector-card ${connSelected.has(c.id)?'selected-card':''}" data-conn="${c.id}">
     <div class="connector-card__top">
       <span class="partner-ava">${esc((c.name||'?').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase())}</span>
       <div style="min-width:0;flex:1">
         <div class="connector-card__name">${esc(c.name)}</div>
         <div class="connector-card__role">${esc(c.role||'')}</div>
       </div>
-      <input type="checkbox" class="done-check" data-conndone="${c.id}" ${st.done?'checked':''} title="${st.done?'Done - uncheck to reactivate':'Mark done'}">
+      <input type="checkbox" class="done-check" data-connsel="${c.id}" ${connSelected.has(c.id)?'checked':''} title="Select for bulk actions">
       <button class="card-icon-btn" data-connarch="${c.id}" title="Archive connector">${ARCHIVE_ICON}</button>
     </div>
     <div class="connector-card__matches">
@@ -1857,9 +1866,11 @@ function renderConnectors(){
   const all = allConnectors();
   const active = all.filter(c => !CS(c.id).archived);
   const archived = all.filter(c => CS(c.id).archived);
-  $('cntConnActive').textContent = active.filter(c => !CS(c.id).done).length;
+  $('cntConnActive').textContent = active.length;
   $('cntConnArchived').textContent = archived.length;
   document.querySelectorAll('#connFilter .tab').forEach(t => t.classList.toggle('active', t.dataset.connview === connView));
+  const bac = $('bulkArchiveConn');
+  if (bac) bac.textContent = connView === 'archived' ? 'Restore selected' : 'Archive selected';
 
   const host = $('connectorGrid');
   if (connView === 'active') {
@@ -2362,7 +2373,7 @@ function openFund(id){
     ${f.looking ? `<div class="d-section"><span class="d-label">About the fund</span><div class="info-card">${esc(f.looking)}</div></div>` : ''}`}
     ${(() => {
       const pids = ppl.map(x => x.id);
-      const allc = allConnectors().filter(c => (c.matches||[]).some(m => pids.includes(m)));
+      const allc = allConnectors().filter(c => !CS(c.id).archived && (c.matches||[]).some(m => pids.includes(m)));
       const conns = allc.filter(c => c.source !== 'nfx');
       const nfxConns = allc.filter(c => c.source === 'nfx');
       const ex = (f.paths||[]).filter(x => x.kind !== 'nfx');
@@ -2581,6 +2592,7 @@ function toast(msg){
 function switchTab(tab){
   currentTab = tab;
   selected.clear();
+  connSelected.clear();
   fundArchiveView = false;
   renderCap = 150;
   render();
@@ -2822,12 +2834,16 @@ $('tableBody').addEventListener('click', e => {
 
 /* Connectors view */
 $('connectorsView').addEventListener('click', e => {
-  const done = e.target.closest('[data-conndone]');
-  if (done) {
+  const sel = e.target.closest('[data-connsel]');
+  if (sel) {
     e.stopPropagation();
-    const st = CS(done.dataset.conndone);
-    st.done = !st.done;
-    save(); renderConnectors();
+    const id = sel.dataset.connsel;
+    connSelected.has(id) ? connSelected.delete(id) : connSelected.add(id);
+    // in-place update: no full re-render on every checkbox tick
+    sel.closest('.connector-card').classList.toggle('selected-card', connSelected.has(id));
+    $('bulkBar').classList.toggle('show', connSelected.size > 0);
+    $('bulkCount').textContent = `${connSelected.size} selected`;
+    document.querySelectorAll('.bulk-conn').forEach(b => b.style.display = 'inline-block');
     return;
   }
   const arch = e.target.closest('[data-connarch]');
@@ -2860,6 +2876,21 @@ $('csvInput').addEventListener('change', e => {
   e.target.value = '';
 });
 $('sampleBtn').addEventListener('click', () => importConnections(SAMPLE_CSV));
+$('connSelectAll').addEventListener('click', () => {
+  const visible = allConnectors().filter(c => !!CS(c.id).archived === (connView === 'archived'));
+  const allSel = visible.every(c => connSelected.has(c.id));
+  connSelected = allSel ? new Set() : new Set(visible.map(c => c.id));
+  render();
+});
+$('bulkArchiveConn').addEventListener('click', () => {
+  if (!connSelected.size) return;
+  const restoring = connView === 'archived';
+  connSelected.forEach(id => { CS(id).archived = !restoring; });
+  const n = connSelected.size;
+  connSelected.clear();
+  save(); render();
+  toast(`${n} connector${n===1?'':'s'} ${restoring ? 'restored' : 'archived'} - paths update accordingly.`);
+});
 $('addConnectorBtn').addEventListener('click', () => {
   const w = $('connAddWrap');
   w.style.display = w.style.display === 'none' ? 'block' : 'none';
@@ -3036,7 +3067,7 @@ $('bulkRemove').addEventListener('click', () => {
   save(); rebuild(); render();
   toast('Removed.');
 });
-$('bulkClear').addEventListener('click', () => { selected.clear(); render(); });
+$('bulkClear').addEventListener('click', () => { selected.clear(); connSelected.clear(); render(); });
 $('bulkBar').addEventListener('click', e => {
   const b = e.target.closest('[data-bulkstage]');
   if (!b || !STAGE_TABS.includes(currentTab)) return;
