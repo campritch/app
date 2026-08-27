@@ -491,8 +491,8 @@
     { id:'d2', title:'July flight',  brand:'DraftKings', showId:'sage',    gross:18900, sellType:'month', createdDate:'2026-06-02', closeDate:'2026-06-09', outcome:'won', rep:'Priya Shah' },
     { id:'d3', title:'Q3 flight',  brand:'Ramp',       showId:'warren',  gross:11200, sellType:'month', createdDate:'2026-06-20', closeDate:'2026-07-01', outcome:'won', rep:'Devin Cole' },
     { id:'d4', title:'August flight',  brand:'Ritual',     showId:'clinton', gross:6400,  sellType:'month', createdDate:'2026-07-08', closeDate:'2026-07-14', outcome:'won', rep:'Priya Shah' },
-    { id:'d5', title:'August flight',  brand:'Kalshi',     showId:'sage',    gross:14800, sellType:'month', createdDate:'2026-07-11', closeDate:'2026-07-19', outcome:'won', rep:'Marcus Bell' },
-    { id:'d6', title:'Q3 flight',  brand:'BetterHelp', showId:'warren',  gross:9800,  sellType:'month', createdDate:'2026-07-02', closeDate:'2026-07-16', outcome:'won', rep:'Priya Shah' },
+    { id:'d5', title:'August flight', checkIn:'2026-08-16', brand:'Kalshi',     showId:'sage',    gross:14800, sellType:'month', createdDate:'2026-07-11', closeDate:'2026-07-19', outcome:'won', rep:'Marcus Bell' },
+    { id:'d6', title:'Q3 flight', notes:'Chase the gift-card redemptions — only a few shows have. Brand wants addresses by Friday.', brand:'BetterHelp', showId:'warren',  gross:9800,  sellType:'month', createdDate:'2026-07-02', closeDate:'2026-07-16', outcome:'won', rep:'Priya Shah' },
     { id:'d7', title:'August flight',  brand:'Notion',     showId:'rubin',   gross:12600, sellType:'month', createdDate:'2026-07-05', closeDate:'2026-07-20', outcome:'won', rep:'Devin Cole' },
     { id:'d8', title:'August flight',  brand:'DraftKings', showId:'action',  gross:8300,  sellType:'month', createdDate:'2026-07-09', closeDate:'2026-07-21', outcome:'won', rep:'Marcus Bell' },
     { id:'d9', title:'August flight',  brand:'Ramp',       showId:'nate',    gross:7100,  sellType:'month', createdDate:'2026-07-22', closeDate:'2026-07-30', outcome:'won', rep:'Devin Cole' },
@@ -536,6 +536,7 @@
     { id:'s17', dealId:'d5', brand:'Kalshi', showId:'sage', kind:'paid', published:'2026-08-26', guarantee:120000, views:null, downloads:null, dlState:'auto', status:'scheduled', length:'60s', yt:'', ts:null, copyStatus:'seen', copySent:'2026-08-12', copySeen:'2026-08-12', copy:[] },
     // ── the make-good that already ran the full loop ──
     { id:'s18', dealId:'d3', brand:'Ramp', showId:'warren', kind:'makegood', published:'2026-08-20', guarantee:0, views:null, downloads:null, dlState:'none', status:'scheduled', length:'60s', yt:'', ts:null, copyStatus:'seen', copy:[] },
+    { id:'s20', dealId:'d8', brand:'DraftKings', showId:'action', kind:'bonus', published:'2026-08-28', guarantee:0, views:null, downloads:null, dlState:'none', status:'scheduled', length:'45s', yt:'', ts:null, copyStatus:'seen', copy:[] },
     { id:'s19', dealId:'d11', brand:'AG1', showId:'sage', kind:'paid', published:'2026-09-02', guarantee:120000, views:null, downloads:null, dlState:'auto', status:'scheduled', length:'60s', yt:'', ts:null, copyStatus:'needs_copy', copy:[] },
   ];
   const spot = id => SPOTS.find(s=>s.id===id);
@@ -590,6 +591,10 @@
       showVia:'gmail', brandVia:'gmail', note:'Written to Airtable as Make Good · Aug 20.' },
     { id:'mg3', spotId:'s7', date:'2026-08-19', status:'awaiting', showOk:true, brandOk:null,
       showVia:'auto', brandVia:null, sentBrand:'2026-08-16' },
+    // Sydney (Aug 24): bonus spots — $0 reads to lift performance — are more
+    // common than make goods and were never tracked, so the inventory vanished.
+    { id:'mgB1', kind:'bonus', spotId:'s8', date:'2026-08-28', position:'Mid-roll', status:'scheduled',
+      showOk:true, brandOk:'skip', showVia:'auto', brandVia:null },
   ];
   let MG_SEQ = 10;
   const mg = id => MAKEGOODS.find(m=>m.id===id);
@@ -598,7 +603,9 @@
   const needsMakegood = () => SPOTS.filter(s=>verdict(s).k==='short' && !mgForSpot(s.id));
 
   // A make good is inventory given away. Value it at the show's own rate.
-  const mgValue = m => { const sp=spot(m.spotId); return Math.round(shortfall(sp)/1000*show(sp.showId).cpm); };
+  const mgValue = m => { const sp=spot(m.spotId);
+    const imps = m.kind==='bonus' ? sp.guarantee : shortfall(sp);
+    return Math.round(imps/1000*show(sp.showId).cpm); };
   function mgStats(){
     const sched=MAKEGOODS.filter(m=>m.status==='scheduled'), open=MAKEGOODS.filter(m=>m.status!=='scheduled');
     const imps=sched.reduce((a,m)=>a+shortfall(spot(m.spotId)),0);
@@ -614,7 +621,7 @@
 
   /* ═══ WHAT THE AGENT LEARNED ═══ the guarantee-tuning + fill-rate read ═══ */
   function fillStats(){
-    const ran = SPOTS.filter(s=>s.status==='verified' || s.kind==='makegood');
+    const ran = SPOTS.filter(s=>s.status==='verified' || s.kind!=='paid');
     const paid = ran.filter(s=>s.kind==='paid').length;
     const free = ran.filter(s=>s.kind!=='paid').length;
     return { paid, free, total:paid+free, rate: pctOf(paid, paid+free) };
@@ -753,6 +760,14 @@
       return (bad.length?`Behind: `+bad.map(x=>`<b>${nameOf(x)}</b> (${Math.round(verdict(x).pr.ratio*100)}%)`).join(', ')+`. `:`Nothing behind. `)
         +(soft.length?`${soft.map(x=>`<b>${nameOf(x)}</b>`).join(', ')} look${soft.length>1?'':'s'} light on raw numbers but the curve says ${soft.length>1?'they land':'it lands'} fine.`:'');
     }
+    if(/check.?in|note/.test(q)){
+      const notes=DEALS.filter(d=>d.outcome==='won'&&(d.notes||'').trim());
+      const due=DEALS.filter(d=>d.checkIn&&d.checkIn<=TODAY);
+      return (notes.length||due.length)
+        ? (notes.map(d=>`<b>${esc(d.brand)} · ${esc(d.title)}</b>: ${esc(d.notes)}`).join('<br>')
+          +(due.length?`<br>Check-in due: ${due.map(d=>esc(d.brand)+' · '+esc(d.title)).join(', ')}.`:''))+goChip('Open Delivery →','delivery')
+        : `No open check-ins or admin notes.`;
+    }
     if(/copy|cta|opened/.test(q)){
       const n=SPOTS.filter(x=>['needs_copy','needs_cta'].includes(x.copyStatus)), u=SPOTS.filter(x=>x.copyStatus==='sent');
       return (n.length?`${n.length} spot${n.length>1?'s':''} need copy or a CTA: `+n.map(x=>`<b>${nameOf(x)}</b>`).join(', ')+`. `:`All copy is in. `)+(u.length?`${u.length} copy email${u.length>1?'s':''} sent but not opened.`:'');
@@ -862,7 +877,7 @@
       `<button onclick="closeRowMenu();openSpot('${id}')">Open record</button>`,
       s.yt?`<button onclick="closeRowMenu();playClip('${s.yt}',${s.ts})">Hear the read</button>`:'',
       verdict(s).k==='short'&&!m?`<button onclick="closeRowMenu();createMakegood('${id}')">Set up make good</button>`:'',
-      m?`<button onclick="closeRowMenu();openMg('${m.id}')">Open make good</button>`:'',
+      m?`<button onclick="closeRowMenu();openMg('${m.id}')">Open ${m.kind==='bonus'?'bonus spot':'make good'}</button>`:'',
       `<button onclick="toggleArchive('${id}')">${isArchived(id)?'Restore':'Mark done · archive'}</button>`,
     ].join('');
     document.body.appendChild(el); ROWMENU=el;
@@ -893,7 +908,7 @@
       <div onclick="event.stopPropagation()" style="display:flex;flex-direction:column;align-items:stretch;gap:4px">${s.yt
         ? `<button class="fran" onclick="playClip('${s.yt}',${s.ts})" title="Hear the read"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>${mmss(s.ts)}</button>`
         : `<span class="fran fran--no">${s.status==='scheduled'?'due '+fmtDate(s.published):s.missed?'due '+fmtDate(s.published)+' ·  missed':'due today'}</span>`}
-        ${s.kind==='makegood'?'<span style="font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--purple-text);text-align:center">Make good</span>':''}</div>
+        ${s.kind!=='paid'?`<span style="font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--purple-text);text-align:center">${s.kind==='bonus'?'Bonus':'Make good'}</span>`:''}</div>
       <div class="fnum">${pr?K(pr.got):dash}${pr&&sh.simulcast?`<small>${K(s.views||0)} vid · ${s.dlState==='requested'?'?':K(s.downloads||0)} aud</small>`:pr?'<small>video</small>':''}</div>
       <div class="wrow__num">${pr?`${projBar(s)}<b style="color:${toneVar(v.tone)}">${Math.round(pr.ratio*100)}%</b>`:'<span style="flex:1;text-align:left;font-size:12px;font-weight:600;color:var(--text-tertiary)">Not started</span>'}</div>
       <span onclick="event.stopPropagation()">${cta(c.label,`openSpot('${s.id}')`,c.dark)}</span>
@@ -915,7 +930,22 @@
     SPOTS.filter(s=>['needs_copy','needs_cta','sent'].includes(s.copyStatus)).forEach(s=>wants.add(s.id));
     SPOTS.filter(s=>closedOut(s)&&!s.completed).forEach(s=>wants.add(s.id));
     const ids=[...wants].map(spot).sort((a,b)=>liveDays(b)-liveDays(a));
-    const active=ids.filter(x=>!isArchived(x.id)).map(flightRow);
+    // Deal-level check-ins: admin notes and the check-in date Sydney sets.
+    // They ping at the top of the list until she clears them (Aug 24, 9:37).
+    const dash='<span class="muted" style="font-weight:600">—</span>';
+    const dealRow=(d,label,text,clearFn)=>`<div class="wrow wflight wrow--click" onclick="go('portal');openDeal('${d.id}')">
+      <div class="wrow__main"><b>${esc(d.brand)} · ${esc(d.title||'Flight')}</b><span style="font-size:12px;color:var(--text-secondary)">${esc(text)}</span></div>
+      <div class="fnum">${dash}</div>
+      <span><span class="fran fran--no">${label}</span></span>
+      <div class="fnum">${dash}</div>
+      <div class="wrow__num"><span style="flex:1"></span></div>
+      <span onclick="event.stopPropagation()">${cta('Clear',`${clearFn}('${d.id}')`,false)}</span>
+      <span></span>
+    </div>`;
+    const checkRows=[];
+    DEALS.filter(d=>d.outcome==='won'&&(d.notes||'').trim()).forEach(d=>checkRows.push(dealRow(d,'note',d.notes,'clearDealNote')));
+    DEALS.filter(d=>d.checkIn&&d.checkIn<=TODAY).forEach(d=>checkRows.push(dealRow(d,'check-in',`Campaign check-in you set for ${fmtDate(d.checkIn)} — how's it going?`,'clearCheckIn')));
+    const active=checkRows.concat(ids.filter(x=>!isArchived(x.id)).map(flightRow));
     const arch=ids.filter(x=>isArchived(x.id)).map(x=>flightRow(x).replace('class="wrow wflight','class="wrow wflight wrow--dim'));
     if(arch.length){
       active.push(`<button class="archdiv" onclick="ARCH_OPEN=!ARCH_OPEN;rerender()">
@@ -923,12 +953,16 @@
         Archived · ${arch.length}</button>`);
       if(ARCH_OPEN) active.push(...arch);
     }
-    active.count=ids.length-arch.length;
+    active.count=ids.length-arch.length+checkRows.length;
     return active;
   }
 
 
   function deliveryAttention(){ return { count: workList().count||0 }; }
+  function clearDealNote(id){ const d=DEALS.find(x=>x.id===id); d.notes=''; rerender(); refreshBadges();
+    toast(`Note cleared for ${d.brand} · ${d.title}. It stays in the deal history.`); }
+  function clearCheckIn(id){ const d=DEALS.find(x=>x.id===id); d.checkIn=null; rerender(); refreshBadges();
+    toast(`Check-in cleared for ${d.brand} · ${d.title}.`); }
 
   /* ═══════════════════════════ VIEW: COMMAND CENTER ═══════════════════════════
      The glance. Three numbers, the next three things, one thing worth knowing.
@@ -993,8 +1027,10 @@
         <div class="card__pad">
           <div style="display:flex;align-items:flex-start;gap:13px">
             <div style="flex:1;min-width:0">
-              <b style="font-size:13.5px">${esc(sp.brand)} on ${esc(sh.name)}</b>
-              <div class="muted" style="font-size:12px;margin-top:2px">Original read ${fmtDate(sp.published)} landed ${Math.round(projection(sp).ratio*100)}% · ${K(shortfall(sp))} short · worth ${money(mgValue(m))} at ${money(sh.cpm)} CPM</div>
+              <b style="font-size:13.5px">${esc(sp.brand)} on ${esc(sh.name)} ${m.kind==='bonus'?'<span class="tag tag--purple" style="margin-left:4px">Bonus</span>':''}</b>
+              <div class="muted" style="font-size:12px;margin-top:2px">${m.kind==='bonus'
+                ?`$0 performance support · worth ${money(mgValue(m))} at ${money(sh.cpm)} CPM`
+                :`Original read ${fmtDate(sp.published)} landed ${Math.round(projection(sp).ratio*100)}% · ${K(shortfall(sp))} short · worth ${money(mgValue(m))} at ${money(sh.cpm)} CPM`}</div>
             </div>
             <div style="text-align:right;flex-shrink:0">
               ${done?`<span class="tag tag--green"><i></i>Booked ${fmtDate(m.date)}</span>`
@@ -1127,7 +1163,7 @@
     <div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Close</button>
       ${s.missed?`<button class="btn btn--primary" onclick="closeOverlays();nudgeEpisode('${s.id}')">Nudge show</button>`
         :v.k==='short'&&!m?`<button class="btn btn--primary" onclick="closeOverlays();createMakegood('${s.id}')">Set up make good</button>`
-        :m?`<button class="btn btn--primary" onclick="closeOverlays();openMg('${m.id}')">Open make good</button>`
+        :m?`<button class="btn btn--primary" onclick="closeOverlays();openMg('${m.id}')">Open ${m.kind==='bonus'?'bonus spot':'make good'}</button>`
         :closedOut(s)&&!s.reportSent?`<button class="btn btn--primary" onclick="closeOverlays();sendDeliveryReport('${s.id}')">Send delivery report</button>`
         :closedOut(s)&&!s.completed?`<button class="btn btn--primary" onclick="closeOverlays();markComplete('${s.id}')">Mark complete</button>`
         :pr?`<button class="btn btn--primary" onclick="closeOverlays();go('portal');openDeal('${s.dealId}')">See in the report</button>`:''}</div>`);
@@ -1141,18 +1177,28 @@
       showOk: sh.mgPolicy==='auto'?true:null, brandOk:null, showVia: sh.mgPolicy==='auto'?'auto':null, brandVia:null };
     MAKEGOODS.push(m); rerender(); refreshBadges(); openMg(m.id);
   }
+  /* A bonus spot: same machinery as a make good — avails, position, optional
+     drafts, written to Airtable at $0 — but it exists to lift performance, not
+     to replace a shortfall, and it gets tracked so the inventory is visible. */
+  function createBonus(dealId){
+    const anchor=SPOTS.find(x=>x.dealId===dealId&&x.kind==='paid'); if(!anchor) return;
+    const sh=show(anchor.showId), av=nextEpisodes(anchor.showId,4).find(e=>e.open>0);
+    const m={ id:'mg'+(++MG_SEQ), kind:'bonus', spotId:anchor.id, date:av?av.date:null, status:'proposed',
+      showOk: sh.mgPolicy==='auto'?true:null, brandOk:null, showVia: sh.mgPolicy==='auto'?'auto':null, brandVia:null };
+    MAKEGOODS.push(m); rerender(); refreshBadges(); openMg(m.id);
+  }
   function setMgDate(id,d){ mg(id).date=d; openMg(id); rerender(); }
   function setMgPosition(id,pos){ mg(id).position=pos; openMg(id); rerender(); }
   function toggleMg(id,key){ const m=mg(id); m[key]=m[key]===true?null:true; openMg(id); rerender(); refreshBadges(); }
   function commitMg(id){
     const m=mg(id), s=spot(m.spotId), sh=show(s.showId);
     m.status='scheduled';
-    SPOTS.push({ id:'mgs'+m.id, dealId:s.dealId, brand:s.brand, showId:s.showId, kind:'makegood', published:m.date,
+    SPOTS.push({ id:'mgs'+m.id, dealId:s.dealId, brand:s.brand, showId:s.showId, kind:m.kind||'makegood', published:m.date,
       position:m.position||'Mid-roll',
       guarantee:0, views:null, downloads:null, dlState:sh.simulcast?'auto':'none', status:'scheduled',
       length:s.length, yt:'', ts:null, copyStatus:'seen', copy:[] });
     closeOverlays(); rerender(); refreshBadges();
-    toast(`${s.brand} make good scheduled — ${m.position||'mid-roll'} on ${sh.name}, ${fmtDate(m.date)}. Written to Airtable as "Make Good" and flagged in Booster so the slot can't be sold twice.`);
+    toast(`${s.brand} ${m.kind==='bonus'?'bonus spot':'make good'} scheduled — ${m.position||'mid-roll'} on ${sh.name}, ${fmtDate(m.date)}. Written to Airtable as "${m.kind==='bonus'?'Bonus':'Make Good'}" and flagged in Booster so the slot can't be sold twice.`);
   }
   /* Make good, in the order the Aug 21 call asked for: date, position, drafts
      you can send (or not), then Notified toggles that are guidance — never a
@@ -1167,9 +1213,12 @@
       <button class="tog__sw ${m[key]===true?'on':''}" onclick="toggleMg('${id}','${key}')"><i></i></button>
       <div style="flex:1"><b>${label} ${m[key]==='skip'?'<span class="muted" style="font-weight:600">· skipped</span>':''}</b><small>${note}</small></div>
       <button class="btn btn--ghost btn--sm" style="flex-shrink:0" onclick="dismissMg('${id}','${key}')">${m[key]==='skip'?'Undo':'Dismiss'}</button></div>`;
-    openDrawer(`<div class="drawer__head"><div><span class="tag tag--orange"><i></i>${K(shortfall(s))} short</span>
-      <h2 style="font-size:18px;font-weight:800;margin-top:8px">Make good · ${esc(s.brand)} on ${esc(sh.name)}</h2>
-      <div class="muted" style="font-size:12px">Projecting ${K(pr?pr.proj:0)} against a ${K(s.guarantee)} guarantee</div></div>
+    const bonus=m.kind==='bonus';
+    openDrawer(`<div class="drawer__head"><div>${bonus
+        ?`<span class="tag tag--purple"><i></i>$0 bonus · performance</span>`
+        :`<span class="tag tag--orange"><i></i>${K(shortfall(s))} short</span>`}
+      <h2 style="font-size:18px;font-weight:800;margin-top:8px">${bonus?'Bonus spot':'Make good'} · ${esc(s.brand)} on ${esc(sh.name)}</h2>
+      <div class="muted" style="font-size:12px">${bonus?'A no-charge read to lift performance — tracked so the inventory doesn\'t vanish':`Projecting ${K(pr?pr.proj:0)} against a ${K(s.guarantee)} guarantee`}</div></div>
       <button class="x" onclick="closeOverlays()">✕</button></div>
     <div class="drawer__body">
       <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:7px">Date · from ${esc(sh.name)}'s avails</div>
@@ -1182,10 +1231,10 @@
       <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary);margin:18px 0 7px">Drafts · sending is optional</div>
       ${auto?`<div class="muted" style="font-size:12px;margin-bottom:9px">${esc(sh.name)} auto-schedules, so the show doesn't need an ask — the draft is here if you want to give them a heads-up anyway.</div>`:''}
       <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--text-tertiary);margin:8px 0 6px">To ${esc(sh.host)}</div>
-      <textarea class="cmp-inp" style="min-height:100px;line-height:1.6;font-size:12.5px">Hey ${esc(sh.host.split(' ')[0])} — the ${esc(s.brand)} read from ${fmtDate(s.published)} is tracking to land near ${K(pr?pr.proj:0)} against a ${K(s.guarantee)} guarantee, so we owe them a make good. Can we put a free ${esc(s.length)} ${m.position?m.position.toLowerCase():'read'} on ${d}? Same copy — comes out of our end, no change to your split. Thanks, Sydney</textarea>
+      <textarea class="cmp-inp" style="min-height:100px;line-height:1.6;font-size:12.5px">Hey ${esc(sh.host.split(' ')[0])} — ${bonus?`we want to add a bonus ${esc(s.length)} ${m.position?m.position.toLowerCase():'read'} for ${esc(s.brand)} on ${d} to help the campaign perform. Same copy, no charge to them, no change to your split. Thanks, Sydney`:`the ${esc(s.brand)} read from ${fmtDate(s.published)} is tracking to land near ${K(pr?pr.proj:0)} against a ${K(s.guarantee)} guarantee, so we owe them a make good. Can we put a free ${esc(s.length)} ${m.position?m.position.toLowerCase():'read'} on ${d}? Same copy — comes out of our end, no change to your split. Thanks, Sydney`}</textarea>
       <button class="btn btn--ghost btn--sm" style="margin-top:7px" onclick="sendMg('${id}','show')">Send to show</button>
       <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--text-tertiary);margin:14px 0 6px">To ${esc(s.brand)}</div>
-      <textarea class="cmp-inp" style="min-height:100px;line-height:1.6;font-size:12.5px">Hi ${esc(s.brand)} team — heads up on the ${esc(sh.name)} read from ${fmtDate(s.published)}. It's pacing a little under the guarantee, so we've queued an additional ${m.position?m.position.toLowerCase():'read'} on ${d} at no cost to bring the flight back over. Nothing needed on your end. Thanks, Sydney</textarea>
+      <textarea class="cmp-inp" style="min-height:100px;line-height:1.6;font-size:12.5px">Hi ${esc(s.brand)} team — ${bonus?`good news — we've added a bonus ${m.position?m.position.toLowerCase():'read'} on ${esc(sh.name)} for ${d}, at no cost, to give the campaign a push. Nothing needed on your end. Thanks, Sydney`:`heads up on the ${esc(sh.name)} read from ${fmtDate(s.published)}. It's pacing a little under the guarantee, so we've queued an additional ${m.position?m.position.toLowerCase():'read'} on ${d} at no cost to bring the flight back over. Nothing needed on your end. Thanks, Sydney`}</textarea>
       <button class="btn btn--ghost btn--sm" style="margin-top:7px" onclick="sendMg('${id}','brand')">Send to brand</button>
 
       <div style="display:flex;flex-direction:column;gap:9px;margin-top:18px">
@@ -1278,7 +1327,7 @@
   function dealSummary(d){
     const spots=SPOTS.filter(s=>s.dealId===d.id).sort((x,y)=>dt(x.published)-dt(y.published));
     const liveSpots=spots.filter(s=>projection(s));
-    const mgs=spots.filter(s=>s.kind==='makegood');
+    const mgs=spots.filter(s=>s.kind!=='paid');
     const paidLive=liveSpots.filter(s=>s.kind==='paid');
     const g=paidLive.reduce((a,s)=>a+s.guarantee,0), got=liveSpots.reduce((a,s)=>a+(delivered(s)||0),0);
     const proj=liveSpots.reduce((a,s)=>a+projection(s).proj,0), paid=paidLive.reduce((a,s)=>a+spotCost(s),0);
@@ -1329,6 +1378,7 @@
         <p>The live report the advertiser sees. Read-only for them, and it fills in as reads land.</p></div>
         <div class="pagebar__right">
           <button class="btn btn--ghost btn--sm" onclick="toast('Copied vmg.live/${d.brand.toLowerCase()}-${d.id} — read-only, admin notes stay internal.')">🔗 Copy link</button>
+          <button class="btn btn--ghost btn--sm" onclick="createBonus('${d.id}')">+ Bonus spot</button>
           <button class="btn btn--primary btn--sm" onclick="sendDealReport('${d.id}')">Send report</button></div>
       </div>
 
@@ -1398,7 +1448,7 @@
           ${spots.filter(s=>s.status==='scheduled'&&s.kind==='paid').map(s=>`<tr><td><b>${esc(show(s.showId).name)}</b></td>
             <td>${fmtDate(s.published)}</td><td class="num muted">booked</td><td colspan="4"><span class="muted" style="font-size:12px">Due ${dayName(s.published)} ${fmtDate(s.published)}</span></td></tr>`).join('')}
           ${mgs.map(s=>`<tr style="background:rgba(235,233,254,.28)"><td><b>${esc(show(s.showId).name)}</b> <span class="tag tag--purple">Added at no cost</span></td>
-            <td>${fmtDate(s.published)}</td><td class="num muted">scheduled</td><td colspan="4"><span class="muted" style="font-size:12px">Make good — replaces the shortfall, no charge</span></td></tr>`).join('')}
+            <td>${fmtDate(s.published)}</td><td class="num muted">scheduled</td><td colspan="4"><span class="muted" style="font-size:12px">${s.kind==='bonus'?'Bonus spot — performance support, no charge':'Make good — replaces the shortfall, no charge'}</span></td></tr>`).join('')}
         </tbody></table>
       </div>
       <div class="footnote">This is the advertiser's view of this deal. Read-only for them, updates as reads land — admin notes never leave the building.</div>
