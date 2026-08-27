@@ -626,6 +626,7 @@
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>
       </button>
       <div class="dd-menu" style="left:auto;right:0">
+        <button type="button" class="dd-item" data-fundact="single">Add one investor</button>
         <button type="button" class="dd-item" data-fundact="upload">Upload CSV file</button>
         <button type="button" class="dd-item" data-fundact="paste">Paste rows</button>
       </div>
@@ -668,6 +669,36 @@
     <div class="section-pad" id="fundsImportView" style="display:none;padding-top:0;padding-bottom:0">
       <input type="file" id="fundCsvInput" accept=".csv,.txt" style="display:none" />
       <div class="sync-card__result" id="fundImportResult" style="margin:0"></div>
+      <div id="fundSingleWrap" style="display:none">
+        <div class="tpl-card" style="gap:12px">
+          <span class="d-label">Add one investor</span>
+          <div class="d-row">
+            <button type="button" class="btn-primary af-kind" data-afkind="fund" style="height:32px;font-size:12px">VC fund</button>
+            <button type="button" class="btn-ghost af-kind" data-afkind="angel" style="height:32px;font-size:12px">Angel investor</button>
+          </div>
+          <div class="var-grid">
+            <div class="var-field"><label id="afNameLabel">Fund name</label><input id="afName" placeholder="Acme Ventures" /></div>
+            <div class="var-field" id="afPersonField"><label>Person (optional)</label><input id="afPerson" placeholder="Jane Doe" /></div>
+          </div>
+          <div class="var-grid">
+            <div class="var-field" id="afTitleField"><label>Title (optional)</label><input id="afTitle" placeholder="Partner" /></div>
+            <div class="var-field"><label>LinkedIn URL (optional)</label><input id="afLi" placeholder="https://linkedin.com/in/janedoe" /></div>
+          </div>
+          <div class="var-grid">
+            <div class="var-field"><label>Email (optional)</label><input id="afEmail" placeholder="jane@acme.vc" /></div>
+            <div class="var-field"><label>Check size (optional)</label><input id="afCheck" placeholder="$100k - $500k" /></div>
+          </div>
+          <div class="var-grid">
+            <div class="var-field"><label>Location (optional)</label><input id="afRegion" placeholder="New York" /></div>
+            <div class="var-field"><label>Thesis / notes (optional)</label><input id="afNotes" placeholder="Consumer marketplaces, invests in media" /></div>
+          </div>
+          <div class="token-hint">Lands in Targets ungraded - open it and run the AI fit read to grade it against the deck.</div>
+          <div class="d-row">
+            <button class="btn-primary" id="afCreate">Add investor</button>
+            <button class="btn-ghost" id="afCancel">Cancel</button>
+          </div>
+        </div>
+      </div>
       <div id="fundPasteWrap" style="display:none">
         <textarea class="tpl-body" id="fundPasteArea" placeholder="Fund, Person, Title, LinkedIn, Type, Check size, Location, Notes
 Acme Ventures, Jane Doe, Partner, https://linkedin.com/in/janedoe, Seed, $250k-$1M, New York, B2B marketplaces"></textarea>
@@ -2099,7 +2130,7 @@ function importFunds(text){
     ci = { fund:0, person:1, title:2, li:3, type:4, check:5, region:6, notes:7, site:-1 };
     start = 0;
   }
-  let added = 0, mergedRows = 0, peopleAdded = 0;
+  let added = 0, mergedRows = 0, peopleAdded = 0, lastAddedId = null;
   const get = (c,k) => ci[k] >= 0 ? (c[ci[k]]||'').trim() : '';
   for (let r = start; r < lines.length; r++) {
     const c = csvLine(lines[r]);
@@ -2116,7 +2147,7 @@ function importFunds(text){
         looking: get(c,'notes') || '', people: [] };
       state.extraFunds.push(f);
       FUNDS.push(f); FUND_BY_ID[f.id] = f;
-      added++;
+      added++; lastAddedId = f.id;
     } else {
       if (f.custom) {
         if (!f.check) f.check = parseCheckRange(get(c,'check'));
@@ -2151,6 +2182,7 @@ function importFunds(text){
   state.fundImportMsg = `${added} fund${added===1?'':'s'} added · ${peopleAdded} people${mergedRows?` · ${mergedRows} rows merged into existing funds`:''}${rematch}`;
   save(); render();
   toast(state.fundImportMsg);
+  if (added === 1 && lastAddedId) openFund(lastAddedId);
 }
 
 /* ── AI fit read (calls api/vc-fit, Claude-backed on the deployed wiki) ── */
@@ -2757,8 +2789,16 @@ document.addEventListener('click', e => {
     if (act === 'upload') $('fundCsvInput').click();
     if (act === 'paste') {
       if (currentTab !== 'funds') switchTab('funds');
+      $('fundSingleWrap').style.display = 'none';
       $('fundPasteWrap').style.display = 'block';
       $('fundPasteWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    if (act === 'single') {
+      if (currentTab !== 'funds') switchTab('funds');
+      $('fundPasteWrap').style.display = 'none';
+      $('fundSingleWrap').style.display = 'block';
+      $('fundSingleWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      $('afName').focus();
     }
     return; // 'samples' is handled by its own removeSamplesBtn listener
   }
@@ -3051,6 +3091,53 @@ $('fundPasteImport').addEventListener('click', () => {
   $('fundPasteWrap').style.display = 'none';
 });
 $('fundPasteCancel').addEventListener('click', () => { $('fundPasteWrap').style.display = 'none'; });
+
+/* ── Single investor add (VC fund or angel) ── */
+let afKind = 'fund';
+document.querySelectorAll('.af-kind').forEach(b => b.addEventListener('click', () => {
+  afKind = b.dataset.afkind;
+  document.querySelectorAll('.af-kind').forEach(x => {
+    x.className = (x === b ? 'btn-primary' : 'btn-ghost') + ' af-kind';
+  });
+  const angel = afKind === 'angel';
+  $('afPersonField').style.display = angel ? 'none' : '';
+  $('afTitleField').style.display = angel ? 'none' : '';
+  $('afNameLabel').textContent = angel ? "Angel's name" : 'Fund name';
+  $('afName').placeholder = angel ? 'Jane Doe' : 'Acme Ventures';
+}));
+$('afCreate').addEventListener('click', () => {
+  const name = $('afName').value.trim();
+  if (!name) { toast('Name is required.'); $('afName').focus(); return; }
+  const isAngel = afKind === 'angel';
+  const existing = FUNDS.find(x => normOrg(x.name) === normOrg(name));
+  if (existing) { toast('Already in the pipeline - opening it.'); openFund(existing.id); return; }
+  let id = 'cf-' + slug(name);
+  while (FUND_BY_ID[id]) id += '-x';
+  const f = { id, name, custom: true,
+    type: isAngel ? 'Angel' : 'Seed',
+    region: $('afRegion').value.trim() || '—',
+    check: parseCheckRange($('afCheck').value.trim()),
+    sectors: [], site: '',
+    looking: $('afNotes').value.trim(),
+    people: [] };
+  const person = isAngel ? name : $('afPerson').value.trim();
+  if (person) {
+    const p = { n: person, t: isAngel ? 'Angel investor' : ($('afTitle').value.trim() || 'Partner') };
+    if ($('afLi').value.trim()) p.li = $('afLi').value.trim();
+    if ($('afEmail').value.trim()) p.email = $('afEmail').value.trim();
+    f.people.push(p);
+  } else f.people.push({ n: '', t: 'Partner', tbd: true });
+  state.extraFunds.push(f);
+  FS(id).stage = 'target';
+  save(); rebuild();
+  if ((state.liConnections || []).length) applyMatching(state.liConnections);
+  render();
+  ['afName','afPerson','afTitle','afLi','afEmail','afCheck','afRegion','afNotes'].forEach(k => { $(k).value = ''; });
+  $('fundSingleWrap').style.display = 'none';
+  toast((isAngel ? 'Angel added' : 'Fund added') + ' - filed under Targets.');
+  openFund(id);
+});
+$('afCancel').addEventListener('click', () => { $('fundSingleWrap').style.display = 'none'; });
 
 /* Drawer inner navigation */
 $('drawerBody').addEventListener('click', e => {
