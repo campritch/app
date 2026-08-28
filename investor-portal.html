@@ -79,9 +79,9 @@ const CONTENT = {
     { value: "59,000+", label: "Profiles in Marketplace", sub: "Searchable host-read inventory" },
     { value: "800+",    label: "Shows onboarded", sub: "Signed to the platform" },
     { value: "55,000",  label: "Platform searches", sub: "Run across the marketplace" },
-    { value: "8.7M",    label: "Impressions bought", sub: "Across 20+ networks" },
-    { value: "$280K+",  label: "Cumulative GMV", sub: "20x from Oct to Mar" },
-    { value: "$12.5K",  label: "Monthly revenue", sub: "As of September" },
+    { value: "10.9M",   label: "Impressions bought", sub: "Across 23 networks" },
+    { value: "$1.1M",   label: "Annual GMV run rate", sub: "As of Aug 2026" },
+    { value: "$18.8K",  label: "Monthly revenue run rate", sub: "As of Aug 2026" },
   ],
 
   // ---- Deal terms (RAISE + RUNWAY confirmed in deck; rest TODO; CLOSING is the scarcity lever) ----
@@ -90,6 +90,15 @@ const CONTENT = {
     { label: "POST-MONEY VALUATION", value: "$10.5M" },
     { label: "ALLOCATION",           value: "$500K" },
   ],
+
+  // ---- Revenue growth chart (bars are relative heights; last = current) ----
+  revenue: {
+    eyebrow: "ANNUAL REVENUE RUN RATE",
+    headline: "$226K",
+    note: "As of Aug 2026",
+    bars: [54, 46, 31, 120, 226],
+    labels: ["Apr", "May", "Jun", "Jul", "Aug"],
+  },
 
   // ---- Try it yourself (interactive demo) ----
   demo: {
@@ -265,7 +274,9 @@ const CONTENT = {
 
   /* video */
   .video{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:16/9;background:#0e1721}
-  .video.portrait{aspect-ratio:9/16;max-width:300px;margin:0 auto}
+  .video.portrait{aspect-ratio:9/16;height:100%;width:auto;max-width:100%;margin:0 auto}
+  .investor-card{display:flex;flex-direction:column}
+  .video-fill{flex:1;min-height:300px;display:flex;justify-content:center;align-items:stretch}
   .video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
   .video-soon{
     position:absolute;inset:0;display:flex;flex-direction:column;
@@ -299,6 +310,20 @@ const CONTENT = {
 
   /* deal terms */
   .terms{display:flex;flex-wrap:wrap;gap:14px 44px}
+  .terms--wide{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  @media (max-width:640px){ .terms--wide{grid-template-columns:1fr} }
+  /* revenue growth chart */
+  .revcard{display:flex;flex-direction:column}
+  .revtop{display:flex;align-items:baseline;gap:12px;margin-top:2px;flex-wrap:wrap}
+  .revval{font-size:34px;font-weight:800;color:var(--salmon);letter-spacing:-.02em;line-height:1}
+  .revnote{font-size:13px;color:var(--mute)}
+  .revbars{flex:1;min-height:150px;display:flex;align-items:flex-end;gap:16px;margin-top:22px}
+  .revbar{flex:1;min-height:8px;border-radius:9px 9px 0 0;
+    background:linear-gradient(180deg,var(--salmon-2),var(--salmon))}
+  .revbar--last{background:linear-gradient(180deg,#ff8f84,var(--salmon));
+    box-shadow:0 0 24px rgba(240,96,96,.35)}
+  .revlabels{display:flex;gap:16px;margin-top:10px}
+  .revlbl{flex:1;text-align:center;font-size:12px;font-weight:600;color:var(--mute)}
   .term .k{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--mute-2)}
   .term .v{font-size:19px;font-weight:700;margin-top:5px}
   .closing{
@@ -474,23 +499,31 @@ const CONTENT = {
     <!-- METRICS + TERMS (left, stacked) | INVESTOR VIDEO (right) -->
     <div class="grid2" style="margin-top:22px;align-items:stretch">
       <div style="display:flex;flex-direction:column;gap:22px">
+        <section class="card revcard" style="flex:1">
+          <div class="eyebrow" id="revEyebrow"></div>
+          <div class="revtop"><span class="revval" id="revVal"></span><span class="revnote" id="revNote"></span></div>
+          <div class="revbars" id="revBars"></div>
+          <div class="revlabels" id="revLabels"></div>
+        </section>
+
         <section class="card">
           <div class="eyebrow">KEY METRICS</div>
           <div class="metricgrid" id="metrics"></div>
         </section>
-
-        <section class="card" style="padding-top:26px;padding-bottom:26px;flex:1">
-          <div class="eyebrow">DEAL TERMS</div>
-          <div class="terms" id="terms"></div>
-        </section>
       </div>
 
-      <section class="card" style="text-align:center">
+      <section class="card investor-card" style="text-align:center">
         <div class="eyebrow" style="text-align:left">WHY WE ARE BACKING THIS</div>
-        <div class="video" id="investorVideo"></div>
+        <div class="video-fill"><div class="video" id="investorVideo"></div></div>
         <div class="vidcap" id="investorCap"></div>
       </section>
     </div>
+
+    <!-- DEAL TERMS across, full width -->
+    <section class="card" style="margin-top:22px">
+      <div class="eyebrow">DEAL TERMS</div>
+      <div class="terms terms--wide" id="terms"></div>
+    </section>
 
     <!-- TRY IT YOURSELF -->
     <section class="card demo" style="margin-top:22px">
@@ -637,6 +670,17 @@ function render(){
   $("terms").innerHTML = c.terms.map(t=>`
     <div class="term"><div class="k">${t.label}</div><div class="v">${cell(t.value)}</div></div>
   `).join("");
+
+  // revenue growth chart
+  const rv = c.revenue;
+  $("revEyebrow").textContent = rv.eyebrow;
+  $("revVal").textContent = rv.headline;
+  $("revNote").textContent = rv.note;
+  const revMax = Math.max(...rv.bars);
+  $("revBars").innerHTML = rv.bars.map((v,i)=>
+    `<div class="revbar${i===rv.bars.length-1?' revbar--last':''}" style="height:${Math.max(6,Math.round(v/revMax*100))}%"></div>`
+  ).join("");
+  $("revLabels").innerHTML = (rv.labels||[]).map(l=>`<div class="revlbl">${l}</div>`).join("");
 
   // demo (try it yourself)
   const d = c.demo;
