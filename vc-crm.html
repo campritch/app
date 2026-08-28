@@ -1318,7 +1318,7 @@ function fundPathInfo(f){
 function fundPathCellHtml(f){
   const pi = fundPathInfo(f);
   if (pi.kind === 'direct') return `<div class="path-text"><b>Direct · 1st°</b></div>`;
-  if (pi.kind === 'existing') return `<div class="path-text" title="${esc(pi.e.via)} — ${esc(pi.e.note)}">${pi.e.kind === 'existing' ? 'Existing' : 'Warm path'} · ${esc(prettyVia(pi.e.via)).slice(0, 34)}</div>`;
+  if (pi.kind === 'existing') return `<div class="path-text" title="${pi.e.kind === 'existing' ? 'Existing relationship' : 'Warm path'}: ${esc(pi.e.via)} — ${esc(pi.e.note)}">${esc(prettyVia(pi.e.via)).slice(0, 34)}${pi.e.kind !== 'existing' ? '<div class="sub">warm path</div>' : ''}</div>`;
   if (pi.kind === 'connector') return `<div class="path-text"><span class="link" data-openconn="${pi.c.id}">via ${esc(pi.c.name)}</span></div>`;
   if (pi.kind === 'nfx') return `<div class="path-text muted" title="Investor intro routes via NFX Signal - open the side panel">NFX only</div>`;
   return `<div class="path-text muted">No path</div>`;
@@ -1555,7 +1555,7 @@ function pathCellHtml(p){
   if (pi.kind === 'existing') {
     const e = pi.existing[0];
     const extra = pi.connectors.length + pi.existing.length - 1;
-    return `<div class="path-text" title="${esc(e.via)} — ${esc(e.note)}">${e.kind === 'existing' ? 'Existing' : 'Warm path'} · ${esc(prettyVia(e.via)).slice(0, 34)}${extra > 0 ? `<div class="sub">+${extra} more</div>` : ''}</div>`;
+    return `<div class="path-text" title="${e.kind === 'existing' ? 'Existing relationship' : 'Warm path'}: ${esc(e.via)} — ${esc(e.note)}">${esc(prettyVia(e.via)).slice(0, 34)}${e.kind !== 'existing' ? `<div class="sub">warm path${extra > 0 ? ` · +${extra} more` : ''}</div>` : (extra > 0 ? `<div class="sub">+${extra} more</div>` : '')}</div>`;
   }
   if (pi.kind === 'connector') {
     const c = pi.connectors[0];
@@ -1713,7 +1713,7 @@ function renderFundsTable(){
     <th class="sortable hide-md" data-hsort="profile" style="width:150px">Profile${hArrow('profile')}</th>
     <th class="sortable" data-hsort="fit" style="width:86px">Fit${hArrow('fit')}</th>
     <th class="sortable" data-hsort="check" style="width:110px">Check${hArrow('check')}</th>
-    <th class="sortable" data-hsort="wayin" style="width:170px">Way in${hArrow('wayin')}</th>
+    <th class="sortable" data-hsort="wayin" style="width:140px">Way in${hArrow('wayin')}</th>
     <th class="hide-md">Why it fits</th>
     <th class="sortable" data-hsort="stage" style="width:112px">Stage${hArrow('stage')}</th>
     <th class="sortable" data-hsort="people" style="width:62px">People${hArrow('people')}</th>
