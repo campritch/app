@@ -78,6 +78,19 @@
     .sb-user__name { color: var(--text-primary); font-size: 12.5px; font-weight: 700; line-height: 1.2; }
 
 
+    /* ─── table toolbar + sortable header, network.spotsnow pattern ─── */
+    .tbar { display:flex; align-items:center; gap:14px; padding:10px 14px; border-bottom:1px solid var(--border-light); }
+    .tbar__search { position:relative; }
+    .tbar__search svg { position:absolute; left:9px; top:50%; transform:translateY(-50%); width:13px; height:13px; color:var(--text-tertiary); }
+    .tbar__search input { width:210px; padding:6px 10px 6px 29px; border:1px solid var(--border); border-radius:8px;
+                          font:inherit; font-size:12px; background:var(--white); color:var(--text-primary); }
+    .tbar__search input:focus { outline:none; border-color:var(--border-strong); }
+    .tsel { border:none; background:transparent; font:inherit; font-size:12px; font-weight:600; color:var(--text-primary); cursor:pointer; }
+    .shead { display:grid; align-items:center; gap:0 13px; padding:8px 14px; border-bottom:1px solid var(--border-light); }
+    .shead button, .shead span { border:none; background:none; padding:0; text-align:left; font-family:inherit;
+                                 font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+                                 color:var(--text-tertiary); cursor:pointer; white-space:nowrap; }
+    .shead button:hover { color:var(--text-primary); }
     /* ─── flat list card: rows divided by hairlines, one border around ─── */
     .listcard { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
     .listcard .fhead { padding: 8px 14px; margin: 0; border-bottom: 1px solid var(--border-light); }
@@ -116,7 +129,6 @@
     .tb-btn svg { width: 13px; height: 13px; }
     .tb-av { width: 30px; height: 30px; border-radius: 9px; background: var(--primary); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 11px; margin-left: 6px; border: none; flex-shrink: 0; }
 
-    body.navhid .sidebar { display: none; }
     /* ─── MAIN ─── */
     .main { flex: 1; min-width: 0; background: var(--panel); display: flex; flex-direction: column; overflow: hidden; position: relative; }
     .views { flex: 1; overflow-y: auto; }
@@ -423,8 +435,7 @@
 </head>
 <body>
   <nav class="sidebar">
-    <div class="sb-brand" style="position:relative">
-      <button class="tb-plain" onclick="toggleNav()" title="Hide sidebar" style="position:absolute;top:0;right:-4px;padding:5px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:14px;height:14px"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <div class="sb-brand">
       <div class="sb-brand__mark"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" fill="#141519"/><text x="34.5" y="33.5" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="900" font-size="19" letter-spacing="5" fill="#fff">VMG</text><text x="33.6" y="45" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="5.8" letter-spacing="3.2" fill="#fff">NETWORK</text></svg></div>
       <div class="sb-brand__name"><b>VMG</b><span>DASHBOARD</span></div>
     </div>
@@ -447,10 +458,7 @@
 
   <main class="main">
     <div class="topbar">
-      <div style="display:flex;align-items:center;gap:6px;margin-right:auto">
-        <span id="navReveal"></span>
-        <span id="tbBack"></span>
-      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-right:auto"><span id="tbBack"></span></div>
       <button class="tb-btn" data-view="shows" onclick="go('shows')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 4v16"/></svg>Shows</button>
       <button class="tb-btn" onclick="toggleDark()" id="dmBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>Dark Mode</button>
     </div>
@@ -772,8 +780,6 @@
     if(RENDER[v]) RENDER[v]();
   }
   function rerender(){ if(RENDER[CURRENT]) RENDER[CURRENT](); }
-  function toggleNav(){ const hid=document.body.classList.toggle('navhid');
-    document.getElementById('navReveal').innerHTML=hid?`<button class="tb-plain" onclick="toggleNav()" title="Show sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:14px;height:14px"><path d="M9 6l6 6-6 6"/></svg></button>`:''; }
   const setBack=h=>{ document.getElementById('tbBack').innerHTML=h||''; }
   function refreshBadges(){
     const el=document.getElementById('nav-del-badge'); if(!el) return;
@@ -1089,7 +1095,16 @@
   let delTab='work';
   RENDER.delivery = () => {
     const work=workList();
-    const live=SPOTS.filter(s=>projection(s)).sort((a,b)=>liveDays(b)-liveDays(a));
+    let live=SPOTS.filter(s=>projection(s)).sort((a,b)=>liveDays(b)-liveDays(a));
+    if(delShowF!=='All shows') live=live.filter(s=>show(s.showId).name===delShowF);
+    if(delQ2.trim()){ const q=delQ2.trim().toLowerCase(); live=live.filter(s=>nameOf(s).toLowerCase().includes(q)); }
+    const fvals={ad:s=>nameOf(s).toLowerCase(), day:s=>projection(s).day, delivered:s=>projection(s).got, pacing:s=>projection(s).ratio};
+    if(fvals[delSort.k]) live=live.slice().sort((a,b)=>{ const f=fvals[delSort.k],x=f(a),y=f(b); return (x>y?1:x<y?-1:0)*delSort.dir; });
+    const delBar=`<div class="tbar">
+      <div class="tbar__search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="delQInp" placeholder="Search flights…" value="${esc(delQ2)}" oninput="delQ2=this.value;FOCUS_Q='delQInp';RENDER.delivery()"></div>
+      <select class="tsel" onchange="delShowF=this.value;RENDER.delivery()">${['All shows',...SHOWS.map(x=>x.name)].map(n=>`<option ${delShowF===n?'selected':''}>${esc(n)}</option>`).join('')}</select>
+    </div>`;
+    const delHead=`<div class="shead" style="grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 118px 26px">${[['ad','Ad'],['day','Day'],[null,'Ran'],['delivered','Delivered'],['pacing','Pacing']].map(([k,l])=>k?`<button onclick="setDelSort('${k}')">${l}${delSort.k===k?(delSort.dir>0?' ↑':' ↓'):''}</button>`:`<span>${l}</span>`).join('')}<span></span><span></span></div>`;
     document.getElementById('view-delivery').innerHTML=`
     <div class="inner" style="max-width:940px">
       <div class="pagebar">
@@ -1103,9 +1118,10 @@
       ${delTab==='mg' ? makeGoodsPanel() : delTab==='work'
         ? (work.checks||'')+((work.checks&&work.length)?'<div style="height:14px"></div>':'')
           +(work.length?`<div class="listcard">${work.join('')}</div>`:work.checks?'':`<div class="card"><div class="empty">✨ Nothing needs you — every flight projects over the 90% line.</div></div>`)
-        : `<div class="listcard">${live.map(flightRow).join('')}</div>`}
+        : `<div class="listcard">${delBar}${delHead}${live.length?live.map(flightRow).join(''):'<div class="empty">No flights match.</div>'}</div>`}
       <div class="footnote">Projections come from each show's own curve, refit every time a read is verified.</div>
     </div>`;
+    refocusQ();
   };
 
   /* Every make good, in every state, plus what they have cost. The flowchart's
@@ -1411,6 +1427,12 @@
      A brand holds several deals closed at different times; the report and the
      guarantee live at the deal. The index defaults to live deals for speed. */
   let portalDeal=null, portalFilter='live';
+  let dealQ='', dealBrandF='All brands', dealSort={k:'date',dir:-1}, FOCUS_Q=null;
+  let delQ2='', delShowF='All shows', delSort={k:'day',dir:-1};
+  function setDealSort(k){ dealSort = dealSort.k===k?{k,dir:-dealSort.dir}:{k,dir:1}; RENDER.portal(); }
+  function setDelSort(k){ delSort = delSort.k===k?{k,dir:-delSort.dir}:{k,dir:1}; RENDER.delivery(); }
+  function refocusQ(){ if(!FOCUS_Q) return; const el=document.getElementById(FOCUS_Q);
+    if(el){ el.focus(); el.selectionStart=el.selectionEnd=el.value.length; } FOCUS_Q=null; }
   function openDeal(id){ portalDeal=id; RENDER.portal(); document.querySelector('.views').scrollTop=0; }
   function closeDeal(){ portalDeal=null; RENDER.portal(); document.querySelector('.views').scrollTop=0; }
   // back-compat: anything still pointing at a brand opens its most recent live deal
@@ -1586,9 +1608,20 @@
           </div>`; }).join('')}
       </div>`;
     } else {
-      const cs=all.filter(c=>portalFilter==='all'||c.state===portalFilter);
-      body=cs.length?`<div class="card" style="overflow:hidden">${cs.map((c,i)=>dealIndexRow(c,i,false)).join('')}</div>`
-                    :'<div class="card"><div class="empty">No deals in this state.</div></div>';
+      let cs=all.filter(c=>portalFilter==='all'||c.state===portalFilter);
+      if(dealBrandF!=='All brands') cs=cs.filter(c=>c.brand===dealBrandF);
+      if(dealQ.trim()){ const q=dealQ.trim().toLowerCase();
+        cs=cs.filter(c=>(c.brand+' '+c.title+' '+c.shows.map(x=>show(x).name).join(' ')).toLowerCase().includes(q)); }
+      const dv={deal:c=>c.brand.toLowerCase(), date:c=>c.spots[0]?dt(c.spots[0].published):0,
+                status:c=>({under:0,mg:1,blocked:2}[c.status.k]??3), pacing:c=>c.pct||0, delivered:c=>c.got||0};
+      const sf=dv[dealSort.k]||dv.date;
+      cs=cs.slice().sort((a,b)=>{ const x=sf(a),y=sf(b); return (x>y?1:x<y?-1:0)*dealSort.dir; });
+      const bar=`<div class="tbar">
+        <div class="tbar__search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="dealQInp" placeholder="Search deals…" value="${esc(dealQ)}" oninput="dealQ=this.value;FOCUS_Q='dealQInp';RENDER.portal()"></div>
+        <select class="tsel" onchange="dealBrandF=this.value;RENDER.portal()">${['All brands',...brands].map(b=>`<option ${dealBrandF===b?'selected':''}>${esc(b)}</option>`).join('')}</select>
+      </div>`;
+      const head=`<div class="shead" style="grid-template-columns:minmax(0,1fr) 108px 150px 168px 118px 26px">${[['deal','Deal'],['date','Dates'],['status','Status'],['pacing','Pacing'],['delivered','Delivered']].map(([k,l])=>`<button onclick="setDealSort('${k}')">${l}${dealSort.k===k?(dealSort.dir>0?' ↑':' ↓'):''}</button>`).join('')}<span></span></div>`;
+      body=`<div class="card" style="overflow:hidden">${bar}${head}${cs.length?cs.map((c,i)=>dealIndexRow(c,i+1,false)).join(''):'<div class="empty">No deals match.</div>'}</div>`;
     }
     document.getElementById('view-portal').innerHTML=`
     <div class="inner" style="max-width:940px">
@@ -1599,6 +1632,7 @@
       ${body}
       <div class="footnote">Every deal opens its own read-only report. Live deals projecting ${pctOf(totP,totG)}%.</div>
     </div>`;
+    refocusQ();
   }
 
   const pStat=(l,v,dark)=>`<div class="pstat${dark?' pstat--dark':''}"><div class="pstat__l">${l}</div><div class="pstat__v">${v}</div></div>`;
