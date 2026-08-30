@@ -1716,10 +1716,10 @@ function renderFundsTable(){
   $('tableHead').innerHTML = `<tr>
     <th style="width:34px"><input type="checkbox" class="row-check" id="checkAll"></th>
     <th class="sortable" data-hsort="name" style="width:168px">Fund${hArrow('name')}</th>
-    <th class="sortable hide-md" data-hsort="profile" style="width:138px">Profile${hArrow('profile')}</th>
     <th class="sortable" data-hsort="fit" style="width:78px">Fit${hArrow('fit')}</th>
     <th class="sortable" data-hsort="check" style="width:100px">Check${hArrow('check')}</th>
     <th class="sortable" data-hsort="wayin" style="width:128px">Way in${hArrow('wayin')}</th>
+    <th class="sortable hide-md" data-hsort="profile" style="width:138px">Profile${hArrow('profile')}</th>
     <th class="hide-md">Why it fits</th>
     <th class="sortable" data-hsort="stage" style="width:104px">Stage${hArrow('stage')}</th>
     <th class="sortable" data-hsort="people" style="width:56px">People${hArrow('people')}</th>
@@ -1738,10 +1738,10 @@ function renderFundsTable(){
         <span class="fund-name">${esc(f.name)}</span>
         ${f.site ? `<a class="fund-site" href="https://${esc(f.site)}" target="_blank" rel="noopener" data-noopen title="Open website">${esc(f.site)}</a>` : ''}
       </div></td>
-      <td class="hide-md"><span class="fund-sub">${esc(f.type||'—')} · ${esc(f.region||'—')}${(f.sectors||[]).length ? ' · ' + esc(f.sectors.slice(0,2).join(', ')) : ''}</span></td>
       <td>${gradePillHtml(f)}</td>
       <td style="white-space:nowrap;font-weight:600">${checkFmt(f)}</td>
       <td>${fundPathCellHtml(f)}</td>
+      <td class="hide-md"><span class="fund-sub">${esc(f.type||'—')} · ${esc(f.region||'—')}${(f.sectors||[]).length ? ' · ' + esc(f.sectors.slice(0,2).join(', ')) : ''}</span></td>
       <td class="hide-md"><div class="why-cell" title="${esc(((f.looking||'') + ' ' + fundFitLine(f)).trim())}">${esc((firstSentence(f.looking) + ' ' + fundFitLine(f)).trim() || 'Add fund notes - they feed the fit read.')}</div></td>
       <td>${ddHtml({ ctx:'fstage:'+f.id, value:fStage(f), quiet:true, options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:v,cls:k==='none'?'st-backlog':''})) })}</td>
       <td><div style="display:flex;gap:6px;align-items:center;white-space:nowrap">
@@ -2013,14 +2013,14 @@ function normOrg(s){
   return (s||'').toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(/\s+/)
     .filter(w => w && !STOPWORDS.includes(w)).join(' ').trim();
 }
-function matchFunds(company, position){
+function matchFunds(company, position, norms = FUND_NORMS){
   // Precision over recall: at 4k connections x 3.4k funds, loose containment
   // matching floods the connector list with noise. Company must equal the
   // fund's normalized name exactly; position may word-boundary-match longer
   // fund names ("Partner at NFX" style).
   const nc = normOrg(company);
   const np = (position || '').toLowerCase();
-  return FUND_NORMS.filter(({f, norm}) => {
+  return norms.filter(({f, norm}) => {
     if (!norm) return false;
     if (nc && nc === norm) return true;
     if (np && f.name.length >= 4) {
@@ -2050,10 +2050,10 @@ function parseConnectionsCsv(text){
   }
   return rows;
 }
-function applyMatching(rows){
+function applyMatching(rows, norms){
   let direct = 0, newConn = 0, updated = 0;
   rows.forEach(r => {
-    const funds = matchFunds(r.company, r.position);
+    const funds = matchFunds(r.company, r.position, norms);
     if (!funds.length) return;
     const full = (r.first + ' ' + r.last).trim();
     let isListed = false;
@@ -2137,6 +2137,7 @@ function importFunds(text){
     start = 0;
   }
   let added = 0, mergedRows = 0, peopleAdded = 0, lastAddedId = null;
+  const addedIds = [];
   const get = (c,k) => ci[k] >= 0 ? (c[ci[k]]||'').trim() : '';
   for (let r = start; r < lines.length; r++) {
     const c = csvLine(lines[r]);
@@ -2153,7 +2154,7 @@ function importFunds(text){
         looking: get(c,'notes') || '', people: [] };
       state.extraFunds.push(f);
       FUNDS.push(f); FUND_BY_ID[f.id] = f;
-      added++; lastAddedId = f.id;
+      added++; lastAddedId = f.id; addedIds.push(f.id);
     } else {
       if (f.custom) {
         if (!f.check) f.check = parseCheckRange(get(c,'check'));
@@ -2181,8 +2182,9 @@ function importFunds(text){
   }
   save(); rebuild();
   let rematch = '';
-  if (state.liConnections.length) {
-    const res = applyMatching(state.liConnections);
+  if (state.liConnections.length && addedIds.length) {
+    // only match against the funds this import added - a full rescan freezes the tab
+    const res = applyMatching(state.liConnections, FUND_NORMS.filter(x => addedIds.includes(x.f.id)));
     rematch = ` · rechecked ${state.liConnections.length} synced connections (${res.direct} direct, ${res.newConn} new connectors)`;
   }
   state.fundImportMsg = `${added} fund${added===1?'':'s'} added · ${peopleAdded} people${mergedRows?` · ${mergedRows} rows merged into existing funds`:''}${rematch}`;
@@ -3163,7 +3165,9 @@ $('afCreate').addEventListener('click', () => {
   state.extraFunds.push(f);
   if (afStage !== 'none') FS(id).stage = afStage;
   save(); rebuild();
-  if ((state.liConnections || []).length) applyMatching(state.liConnections);
+  // match synced LinkedIn connections against ONLY the new fund - a full
+  // rescan (4k connections x 3.4k funds) freezes the tab for seconds
+  if ((state.liConnections || []).length) applyMatching(state.liConnections, FUND_NORMS.filter(x => x.f.id === id));
   render();
   ['afName','afPerson','afTitle','afLi','afEmail','afCheck','afRegion','afNotes'].forEach(k => { $(k).value = ''; });
   $('fundSingleWrap').style.display = 'none';
