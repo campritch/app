@@ -342,16 +342,12 @@
     .wpop button { display:block; width:100%; text-align:left; border:none; background:none; border-radius:7px;
                    padding:8px 11px; font-size:12.5px; font-weight:600; color:var(--text-primary); cursor:pointer; }
     .wpop button:hover { background:var(--nav-hover); }
-    .wnote { display:flex; align-items:center; gap:11px; padding:8px 10px 8px 11px; background:var(--panel);
+    .wnote { display:flex; align-items:center; gap:11px; padding:8px 10px 8px 14px; background:var(--panel);
              border:1px solid var(--border); border-radius:14px; cursor:pointer; box-shadow:0 1px 2px rgba(16,20,28,.04); }
     .wnote + .wnote, .wnote + .wrow { margin-top:8px; }
-    .wnote__ic { width:32px; height:32px; border-radius:9px; flex-shrink:0; display:grid; place-items:center;
-                 background:var(--secondary-lite); color:var(--text-secondary); }
-    .wnote__body { flex:1; min-width:0; }
-    .wnote__kick { font-size:9px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--text-tertiary); }
-    .wnote__body b { display:block; font-size:12.5px; margin-top:1px; }
-    .wnote__txt { display:block; font-size:12px; color:var(--text-secondary); margin-top:1px;
-                  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .wnote__body { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .wnote__body b { font-size:12.5px; }
+    .wnote__txt { font-size:12px; color:var(--text-secondary); margin-left:8px; }
     .wnote__x { flex-shrink:0; width:24px; height:24px; border-radius:50%; border:none; background:var(--secondary-lite);
                 color:var(--text-secondary); font-size:11px; line-height:1; cursor:pointer; display:grid; place-items:center; }
     .wnote__x:hover { background:var(--border); color:var(--text-primary); }
@@ -976,14 +972,13 @@
     const ids=[...wants].map(spot).sort((a,b)=>liveDays(b)-liveDays(a));
     // Deal-level check-ins: admin notes and the check-in date Sydney sets.
     // One quiet line each, pinned above the table until she clears them (Aug 24, 9:37).
-    const noteRow=(d,label,text,clearFn,ic)=>`<div class="wnote" onclick="go('portal');openDeal('${d.id}')">
-      <span class="wnote__ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${ICO[ic]}</svg></span>
-      <span class="wnote__body"><span class="wnote__kick">${label}</span><b>${esc(d.brand)} · ${esc(d.title||'Flight')}</b><span class="wnote__txt" title="${esc(text)}">${esc(text)}</span></span>
+    const noteRow=(d,label,text,clearFn)=>`<div class="wnote" onclick="go('portal');openDeal('${d.id}')">
+      <span class="wnote__body"><b>${esc(d.brand)} · ${esc(d.title||'Flight')}</b><span class="wnote__txt" title="${esc(text)}">${esc(text)}</span></span>
       <button class="wnote__x" title="Dismiss" onclick="event.stopPropagation();${clearFn}('${d.id}')">✕</button>
     </div>`;
     const checkRows=[];
-    DEALS.filter(d=>d.outcome==='won'&&(d.notes||'').trim()).forEach(d=>checkRows.push(noteRow(d,'Note',d.notes,'clearDealNote','doc')));
-    DEALS.filter(d=>d.checkIn&&d.checkIn<=TODAY).forEach(d=>checkRows.push(noteRow(d,'Check-in',`You set a check-in for ${fmtDate(d.checkIn)} — how's it going?`,'clearCheckIn','clock')));
+    DEALS.filter(d=>d.outcome==='won'&&(d.notes||'').trim()).forEach(d=>checkRows.push(noteRow(d,'Note',d.notes,'clearDealNote')));
+    DEALS.filter(d=>d.checkIn&&d.checkIn<=TODAY).forEach(d=>checkRows.push(noteRow(d,'Check-in',`You set a check-in for ${fmtDate(d.checkIn)} — how's it going?`,'clearCheckIn')));
     const active=ids.filter(x=>!isArchived(x.id)).map(flightRow);
     const arch=ids.filter(x=>isArchived(x.id)).map(x=>flightRow(x).replace('class="wrow wflight','class="wrow wflight wrow--dim'));
     if(arch.length){
