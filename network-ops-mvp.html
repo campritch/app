@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>VMG Command Center</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2317212B'/%3E%3Ctext x='16' y='22' font-family='Helvetica,Arial,sans-serif' font-size='15' font-weight='700' fill='%23ffffff' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2064%2064%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2213%22%20fill%3D%22%23141519%22/%3E%3Ctext%20x%3D%2234.5%22%20y%3D%2233.5%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2CArial%2Csans-serif%22%20font-weight%3D%22900%22%20font-size%3D%2219%22%20letter-spacing%3D%225%22%20fill%3D%22%23fff%22%3EVMG%3C/text%3E%3Ctext%20x%3D%2233.6%22%20y%3D%2245%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2CArial%2Csans-serif%22%20font-weight%3D%22700%22%20font-size%3D%225.8%22%20letter-spacing%3D%223.2%22%20fill%3D%22%23fff%22%3ENETWORK%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -55,7 +55,8 @@
     /* ─── SIDEBAR ─── */
     .sidebar { width: 244px; flex-shrink: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 15px; display: flex; flex-direction: column; padding: 16px 13px 13px; overflow: hidden; }
     .sb-brand { display: flex; align-items: center; gap: 11px; padding: 4px 8px 18px; }
-    .sb-brand__mark { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; background: var(--primary); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 13px; letter-spacing: -.02em; }
+    .sb-brand__mark { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; overflow: hidden; }
+    .sb-brand__mark svg { display: block; width: 100%; height: 100%; }
     .sb-brand__name b { display: block; color: var(--text-primary); font-size: 15px; font-weight: 800; letter-spacing: -.02em; }
     .sb-brand__name span { display: block; color: var(--text-tertiary); font-size: 10px; font-weight: 700; letter-spacing: .14em; margin-top: 1px; }
     .sb-scroll { overflow-y: auto; flex: 1; margin: 0 -6px; padding: 0 6px; }
@@ -96,9 +97,9 @@
     .view { display: none; }
     .view.active { display: block; }
     .inner { max-width: 1220px; margin: 0 auto; padding: 26px 34px 90px; }
-    .pagebar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 22px; gap: 16px; flex-wrap: wrap; }
-    .head h1 { font-size: 25px; font-weight: 700; letter-spacing: -.035em; display: flex; align-items: center; gap: 11px; }
-    .head p { color: var(--text-secondary); font-size: 13.5px; margin-top: 4px; font-weight: 500; max-width: 640px; }
+    .pagebar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; gap: 16px; flex-wrap: wrap; }
+    .head h1 { font-size: 20px; font-weight: 700; letter-spacing: -.035em; display: flex; align-items: center; gap: 11px; }
+    .head p { color: var(--text-secondary); font-size: 12.5px; margin-top: 4px; font-weight: 500; max-width: 640px; }
     .pagebar__right { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
     .live-dot { display: inline-flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 700; color: var(--green-text); background: var(--green-bg); padding: 4px 10px; border-radius: var(--radius-pill); }
     .live-dot i { width: 6px; height: 6px; border-radius: 50%; background: var(--green-text); animation: pulse 2s infinite; }
@@ -177,6 +178,10 @@
     .scrim.open { display: block; }
     .drawer { position: fixed; top: 0; right: 0; height: 100vh; width: 560px; max-width: 94vw; background: var(--white); z-index: 61; box-shadow: -10px 0 40px rgba(20,25,35,.16); transform: translateX(100%); transition: transform .28s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; }
     .drawer.open { transform: translateX(0); }
+    /* full-screen variant — the episode view opened from a show record */
+    .drawer--full { width: min(1020px, 96vw); max-width: none; left: 50%; right: auto; top: 20px; height: calc(100vh - 20px);
+                    border-radius: 18px 18px 0 0; transform: translate(-50%, 102%); box-shadow: 0 -12px 48px rgba(20,25,35,.22); }
+    .drawer--full.open { transform: translate(-50%, 0); }
     .drawer__head { padding: 20px 24px; border-bottom: 1px solid var(--border-light); display: flex; align-items: flex-start; justify-content: space-between; }
     .drawer__body { padding: 22px 24px; overflow-y: auto; flex: 1; }
     .drawer__foot { padding: 16px 24px; border-top: 1px solid var(--border-light); display: flex; gap: 10px; justify-content: flex-end; }
@@ -298,15 +303,15 @@
     .wrow { display:flex; align-items:center; gap:13px; padding:13px 16px; border:1px solid var(--border-light); border-radius:12px; background:var(--white); }
     .wrow + .wrow { margin-top:8px; }
     /* ─── flight rows: one grid for Needs you and All flights alike ─── */
-    .wflight { display:grid; grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 118px 26px; align-items:center; gap:0 14px; padding:15px 18px; }
-    .wflight .wrow__main > b { font-size:13.5px; }
+    .wflight { display:grid; grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 118px 26px; align-items:center; gap:0 14px; padding:12px 16px; }
+    .wflight .wrow__main > b { font-size:12.5px; font-weight:500; }
     .wflight .wrow__num { width:auto; justify-content:flex-end; }
     .wflight .btn { width:100%; justify-content:center; }
     .fhead { display:grid; grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 118px 26px; gap:0 14px; padding:0 18px 9px;
              font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--text-tertiary); }
     .fhead span:nth-child(2),.fhead span:nth-child(3),.fhead span:nth-child(4),.fhead span:nth-child(6) { text-align:center; }
     .fhead span:nth-child(5) { text-align:right; }
-    .fnum { text-align:center; font-size:13px; font-weight:700; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+    .fnum { text-align:center; font-size:12.5px; font-weight:700; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
     .fnum small { display:block; font-size:10.5px; font-weight:600; color:var(--text-tertiary); letter-spacing:0; margin-top:1px; }
     .fran { display:inline-flex; align-items:center; justify-content:center; gap:5px; width:100%; font-size:12px; font-weight:700;
             padding:5px 0; border-radius:7px; border:1px solid var(--border); background:var(--panel); color:var(--text-primary);
@@ -322,14 +327,19 @@
     .wpop button { display:block; width:100%; text-align:left; border:none; background:none; border-radius:7px;
                    padding:8px 11px; font-size:12.5px; font-weight:600; color:var(--text-primary); cursor:pointer; }
     .wpop button:hover { background:var(--nav-hover); }
-    .wnote { display:flex; align-items:center; gap:12px; padding:12px 18px; background:var(--panel);
-             border:1px solid var(--border); border-radius:13px; cursor:pointer; }
+    .wnote { display:flex; align-items:center; gap:12px; padding:10px 12px 10px 12px; background:var(--panel);
+             border:1px solid var(--border); border-radius:14px; cursor:pointer; box-shadow:0 1px 2px rgba(16,20,28,.04); }
     .wnote + .wnote, .wnote + .wrow { margin-top:8px; }
-    .wnote__pill { flex-shrink:0; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
-                   color:var(--text-tertiary); border:1px dashed var(--border-strong); border-radius:999px; padding:4px 10px; }
-    .wnote b { flex-shrink:0; font-size:13px; }
-    .wnote__txt { flex:1; min-width:0; font-size:12.5px; color:var(--text-secondary);
+    .wnote__ic { width:32px; height:32px; border-radius:9px; flex-shrink:0; display:grid; place-items:center;
+                 background:var(--secondary-lite); color:var(--text-secondary); }
+    .wnote__body { flex:1; min-width:0; }
+    .wnote__kick { font-size:9px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--text-tertiary); }
+    .wnote__body b { display:block; font-size:12.5px; margin-top:1px; }
+    .wnote__txt { display:block; font-size:12px; color:var(--text-secondary); margin-top:1px;
                   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .wnote__x { flex-shrink:0; width:24px; height:24px; border-radius:50%; border:none; background:var(--secondary-lite);
+                color:var(--text-secondary); font-size:11px; line-height:1; cursor:pointer; display:grid; place-items:center; }
+    .wnote__x:hover { background:var(--border); color:var(--text-primary); }
     .archdiv { display:flex; align-items:center; gap:9px; width:100%; margin:22px 0 10px; padding:0 2px; font-size:11px; font-weight:800;
                letter-spacing:.07em; text-transform:uppercase; color:var(--text-tertiary); border:none; background:none; cursor:pointer; font-family:inherit; }
     .archdiv:hover { color:var(--text-secondary); }
@@ -342,8 +352,8 @@
     .wrow--click:hover { border-color:var(--border-strong); box-shadow:var(--shadow-card); }
     .wrow__ico { width:34px; height:34px; border-radius:9px; display:grid; place-items:center; flex-shrink:0; }
     .wrow__main { flex:1; min-width:0; }
-    .wrow__main > b { font-size:13px; font-weight:700; display:block; }
-    .wrow__main span { font-size:12px; color:var(--text-secondary); }
+    .wrow__main > b { font-size:12.5px; font-weight:700; display:block; }
+    .wrow__main span { font-size:11.5px; color:var(--text-secondary); }
     .wrow__main span b { font-weight:700; color:var(--text-primary); }
     .wrow__num { width:132px; flex-shrink:0; display:flex; align-items:center; gap:9px; }
     .wrow__num b { font-size:12.5px; min-width:38px; text-align:right; }
@@ -387,7 +397,7 @@
 <body>
   <nav class="sidebar">
     <div class="sb-brand">
-      <div class="sb-brand__mark">V</div>
+      <div class="sb-brand__mark"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" fill="#141519"/><text x="34.5" y="33.5" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="900" font-size="19" letter-spacing="5" fill="#fff">VMG</text><text x="33.6" y="45" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="5.8" letter-spacing="3.2" fill="#fff">NETWORK</text></svg></div>
       <div class="sb-brand__name"><b>VMG</b><span>COMMAND CENTER</span></div>
     </div>
     <div class="sb-scroll">
@@ -733,7 +743,7 @@
   }
 
   /* ═══════════════════════════ OVERLAYS ═══════════════════════════ */
-  function openDrawer(html){ const d=document.getElementById('drawer'); d.innerHTML=html; d.classList.add('open'); document.getElementById('scrim').classList.add('open'); }
+  function openDrawer(html,full){ const d=document.getElementById('drawer'); d.innerHTML=html; d.classList.toggle('drawer--full',!!full); d.classList.add('open'); document.getElementById('scrim').classList.add('open'); }
   function openModal(html){ const m=document.getElementById('modal'); m.innerHTML=html; m.classList.add('open'); document.getElementById('scrim').classList.add('open'); }
   function closeOverlays(){ SELFOR=null; document.getElementById('drawer').classList.remove('open'); document.getElementById('modal').classList.remove('open'); document.getElementById('scrim').classList.remove('open'); }
 
@@ -816,7 +826,7 @@
   function toggleSel(id){ if(!SELSET) return;
     if(SELSET.has(id)){ if(SELSET.size===1) return; SELSET.delete(id); } else SELSET.add(id);
     openSpot(DRAWER_SPOT); }
-  let DRAWER_SPOT=null;
+  let DRAWER_SPOT=null, DRAWER_FULL=false;
 
   function dealChart(sel,{w=470,h=200}={}){
     const spots=sel.filter(x=>projection(x)); if(!spots.length) return '<div class="empty">Nothing selected.</div>';
@@ -951,15 +961,14 @@
     const ids=[...wants].map(spot).sort((a,b)=>liveDays(b)-liveDays(a));
     // Deal-level check-ins: admin notes and the check-in date Sydney sets.
     // One quiet line each, pinned above the table until she clears them (Aug 24, 9:37).
-    const noteRow=(d,label,text,clearFn)=>`<div class="wnote" onclick="go('portal');openDeal('${d.id}')">
-      <span class="wnote__pill">${label}</span>
-      <b>${esc(d.brand)} · ${esc(d.title||'Flight')}</b>
-      <span class="wnote__txt" title="${esc(text)}">${esc(text)}</span>
-      <span onclick="event.stopPropagation()" style="flex:none">${cta('Clear',`${clearFn}('${d.id}')`,false)}</span>
+    const noteRow=(d,label,text,clearFn,ic)=>`<div class="wnote" onclick="go('portal');openDeal('${d.id}')">
+      <span class="wnote__ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${ICO[ic]}</svg></span>
+      <span class="wnote__body"><span class="wnote__kick">${label}</span><b>${esc(d.brand)} · ${esc(d.title||'Flight')}</b><span class="wnote__txt" title="${esc(text)}">${esc(text)}</span></span>
+      <button class="wnote__x" title="Dismiss" onclick="event.stopPropagation();${clearFn}('${d.id}')">✕</button>
     </div>`;
     const checkRows=[];
-    DEALS.filter(d=>d.outcome==='won'&&(d.notes||'').trim()).forEach(d=>checkRows.push(noteRow(d,'Note',d.notes,'clearDealNote')));
-    DEALS.filter(d=>d.checkIn&&d.checkIn<=TODAY).forEach(d=>checkRows.push(noteRow(d,'Check-in',`You set a check-in for ${fmtDate(d.checkIn)} — how's it going?`,'clearCheckIn')));
+    DEALS.filter(d=>d.outcome==='won'&&(d.notes||'').trim()).forEach(d=>checkRows.push(noteRow(d,'Note',d.notes,'clearDealNote','doc')));
+    DEALS.filter(d=>d.checkIn&&d.checkIn<=TODAY).forEach(d=>checkRows.push(noteRow(d,'Check-in',`You set a check-in for ${fmtDate(d.checkIn)} — how's it going?`,'clearCheckIn','clock')));
     const active=ids.filter(x=>!isArchived(x.id)).map(flightRow);
     const arch=ids.filter(x=>isArchived(x.id)).map(x=>flightRow(x).replace('class="wrow wflight','class="wrow wflight wrow--dim'));
     if(arch.length){
@@ -1016,8 +1025,7 @@
     document.getElementById('view-delivery').innerHTML=`
     <div class="inner" style="max-width:940px">
       <div class="pagebar">
-        <div class="head"><h1>Delivery <span class="live-dot"><i></i>Checked ${LAST_CHECK}</span></h1>
-        <p>Every read is projected off its own show's view curve, and each show gets its own check-in date — Warren Smith settles by day 3, Sage Steele needs to day 13. 90% of guarantee is full delivery.</p></div>
+        <div class="head"><h1>Delivery</h1></div>
         <div class="pagebar__right"><div class="seg">
           <button class="${delTab==='work'?'active':''}" onclick="delTab='work';RENDER.delivery()">Needs you${work.length?' · '+work.length:''}</button>
           <button class="${delTab==='all'?'active':''}" onclick="delTab='all';RENDER.delivery()">All flights</button>
@@ -1070,8 +1078,9 @@
   const flightRows = s => SPOTS.filter(x=>x.dealId===s.dealId&&x.showId===s.showId).sort((x,y)=>dt(x.published)-dt(y.published));
   const reelStat=(l,v)=>`<div><div style="font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--text-tertiary);text-transform:uppercase">${l}</div><div style="font-size:14px;font-weight:700;margin-top:2px">${v}</div></div>`;
 
-  function openSpot(id){
+  function openSpot(id,full){
     const s=spot(id), sh=show(s.showId), pr=projection(s), v=verdict(s), m=mgForSpot(s.id), cr=creative(s.brand);
+    if(full!==undefined) DRAWER_FULL=!!full; else if(DRAWER_SPOT!==id) DRAWER_FULL=false;
     DRAWER_SPOT=id;
     if(SELFOR!==s.dealId){ SELSET=new Set(flightRows(s).filter(x=>projection(x)).map(x=>x.id)); SELFOR=s.dealId; }
     const q = pr ? qualityScore(s) : null, end = s.ts!=null ? s.ts+adSecs(s) : null, nx = pr ? nextCheck(s) : null;
@@ -1111,19 +1120,29 @@
       ${s.yt?`<div class="reel-stage"><iframe src="https://www.youtube.com/embed/${s.yt}?start=${s.ts}" allow="autoplay" allowfullscreen></iframe></div>`
         :`<div class="reel-stage" style="color:#8a95a3;font-size:13px;text-align:center;padding:20px;display:grid;place-items:center">Audio-only read.<br>Impressions come from the host platform.</div>`}
 
-      <div style="display:flex;gap:16px;margin-top:16px">
-        <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px 14px">
+      <div style="margin-top:16px">
+        <div style="display:flex;align-items:baseline;justify-content:space-between">
+          <span style="font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--text-tertiary);text-transform:uppercase">Delivered</span>
+          <span style="font-size:12px;font-weight:700">${K(pr.got)} of ${K(s.guarantee)} · ${Math.round(pr.rawRatio*100)}%</span>
+        </div>
+        <div class="pace ${pr.rawRatio>=IAB_FULL?'pace--good':''}" style="height:6px;margin-top:6px"><div class="pace__fill" style="width:${Math.min(pr.rawRatio*100,100)}%"></div></div>
+      </div>
+
+      <div style="display:flex;gap:18px;margin-top:16px">
+        <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;align-content:start">
           ${reelStat('Episode length', hms(epLenOf(s)))}
-          ${reelStat('Delivered', K(pr.got))}
           ${reelStat('Ad start', s.ts!=null?mmss(s.ts):'—')}
           ${reelStat('Ad end', end!=null?mmss(end):'—')}
           ${reelStat('Read duration', adSecs(s)+'s')}
           ${reelStat('Placement', esc(cr.placement))}
         </div>
-        <div style="width:126px;flex-shrink:0;text-align:center;border-left:1px solid var(--border-light);padding-left:14px">
-          <div style="font-size:10.5px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em">Quality</div>
-          <div style="display:flex;align-items:baseline;justify-content:center;gap:5px;margin-top:5px"><span style="font-size:30px;font-weight:800;letter-spacing:-.03em">${q.score}</span><span class="tag tag--${q.tone}" style="font-weight:800">${q.grade}</span></div>
-          <div style="margin-top:9px;display:flex;flex-direction:column;gap:6px;text-align:left">${q.factors.map(f=>`<div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-secondary);font-weight:600"><span>${f.k}</span><span>${f.v}</span></div><div class="pace ${f.v>=90?'pace--good':f.v>=75?'':'pace--warn'}" style="height:4px;margin-top:2px"><div class="pace__fill" style="width:${f.v}%"></div></div></div>`).join('')}</div>
+        <div style="flex:1;border-left:1px solid var(--border-light);padding-left:18px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:10.5px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em">Quality</span>
+            <span class="tag tag--${q.tone}" style="font-weight:800">${q.grade}</span>
+          </div>
+          <div style="font-size:34px;font-weight:800;letter-spacing:-.03em;margin-top:3px">${q.score}</div>
+          <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">${q.factors.map(f=>`<div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-secondary);font-weight:600"><span>${f.k}</span><span>${f.v}</span></div><div class="pace ${f.v>=90?'pace--good':f.v>=75?'':'pace--warn'}" style="height:4px;margin-top:3px"><div class="pace__fill" style="width:${f.v}%"></div></div></div>`).join('')}</div>
         </div>
       </div>
 
@@ -1168,7 +1187,7 @@
         :m?`<button class="btn btn--primary" onclick="closeOverlays();openMg('${m.id}')">Open ${m.kind==='bonus'?'bonus spot':'make good'}</button>`
         :closedOut(s)&&!s.reportSent?`<button class="btn btn--primary" onclick="closeOverlays();sendDeliveryReport('${s.id}')">Send delivery report</button>`
         :closedOut(s)&&!s.completed?`<button class="btn btn--primary" onclick="closeOverlays();markComplete('${s.id}')">Mark complete</button>`
-        :pr?`<button class="btn btn--primary" onclick="closeOverlays();go('portal');openDeal('${s.dealId}')">See in the report</button>`:''}</div>`);
+        :pr?`<button class="btn btn--primary" onclick="closeOverlays();go('portal');openDeal('${s.dealId}')">See in the report</button>`:''}</div>`,DRAWER_FULL);
   }
 
 
@@ -1352,7 +1371,6 @@
   }
 
   const DEAL_FILTERS=[['live','Live'],['upcoming','Upcoming'],['complete','Complete'],['all','All'],['brands','Brands']];
-  const STATE_DOT={live:'var(--green-text)', upcoming:'var(--blue-text)', complete:'var(--text-tertiary)'};
 
   function sendDealReport(id){
     const ds=dealSummary(DEALS.find(x=>x.id===id));
@@ -1381,24 +1399,25 @@
       <button class="btn btn--ghost btn--sm" style="margin-bottom:14px" onclick="closeDeal()">← All deals</button>
 
       <div class="card"><div class="card__pad" style="padding:22px 24px">
-        <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap">
-          <div class="brand-chip" style="background:${brandColor[d.brand]||'#3B82F6'};width:46px;height:46px;border-radius:12px;font-size:17px">${esc(d.brand[0])}</div>
+        <div style="display:flex;align-items:flex-start;gap:15px;flex-wrap:wrap">
           <div style="flex:1;min-width:0">
             <div style="font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--text-tertiary)">DELIVERY REPORT · ${esc(c.title).toUpperCase()}</div>
-            <h2 style="font-size:22px;font-weight:800;letter-spacing:-.03em;margin-top:2px">${esc(d.brand)} on VMG</h2>
+            <h2 style="font-size:20px;font-weight:800;letter-spacing:-.03em;margin-top:2px">${esc(d.brand)} on VMG</h2>
             <div class="muted" style="font-size:12.5px;margin-top:3px">${flight}</div>
           </div>
+          <div style="display:flex;gap:9px">
+            <button class="btn btn--ghost btn--sm" onclick="toast('Copied vmg.live/${d.brand.toLowerCase()}-${d.id} — read-only, admin notes stay internal.')">🔗 Copy link</button>
+            <button class="btn btn--ghost btn--sm" onclick="createBonus('${d.id}')">+ Bonus spot</button>
+            <button class="btn btn--primary btn--sm" onclick="sendDealReport('${d.id}')">Send report</button>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:6px">
           <div style="text-align:right">
-            <div style="font-size:38px;font-weight:800;letter-spacing:-.04em;line-height:1;color:${full?'var(--green-text)':'var(--orange-text)'}">${c.pct}%</div>
+            <div style="font-size:34px;font-weight:800;letter-spacing:-.04em;line-height:1;color:${full?'var(--green-text)':'var(--orange-text)'}">${c.pct}%</div>
             <div class="muted" style="font-size:11.5px;margin-top:3px">of booked impressions</div>
           </div>
         </div>
-        <div style="display:flex;gap:9px;justify-content:flex-end;margin-top:16px">
-          <button class="btn btn--ghost btn--sm" onclick="toast('Copied vmg.live/${d.brand.toLowerCase()}-${d.id} — read-only, admin notes stay internal.')">🔗 Copy link</button>
-          <button class="btn btn--ghost btn--sm" onclick="createBonus('${d.id}')">+ Bonus spot</button>
-          <button class="btn btn--primary btn--sm" onclick="sendDealReport('${d.id}')">Send report</button>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:16px;padding-top:20px;border-top:1px solid var(--border-light)">
+        <div style="background:var(--page-bg);border-radius:13px;padding:9px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px">
           ${pStat('Imp delivered',K(got))}${pStat('Delivered CPM','$'+(got?(paid/(got/1000)):0).toFixed(2))}
           ${pStat('YouTube reach',K(yt))}${pStat('Audio reach',K(aud))}
           ${pStat('Shows',shows.length)}${pStat('Verified reads',verified+'/'+spots.filter(s=>s.kind==='paid').length)}
@@ -1473,11 +1492,10 @@
      its deals. */
   function dealIndexRow(c,i,hideBrand){
     const tone=toneVar(c.status.tone), max=Math.max(c.g,c.proj)*1.06, w=x=>c.g?Math.min(100,x/max*100):0;
-    return `<div class="wrow--click" style="display:grid;grid-template-columns:10px minmax(0,1fr) 150px 168px 118px 26px;align-items:center;gap:0 13px;padding:12px 16px;${i===0&&!hideBrand?'':'border-top:1px solid var(--border-light)'}" onclick="openDeal('${c.deal.id}')">
-      <span style="width:8px;height:8px;border-radius:50%;background:${STATE_DOT[c.state]}" title="${c.state}"></span>
+    return `<div class="wrow--click" style="display:grid;grid-template-columns:minmax(0,1fr) 150px 168px 118px 26px;align-items:center;gap:0 13px;padding:12px 16px;${i===0&&!hideBrand?'':'border-top:1px solid var(--border-light)'}" onclick="openDeal('${c.deal.id}')">
       <div style="min-width:0"><b style="font-size:13px">${hideBrand?esc(c.title):`${esc(c.brand)} <span style="font-weight:600;color:var(--text-secondary)">· ${esc(c.title)}</span>`}</b>
         <div class="muted" style="font-size:11px">${c.shows.map(x=>show(x).name).join(', ')} · ${esc(c.flight)}</div></div>
-      <div>${['under','mg','blocked'].includes(c.status.k)?`<span class="tag tag--${c.status.tone}"><i></i>${c.status.label}</span>`
+      <div>${['under','mg','blocked'].includes(c.status.k)?`<b style="font-size:12px">${c.status.label}</b>`
         :`<span class="muted" style="font-size:11.5px">${c.state==='upcoming'?'Starts '+fmtDate(c.spots[0].published):c.state==='complete'?'Complete':''}</span>`}</div>
       <div class="wrow__num" style="width:auto;justify-content:flex-end;display:flex;align-items:center;gap:9px">${c.g?`
         <div style="position:relative;flex:1;height:8px;border-radius:4px;background:var(--secondary-lite)">
@@ -1523,11 +1541,11 @@
       <div class="seg" style="margin-bottom:16px">${DEAL_FILTERS.map(([k,label])=>{ const n=k==='brands'?brands.length:all.filter(c=>k==='all'||c.state===k).length;
         return `<button class="${portalFilter===k?'active':''}" onclick="portalFilter='${k}';RENDER.portal()">${label}${k==='all'?'':' · '+n}</button>`; }).join('')}</div>
       ${body}
-      <div class="footnote">Every deal opens its own read-only report. Green dot live, blue upcoming, grey complete.</div>
+      <div class="footnote">Every deal opens its own read-only report.</div>
     </div>`;
   }
 
-  const pStat=(l,v)=>`<div><div style="font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary)">${l}</div><div style="font-size:19px;font-weight:800;letter-spacing:-.03em;margin-top:3px">${v}</div></div>`;
+  const pStat=(l,v)=>`<div style="background:var(--white);border:1px solid var(--border-light);border-radius:10px;padding:11px 14px"><div style="font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary)">${l}</div><div style="font-size:18px;font-weight:800;letter-spacing:-.03em;margin-top:3px">${v}</div></div>`;
 
 
   // Plain English, written for the advertiser reading the report.
@@ -1807,7 +1825,7 @@
       ${live.length||booked.length?`<div class="dhead">Reads on this show</div>
       <div style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
         ${live.map(x=>{ const pr=projection(x), vv=verdict(x);
-          return `<div class="wrow wrow--click" style="padding:11px 13px" onclick="openSpot('${x.id}')">
+          return `<div class="wrow wrow--click" style="padding:11px 13px" onclick="openSpot('${x.id}',1)">
             <div class="wrow__main"><b>${esc(x.brand)}</b><span>Day ${pr.day} · ${K(pr.got)} of ${K(x.guarantee)}</span></div>
             <div class="wrow__num" style="width:120px">${projBar(x)}<b style="color:${toneVar(vv.tone)}">${Math.round(pr.ratio*100)}%</b></div></div>`; }).join('')}
         ${booked.map(x=>`<div class="wrow" style="padding:11px 13px;border-style:dashed">
