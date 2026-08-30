@@ -16,7 +16,7 @@
       --border: #E4E6ED; --border-light: #EDEEF1; --border-strong: #C5CBD5;
       --white: #ffffff; --secondary-lite: #F3F4F6;
       --nav: #F3F4F6; --nav-current: #E4E6ED; --nav-hover: #EBEDF2;
-      --page-bg: #EDEEF1; --panel: #ffffff;
+      --page-bg: #F6F7F9; --panel: #ffffff;
       --green-text: #0E6832; --green-bg: #D6F1E0;
       --blue-text: #1435C0; --blue-bg: #C7E0FF;
       --orange-text: #C2410C; --orange-bg: #FFEDD5;
@@ -47,13 +47,13 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
       background: var(--page-bg); color: var(--text-primary);
       -webkit-font-smoothing: antialiased; line-height: 1.45; letter-spacing: -.01em;
-      display: flex; gap: 9px; height: 100vh; overflow: hidden; padding: 9px;
+      display: flex; gap: 0; height: 100vh; overflow: hidden; padding: 0;
     }
     button { font-family: inherit; cursor: pointer; }
     a { color: inherit; }
 
     /* ─── SIDEBAR ─── */
-    .sidebar { width: 244px; flex-shrink: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 15px; display: flex; flex-direction: column; padding: 16px 13px 13px; overflow: hidden; }
+    .sidebar { width: 228px; flex-shrink: 0; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 16px 13px 13px; overflow: hidden; }
     .sb-brand { display: flex; align-items: center; gap: 11px; padding: 4px 8px 18px; }
     .sb-brand__mark { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; overflow: hidden; }
     .sb-brand__mark svg { display: block; width: 100%; height: 100%; }
@@ -77,6 +77,26 @@
     .sb-user__name { color: var(--text-primary); font-size: 12.5px; font-weight: 700; line-height: 1.2; }
 
 
+    /* ─── STAGE RAIL (Bluewire pattern): pill stages left, one flat list card right ─── */
+    .stagewrap { display: flex; gap: 24px; align-items: flex-start; }
+    .stagebar { width: 186px; flex-shrink: 0; display: flex; flex-direction: column; gap: 5px; position: sticky; top: 0; }
+    .stagemain { flex: 1; min-width: 0; }
+    .stage { display: flex; align-items: center; gap: 10px; padding: 10px 15px; border: none; background: none;
+             border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--text-secondary); text-align: left; font-family: inherit; }
+    .stage svg { width: 15px; height: 15px; flex-shrink: 0; opacity: .8; }
+    .stage:hover { background: var(--nav-hover); color: var(--text-primary); }
+    .stage.active { background: var(--primary); color: #fff; }
+    body.dark .stage.active { color: #12161C; }
+    .stage__n { margin-left: auto; font-size: 11px; font-weight: 700; color: var(--text-tertiary); }
+    .stage.active .stage__n { color: inherit; opacity: .75; }
+    .stage-div { height: 1px; background: var(--border); margin: 9px 8px; }
+    .listcard { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .listcard .fhead { padding: 10px 16px; margin: 0; border-bottom: 1px solid var(--border-light); }
+    .listcard .wrow { border: none; border-radius: 0; background: none; }
+    .listcard .wrow + .wrow { margin-top: 0; border-top: 1px solid var(--border-light); }
+    .listcard .archdiv { margin: 4px 0; padding: 8px 16px; }
+    .listcard .archdiv::after { display: none; }
+
     /* ─── TOP BAR ─── */
     .topbar { display: flex; align-items: center; gap: 4px; justify-content: flex-end; padding: 13px 18px 0; flex-shrink: 0; }
     .nav-item .dot { width: 6px; height: 6px; border-radius: 50%; background: #3FB87C; margin-left: auto; }
@@ -92,7 +112,7 @@
     .tb-av { width: 30px; height: 30px; border-radius: 9px; background: var(--primary); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 11px; margin-left: 6px; border: none; flex-shrink: 0; }
 
     /* ─── MAIN ─── */
-    .main { flex: 1; min-width: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+    .main { flex: 1; min-width: 0; background: var(--page-bg); display: flex; flex-direction: column; overflow: hidden; position: relative; }
     .views { flex: 1; overflow-y: auto; }
     .view { display: none; }
     .view.active { display: block; }
@@ -402,6 +422,7 @@
     </div>
     <div class="sb-scroll">
       <div class="sb-group">
+        <div class="sb-group__label">Workspace</div>
         <button class="nav-item active" data-view="overview" onclick="go('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Command Center</button>
         <button class="nav-item" data-view="delivery" onclick="go('delivery')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Delivery <span class="badge" id="nav-del-badge"></span></button>
         <button class="nav-item" data-view="portal" onclick="go('portal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg>Campaign Portal <span class="dot"></span></button>
@@ -947,6 +968,7 @@
   const dcta=(label,onclick,dark)=>`<button class="btn ${dark?'btn--primary':'btn--ghost'} btn--sm" onclick="${onclick}">${label}</button>`;
   const cta=dcta;
 
+  const stageBtn=(active,label,n,onclick,ic)=>`<button class="stage ${active?'active':''}" onclick="${onclick}">${ic?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${ICO[ic]}</svg>`:''}${label}${n?`<span class="stage__n">${n}</span>`:''}</button>`;
   const flightHead=()=>`<div class="fhead"><span>Ad</span><span>Day</span><span>Ran</span><span>Delivered</span><span>Pacing</span><span></span><span></span></div>`;
 
   // Needs you: the same rows, filtered to the ads that want something.
@@ -1023,20 +1045,24 @@
     const work=workList();
     const live=SPOTS.filter(s=>projection(s)).sort((a,b)=>liveDays(b)-liveDays(a));
     document.getElementById('view-delivery').innerHTML=`
-    <div class="inner" style="max-width:940px">
-      <div class="pagebar">
-        <div class="head"><h1>Delivery</h1></div>
-        <div class="pagebar__right"><div class="seg">
-          <button class="${delTab==='work'?'active':''}" onclick="delTab='work';RENDER.delivery()">Needs you${work.length?' · '+work.length:''}</button>
-          <button class="${delTab==='all'?'active':''}" onclick="delTab='all';RENDER.delivery()">All flights</button>
-          <button class="${delTab==='mg'?'active':''}" onclick="delTab='mg';RENDER.delivery()">Make goods${MAKEGOODS.length?' · '+MAKEGOODS.length:''}</button></div></div>
+    <div class="inner" style="max-width:1128px">
+      <div class="pagebar"><div class="head"><h1>Delivery</h1></div></div>
+      <div class="stagewrap">
+        <div class="stagebar">
+          ${stageBtn(delTab==='work','Needs you',work.length,"delTab='work';RENDER.delivery()",'check')}
+          ${stageBtn(delTab==='all','All flights',live.length,"delTab='all';RENDER.delivery()",'wave')}
+          <div class="stage-div"></div>
+          ${stageBtn(delTab==='mg','Make goods',MAKEGOODS.length,"delTab='mg';RENDER.delivery()",'mg')}
+        </div>
+        <div class="stagemain">
+          <div id="scanPanel"></div>
+          ${delTab==='mg' ? makeGoodsPanel() : delTab==='work'
+            ? (work.checks||'')+((work.checks&&work.length)?'<div style="height:14px"></div>':'')
+              +(work.length?`<div class="listcard">${flightHead()+work.join('')}</div>`:work.checks?'':`<div class="card"><div class="empty">✨ Nothing needs you — every flight projects over the 90% line.</div></div>`)
+            : `<div class="listcard">${flightHead() + live.map(flightRow).join('')}</div>`}
+          <div class="footnote">Projections come from each show's own curve, refit every time a read is verified.</div>
+        </div>
       </div>
-      <div id="scanPanel"></div>
-      ${delTab==='mg' ? makeGoodsPanel() : delTab==='work'
-        ? (work.checks||'')+((work.checks&&work.length)?'<div style="height:14px"></div>':'')
-          +(work.length?flightHead()+work.join(''):work.checks?'':`<div class="card"><div class="empty">✨ Nothing needs you — every flight projects over the 90% line.</div></div>`)
-        : flightHead() + live.map(flightRow).join('')}
-      <div class="footnote">Projections come from each show's own curve, refit every time a read is verified.</div>
     </div>`;
   };
 
@@ -1062,7 +1088,7 @@
         <div class="tile"><div class="tile__label">Paid fill rate</div><div class="tile__val">${st.rate}%</div><div class="tile__delta"><span class="muted">${st.paid} sold · ${st.free} given</span></div></div>
         <div class="tile"><div class="tile__label">Still open</div><div class="tile__val" style="color:${st.open?'var(--orange-text)':'var(--text-primary)'}">${st.open}</div></div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:8px">${MAKEGOODS.map(row).join('')||'<div class="card"><div class="empty">No make goods.</div></div>'}</div>
+      ${MAKEGOODS.length?`<div class="listcard">${MAKEGOODS.map(row).join('')}</div>`:'<div class="card"><div class="empty">No make goods.</div></div>'}
       ${st.shows.length?`<div class="card" style="margin-top:16px">
         <div class="card__head"><div class="card__title">Cost by show</div></div>
         <table><thead><tr><th>Show</th><th class="num">Given</th><th class="num">Impressions</th><th class="num">Value</th><th></th></tr></thead>
@@ -1534,14 +1560,18 @@
                     :'<div class="card"><div class="empty">No deals in this state.</div></div>';
     }
     document.getElementById('view-portal').innerHTML=`
-    <div class="inner" style="max-width:940px">
+    <div class="inner" style="max-width:1128px">
       <div class="pagebar"><div class="head"><h1>Campaign Portal</h1></div>
         <div class="pagebar__right"><span class="tag tag--grey">Live deals projecting ${pctOf(totP,totG)}%</span></div>
       </div>
-      <div class="seg" style="margin-bottom:16px">${DEAL_FILTERS.map(([k,label])=>{ const n=k==='brands'?brands.length:all.filter(c=>k==='all'||c.state===k).length;
-        return `<button class="${portalFilter===k?'active':''}" onclick="portalFilter='${k}';RENDER.portal()">${label}${k==='all'?'':' · '+n}</button>`; }).join('')}</div>
-      ${body}
-      <div class="footnote">Every deal opens its own read-only report.</div>
+      <div class="stagewrap">
+        <div class="stagebar">${DEAL_FILTERS.map(([k,label])=>{ const n=k==='brands'?brands.length:all.filter(c=>k==='all'||c.state===k).length;
+          return (k==='brands'?'<div class="stage-div"></div>':'')+stageBtn(portalFilter===k,label,k==='all'?0:n,`portalFilter='${k}';RENDER.portal()`); }).join('')}</div>
+        <div class="stagemain">
+          ${body}
+          <div class="footnote">Every deal opens its own read-only report.</div>
+        </div>
+      </div>
     </div>`;
   }
 
