@@ -336,7 +336,9 @@
     .mctl--num { width: 100%; text-align: center; font-size: 13px; }
     .mnum { display: inline-flex; align-items: center; justify-content: center; gap: 1px; width: 100%; }
     .maffix { font-size: 12px; font-weight: 400; color: var(--text-tertiary); }
-    .mctl--select { width: 100%; text-align: center; text-align-last: center; font-size: 12.5px; padding: 0 4px; cursor: pointer; appearance: none; }
+    .mctl--pick { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+                  font-size: 12.5px; padding: 0 4px; cursor: pointer; border-radius: 7px; }
+    .mctl--pick:hover { background: var(--nav-hover); }
     .msheet-foot { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; border-top: 1px solid var(--border); }
     .msheet-total { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
 
@@ -452,7 +454,7 @@
 </head>
 <body>
   <nav class="sidebar">
-    <div class="sb-brand">
+    <div class="sb-brand" onclick="go('overview')" style="cursor:pointer" title="Back to the Command Center">
       <div class="sb-brand__mark"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" fill="#141519"/><text x="34.5" y="33.5" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="900" font-size="19" letter-spacing="5" fill="#fff">VMG</text><text x="33.6" y="45" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="5.8" letter-spacing="3.2" fill="#fff">NETWORK</text></svg></div>
       <div class="sb-brand__name"><b>VMG</b><span>DASHBOARD</span></div>
     </div>
@@ -961,6 +963,27 @@
     el.style.left=Math.max(10, r.right-el.offsetWidth)+'px';
     setTimeout(()=>document.addEventListener('click',closeRowMenu),0);
   }
+  const CHEV=`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="flex-shrink:0;opacity:.6"><path d="M6 9l6 6 6-6"/></svg>`;
+  let REM_LINK='';
+  const REM_LINKS=[['','No link'],['delivery','Delivery'],['portal','Campaign Portal'],['shows','Shows']];
+  function openPick(ev,kind,a,b){
+    ev.stopPropagation(); ev.preventDefault(); closeRowMenu();
+    let opts=[], cur='', apply=null;
+    if(kind==='cell'){ const col=SHEET_COLS.find(c=>c.key===b); opts=col.opts; cur=cellGet(show(a),b); apply=v=>gridCommit(a,b,v); }
+    else if(kind==='brand'){ opts=['All brands',...[...new Set(DEALS.filter(d=>d.outcome==='won').map(d=>d.brand))].sort()]; cur=dealBrandF; apply=v=>{ dealBrandF=v; RENDER.portal(); }; }
+    else if(kind==='show'){ opts=['All shows',...SHOWS.map(x=>x.name)]; cur=delShowF; apply=v=>{ delShowF=v; RENDER.delivery(); }; }
+    else if(kind==='rem'){ opts=REM_LINKS.map(x=>x[1]); cur=(REM_LINKS.find(x=>x[0]===REM_LINK)||REM_LINKS[0])[1];
+      apply=v=>{ REM_LINK=(REM_LINKS.find(x=>x[1]===v)||REM_LINKS[0])[0];
+        const btn=document.getElementById('remLinkBtn'); if(btn) btn.innerHTML=esc(v)+' '+CHEV; }; }
+    const el=document.createElement('div'); el.className='wpop';
+    el.innerHTML=opts.map(o=>`<button style="display:flex;align-items:center;justify-content:space-between;gap:14px">${esc(String(o))}${String(o)===String(cur)?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6L9 17l-5-5"/></svg>':''}</button>`).join('');
+    document.body.appendChild(el); ROWMENU=el;
+    [...el.children].forEach((btn,i)=>btn.onclick=()=>{ closeRowMenu(); apply(opts[i]); });
+    const r=ev.currentTarget.getBoundingClientRect();
+    el.style.top=Math.min(innerHeight-el.offsetHeight-10, r.bottom+6)+'px';
+    el.style.left=Math.max(10, Math.min(innerWidth-el.offsetWidth-10, r.left))+'px';
+    setTimeout(()=>document.addEventListener('click',closeRowMenu),0);
+  }
   function rowMenu(ev,id){
     ev.stopPropagation(); closeRowMenu();
     const s=spot(id), c=ctaFor(s), m=mgForSpot(id);
@@ -968,7 +991,7 @@
     el.innerHTML=[
       `<button onclick="closeRowMenu();openSpot('${id}')">Open record</button>`,
       s.yt?`<button onclick="closeRowMenu();playClip('${s.yt}',${s.ts})">Hear the read</button>`:'',
-      verdict(s).k==='short'&&!m?`<button onclick="closeRowMenu();createMakegood('${id}')">Set up make good</button>`:'',
+      verdict(s).k==='short'&&!m&&dealShort(s)?`<button onclick="closeRowMenu();createMakegood('${id}')">Set up make good</button>`:'',
       m?`<button onclick="closeRowMenu();openMg('${m.id}')">Open ${m.kind==='bonus'?'bonus spot':'make good'}</button>`:'',
       `<button onclick="toggleArchive('${id}')">${isArchived(id)?'Restore':'Mark done · archive'}</button>`,
     ].join('');
@@ -991,9 +1014,13 @@
   /* Three words on the button, and only one of them is dark.
      In progress → running, nothing to do. Verified → it landed.
      Make good → it came in under, and that is the only thing worth shouting. */
+  // A short flight only raises a make good if its CAMPAIGN projects short —
+  // one flight over covers another under, per the deal-level 90% rule.
+  function dealShort(s){ const d=DEALS.find(x=>x.id===s.dealId); if(!d) return true;
+    const c=dealSummary(d); return ['under','mg'].includes(c.status.k); }
   function ctaFor(s){
     const pr=projection(s), v=verdict(s), m=mgForSpot(s.id);
-    if(v.k==='short') return { label:'Make good', dark:!m };
+    if(v.k==='short' && (m || dealShort(s))) return { label:'Make good', dark:!m };
     if(!pr || !pr.confident || s.status!=='verified') return { label:'In progress', dark:false };
     return { label:'Review', dark:false };
   }
@@ -1107,7 +1134,8 @@
   function addReminder(){
     const t=(document.getElementById('remInp')?.value||'').trim();
     if(!t){ toast('Type the reminder first.'); return; }
-    REMINDERS.push({ id:'rm'+(++REM_SEQ), text:t, link:document.getElementById('remLink')?.value||'' });
+    REMINDERS.push({ id:'rm'+(++REM_SEQ), text:t, link:REM_LINK||'' });
+    REM_LINK='';
     remOpen=false; RENDER.overview();
   }
   function dismissReminder(id){ REMINDERS=REMINDERS.filter(r=>r.id!==id); RENDER.overview(); }
@@ -1138,10 +1166,7 @@
         ${remOpen?`<div class="wnote" style="cursor:default;margin-top:8px" onclick="event.stopPropagation()">
           <input id="remInp" placeholder="What should we remind you about?" onkeydown="if(event.key==='Enter')addReminder()"
             style="flex:1;border:none;background:none;font:inherit;font-size:12.5px;color:var(--text-primary);outline:none">
-          <select id="remLink" class="tsel" style="flex-shrink:0">
-            <option value="">No link</option><option value="delivery">Delivery</option>
-            <option value="portal">Campaign Portal</option><option value="shows">Shows</option>
-          </select>
+          <button id="remLinkBtn" class="tsel" style="flex-shrink:0;display:inline-flex;align-items:center;gap:6px" onclick="openPick(event,'rem')">${esc((REM_LINKS.find(x=>x[0]===REM_LINK)||REM_LINKS[0])[1])} ${CHEV}</button>
           <button class="btn btn--primary btn--sm" style="flex-shrink:0" onclick="addReminder()">Add</button>
           <button class="wnote__x" title="Cancel" onclick="remOpen=false;RENDER.overview()">✕</button>
         </div>`
@@ -1165,7 +1190,7 @@
     live=sortFlights(live);
     const delBar=`<div class="tbar tbar--bare">
       <div class="tbar__search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="delQInp" placeholder="Search flights…" value="${esc(delQ2)}" oninput="delQ2=this.value;FOCUS_Q='delQInp';RENDER.delivery()"></div>
-      <select class="tsel" onchange="delShowF=this.value;RENDER.delivery()">${['All shows',...SHOWS.map(x=>x.name)].map(n=>`<option ${delShowF===n?'selected':''}>${esc(n)}</option>`).join('')}</select>
+      <button class="tsel" style="display:inline-flex;align-items:center;gap:6px" onclick="openPick(event,'show')">${esc(delShowF)} ${CHEV}</button>
     </div>`;
     const delHead=`<div class="shead" style="grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 118px 26px">${[['ad','Ad'],['day','Day'],[null,'Ran'],['delivered','Delivered'],['pacing','Pacing']].map(([k,l])=>k?`<button onclick="setDelSort('${k}')">${l}${delSort.k===k?(delSort.dir>0?' ↑':' ↓'):''}</button>`:`<span>${l}</span>`).join('')}<span></span><span></span></div>`;
     document.getElementById('view-delivery').innerHTML=`
@@ -1598,16 +1623,13 @@
 
 
       ${full&&done&&c.pct>=100?`<div class="card" style="margin-top:16px;border-color:var(--green-bg)"><div class="card__pad" style="display:flex;align-items:center;gap:14px">
-        <div style="width:38px;height:38px;border-radius:10px;background:var(--green-bg);display:grid;place-items:center;flex-shrink:0"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--green-text)" stroke-width="2.2"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4-6.3-4.6L5.7 21 8 14 2 9.4h7.6z"/></svg></div>
         <div style="flex:1"><b style="font-size:13.5px">This deal over-delivered (${c.pct}%) — renewal moment</b>
           <div class="muted" style="font-size:12.5px">The numbers are already attached. Pitch the next flight while it's hot.</div></div>
         <button class="btn btn--green btn--sm" onclick="toast('Renewal pitch drafted for ${esc(d.brand)} with the live numbers attached.')">Draft renewal</button></div></div>`
       :!full&&c.state==='live'?`<div class="card" style="margin-top:16px;border-color:var(--orange-bg)"><div class="card__pad" style="display:flex;align-items:center;gap:14px">
-        ${icoBox('mg','orange')}
         <div style="flex:1"><b style="font-size:13.5px">${mgsMg.length?`${mgsMg.length} additional read${mgsMg.length>1?'s':''} booked at no cost`:'Tracking under the guarantee'}</b>
           <div class="muted" style="font-size:12.5px">${mgsMg.length?`On ${mgsMg.map(m=>fmtDate(m.published)).join(', ')}, to bring the flight back over the line.`:'We will add reads at no cost to close the gap.'}</div></div></div></div>`
       :mgsBonus.length?`<div class="card" style="margin-top:16px"><div class="card__pad" style="display:flex;align-items:center;gap:14px">
-        ${icoBox('mg','purple')}
         <div style="flex:1"><b style="font-size:13.5px">${mgsBonus.length} bonus read${mgsBonus.length>1?'s':''} added at no cost</b>
           <div class="muted" style="font-size:12.5px">On ${mgsBonus.map(m=>fmtDate(m.published)).join(', ')} — performance support, no charge.</div></div></div></div>`:''}
 
@@ -1704,7 +1726,7 @@
       <div class="pagebar"><div class="head"><h1>Campaign Portal</h1></div>
         <div class="pagebar__right">${portalFilter!=='brands'?`<div class="tbar tbar--bare">
           <div class="tbar__search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="dealQInp" placeholder="Search deals…" value="${esc(dealQ)}" oninput="dealQ=this.value;FOCUS_Q='dealQInp';RENDER.portal()"></div>
-          <select class="tsel" onchange="dealBrandF=this.value;RENDER.portal()">${['All brands',...brands].map(b=>`<option ${dealBrandF===b?'selected':''}>${esc(b)}</option>`).join('')}</select>
+          <button class="tsel" style="display:inline-flex;align-items:center;gap:6px" onclick="openPick(event,'brand')">${esc(dealBrandF)} ${CHEV}</button>
         </div>`:''}<div class="seg">${DEAL_FILTERS.map(([k,label])=>{ const n=k==='brands'?brands.length:all.filter(c=>k==='all'||c.state===k).length;
           return `<button class="${portalFilter===k?'active':''}" onclick="portalFilter='${k}';RENDER.portal()">${label}${k==='all'?'':' · '+n}</button>`; }).join('')}</div></div>
       </div>
@@ -1896,7 +1918,7 @@
 
   function sheetControl(sh,col){
     const v=cellGet(sh,col.key);
-    if(col.type==='select') return `<select class="mctl mctl--select" onmousedown="event.stopPropagation()" onchange="gridCommit('${sh.id}','${col.key}',this.value)">${col.opts.map(o=>`<option ${o===v?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+    if(col.type==='select') return `<button class="mctl mctl--pick" onmousedown="event.stopPropagation()" onclick="openPick(event,'cell','${sh.id}','${col.key}')">${esc(v)} ${CHEV}</button>`;
     const pre=col.type==='money'?'<span class="maffix">$</span>':'';
     const suf=col.type==='pct'?'<span class="maffix">%</span>':'';
     return `<span class="mnum">${pre}<input class="mctl mctl--num" type="text" inputmode="decimal" value="${v}"
@@ -1938,7 +1960,7 @@
                   ${sheetControl(sh,c)}
                   ${sel?`<span class="mfill" onmousedown="startFill(event,'${sh.id}','${c.key}')"></span>`:''}
                 </div></td>`; }).join('')}
-            <td class="mtd" style="text-align:center"><button class="btn btn--ghost btn--sm" style="padding:4px 8px" onclick="deleteShow('${sh.id}')" title="Remove show"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/></svg></button></td>
+            <td class="mtd" style="text-align:center"><button class="wdots" style="width:28px;height:28px;margin:0 auto" onclick="deleteShow('${sh.id}')" title="Remove show"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/></svg></button></td>
           </tr>`).join('')}</tbody>
         </table></div>
         <div class="msheet-foot">
