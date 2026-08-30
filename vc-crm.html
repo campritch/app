@@ -1128,6 +1128,7 @@ async function bootSync(){
     applyStateDefaults();
     state._dirty = false;
     persistLocal();
+    mergeDuplicateConnectors();
     rebuild(); render();
     setSyncUI('saved');
   } catch (e) {
@@ -1142,7 +1143,58 @@ window.addEventListener('pagehide', () => {
 function PS(id){ return state.people[id] || (state.people[id] = {}); }
 function CS(id){ return state.connectors[id] || (state.connectors[id] = {}); }
 
-function allConnectors(){ return SEED_CONNECTORS.concat(DATA_CONNECTORS, state.extraConnectors || []); }
+function allConnectors(){
+  const hid = state.hiddenConnectors || [];
+  const list = SEED_CONNECTORS.concat(DATA_CONNECTORS, state.extraConnectors || []);
+  return hid.length ? list.filter(c => !hid.includes(c.id)) : list;
+}
+
+/* One person, one connector card. Different imports (NFX roster, LinkedIn
+   export, Chrome scans) minted separate ids for the same human - "Eric Bahn"
+   vs "Eric Hustle Fund". Merge them: exact name matches, plus scan records
+   named "First FundName" folding into the connector whose first name matches
+   and whose name/role mentions that fund. Idempotent; runs at boot, after
+   cloud adoption, and after imports. */
+function mergeDuplicateConnectors(){
+  const cnd = s => (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'');
+  const all = allConnectors();
+  const rank = c => (c.source==='scan'?0:2) + (c.li?1:0) + (isSeedConnector(c.id)?0.5:0) + Math.min((c.matches||[]).length,50)/1000;
+  const groups = {};
+  all.forEach(c => (groups[cnd(c.name)] = groups[cnd(c.name)] || []).push(c));
+  all.filter(c => c.source==='scan').forEach(c => {
+    if ((groups[cnd(c.name)]||[]).length > 1) return;
+    const parts = (c.name||'').trim().split(/\s+/);
+    if (parts.length < 2) return;
+    const first = cnd(parts[0]), rest = parts.slice(1).join(' ').toLowerCase();
+    const target = all.find(o => o !== c && o.source !== 'scan'
+      && cnd((o.name||'').split(/\s+/)[0]) === first
+      && (((o.role||'') + ' ' + (o.name||''))).toLowerCase().includes(rest));
+    if (target) groups[cnd(target.name)].push(c);
+  });
+  let changed = false;
+  Object.values(groups).forEach(g => {
+    const uniq = [...new Set(g)];
+    if (uniq.length < 2) return;
+    uniq.sort((a,b) => rank(b) - rank(a));
+    const keep = uniq[0];
+    uniq.slice(1).forEach(dup => {
+      (dup.matches||[]).forEach(pid => addMatch(keep, pid, matchNote(dup, pid) || ''));
+      if (CS(dup.id).superc) CS(keep.id).superc = true;
+      if (!keep.li && dup.li && !isSeedConnector(keep.id)) keep.li = dup.li;
+      if (isSeedConnector(dup.id)) {
+        state.hiddenConnectors = state.hiddenConnectors || [];
+        if (!state.hiddenConnectors.includes(dup.id)) state.hiddenConnectors.push(dup.id);
+      } else {
+        state.extraConnectors = (state.extraConnectors||[]).filter(x => x.id !== dup.id);
+      }
+      delete state.connectors[dup.id];
+      delete state.connMatchExtra[dup.id];
+      changed = true;
+    });
+  });
+  if (changed) save();
+  return changed;
+}
 function connectorById(id){ return allConnectors().find(c => c.id === id); }
 function isSeedConnector(id){ return SEED_CONNECTORS.some(c => c.id === id) || DATA_CONNECTORS.some(c => c.id === id); }
 function addMatch(c, pid, note){
@@ -2097,6 +2149,7 @@ function importConnections(text){
   });
   const res = applyMatching(rows);
   state.synced = `${rows.length} connections parsed · ${res.direct} direct paths to fund people · ${res.newConn} new connector${res.newConn===1?'':'s'}${res.updated?` · ${res.updated} updated`:''}`;
+  mergeDuplicateConnectors();
   save(); render();
   toast(state.synced);
 }
@@ -3099,6 +3152,7 @@ function importScanEdges(text){
   const msg = `${edges} edge${edges===1?'':'s'} imported · ${newConn} new connector${newConn===1?'':'s'}` +
     (unresolved.length ? ` · ${unresolved.length} unresolved: ${unresolved.slice(0,3).join(', ')}${unresolved.length>3?'...':''}` : '');
   state.synced = msg;
+  mergeDuplicateConnectors();
   save(); render();
   toast(msg);
 }
@@ -3317,6 +3371,7 @@ $('exportBtn').addEventListener('click', () => {
 });
 
 rebuild();
+mergeDuplicateConnectors();
 render();
 bootSync();
 </script>
