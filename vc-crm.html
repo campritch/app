@@ -80,7 +80,7 @@
       background: var(--coral); display: flex; align-items: center; justify-content: center;
     }
     .logo-mark svg { display: block; }
-    .top-bar__title { font-size: 13px; font-weight: 500; color: var(--muted-foreground); }
+    .top-bar__title { font-size: 13px; font-weight: 500; color: #3f3f46; }
     .top-bar__spacer { flex: 1; }
     .login-btn {
       display: inline-flex; align-items: center; height: 36px;
@@ -219,7 +219,7 @@
 
     /* ── Table ── */
     .table-wrap { overflow-x: auto; }
-    table { width: 100%; min-width: 1160px; border-collapse: collapse; table-layout: fixed; }
+    table { width: 100%; min-width: 1080px; border-collapse: collapse; table-layout: fixed; }
     thead th {
       text-align: left; font-size: 12.5px; font-weight: 500;
       color: var(--muted-foreground); text-transform: none; letter-spacing: 0;
@@ -227,7 +227,7 @@
       border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
       white-space: nowrap; background: rgb(244 244 245 / 0.4);
     }
-    thead th:first-child, tbody td:first-child { padding-left: 24px; }
+    thead th:first-child, tbody td:first-child { padding-left: 16px; }
     thead th:last-child, tbody td:last-child { padding-right: 24px; }
     tbody td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 12.5px; }
     tbody tr { cursor: pointer; transition: background 0.1s; }
@@ -239,10 +239,10 @@
     .fund-name { font-weight: 500; color: var(--foreground); display: flex; align-items: center; gap: 6px; font-size: 13px; }
     .fund-sub { font-size: 11.5px; color: var(--muted-foreground); }
     .fund-site {
-      font-size: 11px; color: var(--muted-foreground); text-decoration: none;
+      font-size: 11px; color: #2563eb; text-decoration: none;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;
     }
-    .fund-site:hover { color: var(--foreground); text-decoration: underline; text-underline-offset: 2px; }
+    .fund-site:hover { text-decoration: underline; text-underline-offset: 2px; }
     .st-backlog { color: var(--text-secondary); }
     .icon-sq {
       display: inline-flex; align-items: center; justify-content: center;
@@ -270,8 +270,6 @@
     th.sortable:hover { color: var(--foreground); }
     tr.arch-dim td { opacity: 0.6; }
     tr.arch-dim td:last-child { opacity: 1; }
-    .chev { transition: transform 0.15s; color: var(--muted-foreground); flex-shrink: 0; }
-    tr.expanded .chev { transform: rotate(90deg); }
     .li-link { display: inline-flex; color: #0a66c2; flex-shrink: 0; }
     .li-link:hover { opacity: 0.75; }
 
@@ -290,8 +288,11 @@
       border-radius: 6px; font-size: 11px; font-weight: 600; white-space: nowrap;
       border: 1px solid transparent;
     }
-    .pill--grade-a  { background: var(--primary); color: var(--primary-foreground); }
-    .pill--grade-b  { background: var(--secondary); color: var(--foreground); }
+    .pill--grade-aplus  { background: #15803d; color: #ffffff; }
+    .pill--grade-a      { background: #22c55e; color: #ffffff; }
+    .pill--grade-aminus { background: #bbf7d0; color: #166534; }
+    .pill--grade-bplus  { background: #fef08a; color: #854d0e; }
+    .pill--grade-b      { background: #fde68a; color: #92400e; }
     .pill--grade-c  { background: transparent; border-color: var(--border); color: var(--muted-foreground); }
     .pill--type     { background: var(--secondary); color: var(--secondary-foreground); font-weight: 500; }
     .pill--sector   { background: transparent; border-color: var(--border); color: var(--text-secondary); font-weight: 500; }
@@ -521,8 +522,11 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 19px; font-weight: 700;
     }
-    .grade-big.a { background: var(--primary); color: var(--primary-foreground); }
-    .grade-big.b { background: var(--secondary); color: var(--foreground); }
+    .grade-big.aplus { background: #15803d; color: #ffffff; }
+    .grade-big.a { background: #22c55e; color: #ffffff; }
+    .grade-big.aminus { background: #bbf7d0; color: #166534; }
+    .grade-big.bplus { background: #fef08a; color: #854d0e; }
+    .grade-big.b { background: #fde68a; color: #92400e; }
     .grade-big.c { background: var(--secondary); color: var(--muted-foreground); }
     .grade-card__score { font-size: 13.5px; font-weight: 600; }
     .grade-card__note { font-size: 12.5px; color: var(--text-secondary); line-height: 1.55; }
@@ -613,13 +617,7 @@
 <body>
 
   <div class="top-bar">
-    <a class="top-bar__logo" href="/raise">
-      <span class="logo-mark">
-        <svg width="12" height="12" viewBox="0 0 78.1 73.2" fill="none"><path d="M78.078 1.79314L75.3917 22.0607C75.3043 22.6722 74.9112 23.1527 74.3434 23.3492C74.1686 23.4147 73.9939 23.4584 73.8192 23.4584C73.4042 23.4584 73.0111 23.3055 72.7272 23.0216L66.6994 17.3214L39.1154 47.1767C38.351 48.0066 37.2809 48.4652 36.2107 48.4652C35.5774 48.4652 34.944 48.3123 34.3543 48.0066L18.6514 39.7074C16.7076 38.6809 15.965 36.2785 16.9915 34.3347C18.018 32.391 20.3986 31.6484 22.3423 32.6749L35.359 39.5545L60.9336 11.8614L55.3207 6.55425C54.9058 6.13929 54.731 5.52778 54.9058 4.95994C55.0586 4.3921 55.5391 3.95529 56.1288 3.84609L76.2216 0.0240946C76.7239 -0.0632654 77.2262 0.0896158 77.5975 0.439056C77.9688 0.788496 78.1435 1.29082 78.078 1.79314ZM0.0218405 38.4188C0.0218405 57.5725 15.5501 73.1007 34.7038 73.1007C53.8574 73.1007 69.3857 57.5725 69.3857 38.4188C69.3857 33.7887 68.4684 29.3771 66.8304 25.3585L59.0772 33.7451C59.3611 35.252 59.514 36.8245 59.514 38.4188C59.514 52.1343 48.3974 63.2509 34.6819 63.2509C20.9664 63.2509 9.84984 52.1343 9.84984 38.4188C9.84984 24.7033 20.9664 13.5867 34.6819 13.5867C39.5959 13.5867 44.1823 15.0282 48.048 17.4961L54.8184 10.1579C49.14 6.09562 42.1949 3.71506 34.6819 3.71506C15.5282 3.71506 0 19.2433 0 38.397L0.0218405 38.4188Z" fill="#fff"/></svg>
-      </span>
-      SpotsNow
-    </a>
-    <span class="top-bar__title">Raise · VC outreach</span>
+    <a class="top-bar__logo" href="/raise">Raise · VC outreach</a>
     <div class="top-bar__spacer"></div>
     <span class="top-bar__title" id="syncStatus" style="font-size:11.5px"></span>
     <div class="dd dd--menu">
@@ -970,10 +968,10 @@ function score(f){ return f.dims ? PITCH_DIMS.reduce((s,[k,,w]) => s + (f.dims[k
 function grade(f){
   if (!f.dims) return '—';
   const s = score(f);
-  if (s >= 90) return 'A+'; if (s >= 84) return 'A'; if (s >= 78) return 'A-';
+  if (s >= 90) return 'A+'; if (s >= 84) return 'A'; if (s >= 80) return 'A-';
   if (s >= 72) return 'B+'; if (s >= 65) return 'B'; return 'C';
 }
-function gradeClass(g){ return g[0]==='A' ? 'a' : (g[0]==='B' ? 'b' : 'c'); }
+function gradeClass(g){ return { 'A+':'aplus', 'A':'a', 'A-':'aminus', 'B+':'bplus', 'B':'b' }[g] || 'c'; }
 function gradePillHtml(f){
   if (!f.dims) return `<span class="pill pill--grade-c" title="Not graded against the pitch yet">Not graded</span>`;
   const g = grade(f);
@@ -1488,7 +1486,6 @@ const RESTORE_ICON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none
 const DOTS_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>`;
 const OPEN_ICON = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>`;
 const PLUS_ICON = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`;
-const CHEV = `<svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 6 6 6-6 6"/></svg>`;
 
 /* Custom dropdown component. ctx routes the change to the right handler. */
 function ddHtml(o){
@@ -1718,16 +1715,16 @@ function personSubRows(f){
 function renderFundsTable(){
   $('tableHead').innerHTML = `<tr>
     <th style="width:34px"><input type="checkbox" class="row-check" id="checkAll"></th>
-    <th class="sortable" data-hsort="name" style="width:180px">Fund${hArrow('name')}</th>
-    <th class="sortable hide-md" data-hsort="profile" style="width:150px">Profile${hArrow('profile')}</th>
-    <th class="sortable" data-hsort="fit" style="width:86px">Fit${hArrow('fit')}</th>
-    <th class="sortable" data-hsort="check" style="width:110px">Check${hArrow('check')}</th>
-    <th class="sortable" data-hsort="wayin" style="width:140px">Way in${hArrow('wayin')}</th>
+    <th class="sortable" data-hsort="name" style="width:168px">Fund${hArrow('name')}</th>
+    <th class="sortable hide-md" data-hsort="profile" style="width:138px">Profile${hArrow('profile')}</th>
+    <th class="sortable" data-hsort="fit" style="width:78px">Fit${hArrow('fit')}</th>
+    <th class="sortable" data-hsort="check" style="width:100px">Check${hArrow('check')}</th>
+    <th class="sortable" data-hsort="wayin" style="width:128px">Way in${hArrow('wayin')}</th>
     <th class="hide-md">Why it fits</th>
-    <th class="sortable" data-hsort="stage" style="width:112px">Stage${hArrow('stage')}</th>
-    <th class="sortable" data-hsort="people" style="width:62px">People${hArrow('people')}</th>
-    <th style="width:38px"></th>
-    <th style="width:150px"></th>
+    <th class="sortable" data-hsort="stage" style="width:104px">Stage${hArrow('stage')}</th>
+    <th class="sortable" data-hsort="people" style="width:56px">People${hArrow('people')}</th>
+    <th style="width:36px"></th>
+    <th style="width:142px"></th>
   </tr>`;
   const rows = visibleFunds();
   const shown = rows.slice(0, renderCap);
@@ -1738,7 +1735,7 @@ function renderFundsTable(){
     return `<tr data-fundrow="${f.id}" class="${selected.has(f.id)?'selected':''} ${open?'expanded':''} ${fundArchiveView?'arch-dim':''}">
       <td><input type="checkbox" class="row-check" data-check="${f.id}" ${selected.has(f.id)?'checked':''}></td>
       <td><div class="fund-cell">
-        <span class="fund-name">${CHEV}${esc(f.name)}</span>
+        <span class="fund-name">${esc(f.name)}</span>
         ${f.site ? `<a class="fund-site" href="https://${esc(f.site)}" target="_blank" rel="noopener" data-noopen title="Open website">${esc(f.site)}</a>` : ''}
       </div></td>
       <td class="hide-md"><span class="fund-sub">${esc(f.type||'—')} · ${esc(f.region||'—')}${(f.sectors||[]).length ? ' · ' + esc(f.sectors.slice(0,2).join(', ')) : ''}</span></td>
@@ -1747,7 +1744,7 @@ function renderFundsTable(){
       <td>${fundPathCellHtml(f)}</td>
       <td class="hide-md"><div class="why-cell" title="${esc(((f.looking||'') + ' ' + fundFitLine(f)).trim())}">${esc((firstSentence(f.looking) + ' ' + fundFitLine(f)).trim() || 'Add fund notes - they feed the fit read.')}</div></td>
       <td>${ddHtml({ ctx:'fstage:'+f.id, value:fStage(f), quiet:true, options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:v,cls:k==='none'?'st-backlog':''})) })}</td>
-      <td><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <td><div style="display:flex;gap:6px;align-items:center;white-space:nowrap">
         <span style="font-weight:700">${ppl.length}</span>
         <button class="add-ava" data-addperson="${f.id}" title="Add person to ${esc(f.name)}">${PLUS_ICON}</button>
         ${tbd ? `<span class="pill pill--needs">${tbd} unmapped</span>` : ''}
