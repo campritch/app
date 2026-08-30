@@ -293,8 +293,8 @@
     .mtd--show { position: sticky; left: 0; z-index: 1; width: 210px; min-width: 210px; box-shadow: 1px 0 0 var(--border-light); }
     .mshowcell--btn { width:100%; border:none; background:none; font-family:inherit; text-align:left; cursor:pointer; }
     .mshowcell--btn:hover { background: var(--secondary-lite); }
-    .mshowdetail { display:flex; align-items:center; gap:1px; font-size:10.5px; font-weight:700; color:var(--text-tertiary); margin-top:1px; }
-    .mshowcell--btn:hover .mshowdetail { color: var(--accent); }
+    .mshowdetail { display:flex; align-items:center; gap:1px; font-size:10.5px; font-weight:600; color:var(--blue-text); margin-top:1px; }
+    .mshowcell--btn:hover .mshowdetail { text-decoration: underline; }
     .mshowcell { display: flex; align-items: center; gap: 10px; padding: 0 14px; height: 50px; overflow: hidden; }
     .mthumb { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); color: var(--panel); display: grid; place-items: center; font-size: 11px; font-weight: 800; flex-shrink: 0; letter-spacing: -.02em; }
     .mshowname { font-size: 12.5px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -303,10 +303,10 @@
     .mcell--sel { box-shadow: inset 0 0 0 2px var(--primary); border-radius: 3px; z-index: 3; }
     .mcell--range { background: var(--nav-current); box-shadow: inset 0 0 0 1px var(--border-strong); }
     .mfill { position: absolute; right: -1px; bottom: -1px; width: 9px; height: 9px; background: var(--primary); border: 1.5px solid var(--panel); cursor: crosshair; z-index: 5; }
-    .mctl { font-family: inherit; border: none; background: transparent; outline: none; color: var(--text-primary); font-weight: 600; }
+    .mctl { font-family: inherit; border: none; background: transparent; outline: none; color: var(--text-primary); font-weight: 400; }
     .mctl--num { width: 100%; text-align: center; font-size: 13px; }
     .mnum { display: inline-flex; align-items: center; justify-content: center; gap: 1px; width: 100%; }
-    .maffix { font-size: 12px; font-weight: 600; color: var(--text-tertiary); }
+    .maffix { font-size: 12px; font-weight: 400; color: var(--text-tertiary); }
     .mctl--select { width: 100%; text-align: center; text-align-last: center; font-size: 12.5px; padding: 0 4px; cursor: pointer; appearance: none; }
     .msheet-foot { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; border-top: 1px solid var(--border); }
     .msheet-total { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
@@ -1901,8 +1901,7 @@
     document.getElementById('view-shows').innerHTML=`
     <div class="inner" style="max-width:1180px">
       <div class="pagebar">
-        <div class="head"><h1>Shows</h1>
-        <p>Show setup lives here — every projection, avail and make-good recommendation reads off this grid. Click a show name for its full record.</p></div>
+        <div class="head"><h1>Shows</h1></div>
         <div class="pagebar__right"><span class="tag tag--purple">${SHOWS.filter(x=>x.src==='booster').length} of ${SHOWS.length} synced from Booster</span></div>
       </div>
       <div id="gridHost"></div>
