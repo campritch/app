@@ -1239,15 +1239,24 @@
     DRAWER_SPOT=id;
     if(SELFOR!==s.dealId){ SELSET=new Set(flightRows(s).filter(x=>projection(x)).map(x=>x.id)); SELFOR=s.dealId; }
     const q = pr ? qualityScore(s) : null, end = s.ts!=null ? s.ts+adSecs(s) : null, nx = pr ? nextCheck(s) : null;
+    const actBtns=`${s.missed?`<button class="btn btn--primary btn--sm" onclick="closeOverlays();nudgeEpisode('${s.id}')">Nudge show</button>`
+        :v.k==='short'&&!m?`<button class="btn btn--primary btn--sm" onclick="closeOverlays();createMakegood('${s.id}')">Set up make good</button>`
+        :m?`<button class="btn btn--primary btn--sm" onclick="closeOverlays();openMg('${m.id}')">Open ${m.kind==='bonus'?'bonus spot':'make good'}</button>`
+        :closedOut(s)&&!s.reportSent?`<button class="btn btn--primary btn--sm" onclick="closeOverlays();sendDeliveryReport('${s.id}')">Send delivery report</button>`
+        :closedOut(s)&&!s.completed?`<button class="btn btn--primary btn--sm" onclick="closeOverlays();markComplete('${s.id}')">Mark complete</button>`
+        :pr?`<button class="btn btn--primary btn--sm" onclick="closeOverlays();go('portal');openDeal('${s.dealId}')">See in the report</button>`:''}`;
     openDrawer(`<div class="drawer__head"><div>
         <span class="tag tag--${v.tone}"><i></i>${esc(v.label)}</span>
         <h2 style="font-size:18px;font-weight:800;margin-top:8px">${esc(s.brand)} · ${esc(sh.name)}</h2>
         <div class="muted" style="font-size:12px">${pr?`${s.yt?`<a href="https://www.youtube.com/watch?v=${esc(s.yt)}" target="_blank" rel="noopener" style="color:var(--blue-text);text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${esc(epTitle(s))}</a>`:esc(epTitle(s))} · published ${fmtDate(s.published)}`:`Airs ${fmtDate(s.published)}`} · ${esc(cr.len)} ${esc(cr.placement).toLowerCase()}</div>
       </div>
-      ${pr?`<div style="margin-left:auto;margin-right:18px;min-width:230px;align-self:center">
-        <div style="text-align:right;font-size:12px;font-weight:700">${K(pr.got)} of ${K(s.guarantee)} · ${Math.round(pr.rawRatio*100)}%</div>
-        <div class="pace ${pr.rawRatio>=IAB_FULL?'pace--good':''}" style="height:6px;margin-top:5px"><div class="pace__fill" style="width:${Math.min(pr.rawRatio*100,100)}%"></div></div>
-      </div>`:''}
+      <div style="margin-left:auto;margin-right:16px;display:flex;align-items:center;gap:14px;align-self:center">
+        ${actBtns}
+        ${pr?`<div style="min-width:210px">
+          <div style="text-align:right;font-size:12px;font-weight:700">${K(pr.got)} of ${K(s.guarantee)} · ${Math.round(pr.rawRatio*100)}%</div>
+          <div class="pace ${pr.rawRatio>=IAB_FULL?'pace--good':''}" style="height:6px;margin-top:5px"><div class="pace__fill" style="width:${Math.min(pr.rawRatio*100,100)}%"></div></div>
+        </div>`:''}
+      </div>
       <button class="x" onclick="closeOverlays()">✕</button></div>
     <div class="drawer__body">
     ${!pr?(()=>{ const kv=(l,v)=>`<div class="kv"><span>${l}</span><b>${v}</b></div>`;
@@ -1337,13 +1346,7 @@
       </div>
       </div>`}
     </div>
-    <div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Close</button>
-      ${s.missed?`<button class="btn btn--primary" onclick="closeOverlays();nudgeEpisode('${s.id}')">Nudge show</button>`
-        :v.k==='short'&&!m?`<button class="btn btn--primary" onclick="closeOverlays();createMakegood('${s.id}')">Set up make good</button>`
-        :m?`<button class="btn btn--primary" onclick="closeOverlays();openMg('${m.id}')">Open ${m.kind==='bonus'?'bonus spot':'make good'}</button>`
-        :closedOut(s)&&!s.reportSent?`<button class="btn btn--primary" onclick="closeOverlays();sendDeliveryReport('${s.id}')">Send delivery report</button>`
-        :closedOut(s)&&!s.completed?`<button class="btn btn--primary" onclick="closeOverlays();markComplete('${s.id}')">Mark complete</button>`
-        :pr?`<button class="btn btn--primary" onclick="closeOverlays();go('portal');openDeal('${s.dealId}')">See in the report</button>`:''}</div>`,DRAWER_FULL,!!pr);
+    `,DRAWER_FULL,!!pr);
   }
 
 
