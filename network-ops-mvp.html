@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VMG Command Center</title>
+  <title>VMG Dashboard</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2064%2064%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2213%22%20fill%3D%22%23141519%22/%3E%3Ctext%20x%3D%2234.5%22%20y%3D%2233.5%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2CArial%2Csans-serif%22%20font-weight%3D%22900%22%20font-size%3D%2219%22%20letter-spacing%3D%225%22%20fill%3D%22%23fff%22%3EVMG%3C/text%3E%3Ctext%20x%3D%2233.6%22%20y%3D%2245%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2CArial%2Csans-serif%22%20font-weight%3D%22700%22%20font-size%3D%225.8%22%20letter-spacing%3D%223.2%22%20fill%3D%22%23fff%22%3ENETWORK%3C/text%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -26,7 +26,7 @@
       --shadow-btn: 0 1px 3px 0 rgba(166,175,195,.20);
       --shadow-card: 0 1px 2px rgba(166,175,195,.18);
       --shadow-hover: 0 12px 34px rgba(120,130,150,.18);
-      --radius-card: 14px; --radius-btn: 9px; --radius-pill: 999px;
+      --radius-card: 12px; --radius-btn: 7px; --radius-pill: 999px;
       /* categorical chart palette */
       --c1:#17212B; --c2:#3B82F6; --c3:#10B981; --c4:#F59E0B; --c5:#8B5CF6; --c6:#EC4899; --c7:#06B6D4;
     }
@@ -79,14 +79,14 @@
 
 
     /* ─── flat list card: rows divided by hairlines, one border around ─── */
-    .listcard { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .listcard { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
     .listcard .fhead { padding: 8px 14px; margin: 0; border-bottom: 1px solid var(--border-light); }
     .listcard .wrow { border: none; border-radius: 0; background: none; }
     .listcard .wrow + .wrow { margin-top: 0; border-top: 1px solid var(--border-light); }
     .listcard .archdiv { margin: 4px 0; padding: 8px 16px; }
     .listcard .archdiv::after { display: none; }
     /* report stat tiles — the lead one goes dark, like the network's impressions card */
-    .pstat { background: var(--white); border: 1px solid var(--border-light); border-radius: 10px; padding: 9px 12px; }
+    .pstat { background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; padding: 9px 12px; }
     .pstat__l { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-tertiary); }
     .pstat__v { font-size: 18px; font-weight: 800; letter-spacing: -.03em; margin-top: 3px; }
     .pstat--dark { background: var(--primary); border-color: var(--primary); color: #fff; }
@@ -103,9 +103,13 @@
     .nav-item .badge { background: var(--red-bg); color: var(--red-text); font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 999px; }
     .nav-item .dot { width: 6px; height: 6px; border-radius: 50%; background: #3FB87C; }
     /* sidebar nav re-asserted over the topbar redefinition: chunky Bluewire pills */
-    .sidebar .nav-item { display: flex; width: 100%; padding: 12px 14px; border-radius: 12px; font-size: 13.5px; color: var(--text-secondary); gap: 12px; }
+    .sidebar .nav-item { display: flex; width: 100%; padding: 12px 14px; border-radius: 10px; font-size: 13.5px; color: var(--text-secondary); gap: 12px; }
     .sidebar .nav-item:hover { background: var(--nav-hover); color: var(--text-primary); }
     .sidebar .nav-item.active { background: var(--secondary-lite); color: var(--text-primary); }
+    .tb-plain { display: inline-flex; align-items: center; gap: 6px; border: none; background: none; padding: 6px 8px;
+                border-radius: 8px; color: var(--text-secondary); font-size: 12px; font-weight: 600; }
+    .tb-plain:hover { background: var(--nav-hover); color: var(--text-primary); }
+    .tb-plain svg { width: 14px; height: 14px; }
     .tb-btn { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--panel); color: var(--text-secondary); font-size: 12px; font-weight: 600; margin-left: 6px; }
     .tb-btn:hover { border-color: var(--border-strong); color: var(--text-primary); }
     .tb-btn.active { background: var(--nav-current); color: var(--text-primary); border-color: transparent; }
@@ -202,7 +206,7 @@
     .drawer.open { transform: translateX(0); }
     /* full-screen variant — the episode view opened from a show record */
     .drawer--full { width: min(1020px, 96vw); max-width: none; left: 50%; right: auto; top: 20px; height: calc(100vh - 20px);
-                    border-radius: 18px 18px 0 0; transform: translate(-50%, 102%); box-shadow: 0 -12px 48px rgba(20,25,35,.22); }
+                    border-radius: 16px 16px 0 0; transform: translate(-50%, 102%); box-shadow: 0 -12px 48px rgba(20,25,35,.22); }
     .drawer--full.open { transform: translate(-50%, 0); }
     .drawer__head { padding: 20px 24px; border-bottom: 1px solid var(--border-light); display: flex; align-items: flex-start; justify-content: space-between; }
     .drawer__body { padding: 22px 24px; overflow-y: auto; flex: 1; }
@@ -247,7 +251,7 @@
     /* deliverables & compliance (North Station pattern) */
     .ai-tag { font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; background: var(--purple-bg); color: var(--purple-text); padding: 3px 8px; border-radius: 999px; }
     .cmp-hint { font-size: 11.5px; color: var(--text-tertiary); margin: 6px 0 2px; line-height: 1.45; }
-    .cmp-row { border: 1px solid transparent; border-radius: 12px; padding: 11px 12px; margin-top: 9px; background: var(--page-bg); }
+    .cmp-row { border: 1px solid transparent; border-radius: 10px; padding: 11px 12px; margin-top: 9px; background: var(--page-bg); }
     .cmp-row__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
     .cmp-row__date { font-size: 12px; font-weight: 700; }
     .cmp-status { font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
@@ -321,7 +325,7 @@
 
 
     /* ─── one work row, used for every kind of item ─── */
-    .wrow { display:flex; align-items:center; gap:13px; padding:11px 14px; border:1px solid var(--border-light); border-radius:12px; background:var(--white); }
+    .wrow { display:flex; align-items:center; gap:13px; padding:11px 14px; border:1px solid var(--border-light); border-radius:10px; background:var(--white); }
     .wrow + .wrow { margin-top:8px; }
     /* ─── flight rows: one grid for Needs you and All flights alike ─── */
     .wflight { display:grid; grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 118px 26px; align-items:center; gap:0 14px; padding:10px 14px; }
@@ -351,7 +355,7 @@
                    padding:8px 11px; font-size:12.5px; font-weight:600; color:var(--text-primary); cursor:pointer; }
     .wpop button:hover { background:var(--nav-hover); }
     .wnote { display:flex; align-items:center; gap:11px; padding:8px 10px 8px 14px; background:var(--page-bg);
-             border:1px solid var(--border-light); border-radius:14px; cursor:pointer; }
+             border:1px solid var(--border-light); border-radius:12px; cursor:pointer; }
     .wnote__x { background:var(--white); }
     .wnote + .wnote, .wnote + .wrow { margin-top:8px; }
     .wnote__body { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -421,12 +425,12 @@
   <nav class="sidebar">
     <div class="sb-brand">
       <div class="sb-brand__mark"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" fill="#141519"/><text x="34.5" y="33.5" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="900" font-size="19" letter-spacing="5" fill="#fff">VMG</text><text x="33.6" y="45" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="5.8" letter-spacing="3.2" fill="#fff">NETWORK</text></svg></div>
-      <div class="sb-brand__name"><b>VMG</b><span>COMMAND CENTER</span></div>
+      <div class="sb-brand__name"><b>VMG</b><span>DASHBOARD</span></div>
     </div>
     <div class="sb-scroll">
       <div class="sb-group">
         <div class="sb-group__label">Planning</div>
-        <button class="nav-item active" data-view="overview" onclick="go('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Command Center</button>
+        <button class="nav-item active" data-view="overview" onclick="go('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Dashboard</button>
         <button class="nav-item" data-view="delivery" onclick="go('delivery')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Delivery <span class="badge" id="nav-del-badge"></span></button>
         <button class="nav-item" data-view="portal" onclick="go('portal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg>Campaign Portal <span class="dot"></span></button>
       </div>
@@ -446,7 +450,7 @@
   <main class="main">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:6px;margin-right:auto">
-        <button class="tb-btn" id="navBtn" onclick="toggleNav()" title="Hide sidebar" style="margin-left:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <button class="tb-plain" id="navBtn" onclick="toggleNav()" title="Hide sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></button>
         <span id="tbBack"></span>
       </div>
       <button class="tb-btn" data-view="shows" onclick="go('shows')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 4v16"/></svg>Shows</button>
@@ -1064,7 +1068,7 @@
     document.getElementById('view-overview').innerHTML=`
     <div class="inner" style="max-width:940px;padding-top:8px">
       <div class="hero">
-        <h1>VMG Command Center</h1>
+        <h1>VMG Dashboard</h1>
         <p>Ask anything about the network — delivery pacing, what needs a make good, which guarantees are running hot. Answered off Airtable and Booster.</p>
         <div class="hero__pills">
           <span class="pill"><i style="background:var(--green-text)"></i>Agent checked ${LAST_CHECK}</span>
@@ -1467,7 +1471,7 @@
 
     document.getElementById('view-portal').innerHTML=`
     <div class="inner" style="max-width:940px">
-      ${setBack(`<button class="tb-btn" onclick="closeDeal()" style="margin-left:0">← All deals</button>`)||''}
+      ${setBack(`<button class="tb-plain" onclick="closeDeal()">← All deals</button>`)||''}
       <div class="pagebar">
         <div class="head">
           <h1>${esc(d.brand)} on VMG</h1>
@@ -1481,7 +1485,7 @@
           </div>
         </div>
       </div>
-      <div style="background:var(--page-bg);border-radius:13px;padding:9px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+      <div style="background:var(--page-bg);border-radius:11px;padding:9px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
         ${pStat('Imp delivered',K(got),1)}
         ${pStat('Of booked impressions',`<span style="color:${full?'var(--green-text)':'var(--orange-text)'}">${c.pct}%</span>`)}
         ${pStat('Delivered CPM','$'+(got?(paid/(got/1000)):0).toFixed(2))}
@@ -1538,7 +1542,7 @@
     </div>`;
   };
   function saveDealNotes(id){ const d=DEALS.find(x=>x.id===id); d.notes=document.getElementById('dealNotes').value;
-    toast('Notes saved — internal only, and the Command Center reads them for check-ins.'); }
+    toast('Notes saved — internal only, and the Dashboard reads them for check-ins.'); }
 
   /* The index: full-width brand rows, deals always visible under them (13:33 —
      "the default should go straight to the deals for speed"). */
@@ -1551,7 +1555,7 @@
     return `<div class="wrow--click" style="display:grid;grid-template-columns:minmax(0,1fr) 150px 168px 118px 26px;align-items:center;gap:0 13px;padding:10px 14px;${i===0&&!hideBrand?'':'border-top:1px solid var(--border-light)'}" onclick="openDeal('${c.deal.id}')">
       <div style="min-width:0"><b style="font-size:13px">${hideBrand?esc(c.title):`${esc(c.brand)} <span style="font-weight:400;color:var(--text-secondary)">· ${esc(c.title)}</span>`}</b>
         <div class="muted" style="font-size:11px">${c.shows.map(x=>show(x).name).join(', ')} · ${esc(c.flight)}</div></div>
-      <div>${['under','mg','blocked'].includes(c.status.k)?`<b style="font-size:12px">${c.status.label}</b>`
+      <div>${['under','mg','blocked'].includes(c.status.k)?`<b style="font-size:12px;display:inline-flex;align-items:center;gap:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${ICO[{under:'warn',mg:'mg',blocked:'clock'}[c.status.k]]}</svg>${c.status.label}</b>`
         :`<span class="muted" style="font-size:11.5px">${c.state==='upcoming'?'Starts '+fmtDate(c.spots[0].published):c.state==='complete'?'Complete':''}</span>`}</div>
       <div class="wrow__num" style="width:auto;justify-content:flex-end;display:flex;align-items:center;gap:9px">${c.g?`
         <div style="position:relative;flex:1;height:8px;border-radius:4px;background:var(--secondary-lite)">
