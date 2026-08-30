@@ -1024,48 +1024,33 @@
   /* Every make good, in every state, plus what they have cost. The flowchart's
      back half: written to Airtable, flagged in Booster, and the analytics that
      come out of tracking sold against given. */
-  const MGSTEP=[['Date from avails',m=>!!m.date],['Position',m=>!!m.position],
-                ['Show notified',m=>m.showOk],['Brand notified',m=>m.brandOk]];
+  /* One quiet row per make good / bonus. The number that matters, the state,
+     one button. Everything else lives in the drawer. */
   function makeGoodsPanel(){
     const st=mgStats();
-    const card=m=>{ const sp=spot(m.spotId), sh=show(sp.showId), done=m.status==='scheduled';
-      return `<div class="card" style="${done?'':'border-color:var(--orange-bg)'}">
-        <div class="card__pad">
-          <div style="display:flex;align-items:flex-start;gap:13px">
-            <div style="flex:1;min-width:0">
-              <b style="font-size:13.5px">${esc(sp.brand)} on ${esc(sh.name)} ${m.kind==='bonus'?'<span class="tag tag--purple" style="margin-left:4px">Bonus</span>':''}</b>
-              <div class="muted" style="font-size:12px;margin-top:2px">${m.kind==='bonus'
-                ?`$0 performance support · worth ${money(mgValue(m))} at ${money(sh.cpm)} CPM`
-                :`Original read ${fmtDate(sp.published)} landed ${Math.round(projection(sp).ratio*100)}% · ${K(shortfall(sp))} short · worth ${money(mgValue(m))} at ${money(sh.cpm)} CPM`}</div>
-            </div>
-            <div style="text-align:right;flex-shrink:0">
-              ${done?`<span class="tag tag--green"><i></i>Booked ${fmtDate(m.date)}</span>`
-                   :`<button class="btn btn--primary btn--sm" onclick="openMg('${m.id}')">${!m.date?'Pick a date':!m.position?'Pick position':'Book it'}</button>`}
-            </div>
-          </div>
-          <div style="display:flex;gap:7px;margin-top:13px;flex-wrap:wrap">
-            ${MGSTEP.map(([label,test])=>{ const v=test(m);
-              return `<span class="tag ${v===true?'tag--green':'tag--grey'}">${v===true?'✓':v==='skip'?'–':'○'} ${label}${v==='skip'?' · skipped':''}</span>`; }).join('')}
-            ${sh.mgPolicy==='auto'&&m.showOk===true?'<span class="muted" style="font-size:11px;align-self:center">show auto-schedules</span>':''}
-          </div>
-          ${done?`<div class="muted" style="font-size:11.5px;margin-top:10px">Inventory type <b>Make Good</b> on ${fmtDate(m.date)}, its own colour in Airtable, and the slot is flagged in Booster so it cannot be sold twice.</div>`:''}
-        </div></div>`; };
+    const row=m=>{ const sp=spot(m.spotId), sh=show(sp.showId), done=m.status==='scheduled';
+      const next=!m.date?'Pick a date':!m.position?'Pick position':'Book it';
+      return `<div class="wrow wrow--click" onclick="openMg('${m.id}')">
+        <div class="wrow__main"><b>${esc(sp.brand)} on ${esc(sh.name)}${m.kind==='bonus'?' <span class="tag tag--purple">Bonus</span>':''}</b></div>
+        <span class="muted" style="font-size:12.5px;flex-shrink:0">${m.kind==='bonus'?`$0 bonus · worth ${money(mgValue(m))}`:`${K(shortfall(sp))} short · worth ${money(mgValue(m))}`}</span>
+        <span onclick="event.stopPropagation()" style="flex-shrink:0">${done
+          ?`<span class="tag tag--green"><i></i>Booked ${fmtDate(m.date)}</span>`
+          :cta(next,`openMg('${m.id}')`,true)}</span>
+      </div>`; };
     return `
-      <div class="tiles" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
+      <div class="tiles" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px">
         <div class="tile"><div class="tile__label">Given away</div><div class="tile__val">${money(st.val)}</div><div class="tile__delta"><span class="muted">${K(st.imps)} impressions</span></div></div>
         <div class="tile"><div class="tile__label">Paid fill rate</div><div class="tile__val">${st.rate}%</div><div class="tile__delta"><span class="muted">${st.paid} sold · ${st.free} given</span></div></div>
-        <div class="tile"><div class="tile__label">Booked</div><div class="tile__val" style="color:var(--green-text)">${st.sched}</div></div>
         <div class="tile"><div class="tile__label">Still open</div><div class="tile__val" style="color:${st.open?'var(--orange-text)':'var(--text-primary)'}">${st.open}</div></div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:11px">${MAKEGOODS.map(card).join('')||'<div class="card"><div class="empty">No make goods.</div></div>'}</div>
+      <div style="display:flex;flex-direction:column;gap:8px">${MAKEGOODS.map(row).join('')||'<div class="card"><div class="empty">No make goods.</div></div>'}</div>
       ${st.shows.length?`<div class="card" style="margin-top:16px">
-        <div class="card__head"><div><div class="card__title">What it is costing, by show</div>
-          <div class="card__sub">Tracking sold against given is what tells you a guarantee is set wrong.</div></div></div>
-        <table><thead><tr><th>Show</th><th class="num">Make goods</th><th class="num">Impressions</th><th class="num">Value</th><th>What it says</th></tr></thead>
+        <div class="card__head"><div class="card__title">Cost by show</div></div>
+        <table><thead><tr><th>Show</th><th class="num">Given</th><th class="num">Impressions</th><th class="num">Value</th><th></th></tr></thead>
         <tbody>${st.shows.map(r=>{ const sh=show(r.showId), adv=guaranteeAdvice().find(a=>a.showId===r.showId);
           return `<tr><td><b>${esc(sh.name)}</b></td><td class="num">${r.n}</td><td class="num">${K(r.imps)}</td><td class="num">${money(r.val)}</td>
-            <td>${adv?`<span style="font-size:12.5px">Guarantee too high — reads land near ${K(adv.typical)}. <button class="btn btn--ghost btn--sm" style="margin-left:4px" onclick="applyGuarantee('${sh.id}',${adv.suggest})">Drop to ${K(adv.suggest)}</button></span>`
-                     :'<span class="muted" style="font-size:12.5px">Within normal range</span>'}</td></tr>`; }).join('')}</tbody></table>
+            <td class="right">${adv?`<button class="btn btn--ghost btn--sm" onclick="applyGuarantee('${sh.id}',${adv.suggest})">Guarantee too high — drop to ${K(adv.suggest)}</button>`
+                     :'<span class="muted" style="font-size:12px">—</span>'}</td></tr>`; }).join('')}</tbody></table>
       </div>`:''}`;
   }
 
@@ -1229,7 +1214,7 @@
     <div class="drawer__body">
       <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:7px">Date · from ${esc(sh.name)}'s avails</div>
       <div style="display:flex;gap:7px;flex-wrap:wrap">${nextEpisodes(s.showId,4).map(e=>`<button class="tag ${m.date===e.date?'tag--blue':'tag--grey'}" style="padding:7px 11px;cursor:${e.open?'pointer':'not-allowed'};opacity:${e.open?1:.45}" ${e.open?`onclick="setMgDate('${id}','${e.date}')"`:''}>${dayName(e.date)} ${fmtDate(e.date)} · ${e.open}/${e.cap}</button>`).join('')}</div>
-      <div class="muted" style="font-size:11.5px;margin-top:8px">Booster caps ${esc(sh.name)} at ${sh.positionsPerEp} positions an episode, so these slots are real.</div>
+      <div class="muted" style="font-size:11.5px;margin-top:8px">Pulled from Airtable — what's booked comes from the inventory calendar, and Booster caps ${esc(sh.name)} at ${sh.positionsPerEp} positions an episode, so these slots are real.</div>
 
       <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary);margin:16px 0 7px">Position</div>
       <div style="display:flex;gap:7px;flex-wrap:wrap">${['Pre-roll','Mid-roll','Post-roll'].map(pos=>`<button class="tag ${m.position===pos?'tag--blue':'tag--grey'}" style="padding:7px 13px;cursor:pointer" onclick="setMgPosition('${id}','${pos}')">${pos}${pos===creative(s.brand).placement?' · same as original':''}</button>`).join('')}</div>
