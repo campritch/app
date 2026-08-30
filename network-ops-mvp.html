@@ -983,7 +983,6 @@
   const dcta=(label,onclick,dark)=>`<button class="btn ${dark?'btn--primary':'btn--ghost'} btn--sm" onclick="${onclick}">${label}</button>`;
   const cta=dcta;
 
-  const flightHead=()=>`<div class="fhead"><span>Ad</span><span>Day</span><span>Ran</span><span>Delivered</span><span>Pacing</span><span></span><span></span></div>`;
 
   // Needs you: the same rows, filtered to the ads that want something.
   function workList(){
@@ -1101,8 +1100,8 @@
       <div id="scanPanel"></div>
       ${delTab==='mg' ? makeGoodsPanel() : delTab==='work'
         ? (work.checks||'')+((work.checks&&work.length)?'<div style="height:14px"></div>':'')
-          +(work.length?`<div class="listcard">${flightHead()+work.join('')}</div>`:work.checks?'':`<div class="card"><div class="empty">✨ Nothing needs you — every flight projects over the 90% line.</div></div>`)
-        : `<div class="listcard">${flightHead() + live.map(flightRow).join('')}</div>`}
+          +(work.length?`<div class="listcard">${work.join('')}</div>`:work.checks?'':`<div class="card"><div class="empty">✨ Nothing needs you — every flight projects over the 90% line.</div></div>`)
+        : `<div class="listcard">${live.map(flightRow).join('')}</div>`}
       <div class="footnote">Projections come from each show's own curve, refit every time a read is verified.</div>
     </div>`;
   };
