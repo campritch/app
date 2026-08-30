@@ -692,7 +692,11 @@
             <div class="var-field"><label>Location (optional)</label><input id="afRegion" placeholder="New York" /></div>
             <div class="var-field"><label>Thesis / notes (optional)</label><input id="afNotes" placeholder="Consumer marketplaces, invests in media" /></div>
           </div>
-          <div class="token-hint">Lands in Targets ungraded - open it and run the AI fit read to grade it against the deck.</div>
+          <div class="d-row" style="align-items:center;gap:10px">
+            <span class="d-label" style="margin:0">Starts in</span>
+            <span id="afStageDD"></span>
+          </div>
+          <div class="token-hint">Added ungraded - open it and run the AI fit read to grade it against the deck.</div>
           <div class="d-row">
             <button class="btn-primary" id="afCreate">Add investor</button>
             <button class="btn-ghost" id="afCancel">Cancel</button>
@@ -1510,6 +1514,7 @@ function onDdChange(ctx, v){
   const kind = i === -1 ? ctx : ctx.slice(0, i);
   const arg = i === -1 ? null : ctx.slice(i + 1);
   if (kind === 'sort') { sortBy = v; headSort = { key: null, dir: 1 }; render(); return; }
+  if (kind === 'afstage') { afStage = v; renderAfStage(); return; }
   if (kind === 'pstatus') { setPersonStatus(arg, v); return; }
   if (kind === 'dstatus') {
     setPersonStatus(arg, v);
@@ -3093,7 +3098,11 @@ $('fundPasteImport').addEventListener('click', () => {
 $('fundPasteCancel').addEventListener('click', () => { $('fundPasteWrap').style.display = 'none'; });
 
 /* ── Single investor add (VC fund or angel) ── */
-let afKind = 'fund';
+let afKind = 'fund', afStage = 'target';
+function renderAfStage(){
+  $('afStageDD').innerHTML = ddHtml({ ctx:'afstage', value: afStage, options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:v,cls:k==='none'?'st-backlog':''})) });
+}
+renderAfStage();
 document.querySelectorAll('.af-kind').forEach(b => b.addEventListener('click', () => {
   afKind = b.dataset.afkind;
   document.querySelectorAll('.af-kind').forEach(x => {
@@ -3128,13 +3137,14 @@ $('afCreate').addEventListener('click', () => {
     f.people.push(p);
   } else f.people.push({ n: '', t: 'Partner', tbd: true });
   state.extraFunds.push(f);
-  FS(id).stage = 'target';
+  if (afStage !== 'none') FS(id).stage = afStage;
   save(); rebuild();
   if ((state.liConnections || []).length) applyMatching(state.liConnections);
   render();
   ['afName','afPerson','afTitle','afLi','afEmail','afCheck','afRegion','afNotes'].forEach(k => { $(k).value = ''; });
   $('fundSingleWrap').style.display = 'none';
-  toast((isAngel ? 'Angel added' : 'Fund added') + ' - filed under Targets.');
+  toast((isAngel ? 'Angel added' : 'Fund added') + ' - filed under ' + F_STAGES[afStage] + '.');
+  afStage = 'target'; renderAfStage();
   openFund(id);
 });
 $('afCancel').addEventListener('click', () => { $('fundSingleWrap').style.display = 'none'; });
