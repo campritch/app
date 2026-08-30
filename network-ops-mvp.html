@@ -1483,16 +1483,16 @@
             <button class="btn btn--ghost btn--sm" onclick="createBonus('${d.id}')">+ Make good</button>
             <button class="btn btn--primary btn--sm" onclick="sendDealReport('${d.id}')">Send report</button>
           </div>
-          <div style="margin-top:10px">
-            <div style="font-size:30px;font-weight:800;letter-spacing:-.04em;line-height:1;color:${full?'var(--green-text)':'var(--orange-text)'}">${c.pct}%</div>
-            <div class="muted" style="font-size:11.5px;margin-top:2px">of booked impressions</div>
-          </div>
         </div>
       </div>
-      <div style="background:var(--page-bg);border-radius:13px;padding:9px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-        ${pStat('Imp delivered',K(got),1)}${pStat('Delivered CPM','$'+(got?(paid/(got/1000)):0).toFixed(2))}
-        ${pStat('YouTube reach',K(yt))}${pStat('Audio reach',K(aud))}
-        ${pStat('Shows',shows.length)}${pStat('Verified reads',verified+'/'+spots.filter(s=>s.kind==='paid').length)}
+      <div style="background:var(--page-bg);border-radius:13px;padding:9px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        ${pStat('Imp delivered',K(got),1)}
+        ${pStat('Of booked impressions',`<span style="color:${full?'var(--green-text)':'var(--orange-text)'}">${c.pct}%</span>`)}
+        ${pStat('Delivered CPM','$'+(got?(paid/(got/1000)):0).toFixed(2))}
+        ${pStat('YouTube reach',K(yt))}
+        ${pStat('Audio reach',K(aud))}
+        ${pStat('Shows',shows.length)}
+        ${pStat('Verified reads',verified+'/'+spots.filter(s=>s.kind==='paid').length)}
       </div>
 
       <div class="card" style="margin-top:16px;border-style:dashed">
