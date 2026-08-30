@@ -1552,9 +1552,10 @@
      its deals. */
   function dealIndexRow(c,i,hideBrand){
     const tone=toneVar(c.status.tone), max=Math.max(c.g,c.proj)*1.06, w=x=>c.g?Math.min(100,x/max*100):0;
-    return `<div class="wrow--click" style="display:grid;grid-template-columns:minmax(0,1fr) 150px 168px 118px 26px;align-items:center;gap:0 13px;padding:10px 14px;${i===0&&!hideBrand?'':'border-top:1px solid var(--border-light)'}" onclick="openDeal('${c.deal.id}')">
+    return `<div class="wrow--click" style="display:grid;grid-template-columns:minmax(0,1fr) 108px 150px 168px 118px 26px;align-items:center;gap:0 13px;padding:10px 14px;${i===0&&!hideBrand?'':'border-top:1px solid var(--border-light)'}" onclick="openDeal('${c.deal.id}')">
       <div style="min-width:0"><b style="font-size:13px">${hideBrand?esc(c.title):`${esc(c.brand)} <span style="font-weight:400;color:var(--text-secondary)">· ${esc(c.title)}</span>`}</b>
-        <div class="muted" style="font-size:11px">${c.shows.map(x=>show(x).name).join(', ')} · ${esc(c.flight)}</div></div>
+        <div class="muted" style="font-size:11px">${c.shows.map(x=>show(x).name).join(', ')}</div></div>
+      <div class="muted" style="font-size:11px;white-space:nowrap">${esc(c.flight)}</div>
       <div>${['under','mg','blocked'].includes(c.status.k)?`<b style="font-size:12px;display:inline-flex;align-items:center;gap:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${ICO[{under:'warn',mg:'mg',blocked:'clock'}[c.status.k]]}</svg>${c.status.label}</b>`
         :`<span class="muted" style="font-size:11.5px">${c.state==='upcoming'?'Starts '+fmtDate(c.spots[0].published):c.state==='complete'?'Complete':''}</span>`}</div>
       <div class="wrow__num" style="width:auto;justify-content:flex-end;display:flex;align-items:center;gap:9px">${c.g?`
