@@ -80,6 +80,12 @@
 
     /* ─── table toolbar + sortable header, network.spotsnow pattern ─── */
     .tbar { display:flex; align-items:center; gap:14px; padding:10px 14px; border-bottom:1px solid var(--border-light); }
+    .tbar--bare { padding:0; border:none; }
+    .tbar--bare .tbar__search input { width:150px; }
+    .cmp-inp--link { color:var(--blue-text); text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
+    .cmp-copy { position:absolute; right:5px; top:50%; transform:translateY(-50%); width:24px; height:24px;
+                border:none; background:none; color:var(--text-tertiary); cursor:pointer; display:grid; place-items:center; border-radius:6px; }
+    .cmp-copy:hover { color:var(--text-primary); background:var(--secondary-lite); }
     .tbar__search { position:relative; }
     .tbar__search svg { position:absolute; left:9px; top:50%; transform:translateY(-50%); width:13px; height:13px; color:var(--text-tertiary); }
     .tbar__search input { width:210px; padding:6px 10px 6px 29px; border:1px solid var(--border); border-radius:8px;
@@ -220,6 +226,10 @@
     .drawer--full { width: min(1020px, 96vw); max-width: none; left: 50%; right: auto; top: 20px; height: calc(100vh - 20px);
                     border-radius: 16px 16px 0 0; transform: translate(-50%, 102%); box-shadow: 0 -12px 48px rgba(20,25,35,.22); }
     .drawer--full.open { transform: translate(-50%, 0); }
+    /* wide variant — the flight drawer runs two columns: numbers left, video + links right */
+    .drawer--wide { width: min(1120px, 96vw); }
+    .spotcols { display:grid; grid-template-columns:1fr 1.05fr; gap:0 26px; align-items:start; }
+    @media (max-width: 1040px){ .spotcols { grid-template-columns:1fr; } }
     .drawer__head { padding: 20px 24px; border-bottom: 1px solid var(--border-light); display: flex; align-items: flex-start; justify-content: space-between; }
     .drawer__body { padding: 22px 24px; overflow-y: auto; flex: 1; }
     .drawer__foot { padding: 16px 24px; border-top: 1px solid var(--border-light); display: flex; gap: 10px; justify-content: flex-end; }
@@ -249,6 +259,13 @@
     .agentrow + .agentrow { margin-top: 10px; }
     .thumb { width: 92px; height: 52px; border-radius: 8px; object-fit: cover; background: var(--secondary-lite); flex-shrink: 0; }
     .pulse-blue { animation: pulseb 1.4s infinite; }
+    /* flight-row CTAs: one min-width for all so the column never shifts;
+       In progress is a quiet underlined link until it becomes a real ask */
+    .fcta { min-width: 92px; justify-content: center; text-align: center; }
+    .fcta--quiet { background: none; border: none; font-family: inherit; font-size: 12px; font-weight: 600;
+                   color: var(--text-secondary); text-decoration: underline; text-underline-offset: 3px;
+                   cursor: pointer; padding: 0; }
+    .fcta--quiet:hover { color: var(--text-primary); }
     @keyframes pulseb { 0%,100%{opacity:1;} 50%{opacity:.45;} }
 
     /* proof reel */
@@ -442,7 +459,7 @@
     <div class="sb-scroll">
       <div class="sb-group">
         <div class="sb-group__label">Planning</div>
-        <button class="nav-item active" data-view="overview" onclick="go('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Dashboard</button>
+        <button class="nav-item active" data-view="overview" onclick="go('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Command Center</button>
         <button class="nav-item" data-view="delivery" onclick="go('delivery')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Delivery <span class="badge" id="nav-del-badge"></span></button>
         <button class="nav-item" data-view="portal" onclick="go('portal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg>Campaign Portal <span class="dot"></span></button>
       </div>
@@ -776,7 +793,7 @@
     document.getElementById('view-'+v).classList.add('active');
     document.getElementById('main').scrollTop=0;
     CURRENT=v;
-    if(v!=='portal') setBack('');
+    if(v!=='portal'&&v!=='shows') setBack('');
     if(RENDER[v]) RENDER[v]();
   }
   function rerender(){ if(RENDER[CURRENT]) RENDER[CURRENT](); }
@@ -787,7 +804,7 @@
   }
 
   /* ═══════════════════════════ OVERLAYS ═══════════════════════════ */
-  function openDrawer(html,full){ const d=document.getElementById('drawer'); d.innerHTML=html; d.classList.toggle('drawer--full',!!full); d.classList.add('open'); document.getElementById('scrim').classList.add('open'); }
+  function openDrawer(html,full,wide){ const d=document.getElementById('drawer'); d.innerHTML=html; d.classList.toggle('drawer--full',!!full); d.classList.toggle('drawer--wide',!!wide&&!full); d.classList.add('open'); document.getElementById('scrim').classList.add('open'); }
   function openModal(html){ const m=document.getElementById('modal'); m.innerHTML=html; m.classList.add('open'); document.getElementById('scrim').classList.add('open'); }
   function closeOverlays(){ SELFOR=null; document.getElementById('drawer').classList.remove('open'); document.getElementById('modal').classList.remove('open'); document.getElementById('scrim').classList.remove('open'); }
 
@@ -960,6 +977,15 @@
     setTimeout(()=>document.addEventListener('click',closeRowMenu),0);
   }
 
+  /* One sorter for every flight table - Needs you and All flights sort alike.
+     Spots without a projection sort to the bottom on numeric keys. */
+  function sortFlights(list){
+    const fv={ad:s=>nameOf(s).toLowerCase(), day:s=>projection(s)?projection(s).day:-1,
+              delivered:s=>projection(s)?projection(s).got:-1, pacing:s=>projection(s)?projection(s).ratio:-1};
+    const f=fv[delSort.k]; if(!f) return list;
+    return list.slice().sort((a,b)=>{ const x=f(a),y=f(b); return (x>y?1:x<y?-1:0)*delSort.dir; });
+  }
+
   /* Three words on the button, and only one of them is dark.
      In progress → running, nothing to do. Verified → it landed.
      Make good → it came in under, and that is the only thing worth shouting. */
@@ -988,7 +1014,12 @@
       <span onclick="event.stopPropagation()"><button class="wdots" title="More" onclick="rowMenu(event,'${s.id}')">⋮</button></span>
     </div>`;
   }
-  const dcta=(label,onclick,dark)=>`<button class="btn ${dark?'btn--primary':'btn--ghost'} btn--sm" onclick="${onclick}">${label}</button>`;
+  /* In progress is a quiet underlined link — nothing to do yet. The moment it
+     turns into Review or Make good it becomes a real button: time to act.
+     All three share one min-width so the column never shifts. */
+  const dcta=(label,onclick,dark)=>label==='In progress'
+    ? `<button class="fcta fcta--quiet" onclick="${onclick}">${label}</button>`
+    : `<button class="btn ${dark?'btn--primary':'btn--ghost'} btn--sm fcta" onclick="${onclick}">${label}</button>`;
   const cta=dcta;
 
 
@@ -1001,7 +1032,10 @@
     SPOTS.filter(s=>s.dlState==='requested').forEach(s=>wants.add(s.id));
     SPOTS.filter(s=>['needs_copy','needs_cta','sent'].includes(s.copyStatus)).forEach(s=>wants.add(s.id));
     SPOTS.filter(s=>closedOut(s)&&!s.completed).forEach(s=>wants.add(s.id));
-    const ids=[...wants].map(spot).sort((a,b)=>liveDays(b)-liveDays(a));
+    let ids=[...wants].map(spot).sort((a,b)=>liveDays(b)-liveDays(a));
+    if(delShowF!=='All shows') ids=ids.filter(s=>show(s.showId).name===delShowF);
+    if(delQ2.trim()){ const q=delQ2.trim().toLowerCase(); ids=ids.filter(s=>nameOf(s).toLowerCase().includes(q)); }
+    ids=sortFlights(ids);
     // Deal-level check-ins: admin notes and the check-in date Sydney sets.
     // One quiet line each, pinned above the table until she clears them (Aug 24, 9:37).
     const noteRow=(d,label,text,clearFn)=>`<div class="wnote" onclick="go('portal');openDeal('${d.id}')">
@@ -1012,12 +1046,11 @@
     DEALS.filter(d=>d.outcome==='won'&&(d.notes||'').trim()).forEach(d=>checkRows.push(noteRow(d,'Note',d.notes,'clearDealNote')));
     DEALS.filter(d=>d.checkIn&&d.checkIn<=TODAY).forEach(d=>checkRows.push(noteRow(d,'Check-in',`You set a check-in for ${fmtDate(d.checkIn)} — how's it going?`,'clearCheckIn')));
     const active=ids.filter(x=>!isArchived(x.id)).map(flightRow);
-    const arch=ids.filter(x=>isArchived(x.id)).map(x=>flightRow(x).replace('class="wrow wflight','class="wrow wflight wrow--dim'));
+    const arch=ids.filter(x=>isArchived(x.id));
     if(arch.length){
-      active.push(`<button class="archdiv" onclick="ARCH_OPEN=!ARCH_OPEN;rerender()">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" style="transform:rotate(${ARCH_OPEN?90:0}deg)"><path d="M9 6l6 6-6 6"/></svg>
-        Archived · ${arch.length}</button>`);
-      if(ARCH_OPEN) active.push(...arch);
+      // archived: up to the five most recent, one crossed-out mid-gray line each - no controls
+      active.push(`<div style="border-top:1px solid var(--border-light);margin-top:6px;padding:6px 0 2px">${arch.slice(0,5).map(x=>
+        `<div onclick="openSpot('${x.id}')" style="font-size:12.5px;color:var(--text-secondary);text-decoration:line-through;padding:6px 14px;cursor:pointer">${nameOf(x)}</div>`).join('')}</div>`);
     }
     active.count=ids.length-arch.length+checkRows.length;
     active.checks=checkRows.join('');
@@ -1066,12 +1099,23 @@
     </div>`;
   };
 
+  /* Reminders Sydney writes herself - same visual grammar as the agent's
+     notifications, optionally linked to an area of the app. */
+  let REMINDERS=[], remOpen=false, REM_SEQ=0;
+  function addReminder(){
+    const t=(document.getElementById('remInp')?.value||'').trim();
+    if(!t){ toast('Type the reminder first.'); return; }
+    REMINDERS.push({ id:'rm'+(++REM_SEQ), text:t, link:document.getElementById('remLink')?.value||'' });
+    remOpen=false; RENDER.overview();
+  }
+  function dismissReminder(id){ REMINDERS=REMINDERS.filter(r=>r.id!==id); RENDER.overview(); }
+
   RENDER.overview = () => {
     const work=workList();
     document.getElementById('view-overview').innerHTML=`
     <div class="inner" style="max-width:940px;padding-top:8px">
       <div class="hero">
-        <h1>VMG Dashboard</h1>
+        <h1>Command Center</h1>
         <p>Ask anything about the network — delivery pacing, what needs a make good, which guarantees are running hot. Answered off Airtable and Booster.</p>
         <div class="hero__pills">
           <span class="pill"><i style="background:var(--green-text)"></i>Agent checked ${LAST_CHECK}</span>
@@ -1082,6 +1126,24 @@
           <button class="askwrap__go" onclick="askVmg()" aria-label="Ask">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h13M12 5l7 7-7 7"/></svg></button>
         </div>
+      </div>
+      <div style="max-width:720px;margin:18px auto 0;text-align:left">
+        ${work.checks||''}
+        ${REMINDERS.map(rm=>`<div class="wnote" ${rm.link?`onclick="go('${rm.link}')"`:''} style="${REMINDERS.length||work.checks?'margin-top:8px':''}">
+          <span class="wnote__body"><b>Reminder</b><span class="wnote__txt" title="${esc(rm.text)}">${esc(rm.text)}</span>${rm.link?`<span class="tag tag--grey" style="margin-left:8px;flex-shrink:0">${({delivery:'Delivery',portal:'Campaign Portal',shows:'Shows'})[rm.link]}</span>`:''}</span>
+          <button class="wnote__x" title="Dismiss" onclick="event.stopPropagation();dismissReminder('${rm.id}')">✕</button>
+        </div>`).join('')}
+        ${remOpen?`<div class="wnote" style="cursor:default;margin-top:8px" onclick="event.stopPropagation()">
+          <input id="remInp" placeholder="What should we remind you about?" onkeydown="if(event.key==='Enter')addReminder()"
+            style="flex:1;border:none;background:none;font:inherit;font-size:12.5px;color:var(--text-primary);outline:none">
+          <select id="remLink" class="tsel" style="flex-shrink:0">
+            <option value="">No link</option><option value="delivery">Delivery</option>
+            <option value="portal">Campaign Portal</option><option value="shows">Shows</option>
+          </select>
+          <button class="btn btn--primary btn--sm" style="flex-shrink:0" onclick="addReminder()">Add</button>
+          <button class="wnote__x" title="Cancel" onclick="remOpen=false;RENDER.overview()">✕</button>
+        </div>`
+        :`<button class="btn btn--ghost btn--sm" style="margin-top:10px" onclick="remOpen=true;RENDER.overview();document.getElementById('remInp').focus()">+ Add reminder</button>`}
       </div>
       ${CHATS.length?`<div class="thread">
         <div class="thread__hd"><span>Conversation</span><button onclick="newChat()">Clear</button></div>
@@ -1098,9 +1160,8 @@
     let live=SPOTS.filter(s=>projection(s)).sort((a,b)=>liveDays(b)-liveDays(a));
     if(delShowF!=='All shows') live=live.filter(s=>show(s.showId).name===delShowF);
     if(delQ2.trim()){ const q=delQ2.trim().toLowerCase(); live=live.filter(s=>nameOf(s).toLowerCase().includes(q)); }
-    const fvals={ad:s=>nameOf(s).toLowerCase(), day:s=>projection(s).day, delivered:s=>projection(s).got, pacing:s=>projection(s).ratio};
-    if(fvals[delSort.k]) live=live.slice().sort((a,b)=>{ const f=fvals[delSort.k],x=f(a),y=f(b); return (x>y?1:x<y?-1:0)*delSort.dir; });
-    const delBar=`<div class="tbar">
+    live=sortFlights(live);
+    const delBar=`<div class="tbar tbar--bare">
       <div class="tbar__search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="delQInp" placeholder="Search flights…" value="${esc(delQ2)}" oninput="delQ2=this.value;FOCUS_Q='delQInp';RENDER.delivery()"></div>
       <select class="tsel" onchange="delShowF=this.value;RENDER.delivery()">${['All shows',...SHOWS.map(x=>x.name)].map(n=>`<option ${delShowF===n?'selected':''}>${esc(n)}</option>`).join('')}</select>
     </div>`;
@@ -1109,16 +1170,15 @@
     <div class="inner" style="max-width:1080px">
       <div class="pagebar">
         <div class="head"><h1>Delivery</h1></div>
-        <div class="pagebar__right"><div class="seg">
+        <div class="pagebar__right">${delTab!=='mg'?delBar:''}<div class="seg">
           <button class="${delTab==='work'?'active':''}" onclick="delTab='work';RENDER.delivery()">Needs you${work.length?' · '+work.length:''}</button>
           <button class="${delTab==='all'?'active':''}" onclick="delTab='all';RENDER.delivery()">All flights</button>
           <button class="${delTab==='mg'?'active':''}" onclick="delTab='mg';RENDER.delivery()">Make goods${MAKEGOODS.length?' · '+MAKEGOODS.length:''}</button></div></div>
       </div>
       <div id="scanPanel"></div>
       ${delTab==='mg' ? makeGoodsPanel() : delTab==='work'
-        ? (work.checks||'')+((work.checks&&work.length)?'<div style="height:14px"></div>':'')
-          +(work.length?`<div class="listcard">${work.join('')}</div>`:work.checks?'':`<div class="card"><div class="empty">✨ Nothing needs you — every flight projects over the 90% line.</div></div>`)
-        : `<div class="listcard">${delBar}${delHead}${live.length?live.map(flightRow).join(''):'<div class="empty">No flights match.</div>'}</div>`}
+        ? (work.length?`<div class="listcard">${delHead}${work.join('')}</div>`:`<div class="card"><div class="empty">✨ Nothing needs you — every flight projects over the 90% line.</div></div>`)
+        : `<div class="listcard">${delHead}${live.length?live.map(flightRow).join(''):'<div class="empty">No flights match.</div>'}</div>`}
       <div class="footnote">Projections come from each show's own curve, refit every time a read is verified.</div>
     </div>`;
     refocusQ();
@@ -1180,8 +1240,9 @@
     openDrawer(`<div class="drawer__head"><div>
         <span class="tag tag--${v.tone}"><i></i>${esc(v.label)}</span>
         <h2 style="font-size:18px;font-weight:800;margin-top:8px">${esc(s.brand)} · ${esc(sh.name)}</h2>
-        <div class="muted" style="font-size:12px">${pr?`${esc(epTitle(s))} · published ${fmtDate(s.published)}`:`Airs ${fmtDate(s.published)}`} · ${esc(cr.len)} ${esc(cr.placement).toLowerCase()}</div>
-      </div><button class="x" onclick="closeOverlays()">✕</button></div>
+        <div class="muted" style="font-size:12px">${pr?`${s.yt?`<a href="https://www.youtube.com/watch?v=${esc(s.yt)}" target="_blank" rel="noopener" style="color:var(--blue-text);text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${esc(epTitle(s))}</a>`:esc(epTitle(s))} · published ${fmtDate(s.published)}`:`Airs ${fmtDate(s.published)}`} · ${esc(cr.len)} ${esc(cr.placement).toLowerCase()}</div>
+      </div>
+      <button class="x" onclick="closeOverlays()">✕</button></div>
     <div class="drawer__body">
     ${!pr?(()=>{ const kv=(l,v)=>`<div class="kv"><span>${l}</span><b>${v}</b></div>`;
       const copyLabel = s.copyStatus==='needs_copy'?'<span style="color:var(--blue-text)">Not in yet</span>'
@@ -1210,15 +1271,9 @@
       <div class="dhead">${esc(sh.name)}'s next episodes</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${nextEpisodes(s.showId,5,s.published).map(ep=>`<span class="tag ${ep.date===s.published?'tag--blue':ep.open?'tag--green':'tag--grey'}">${dayName(ep.date)} ${fmtDate(ep.date)} · ${ep.open}/${ep.cap}${ep.date===s.published?' · this ad':''}</span>`).join('')}</div>
       `; })():`
-      <div style="margin-bottom:14px">
-        <div style="text-align:right;font-size:12px;font-weight:700">${K(pr.got)} of ${K(s.guarantee)} · ${Math.round(pr.rawRatio*100)}%</div>
-        <div class="pace ${pr.rawRatio>=IAB_FULL?'pace--good':''}" style="height:6px;margin-top:5px"><div class="pace__fill" style="width:${Math.min(pr.rawRatio*100,100)}%"></div></div>
-      </div>
-
-      ${s.yt?`<div class="reel-stage"><iframe src="https://www.youtube.com/embed/${s.yt}?start=${s.ts}" allow="autoplay" allowfullscreen></iframe></div>`
-        :`<div class="reel-stage" style="color:#8a95a3;font-size:13px;text-align:center;padding:20px;display:grid;place-items:center">Audio-only read.<br>Impressions come from the host platform.</div>`}
-
-      <div style="display:flex;gap:18px;margin-top:16px">
+      <div class="spotcols">
+      <div>
+      <div style="display:flex;gap:18px">
         <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;align-content:start">
           ${reelStat('Episode length', hms(epLenOf(s)), `setSpotStat('${s.id}','epLen',this.value)`)}
           ${reelStat('Ad start', s.ts!=null?mmss(s.ts):'—', `setSpotStat('${s.id}','ts',this.value)`)}
@@ -1236,21 +1291,24 @@
         </div>
       </div>
 
+      <div style="margin-top:22px">
+        <div style="text-align:right;font-size:12px;font-weight:700">${K(pr.got)} of ${K(s.guarantee)} · ${Math.round(pr.rawRatio*100)}%</div>
+        <div class="pace ${pr.rawRatio>=IAB_FULL?'pace--good':''}" style="height:6px;margin-top:5px"><div class="pace__fill" style="width:${Math.min(pr.rawRatio*100,100)}%"></div></div>
+      </div>
 
-      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light)">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="flex:1"></div>
-          <button class="btn btn--ghost btn--sm" onclick="copyDeliverables('${s.id}')">Copy all</button>
-        </div>
-        ${flightRows(s).map(e=>{ const epr=projection(e), passed=e.status==='verified'&&!!e.yt;
+      <div style="margin-top:16px">
+        ${flightRows(s).map((e,ci)=>{ const epr=projection(e), passed=e.status==='verified'&&!!e.yt;
           const inSel=SELSET&&SELSET.has(e.id), selectable=!!epr;
           return `<div class="cmp-row" style="${selectable?(inSel?'':'opacity:.45;border-style:dashed;border-color:var(--border);'):''}">
           <div class="cmp-row__top" ${selectable?`style="cursor:pointer" onclick="toggleSel('${e.id}')"`:''}><span class="cmp-row__date">${fmtDate(e.published)} · ${dayName(e.published)}${epr?` <span class="muted" style="font-weight:500">· ${K(epr.got)} impressions</span>`:''}</span>
             <span style="display:inline-flex;align-items:center;gap:7px">
-              ${e.yt?`<button class="btn btn--ghost btn--sm" style="padding:3px 9px;font-size:11px" onclick="copyDeliverable('${e.id}')">Copy</button>`:''}
+              ${ci===0?`<button class="btn btn--ghost btn--sm" style="padding:3px 9px" onclick="event.stopPropagation();copyDeliverables('${s.id}')">Copy all</button>`:''}
               <span class="cmp-status ${passed?'ok':'pend'}">${passed?'✓ Passed':'Pending'}</span></span></div>
           <div style="display:flex;align-items:center;gap:8px">
-            <input class="cmp-inp" style="margin-top:6px;flex:1" value="${e.yt?esc('youtu.be/'+e.yt+'?t='+e.ts):''}" placeholder="Video link">
+            <div style="position:relative;flex:1;margin-top:6px">
+              <input class="cmp-inp${e.yt?' cmp-inp--link':''}" style="width:100%;padding-right:32px" value="${e.yt?esc('youtu.be/'+e.yt+'?t='+e.ts):''}" placeholder="Video link" ${e.yt?`readonly onclick="window.open('https://youtu.be/${e.yt}?t=${e.ts}','_blank')" title="Open on YouTube"`:''}>
+              ${e.yt?`<button class="cmp-copy" title="Copy link" onclick="event.stopPropagation();copyDeliverable('${e.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2"/></svg></button>`:''}
+            </div>
             <span class="tag tag--grey" style="margin-top:6px;flex-shrink:0;font-variant-numeric:tabular-nums">${e.ts!=null?mmss(e.ts)+'–'+mmss(e.ts+adSecs(e)):'—'}</span>
           </div>
           ${show(e.showId).simulcast?`<div style="display:flex;align-items:center;gap:8px">
@@ -1259,7 +1317,10 @@
           </div>`:''}
         </div>`; }).join('')}
       </div>
-
+      </div>
+      <div>
+      ${s.yt?`<div class="reel-stage"><iframe src="https://www.youtube.com/embed/${s.yt}?start=${s.ts}" allow="autoplay" allowfullscreen></iframe></div>`
+        :`<div class="reel-stage" style="color:#8a95a3;font-size:13px;text-align:center;padding:20px;display:grid;place-items:center">Audio-only read.<br>Impressions come from the host platform.</div>`}
       ${(()=>{ const fr=flightRows(s).filter(x=>projection(x)); const sel=fr.filter(x=>SELSET&&SELSET.has(x.id));
         const selG=sel.reduce((a,x)=>a+x.guarantee,0), selGot=sel.reduce((a,x)=>a+(delivered(x)||0),0), selProj=sel.reduce((a,x)=>a+projection(x).proj,0);
         return `<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light)">
@@ -1267,7 +1328,9 @@
           <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em">Deal delivery${sel.length<fr.length?` · ${sel.length} of ${fr.length} reads`:''}</div>
           <span class="muted" style="font-size:11.5px">${K(selGot)} delivered · projecting ${K(selProj)} of ${K(selG)}</span>
         </div>
-        <div class="curvewrap">${dealChart(sel)}</div></div>`; })()}`}
+        <div class="curvewrap">${dealChart(sel)}</div></div>`; })()}
+      </div>
+      </div>`}
     </div>
     <div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Close</button>
       ${s.missed?`<button class="btn btn--primary" onclick="closeOverlays();nudgeEpisode('${s.id}')">Nudge show</button>`
@@ -1275,7 +1338,7 @@
         :m?`<button class="btn btn--primary" onclick="closeOverlays();openMg('${m.id}')">Open ${m.kind==='bonus'?'bonus spot':'make good'}</button>`
         :closedOut(s)&&!s.reportSent?`<button class="btn btn--primary" onclick="closeOverlays();sendDeliveryReport('${s.id}')">Send delivery report</button>`
         :closedOut(s)&&!s.completed?`<button class="btn btn--primary" onclick="closeOverlays();markComplete('${s.id}')">Mark complete</button>`
-        :pr?`<button class="btn btn--primary" onclick="closeOverlays();go('portal');openDeal('${s.dealId}')">See in the report</button>`:''}</div>`,DRAWER_FULL);
+        :pr?`<button class="btn btn--primary" onclick="closeOverlays();go('portal');openDeal('${s.dealId}')">See in the report</button>`:''}</div>`,DRAWER_FULL,!!pr);
   }
 
 
@@ -1616,17 +1679,16 @@
                 status:c=>({under:0,mg:1,blocked:2}[c.status.k]??3), pacing:c=>c.pct||0, delivered:c=>c.got||0};
       const sf=dv[dealSort.k]||dv.date;
       cs=cs.slice().sort((a,b)=>{ const x=sf(a),y=sf(b); return (x>y?1:x<y?-1:0)*dealSort.dir; });
-      const bar=`<div class="tbar">
-        <div class="tbar__search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="dealQInp" placeholder="Search deals…" value="${esc(dealQ)}" oninput="dealQ=this.value;FOCUS_Q='dealQInp';RENDER.portal()"></div>
-        <select class="tsel" onchange="dealBrandF=this.value;RENDER.portal()">${['All brands',...brands].map(b=>`<option ${dealBrandF===b?'selected':''}>${esc(b)}</option>`).join('')}</select>
-      </div>`;
       const head=`<div class="shead" style="grid-template-columns:minmax(0,1fr) 108px 150px 168px 118px 26px">${[['deal','Deal'],['date','Dates'],['status','Status'],['pacing','Pacing'],['delivered','Delivered']].map(([k,l])=>`<button onclick="setDealSort('${k}')">${l}${dealSort.k===k?(dealSort.dir>0?' ↑':' ↓'):''}</button>`).join('')}<span></span></div>`;
-      body=`<div class="card" style="overflow:hidden">${bar}${head}${cs.length?cs.map((c,i)=>dealIndexRow(c,i+1,false)).join(''):'<div class="empty">No deals match.</div>'}</div>`;
+      body=`<div class="card" style="overflow:hidden">${head}${cs.length?cs.map((c,i)=>dealIndexRow(c,i+1,false)).join(''):'<div class="empty">No deals match.</div>'}</div>`;
     }
     document.getElementById('view-portal').innerHTML=`
     <div class="inner" style="max-width:1080px">
       <div class="pagebar"><div class="head"><h1>Campaign Portal</h1></div>
-        <div class="pagebar__right"><div class="seg">${DEAL_FILTERS.map(([k,label])=>{ const n=k==='brands'?brands.length:all.filter(c=>k==='all'||c.state===k).length;
+        <div class="pagebar__right">${portalFilter!=='brands'?`<div class="tbar tbar--bare">
+          <div class="tbar__search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="dealQInp" placeholder="Search deals…" value="${esc(dealQ)}" oninput="dealQ=this.value;FOCUS_Q='dealQInp';RENDER.portal()"></div>
+          <select class="tsel" onchange="dealBrandF=this.value;RENDER.portal()">${['All brands',...brands].map(b=>`<option ${dealBrandF===b?'selected':''}>${esc(b)}</option>`).join('')}</select>
+        </div>`:''}<div class="seg">${DEAL_FILTERS.map(([k,label])=>{ const n=k==='brands'?brands.length:all.filter(c=>k==='all'||c.state===k).length;
           return `<button class="${portalFilter===k?'active':''}" onclick="portalFilter='${k}';RENDER.portal()">${label}${k==='all'?'':' · '+n}</button>`; }).join('')}</div></div>
       </div>
       ${body}
@@ -1859,7 +1921,7 @@
                   ${sheetControl(sh,c)}
                   ${sel?`<span class="mfill" onmousedown="startFill(event,'${sh.id}','${c.key}')"></span>`:''}
                 </div></td>`; }).join('')}
-            <td class="mtd" style="text-align:center"><button class="btn btn--ghost btn--sm" style="padding:4px 8px" onclick="deleteShow('${sh.id}')" title="Remove show">✕</button></td>
+            <td class="mtd" style="text-align:center"><button class="btn btn--ghost btn--sm" style="padding:4px 8px" onclick="deleteShow('${sh.id}')" title="Remove show"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/></svg></button></td>
           </tr>`).join('')}</tbody>
         </table></div>
         <div class="msheet-foot">
@@ -1869,8 +1931,14 @@
       </div>`;
   }
 
-  function openShow(id){
-    const sh=show(id);
+  /* Each show gets its own page inside the Shows view — same page grammar as
+     the rest of the app (back link, pagebar, cards), not a drawer. */
+  let SHOW_PAGE=null;
+  function openShow(id){ SHOW_PAGE=id; if(CURRENT!=='shows'){ go('shows'); } else RENDER.shows(); document.getElementById('main').scrollTop=0; }
+  function closeShow(){ SHOW_PAGE=null; RENDER.shows(); document.getElementById('main').scrollTop=0; }
+
+  function renderShowPage(sh){
+    const id=sh.id;
     const live=SPOTS.filter(x=>x.showId===id&&projection(x)).sort((a,b)=>liveDays(a)-liveDays(b));
     const booked=SPOTS.filter(x=>x.showId===id&&x.status==='scheduled');
     const ran=SPOTS.filter(x=>x.showId===id&&x.kind==='paid'&&projection(x));
@@ -1878,59 +1946,78 @@
     const owed=wonDeals().filter(d=>d.showId===id).reduce((a,d)=>a+Math.round(d.gross*0.85*sh.revShare),0);
     const adv=guaranteeAdvice().find(x=>x.showId===id);
     const kv=(l,v)=>`<div class="kv"><span>${l}</span><b>${v}</b></div>`;
-    openDrawer(`<div class="drawer__head"><div>
-        <span class="srcpill ${sh.src==='booster'?'booster':''}">${sh.src}</span>
-        <h2 style="font-size:19px;font-weight:800;margin-top:8px;letter-spacing:-.03em">${esc(sh.name)}</h2>
-        <div class="muted" style="font-size:12px">${esc(sh.host)} · ${esc(sh.category)} · ${esc(sh.channel)}</div>
-      </div><button class="x" onclick="closeOverlays()">✕</button></div>
-    <div class="drawer__body">
-      <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:10px">
+    document.getElementById('view-shows').innerHTML=`
+    <div class="inner" style="max-width:1080px">
+      ${setBack(`<button class="tb-plain" onclick="closeShow()">← All shows</button>`)||''}
+      <div class="pagebar">
+        <div class="head">
+          <h1>${esc(sh.name)}</h1>
+          <div class="muted" style="font-size:12.5px;margin-top:3px">${esc(sh.host)} · ${esc(sh.category)} · ${esc(sh.channel)}</div>
+        </div>
+        <div class="pagebar__right"><span class="srcpill ${sh.src==='booster'?'booster':''}">${sh.src}</span></div>
+      </div>
+
+      <div class="grid" style="grid-template-columns:repeat(4,1fr);gap:10px">
         ${kpiBox('Guarantee',K(sh.guarantee),`90% = ${K(Math.round(sh.guarantee*IAB_FULL))}`)}
         ${kpiBox('Check-in','day '+checkInDay(sh),'set by its own curve')}
         ${kpiBox('Live reads',live.length,live.length?live.map(x=>esc(x.brand)).join(', '):'none right now')}
+        ${kpiBox('Owed',money(owed),`${Math.round(sh.revShare*100)}% rev share`)}
       </div>
 
-      <div style="margin-top:8px">
-        ${kv('Publishes', sh.publishDays.join(' · '))}
-        ${kv('Episodes a week', sh.epsPerWeek)}
-        ${kv('Ad positions an episode', `${sh.positionsPerEp} <em>Booster cap</em>`)}
-        ${kv('Rate', money(sh.cpm)+' CPM')}
-        ${kv('Delivery numbers', sh.simulcast?`Video + audio <em>${sh.audioSrc==='hosting'?'auto from host':'requested from creator'}</em>`:'Video only')}
-        ${kv('Channel scan', 'Every '+sh.scanEvery+'h')}
-        ${kv('Rev share', `${Math.round(sh.revShare*100)}% <em>${money(owed)} owed</em>`)}
-        ${kv('Make goods', sh.mgPolicy==='auto'?'Auto-schedule':'Ask the show first')}
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;align-items:start">
+        <div class="card">
+          <div class="card__head"><div><div class="card__title">Show setup</div><div class="card__sub">Maps 1:1 to the Airtable show page; positions and the guarantee come from Booster.</div></div></div>
+          <div class="card__pad" style="padding-top:2px">
+            ${kv('Publishes', sh.publishDays.join(' · '))}
+            ${kv('Episodes a week', sh.epsPerWeek)}
+            ${kv('Ad positions an episode', `${sh.positionsPerEp} <em>Booster cap</em>`)}
+            ${kv('Rate', money(sh.cpm)+' CPM')}
+            ${kv('Delivery numbers', sh.simulcast?`Video + audio <em>${sh.audioSrc==='hosting'?'auto from host':'requested from creator'}</em>`:'Video only')}
+            ${kv('Channel scan', 'Every '+sh.scanEvery+'h')}
+            ${kv('Rev share', `${Math.round(sh.revShare*100)}% <em>${money(owed)} owed</em>`)}
+            ${kv('Make goods', sh.mgPolicy==='auto'?'Auto-schedule':'Ask the show first')}
+          </div>
+        </div>
+        <div class="card">
+          <div class="card__head"><div><div class="card__title">Pacing</div><div class="card__sub">Fitted from ${sh.samples} verified reads on this channel.</div></div></div>
+          <div class="card__pad" style="padding-top:2px">
+            <p style="font-size:13px;line-height:1.6;color:var(--text-secondary);margin:0">
+              <b style="color:var(--text-primary)">${Math.round(curveAt(sh.curve,2)*100)}%</b> of a read's views land inside 48 hours and
+              <b style="color:var(--text-primary)">${Math.round(curveAt(sh.curve,7)*100)}%</b> by day 7.
+              That is why the call gets made on day ${checkInDay(sh)} here rather than on a fixed rule.
+              ${shorts?` ${shorts} of the last ${ran.length} flights came in under.`:''}
+            </p>
+            ${adv?`<div style="margin-top:12px;padding:12px 14px;border:1px solid var(--orange-bg);background:rgba(255,237,213,.4);border-radius:11px;display:flex;align-items:center;gap:11px">
+              <div style="flex:1;font-size:12.5px">The guarantee is set above what the show does — reads land near ${K(adv.typical)}.</div>
+              <button class="btn btn--ghost btn--sm" onclick="applyGuarantee('${sh.id}',${adv.suggest})">Drop to ${K(adv.suggest)}</button></div>`:''}
+            <div class="dhead" style="margin-top:14px">Next avails</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${nextEpisodes(id,5).map(e=>`<span class="tag ${e.open?'tag--green':'tag--grey'}">${dayName(e.date)} ${fmtDate(e.date)} · ${e.open}/${e.cap}</span>`).join('')}</div>
+          </div>
+        </div>
       </div>
 
-      <div class="dhead">Pacing</div>
-      <p style="font-size:13px;line-height:1.6;color:var(--text-secondary);margin-top:6px">
-        <b style="color:var(--text-primary)">${Math.round(curveAt(sh.curve,2)*100)}%</b> of a read's views land inside 48 hours and
-        <b style="color:var(--text-primary)">${Math.round(curveAt(sh.curve,7)*100)}%</b> by day 7, fitted from ${sh.samples} verified reads.
-        That is why the call gets made on day ${checkInDay(sh)} here rather than on a fixed rule.
-        ${shorts?` ${shorts} of the last ${ran.length} flights came in under.`:''}
-      </p>
-      ${adv?`<div style="margin-top:11px;padding:12px 14px;border:1px solid var(--orange-bg);background:rgba(255,237,213,.4);border-radius:11px;display:flex;align-items:center;gap:11px">
-        <div style="flex:1;font-size:12.5px">The guarantee is set above what the show does — reads land near ${K(adv.typical)}.</div>
-        <button class="btn btn--ghost btn--sm" onclick="applyGuarantee('${sh.id}',${adv.suggest});closeOverlays()">Drop to ${K(adv.suggest)}</button></div>`:''}
-
-      ${live.length||booked.length?`<div class="dhead">Reads on this show</div>
-      <div style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
-        ${live.map(x=>{ const pr=projection(x), vv=verdict(x);
-          return `<div class="wrow wrow--click" style="padding:11px 13px" onclick="openSpot('${x.id}',1)">
-            <div class="wrow__main"><b>${esc(x.brand)}</b><span>Day ${pr.day} · ${K(pr.got)} of ${K(x.guarantee)}</span></div>
-            <div class="wrow__num" style="width:120px">${projBar(x)}<b style="color:${toneVar(vv.tone)}">${Math.round(pr.ratio*100)}%</b></div></div>`; }).join('')}
-        ${booked.map(x=>`<div class="wrow" style="padding:11px 13px;border-style:dashed">
-          <div class="wrow__main"><b>${esc(x.brand)}</b><span>Booked ${dayName(x.published)} ${fmtDate(x.published)}${x.kind!=='paid'?' · '+esc(x.kind):''}</span></div></div>`).join('')}
-      </div>`:''}
-
-      <div class="dhead">Next avails</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${nextEpisodes(id,5).map(e=>`<span class="tag ${e.open?'tag--green':'tag--grey'}">${dayName(e.date)} ${fmtDate(e.date)} · ${e.open}/${e.cap}</span>`).join('')}</div>
-    </div>
-    <div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Close</button></div>`);
+      <div class="card" style="margin-top:12px">
+        <div class="card__head"><div><div class="card__title">How it's tracking</div><div class="card__sub">Every read on this show — live flights project from the show's own curve.</div></div></div>
+        <div class="card__pad" style="padding-top:2px;display:flex;flex-direction:column;gap:7px">
+          ${live.length||booked.length?`
+          ${live.map(x=>{ const pr=projection(x), vv=verdict(x);
+            return `<div class="wrow wrow--click" style="padding:11px 13px" onclick="openSpot('${x.id}',1)">
+              <div class="wrow__main"><b>${esc(x.brand)}</b><span>Day ${pr.day} · ${K(pr.got)} of ${K(x.guarantee)}</span></div>
+              <div class="wrow__num" style="width:120px">${projBar(x)}<b style="color:${toneVar(vv.tone)}">${Math.round(pr.ratio*100)}%</b></div></div>`; }).join('')}
+          ${booked.map(x=>`<div class="wrow" style="padding:11px 13px;border-style:dashed">
+            <div class="wrow__main"><b>${esc(x.brand)}</b><span>Booked ${dayName(x.published)} ${fmtDate(x.published)}${x.kind!=='paid'?' · '+esc(x.kind):''}</span></div></div>`).join('')}`
+          :`<div class="empty" style="padding:18px 0">No reads on this show yet.</div>`}
+        </div>
+      </div>
+      <div class="footnote">Everything here maps 1:1 to the show page Sydney keeps in Airtable — this is its live view.</div>
+    </div>`;
   }
 
   const kpiBox=(l,v,sub)=>`<div style="border:1px solid var(--border-light);border-radius:11px;padding:12px 14px"><div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-tertiary)">${l}</div><div style="font-size:21px;font-weight:800;letter-spacing:-.03em;margin-top:3px">${v}</div><div class="muted" style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sub}</div></div>`;
 
   RENDER.shows = () => {
+    if(SHOW_PAGE){ const sh=show(SHOW_PAGE); if(sh) return renderShowPage(sh); SHOW_PAGE=null; }
+    setBack('');
     const f=fillStats();
     document.getElementById('view-shows').innerHTML=`
     <div class="inner" style="max-width:1180px">
