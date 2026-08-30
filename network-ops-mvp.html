@@ -877,6 +877,17 @@
 
   let ARCH_OPEN=false, ROWMENU=null;
   function closeRowMenu(){ if(ROWMENU){ ROWMENU.remove(); ROWMENU=null; document.removeEventListener('click',closeRowMenu); } }
+  function setVerify(id,v){ spot(id).copyCheck=v; closeRowMenu(); rerender(); }
+  function verifyMenu(ev,id){
+    ev.stopPropagation(); closeRowMenu();
+    const el=document.createElement('div'); el.className='wpop';
+    el.innerHTML=['Copy verified','Needs review'].map(o=>`<button onclick="setVerify('${id}','${o}')">${o}</button>`).join('');
+    document.body.appendChild(el); ROWMENU=el;
+    const r=ev.currentTarget.getBoundingClientRect();
+    el.style.top=Math.min(innerHeight-el.offsetHeight-10, r.bottom+6)+'px';
+    el.style.left=Math.max(10, r.right-el.offsetWidth)+'px';
+    setTimeout(()=>document.addEventListener('click',closeRowMenu),0);
+  }
   function rowMenu(ev,id){
     ev.stopPropagation(); closeRowMenu();
     const s=spot(id), c=ctaFor(s), m=mgForSpot(id);
@@ -1368,13 +1379,6 @@
     document.getElementById('view-portal').innerHTML=`
     <div class="inner" style="max-width:940px">
       <button class="btn btn--ghost btn--sm" style="margin-bottom:14px" onclick="closeDeal()">← All deals</button>
-      <div class="pagebar">
-        <div class="head"><h1>${esc(d.brand)} <span class="muted" style="font-weight:600;font-size:19px">· ${esc(c.title)}</span></h1></div>
-        <div class="pagebar__right">
-          <button class="btn btn--ghost btn--sm" onclick="toast('Copied vmg.live/${d.brand.toLowerCase()}-${d.id} — read-only, admin notes stay internal.')">🔗 Copy link</button>
-          <button class="btn btn--ghost btn--sm" onclick="createBonus('${d.id}')">+ Bonus spot</button>
-          <button class="btn btn--primary btn--sm" onclick="sendDealReport('${d.id}')">Send report</button></div>
-      </div>
 
       <div class="card"><div class="card__pad" style="padding:22px 24px">
         <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap">
@@ -1389,7 +1393,12 @@
             <div class="muted" style="font-size:11.5px;margin-top:3px">of booked impressions</div>
           </div>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:22px;padding-top:20px;border-top:1px solid var(--border-light)">
+        <div style="display:flex;gap:9px;justify-content:flex-end;margin-top:16px">
+          <button class="btn btn--ghost btn--sm" onclick="toast('Copied vmg.live/${d.brand.toLowerCase()}-${d.id} — read-only, admin notes stay internal.')">🔗 Copy link</button>
+          <button class="btn btn--ghost btn--sm" onclick="createBonus('${d.id}')">+ Bonus spot</button>
+          <button class="btn btn--primary btn--sm" onclick="sendDealReport('${d.id}')">Send report</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:16px;padding-top:20px;border-top:1px solid var(--border-light)">
           ${pStat('Imp delivered',K(got))}${pStat('Delivered CPM','$'+(got?(paid/(got/1000)):0).toFixed(2))}
           ${pStat('YouTube reach',K(yt))}${pStat('Audio reach',K(aud))}
           ${pStat('Shows',shows.length)}${pStat('Verified reads',verified+'/'+spots.filter(s=>s.kind==='paid').length)}
@@ -1433,19 +1442,21 @@
       <div class="card" style="margin-top:16px">
         <div class="card__head"><div><div class="card__title">Reads on this deal</div>
           <div class="card__sub">Click a timestamp to hear the read, or open one for the transcript and the brief.</div></div></div>
-        <table><thead><tr><th style="min-width:150px">Show</th><th>Published</th><th class="num">Impressions</th><th>Verified</th><th>Ad read</th><th>Episode</th><th></th></tr></thead>
+        <table><thead><tr><th style="min-width:190px">Show</th><th>Published</th><th class="num">Impressions</th><th>Verified</th><th>Ad read</th><th></th></tr></thead>
         <tbody>${liveSpots.filter(s=>s.kind==='paid').map(s=>{ const pr=projection(s);
-          return `<tr><td><b>${esc(show(s.showId).name)}</b><div class="muted" style="font-size:11.5px">${esc(epTitle(s))}</div></td>
+          return `<tr><td style="white-space:nowrap"><b>${esc(show(s.showId).name)}</b>
+            ${s.yt?`<a href="${clipUrl(s)}" target="_blank" title="Opens the episode at ${mmss(s.ts)}" style="display:block;font-size:11.5px;color:var(--blue-text);font-weight:600;text-decoration:none;max-width:230px;overflow:hidden;text-overflow:ellipsis">${esc(epTitle(s))}</a>`
+                 :`<div class="muted" style="font-size:11.5px;max-width:230px;overflow:hidden;text-overflow:ellipsis">${esc(epTitle(s))}</div>`}</td>
             <td>${fmtDate(s.published)}</td>
             <td class="num"><b>${K(pr.got)}</b>${pr.confident?`<div class="muted" style="font-size:11px">${Math.round(pr.ratio*100)}% of goal</div>`:'<div class="muted" style="font-size:11px">still building</div>'}</td>
-            <td>${s.yt?'<span class="tag tag--green"><i></i>Copy verified</span>':'<span class="tag tag--grey">—</span>'}</td>
+            <td style="white-space:nowrap">${s.yt?`<span style="font-size:12.5px;font-weight:600;color:${(s.copyCheck||'Copy verified')==='Copy verified'?'var(--text-primary)':'var(--orange-text)'}">${esc(s.copyCheck||'Copy verified')}</span><button class="wdots" style="width:20px;height:20px;display:inline-grid;vertical-align:middle;margin-left:2px" onclick="verifyMenu(event,'${s.id}')" title="Change state"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 9l6 6 6-6"/></svg></button>`:'<span class="muted">—</span>'}</td>
             <td>${s.yt?`<button class="btn btn--ghost btn--sm" onclick="playClip('${s.yt}',${s.ts})">${mmss(s.ts)}–${mmss(s.ts+adSecs(s))}</button>`:'<span class="muted" style="font-size:12px">audio</span>'}</td>
-            <td>${s.yt?`<a href="${clipUrl(s)}" target="_blank" style="font-size:12px;color:var(--blue-text);font-weight:600;text-decoration:none">youtu.be/${esc(s.yt)} ↗</a>`:'<span class="muted" style="font-size:12px">host feed</span>'}</td>
+
             <td class="right"><button class="btn btn--ghost btn--sm" onclick="openRead('${s.id}')">More info</button></td></tr>`; }).join('')}
           ${spots.filter(s=>s.status==='scheduled'&&s.kind==='paid').map(s=>`<tr><td><b>${esc(show(s.showId).name)}</b></td>
-            <td>${fmtDate(s.published)}</td><td class="num muted">booked</td><td colspan="4"><span class="muted" style="font-size:12px">Due ${dayName(s.published)} ${fmtDate(s.published)}</span></td></tr>`).join('')}
+            <td>${fmtDate(s.published)}</td><td class="num muted">booked</td><td colspan="3"><span class="muted" style="font-size:12px">Due ${dayName(s.published)} ${fmtDate(s.published)}</span></td></tr>`).join('')}
           ${mgs.map(s=>`<tr style="background:rgba(235,233,254,.28)"><td><b>${esc(show(s.showId).name)}</b> <span class="tag tag--purple">Added at no cost</span></td>
-            <td>${fmtDate(s.published)}</td><td class="num muted">scheduled</td><td colspan="4"><span class="muted" style="font-size:12px">${s.kind==='bonus'?'Bonus spot — performance support, no charge':'Make good — replaces the shortfall, no charge'}</span></td></tr>`).join('')}
+            <td>${fmtDate(s.published)}</td><td class="num muted">scheduled</td><td colspan="3"><span class="muted" style="font-size:12px">${s.kind==='bonus'?'Bonus spot — performance support, no charge':'Make good — replaces the shortfall, no charge'}</span></td></tr>`).join('')}
         </tbody></table>
       </div>
       <div class="footnote">This is the advertiser's view of this deal. Read-only for them, updates as reads land — admin notes never leave the building.</div>
