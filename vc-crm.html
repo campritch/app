@@ -312,11 +312,16 @@
     .fit-brief__text b { color: var(--foreground); }
     .fit-brief__ai { margin-top: 8px; padding: 10px 12px; background: rgb(244 244 245 / 0.6); border-radius: 8px; }
     .fit-brief button { margin-left: auto; }
-    .path-text { font-size: 12px; font-weight: 500; color: var(--foreground); line-height: 1.4; white-space: nowrap; }
-    .path-text b { font-weight: 600; }
+    .path-text { font-size: 12px; font-weight: 400; color: var(--foreground); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+    .path-text b { font-weight: 500; }
     .path-text .sub { color: var(--muted-foreground); font-weight: 400; font-size: 11.5px; }
     .path-text .link { text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
     .path-text.muted { color: var(--muted-foreground); font-weight: 400; }
+    .src-pill { border: none; border-radius: 9999px; height: 22px; padding: 0 10px; font-family: inherit;
+                font-size: 11px; font-weight: 600; cursor: pointer;
+                background: var(--secondary); color: var(--muted-foreground); }
+    .src-pill svg { display: none; }
+    .src-pill--open { background: #ffedd5; color: #c2410c; }
     .why-cell {
       font-size: 11.5px; color: var(--text-secondary); line-height: 1.45; max-width: 260px;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
@@ -641,6 +646,7 @@
       <div class="tab-row" id="tabRow">
         <button class="tab active" data-tab="funds">All funds <span class="count" id="cntFunds">0</span></button>
         <button class="tab" data-tab="targets">Targets <span class="count" id="cntTargets">0</span></button>
+        <button class="tab" data-tab="messaged">Messaged <span class="count" id="cntMessaged">0</span></button>
         <button class="tab" data-tab="booked">Booked <span class="count" id="cntBooked">0</span></button>
         <button class="tab" data-tab="pitching">Pitching <span class="count" id="cntPitching">0</span></button>
         <button class="tab" data-tab="closed">Closed <span class="count" id="cntClosed">0</span></button>
@@ -825,6 +831,7 @@ Dana Whitfield, Overline, worked together at Techstars,"></textarea>
   <div class="bulk-bar" id="bulkBar">
     <span class="bulk-bar__count" id="bulkCount">0 selected</span>
     <button class="bulk-btn bulk-btn--coral bulk-fund" data-bulkstage="target">→ Targets</button>
+    <button class="bulk-btn bulk-fund" data-bulkstage="messaged">→ Messaged</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="booked">→ Booked</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="pitching">→ Pitching</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="closed">→ Closed</button>
@@ -1285,10 +1292,22 @@ const P_STATUS = {
 };
 const C_STATUS = { none:'Not asked', draft:'Ask drafted', asked:'Asked', agreed:'Agreed', declined:'Declined' };
 /* Fund pipeline stages — the core CRM flow. */
-const F_STAGES = { none:'Backlog', target:'\ud83c\udfaf Target', booked:'\u2705 Booked', pitching:'\ud83c\udfa4 Pitching', closed:'\u274c Closed', disqualified:'\ud83d\udeab Disqualified', future:'\u23f3 Future rounds' };
-const STAGE_TABS = ['funds','targets','booked','pitching','closed','disqualified','future'];
+const F_STAGES = { none:'Backlog', target:'\ud83c\udfaf Target', messaged:'\ud83d\udcac Messaged', booked:'\u2705 Booked', pitching:'\ud83c\udfa4 Pitching', closed:'\u274c Closed', disqualified:'\ud83d\udeab Disqualified', future:'\u23f3 Future rounds' };
+const STAGE_TABS = ['funds','targets','messaged','booked','pitching','closed','disqualified','future'];
 const WARMTH = { hot:'\ud83d\udd25 Hot', warm:'\u2600\ufe0f Warm', cool:'\ud83d\udd35 Cool', cold:'\ud83e\udd76 Cold', na:'\u2014 Not set' };
 const WARMTH_ICON = { na:'\u25cb', hot:'\ud83d\udd25', warm:'\u2600\ufe0f', cool:'\ud83d\udd35', cold:'\ud83e\udd76' };
+/* Where the fund came from: the master lists (grey) or OpenVC (light orange). */
+function sourceCellHtml(f){
+  const v = FS(f.id).source || 'list';
+  return `<div class="dd dd--row" data-ddctx="fsource:${f.id}" data-ddval="${v}">
+    <button type="button" class="dd-btn src-pill ${v==='openvc'?'src-pill--open':''}" title="Source">${v==='openvc'?'Open VC':'List'}</button>
+    <div class="dd-menu"><div class="dd-head">Source</div>
+      <button type="button" class="dd-item ${v==='list'?'on':''}" data-ddv="list">List</button>
+      <button type="button" class="dd-item ${v==='openvc'?'on':''}" data-ddv="openvc">Open VC</button>
+    </div>
+  </div>`;
+}
+
 function warmthCellHtml(f){
   const w = FS(f.id).warmth || 'na';
   return `<div class="dd dd--row" data-ddctx="fwarmth:${f.id}" data-ddval="${w}">
@@ -1428,7 +1447,7 @@ let fundArchiveView = false;
 let headSort = { key: null, dir: 1 };
 let renderCap = 150;
 const HSORT_DEFAULT_DIR = { name:1, profile:1, fit:-1, check:-1, stage:1, people:-1, path:1, status:1, wayin:1 };
-const STAGE_ORDER = { none:0, target:1, booked:2, pitching:3, closed:4, disqualified:5, future:6 };
+const STAGE_ORDER = { none:0, target:1, messaged:2, booked:3, pitching:4, closed:5, disqualified:6, future:7 };
 const hArrow = k => headSort.key === k ? (headSort.dir === 1 ? ' \u2191' : ' \u2193') : '';
 let currentTab = 'funds';
 let searchQ = '';
@@ -1583,6 +1602,7 @@ function onDdChange(ctx, v){
   const arg = i === -1 ? null : ctx.slice(i + 1);
   if (kind === 'sort') { sortBy = v; headSort = { key: null, dir: 1 }; render(); return; }
   if (kind === 'afstage') { afStage = v; renderAfStage(); return; }
+  if (kind === 'fsource') { FS(arg).source = v; save(); render(); return; }
   if (kind === 'pstatus') { setPersonStatus(arg, v); return; }
   if (kind === 'dstatus') {
     setPersonStatus(arg, v);
@@ -1698,6 +1718,7 @@ function render(){
   $('cntFunds').textContent = activeFunds.length;
   const stageCount = s => activeFunds.filter(f => fStage(f) === s).length;
   $('cntTargets').textContent = stageCount('target');
+  $('cntMessaged').textContent = stageCount('messaged');
   $('cntBooked').textContent = stageCount('booked');
   $('cntPitching').textContent = stageCount('pitching');
   $('cntClosed').textContent = stageCount('closed');
@@ -1723,7 +1744,8 @@ function render(){
 
   const bar = $('bulkBar');
   const connMode = currentTab === 'connectors';
-  bar.classList.toggle('show', (selected.size > 0 && (isStageTab || currentTab === 'people')) || (connMode && connSelected.size > 0));
+  // single fund selection gets an inline action row under the row instead
+  bar.classList.toggle('show', (selected.size > (isStageTab ? 1 : 0) && (isStageTab || currentTab === 'people')) || (connMode && connSelected.size > 0));
   $('bulkCount').textContent = `${connMode ? connSelected.size : selected.size} selected`;
   document.querySelectorAll('.bulk-conn').forEach(b => b.style.display = connMode ? 'inline-block' : 'none');
   document.querySelectorAll('.bulk-fund').forEach(b => b.style.display = isStageTab ? 'inline-block' : 'none');
@@ -1789,6 +1811,7 @@ function renderFundsTable(){
     <th class="sortable" data-hsort="wayin" style="width:128px">Way in${hArrow('wayin')}</th>
     <th class="sortable hide-md" data-hsort="profile" style="width:138px">Profile${hArrow('profile')}</th>
     <th class="hide-md">Why it fits</th>
+    <th class="hide-md" style="width:88px">Source</th>
     <th class="sortable" data-hsort="stage" style="width:104px">Stage${hArrow('stage')}</th>
     <th class="sortable" data-hsort="people" style="width:56px">People${hArrow('people')}</th>
     <th style="width:36px"></th>
@@ -1811,6 +1834,7 @@ function renderFundsTable(){
       <td>${fundPathCellHtml(f)}</td>
       <td class="hide-md"><span class="fund-sub">${esc(f.type||'—')} · ${esc(f.region||'—')}${(f.sectors||[]).length ? ' · ' + esc(f.sectors.slice(0,2).join(', ')) : ''}</span></td>
       <td class="hide-md"><div class="why-cell" title="${esc(((f.looking||'') + ' ' + fundFitLine(f)).trim())}">${esc((firstSentence(f.looking) + ' ' + fundFitLine(f)).trim() || 'Add fund notes - they feed the fit read.')}</div></td>
+      <td class="hide-md">${sourceCellHtml(f)}</td>
       <td>${ddHtml({ ctx:'fstage:'+f.id, value:fStage(f), quiet:true, options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:v,cls:k==='none'?'st-backlog':''})) })}</td>
       <td><div style="display:flex;gap:6px;align-items:center;white-space:nowrap">
         <span style="font-weight:700">${ppl.length}</span>
@@ -1843,6 +1867,12 @@ function renderFundsTable(){
         <button class="mini-btn" data-msgfund="${f.id}">Message</button>
       </div></td>
     </tr>
+    ${selected.size === 1 && selected.has(f.id) ? `<tr class="sub-row"><td></td><td colspan="11" style="padding:8px 12px">
+      <div class="d-row" style="gap:8px;flex-wrap:wrap">
+        ${Object.entries(F_STAGES).filter(([k]) => k !== 'none' && k !== fStage(f)).map(([k,v]) =>
+          `<button class="bulk-btn" data-selstage="${k}" data-selid="${f.id}">→ ${v}</button>`).join('')}
+        <button class="bulk-btn" data-selstage="__clear" data-selid="${f.id}" title="Clear selection">✕</button>
+      </div></td></tr>` : ''}
     ${open ? personSubRows(f) : ''}`;
   }).join('');
   emptyState(rows.length, fundArchiveView ? 'Archive is empty. The check icon on a fund row sends it here.' : 'No funds match. Clear filters or upload more via Add funds in the top menu.');
@@ -2902,7 +2932,7 @@ document.addEventListener('click', e => {
     if (act === 'single') {
       if (!STAGE_TABS.includes(currentTab)) switchTab('funds');
       // default the stage to the board you're looking at
-      afStage = { targets:'target', booked:'booked', pitching:'pitching', closed:'closed', disqualified:'disqualified', future:'future' }[currentTab] || 'target';
+      afStage = { targets:'target', messaged:'messaged', booked:'booked', pitching:'pitching', closed:'closed', disqualified:'disqualified', future:'future' }[currentTab] || 'target';
       renderAfStage();
       $('fundPasteWrap').style.display = 'none';
       $('fundSingleWrap').style.display = 'block';
@@ -2910,6 +2940,16 @@ document.addEventListener('click', e => {
       $('afName').focus();
     }
     return; // 'samples' is handled by its own removeSamplesBtn listener
+  }
+  const selAct = e.target.closest('[data-selstage]');
+  if (selAct) {
+    const id = selAct.dataset.selid, stage = selAct.dataset.selstage;
+    if (stage === '__clear') { selected.clear(); render(); return; }
+    const fs = FS(id); fs.stage = stage; fs.archived = false;
+    selected.clear();
+    save(); render();
+    toast('Moved to ' + F_STAGES[stage]);
+    return;
   }
   const ddItem = e.target.closest('.dd-item');
   if (ddItem) {
@@ -3265,7 +3305,7 @@ $('afCreate').addEventListener('click', () => {
   $('fundSingleWrap').style.display = 'none';
   toast((isAngel ? 'Angel added' : 'Fund added') + ' - filed under ' + F_STAGES[afStage] + '.');
   // land the user on the board the investor was filed into
-  const wantTab = { target:'targets', booked:'booked', pitching:'pitching', closed:'closed', disqualified:'disqualified', future:'future' }[afStage] || 'funds';
+  const wantTab = { target:'targets', messaged:'messaged', booked:'booked', pitching:'pitching', closed:'closed', disqualified:'disqualified', future:'future' }[afStage] || 'funds';
   if (currentTab !== wantTab && currentTab !== 'funds') switchTab(wantTab);
   afStage = 'target'; renderAfStage();
   openFund(id);
