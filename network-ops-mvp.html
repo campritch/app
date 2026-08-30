@@ -247,7 +247,7 @@
     /* deliverables & compliance (North Station pattern) */
     .ai-tag { font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; background: var(--purple-bg); color: var(--purple-text); padding: 3px 8px; border-radius: 999px; }
     .cmp-hint { font-size: 11.5px; color: var(--text-tertiary); margin: 6px 0 2px; line-height: 1.45; }
-    .cmp-row { border: 1px solid var(--border-light); border-radius: 11px; padding: 11px 12px; margin-top: 9px; background: var(--white); }
+    .cmp-row { border: 1px solid transparent; border-radius: 12px; padding: 11px 12px; margin-top: 9px; background: var(--page-bg); }
     .cmp-row__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
     .cmp-row__date { font-size: 12px; font-weight: 700; }
     .cmp-status { font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
@@ -1227,9 +1227,7 @@
         <div style="display:flex;align-items:center;gap:8px">
           <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;flex:1">Deliverables &amp; compliance</div>
           <button class="btn btn--ghost btn--sm" onclick="copyDeliverables('${s.id}')">Copy all</button>
-          <span class="ai-tag">AI auto-detect</span>
         </div>
-        <div class="cmp-hint">Every read booked on this deal. Click a row to include or exclude it from the graph below — it reverts to the full deal when you close.</div>
         ${flightRows(s).map(e=>{ const epr=projection(e), passed=e.status==='verified'&&!!e.yt;
           const inSel=SELSET&&SELSET.has(e.id), selectable=!!epr;
           return `<div class="cmp-row" style="${selectable?(inSel?'box-shadow:inset 3px 0 0 var(--green-text);':'opacity:.45;border-style:dashed;'):''}">
