@@ -1605,12 +1605,11 @@
     document.getElementById('view-portal').innerHTML=`
     <div class="inner" style="max-width:940px">
       <div class="pagebar"><div class="head"><h1>Campaign Portal</h1></div>
-        <div class="pagebar__right"><span class="tag tag--grey">Live deals projecting ${pctOf(totP,totG)}%</span></div>
+        <div class="pagebar__right"><div class="seg">${DEAL_FILTERS.map(([k,label])=>{ const n=k==='brands'?brands.length:all.filter(c=>k==='all'||c.state===k).length;
+          return `<button class="${portalFilter===k?'active':''}" onclick="portalFilter='${k}';RENDER.portal()">${label}${k==='all'?'':' · '+n}</button>`; }).join('')}</div></div>
       </div>
-      <div class="seg" style="margin-bottom:14px">${DEAL_FILTERS.map(([k,label])=>{ const n=k==='brands'?brands.length:all.filter(c=>k==='all'||c.state===k).length;
-        return `<button class="${portalFilter===k?'active':''}" onclick="portalFilter='${k}';RENDER.portal()">${label}${k==='all'?'':' · '+n}</button>`; }).join('')}</div>
       ${body}
-      <div class="footnote">Every deal opens its own read-only report.</div>
+      <div class="footnote">Every deal opens its own read-only report. Live deals projecting ${pctOf(totP,totG)}%.</div>
     </div>`;
   }
 
