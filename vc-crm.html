@@ -1011,6 +1011,17 @@ We're excited to say we kicked off our seed round, and we've got {{spots_left}} 
 Deck: spotsnow.wiki/investors
 
 Cam` },
+  { id:'t_email_intro', name:'Email intro', audience:'person',
+    subject:`SpotsNow seed - {{spots_left}} left, meetings {{weeks}}`,
+    body:`Hey {{first}},
+
+We just kicked off SpotsNow's seed. We're the marketplace for host-read podcast ads - brands research, buy, and measure campaigns in minutes instead of weeks. $500K GMV in our first months, backed by Brickyard and Hustle Fund.
+
+We've got {{spots_left}} left and we're booking meetings for the weeks of {{weeks}}. Deck: spotsnow.wiki/investors
+
+Worth a look?
+
+Cam` },
   { id:'t_warm_intro', name:'Warm personalized intro', audience:'person',
     body:`Hey {{first}},
 
@@ -1215,6 +1226,11 @@ function matchNote(c, pid){
 function connectorsFor(personId){ return allConnectors().filter(c => !CS(c.id).archived && (c.matches||[]).includes(personId)); }
 function templates(){
   if (!state.templates) { state.templates = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES)); save(); }
+  // older saved template sets predate the email template - graft it in once
+  if (!state.templates.some(t => t.subject !== undefined)) {
+    const em = DEFAULT_TEMPLATES.find(t => t.subject !== undefined);
+    if (em) { state.templates.push(JSON.parse(JSON.stringify(em))); save(); }
+  }
   return state.templates;
 }
 
@@ -1598,7 +1614,7 @@ function onDdChange(ctx, v){
     if (drawerRef && drawerRef.kind === 'fund' && drawerRef.id === arg) openFund(arg);
     return;
   }
-  /* kind === 'tpl' → value is read when Generate is clicked */
+  if (kind === 'tpl') { if (typeof updateComposerUI === 'function' && updateComposerUI) updateComposerUI(); return; }
 }
 
 function statusDdHtml(p){
@@ -2276,6 +2292,7 @@ async function runAiFit(fid, btn){
 }
 
 /* ── Message composer (shared) ── */
+var updateComposerUI = null;   // set per drawer; dd 'tpl' changes call it
 function composerHtml(audience, draft, preferId){
   const ordered = templates().map((t,i)=>({t,i})).sort((a,b) =>
     ((a.t.id === preferId ? -1 : 0) - (b.t.id === preferId ? -1 : 0)) ||
@@ -2286,6 +2303,7 @@ function composerHtml(audience, draft, preferId){
         options: ordered.map(({t,i}) => ({ v:String(i), l:t.name + (t.audience!==audience?' (other)':'') })) })}
       <button class="btn-primary btn-primary--coral" id="dGen" style="margin-left:auto">Generate</button>
     </div>
+    <div id="dSubjRow" style="display:none"><input class="li-input" id="dSubj" placeholder="Subject" style="width:100%"></div>
     <textarea class="msg-area" id="dMsg" placeholder="Pick a template and hit Generate, or write from scratch.">${esc(draft||'')}</textarea>
     <div id="dCharCount" style="font-size:11.5px;color:var(--muted-foreground)"></div>
     <div class="d-row" style="flex-wrap:wrap">
@@ -2424,14 +2442,33 @@ function openPerson(id){
     }
   };
   updateCount();
+  const selTpl = () => templates()[+ddVal('dTplSel')];
+  const isEmailTpl = t => !!(t && t.subject !== undefined);
+  updateComposerUI = () => {
+    const em = isEmailTpl(selTpl());
+    if ($('dSubjRow')) $('dSubjRow').style.display = em ? 'block' : 'none';
+    if ($('dCopy')) $('dCopy').textContent = em ? 'Copy + open email' : 'Copy + open LinkedIn';
+    if ($('dCharCount')) $('dCharCount').style.display = em ? 'none' : 'block';
+  };
+  updateComposerUI();
   $('dMsg').oninput = e => { st.draft = e.target.value; save(); updateCount(); };
   $('dGen').onclick = () => {
-    const t = templates()[+ddVal('dTplSel')];
+    const t = selTpl();
     if (!t) return;
+    if (isEmailTpl(t)) $('dSubj').value = renderTemplate(t.subject, personCtx(p));
     const text = renderTemplate(t.body, personCtx(p));
     typeInto(text, () => { st.draft = text; save(); updateCount(); });
   };
   $('dCopy').onclick = () => {
+    const t = selTpl();
+    if (isEmailTpl(t)) {
+      const subj = $('dSubj').value || '', body = $('dMsg').value || '';
+      navigator.clipboard.writeText((subj ? 'Subject: ' + subj + '\n\n' : '') + body).catch(() => {});
+      const addr = p.email0 || '';
+      window.open('mailto:' + encodeURIComponent(addr) + '?subject=' + encodeURIComponent(subj) + '&body=' + encodeURIComponent(body));
+      toast(addr ? 'Copied. Compose window opened - lands in your drafts once you touch it.' : 'Copied. No email on file for them - fill the To line.');
+      return;
+    }
     // Copy first (while the page still has focus), then open LinkedIn.
     navigator.clipboard.writeText($('dMsg').value || '').catch(() => {});
     window.open(personLi(p), '_blank');
@@ -2691,6 +2728,7 @@ function openConnector(id, preselect){
     save(); render(); openConnector(id);
   };
   $('dNotes').oninput = e => { st.notes = e.target.value; save(); };
+  updateComposerUI = null;   // connector composer stays LinkedIn-only
   $('dMsg').oninput = e => { st.draft = e.target.value; save(); };
   $('dGen').onclick = () => {
     const t = templates()[+ddVal('dTplSel')];
