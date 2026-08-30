@@ -1340,7 +1340,7 @@
       flight: spots.length?`${fmtDate(first.published)} – ${fmtDate(addDays(last.published,30))}`:'—' };
   }
 
-  const DEAL_FILTERS=[['live','Live'],['upcoming','Upcoming'],['complete','Complete'],['all','All']];
+  const DEAL_FILTERS=[['live','Live'],['upcoming','Upcoming'],['complete','Complete'],['all','All'],['brands','Brands']];
   const STATE_DOT={live:'var(--green-text)', upcoming:'var(--blue-text)', complete:'var(--text-tertiary)'};
 
   function sendDealReport(id){
@@ -1358,7 +1358,10 @@
     const verified=spots.filter(s=>s.status==='verified'&&s.yt).length;
     const full=c.pct>=Math.round(IAB_FULL*100);   // 90% is full delivery under IAB
     const mgsMg=mgs.filter(x=>x.kind==='makegood'), mgsBonus=mgs.filter(x=>x.kind==='bonus');
-    const byShow={}; liveSpots.filter(s=>s.kind==='paid').forEach(s=>{ const k=s.showId;
+    const paidLiveSpots=liveSpots.filter(s=>s.kind==='paid');
+    const callableSpots=paidLiveSpots.filter(s=>projection(s).confident);
+    const reachBasis=callableSpots.length?callableSpots:paidLiveSpots;   // same rule as the headline
+    const byShow={}; reachBasis.forEach(s=>{ const k=s.showId;
       byShow[k]=byShow[k]||{showId:k,n:0,got:0,g:0,proj:0};
       byShow[k].n++; byShow[k].got+=delivered(s)||0; byShow[k].g+=s.guarantee; byShow[k].proj+=projection(s).proj; });
 
@@ -1366,8 +1369,7 @@
     <div class="inner" style="max-width:940px">
       <button class="btn btn--ghost btn--sm" style="margin-bottom:14px" onclick="closeDeal()">← All deals</button>
       <div class="pagebar">
-        <div class="head"><h1>${esc(d.brand)} <span class="muted" style="font-weight:600;font-size:19px">· ${esc(c.title)}</span></h1>
-        <p>The live report the advertiser sees. Read-only for them, and it fills in as reads land.</p></div>
+        <div class="head"><h1>${esc(d.brand)} <span class="muted" style="font-weight:600;font-size:19px">· ${esc(c.title)}</span></h1></div>
         <div class="pagebar__right">
           <button class="btn btn--ghost btn--sm" onclick="toast('Copied vmg.live/${d.brand.toLowerCase()}-${d.id} — read-only, admin notes stay internal.')">🔗 Copy link</button>
           <button class="btn btn--ghost btn--sm" onclick="createBonus('${d.id}')">+ Bonus spot</button>
@@ -1395,8 +1397,7 @@
       </div></div>
 
       <div class="card" style="margin-top:16px;border-style:dashed">
-        <div class="card__head"><div><div class="card__title">Admin notes <span class="tag tag--grey" style="margin-left:6px">Internal · not on the shared link</span></div>
-          <div class="card__sub">Ops notes for Sydney and Shelby — check-ins, addresses owed, things a show or brand said.</div></div>
+        <div class="card__head"><div><div class="card__title">Admin notes <span class="tag tag--grey" style="margin-left:6px">Internal · not on the shared link</span></div></div>
           <button class="btn btn--ghost btn--sm" onclick="saveDealNotes('${d.id}')">Save</button></div>
         <div class="card__pad" style="padding-top:0">
           <textarea id="dealNotes" class="cmp-inp" style="min-height:64px;line-height:1.6;font-size:12.5px" placeholder="e.g. Chase the gift-card redemptions — only a few shows have. Brand wants addresses by Friday.">${esc(d.notes||'')}</textarea>
@@ -1405,7 +1406,7 @@
 
       ${Object.keys(byShow).length?`<div class="card" style="margin-top:16px">
         <div class="card__head"><div class="card__title">Reach by show</div>
-          <span class="tag tag--grey">${(n=>n+' show'+(n!==1?'s':''))(Object.keys(byShow).length)} · ${(n=>n+' read'+(n!==1?'s':''))(liveSpots.filter(s=>s.kind==='paid').length)} live</span></div>
+          <span class="tag tag--grey">${(n=>n+' show'+(n!==1?'s':''))(Object.keys(byShow).length)} · ${(n=>n+' read'+(n!==1?'s':''))(reachBasis.length)}</span></div>
         <div class="card__pad">${Object.values(byShow).map(r=>{ const pct=pctOf(r.proj,r.g);
           return `<div style="margin-bottom:14px">
             <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:600">
@@ -1432,7 +1433,7 @@
       <div class="card" style="margin-top:16px">
         <div class="card__head"><div><div class="card__title">Reads on this deal</div>
           <div class="card__sub">Click a timestamp to hear the read, or open one for the transcript and the brief.</div></div></div>
-        <table><thead><tr><th>Show</th><th>Published</th><th class="num">Impressions</th><th>Verified</th><th>Ad read</th><th>Episode</th><th></th></tr></thead>
+        <table><thead><tr><th style="min-width:150px">Show</th><th>Published</th><th class="num">Impressions</th><th>Verified</th><th>Ad read</th><th>Episode</th><th></th></tr></thead>
         <tbody>${liveSpots.filter(s=>s.kind==='paid').map(s=>{ const pr=projection(s);
           return `<tr><td><b>${esc(show(s.showId).name)}</b><div class="muted" style="font-size:11.5px">${esc(epTitle(s))}</div></td>
             <td>${fmtDate(s.published)}</td>
@@ -1455,53 +1456,62 @@
 
   /* The index: full-width brand rows, deals always visible under them (13:33 —
      "the default should go straight to the deals for speed"). */
-  let BRAND_CLOSED={};
+  let BRAND_OPEN={};
+  /* Two ways in (Cam): the deal tabs are a flat stack — brand bold, campaign
+     after it. The Brands tab is a closed stack of brands; click one to see
+     its deals. */
+  function dealIndexRow(c,i,hideBrand){
+    const tone=toneVar(c.status.tone), max=Math.max(c.g,c.proj)*1.06, w=x=>c.g?Math.min(100,x/max*100):0;
+    return `<div class="wrow--click" style="display:grid;grid-template-columns:10px minmax(0,1fr) 150px 168px 118px 26px;align-items:center;gap:0 13px;padding:12px 16px;${i===0&&!hideBrand?'':'border-top:1px solid var(--border-light)'}" onclick="openDeal('${c.deal.id}')">
+      <span style="width:8px;height:8px;border-radius:50%;background:${STATE_DOT[c.state]}" title="${c.state}"></span>
+      <div style="min-width:0"><b style="font-size:13px">${hideBrand?esc(c.title):`${esc(c.brand)} <span style="font-weight:600;color:var(--text-secondary)">· ${esc(c.title)}</span>`}</b>
+        <div class="muted" style="font-size:11px">${c.shows.map(x=>show(x).name).join(', ')} · ${esc(c.flight)}</div></div>
+      <div>${['under','mg','blocked'].includes(c.status.k)?`<span class="tag tag--${c.status.tone}"><i></i>${c.status.label}</span>`
+        :`<span class="muted" style="font-size:11.5px">${c.state==='upcoming'?'Starts '+fmtDate(c.spots[0].published):c.state==='complete'?'Complete':''}</span>`}</div>
+      <div class="wrow__num" style="width:auto;justify-content:flex-end;display:flex;align-items:center;gap:9px">${c.g?`
+        <div style="position:relative;flex:1;height:8px;border-radius:4px;background:var(--secondary-lite)">
+          <div style="position:absolute;inset:0 auto 0 0;width:${w(c.proj)}%;border-radius:4px;background:${tone};opacity:.28"></div>
+          <div style="position:absolute;inset:0 auto 0 0;width:${w(c.got)}%;border-radius:4px;background:${tone}"></div>
+          <div style="position:absolute;top:-2px;bottom:-2px;left:${w(c.g*IAB_FULL)}%;width:2px;background:var(--green-text)"></div>
+        </div><b style="font-size:12px;color:${tone};min-width:36px;text-align:right">${c.pct}%</b>`
+        :'<span style="flex:1;text-align:left;font-size:12px;font-weight:600;color:var(--text-tertiary)">Not started</span>'}</div>
+      <div style="text-align:right"><span class="muted" style="font-size:11px">${c.g?K(c.got)+' of '+K(c.g):K(c.spots.reduce((a,s)=>a+s.guarantee,0))+' booked'}</span></div>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.4" style="justify-self:center"><path d="M9 6l6 6-6 6"/></svg>
+    </div>`;
+  }
   function renderDealIndex(){
     const all=DEALS.filter(d=>d.outcome==='won').map(dealSummary);
-    const match=c=>portalFilter==='all'||c.state===portalFilter;
-    const shown=all.filter(match);
-    const byBrand={}; shown.forEach(c=>{ (byBrand[c.brand]=byBrand[c.brand]||[]).push(c); });
     const totG=all.filter(c=>c.state==='live').reduce((a,c)=>a+c.g,0);
     const totP=all.filter(c=>c.state==='live').reduce((a,c)=>a+c.proj,0);
-    document.getElementById('view-portal').innerHTML=`
-    <div class="inner" style="max-width:940px">
-      <div class="pagebar"><div class="head"><h1>Campaign Portal</h1>
-        <p>Brand, then the deals under it — each deal has its own guarantee and its own report.</p></div>
-        <div class="pagebar__right"><span class="tag tag--grey">Live deals projecting ${pctOf(totP,totG)}%</span></div>
-      </div>
-      <div class="seg" style="margin-bottom:16px">${DEAL_FILTERS.map(([k,label])=>{ const n=all.filter(c=>k==='all'||c.state===k).length;
-        return `<button class="${portalFilter===k?'active':''}" onclick="portalFilter='${k}';RENDER.portal()">${label}${k==='all'?'':' · '+n}</button>`; }).join('')}</div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        ${Object.entries(byBrand).map(([b,deals])=>{ const closed=!!BRAND_CLOSED[b];
-          const allB=all.filter(c=>c.brand===b);
-          const totDelivered=allB.reduce((a,c)=>a+c.got,0);
+    const brands=[...new Set(all.map(c=>c.brand))].sort();
+    let body;
+    if(portalFilter==='brands'){
+      body=`<div style="display:flex;flex-direction:column;gap:10px">
+        ${brands.map(b=>{ const bd=all.filter(c=>c.brand===b), open=!!BRAND_OPEN[b];
+          const delivered=bd.reduce((a,c)=>a+c.got,0);
           return `<div class="card">
-          <button style="width:100%;border:none;background:none;font-family:inherit;color:var(--text-primary);text-align:left;padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="BRAND_CLOSED['${esc(b)}']=!BRAND_CLOSED['${esc(b)}'];RENDER.portal()">
+          <button style="width:100%;border:none;background:none;font-family:inherit;color:var(--text-primary);text-align:left;padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="BRAND_OPEN['${esc(b)}']=!BRAND_OPEN['${esc(b)}'];RENDER.portal()">
             <div class="brand-chip" style="background:${brandColor[b]||'#3B82F6'};width:32px;height:32px;border-radius:9px;font-size:12px">${esc(b[0])}</div>
             <b style="font-size:14.5px;letter-spacing:-.02em;flex:1">${esc(b)}</b>
-            <span class="muted" style="font-size:11.5px">${K(totDelivered)} delivered to date · ${allB.length} deal${allB.length!==1?'s':''}</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.4" style="transform:rotate(${closed?0:90}deg);transition:.15s"><path d="M9 6l6 6-6 6"/></svg>
+            <span class="muted" style="font-size:11.5px">${K(delivered)} delivered to date · ${bd.length} deal${bd.length!==1?'s':''}</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.4" style="transform:rotate(${open?90:0}deg);transition:.15s"><path d="M9 6l6 6-6 6"/></svg>
           </button>
-          ${closed?'':`<div style="border-top:1px solid var(--border-light)">${deals.map(c=>{ const tone=toneVar(c.status.tone);
-            const max=Math.max(c.g,c.proj)*1.06, w=x=>c.g?Math.min(100,x/max*100):0;
-            return `<div class="wrow--click" style="display:grid;grid-template-columns:10px minmax(0,1fr) 150px 168px 118px 26px;align-items:center;gap:0 13px;padding:12px 16px;border-top:1px solid var(--border-light)" onclick="openDeal('${c.deal.id}')">
-              <span style="width:8px;height:8px;border-radius:50%;background:${STATE_DOT[c.state]}" title="${c.state}"></span>
-              <div style="min-width:0"><b style="font-size:13px">${esc(c.title)}</b>
-                <div class="muted" style="font-size:11px">${c.shows.map(x=>show(x).name).join(', ')} · ${esc(c.flight)}</div></div>
-              <div>${['under','mg','blocked'].includes(c.status.k)?`<span class="tag tag--${c.status.tone}"><i></i>${c.status.label}</span>`
-                :`<span class="muted" style="font-size:11.5px">${c.state==='upcoming'?'Starts '+fmtDate(c.spots[0].published):c.state==='complete'?'Complete':''}</span>`}</div>
-              <div class="wrow__num" style="width:auto;justify-content:flex-end;display:flex;align-items:center;gap:9px">${c.g?`
-                <div style="position:relative;flex:1;height:8px;border-radius:4px;background:var(--secondary-lite)">
-                  <div style="position:absolute;inset:0 auto 0 0;width:${w(c.proj)}%;border-radius:4px;background:${tone};opacity:.28"></div>
-                  <div style="position:absolute;inset:0 auto 0 0;width:${w(c.got)}%;border-radius:4px;background:${tone}"></div>
-                  <div style="position:absolute;top:-2px;bottom:-2px;left:${w(c.g*IAB_FULL)}%;width:2px;background:var(--green-text)"></div>
-                </div><b style="font-size:12px;color:${tone};min-width:36px;text-align:right">${c.pct}%</b>`
-                :'<span style="flex:1;text-align:left;font-size:12px;font-weight:600;color:var(--text-tertiary)">Not started</span>'}</div>
-              <div style="text-align:right"><span class="muted" style="font-size:11px">${c.g?K(c.got)+' of '+K(c.g):K(c.spots.reduce((a,s)=>a+s.guarantee,0))+' booked'}</span></div>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.4" style="justify-self:center"><path d="M9 6l6 6-6 6"/></svg>
-            </div>`; }).join('')}</div>`}
-          </div>`; }).join('')||'<div class="card"><div class="empty">No deals in this state.</div></div>'}
+          ${open?`<div style="border-top:1px solid var(--border-light)">${bd.map((c,i)=>dealIndexRow(c,i+1,true)).join('')}</div>`:''}
+          </div>`; }).join('')}
+      </div>`;
+    } else {
+      const cs=all.filter(c=>portalFilter==='all'||c.state===portalFilter);
+      body=cs.length?`<div class="card" style="overflow:hidden">${cs.map((c,i)=>dealIndexRow(c,i,false)).join('')}</div>`
+                    :'<div class="card"><div class="empty">No deals in this state.</div></div>';
+    }
+    document.getElementById('view-portal').innerHTML=`
+    <div class="inner" style="max-width:940px">
+      <div class="pagebar"><div class="head"><h1>Campaign Portal</h1></div>
+        <div class="pagebar__right"><span class="tag tag--grey">Live deals projecting ${pctOf(totP,totG)}%</span></div>
       </div>
+      <div class="seg" style="margin-bottom:16px">${DEAL_FILTERS.map(([k,label])=>{ const n=k==='brands'?brands.length:all.filter(c=>k==='all'||c.state===k).length;
+        return `<button class="${portalFilter===k?'active':''}" onclick="portalFilter='${k}';RENDER.portal()">${label}${k==='all'?'':' · '+n}</button>`; }).join('')}</div>
+      ${body}
       <div class="footnote">Every deal opens its own read-only report. Green dot live, blue upcoming, grey complete.</div>
     </div>`;
   }
