@@ -105,13 +105,14 @@
     /* sidebar nav re-asserted over the topbar redefinition: chunky Bluewire pills */
     .sidebar .nav-item { display: flex; width: 100%; padding: 12px 14px; border-radius: 12px; font-size: 13.5px; color: var(--text-secondary); gap: 12px; }
     .sidebar .nav-item:hover { background: var(--nav-hover); color: var(--text-primary); }
-    .sidebar .nav-item.active { background: var(--nav-current); color: var(--text-primary); }
+    .sidebar .nav-item.active { background: var(--secondary-lite); color: var(--text-primary); }
     .tb-btn { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--panel); color: var(--text-secondary); font-size: 12px; font-weight: 600; margin-left: 6px; }
     .tb-btn:hover { border-color: var(--border-strong); color: var(--text-primary); }
     .tb-btn.active { background: var(--nav-current); color: var(--text-primary); border-color: transparent; }
     .tb-btn svg { width: 13px; height: 13px; }
     .tb-av { width: 30px; height: 30px; border-radius: 9px; background: var(--primary); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 11px; margin-left: 6px; border: none; flex-shrink: 0; }
 
+    body.navhid .sidebar { display: none; }
     /* ─── MAIN ─── */
     .main { flex: 1; min-width: 0; background: var(--panel); display: flex; flex-direction: column; overflow: hidden; position: relative; }
     .views { flex: 1; overflow-y: auto; }
@@ -442,6 +443,10 @@
 
   <main class="main">
     <div class="topbar">
+      <div style="display:flex;align-items:center;gap:6px;margin-right:auto">
+        <button class="tb-btn" onclick="toggleNav()" title="Hide sidebar" style="margin-left:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></button>
+        <span id="tbBack"></span>
+      </div>
       <button class="tb-btn" data-view="shows" onclick="go('shows')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 4v16"/></svg>Shows</button>
       <button class="tb-btn" onclick="toggleDark()" id="dmBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>Dark Mode</button>
     </div>
@@ -759,9 +764,12 @@
     document.getElementById('view-'+v).classList.add('active');
     document.getElementById('main').scrollTop=0;
     CURRENT=v;
+    if(v!=='portal') setBack('');
     if(RENDER[v]) RENDER[v]();
   }
   function rerender(){ if(RENDER[CURRENT]) RENDER[CURRENT](); }
+  function toggleNav(){ document.body.classList.toggle('navhid'); }
+  const setBack=h=>{ document.getElementById('tbBack').innerHTML=h||''; }
   function refreshBadges(){
     const el=document.getElementById('nav-del-badge'); if(!el) return;
     const n=workList().length; el.textContent=n; el.style.display=n?'':'none';
@@ -1019,7 +1027,7 @@
   RENDER.settings = () => {
     const kvrow=(l,v)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-light);font-size:12.5px"><span class="muted">${l}</span><span style="font-weight:600">${v}</span></div>`;
     document.getElementById('view-settings').innerHTML=`
-    <div class="inner" style="max-width:680px">
+    <div class="inner" style="max-width:940px">
       <div class="pagebar"><div class="head"><h1>Settings</h1></div></div>
       <div class="card">
         <div class="card__head"><div class="card__title">Workspace</div></div>
@@ -1445,7 +1453,7 @@
   }
 
   RENDER.portal = () => {
-    if(portalDeal===null) return renderDealIndex();
+    if(portalDeal===null){ setBack(''); return renderDealIndex(); }
     const d=DEALS.find(x=>x.id===portalDeal); if(!d){ portalDeal=null; return renderDealIndex(); }
     const c=dealSummary(d), cr=creative(d.brand);
     const {spots,liveSpots,mgs,g,got,proj,paid,yt,aud,shows,flight,done}=c;
@@ -1461,33 +1469,30 @@
 
     document.getElementById('view-portal').innerHTML=`
     <div class="inner" style="max-width:940px">
-      <button class="btn btn--ghost btn--sm" style="margin-bottom:14px" onclick="closeDeal()">← All deals</button>
-
-      <div class="card"><div class="card__pad" style="padding:17px 20px">
-        <div style="display:flex;align-items:flex-start;gap:15px;flex-wrap:wrap">
-          <div style="flex:1;min-width:0">
-            <div style="font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--text-tertiary)">DELIVERY REPORT · ${esc(c.title).toUpperCase()}</div>
-            <h2 style="font-size:20px;font-weight:800;letter-spacing:-.03em;margin-top:2px">${esc(d.brand)} on VMG</h2>
-            <div class="muted" style="font-size:12.5px;margin-top:3px">${flight}</div>
-          </div>
-          <div style="display:flex;gap:9px">
+      ${setBack(`<button class="tb-btn" onclick="closeDeal()" style="margin-left:0">← All deals</button>`)||''}
+      <div class="pagebar">
+        <div class="head">
+          <div style="font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--text-tertiary)">DELIVERY REPORT · ${esc(c.title).toUpperCase()}</div>
+          <h1 style="margin-top:2px">${esc(d.brand)} on VMG</h1>
+          <div class="muted" style="font-size:12.5px;margin-top:3px">${flight}</div>
+        </div>
+        <div class="pagebar__right" style="text-align:right">
+          <div style="display:flex;gap:9px;justify-content:flex-end">
             <button class="btn btn--ghost btn--sm" onclick="toast('Copied vmg.live/${d.brand.toLowerCase()}-${d.id} — read-only, admin notes stay internal.')">🔗 Copy link</button>
             <button class="btn btn--ghost btn--sm" onclick="createBonus('${d.id}')">+ Make good</button>
             <button class="btn btn--primary btn--sm" onclick="sendDealReport('${d.id}')">Send report</button>
           </div>
-        </div>
-        <div style="display:flex;justify-content:flex-end;margin-top:6px">
-          <div style="text-align:right">
-            <div style="font-size:34px;font-weight:800;letter-spacing:-.04em;line-height:1;color:${full?'var(--green-text)':'var(--orange-text)'}">${c.pct}%</div>
-            <div class="muted" style="font-size:11.5px;margin-top:3px">of booked impressions</div>
+          <div style="margin-top:10px">
+            <div style="font-size:30px;font-weight:800;letter-spacing:-.04em;line-height:1;color:${full?'var(--green-text)':'var(--orange-text)'}">${c.pct}%</div>
+            <div class="muted" style="font-size:11.5px;margin-top:2px">of booked impressions</div>
           </div>
         </div>
-        <div style="background:var(--page-bg);border-radius:13px;padding:9px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px">
-          ${pStat('Imp delivered',K(got),1)}${pStat('Delivered CPM','$'+(got?(paid/(got/1000)):0).toFixed(2))}
-          ${pStat('YouTube reach',K(yt))}${pStat('Audio reach',K(aud))}
-          ${pStat('Shows',shows.length)}${pStat('Verified reads',verified+'/'+spots.filter(s=>s.kind==='paid').length)}
-        </div>
-      </div></div>
+      </div>
+      <div style="background:var(--page-bg);border-radius:13px;padding:9px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        ${pStat('Imp delivered',K(got),1)}${pStat('Delivered CPM','$'+(got?(paid/(got/1000)):0).toFixed(2))}
+        ${pStat('YouTube reach',K(yt))}${pStat('Audio reach',K(aud))}
+        ${pStat('Shows',shows.length)}${pStat('Verified reads',verified+'/'+spots.filter(s=>s.kind==='paid').length)}
+      </div>
 
       <div class="card" style="margin-top:16px;border-style:dashed">
         <div class="card__head"><div><div class="card__title">Admin notes <span class="tag tag--grey" style="margin-left:6px">Internal · not on the shared link</span></div></div>
