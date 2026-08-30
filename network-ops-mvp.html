@@ -84,6 +84,14 @@
     .listcard .wrow + .wrow { margin-top: 0; border-top: 1px solid var(--border-light); }
     .listcard .archdiv { margin: 4px 0; padding: 8px 16px; }
     .listcard .archdiv::after { display: none; }
+    /* report stat tiles — the lead one goes dark, like the network's impressions card */
+    .pstat { background: var(--white); border: 1px solid var(--border-light); border-radius: 10px; padding: 9px 12px; }
+    .pstat__l { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-tertiary); }
+    .pstat__v { font-size: 18px; font-weight: 800; letter-spacing: -.03em; margin-top: 3px; }
+    .pstat--dark { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .pstat--dark .pstat__l { color: inherit; opacity: .65; }
+    .pstat--dark .pstat__v { font-size: 24px; }
+    body.dark .pstat--dark { color: #12161C; }
 
     /* ─── TOP BAR ─── */
     .topbar { display: flex; align-items: center; gap: 4px; justify-content: flex-end; padding: 13px 18px 0; flex-shrink: 0; }
@@ -1425,7 +1433,7 @@
           </div>
         </div>
         <div style="background:var(--page-bg);border-radius:13px;padding:9px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px">
-          ${pStat('Imp delivered',K(got))}${pStat('Delivered CPM','$'+(got?(paid/(got/1000)):0).toFixed(2))}
+          ${pStat('Imp delivered',K(got),1)}${pStat('Delivered CPM','$'+(got?(paid/(got/1000)):0).toFixed(2))}
           ${pStat('YouTube reach',K(yt))}${pStat('Audio reach',K(aud))}
           ${pStat('Shows',shows.length)}${pStat('Verified reads',verified+'/'+spots.filter(s=>s.kind==='paid').length)}
         </div>
@@ -1551,7 +1559,7 @@
     </div>`;
   }
 
-  const pStat=(l,v)=>`<div style="background:var(--white);border:1px solid var(--border-light);border-radius:10px;padding:9px 12px"><div style="font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary)">${l}</div><div style="font-size:18px;font-weight:800;letter-spacing:-.03em;margin-top:3px">${v}</div></div>`;
+  const pStat=(l,v,dark)=>`<div class="pstat${dark?' pstat--dark':''}"><div class="pstat__l">${l}</div><div class="pstat__v">${v}</div></div>`;
 
 
   // Plain English, written for the advertiser reading the report.
