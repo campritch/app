@@ -423,7 +423,8 @@
 </head>
 <body>
   <nav class="sidebar">
-    <div class="sb-brand">
+    <div class="sb-brand" style="position:relative">
+      <button class="tb-plain" onclick="toggleNav()" title="Hide sidebar" style="position:absolute;top:0;right:-4px;padding:5px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:14px;height:14px"><path d="M15 6l-6 6 6 6"/></svg></button>
       <div class="sb-brand__mark"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect width="64" height="64" fill="#141519"/><text x="34.5" y="33.5" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="900" font-size="19" letter-spacing="5" fill="#fff">VMG</text><text x="33.6" y="45" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="5.8" letter-spacing="3.2" fill="#fff">NETWORK</text></svg></div>
       <div class="sb-brand__name"><b>VMG</b><span>DASHBOARD</span></div>
     </div>
@@ -447,7 +448,7 @@
   <main class="main">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:6px;margin-right:auto">
-        <button class="tb-plain" id="navBtn" onclick="toggleNav()" title="Hide sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <span id="navReveal"></span>
         <span id="tbBack"></span>
       </div>
       <button class="tb-btn" data-view="shows" onclick="go('shows')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 4v16"/></svg>Shows</button>
@@ -772,8 +773,7 @@
   }
   function rerender(){ if(RENDER[CURRENT]) RENDER[CURRENT](); }
   function toggleNav(){ const hid=document.body.classList.toggle('navhid');
-    document.getElementById('navBtn').innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="${hid?'M9 6l6 6-6 6':'M15 6l-6 6 6 6'}"/></svg>`;
-    document.getElementById('navBtn').title=hid?'Show sidebar':'Hide sidebar'; }
+    document.getElementById('navReveal').innerHTML=hid?`<button class="tb-plain" onclick="toggleNav()" title="Show sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:14px;height:14px"><path d="M9 6l6 6-6 6"/></svg></button>`:''; }
   const setBack=h=>{ document.getElementById('tbBack').innerHTML=h||''; }
   function refreshBadges(){
     const el=document.getElementById('nav-del-badge'); if(!el) return;
