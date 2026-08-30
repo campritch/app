@@ -970,7 +970,7 @@
     const dash='<span class="muted">—</span>';
     return `<div class="wrow wflight wrow--click" onclick="openSpot('${s.id}')">
       <div class="wrow__main"><b>${nameOf(s)}</b></div>
-      <div class="fnum" style="white-space:nowrap">${pr?`${Math.min(pr.day,30)} <span class="muted" style="font-size:10.5px">of 30</span>`:'—'}</div>
+      <div class="fnum" style="white-space:nowrap">${pr?`${Math.min(pr.day,30)}/30 <span class="muted" style="font-size:10px">days</span>`:'—'}</div>
       <div onclick="event.stopPropagation()" style="display:flex;flex-direction:column;align-items:stretch;gap:4px">${s.yt
         ? `<button class="fran" onclick="playClip('${s.yt}',${s.ts})" title="Hear the read"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>${mmss(s.ts)}</button>`
         : `<span class="fran fran--no">${s.status==='scheduled'?'due '+fmtDate(s.published):s.missed?'Overdue '+fmtDate(s.published):'due today'}</span>`}
@@ -1193,16 +1193,13 @@
       <div class="dhead">${esc(sh.name)}'s next episodes</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${nextEpisodes(s.showId,5,s.published).map(ep=>`<span class="tag ${ep.date===s.published?'tag--blue':ep.open?'tag--green':'tag--grey'}">${dayName(ep.date)} ${fmtDate(ep.date)} · ${ep.open}/${ep.cap}${ep.date===s.published?' · this ad':''}</span>`).join('')}</div>
       `; })():`
+      <div style="margin-bottom:14px">
+        <div style="text-align:right;font-size:12px;font-weight:700">${K(pr.got)} of ${K(s.guarantee)} · ${Math.round(pr.rawRatio*100)}%</div>
+        <div class="pace ${pr.rawRatio>=IAB_FULL?'pace--good':''}" style="height:6px;margin-top:5px"><div class="pace__fill" style="width:${Math.min(pr.rawRatio*100,100)}%"></div></div>
+      </div>
+
       ${s.yt?`<div class="reel-stage"><iframe src="https://www.youtube.com/embed/${s.yt}?start=${s.ts}" allow="autoplay" allowfullscreen></iframe></div>`
         :`<div class="reel-stage" style="color:#8a95a3;font-size:13px;text-align:center;padding:20px;display:grid;place-items:center">Audio-only read.<br>Impressions come from the host platform.</div>`}
-
-      <div style="margin-top:16px">
-        <div style="display:flex;align-items:baseline;justify-content:space-between">
-          <span style="font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--text-tertiary);text-transform:uppercase">Delivered</span>
-          <span style="font-size:12px;font-weight:700">${K(pr.got)} of ${K(s.guarantee)} · ${Math.round(pr.rawRatio*100)}%</span>
-        </div>
-        <div class="pace ${pr.rawRatio>=IAB_FULL?'pace--good':''}" style="height:6px;margin-top:6px"><div class="pace__fill" style="width:${Math.min(pr.rawRatio*100,100)}%"></div></div>
-      </div>
 
       <div style="display:flex;gap:18px;margin-top:16px">
         <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;align-content:start">
