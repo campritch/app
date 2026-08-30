@@ -476,6 +476,7 @@
   <main class="main">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:6px;margin-right:auto"><span id="tbBack"></span></div>
+      <button class="tb-btn" id="remBtn" onclick="remOpen=true;RENDER.overview();document.getElementById('remInp').focus()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add reminder</button>
       <button class="tb-btn" data-view="shows" onclick="go('shows')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 4v16"/></svg>Shows</button>
       <button class="tb-btn" onclick="toggleDark()" id="dmBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>Dark Mode</button>
     </div>
@@ -794,6 +795,7 @@
     document.getElementById('main').scrollTop=0;
     CURRENT=v;
     if(v!=='portal'&&v!=='shows') setBack('');
+    const rb=document.getElementById('remBtn'); if(rb) rb.style.display=v==='overview'?'':'none';
     if(RENDER[v]) RENDER[v]();
   }
   function rerender(){ if(RENDER[CURRENT]) RENDER[CURRENT](); }
@@ -1143,7 +1145,7 @@
           <button class="btn btn--primary btn--sm" style="flex-shrink:0" onclick="addReminder()">Add</button>
           <button class="wnote__x" title="Cancel" onclick="remOpen=false;RENDER.overview()">✕</button>
         </div>`
-        :`<button class="btn btn--ghost btn--sm" style="margin-top:10px" onclick="remOpen=true;RENDER.overview();document.getElementById('remInp').focus()">+ Add reminder</button>`}
+        :''}
       </div>
       ${CHATS.length?`<div class="thread">
         <div class="thread__hd"><span>Conversation</span><button onclick="newChat()">Clear</button></div>
@@ -1397,8 +1399,10 @@
       <button class="x" onclick="closeOverlays()">✕</button></div>
     <div class="drawer__body">
       <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:7px">Date · from ${esc(sh.name)}'s avails</div>
-      <div style="display:flex;gap:7px;flex-wrap:wrap">${nextEpisodes(s.showId,4).map(e=>`<button class="tag ${m.date===e.date?'tag--blue':'tag--grey'}" style="padding:7px 11px;cursor:${e.open?'pointer':'not-allowed'};opacity:${e.open?1:.45}" ${e.open?`onclick="setMgDate('${id}','${e.date}')"`:''}>${dayName(e.date)} ${fmtDate(e.date)} · ${e.open}/${e.cap}</button>`).join('')}</div>
-      <div class="muted" style="font-size:11.5px;margin-top:8px">Pulled from Airtable — what's booked comes from the inventory calendar, and Booster caps ${esc(sh.name)} at ${sh.positionsPerEp} positions an episode, so these slots are real.</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">${nextEpisodes(s.showId,4).map(e=>`<button class="tag ${m.date===e.date?'tag--blue':'tag--grey'}" style="padding:7px 11px;cursor:${e.open?'pointer':'not-allowed'};opacity:${e.open?1:.45}" ${e.open?`onclick="setMgDate('${id}','${e.date}')"`:''}>${dayName(e.date)} ${fmtDate(e.date)} · ${e.open}/${e.cap}</button>`).join('')}
+        <label class="tag ${m.date&&!nextEpisodes(s.showId,4).some(e=>e.date===m.date)?'tag--blue':'tag--grey'}" style="padding:6px 11px;cursor:pointer">Custom
+          <input type="date" value="${m.date&&!nextEpisodes(s.showId,4).some(e=>e.date===m.date)?m.date:''}" onchange="setMgDate('${id}',this.value)" style="border:none;background:none;font:inherit;color:inherit;margin-left:5px;width:110px;cursor:pointer">
+        </label></div>
 
       <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary);margin:16px 0 7px">Position</div>
       <div style="display:flex;gap:7px;flex-wrap:wrap">${['Pre-roll','Mid-roll','Post-roll'].map(pos=>`<button class="tag ${m.position===pos?'tag--blue':'tag--grey'}" style="padding:7px 13px;cursor:pointer" onclick="setMgPosition('${id}','${pos}')">${pos}${pos===creative(s.brand).placement?' · same as original':''}</button>`).join('')}</div>
