@@ -1495,13 +1495,7 @@
         ${pStat('Verified reads',verified+'/'+spots.filter(s=>s.kind==='paid').length)}
       </div>
 
-      <div class="card" style="margin-top:16px;border-style:dashed">
-        <div class="card__head"><div><div class="card__title">Admin notes <span class="tag tag--grey" style="margin-left:6px">Internal · not on the shared link</span></div></div>
-          <button class="btn btn--ghost btn--sm" onclick="saveDealNotes('${d.id}')">Save</button></div>
-        <div class="card__pad" style="padding-top:0">
-          <textarea id="dealNotes" class="cmp-inp" style="min-height:64px;line-height:1.6;font-size:12.5px" placeholder="e.g. Chase the gift-card redemptions — only a few shows have. Brand wants addresses by Friday.">${esc(d.notes||'')}</textarea>
-        </div>
-      </div>
+      <textarea id="dealNotes" class="cmp-inp" style="margin-top:14px;min-height:42px;line-height:1.6;font-size:12.5px" placeholder="Note — internal, never on the shared link. e.g. Chase the gift-card redemptions, brand wants addresses by Friday." onchange="saveDealNotes('${d.id}')">${esc(d.notes||'')}</textarea>
 
       ${Object.keys(byShow).length?`<div class="card" style="margin-top:16px">
         <div class="card__head"><div class="card__title">Reach by show</div>
