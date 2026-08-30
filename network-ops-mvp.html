@@ -1242,6 +1242,10 @@
         <h2 style="font-size:18px;font-weight:800;margin-top:8px">${esc(s.brand)} · ${esc(sh.name)}</h2>
         <div class="muted" style="font-size:12px">${pr?`${s.yt?`<a href="https://www.youtube.com/watch?v=${esc(s.yt)}" target="_blank" rel="noopener" style="color:var(--blue-text);text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${esc(epTitle(s))}</a>`:esc(epTitle(s))} · published ${fmtDate(s.published)}`:`Airs ${fmtDate(s.published)}`} · ${esc(cr.len)} ${esc(cr.placement).toLowerCase()}</div>
       </div>
+      ${pr?`<div style="margin-left:auto;margin-right:18px;min-width:230px;align-self:center">
+        <div style="text-align:right;font-size:12px;font-weight:700">${K(pr.got)} of ${K(s.guarantee)} · ${Math.round(pr.rawRatio*100)}%</div>
+        <div class="pace ${pr.rawRatio>=IAB_FULL?'pace--good':''}" style="height:6px;margin-top:5px"><div class="pace__fill" style="width:${Math.min(pr.rawRatio*100,100)}%"></div></div>
+      </div>`:''}
       <button class="x" onclick="closeOverlays()">✕</button></div>
     <div class="drawer__body">
     ${!pr?(()=>{ const kv=(l,v)=>`<div class="kv"><span>${l}</span><b>${v}</b></div>`;
@@ -1291,11 +1295,6 @@
         </div>
       </div>
 
-      <div style="margin-top:22px">
-        <div style="text-align:right;font-size:12px;font-weight:700">${K(pr.got)} of ${K(s.guarantee)} · ${Math.round(pr.rawRatio*100)}%</div>
-        <div class="pace ${pr.rawRatio>=IAB_FULL?'pace--good':''}" style="height:6px;margin-top:5px"><div class="pace__fill" style="width:${Math.min(pr.rawRatio*100,100)}%"></div></div>
-      </div>
-
       <div style="margin-top:16px">
         ${flightRows(s).map((e,ci)=>{ const epr=projection(e), passed=e.status==='verified'&&!!e.yt;
           const inSel=SELSET&&SELSET.has(e.id), selectable=!!epr;
@@ -1306,13 +1305,17 @@
               <span class="cmp-status ${passed?'ok':'pend'}">${passed?'✓ Passed':'Pending'}</span></span></div>
           <div style="display:flex;align-items:center;gap:8px">
             <div style="position:relative;flex:1;margin-top:6px">
-              <input class="cmp-inp${e.yt?' cmp-inp--link':''}" style="width:100%;padding-right:32px" value="${e.yt?esc('youtu.be/'+e.yt+'?t='+e.ts):''}" placeholder="Video link" ${e.yt?`readonly onclick="window.open('https://youtu.be/${e.yt}?t=${e.ts}','_blank')" title="Open on YouTube"`:''}>
+              <input class="cmp-inp${e.yt?' cmp-inp--link':''}" style="width:100%;padding-right:56px" value="${e.yt?esc('youtu.be/'+e.yt+'?t='+e.ts):''}" placeholder="Video link" title="Paste a new link if the wrong one was picked up" onmousedown="event.stopPropagation()" onchange="setSpotLink('${e.id}',this.value)">
+              ${e.yt?`<button class="cmp-copy" style="right:31px" title="Open on YouTube" onclick="event.stopPropagation();window.open('https://youtu.be/${e.yt}?t=${e.ts}','_blank')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg></button>`:''}
               ${e.yt?`<button class="cmp-copy" title="Copy link" onclick="event.stopPropagation();copyDeliverable('${e.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2"/></svg></button>`:''}
             </div>
             <span class="tag tag--grey" style="margin-top:6px;flex-shrink:0;font-variant-numeric:tabular-nums">${e.ts!=null?mmss(e.ts)+'–'+mmss(e.ts+adSecs(e)):'—'}</span>
           </div>
           ${show(e.showId).simulcast?`<div style="display:flex;align-items:center;gap:8px">
-            <input class="cmp-inp" style="margin-top:6px;flex:1" value="${e.yt?esc(e.brand.toLowerCase()+'-'+e.showId+'-'+e.published+'.mp3'):''}" placeholder="Audio file">
+            <div style="position:relative;flex:1;margin-top:6px">
+              <input class="cmp-inp" style="width:100%;padding-right:32px" value="${e.yt?esc(e.brand.toLowerCase()+'-'+e.showId+'-'+e.published+'.mp3'):''}" placeholder="Audio file">
+              ${e.yt?`<button class="cmp-copy" title="Copy file name" onclick="event.stopPropagation();copyAudio('${e.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2"/></svg></button>`:''}
+            </div>
             <button class="btn btn--ghost btn--sm" style="margin-top:6px;flex-shrink:0" onclick="event.stopPropagation();toast('Downloading the baked-in audio file. The feed itself can carry dynamic ads, so we hand over the file, not the link.')">↓ MP3</button>
           </div>`:''}
         </div>`; }).join('')}
@@ -1439,6 +1442,13 @@
     return pr && pr.final && verdict(s).k!=='short' && s.dlState!=='requested'; };
 
   const deliverableLine = e => `${spot(e).brand} on ${show(spot(e).showId).name} · ${fmtDate(spot(e).published)} · youtu.be/${spot(e).yt}?t=${spot(e).ts} · ad at ${mmss(spot(e).ts)}–${mmss(spot(e).ts+adSecs(spot(e)))}`;
+  function setSpotLink(id,val){ const e=spot(id), m=String(val).match(/(?:youtu\.be\/|[?&]v=|\/embed\/)([\w-]{6,})/);
+    if(!m){ toast('Could not read that link — paste a YouTube URL.'); openSpot(DRAWER_SPOT); return; }
+    e.yt=m[1]; const t=String(val).match(/[?&]t=(\d+)/); if(t) e.ts=parseInt(t[1]);
+    toast('Link replaced — the air check will re-verify against the new tape.');
+    rerender(); openSpot(DRAWER_SPOT); }
+  function copyAudio(id){ const e=spot(id), f=e.brand.toLowerCase()+'-'+e.showId+'-'+e.published+'.mp3';
+    navigator.clipboard&&navigator.clipboard.writeText(f); toast('Copied '+f); }
   function copyDeliverable(id){ const line=deliverableLine(id);
     navigator.clipboard&&navigator.clipboard.writeText(line); toast('Copied — ready to paste: '+line.slice(0,60)+'…'); }
   function copyDeliverables(id){ const s=spot(id);
