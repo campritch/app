@@ -1239,13 +1239,13 @@
 
       <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light)">
         <div style="display:flex;align-items:center;gap:8px">
-          <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;flex:1">Deliverables &amp; compliance</div>
+          <div style="flex:1"></div>
           <button class="btn btn--ghost btn--sm" onclick="copyDeliverables('${s.id}')">Copy all</button>
         </div>
         ${flightRows(s).map(e=>{ const epr=projection(e), passed=e.status==='verified'&&!!e.yt;
           const inSel=SELSET&&SELSET.has(e.id), selectable=!!epr;
-          return `<div class="cmp-row" style="${selectable?(inSel?'box-shadow:inset 3px 0 0 var(--green-text);':'opacity:.45;border-style:dashed;'):''}">
-          <div class="cmp-row__top" ${selectable?`style="cursor:pointer" onclick="toggleSel('${e.id}')"`:''}><span class="cmp-row__date">${fmtDate(e.published)} · ${dayName(e.published)}${epr?` <span class="muted" style="font-weight:500">· ${K(epr.got)} impressions</span>`:''}${e.id===s.id?' <span class="tag tag--blue" style="margin-left:4px">this read</span>':''}</span>
+          return `<div class="cmp-row" style="${selectable?(inSel?'':'opacity:.45;border-style:dashed;border-color:var(--border);'):''}">
+          <div class="cmp-row__top" ${selectable?`style="cursor:pointer" onclick="toggleSel('${e.id}')"`:''}><span class="cmp-row__date">${fmtDate(e.published)} · ${dayName(e.published)}${epr?` <span class="muted" style="font-weight:500">· ${K(epr.got)} impressions</span>`:''}</span>
             <span style="display:inline-flex;align-items:center;gap:7px">
               ${e.yt?`<button class="btn btn--ghost btn--sm" style="padding:3px 9px;font-size:11px" onclick="copyDeliverable('${e.id}')">Copy</button>`:''}
               <span class="cmp-status ${passed?'ok':'pend'}">${passed?'✓ Passed':'Pending'}</span></span></div>
