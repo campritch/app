@@ -350,8 +350,9 @@
     .wpop button { display:block; width:100%; text-align:left; border:none; background:none; border-radius:7px;
                    padding:8px 11px; font-size:12.5px; font-weight:600; color:var(--text-primary); cursor:pointer; }
     .wpop button:hover { background:var(--nav-hover); }
-    .wnote { display:flex; align-items:center; gap:11px; padding:8px 10px 8px 14px; background:var(--panel);
-             border:1px solid var(--border); border-radius:14px; cursor:pointer; box-shadow:0 1px 2px rgba(16,20,28,.04); }
+    .wnote { display:flex; align-items:center; gap:11px; padding:8px 10px 8px 14px; background:var(--page-bg);
+             border:1px solid var(--border-light); border-radius:14px; cursor:pointer; }
+    .wnote__x { background:var(--white); }
     .wnote + .wnote, .wnote + .wrow { margin-top:8px; }
     .wnote__body { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .wnote__body b { font-size:12.5px; }
@@ -1497,17 +1498,6 @@
 
       <textarea id="dealNotes" class="cmp-inp" style="margin-top:14px;min-height:42px;line-height:1.6;font-size:12.5px" placeholder="Note — internal, never on the shared link. e.g. Chase the gift-card redemptions, brand wants addresses by Friday." onchange="saveDealNotes('${d.id}')">${esc(d.notes||'')}</textarea>
 
-      ${Object.keys(byShow).length?`<div class="card" style="margin-top:16px">
-        <div class="card__head"><div class="card__title">Reach by show</div>
-          <span class="tag tag--grey">${(n=>n+' show'+(n!==1?'s':''))(Object.keys(byShow).length)} · ${(n=>n+' read'+(n!==1?'s':''))(reachBasis.length)}</span></div>
-        <div class="card__pad">${Object.values(byShow).map(r=>{ const pct=pctOf(r.proj,r.g);
-          return `<div style="margin-bottom:14px">
-            <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:600">
-              <span>${esc(show(r.showId).name)} <span class="muted" style="font-weight:500">· ${r.n} read${r.n>1?'s':''}</span></span>
-              <span>${K(r.got)} · ${pct}%</span></div>
-            <div class="pace ${pct>=90?'pace--good':'pace--warn'}" style="margin-top:5px"><div class="pace__fill" style="width:${Math.min(pct,100)}%"></div></div>
-          </div>`; }).join('')}</div>
-      </div>`:''}
 
       ${full&&done&&c.pct>=100?`<div class="card" style="margin-top:16px;border-color:var(--green-bg)"><div class="card__pad" style="display:flex;align-items:center;gap:14px">
         <div style="width:38px;height:38px;border-radius:10px;background:var(--green-bg);display:grid;place-items:center;flex-shrink:0"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--green-text)" stroke-width="2.2"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4-6.3-4.6L5.7 21 8 14 2 9.4h7.6z"/></svg></div>
@@ -1524,8 +1514,14 @@
           <div class="muted" style="font-size:12.5px">On ${mgsBonus.map(m=>fmtDate(m.published)).join(', ')} — performance support, no charge.</div></div></div></div>`:''}
 
       <div class="card" style="margin-top:16px">
-        <div class="card__head"><div><div class="card__title">Reads on this deal</div>
-          <div class="card__sub">Click a timestamp to hear the read, or open one for the transcript and the brief.</div></div></div>
+        <div class="card__head"><div class="card__title">Delivery</div></div>
+        ${Object.keys(byShow).length>1?`<div class="card__pad" style="padding-bottom:2px">${Object.values(byShow).map(r=>{ const pct=pctOf(r.proj,r.g);
+          return `<div style="margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:600">
+              <span>${esc(show(r.showId).name)} <span class="muted" style="font-weight:400">· ${r.n} read${r.n>1?'s':''}</span></span>
+              <span>${K(r.got)} · ${pct}%</span></div>
+            <div class="pace ${pct>=90?'pace--good':'pace--warn'}" style="margin-top:5px"><div class="pace__fill" style="width:${Math.min(pct,100)}%"></div></div>
+          </div>`; }).join('')}</div>`:''}
         <table><thead><tr><th style="min-width:190px">Show</th><th>Published</th><th class="num">Impressions</th><th>Verified</th><th>Ad read</th><th></th></tr></thead>
         <tbody>${liveSpots.filter(s=>s.kind==='paid').map(s=>{ const pr=projection(s);
           return `<tr><td style="white-space:nowrap"><b>${esc(show(s.showId).name)}</b>
