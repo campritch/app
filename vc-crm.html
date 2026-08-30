@@ -199,7 +199,8 @@
     }
     .dd--menu .dd-btn:hover, .dd--menu.open .dd-btn { background: var(--accent); color: var(--foreground); }
     .dd-menu {
-      position: absolute; top: calc(100% + 6px); left: 0; z-index: 320;
+      /* above the drawer (z 501) so drawer dropdowns are clickable */
+      position: absolute; top: calc(100% + 6px); left: 0; z-index: 560;
       background: var(--background); border: 1px solid var(--border); border-radius: 8px;
       box-shadow: var(--shadow-md);
       padding: 4px; min-width: 190px; display: none;
@@ -647,6 +648,7 @@
         <button class="tab" data-tab="closed">Closed <span class="count" id="cntClosed">0</span></button>
         <button class="tab" data-tab="disqualified">Disqualified <span class="count" id="cntDisqualified">0</span></button>
         <button class="tab" data-tab="followups">Follow-ups <span class="count" id="cntFollowups">0</span></button>
+        <button class="tab" data-tab="future">Future rounds <span class="count" id="cntFuture">0</span></button>
       </div>
     </div>
 
@@ -1216,8 +1218,8 @@ const P_STATUS = {
 };
 const C_STATUS = { none:'Not asked', draft:'Ask drafted', asked:'Asked', agreed:'Agreed', declined:'Declined' };
 /* Fund pipeline stages — the core CRM flow. */
-const F_STAGES = { none:'Backlog', target:'\ud83c\udfaf Target', booked:'\u2705 Booked', pitching:'\ud83c\udfa4 Pitching', closed:'\u274c Closed', disqualified:'\ud83d\udeab Disqualified' };
-const STAGE_TABS = ['funds','targets','booked','pitching','closed','disqualified'];
+const F_STAGES = { none:'Backlog', target:'\ud83c\udfaf Target', booked:'\u2705 Booked', pitching:'\ud83c\udfa4 Pitching', closed:'\u274c Closed', disqualified:'\ud83d\udeab Disqualified', future:'\u23f3 Future rounds' };
+const STAGE_TABS = ['funds','targets','booked','pitching','closed','disqualified','future'];
 const WARMTH = { hot:'\ud83d\udd25 Hot', warm:'\u2600\ufe0f Warm', cool:'\ud83d\udd35 Cool', cold:'\ud83e\udd76 Cold', na:'\u2014 Not set' };
 const WARMTH_ICON = { na:'\u25cb', hot:'\ud83d\udd25', warm:'\u2600\ufe0f', cool:'\ud83d\udd35', cold:'\ud83e\udd76' };
 function warmthCellHtml(f){
@@ -1359,7 +1361,7 @@ let fundArchiveView = false;
 let headSort = { key: null, dir: 1 };
 let renderCap = 150;
 const HSORT_DEFAULT_DIR = { name:1, profile:1, fit:-1, check:-1, stage:1, people:-1, path:1, status:1, wayin:1 };
-const STAGE_ORDER = { none:0, target:1, booked:2, pitching:3, closed:4, disqualified:5 };
+const STAGE_ORDER = { none:0, target:1, booked:2, pitching:3, closed:4, disqualified:5, future:6 };
 const hArrow = k => headSort.key === k ? (headSort.dir === 1 ? ' \u2191' : ' \u2193') : '';
 let currentTab = 'funds';
 let searchQ = '';
@@ -1613,7 +1615,7 @@ function render(){
   const isTable = isStageTab || ['people','followups'].includes(currentTab);
   $('tableView').style.display = isTable ? 'block' : 'none';
   $('toolbar').style.display = (isStageTab || currentTab === 'people') ? 'flex' : 'none';
-  $('fundsImportView').style.display = currentTab === 'funds' ? 'flex' : 'none';
+  $('fundsImportView').style.display = STAGE_TABS.includes(currentTab) ? 'flex' : 'none';
   $('connectorsView').style.display = currentTab === 'connectors' ? 'flex' : 'none';
   $('templatesView').style.display = currentTab === 'templates' ? 'flex' : 'none';
 
@@ -1634,6 +1636,7 @@ function render(){
   $('cntPitching').textContent = stageCount('pitching');
   $('cntClosed').textContent = stageCount('closed');
   $('cntDisqualified').textContent = stageCount('disqualified');
+  $('cntFuture').textContent = stageCount('future');
   const cf = $('cntFollowups');
   cf.textContent = allFollow;
   cf.classList.toggle('hot', (dueP + dueC) > 0);
@@ -2670,10 +2673,17 @@ function openConnector(id, preselect){
 }
 
 function showDrawer(){
-  $('drawer').classList.add('show');
+  const d = $('drawer');
+  d.classList.add('show');
+  // once slid in, drop the transform: a transformed ancestor hijacks the
+  // fixed-position dd menus (they'd render offscreen and look dead)
+  clearTimeout(showDrawer._t);
+  showDrawer._t = setTimeout(() => { if (d.classList.contains('show')) d.style.transform = 'none'; }, 260);
   $('drawerOverlay').classList.add('show');
 }
 function closeDrawer(){
+  clearTimeout(showDrawer._t);
+  $('drawer').style.transform = '';
   $('drawer').classList.remove('show');
   $('drawerOverlay').classList.remove('show');
   drawerRef = null;
@@ -2793,13 +2803,16 @@ document.addEventListener('click', e => {
     const act = fact.dataset.fundact;
     if (act === 'upload') $('fundCsvInput').click();
     if (act === 'paste') {
-      if (currentTab !== 'funds') switchTab('funds');
+      if (!STAGE_TABS.includes(currentTab)) switchTab('funds');
       $('fundSingleWrap').style.display = 'none';
       $('fundPasteWrap').style.display = 'block';
       $('fundPasteWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     if (act === 'single') {
-      if (currentTab !== 'funds') switchTab('funds');
+      if (!STAGE_TABS.includes(currentTab)) switchTab('funds');
+      // default the stage to the board you're looking at
+      afStage = { targets:'target', booked:'booked', pitching:'pitching', closed:'closed', disqualified:'disqualified', future:'future' }[currentTab] || 'target';
+      renderAfStage();
       $('fundPasteWrap').style.display = 'none';
       $('fundSingleWrap').style.display = 'block';
       $('fundSingleWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2829,11 +2842,20 @@ document.addEventListener('click', e => {
         const r = ddBtn.getBoundingClientRect();
         menu.style.position = 'fixed';
         menu.style.right = 'auto';
-        menu.style.top = (r.bottom + 6) + 'px';
+        let top = r.bottom + 6;
+        menu.style.top = top + 'px';
         const mw = menu.offsetWidth;
-        menu.style.left = Math.max(8, Math.min(window.innerWidth - mw - 8, r.right - mw)) + 'px';
+        let left = Math.max(8, Math.min(window.innerWidth - mw - 8, r.right - mw));
+        menu.style.left = left + 'px';
         const mh = menu.offsetHeight;
-        if (r.bottom + 6 + mh > window.innerHeight - 8) menu.style.top = Math.max(8, r.top - mh - 6) + 'px';
+        if (top + mh > window.innerHeight - 8) { top = Math.max(8, r.top - mh - 6); menu.style.top = top + 'px'; }
+        // a transformed ancestor (the drawer mid-slide) shifts the fixed
+        // coordinate origin - measure the landing spot and correct the delta
+        const a = menu.getBoundingClientRect();
+        if (Math.abs(a.left - left) > 1 || Math.abs(a.top - top) > 1) {
+          menu.style.left = (left - (a.left - left)) + 'px';
+          menu.style.top = (top - (a.top - top)) + 'px';
+        }
       }
     }
     return;
@@ -3118,6 +3140,10 @@ $('afCreate').addEventListener('click', () => {
   const name = $('afName').value.trim();
   if (!name) { toast('Name is required.'); $('afName').focus(); return; }
   const isAngel = afKind === 'angel';
+  if (/^(angel investors?|angels?|investors?|vcs?|venture capital)$/i.test(name)) {
+    toast(isAngel ? "Use the person's actual name." : 'That’s a category, not a name - for an angel, flip the toggle and enter their name.');
+    $('afName').focus(); return;
+  }
   const existing = FUNDS.find(x => normOrg(x.name) === normOrg(name));
   if (existing) { toast('Already in the pipeline - opening it.'); openFund(existing.id); return; }
   let id = 'cf-' + slug(name);
@@ -3144,6 +3170,9 @@ $('afCreate').addEventListener('click', () => {
   ['afName','afPerson','afTitle','afLi','afEmail','afCheck','afRegion','afNotes'].forEach(k => { $(k).value = ''; });
   $('fundSingleWrap').style.display = 'none';
   toast((isAngel ? 'Angel added' : 'Fund added') + ' - filed under ' + F_STAGES[afStage] + '.');
+  // land the user on the board the investor was filed into
+  const wantTab = { target:'targets', booked:'booked', pitching:'pitching', closed:'closed', disqualified:'disqualified', future:'future' }[afStage] || 'funds';
+  if (currentTab !== wantTab && currentTab !== 'funds') switchTab(wantTab);
   afStage = 'target'; renderAfStage();
   openFund(id);
 });
