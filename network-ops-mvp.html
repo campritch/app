@@ -341,7 +341,7 @@
     .wrow + .wrow { margin-top:8px; }
     /* ─── flight rows: one grid for Needs you and All flights alike ─── */
     .wflight { display:grid; grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 118px 26px; align-items:center; gap:0 14px; padding:10px 14px; }
-    .wflight .wrow__main > b { font-size:12.5px; font-weight:500; }
+    .wflight .wrow__main > b { font-size:13px; font-weight:500; }
     .wflight .wrow__num { width:auto; justify-content:flex-end; }
     .wflight .wrow__num b { font-weight:600; }
     .wflight .btn { width:auto; justify-content:center; padding-left:10px; padding-right:10px; }
@@ -350,9 +350,9 @@
              font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--text-tertiary); }
     .fhead span:nth-child(2),.fhead span:nth-child(3),.fhead span:nth-child(4),.fhead span:nth-child(6) { text-align:center; }
     .fhead span:nth-child(5) { text-align:right; }
-    .fnum { text-align:center; font-size:12.5px; font-weight:500; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+    .fnum { text-align:center; font-size:13px; font-weight:500; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
     .fnum small { display:block; font-size:10.5px; font-weight:500; color:var(--text-tertiary); letter-spacing:0; margin-top:1px; }
-    .fran { display:inline-flex; align-items:center; justify-content:center; gap:5px; width:100%; max-width:100%; font-size:12px; font-weight:500;
+    .fran { display:inline-flex; align-items:center; justify-content:center; gap:5px; width:100%; max-width:100%; font-size:12.5px; font-weight:500;
             padding:4px 0; border-radius:7px; border:1px solid var(--border); background:var(--panel); color:var(--text-primary);
             font-variant-numeric:tabular-nums; cursor:pointer; overflow:hidden; }
     .fran:hover { border-color:var(--border-strong); }
@@ -391,8 +391,8 @@
     .wrow--click:hover { border-color:var(--border-strong); box-shadow:var(--shadow-card); }
     .wrow__ico { width:34px; height:34px; border-radius:9px; display:grid; place-items:center; flex-shrink:0; }
     .wrow__main { flex:1; min-width:0; }
-    .wrow__main > b { font-size:12.5px; font-weight:700; display:block; }
-    .wrow__main span { font-size:11.5px; color:var(--text-secondary); font-weight:400; }
+    .wrow__main > b { font-size:13px; font-weight:700; display:block; }
+    .wrow__main span { font-size:12px; color:var(--text-secondary); font-weight:400; }
     .wrow__main span b { font-weight:700; color:var(--text-primary); }
     .wrow__num { width:132px; flex-shrink:0; display:flex; align-items:center; gap:9px; }
     .wrow__num b { font-size:12.5px; min-width:38px; text-align:right; }
@@ -1037,7 +1037,7 @@
   RENDER.settings = () => {
     const kvrow=(l,v)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-light);font-size:12.5px"><span class="muted">${l}</span><span style="font-weight:600">${v}</span></div>`;
     document.getElementById('view-settings').innerHTML=`
-    <div class="inner" style="max-width:940px">
+    <div class="inner" style="max-width:1080px">
       <div class="pagebar"><div class="head"><h1>Settings</h1></div></div>
       <div class="card">
         <div class="card__head"><div class="card__title">Workspace</div></div>
@@ -1106,7 +1106,7 @@
     </div>`;
     const delHead=`<div class="shead" style="grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 118px 26px">${[['ad','Ad'],['day','Day'],[null,'Ran'],['delivered','Delivered'],['pacing','Pacing']].map(([k,l])=>k?`<button onclick="setDelSort('${k}')">${l}${delSort.k===k?(delSort.dir>0?' ↑':' ↓'):''}</button>`:`<span>${l}</span>`).join('')}<span></span><span></span></div>`;
     document.getElementById('view-delivery').innerHTML=`
-    <div class="inner" style="max-width:940px">
+    <div class="inner" style="max-width:1080px">
       <div class="pagebar">
         <div class="head"><h1>Delivery</h1></div>
         <div class="pagebar__right"><div class="seg">
@@ -1489,7 +1489,7 @@
       byShow[k].n++; byShow[k].got+=delivered(s)||0; byShow[k].g+=s.guarantee; byShow[k].proj+=projection(s).proj; });
 
     document.getElementById('view-portal').innerHTML=`
-    <div class="inner" style="max-width:940px">
+    <div class="inner" style="max-width:1080px">
       ${setBack(`<button class="tb-plain" onclick="closeDeal()">← All deals</button>`)||''}
       <div class="pagebar">
         <div class="head">
@@ -1572,10 +1572,10 @@
   function dealIndexRow(c,i,hideBrand){
     const tone=toneVar(c.status.tone), max=Math.max(c.g,c.proj)*1.06, w=x=>c.g?Math.min(100,x/max*100):0;
     return `<div class="wrow--click" style="display:grid;grid-template-columns:minmax(0,1fr) 108px 150px 168px 118px 26px;align-items:center;gap:0 13px;padding:10px 14px;${i===0&&!hideBrand?'':'border-top:1px solid var(--border-light)'}" onclick="openDeal('${c.deal.id}')">
-      <div style="min-width:0"><b style="font-size:13px">${hideBrand?esc(c.title):`${esc(c.brand)} <span style="font-weight:400;color:var(--text-secondary)">· ${esc(c.title)}</span>`}</b>
-        <div class="muted" style="font-size:11px">${c.shows.map(x=>show(x).name).join(', ')}</div></div>
-      <div class="muted" style="font-size:11px;white-space:nowrap">${esc(c.flight)}</div>
-      <div>${['under','mg','blocked'].includes(c.status.k)?`<b style="font-size:12px;display:inline-flex;align-items:center;gap:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${ICO[{under:'warn',mg:'mg',blocked:'clock'}[c.status.k]]}</svg>${c.status.label}</b>`
+      <div style="min-width:0"><b style="font-size:13.5px">${hideBrand?esc(c.title):`${esc(c.brand)} <span style="font-weight:400;color:var(--text-secondary)">· ${esc(c.title)}</span>`}</b>
+        <div class="muted" style="font-size:11.5px">${c.shows.map(x=>show(x).name).join(', ')}</div></div>
+      <div class="muted" style="font-size:11.5px;white-space:nowrap">${esc(c.flight)}</div>
+      <div>${['under','mg','blocked'].includes(c.status.k)?`<b style="font-size:12.5px;display:inline-flex;align-items:center;gap:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${ICO[{under:'warn',mg:'mg',blocked:'clock'}[c.status.k]]}</svg>${c.status.label}</b>`
         :`<span class="muted" style="font-size:11.5px">${c.state==='upcoming'?'Starts '+fmtDate(c.spots[0].published):c.state==='complete'?'Complete':''}</span>`}</div>
       <div class="wrow__num" style="width:auto;justify-content:flex-end;display:flex;align-items:center;gap:9px">${c.g?`
         <div style="position:relative;flex:1;height:8px;border-radius:4px;background:var(--secondary-lite)">
@@ -1584,7 +1584,7 @@
           <div style="position:absolute;top:-2px;bottom:-2px;left:${w(c.g*IAB_FULL)}%;width:2px;background:var(--green-text)"></div>
         </div><b style="font-size:12px;color:${tone};min-width:36px;text-align:right">${c.pct}%</b>`
         :'<span style="flex:1;text-align:left;font-size:12px;color:var(--text-tertiary)">Not started</span>'}</div>
-      <div style="text-align:right"><span class="muted" style="font-size:11px">${c.g?K(c.got)+' of '+K(c.g):K(c.spots.reduce((a,s)=>a+s.guarantee,0))+' booked'}</span></div>
+      <div style="text-align:right"><span class="muted" style="font-size:11.5px">${c.g?K(c.got)+' of '+K(c.g):K(c.spots.reduce((a,s)=>a+s.guarantee,0))+' booked'}</span></div>
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.4" style="justify-self:center"><path d="M9 6l6 6-6 6"/></svg>
     </div>`;
   }
@@ -1624,7 +1624,7 @@
       body=`<div class="card" style="overflow:hidden">${bar}${head}${cs.length?cs.map((c,i)=>dealIndexRow(c,i+1,false)).join(''):'<div class="empty">No deals match.</div>'}</div>`;
     }
     document.getElementById('view-portal').innerHTML=`
-    <div class="inner" style="max-width:940px">
+    <div class="inner" style="max-width:1080px">
       <div class="pagebar"><div class="head"><h1>Campaign Portal</h1></div>
         <div class="pagebar__right"><div class="seg">${DEAL_FILTERS.map(([k,label])=>{ const n=k==='brands'?brands.length:all.filter(c=>k==='all'||c.state===k).length;
           return `<button class="${portalFilter===k?'active':''}" onclick="portalFilter='${k}';RENDER.portal()">${label}${k==='all'?'':' · '+n}</button>`; }).join('')}</div></div>
