@@ -889,7 +889,8 @@
      drawer, so it always reopens on the full picture. */
   let SELSET=null, SELFOR=null;
   function toggleSel(id){ if(!SELSET) return;
-    if(SELSET.has(id)){ if(SELSET.size===1) return; SELSET.delete(id); } else SELSET.add(id);
+    const all=flightRows(spot(DRAWER_SPOT)).filter(x=>projection(x)).map(x=>x.id);
+    if(SELSET.size===1&&SELSET.has(id)) SELSET=new Set(all); else SELSET=new Set([id]);
     openSpot(DRAWER_SPOT); }
   let DRAWER_SPOT=null, DRAWER_FULL=false;
 
@@ -1299,6 +1300,9 @@
     DRAWER_SPOT=id;
     if(SELFOR!==s.dealId){ SELSET=new Set(flightRows(s).filter(x=>projection(x)).map(x=>x.id)); SELFOR=s.dealId; }
     const q = pr ? qualityScore(s) : null, end = s.ts!=null ? s.ts+adSecs(s) : null, nx = pr ? nextCheck(s) : null;
+    const frAll=flightRows(s).filter(x=>projection(x));
+    const gotT=frAll.reduce((a,x)=>a+(delivered(x)||0),0), gT=frAll.reduce((a,x)=>a+x.guarantee,0)||s.guarantee;
+    const ratioT=gotT/Math.max(gT,1);
     const actBtns=`${s.missed?`<button class="btn btn--primary btn--sm" onclick="closeOverlays();nudgeEpisode('${s.id}')">Nudge show</button>`
         :v.k==='short'&&!m?`<button class="btn btn--primary btn--sm" onclick="closeOverlays();createMakegood('${s.id}')">Set up make good</button>`
         :m?`<button class="btn btn--primary btn--sm" onclick="closeOverlays();openMg('${m.id}')">Open ${m.kind==='bonus'?'bonus spot':'make good'}</button>`
@@ -1313,8 +1317,8 @@
       <div style="margin-left:auto;margin-right:16px;display:flex;align-items:center;gap:14px;align-self:center">
         ${actBtns}
         ${pr?`<div style="min-width:210px">
-          <div style="text-align:right;font-size:12px;font-weight:700">${K(pr.got)} of ${K(s.guarantee)} · ${Math.round(pr.rawRatio*100)}%</div>
-          <div class="pace ${pr.rawRatio>=IAB_FULL?'pace--good':''}" style="height:6px;margin-top:5px"><div class="pace__fill" style="width:${Math.min(pr.rawRatio*100,100)}%"></div></div>
+          <div style="text-align:right;font-size:12px;font-weight:700">${K(gotT)} of ${K(gT)} · ${Math.round(ratioT*100)}%</div>
+          <div class="pace ${ratioT>=IAB_FULL?'pace--good':''}" style="height:6px;margin-top:5px"><div class="pace__fill" style="width:${Math.min(ratioT*100,100)}%"></div></div>
         </div>`:''}
       </div>
       <button class="x" onclick="closeOverlays()">✕</button></div>
@@ -1348,25 +1352,7 @@
       `; })():`
       <div class="spotcols">
       <div>
-      <div style="display:flex;gap:18px">
-        <div style="flex:1">
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <span style="font-size:10.5px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em">Quality</span>
-            <span class="tag tag--${q.tone}" style="font-weight:800">${q.grade}</span>
-          </div>
-          <div style="font-size:34px;font-weight:800;letter-spacing:-.03em;margin-top:3px">${q.score}</div>
-          <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">${q.factors.map(f=>`<div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-secondary)"><span>${f.k}</span><span>${f.v}</span></div><div class="pace ${f.v>=90?'pace--good':f.v>=75?'':'pace--warn'}" style="height:4px;margin-top:3px"><div class="pace__fill" style="width:${f.v}%"></div></div></div>`).join('')}</div>
-        </div>
-        <div style="flex:1;border-left:1px solid var(--border-light);padding-left:18px;display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;align-content:start">
-          ${reelStat('Episode length', hms(epLenOf(s)), `setSpotStat('${s.id}','epLen',this.value)`)}
-          ${reelStat('Ad start', s.ts!=null?mmss(s.ts):'—', `setSpotStat('${s.id}','ts',this.value)`)}
-          ${reelStat('Ad end', end!=null?mmss(end):'—', `setSpotStat('${s.id}','end',this.value)`)}
-          ${reelStat('Read duration', adSecs(s)+'s', `setSpotStat('${s.id}','dur',this.value)`)}
-          ${reelStat('Placement', esc(s.placement||cr.placement), `setSpotStat('${s.id}','placement',this.value)`)}
-        </div>
-      </div>
-
-      <div style="margin-top:28px">
+      <div>
         ${flightRows(s).map((e,ci)=>{ const epr=projection(e), passed=e.status==='verified'&&!!e.yt;
           const inSel=SELSET&&SELSET.has(e.id), selectable=!!epr;
           return `<div class="cmp-row" style="${selectable?(inSel?'':'opacity:.45;border-style:dashed;border-color:var(--border);'):''}">
@@ -1389,6 +1375,25 @@
             </div>
             <button class="btn btn--ghost btn--sm" style="margin-top:6px;flex-shrink:0" onclick="event.stopPropagation();toast('Downloading the baked-in audio file. The feed itself can carry dynamic ads, so we hand over the file, not the link.')">↓ MP3</button>
           </div>`:''}
+          ${inSel&&SELSET&&SELSET.size===1&&epr?(()=>{ const qf=qualityScore(e), endf=e.ts!=null?e.ts+adSecs(e):null, crf=creative(e.brand);
+            return `<div style="background:var(--white);border:1px solid var(--border-light);border-radius:8px;padding:13px 15px;margin-top:9px">
+            <div style="display:flex;gap:16px">
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <span style="font-size:10.5px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em">Quality</span>
+                  <span class="tag tag--${qf.tone}" style="font-weight:800">${qf.grade}</span>
+                </div>
+                <div style="font-size:30px;font-weight:800;letter-spacing:-.03em;margin-top:2px">${qf.score}</div>
+                <div style="margin-top:8px;display:flex;flex-direction:column;gap:7px">${qf.factors.map(f=>`<div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-secondary)"><span>${f.k}</span><span>${f.v}</span></div><div class="pace ${f.v>=90?'pace--good':f.v>=75?'':'pace--warn'}" style="height:4px;margin-top:3px"><div class="pace__fill" style="width:${f.v}%"></div></div></div>`).join('')}</div>
+              </div>
+              <div style="flex:1;border-left:1px solid var(--border-light);padding-left:16px;display:grid;grid-template-columns:1fr 1fr;gap:11px 13px;align-content:start">
+                ${reelStat('Episode length', hms(epLenOf(e)), `setSpotStat('${e.id}','epLen',this.value)`)}
+                ${reelStat('Ad start', e.ts!=null?mmss(e.ts):'—', `setSpotStat('${e.id}','ts',this.value)`)}
+                ${reelStat('Ad end', endf!=null?mmss(endf):'—', `setSpotStat('${e.id}','end',this.value)`)}
+                ${reelStat('Read duration', adSecs(e)+'s', `setSpotStat('${e.id}','dur',this.value)`)}
+                ${reelStat('Placement', esc(e.placement||crf.placement), `setSpotStat('${e.id}','placement',this.value)`)}
+              </div>
+            </div></div>`; })():''}
         </div>`; }).join('')}
       </div>
       </div>
