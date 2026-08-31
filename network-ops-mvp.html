@@ -1359,7 +1359,8 @@
           <div class="cmp-row__top" ${selectable?`style="cursor:pointer" onclick="toggleSel('${e.id}')"`:''}><span class="cmp-row__date">${fmtDate(e.published)} · ${dayName(e.published)}${epr?` <span class="muted" style="font-weight:500">· ${K(epr.got)} impressions</span>`:''}</span>
             <span style="display:inline-flex;align-items:center;gap:7px">
               ${ci===0?`<button class="btn btn--ghost btn--sm" style="padding:3px 9px" onclick="event.stopPropagation();copyDeliverables('${s.id}')">Copy all</button>`:''}
-              <span class="cmp-status ${passed?'ok':'pend'}">${passed?'✓ Passed':'Pending'}</span></span></div>
+              <span class="cmp-status ${passed?'ok':'pend'}">${passed?'✓ Passed':'Pending'}</span>
+              ${selectable?`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.4" style="transition:transform .15s;transform:rotate(${inSel&&SELSET&&SELSET.size===1?180:0}deg)"><path d="M6 9l6 6 6-6"/></svg>`:''}</span></div>
           <div style="display:flex;align-items:center;gap:8px">
             <div style="position:relative;flex:1;margin-top:6px">
               <input class="cmp-inp${e.yt?' cmp-inp--link':''}" style="width:100%;padding-right:56px" value="${e.yt?esc('youtu.be/'+e.yt+'?t='+e.ts):''}" placeholder="Video link" title="Paste a new link if the wrong one was picked up" onmousedown="event.stopPropagation()" onchange="setSpotLink('${e.id}',this.value)">
