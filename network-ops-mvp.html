@@ -893,19 +893,29 @@
     openSpot(DRAWER_SPOT); }
   let DRAWER_SPOT=null, DRAWER_FULL=false;
 
+  /* One line per episode when several are selected (Aug 31 review) — click a
+     cluster to isolate its line; a single selection reads like before. */
   function dealChart(sel,{w=470,h=200}={}){
     const spots=sel.filter(x=>projection(x)); if(!spots.length) return '<div class="empty">Nothing selected.</div>';
     const start=spots.map(x=>x.published).sort()[0];
     const end=spots.map(x=>addDays(x.published,30)).sort().slice(-1)[0];
     const span=Math.max(daysBetween(start,end),1), today=Math.min(Math.max(daysBetween(start,TODAY),0),span);
     const goal=Math.round(spots.reduce((a,x)=>a+x.guarantee,0)*IAB_FULL);
-    const total=d=>spots.reduce((acc,x)=>{ const pr=projection(x); const dd=d-daysBetween(start,x.published);
-      return dd<=0?acc:acc+curveAt(show(x.showId).curve,Math.min(dd,30))*pr.proj; },0);
-    const padL=14,padR=52,padT=18,padB=26, max=Math.max(goal,total(span))*1.15;
+    const fnOf=x=>{ const off=daysBetween(start,x.published), pr=projection(x);
+      return d=>{ const dd=d-off; return dd<=0?0:curveAt(show(x.showId).curve,Math.min(dd,30))*pr.proj; }; };
+    const fns=spots.map(fnOf), multi=spots.length>1;
+    const totalAt=d=>fns.reduce((a,f)=>a+f(d),0);
+    const peak=multi?Math.max(...fns.map(f=>f(span))):totalAt(span);
+    const padL=14,padR=52,padT=18,padB=26, max=Math.max(goal,peak,1)*1.15;
     const X=d=>padL+(w-padL-padR)*(d/span), Y=v=>h-padB-(h-padT-padB)*(v/max);
-    const pts=[]; for(let d=0;d<=span;d++) pts.push([X(d),Y(total(d))]);
-    const solid=pts.slice(0,today+1).map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1));
-    const dash=pts.slice(Math.max(today,0)).map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1));
+    const line=(f,color,wd,r)=>{ const pts=[]; for(let d=0;d<=span;d++) pts.push([X(d),Y(f(d))]);
+      const solid=pts.slice(0,today+1).map(pt=>pt[0].toFixed(1)+' '+pt[1].toFixed(1));
+      const dash=pts.slice(Math.max(today,0)).map(pt=>pt[0].toFixed(1)+' '+pt[1].toFixed(1));
+      return `${dash.length>1?`<path d="M${dash.join(' L')}" fill="none" stroke="${color}" stroke-width="${(wd*.75).toFixed(1)}" stroke-dasharray="5 4" opacity=".5"/>`:''}
+      <path d="M${solid.join(' L')}" fill="none" stroke="${color}" stroke-width="${wd}" stroke-linecap="round"/>
+      <circle cx="${X(today)}" cy="${Y(f(today))}" r="${r}" fill="${color}" stroke="var(--panel)" stroke-width="2"/>
+      <text x="${X(span)}" y="${Y(f(span))-8}" text-anchor="end" font-size="10.5" font-weight="800" fill="${color}">${K(Math.round(f(span)))}</text>`; };
+    const col=i=>PAL[(i+1)%PAL.length];
     return `<svg viewBox="0 0 ${w} ${h}" width="100%">
       <line x1="${padL}" x2="${w-padR}" y1="${h-padB}" y2="${h-padB}" stroke="var(--border)"/>
       ${spots.map(x=>{ const d=daysBetween(start,x.published);
@@ -913,13 +923,12 @@
         <text x="${X(d)}" y="${h-9}" text-anchor="middle" font-size="9" font-weight="600" fill="var(--text-tertiary)">${fmtDate(x.published)}</text>`; }).join('')}
       <line x1="${padL}" x2="${w-padR}" y1="${Y(goal)}" y2="${Y(goal)}" stroke="var(--text-tertiary)" stroke-width="1.5" stroke-dasharray="6 5"/>
       <text x="${w-padR+7}" y="${Y(goal)+3.5}" font-size="10.5" font-weight="700" fill="var(--text-secondary)">Goal ${K(goal)}</text>
-      ${dash.length>1?`<path d="M${dash.join(' L')}" fill="none" stroke="var(--green-text)" stroke-width="2" stroke-dasharray="5 4" opacity=".5"/>`:''}
-      <path d="M${solid.join(' L')}" fill="none" stroke="var(--green-text)" stroke-width="2.8" stroke-linecap="round"/>
-      <circle cx="${X(today)}" cy="${Y(total(today))}" r="4.5" fill="var(--green-text)" stroke="var(--panel)" stroke-width="2"/>
-      <text x="${X(span)}" y="${Y(total(span))-10}" text-anchor="end" font-size="11.5" font-weight="800" fill="var(--green-text)">${K(Math.round(total(span)))}</text>
+      ${multi?fns.map((f,i)=>line(f,col(i),2.2,3.6)).join(''):line(totalAt,'var(--green-text)',2.8,4.5)}
     </svg>
-    <div class="curvekey"><span><i style="border-color:var(--green-text)"></i>Delivered</span>
-      <span><i style="border-color:var(--green-text);border-top-style:dashed"></i>Where it lands</span></div>`;
+    <div class="curvekey">${multi
+      ?spots.map((x,i)=>`<span><i style="border-color:${col(i)}"></i>${fmtDate(x.published)}</span>`).join('')
+      :`<span><i style="border-color:var(--green-text)"></i>Delivered</span>
+        <span><i style="border-color:var(--green-text);border-top-style:dashed"></i>Where it lands</span>`}</div>`;
   }
 
 
@@ -972,6 +981,8 @@
     if(kind==='cell'){ const col=SHEET_COLS.find(c=>c.key===b); opts=col.opts; cur=cellGet(show(a),b); apply=v=>gridCommit(a,b,v); }
     else if(kind==='brand'){ opts=['All brands',...[...new Set(DEALS.filter(d=>d.outcome==='won').map(d=>d.brand))].sort()]; cur=dealBrandF; apply=v=>{ dealBrandF=v; RENDER.portal(); }; }
     else if(kind==='show'){ opts=['All shows',...SHOWS.map(x=>x.name)]; cur=delShowF; apply=v=>{ delShowF=v; RENDER.delivery(); }; }
+    else if(kind==='time'){ opts=['All time','This week','This month','August','July','June']; cur=delTime; apply=v=>{ delTime=v; RENDER.delivery(); }; }
+    else if(kind==='status'){ opts=['All statuses','Tracking over','On track','Tracking under','Not started','Complete']; cur=delStatus; apply=v=>{ delStatus=v; RENDER.delivery(); }; }
     else if(kind==='rem'){ opts=REM_LINKS.map(x=>x[1]); cur=(REM_LINKS.find(x=>x[0]===REM_LINK)||REM_LINKS[0])[1];
       apply=v=>{ REM_LINK=(REM_LINKS.find(x=>x[1]===v)||REM_LINKS[0])[0];
         const btn=document.getElementById('remLinkBtn'); if(btn) btn.innerHTML=esc(v)+' '+CHEV; }; }
@@ -1069,10 +1080,11 @@
     // One quiet line each, pinned above the table until she clears them (Aug 24, 9:37).
     const noteRow=(d,label,text,clearFn)=>`<div class="wnote" onclick="go('portal');openDeal('${d.id}')">
       <span class="wnote__body"><b>${esc(d.brand)} · ${esc(d.title||'Flight')}</b><span class="wnote__txt" title="${esc(text)}">${esc(text)}</span></span>
-      <button class="wnote__x" title="Dismiss" onclick="event.stopPropagation();${clearFn}('${d.id}')">✕</button>
+      <button class="wnote__x" title="Snooze 2 days" onclick="event.stopPropagation();snoozeNote('${d.id}','${label}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
+      <button class="wnote__x" title="Done — dismiss" onclick="event.stopPropagation();${clearFn}('${d.id}')">✕</button>
     </div>`;
     const checkRows=[];
-    DEALS.filter(d=>d.outcome==='won'&&(d.notes||'').trim()).forEach(d=>checkRows.push(noteRow(d,'Note',d.notes,'clearDealNote')));
+    DEALS.filter(d=>d.outcome==='won'&&(d.notes||'').trim()&&!(d.noteSnooze&&d.noteSnooze>TODAY)).forEach(d=>checkRows.push(noteRow(d,'Note',d.notes,'clearDealNote')));
     DEALS.filter(d=>d.checkIn&&d.checkIn<=TODAY).forEach(d=>checkRows.push(noteRow(d,'Check-in',`You set a check-in for ${fmtDate(d.checkIn)} — how's it going?`,'clearCheckIn')));
     const active=ids.filter(x=>!isArchived(x.id)).map(flightRow);
     const arch=ids.filter(x=>isArchived(x.id));
@@ -1088,6 +1100,10 @@
 
 
   function deliveryAttention(){ return { count: workList().count||0 }; }
+  function snoozeNote(id,kind){ const d=DEALS.find(x=>x.id===id); if(!d) return;
+    if(kind==='Check-in') d.checkIn=addDays(TODAY,2); else d.noteSnooze=addDays(TODAY,2);
+    toast('Snoozed — back '+dayName(addDays(TODAY,2))+' '+fmtDate(addDays(TODAY,2))+'.');
+    rerender(); refreshBadges(); }
   function clearDealNote(id){ const d=DEALS.find(x=>x.id===id); d.notes=''; rerender(); refreshBadges();
     toast(`Note cleared for ${d.brand} · ${d.title}. It stays in the deal history.`); }
   function clearCheckIn(id){ const d=DEALS.find(x=>x.id===id); d.checkIn=null; rerender(); refreshBadges();
@@ -1184,13 +1200,25 @@
   let delTab='work';
   RENDER.delivery = () => {
     const work=workList();
-    let live=SPOTS.filter(s=>projection(s)).sort((a,b)=>liveDays(b)-liveDays(a));
+    let live=(delStatus==='Not started'?SPOTS.filter(s=>!projection(s)):SPOTS.filter(s=>projection(s))).sort((a,b)=>liveDays(b)-liveDays(a));
+    const DMONTH={June:'06',July:'07',August:'08',September:'09'};
+    if(delTime!=='All time') live=live.filter(s=>{ const p=s.published;
+      if(delTime==='This week'){ const d=daysBetween(p,TODAY); return d>=-7&&d<=7; }
+      if(delTime==='This month') return p.slice(5,7)===TODAY.slice(5,7);
+      return p.slice(5,7)===DMONTH[delTime]; });
+    if(delStatus!=='All statuses'&&delStatus!=='Not started') live=live.filter(s=>{ const pr=projection(s); if(!pr) return false;
+      if(delStatus==='Complete') return pr.final; const k=verdict(s).k;
+      if(delStatus==='Tracking over') return !pr.final&&k==='bonus';
+      if(delStatus==='Tracking under') return !pr.final&&k==='short';
+      return !pr.final&&k!=='bonus'&&k!=='short'; });
     if(delShowF!=='All shows') live=live.filter(s=>show(s.showId).name===delShowF);
     if(delQ2.trim()){ const q=delQ2.trim().toLowerCase(); live=live.filter(s=>nameOf(s).toLowerCase().includes(q)); }
     live=sortFlights(live);
     const delBar=`<div class="tbar tbar--bare">
       <div class="tbar__search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="delQInp" placeholder="Search flights…" value="${esc(delQ2)}" oninput="delQ2=this.value;FOCUS_Q='delQInp';RENDER.delivery()"></div>
       <button class="tsel" style="display:inline-flex;align-items:center;gap:6px" onclick="openPick(event,'show')">${esc(delShowF)} ${CHEV}</button>
+      <button class="tsel" style="display:inline-flex;align-items:center;gap:6px" onclick="openPick(event,'time')">${esc(delTime)} ${CHEV}</button>
+      <button class="tsel" style="display:inline-flex;align-items:center;gap:6px" onclick="openPick(event,'status')">${esc(delStatus)} ${CHEV}</button>
     </div>`;
     const delHead=`<div class="shead" style="grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 118px 26px">${[['ad','Ad'],['day','Day'],[null,'Ran'],['delivered','Delivered'],['pacing','Pacing']].map(([k,l])=>k?`<button onclick="setDelSort('${k}')">${l}${delSort.k===k?(delSort.dir>0?' ↑':' ↓'):''}</button>`:`<span>${l}</span>`).join('')}<span></span><span></span></div>`;
     document.getElementById('view-delivery').innerHTML=`
@@ -1205,7 +1233,14 @@
       <div id="scanPanel"></div>
       ${delTab==='mg' ? makeGoodsPanel() : delTab==='work'
         ? (work.length?`<div class="listcard">${delHead}${work.join('')}</div>`:`<div class="card"><div class="empty">✨ Nothing needs you — every flight projects over the 90% line.</div></div>`)
-        : `<div class="listcard">${delHead}${live.length?live.map(flightRow).join(''):'<div class="empty">No flights match.</div>'}</div>`}
+        : `${delMode==='campaigns'?'':''}<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><div class="seg">
+            <button class="${delMode==='episodes'?'active':''}" onclick="delMode='episodes';RENDER.delivery()">By episode</button>
+            <button class="${delMode==='campaigns'?'active':''}" onclick="delMode='campaigns';RENDER.delivery()">By campaign</button></div></div>
+          ${delMode==='campaigns'
+            ? (()=>{ const cs=DEALS.filter(d=>d.outcome==='won').map(dealSummary).filter(c=>c.state==='live')
+                .sort((a,b)=>(b.spots[0]?dt(b.spots[0].published):0)-(a.spots[0]?dt(a.spots[0].published):0));
+                return `<div class="card" style="overflow:hidden">${cs.length?cs.map((c,i)=>dealIndexRow(c,i+1,false)).join(''):'<div class="empty">No live campaigns.</div>'}</div>`; })()
+            : `<div class="listcard">${delHead}${live.length?live.map(flightRow).join(''):'<div class="empty">No flights match.</div>'}</div>`}`}
       <div class="footnote">Projections come from each show's own curve, refit every time a read is verified.</div>
     </div>`;
     refocusQ();
@@ -1314,20 +1349,20 @@
       <div class="spotcols">
       <div>
       <div style="display:flex;gap:18px">
-        <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;align-content:start">
-          ${reelStat('Episode length', hms(epLenOf(s)), `setSpotStat('${s.id}','epLen',this.value)`)}
-          ${reelStat('Ad start', s.ts!=null?mmss(s.ts):'—', `setSpotStat('${s.id}','ts',this.value)`)}
-          ${reelStat('Ad end', end!=null?mmss(end):'—', `setSpotStat('${s.id}','end',this.value)`)}
-          ${reelStat('Read duration', adSecs(s)+'s', `setSpotStat('${s.id}','dur',this.value)`)}
-          ${reelStat('Placement', esc(s.placement||cr.placement), `setSpotStat('${s.id}','placement',this.value)`)}
-        </div>
-        <div style="flex:1;border-left:1px solid var(--border-light);padding-left:18px">
+        <div style="flex:1">
           <div style="display:flex;align-items:center;justify-content:space-between">
             <span style="font-size:10.5px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em">Quality</span>
             <span class="tag tag--${q.tone}" style="font-weight:800">${q.grade}</span>
           </div>
           <div style="font-size:34px;font-weight:800;letter-spacing:-.03em;margin-top:3px">${q.score}</div>
           <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">${q.factors.map(f=>`<div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-secondary)"><span>${f.k}</span><span>${f.v}</span></div><div class="pace ${f.v>=90?'pace--good':f.v>=75?'':'pace--warn'}" style="height:4px;margin-top:3px"><div class="pace__fill" style="width:${f.v}%"></div></div></div>`).join('')}</div>
+        </div>
+        <div style="flex:1;border-left:1px solid var(--border-light);padding-left:18px;display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;align-content:start">
+          ${reelStat('Episode length', hms(epLenOf(s)), `setSpotStat('${s.id}','epLen',this.value)`)}
+          ${reelStat('Ad start', s.ts!=null?mmss(s.ts):'—', `setSpotStat('${s.id}','ts',this.value)`)}
+          ${reelStat('Ad end', end!=null?mmss(end):'—', `setSpotStat('${s.id}','end',this.value)`)}
+          ${reelStat('Read duration', adSecs(s)+'s', `setSpotStat('${s.id}','dur',this.value)`)}
+          ${reelStat('Placement', esc(s.placement||cr.placement), `setSpotStat('${s.id}','placement',this.value)`)}
         </div>
       </div>
 
@@ -1358,11 +1393,9 @@
       </div>
       </div>
       <div>
-      ${s.yt?`<div class="reel-stage"><iframe src="https://www.youtube.com/embed/${s.yt}?start=${s.ts}" allow="autoplay" allowfullscreen></iframe></div>`
-        :`<div class="reel-stage" style="color:#8a95a3;font-size:13px;text-align:center;padding:20px;display:grid;place-items:center">Audio-only read.<br>Impressions come from the host platform.</div>`}
       ${(()=>{ const fr=flightRows(s).filter(x=>projection(x)); const sel=fr.filter(x=>SELSET&&SELSET.has(x.id));
         const selG=sel.reduce((a,x)=>a+x.guarantee,0), selGot=sel.reduce((a,x)=>a+(delivered(x)||0),0), selProj=sel.reduce((a,x)=>a+projection(x).proj,0);
-        return `<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light)">
+        return `<div>
         <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:9px">
           <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em">Deal delivery${sel.length<fr.length?` · ${sel.length} of ${fr.length} reads`:''}</div>
           <span class="muted" style="font-size:11.5px">${K(selGot)} delivered · projecting ${K(selProj)} of ${K(selG)}</span>
@@ -1534,6 +1567,7 @@
   let portalDeal=null, portalFilter='live';
   let dealQ='', dealBrandF='All brands', dealSort={k:'date',dir:-1}, FOCUS_Q=null;
   let delQ2='', delShowF='All shows', delSort={k:'day',dir:-1};
+  let delTime='All time', delStatus='All statuses', delMode='episodes';
   function setDealSort(k){ dealSort = dealSort.k===k?{k,dir:-dealSort.dir}:{k,dir:1}; RENDER.portal(); }
   function setDelSort(k){ delSort = delSort.k===k?{k,dir:-delSort.dir}:{k,dir:1}; RENDER.delivery(); }
   function refocusQ(){ if(!FOCUS_Q) return; const el=document.getElementById(FOCUS_Q);
@@ -1673,7 +1707,7 @@
      its deals. */
   function dealIndexRow(c,i,hideBrand){
     const tone=toneVar(c.status.tone), max=Math.max(c.g,c.proj)*1.06, w=x=>c.g?Math.min(100,x/max*100):0;
-    return `<div class="wrow--click" style="display:grid;grid-template-columns:minmax(0,1fr) 108px 150px 168px 118px 26px;align-items:center;gap:0 13px;padding:10px 14px;${i===0&&!hideBrand?'':'border-top:1px solid var(--border-light)'}" onclick="openDeal('${c.deal.id}')">
+    return `<div class="wrow--click" style="display:grid;grid-template-columns:minmax(0,1fr) 108px 150px 168px 118px 26px;align-items:center;gap:0 13px;padding:10px 14px;${i===0&&!hideBrand?'':'border-top:1px solid var(--border-light)'}" onclick="go('portal');openDeal('${c.deal.id}')">
       <div style="min-width:0"><b style="font-size:13.5px">${hideBrand?esc(c.title):`${esc(c.brand)} <span style="font-weight:400;color:var(--text-secondary)">· ${esc(c.title)}</span>`}</b>
         <div class="muted" style="font-size:11.5px">${c.shows.map(x=>show(x).name).join(', ')}</div></div>
       <div class="muted" style="font-size:11.5px;white-space:nowrap">${esc(c.flight)}</div>
@@ -2002,6 +2036,8 @@
         ${kpiBox('Live reads',live.length,live.length?live.map(x=>esc(x.brand)).join(', '):'none right now')}
         ${kpiBox('Owed',money(owed),`${Math.round(sh.revShare*100)}% rev share`)}
       </div>
+
+      <textarea class="cmp-inp" style="margin-top:12px;min-height:42px;line-height:1.6;font-size:12.5px" placeholder="Note — internal, the show and brands never see this. e.g. Takes August off every year · no onboarding calls." onchange="show('${id}').adminNotes=this.value;toast('Saved — internal only.')">${esc(sh.adminNotes||'')}</textarea>
 
       <div class="grid" style="grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;align-items:start">
         <div class="card">
