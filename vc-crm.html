@@ -775,6 +775,10 @@ Dana Whitfield, Overline, worked together at Techstars,"></textarea>
           <button class="tab active" data-connview="active">Active <span class="count" id="cntConnActive">0</span></button>
           <button class="tab" data-connview="archived">Archived <span class="count" id="cntConnArchived">0</span></button>
         </div>
+        <div class="search-box" style="max-width:260px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="color:var(--grey-1)"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="connSearch" placeholder="Search connectors..." />
+        </div>
         <button class="mini-btn" id="connSelectAll">Select all shown</button>
       </div>
       <div class="connector-grid" id="connectorGrid"></div>
@@ -1197,7 +1201,7 @@ function mergeDuplicateConnectors(){
     const keep = uniq[0];
     uniq.slice(1).forEach(dup => {
       (dup.matches||[]).forEach(pid => addMatch(keep, pid, matchNote(dup, pid) || ''));
-      if (CS(dup.id).superc) CS(keep.id).superc = true;
+      if (isSuper(dup)) CS(keep.id).superc = true;
       if (!keep.li && dup.li && !isSeedConnector(keep.id)) keep.li = dup.li;
       if (isSeedConnector(dup.id)) {
         state.hiddenConnectors = state.hiddenConnectors || [];
@@ -1231,6 +1235,9 @@ function matchNote(c, pid){
   return (ov && ov.notes && ov.notes[pid]) || (c.matchNotes && c.matchNotes[pid]) || '';
 }
 function connectorsFor(personId){ return allConnectors().filter(c => !CS(c.id).archived && (c.matches||[]).includes(personId)); }
+/* Super-connector flag: seed data can preset it (c.superc); a state value,
+   set by toggling in the UI, always wins - so it can be un-marked too. */
+function isSuper(c){ const st = CS(c.id); return st.superc !== undefined ? !!st.superc : !!c.superc; }
 function templates(){
   if (!state.templates) { state.templates = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES)); save(); }
   // older saved template sets predate the email template - graft it in once
@@ -1996,7 +2003,7 @@ function connectorCardHtml(c){
   const cst = st.status || 'none';
   const due = connectorFollowUp(c);
   const matches = (c.matches||[]).map(pid => PERSON_BY_ID[pid]).filter(Boolean);
-  return `<div class="connector-card ${connSelected.has(c.id)?'selected-card':''} ${st.superc?'superc':''}" data-conn="${c.id}">
+  return `<div class="connector-card ${connSelected.has(c.id)?'selected-card':''} ${isSuper(c)?'superc':''}" data-conn="${c.id}">
     <div class="connector-card__top">
       <span class="partner-ava">${esc((c.name||'?').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase())}</span>
       <div style="min-width:0;flex:1">
@@ -2015,13 +2022,25 @@ function connectorCardHtml(c){
     </div>
     <div class="connector-card__foot">
       <span class="pill pill--cst-${cst}">${C_STATUS[cst]}</span>
-      <button type="button" class="mini-btn superc-btn ${st.superc?'on':''}" data-supertoggle="${c.id}" style="border:none;box-shadow:none;background:none;padding:0 4px">${st.superc ? 'Super connector \u2713' : 'Mark super connector'}</button>
+      <button type="button" class="mini-btn superc-btn ${isSuper(c)?'on':''}" data-supertoggle="${c.id}" style="border:none;box-shadow:none;background:none;padding:0 4px">${isSuper(c) ? 'Super connector \u2713' : 'Mark super connector'}</button>
       ${due ? `<span class="pill ${due.cls}">${due.label}</span>` : `<span style="font-size:12px;color:var(--muted-foreground)">${matches.length} match${matches.length===1?'':'es'}</span>`}
     </div>
   </div>`;
 }
+let connQ = '';
+function connMatchesQ(c){
+  if (!connQ.trim()) return true;
+  const q = connQ.trim().toLowerCase();
+  if (((c.name||'') + ' ' + (c.role||'') + ' ' + (c.rapport||'')).toLowerCase().includes(q)) return true;
+  // also match on the funds they can open doors to
+  return (c.matches||[]).some(pid => {
+    const p = PERSON_BY_ID[pid];
+    const f = p && FUND_BY_ID[p.fundId];
+    return f && f.name.toLowerCase().includes(q);
+  });
+}
 function renderConnectors(){
-  const all = allConnectors();
+  const all = allConnectors().filter(connMatchesQ);
   const active = all.filter(c => !CS(c.id).archived);
   const archived = all.filter(c => CS(c.id).archived);
   $('cntConnActive').textContent = active.length;
@@ -2034,7 +2053,7 @@ function renderConnectors(){
   if (connView === 'active') {
     host.style.display = ''; host.style.flexDirection = ''; host.style.gap = '';
     const sorted = active.slice().sort((a,b) =>
-      ((CS(b.id).superc ? 1 : 0) - (CS(a.id).superc ? 1 : 0)) ||
+      ((isSuper(b) ? 1 : 0) - (isSuper(a) ? 1 : 0)) ||
       ((a.source === 'nfx' ? 1 : 0) - (b.source === 'nfx' ? 1 : 0)) ||
       ((b.matches || []).length - (a.matches || []).length));
     host.innerHTML = sorted.map(connectorCardHtml).join('') ||
@@ -2708,7 +2727,7 @@ function openConnector(id, preselect){
   const checkedSet = new Set(preselect ? [preselect] : (stored || defaultIds));
   const due = connectorFollowUp(c);
   $('dTitle').textContent = c.name;
-  $('dMeta').innerHTML = `<span class="pill pill--type">Connector</span>${st.superc ? ' <span class="pill" style="background:var(--red-bg);color:var(--red-text)">Super connector</span>' : ''} ${esc(c.role||'')}${c.li ? ` · <a href="${esc(c.li)}" target="_blank" rel="noopener" style="font-weight:600;color:#0a66c2">LinkedIn</a>` : ''}`;
+  $('dMeta').innerHTML = `<span class="pill pill--type">Connector</span>${isSuper(c) ? ' <span class="pill" style="background:var(--red-bg);color:var(--red-text)">Super connector</span>' : ''} ${esc(c.role||'')}${c.li ? ` · <a href="${esc(c.li)}" target="_blank" rel="noopener" style="font-weight:600;color:#0a66c2">LinkedIn</a>` : ''}`;
   $('drawerBody').innerHTML = `
     <div class="d-row" style="justify-content:space-between;flex-wrap:wrap">
       ${ddHtml({ ctx:'cstatus:'+id, value:cst, options: Object.entries(C_STATUS).map(([k,v]) => ({v:k,l:v})) })}
@@ -3128,8 +3147,9 @@ $('connectorsView').addEventListener('click', e => {
   const sup = e.target.closest('[data-supertoggle]');
   if (sup) {
     e.stopPropagation();
+    const c = connectorById(sup.dataset.supertoggle);
     const st = CS(sup.dataset.supertoggle);
-    st.superc = !st.superc;
+    st.superc = !(c ? isSuper(c) : st.superc);
     save(); render();
     if (st.superc) toast('Super connector - flagged for a deep network scan.');
     return;
@@ -3250,6 +3270,7 @@ $('fundPasteImport').addEventListener('click', () => {
   $('fundPasteWrap').style.display = 'none';
 });
 $('fundPasteCancel').addEventListener('click', () => { $('fundPasteWrap').style.display = 'none'; });
+$('connSearch').addEventListener('input', e => { connQ = e.target.value; renderConnectors(); });
 
 /* ── Single investor add (VC fund or angel) ── */
 let afKind = 'fund', afStage = 'target';
