@@ -1265,6 +1265,17 @@ function connectorsFor(personId){ return allConnectors().filter(c => !CS(c.id).a
 /* Super-connector flag: seed data can preset it (c.superc); a state value,
    set by toggling in the UI, always wins - so it can be un-marked too. */
 function isSuper(c){ const st = CS(c.id); return st.superc !== undefined ? !!st.superc : !!c.superc; }
+/* Display name for a connector - a saved rename wins over the imported name. */
+function connName(c){ return CS(c.id).customName || c.name; }
+function renameConnector(id, name){
+  name = (name || '').trim();
+  if (!name) return;
+  const c = connectorById(id);
+  if (!c) return;
+  if (isSeedConnector(id)) CS(id).customName = name;
+  else { c.name = name; delete CS(id).customName; }
+  save(); render();
+}
 function templates(){
   if (!state.templates) { state.templates = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES)); save(); }
   // older saved template sets predate the email template - graft it in once
@@ -1686,7 +1697,7 @@ function pathCellHtml(p){
   }
   if (pi.kind === 'connector') {
     const c = pi.connectors[0];
-    return `<div class="path-text"><span class="link" data-openconn="${c.id}">via ${esc(c.name)}</span>${pi.connectors.length > 1 ? `<div class="sub">+${pi.connectors.length - 1} more</div>` : ''}</div>`;
+    return `<div class="path-text"><span class="link" data-openconn="${c.id}">via ${esc(connName(c))}</span>${pi.connectors.length > 1 ? `<div class="sub">+${pi.connectors.length - 1} more</div>` : ''}</div>`;
   }
   if (pi.kind === 'nfx') return `<div class="path-text muted" title="Investor intro routes via NFX Signal - open the side panel">NFX only</div>`;
   return `<div class="path-text muted">No path yet</div>`;
@@ -2034,7 +2045,7 @@ function connectorCardHtml(c){
     <div class="connector-card__top">
       <span class="partner-ava">${esc((c.name||'?').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase())}</span>
       <div style="min-width:0;flex:1">
-        <div class="connector-card__name" style="display:flex;align-items:center;gap:6px">${esc(c.name)}
+        <div class="connector-card__name" style="display:flex;align-items:center;gap:6px">${esc(connName(c))}
           <a class="li-link" href="${esc(c.li || ('https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(c.name)))}" target="_blank" rel="noopener" title="Open LinkedIn">${LI_ICON}</a></div>
         <div class="connector-card__role">${esc(c.role||'')}</div>
       </div>
@@ -2058,7 +2069,7 @@ let connQ = '';
 function connMatchesQ(c){
   if (!connQ.trim()) return true;
   const q = connQ.trim().toLowerCase();
-  if (((c.name||'') + ' ' + (c.role||'') + ' ' + (c.rapport||'')).toLowerCase().includes(q)) return true;
+  if ((connName(c) + ' ' + (c.name||'') + ' ' + (c.role||'') + ' ' + (c.rapport||'')).toLowerCase().includes(q)) return true;
   // also match on the funds they can open doors to
   return (c.matches||[]).some(pid => {
     const p = PERSON_BY_ID[pid];
@@ -2096,7 +2107,7 @@ function renderConnectors(){
       const matches = (c.matches||[]).filter(pid => PERSON_BY_ID[pid]).length;
       const liUrl = c.li || ('https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(c.name));
       return `<div class="arch-row ${connSelected.has(c.id)?'selected-card':''}" data-conn="${c.id}">
-        <span class="arch-row__name">${esc(c.name)} <a class="li-link" href="${esc(liUrl)}" target="_blank" rel="noopener" title="Open LinkedIn">${LI_ICON}</a></span>
+        <span class="arch-row__name">${esc(connName(c))} <a class="li-link" href="${esc(liUrl)}" target="_blank" rel="noopener" title="Open LinkedIn">${LI_ICON}</a></span>
         <span class="arch-row__role">${esc(c.role||'')} · ${matches} match${matches===1?'':'es'}</span>
         <button class="card-icon-btn" data-connunarch="${c.id}" title="Restore to active">${UNARCHIVE_ICON}</button>
         <input type="checkbox" class="done-check" data-connsel="${c.id}" ${connSelected.has(c.id)?'checked':''} title="Select for bulk actions">
@@ -2462,14 +2473,14 @@ function openPerson(id){
       ${pi.direct ? `<div class="info-card"><b>Direct connection (1st°).</b> Message them on LinkedIn or email straight away - no intro needed.</div>` : ''}
       ${pi.existing.map(e => `<div class="info-card"><b>${esc(prettyVia(e.via))}</b> <span class="pill pill--type" style="margin-left:4px">${e.kind === 'existing' ? 'Existing' : 'Warm path'}</span>${viaUrl(e.via) ? ` · <a href="${esc(viaUrl(e.via))}" target="_blank" rel="noopener" style="text-decoration:underline">profile</a>` : ''}<br>${esc(e.note)}</div>`).join('')}
       ${pi.connectors.map(c => `<div class="d-row" style="justify-content:space-between;border:1px solid var(--border);border-radius:10px;padding:10px 14px">
-          <div><div style="font-weight:600;font-size:13px">${esc(c.name)}</div><div style="font-size:11.5px;color:var(--muted-foreground)">${esc(c.role||'')}</div></div>
+          <div><div style="font-weight:600;font-size:13px">${esc(connName(c))}</div><div style="font-size:11.5px;color:var(--muted-foreground)">${esc(c.role||'')}</div></div>
           <button class="mini-btn" data-askvia="${c.id}">Draft ask</button>
         </div>`).join('')}
       ${(pi.nfxConnectors.length || pi.nfxPaths.length) ? `<span class="d-label" style="color:var(--muted-foreground);margin-top:4px">NFX Signal routes - other investors who can intro (weakest option; use only if nothing warmer exists)</span>` : ''}
       ${pi.nfxConnectors.map(c => {
         const stg = nfxStrengthOf(c, p.id);
         return `<div class="d-row" style="justify-content:space-between;border:1px solid var(--border);border-radius:10px;padding:10px 14px;opacity:0.75">
-          <div><div style="font-weight:600;font-size:13px">${esc(c.name)}</div><div style="font-size:11.5px;color:var(--muted-foreground)">${esc(c.role||'')}${stg ? ' · strength ' + stg : ''}</div></div>
+          <div><div style="font-weight:600;font-size:13px">${esc(connName(c))}</div><div style="font-size:11.5px;color:var(--muted-foreground)">${esc(c.role||'')}${stg ? ' · strength ' + stg : ''}</div></div>
           <button class="mini-btn" data-askvia="${c.id}">Draft ask</button>
         </div>`;
       }).join('')}
@@ -2635,7 +2646,7 @@ function openFund(id){
         const pid = (c.matches||[]).find(m => pids.includes(m));
         const stg = nfxStrengthOf(c, pid);
         return `<div class="d-row" style="justify-content:space-between;border:1px solid var(--border);border-radius:10px;padding:10px 14px${dim?';opacity:0.75':''}">
-          <div><div style="font-weight:600;font-size:13px">${esc(c.name)}</div><div style="font-size:11.5px;color:var(--muted-foreground)">${esc(c.role||'')}${stg ? ' · strength ' + stg : ''}</div></div>
+          <div><div style="font-weight:600;font-size:13px">${esc(connName(c))}</div><div style="font-size:11.5px;color:var(--muted-foreground)">${esc(c.role||'')}${stg ? ' · strength ' + stg : ''}</div></div>
           <button class="mini-btn" data-askvia2="${c.id}:${pid}">Draft ask</button>
         </div>`;
       };
@@ -2755,8 +2766,17 @@ function openConnector(id, preselect){
   const stored = (st.included && st.included.length && st.included.length <= 12) ? st.included : null;
   const checkedSet = new Set(preselect ? [preselect] : (stored || defaultIds));
   const due = connectorFollowUp(c);
-  $('dTitle').textContent = c.name;
-  $('dMeta').innerHTML = `<span class="pill pill--type">Connector</span>${isSuper(c) ? ' <span class="pill" style="background:var(--red-bg);color:var(--red-text)">Super connector</span>' : ''} ${esc(c.role||'')}${c.li ? ` · <a href="${esc(c.li)}" target="_blank" rel="noopener" style="font-weight:600;color:#0a66c2">LinkedIn</a>` : ''}`;
+  $('dTitle').textContent = connName(c);
+  $('dMeta').innerHTML = `<span class="pill pill--type">Connector</span>${isSuper(c) ? ' <span class="pill" style="background:var(--red-bg);color:var(--red-text)">Super connector</span>' : ''} ${esc(c.role||'')}${c.li ? ` · <a href="${esc(c.li)}" target="_blank" rel="noopener" style="font-weight:600;color:#0a66c2">LinkedIn</a>` : ''} · <button class="read-more" id="dConnRename" style="border:none;background:none;padding:0;font:inherit;text-decoration:underline;cursor:pointer;color:var(--muted-foreground)">Edit name</button>`;
+  setTimeout(() => { const b = $('dConnRename'); if (b) b.onclick = () => {
+    const t = $('dTitle');
+    const inp = document.createElement('input');
+    inp.className = 'li-input'; inp.value = connName(c); inp.style.cssText = 'font-size:16px;font-weight:600;width:100%';
+    t.replaceChildren(inp); inp.focus(); inp.select();
+    const done = () => { renameConnector(id, inp.value); openConnector(id); };
+    inp.onkeydown = e => { if (e.key === 'Enter') done(); if (e.key === 'Escape') openConnector(id); };
+    inp.onblur = done;
+  }; }, 0);
   $('drawerBody').innerHTML = `
     <div class="d-row" style="justify-content:space-between;flex-wrap:wrap">
       ${ddHtml({ ctx:'cstatus:'+id, value:cst, options: Object.entries(C_STATUS).map(([k,v]) => ({v:k,l:v})) })}
@@ -2813,17 +2833,17 @@ function openConnector(id, preselect){
     if (!t) return;
     const ids = included();
     if (!ids.length && t.body.includes('{{people_list}}')) { toast('Check at least one person to include in the ask.'); return; }
-    const text = renderTemplate(t.body, { first: firstName(c.name), name: c.name, people_list: peopleListFor(ids) });
+    const text = renderTemplate(t.body, { first: firstName(connName(c)), name: connName(c), people_list: peopleListFor(ids) });
     typeInto(text, () => { st.draft = text; if ((st.status||'none') === 'none') st.status = 'draft'; save(); render(); });
   };
   $('dCopy').onclick = () => {
     navigator.clipboard.writeText($('dMsg').value || '').catch(() => {});
     if (c.li) {
       window.open(c.li, '_blank');
-      toast('Copied. Paste it into the LinkedIn message to ' + firstName(c.name) + '.');
+      toast('Copied. Paste it into the LinkedIn message to ' + firstName(connName(c)) + '.');
     } else {
       window.open('https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(c.name), '_blank');
-      toast('Copied. No saved profile link for ' + firstName(c.name) + ' - opened a LinkedIn search instead.');
+      toast('Copied. No saved profile link for ' + firstName(connName(c)) + ' - opened a LinkedIn search instead.');
     }
   };
   $('dSent').onclick = () => {
