@@ -773,6 +773,7 @@ Dana Whitfield, Overline, worked together at Techstars,"></textarea>
       <div class="d-row" style="justify-content:space-between;flex-wrap:wrap">
         <div class="tab-row" id="connFilter">
           <button class="tab active" data-connview="active">Active <span class="count" id="cntConnActive">0</span></button>
+          <button class="tab" data-connview="super">Super <span class="count" id="cntConnSuper">0</span></button>
           <button class="tab" data-connview="archived">Archived <span class="count" id="cntConnArchived">0</span></button>
         </div>
         <div class="search-box" style="max-width:260px">
@@ -1192,6 +1193,32 @@ function mergeDuplicateConnectors(){
       && cnd((o.name||'').split(/\s+/)[0]) === first
       && (((o.role||'') + ' ' + (o.name||''))).toLowerCase().includes(rest));
     if (target) groups[cnd(target.name)].push(c);
+  });
+  // near-identical names across import sources ("Harry Uffindal" / "Harry
+  // Uffindell"): same first name, long names, edit distance <= 2 -> same human
+  const dist = (a,b) => {
+    if (Math.abs(a.length - b.length) > 2) return 3;
+    const d = Array.from({length: a.length + 1}, (_, i) => [i]);
+    for (let j = 1; j <= b.length; j++) d[0][j] = j;
+    for (let i = 1; i <= a.length; i++)
+      for (let j = 1; j <= b.length; j++)
+        d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+    return d[a.length][b.length];
+  };
+  const byFirst = {};
+  all.forEach(c => {
+    const first = cnd((c.name||'').split(/\s+/)[0]);
+    if (first) (byFirst[first] = byFirst[first] || []).push(c);
+  });
+  Object.values(byFirst).forEach(bucket => {
+    for (let i = 0; i < bucket.length; i++) for (let j = i+1; j < bucket.length; j++) {
+      const a = cnd(bucket[i].name), b = cnd(bucket[j].name);
+      if (a === b || a.length < 10 || b.length < 10) continue;
+      if (dist(a, b) <= 2) {
+        const g = groups[a];
+        if (!g.includes(bucket[j])) g.push(bucket[j]);
+      }
+    }
   });
   let changed = false;
   Object.values(groups).forEach(g => {
@@ -2044,20 +2071,22 @@ function renderConnectors(){
   const active = all.filter(c => !CS(c.id).archived);
   const archived = all.filter(c => CS(c.id).archived);
   $('cntConnActive').textContent = active.length;
+  $('cntConnSuper').textContent = active.filter(isSuper).length;
   $('cntConnArchived').textContent = archived.length;
   document.querySelectorAll('#connFilter .tab').forEach(t => t.classList.toggle('active', t.dataset.connview === connView));
   const bac = $('bulkArchiveConn');
   if (bac) bac.textContent = connView === 'archived' ? 'Restore selected' : 'Archive selected';
 
   const host = $('connectorGrid');
-  if (connView === 'active') {
+  if (connView !== 'archived') {
+    const shown = connView === 'super' ? active.filter(isSuper) : active;
     host.style.display = ''; host.style.flexDirection = ''; host.style.gap = '';
-    const sorted = active.slice().sort((a,b) =>
+    const sorted = shown.slice().sort((a,b) =>
       ((isSuper(b) ? 1 : 0) - (isSuper(a) ? 1 : 0)) ||
       ((a.source === 'nfx' ? 1 : 0) - (b.source === 'nfx' ? 1 : 0)) ||
       ((b.matches || []).length - (a.matches || []).length));
     host.innerHTML = sorted.map(connectorCardHtml).join('') ||
-      '<div class="info-card">No active connectors. Sync LinkedIn or add one above.</div>';
+      `<div class="info-card">${connView === 'super' ? 'No super connectors yet - hit "Mark super connector" on a card.' : 'No active connectors. Sync LinkedIn or add one above.'}</div>`;
     $('archivedStrip').innerHTML = archived.length
       ? `<button class="arch-strip" data-connview="archived">${ARCHIVE_ICON} Archived · ${archived.length}</button>` : '';
   } else {
