@@ -983,7 +983,7 @@
     else if(kind==='brand'){ opts=['All brands',...[...new Set(DEALS.filter(d=>d.outcome==='won').map(d=>d.brand))].sort()]; cur=dealBrandF; apply=v=>{ dealBrandF=v; RENDER.portal(); }; }
     else if(kind==='show'){ opts=['All shows',...SHOWS.map(x=>x.name)]; cur=delShowF; apply=v=>{ delShowF=v; RENDER.delivery(); }; }
     else if(kind==='time'){ opts=['All time','This week','This month','August','July','June']; cur=delTime; apply=v=>{ delTime=v; RENDER.delivery(); }; }
-    else if(kind==='status'){ opts=['All statuses','Tracking over','On track','Tracking under','Not started','Complete']; cur=delStatus; apply=v=>{ delStatus=v; RENDER.delivery(); }; }
+    else if(kind==='status'){ opts=['All statuses','In progress','Tracking over','On track','Tracking under','Not started','Complete']; cur=delStatus; apply=v=>{ delStatus=v; RENDER.delivery(); }; }
     else if(kind==='rem'){ opts=REM_LINKS.map(x=>x[1]); cur=(REM_LINKS.find(x=>x[0]===REM_LINK)||REM_LINKS[0])[1];
       apply=v=>{ REM_LINK=(REM_LINKS.find(x=>x[1]===v)||REM_LINKS[0])[0];
         const btn=document.getElementById('remLinkBtn'); if(btn) btn.innerHTML=esc(v)+' '+CHEV; }; }
@@ -1189,6 +1189,18 @@
         </div>`
         :''}
       </div>
+
+      ${(()=>{ const mgOpen=mgStats().open,
+          under=DEALS.filter(d=>d.outcome==='won').map(dealSummary).filter(c=>['under','mg'].includes(c.status.k)&&c.state==='live').length;
+        const t=(label,n,sub,click)=>`<div class="tile" style="cursor:pointer" onclick="${click}">
+          <div class="tile__label">${label}</div>
+          <div class="tile__val" style="color:${n?'var(--text-primary)':'var(--text-tertiary)'}">${n}</div>
+          <div class="tile__delta"><span class="muted">${sub}</span></div></div>`;
+        return `<div class="tiles" style="grid-template-columns:repeat(3,1fr);margin-top:18px">
+          ${t('Needs you',work.length,'flights wanting a look',"go('delivery')")}
+          ${t('Make goods open',mgOpen,'waiting on a date or position',"delTab='mg';go('delivery')")}
+          ${t('Campaigns under',under,'projecting below the 90% line',"go('portal')")}
+        </div>`; })()}
       ${CHATS.length?`<div class="thread">
         <div class="thread__hd"><span>Conversation</span><button onclick="newChat()">Clear</button></div>
         ${CHATS.map(c=>`<div class="turn"><div class="turn__q">${esc(c.q)}</div><div class="turn__a">${c.a}</div></div>`).join('')}
@@ -1208,6 +1220,7 @@
       if(delTime==='This month') return p.slice(5,7)===TODAY.slice(5,7);
       return p.slice(5,7)===DMONTH[delTime]; });
     if(delStatus!=='All statuses'&&delStatus!=='Not started') live=live.filter(s=>{ const pr=projection(s); if(!pr) return false;
+      if(delStatus==='In progress') return !pr.final;
       if(delStatus==='Complete') return pr.final; const k=verdict(s).k;
       if(delStatus==='Tracking over') return !pr.final&&k==='bonus';
       if(delStatus==='Tracking under') return !pr.final&&k==='short';
@@ -1234,13 +1247,18 @@
       <div id="scanPanel"></div>
       ${delTab==='mg' ? makeGoodsPanel() : delTab==='work'
         ? (work.length?`<div class="listcard">${delHead}${work.join('')}</div>`:`<div class="card"><div class="empty">✨ Nothing needs you — every flight projects over the 90% line.</div></div>`)
-        : `${delMode==='campaigns'?'':''}<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><div class="seg">
-            <button class="${delMode==='episodes'?'active':''}" onclick="delMode='episodes';RENDER.delivery()">By episode</button>
-            <button class="${delMode==='campaigns'?'active':''}" onclick="delMode='campaigns';RENDER.delivery()">By campaign</button></div></div>
+        : `<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><div class="seg">
+            <button class="${delMode==='campaigns'?'active':''}" onclick="delMode='campaigns';RENDER.delivery()">By campaign</button>
+            <button class="${delMode==='episodes'?'active':''}" onclick="delMode='episodes';RENDER.delivery()">By episode</button></div></div>
           ${delMode==='campaigns'
             ? (()=>{ const cs=DEALS.filter(d=>d.outcome==='won').map(dealSummary).filter(c=>c.state==='live')
                 .sort((a,b)=>(b.spots[0]?dt(b.spots[0].published):0)-(a.spots[0]?dt(a.spots[0].published):0));
-                return `<div class="card" style="overflow:hidden">${cs.length?cs.map((c,i)=>dealIndexRow(c,i+1,false)).join(''):'<div class="empty">No live campaigns.</div>'}</div>`; })()
+                return `<div class="listcard">${cs.length?cs.map((c,i)=>
+                  dealIndexRow(c,i+1,false,`toggleDelDeal('${c.deal.id}')`,!!DEL_OPEN[c.deal.id])
+                  +(DEL_OPEN[c.deal.id]?`<div style="background:var(--page-bg);box-shadow:inset 0 1px 0 var(--border-light)">${
+                      SPOTS.filter(x=>x.dealId===c.deal.id&&projection(x)).sort((a,b)=>liveDays(b)-liveDays(a)).map(flightRow).join('')
+                    }</div>`:'')
+                ).join(''):'<div class="empty">No live campaigns.</div>'}</div>`; })()
             : `<div class="listcard">${delHead}${live.length?live.map(flightRow).join(''):'<div class="empty">No flights match.</div>'}</div>`}`}
       <div class="footnote">Projections come from each show's own curve, refit every time a read is verified.</div>
     </div>`;
@@ -1576,7 +1594,9 @@
   let portalDeal=null, portalFilter='live';
   let dealQ='', dealBrandF='All brands', dealSort={k:'date',dir:-1}, FOCUS_Q=null;
   let delQ2='', delShowF='All shows', delSort={k:'day',dir:-1};
-  let delTime='All time', delStatus='All statuses', delMode='episodes';
+  let delTime='All time', delStatus='All statuses', delMode='campaigns';
+  const DEL_OPEN={};
+  function toggleDelDeal(id){ DEL_OPEN[id]=!DEL_OPEN[id]; RENDER.delivery(); }
   function setDealSort(k){ dealSort = dealSort.k===k?{k,dir:-dealSort.dir}:{k,dir:1}; RENDER.portal(); }
   function setDelSort(k){ delSort = delSort.k===k?{k,dir:-delSort.dir}:{k,dir:1}; RENDER.delivery(); }
   function refocusQ(){ if(!FOCUS_Q) return; const el=document.getElementById(FOCUS_Q);
@@ -1714,9 +1734,9 @@
   /* Two ways in (Cam): the deal tabs are a flat stack — brand bold, campaign
      after it. The Brands tab is a closed stack of brands; click one to see
      its deals. */
-  function dealIndexRow(c,i,hideBrand){
+  function dealIndexRow(c,i,hideBrand,click,open){
     const tone=toneVar(c.status.tone), max=Math.max(c.g,c.proj)*1.06, w=x=>c.g?Math.min(100,x/max*100):0;
-    return `<div class="wrow--click" style="display:grid;grid-template-columns:minmax(0,1fr) 108px 150px 168px 118px 26px;align-items:center;gap:0 13px;padding:10px 14px;${i===0&&!hideBrand?'':'border-top:1px solid var(--border-light)'}" onclick="go('portal');openDeal('${c.deal.id}')">
+    return `<div class="wrow--click" style="display:grid;grid-template-columns:minmax(0,1fr) 108px 150px 168px 118px 26px;align-items:center;gap:0 13px;padding:10px 14px;${i===0&&!hideBrand?'':'border-top:1px solid var(--border-light)'}" onclick="${click||`go('portal');openDeal('${c.deal.id}')`}">
       <div style="min-width:0"><b style="font-size:13.5px">${hideBrand?esc(c.title):`${esc(c.brand)} <span style="font-weight:400;color:var(--text-secondary)">· ${esc(c.title)}</span>`}</b>
         <div class="muted" style="font-size:11.5px">${c.shows.map(x=>show(x).name).join(', ')}</div></div>
       <div class="muted" style="font-size:11.5px;white-space:nowrap">${esc(c.flight)}</div>
@@ -1730,7 +1750,7 @@
         </div><b style="font-size:12px;color:${tone};min-width:36px;text-align:right">${c.pct}%</b>`
         :'<span style="flex:1;text-align:left;font-size:12px;color:var(--text-tertiary)">Not started</span>'}</div>
       <div style="text-align:right"><span class="muted" style="font-size:11.5px">${c.g?K(c.got)+' of '+K(c.g):K(c.spots.reduce((a,s)=>a+s.guarantee,0))+' booked'}</span></div>
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.4" style="justify-self:center"><path d="M9 6l6 6-6 6"/></svg>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.4" style="justify-self:center;transition:transform .15s;transform:rotate(${open?90:0}deg)"><path d="M9 6l6 6-6 6"/></svg>
     </div>`;
   }
   function renderDealIndex(){
