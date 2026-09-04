@@ -1316,10 +1316,6 @@
       </div>
       <div style="margin-left:auto;margin-right:16px;display:flex;align-items:center;gap:14px;align-self:center">
         ${actBtns}
-        ${pr?`<div style="min-width:210px">
-          <div style="text-align:right;font-size:12px;font-weight:700">${K(gotT)} of ${K(gT)} · ${Math.round(ratioT*100)}%</div>
-          <div class="pace ${ratioT>=IAB_FULL?'pace--good':''}" style="height:6px;margin-top:5px"><div class="pace__fill" style="width:${Math.min(ratioT*100,100)}%"></div></div>
-        </div>`:''}
       </div>
       <button class="x" onclick="closeOverlays()">✕</button></div>
     <div class="drawer__body">
@@ -1353,6 +1349,13 @@
       <div class="spotcols">
       <div>
       <div>
+        <div class="cmp-row" style="margin-top:0">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <span style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em">Campaign delivery</span>
+            <span style="font-size:12px;font-weight:700">${K(gotT)} of ${K(gT)} · ${Math.round(ratioT*100)}%</span>
+          </div>
+          <div class="pace ${ratioT>=IAB_FULL?'pace--good':''}" style="height:6px;margin-top:8px"><div class="pace__fill" style="width:${Math.min(ratioT*100,100)}%"></div></div>
+        </div>
         ${flightRows(s).map((e,ci)=>{ const epr=projection(e), passed=e.status==='verified'&&!!e.yt;
           const inSel=SELSET&&SELSET.has(e.id), selectable=!!epr;
           return `<div class="cmp-row" style="${selectable?(inSel?'':'opacity:.45;border-style:dashed;border-color:var(--border);'):''}">
