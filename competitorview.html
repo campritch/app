@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SpotsNow: supply and buyer matrices</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2">
+<link rel="icon" type="image/png" href="/favicon.png?v=2">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
+<meta property="og:title" content="SpotsNow: supply and buyer matrices">
+<meta property="og:description" content="How SpotsNow compares for shows, networks, brands, and agencies across creator-read advertising platforms.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://spotsnow.wiki/competitorview">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Brand vars (edit here): coral / mint / navy */
+  :root{
+    --coral:#FF6B6B;--mint:#2FCF8B;--navy:#17212B;
+    --mint-light:#EAFBF3;--mint-light2:#DDF7EA;
+    --bg:#F5F4F2;--ink:#17212B;--ink-soft:#5C5C5C;
+    --accent:var(--coral);--accent-soft:#FFE8E8;
+    --line:#E8E8E8;--card:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  html,body{background:var(--bg);color:var(--ink);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased;line-height:1.5}
+
+  .page{max-width:1320px;margin:0 auto;padding:24px 48px 80px}
+  @media (max-width:720px){.page{padding:16px 24px 64px}}
+
+  .slide{background:var(--card);border-radius:24px;padding:40px 72px 56px;margin-bottom:32px;border:1px solid var(--line)}
+  @media (max-width:1100px){.slide{padding:40px 40px 48px}}
+  @media (max-width:720px){.slide{padding:28px 28px 36px;border-radius:18px}}
+
+  .slide-header{display:flex;justify-content:space-between;align-items:center;font-size:13px;letter-spacing:.04em;color:var(--ink-soft);margin-bottom:32px}
+  .slide-header .brand-logo{display:block;height:26px;width:auto}
+  @media (max-width:720px){.slide-header .brand-logo{height:22px}}
+  .slide-header .num{font-variant-numeric:tabular-nums}
+
+  .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:20px;font-weight:700}
+
+  h1,h2{font-weight:800;line-height:1.06;letter-spacing:-.03em;color:var(--ink)}
+  h1 em,h2 em{font-style:normal;color:var(--accent);font-weight:800}
+  h1{font-size:clamp(40px,5.2vw,64px);margin-bottom:24px}
+  h2{font-size:clamp(28px,3.6vw,44px);line-height:1.08;letter-spacing:-.025em;margin-bottom:20px}
+
+  .lede{font-size:clamp(17px,1.4vw,19px);color:var(--ink-soft);max-width:640px;line-height:1.55}
+
+  /* Side dot nav */
+  .nav{position:fixed;right:18px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px;padding:14px 8px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:100px;box-shadow:0 8px 24px rgba(23,33,43,.06);z-index:100}
+  .nav a{width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;text-decoration:none}
+  .nav a::after{content:'';width:9px;height:9px;border-radius:50%;background:rgba(23,33,43,.22);transition:background .2s,transform .2s}
+  .nav a:hover::after{background:var(--accent);transform:scale(1.3)}
+  .nav a.active::after{background:var(--accent);transform:scale(1.4)}
+  .nav a .label{position:absolute;right:32px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);background:#fff;padding:6px 10px;border-radius:8px;border:1px solid var(--line);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .18s}
+  .nav a:hover .label{opacity:1}
+  @media (max-width:720px){.nav{right:10px;gap:10px}.nav a .label{display:none}}
+
+  /* Hero */
+  .tag{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:var(--accent-soft);color:var(--accent);border-radius:100px;font-size:11px;letter-spacing:.1em;font-weight:700;text-transform:uppercase;margin-bottom:24px}
+  .hero-jump{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:44px}
+  @media (max-width:720px){.hero-jump{grid-template-columns:1fr}}
+  .jump-card{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:26px 28px;text-decoration:none;color:var(--ink);font-weight:800;font-size:18px;letter-spacing:-.02em;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+  .jump-card:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(23,33,43,.08);border-color:var(--accent)}
+  .jump-card svg{width:20px;height:20px;flex-shrink:0;color:var(--accent)}
+  .jump-card .sub{display:block;font-size:13px;font-weight:500;color:var(--ink-soft);margin-top:4px;letter-spacing:0}
+
+  .scroll-cue{display:flex;align-items:center;justify-content:center;margin:48px auto 0;width:72px;height:72px;color:var(--ink);text-decoration:none;animation:scroll-bounce 1.4s ease-in-out infinite}
+  .scroll-cue svg{width:34px;height:34px}
+  @keyframes scroll-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(12px)}}
+
+  /* Callout (the argued-over one-liner) */
+  .callout{background:var(--bg);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:14px;padding:20px 24px;font-size:16px;font-weight:600;line-height:1.5;color:var(--ink);margin:0 0 22px;max-width:72ch}
+
+  .body-p{margin:0 0 32px;font-size:16px;line-height:1.6;color:var(--ink-soft);max-width:70ch}
+
+  /* Matrix table */
+  .scroll{overflow-x:auto;border-radius:18px;border:1px solid var(--line);box-shadow:0 16px 48px rgba(23,33,43,.07)}
+  table{width:100%;min-width:800px;border-collapse:separate;border-spacing:0}
+  th{background:var(--navy);color:#fff;font-weight:700;font-size:17px;padding:18px 10px;text-align:center;border-bottom:2px solid rgba(255,255,255,.9)}
+  th:first-child{width:38%;text-align:left;padding-left:24px}
+  th.sn{background:var(--mint)}
+  td{height:48px;border-bottom:2px solid #fff;text-align:center;background:#fff;padding:0;transition:background .12s ease}
+  td.label{background:var(--navy);color:rgba(255,255,255,.85);font-weight:500;font-size:15px;text-align:left;padding:0 24px}
+  td.sn{background:var(--mint-light)}
+  tbody tr:hover td:not(.label):not(.sn){background:#f6f7f9}
+  tbody tr:hover td.sn{background:var(--mint-light2)}
+  tbody tr:hover td.label{color:#fff}
+  .ic{display:inline-block;width:26px;height:26px;vertical-align:middle}
+  .ic svg{width:26px;height:26px;display:block}
+  .y svg{stroke:var(--navy)}
+  .n svg{stroke:#c4c9d0}
+  td.sn .y svg{stroke:#fff}
+  td.sn .y svg circle{fill:var(--mint);stroke:var(--mint)}
+  tr.top td{background:#f4f5f7}
+  tr.top td.label{background:var(--navy);color:#fff;box-shadow:inset 6px 0 0 #3DDC97}
+  tr.top td.sn{background:var(--mint-light2)}
+  tr.spacer td{height:14px;background:#fff;border-bottom:2px solid #fff}
+  tr.spacer td.label{background:#fff}
+
+  /* Reveal on scroll */
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
+  .reveal.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .reveal{opacity:1;transform:none;transition:none}
+    .scroll-cue{animation:none}
+  }
+
+  /* Closing CTA */
+  .cta{margin-top:48px;padding-top:40px;border-top:1px solid var(--line);display:flex;justify-content:center}
+  .cta-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:#fff;padding:16px 32px;border-radius:12px;font-size:16px;font-weight:700;letter-spacing:-.01em;text-decoration:none;transition:background .15s,transform .15s}
+  .cta-btn:hover{background:#f25252;transform:translateY(-1px)}
+  .cta-btn svg{width:18px;height:18px}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="#s1" class="active"><span class="label">What is SpotsNow</span></a>
+  <a href="#s2"><span class="label">For Shows &amp; Networks</span></a>
+  <a href="#s3"><span class="label">For Brands &amp; Agencies</span></a>
+</nav>
+
+<div class="page">
+
+  <!-- 01 · Intro -->
+  <section class="slide" id="s1">
+    <div class="slide-header">
+      <a href="https://www.spotsnow.io" target="_blank" rel="noopener"><img class="brand-logo" src="/spotsnow-logo.png" alt="SpotsNow"></a>
+      <span class="num">01 / 03</span>
+    </div>
+    <span class="tag">Supply &amp; buyer matrices</span>
+    <h1>What Is <em>SpotsNow?</em></h1>
+    <p class="lede">SpotsNow is the marketplace and workflow platform that connects media publishers with the brands and agencies buying host-read and remnant placements. It's the most advertiser-friendly and show-friendly model in creator media, because we never standardize the creator.</p>
+    <div class="hero-jump">
+      <a class="jump-card" href="#s2">
+        <span>For Shows &amp; Networks<span class="sub">The 'Seller First' brand lead platform</span></span>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a class="jump-card" href="#s3">
+        <span>For Brands &amp; Agencies<span class="sub">Plan, book and scale creator-read ads</span></span>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+    <a href="#s2" class="scroll-cue" aria-label="Scroll to next section">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </section>
+
+  <!-- 02 · Supply -->
+  <section class="slide" id="s2">
+    <div class="slide-header">
+      <a href="https://www.spotsnow.io" target="_blank" rel="noopener"><img class="brand-logo" src="/spotsnow-logo.png" alt="SpotsNow"></a>
+      <span class="num">02 / 03</span>
+    </div>
+    <div class="eyebrow">For Shows &amp; Networks</div>
+    <h2>SpotsNow is the <em>'Seller First'</em> brand lead platform.</h2>
+    <div class="callout">We drive brands into your ecosystem and you own the relationships. Others only send you orders, hurting long-term revenue.</div>
+    <p class="body-p">Our agents plug into the stack you already run and grow your margins. You sell your ad in your format. You set every rate. You keep the brand relationship and the renewal. And your inventory is findable by the AI agents brands are starting to buy through.</p>
+    <div class="scroll reveal"><table>
+      <thead><tr><th></th><th>Creator Exchange</th><th>RedCircle</th><th>Gumball</th><th>Spotify</th><th class="sn">SpotsNow</th></tr></thead>
+      <tbody id="supply"></tbody>
+    </table></div>
+  </section>
+
+  <!-- 03 · Buyers -->
+  <section class="slide" id="s3">
+    <div class="slide-header">
+      <a href="https://www.spotsnow.io" target="_blank" rel="noopener"><img class="brand-logo" src="/spotsnow-logo.png" alt="SpotsNow"></a>
+      <span class="num">03 / 03</span>
+    </div>
+    <div class="eyebrow">For Brands &amp; Agencies</div>
+    <h2>SpotsNow helps you plan, book and scale creator-read ads <em>with ease.</em></h2>
+    <div class="callout">We find you what works across all inventory. Others only push what they have, capping your ROAS upside.</div>
+    <p class="body-p">Plan across all 59,000 shows, not one shelf. See which brands already buy there, get every price up front, and book in minutes with no sales call, or straight from your MMM in Claude or ChatGPT. Then renew direct with the show on better terms.</p>
+    <div class="scroll reveal"><table>
+      <thead><tr><th></th><th>Creator Exchange</th><th>RedCircle</th><th>Gumball</th><th>Spotify</th><th class="sn">SpotsNow</th></tr></thead>
+      <tbody id="buyers"></tbody>
+    </table></div>
+
+    <div class="cta">
+      <a class="cta-btn" href="https://www.spotsnow.io" target="_blank" rel="noopener">
+        Onboard today
+        <svg viewBox="0 0 24 24" fill="none"><path d="m8.25 4.5 7.5 7.5-7.5 7.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </section>
+
+</div>
+
+<script>
+// column order: Agentio, Creator Exchange, RedCircle, Gumball, Spotify, SpotsNow
+const Y = '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.6 2.6L16 9.5"/></svg>';
+const N = '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 9l6 6M15 9l-6 6"/></svg>';
+const supply = [
+  ["Sell your ad in your format, no standardized unit", [0,0,0,0,0,1], 1],
+  ["Keep the brand relationship and the renewal", [0,0,0,0,0,1], 1],
+  ["Agent tools that plug into your stack and grow seller margins", [0,0,0,0,0,1], 1],
+  ["Your inventory findable by AI agents (Claude, ChatGPT)", [0,0,0,0,0,1], 1],
+  ["Set your own price", [0,0,1,1,0,1], 1],
+  ["Keep your hosting, your stack, your other deals", [1,1,0,1,0,1]],
+  ["Counter or negotiate with the brand", [0,0,0,0,0,1]],
+  ["Sell last-minute spots at a discount you control", [0,0,0,0,0,1]],
+  ["Sell podcast and YouTube inventory in one place", [0,1,0,1,0,1]],
+  ["Paid up front, on booking", [1,0,1,1,0,1]],
+];
+const buyers = [
+  ["Self-serve, no sales calls", [0,0,0,1,1,1], 1],
+  ["Plan and mix with your MMM in Claude and ChatGPT", [0,0,0,0,0,1], 1],
+  ["Plan across 59,000 shows, not just their shelf", [0,0,0,0,0,1], 1],
+  ["Discounted last-minute inventory", [0,0,0,0,0,1], 1],
+  ["Renew and negotiate direct with the show", [0,0,0,0,0,1], 1],
+  ["Instant availability shown", [0,0,0,1,1,1]],
+  ["Auto air checks and ad delivery checks", [1,0,1,1,1,1]],
+  ["Campaigns from $100", [0,0,0,1,0,1]],
+  ["Campaign planned in 60 seconds", [0,0,0,0,0,1]],
+  ["Transparent pricing before you commit", [0,0,0,1,1,1]],
+  ["See which brands already buy each show", [0,0,0,0,0,1]],
+  ["AI-built media plans", [1,0,0,0,0,1]],
+  ["YouTube creator integrations", [1,1,0,1,0,1]],
+  ["Zero-touch brief and approval", [1,0,1,0,1,1]],
+  ["Message the show or its rep directly", [0,0,0,0,0,1]],
+];
+const render = (id, rows) => {
+  let html = '', prevTop = null;
+  rows.forEach(([l,v,top]) => {
+    if (prevTop && !top) html += '<tr class="spacer"><td class="label"></td><td></td><td></td><td></td><td></td><td class="sn"></td></tr>';
+    const cols = v.filter((x,i) => i !== 0); // drop Agentio (column 0)
+    html += `<tr${top?' class="top"':''}><td class="label">${l}</td>` + cols.map((x,i)=>`<td${i===cols.length-1?' class="sn"':''}><span class="ic ${x?'y':'n'}">${x?Y:N}</span></td>`).join('') + `</tr>`;
+    prevTop = top;
+  });
+  document.getElementById(id).innerHTML = html;
+};
+render('supply', supply); render('buyers', buyers);
+
+// Side nav active state + reveal on scroll
+(() => {
+  const sections = [...document.querySelectorAll('section.slide')];
+  const links = [...document.querySelectorAll('.nav a')];
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const i = sections.indexOf(e.target);
+        links.forEach(l => l.classList.remove('active'));
+        if (links[i]) links[i].classList.add('active');
+      }
+    });
+  }, { threshold: 0.35 });
+  sections.forEach(s => io.observe(s));
+
+  const rio = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); rio.unobserve(e.target); } });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => rio.observe(el));
+})();
+</script>
+</body>
+</html>
