@@ -322,6 +322,14 @@
                 background: var(--secondary); color: var(--muted-foreground); }
     .src-pill svg { display: none; }
     .src-pill--open { background: #ffedd5; color: #c2410c; }
+    /* blacklisted competitor backers: whole row grayed, loud tag stays legible */
+    tr.competitor-dim td { opacity: .45; }
+    tr.competitor-dim td.fund-td { opacity: 1; }
+    tr.competitor-dim td.fund-td .fund-name { color: var(--muted-foreground); }
+    tr.competitor-dim td.fund-td .fund-site { color: var(--muted-foreground); }
+    .pill--competitor { display: inline-block; background: var(--destructive); color: #fff;
+      font-size: 10px; font-weight: 700; letter-spacing: .05em; padding: 2px 8px;
+      border-radius: 9999px; vertical-align: 1px; }
     .why-cell {
       font-size: 11.5px; color: var(--text-secondary); line-height: 1.45; max-width: 260px;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
@@ -1267,6 +1275,9 @@ function connectorsFor(personId){ return allConnectors().filter(c => !CS(c.id).a
 function isSuper(c){ const st = CS(c.id); return st.superc !== undefined ? !!st.superc : !!c.superc; }
 /* Display name for a connector - a saved rename wins over the imported name. */
 function connName(c){ return CS(c.id).customName || c.name; }
+/* Competitor blacklist: funds backing direct competitors (e.g. Agentio's cap
+   table). Data can preset it; the drawer toggle (state) always wins. */
+function isCompetitor(f){ const fs = FS(f.id); return fs.competitor !== undefined ? !!fs.competitor : !!f.competitor; }
 function renameConnector(id, name){
   name = (name || '').trim();
   if (!name) return;
@@ -1868,10 +1879,10 @@ function renderFundsTable(){
     const ppl = PEOPLE.filter(p => p.fundId === f.id && !isExcluded(p));
     const tbd = ppl.filter(p => p.tbd).length;
     const open = expandedFunds.has(f.id);
-    return `<tr data-fundrow="${f.id}" class="${selected.has(f.id)?'selected':''} ${open?'expanded':''} ${fundArchiveView?'arch-dim':''}">
+    return `<tr data-fundrow="${f.id}" class="${selected.has(f.id)?'selected':''} ${open?'expanded':''} ${fundArchiveView?'arch-dim':''} ${isCompetitor(f)?'competitor-dim':''}">
       <td><input type="checkbox" class="row-check" data-check="${f.id}" ${selected.has(f.id)?'checked':''}></td>
-      <td><div class="fund-cell">
-        <span class="fund-name">${esc(f.name)}</span>
+      <td class="fund-td"><div class="fund-cell">
+        <span class="fund-name">${esc(f.name)}${isCompetitor(f)?' <span class="pill--competitor" title="'+esc(f.competitorNote||'Backs a direct competitor')+'">COMPETITOR</span>':''}</span>
         ${f.site ? `<a class="fund-site" href="https://${esc(f.site)}" target="_blank" rel="noopener" data-noopen title="Open website">${esc(f.site)}</a>` : ''}
       </div></td>
       <td>${gradePillHtml(f)}</td>
@@ -2603,6 +2614,11 @@ function openFund(id){
   $('dMeta').innerHTML = `<span class="pill pill--type">${esc(f.type||'—')}</span> ${esc(f.region||'—')} · ${checkFmt(f)}${f.site ? ` · <a href="https://${esc(f.site)}" target="_blank" rel="noopener" style="color:var(--text-secondary);font-weight:600">${esc(f.site)}</a>` : ''}`;
   const meetings = FS(id).meetings || [];
   $('drawerBody').innerHTML = `
+    ${isCompetitor(f) ? `<div style="border:1.5px solid var(--destructive);background:rgba(220,38,38,.06);border-radius:11px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
+      <span class="pill--competitor">COMPETITOR</span>
+      <span style="flex:1;font-size:12.5px">${esc(f.competitorNote || 'Backs a direct competitor - do not pitch.')}</span>
+      <button class="btn-ghost" id="dCompClear" style="height:30px;font-size:11.5px;flex-shrink:0">Clear flag</button>
+    </div>` : ''}
     <div class="d-row" style="justify-content:space-between;flex-wrap:wrap">
       <div class="d-row">
         ${ddHtml({ ctx:'fstage:'+id, value:fStage(f), options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:'Stage: '+v,cls:k==='none'?'st-backlog':''})) })}
@@ -2610,6 +2626,7 @@ function openFund(id){
       </div>
       <div class="d-row">
         <button class="btn-ghost" id="dAddPerson" style="height:34px;font-size:12px">+ Add person</button>
+        ${isCompetitor(f) ? '' : `<button class="btn-ghost" id="dCompFlag" style="height:34px;font-size:12px" title="Blacklist - they back a direct competitor">Flag competitor</button>`}
         <button class="btn-ghost" id="dRemoveFund" style="height:34px;font-size:12px;color:var(--red-text)">Remove</button>
       </div>
     </div>
@@ -2732,6 +2749,14 @@ function openFund(id){
     }
   };
   $('dRemoveFund').onclick = () => removeFund(id);
+  if ($('dCompFlag')) $('dCompFlag').onclick = () => {
+    FS(id).competitor = true; save(); render(); openFund(id);
+    toast('Blacklisted - grayed out with a competitor tag.');
+  };
+  if ($('dCompClear')) $('dCompClear').onclick = () => {
+    FS(id).competitor = false; save(); render(); openFund(id);
+    toast('Competitor flag cleared.');
+  };
   showDrawer();
 }
 
