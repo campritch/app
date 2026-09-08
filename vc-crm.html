@@ -998,6 +998,7 @@ function rebuild(){
   FUNDS.forEach(f => {
     const st = state.funds && state.funds[f.id];
     if (!f.dims && st && st.aiDims) f.dims = st.aiDims;
+    if (st && st.site) f.site = st.site;
   });
   // Persisted match additions for the built-in connectors (their objects are code constants).
   Object.entries(state.connMatchExtra || {}).forEach(([cid, ov]) => {
@@ -2657,7 +2658,7 @@ function openFund(id){
   drawerRef = { kind:'fund', id };
   const ppl = PEOPLE.filter(p => p.fundId === id);
   $('dTitle').textContent = f.name;
-  $('dMeta').innerHTML = `<span class="pill pill--type">${esc(f.type||'—')}</span> ${esc(f.region||'—')} · ${checkFmt(f)}${f.site ? ` · <a href="https://${esc(f.site)}" target="_blank" rel="noopener" style="color:var(--text-secondary);font-weight:600">${esc(f.site)}</a>` : ''}`;
+  $('dMeta').innerHTML = `<span class="pill pill--type">${esc(f.type||'—')}</span> ${esc(f.region||'—')} · ${checkFmt(f)}${f.site ? ` · <a href="https://${esc(f.site)}" target="_blank" rel="noopener" style="color:#2563eb;font-weight:600">${esc(f.site)}</a>` : ''} · <button class="read-more" id="dEditSite" style="border:none;background:none;padding:0;font:inherit;text-decoration:underline;cursor:pointer;color:var(--muted-foreground)">${f.site ? 'Edit site' : 'Add website'}</button>`;
   const meetings = FS(id).meetings || [];
   $('drawerBody').innerHTML = `
     ${isCompetitor(f) ? `<div style="border:1.5px solid var(--destructive);background:rgba(220,38,38,.06);border-radius:11px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
@@ -2795,6 +2796,15 @@ function openFund(id){
     }
   };
   $('dRemoveFund').onclick = () => removeFund(id);
+  if ($('dEditSite')) $('dEditSite').onclick = () => {
+    const v = prompt('Website for ' + f.name + ':', f.site ? 'https://' + f.site : 'https://');
+    if (v === null) return;
+    const clean = v.trim().replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+    f.site = clean;
+    FS(id).site = clean;
+    save(); render(); openFund(id);
+    toast(clean ? 'Website saved.' : 'Website cleared.');
+  };
   if ($('dCompFlag')) $('dCompFlag').onclick = () => {
     FS(id).competitor = true; save(); render(); openFund(id);
     toast('Blacklisted - grayed out with a competitor tag.');
