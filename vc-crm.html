@@ -330,6 +330,14 @@
     .pill--competitor { display: inline-block; background: var(--destructive); color: #fff;
       font-size: 10px; font-weight: 700; letter-spacing: .05em; padding: 2px 8px;
       border-radius: 9999px; vertical-align: 1px; }
+    /* connector faces on fund rows - intro in motion */
+    .intro-avas { display: inline-flex; align-items: center; margin-left: 8px; vertical-align: middle; }
+    .intro-ava { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--background);
+      margin-left: -6px; background: #dbeafe; color: #1d4ed8; overflow: hidden; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center; position: relative; cursor: pointer; }
+    .intro-ava:first-child { margin-left: 0; }
+    .intro-ava i { font-style: normal; font-size: 8.5px; font-weight: 700; letter-spacing: 0; }
+    .intro-ava img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
     .why-cell {
       font-size: 11.5px; color: var(--text-secondary); line-height: 1.45; max-width: 260px;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
@@ -1093,6 +1101,7 @@ state.vars = state.vars || { ...DEFAULT_VARS };
 state.funds = state.funds || {};
 state.settings = state.settings || { autoFollowDirect: 0, autoFollowAsk: 0 };
 state.connMatchExtra = state.connMatchExtra || {};
+state.introLists = state.introLists || {};
 // Migrate the old target-list flag into the pipeline.
 Object.values(state.funds).forEach(fs => { if (fs.target && !fs.stage) fs.stage = 'target'; delete fs.target; });
 // v3: adds the 300-char LinkedIn invite template.
@@ -1358,6 +1367,23 @@ const STAGE_TABS = ['funds','targets','messaged','booked','pitching','closed','d
 const WARMTH = { hot:'\ud83d\udd25 Hot', warm:'\u2600\ufe0f Warm', cool:'\ud83d\udd35 Cool', cold:'\ud83e\udd76 Cold', na:'\u2014 Not set' };
 const WARMTH_ICON = { na:'\u25cb', hot:'\ud83d\udd25', warm:'\u2600\ufe0f', cool:'\ud83d\udd35', cold:'\ud83e\udd76' };
 /* Where the fund came from: the master lists (grey) or OpenVC (light orange). */
+/* Connector faces on a fund row - who's making the intro. Photo if we have
+   one, initials circle otherwise; stacked when several are reaching out. */
+function introAvatarsHtml(f){
+  const ids = FS(f.id).introFrom || [];
+  if (!ids.length) return '';
+  const avs = ids.slice(0, 3).map(cid => {
+    const c = connectorById(cid);
+    if (!c) return '';
+    const nm = connName(c);
+    const initials = nm.split(/\s+/).map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const ph = c.photo || CS(cid).photo;
+    return `<span class="intro-ava" title="${esc(nm)} is reaching out" data-openconn="${cid}">${ph ? `<img src="${esc(ph)}" onerror="this.remove()" alt="">` : ''}<i>${esc(initials)}</i></span>`;
+  }).join('');
+  const extra = ids.length > 3 ? `<span class="intro-ava"><i>+${ids.length - 3}</i></span>` : '';
+  return `<span class="intro-avas" title="Intro in motion">${avs}${extra}</span>`;
+}
+
 function sourceCellHtml(f){
   const v = FS(f.id).source || 'list';
   return `<div class="dd dd--row" data-ddctx="fsource:${f.id}" data-ddval="${v}">
@@ -1664,6 +1690,13 @@ function onDdChange(ctx, v){
   if (kind === 'sort') { sortBy = v; headSort = { key: null, dir: 1 }; render(); return; }
   if (kind === 'afstage') { afStage = v; renderAfStage(); return; }
   if (kind === 'fsource') { FS(arg).source = v; save(); render(); return; }
+  if (kind === 'introstage') {
+    introStage = v;
+    const dd = $('dIntroStageDD');
+    if (dd) dd.innerHTML = ddHtml({ ctx:'introstage', value: v,
+      options: Object.entries(F_STAGES).filter(([k]) => k !== 'none').map(([k,vv]) => ({v:k,l:vv})) });
+    return;
+  }
   if (kind === 'pstatus') { setPersonStatus(arg, v); return; }
   if (kind === 'dstatus') {
     setPersonStatus(arg, v);
@@ -1887,7 +1920,7 @@ function renderFundsTable(){
     return `<tr data-fundrow="${f.id}" class="${selected.has(f.id)?'selected':''} ${open?'expanded':''} ${fundArchiveView?'arch-dim':''} ${isCompetitor(f)?'competitor-dim':''}">
       <td><input type="checkbox" class="row-check" data-check="${f.id}" ${selected.has(f.id)?'checked':''}></td>
       <td class="fund-td"><div class="fund-cell">
-        <span class="fund-name">${esc(f.name)}${isCompetitor(f)?' <span class="pill--competitor" title="'+esc(f.competitorNote||'Backs a direct competitor')+'">COMPETITOR</span>':''}</span>
+        <span class="fund-name">${esc(f.name)}${isCompetitor(f)?' <span class="pill--competitor" title="'+esc(f.competitorNote||'Backs a direct competitor')+'">COMPETITOR</span>':''}${introAvatarsHtml(f)}</span>
         ${f.site ? `<a class="fund-site" href="https://${esc(f.site)}" target="_blank" rel="noopener" data-noopen title="Open website">${esc(f.site)}</a>` : ''}
       </div></td>
       <td>${gradePillHtml(f)}</td>
@@ -2765,6 +2798,180 @@ function openFund(id){
   showDrawer();
 }
 
+/* ── Connector intro lists ──
+   A super connector hands over their relationship sheet; it lives on their
+   card. Rows auto-match to CRM funds (instant grade), unknowns get an AI
+   pass, then checked rows file into a pipeline stage in one click, the fund
+   rows pick up the connector's face, and the curated list exports as the
+   CSV you send back to them. */
+var introStage = 'messaged';
+function parseIntroSheet(text){
+  const lines = (text||'').split(/\r?\n/).filter(l => l.trim());
+  if (!lines.length) return [];
+  let head = csvLine(lines[0]).map(h => h.trim().toLowerCase());
+  const col = names => { for (const n of names) { const i = head.indexOf(n); if (i >= 0) return i; } return -1; };
+  let ci = {
+    name: col(['name','investor','contact','person','full name']),
+    firm: col(['firm','fund','company','investor firm','organization']),
+    title: col(['title','role','position']),
+    email: col(['email','e-mail']),
+    li: col(['linkedin','linkedin url','url','profile']),
+    note: col(['notes','note','strength','relationship','context','how they know them'])
+  };
+  let start = 1;
+  if (ci.name === -1 && ci.firm === -1) { ci = { name:0, firm:1, title:2, email:3, li:4, note:5 }; start = 0; }
+  const get = (c,k) => ci[k] >= 0 ? (c[ci[k]]||'').trim() : '';
+  const rows = [];
+  for (let i = start; i < lines.length; i++) {
+    const c = csvLine(lines[i]);
+    const name = get(c,'name'), firm = get(c,'firm');
+    if (!name && !firm) continue;
+    rows.push({ name, firm, title: get(c,'title'), email: get(c,'email'), li: get(c,'li'), note: get(c,'note'),
+                fundId: null, inc: true, aiDims: null, filed: null });
+  }
+  return rows;
+}
+function matchIntroRow(r){
+  if (r.firm) { const f = FUNDS.find(x => normOrg(x.name) === normOrg(r.firm)); if (f) return f.id; }
+  if (r.name) { const p = PEOPLE.find(pp => pp.name && pp.name.toLowerCase() === r.name.toLowerCase()); if (p) return p.fundId; }
+  return null;
+}
+function importIntroList(cid, text){
+  const rows = parseIntroSheet(text);
+  if (!rows.length) { toast('Could not read the sheet. Expected columns like: Name, Firm, Title, Email, LinkedIn, Notes.'); return; }
+  rows.forEach(r => { r.fundId = matchIntroRow(r); });
+  state.introLists[cid] = { rows, uploadedAt: Date.now() };
+  save(); openConnector(cid);
+  toast(`${rows.length} relationships imported · ${rows.filter(r=>r.fundId).length} matched to funds already in the CRM.`);
+}
+function introRowScore(r){
+  if (r.fundId && FUND_BY_ID[r.fundId] && FUND_BY_ID[r.fundId].dims) return Math.round(score(FUND_BY_ID[r.fundId]));
+  if (r.aiDims) return Math.round(PITCH_DIMS.reduce((s,[k,,w]) => s + (r.aiDims[k]||0)*w, 0));
+  return null;
+}
+function introGradePill(r){
+  const s = introRowScore(r);
+  if (s === null) return `<span class="pill pill--grade-c">Not graded</span>`;
+  const g = s >= 90 ? 'A+' : s >= 84 ? 'A' : s >= 80 ? 'A-' : s >= 72 ? 'B+' : s >= 65 ? 'B' : 'C';
+  return `<span class="pill pill--grade-${gradeClass(g)}" title="Fit ${s}/100">${g} · ${s}</span>`;
+}
+function introListSectionHtml(c){
+  const il = state.introLists[c.id];
+  const head = `<div class="d-row" style="justify-content:space-between;flex-wrap:wrap">
+      <span class="d-label">Intro list${il ? ` (${il.rows.length} · ${il.rows.filter(r=>r.fundId).length} known funds)` : ''}</span>
+      <div class="d-row">
+        ${il ? `<button class="mini-btn" id="dIntroAi">AI-grade unknowns</button>
+        <button class="mini-btn" id="dIntroExport">Export CSV</button>` : ''}
+        <button class="mini-btn" id="dIntroUpload">${il ? 'Replace sheet' : 'Upload their sheet'}</button>
+      </div>
+    </div>
+    <input type="file" id="dIntroFile" accept=".csv,.txt" style="display:none">`;
+  if (!il) return `<div class="d-section">${head}
+    <div class="info-card">Upload the relationships sheet they gave you (CSV with Name, Firm, Title, Email, LinkedIn, Notes - save Excel as CSV first, or drop the Excel into Claude and it will convert).</div>
+  </div>`;
+  const rows = il.rows.map((r,i) => {
+    const f = r.fundId ? FUND_BY_ID[r.fundId] : null;
+    return `<label class="check-row" style="align-items:center">
+      <input type="checkbox" data-introinc="${i}" ${r.inc ? 'checked' : ''}>
+      <span style="flex:1;min-width:0"><b>${esc(r.name || r.firm)}</b>
+        <span style="color:var(--muted-foreground)">${r.name && r.firm ? ' · ' + esc(r.firm) : ''}${r.title ? ' · ' + esc(r.title) : ''}</span>
+        ${f ? `<span style="color:var(--muted-foreground)"> → ${esc(f.name)}</span>` : ' <span class="pill pill--needs">new</span>'}
+      </span>
+      <span class="cr-sub" style="display:inline-flex;gap:6px;align-items:center">${introGradePill(r)}${r.filed ? `<span class="pill pill--type">${F_STAGES[r.filed] || r.filed}</span>` : ''}</span>
+    </label>`;
+  }).join('');
+  const nInc = il.rows.filter(r => r.inc && !r.filed).length;
+  return `<div class="d-section">${head}
+    <div style="max-height:340px;overflow:auto;border:1px solid var(--border);border-radius:10px;margin-top:6px">${rows}</div>
+    <div class="d-row" style="margin-top:10px;flex-wrap:wrap">
+      <span class="d-label" style="margin:0">File checked under</span>
+      <span id="dIntroStageDD"></span>
+      <button class="btn-primary" id="dIntroFileBtn" ${nInc ? '' : 'disabled'}>File ${nInc} ${nInc===1?'intro':'intros'}</button>
+    </div>
+    <span style="font-size:11px;color:var(--grey-1)">Filing moves each fund to that stage, tags it with ${esc(firstName(connName(c)))}'s face, and marks who is reaching out. Export sends the curated list back to them.</span>
+  </div>`;
+}
+function fileIntroList(cid){
+  const c = connectorById(cid), il = state.introLists[cid];
+  if (!c || !il) return;
+  let filed = 0;
+  il.rows.forEach(r => {
+    if (!r.inc || r.filed) return;
+    let fid = r.fundId;
+    if (!fid) {
+      fid = 'cf-' + slug(r.firm || r.name);
+      while (FUND_BY_ID[fid] && normOrg(FUND_BY_ID[fid].name) !== normOrg(r.firm || r.name)) fid += '-x';
+      if (!FUND_BY_ID[fid]) {
+        const nf = { id: fid, name: r.firm || r.name, custom: true, type: r.firm ? 'Seed' : 'Angel',
+          region: '—', check: null, sectors: [], site: '',
+          looking: r.note || '', people: [] };
+        if (r.name) {
+          const p = { n: r.name, t: r.title || (r.firm ? 'Partner' : 'Angel investor') };
+          if (r.email) p.email = r.email;
+          if (r.li && /\/in\//.test(r.li)) p.li = r.li;
+          nf.people.push(p);
+        } else nf.people.push({ n: '', t: 'Partner', tbd: true });
+        if (r.aiDims) nf.dims = r.aiDims;
+        state.extraFunds.push(nf);
+      }
+      r.fundId = fid;
+    }
+    const fs = FS(fid);
+    fs.stage = introStage; fs.archived = false;
+    fs.introFrom = fs.introFrom || [];
+    if (!fs.introFrom.includes(cid)) fs.introFrom.push(cid);
+    r.filed = introStage;
+    filed++;
+  });
+  save(); rebuild();
+  // match the new people so the connector's checklist and asks stay coherent
+  il.rows.forEach(r => {
+    if (r.filed && r.fundId && r.name) {
+      const pid = r.fundId + '_' + slug(r.name);
+      if (PERSON_BY_ID[pid]) addMatch(c, pid, r.note || 'From their intro list');
+    }
+  });
+  save(); render(); openConnector(cid);
+  toast(`${filed} filed under ${F_STAGES[introStage]} - ${connName(c)} is reaching out. Their face is on each fund row.`);
+}
+function exportIntroList(cid){
+  const c = connectorById(cid), il = state.introLists[cid];
+  if (!il) return;
+  const rows = il.rows.filter(r => r.inc);
+  const lines = [['Name','Firm','Title','Fit','Status','LinkedIn','Email','Notes'].join(',')]
+    .concat(rows.map(r => {
+      const s = introRowScore(r);
+      return [r.name, r.firm, r.title, s === null ? '' : s + '/100', r.filed ? 'Requested - ' + (F_STAGES[r.filed]||r.filed) : 'Hold', r.li, r.email, r.note]
+        .map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',');
+    }));
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' }));
+  a.download = 'intros-' + slug(connName(c)) + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('Downloaded - send this back to ' + firstName(connName(c)) + ' as the ask list.');
+}
+async function aiGradeIntroList(cid, btn){
+  const il = state.introLists[cid];
+  if (!il) return;
+  const todo = il.rows.filter(r => r.inc && !r.fundId && !r.aiDims && (r.firm || r.name));
+  if (!todo.length) { toast('Nothing ungraded - every checked row is matched or scored.'); return; }
+  let done = 0;
+  for (const r of todo) {
+    if (btn) btn.textContent = `Grading ${++done}/${todo.length}...`;
+    try {
+      const resp = await fetch('/api/vc-fit', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ fund: { name: r.firm || r.name, type: r.firm ? '' : 'Angel', region: '', check: null,
+          sectors: [], looking: [r.title, r.note].filter(Boolean).join(' · ') } }) });
+      const d = await resp.json();
+      if (d && d.dims) r.aiDims = d.dims;
+    } catch (e) { /* keep going; ungraded rows stay ungraded */ }
+    save();
+  }
+  openConnector(cid);
+  toast(`Graded ${todo.length} unknown${todo.length===1?'':'s'} against the deck.`);
+}
+
 function openConnector(id, preselect){
   const c = connectorById(id);
   if (!c) return;
@@ -2833,6 +3040,7 @@ function openConnector(id, preselect){
       </div>
       <span style="font-size:11px;color:var(--grey-1)">Sorted by fund fit; the top 6 are pre-checked. Checked people become the bulleted list in the ask below - keep it short.</span>
     </div>
+    ${introListSectionHtml(c)}
     <div class="d-section">
       <span class="d-label">Ask message</span>
       ${composerHtml('connector', st.draft)}
@@ -2856,6 +3064,26 @@ function openConnector(id, preselect){
     save(); render(); openConnector(id);
   };
   $('dNotes').oninput = e => { st.notes = e.target.value; save(); };
+  // ── intro list wiring ──
+  const introDD = $('dIntroStageDD');
+  if (introDD) introDD.innerHTML = ddHtml({ ctx:'introstage', value: introStage,
+    options: Object.entries(F_STAGES).filter(([k]) => k !== 'none').map(([k,v]) => ({v:k,l:v})) });
+  if ($('dIntroUpload')) $('dIntroUpload').onclick = () => $('dIntroFile').click();
+  if ($('dIntroFile')) $('dIntroFile').onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => importIntroList(id, reader.result);
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+  if ($('dIntroAi')) $('dIntroAi').onclick = e => aiGradeIntroList(id, e.target);
+  if ($('dIntroExport')) $('dIntroExport').onclick = () => exportIntroList(id);
+  if ($('dIntroFileBtn')) $('dIntroFileBtn').onclick = () => fileIntroList(id);
+  document.querySelectorAll('[data-introinc]').forEach(cb => cb.addEventListener('change', () => {
+    const il = state.introLists[id];
+    if (il && il.rows[+cb.dataset.introinc]) { il.rows[+cb.dataset.introinc].inc = cb.checked; save(); }
+  }));
   updateComposerUI = null;   // connector composer stays LinkedIn-only
   $('dMsg').oninput = e => { st.draft = e.target.value; save(); };
   $('dGen').onclick = () => {
