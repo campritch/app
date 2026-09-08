@@ -1412,7 +1412,7 @@ function sourceCellHtml(f){
 }
 
 function warmthCellHtml(f){
-  const w = FS(f.id).warmth || 'na';
+  const w = FS(f.id).warmth || f.warmth0 || 'na';
   return `<div class="dd dd--row" data-ddctx="fwarmth:${f.id}" data-ddval="${w}">
     <button type="button" class="dd-btn warmth-btn ${w==='na'?'warmth-btn--empty':''}" title="Interest level">${WARMTH_ICON[w]}</button>
     <div class="dd-menu">
@@ -2669,7 +2669,7 @@ function openFund(id){
     <div class="d-row" style="justify-content:space-between;flex-wrap:wrap">
       <div class="d-row">
         ${ddHtml({ ctx:'fstage:'+id, value:fStage(f), options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:'Stage: '+v,cls:k==='none'?'st-backlog':''})) })}
-        ${ddHtml({ ctx:'fwarmth:'+id, value:FS(id).warmth || 'na', options: Object.entries(WARMTH).map(([k,v]) => ({v:k,l:k==='na'?'Interest: not set':'Interest: '+v})) })}
+        ${ddHtml({ ctx:'fwarmth:'+id, value:FS(id).warmth || f.warmth0 || 'na', options: Object.entries(WARMTH).map(([k,v]) => ({v:k,l:k==='na'?'Interest: not set':'Interest: '+v})) })}
       </div>
       <div class="d-row">
         <button class="btn-ghost" id="dAddPerson" style="height:34px;font-size:12px">+ Add person</button>
