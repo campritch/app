@@ -3023,7 +3023,9 @@ async function aiFitFetch(f){
   const st = FS(f.id);
   st.aiBrief = data.brief || '';
   st.aiOneLiner = data.one_liner || '';
-  if (!f.dims && data.dims) { f.dims = data.dims; st.aiDims = data.dims; }
+  // a real AI read replaces the rubric first-pass numbers
+  if (data.dims) { f.dims = data.dims; st.aiDims = data.dims; }
+  st.aiGraded = true;
   return data;
 }
 
@@ -3048,7 +3050,7 @@ async function gradeConnectorFunds(cid, btn){
   const fundIds = new Set();
   (c.matches || []).forEach(pid => { const p = PERSON_BY_ID[pid]; if (p) fundIds.add(p.fundId); });
   if (il) il.rows.forEach(r => { if (r.fundId) fundIds.add(r.fundId); });
-  const targets = [...fundIds].map(id => FUND_BY_ID[id]).filter(f => f && !f.dims);
+  const targets = [...fundIds].map(id => FUND_BY_ID[id]).filter(f => f && !FS(f.id).aiGraded && !isCompetitor(f));
   const sheetOnly = il ? il.rows.filter(r => r.inc && !r.fundId && !r.aiDims && (r.firm || r.name)) : [];
   const total = targets.length + sheetOnly.length;
   if (!total) { toast('Everything this connector reaches is already graded.'); return; }
@@ -3078,8 +3080,11 @@ async function gradeConnectorFunds(cid, btn){
 }
 function fundWhyLine(f){
   if (!f) return '';
-  if (f.dims) return firstSentence(f.why || '') || fundFitLine(f) || FS(f.id).aiOneLiner || '';
-  return FS(f.id).aiOneLiner || 'Not graded yet - run "Grade the funds".';
+  const ai = FS(f.id).aiOneLiner || firstSentence(FS(f.id).aiBrief || '');
+  if (ai) return ai;                                  // real AI read
+  if (f.why) return firstSentence(f.why);             // hand-written
+  if (f.dims) return 'Rubric estimate: ' + fundFitLine(f); // first-pass, not AI
+  return 'Not graded yet - run "Grade the funds".';
 }
 
 async function aiGradeIntroList(cid, btn){
