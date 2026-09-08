@@ -3137,7 +3137,14 @@ function openConnector(id, preselect){
   const checkedSet = new Set(preselect ? [preselect] : (stored || defaultIds));
   const due = connectorFollowUp(c);
   $('dTitle').textContent = connName(c);
-  $('dMeta').innerHTML = `<span class="pill pill--type">Connector</span>${isSuper(c) ? ' <span class="pill" style="background:var(--red-bg);color:var(--red-text)">Super connector</span>' : ''} ${esc(c.role||'')}${c.li ? ` · <a href="${esc(c.li)}" target="_blank" rel="noopener" style="font-weight:600;color:#0a66c2">LinkedIn</a>` : ''} · <button class="read-more" id="dConnRename" style="border:none;background:none;padding:0;font:inherit;text-decoration:underline;cursor:pointer;color:var(--muted-foreground)">Edit name</button>`;
+  $('dMeta').innerHTML = `<span class="pill pill--type">Connector</span>${isSuper(c) ? ' <span class="pill" style="background:var(--red-bg);color:var(--red-text)">Super connector</span>' : ''} ${esc(c.role||'')}${c.li ? ` · <a href="${esc(c.li)}" target="_blank" rel="noopener" style="font-weight:600;color:#0a66c2">LinkedIn</a>` : ''} · <button class="read-more" id="dConnRename" style="border:none;background:none;padding:0;font:inherit;text-decoration:underline;cursor:pointer;color:var(--muted-foreground)">Edit name</button> · <button class="read-more" id="dConnArchive" style="border:none;background:none;padding:0;font:inherit;text-decoration:underline;cursor:pointer;color:var(--muted-foreground)">${CS(id).archived ? 'Restore' : 'Archive'}</button>`;
+  setTimeout(() => { const ab = $('dConnArchive'); if (ab) ab.onclick = () => {
+    const st2 = CS(id);
+    st2.archived = !st2.archived;
+    save(); render();
+    if (st2.archived) { closeDrawer(); toast(connName(c) + ' archived - out of the connector lists. Restore from the Archived tab.'); }
+    else { openConnector(id); toast(connName(c) + ' restored to active connectors.'); }
+  }; }, 0);
   setTimeout(() => { const b = $('dConnRename'); if (b) b.onclick = () => {
     const t = $('dTitle');
     const inp = document.createElement('input');
@@ -3164,6 +3171,7 @@ function openConnector(id, preselect){
           ${ddHtml({ ctx:'connsrc', value: connSrcFilter, options: [
             {v:'all', l:'All sources'}, {v:'sheet', l:'Sheet'}, {v:'linkedin', l:'LinkedIn'}, {v:'nfx', l:'NFX'}
           ] })}
+          <button class="mini-btn" id="dSelectAllInc">Select all</button>
           <button class="mini-btn" id="dGradeFunds" style="font-weight:600">Grade the funds</button>
           <button class="mini-btn" id="dAddMatch">+ Add match</button>
         </div>
@@ -3230,6 +3238,22 @@ function openConnector(id, preselect){
   };
   if ($('dIntroAi')) $('dIntroAi').onclick = e => aiGradeIntroList(id, e.target);
   if ($('dGradeFunds')) $('dGradeFunds').onclick = e => gradeConnectorFunds(id, e.target);
+  if ($('dSelectAllInc')) {
+    const btn = $('dSelectAllInc');
+    const syncLabel = () => {
+      const cbs = [...document.querySelectorAll('[data-inc]')];
+      btn.textContent = cbs.length && cbs.every(cb => cb.checked) ? 'Clear all' : 'Select all';
+    };
+    syncLabel();
+    btn.onclick = () => {
+      const cbs = [...document.querySelectorAll('[data-inc]')];
+      const on = !cbs.every(cb => cb.checked);
+      cbs.forEach(cb => { cb.checked = on; });
+      st.included = included(); save(); syncLabel();
+      toast(on ? `${cbs.length} selected` + (connSrcFilter !== 'all' ? ' (shown only)' : '') : 'Selection cleared for shown rows.');
+    };
+    document.querySelectorAll('[data-inc]').forEach(cb => cb.addEventListener('change', syncLabel));
+  }
   if ($('dIntroExport')) $('dIntroExport').onclick = () => exportIntroList(id);
   if ($('dIntroFileBtn')) $('dIntroFileBtn').onclick = () => fileIntroList(id);
   document.querySelectorAll('[data-introinc]').forEach(cb => cb.addEventListener('change', () => {
