@@ -517,6 +517,13 @@
       display: flex; flex-direction: column;
     }
     .drawer.show { transform: translateX(0); }
+    /* connector drawer = the intro-decision module: two-thirds of the screen */
+    .drawer.drawer--conn { width: min(960px, 72vw); }
+    .src-badge { display:inline-block; font-size:9.5px; font-weight:700; letter-spacing:.04em;
+      padding:1px 7px; border-radius:9999px; background:var(--secondary); color:var(--muted-foreground); vertical-align:1px; }
+    .src-badge--sheet { background:var(--foreground); color:var(--background); }
+    .src-badge--li { background:#dbeafe; color:#1d4ed8; }
+    .cr-why { font-size:11.5px; color:var(--muted-foreground); line-height:1.45; margin-top:1px; }
     .drawer__head {
       padding: 24px 24px 16px; border-bottom: 1px solid var(--border);
       display: flex; align-items: flex-start; gap: 12px;
@@ -2406,21 +2413,7 @@ async function runAiFit(fid, btn){
   if (!f) return;
   if (btn) { btn.textContent = 'Thinking...'; btn.disabled = true; }
   try {
-    const r = await fetch('/api/vc-fit', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fund: {
-        name: f.name, site: f.site, type: f.type, region: f.region, check: f.check,
-        sectors: f.sectors, tier: f.tier, looking: f.looking, dims: f.dims || null,
-        people: (PEOPLE_BY_FUND[fid] || []).map(p => ({ n: p.name, t: p.title })),
-        ctx: f.ctx || [], paths: f.paths || []
-      }})
-    });
-    const data = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
-    const st = FS(fid);
-    st.aiBrief = data.brief || '';
-    st.aiOneLiner = data.one_liner || '';
-    if (!f.dims && data.dims) { f.dims = data.dims; st.aiDims = data.dims; }
+    const data = await aiFitFetch(f);
     save(); render();
     toast('AI fit read done' + (data.one_liner ? ': ' + data.one_liner : '.'));
   } catch (err) {
@@ -2482,6 +2475,7 @@ function fundFitLine(f){
 function openPerson(id){
   const p = PERSON_BY_ID[id];
   if (!p) return;
+  $('drawer').classList.remove('drawer--conn');
   drawerRef = { kind:'person', id };
   const f = FUND_BY_ID[p.fundId];
   const st = PS(id);
@@ -2646,6 +2640,7 @@ function addPersonTo(fundId, after){
 function openFund(id){
   const f = FUND_BY_ID[id];
   if (!f) return;
+  $('drawer').classList.remove('drawer--conn');
   drawerRef = { kind:'fund', id };
   const ppl = PEOPLE.filter(p => p.fundId === id);
   $('dTitle').textContent = f.name;
@@ -2871,13 +2866,14 @@ function introListSectionHtml(c){
   </div>`;
   const rows = il.rows.map((r,i) => {
     const f = r.fundId ? FUND_BY_ID[r.fundId] : null;
-    return `<label class="check-row" style="align-items:center">
+    return `<label class="check-row" style="align-items:center;flex-wrap:wrap">
       <input type="checkbox" data-introinc="${i}" ${r.inc ? 'checked' : ''}>
       <span style="flex:1;min-width:0"><b>${esc(r.name || r.firm)}</b>
         <span style="color:var(--muted-foreground)">${r.name && r.firm ? ' · ' + esc(r.firm) : ''}${r.title ? ' · ' + esc(r.title) : ''}</span>
         ${f ? `<span style="color:var(--muted-foreground)"> → ${esc(f.name)}</span>` : ' <span class="pill pill--needs">new</span>'}
       </span>
       <span class="cr-sub" style="display:inline-flex;gap:6px;align-items:center">${introGradePill(r)}${r.filed ? `<span class="pill pill--type">${F_STAGES[r.filed] || r.filed}</span>` : ''}</span>
+      <div class="cr-why" style="flex-basis:100%">${esc(f ? fundWhyLine(f) : (r.aiWhy || (r.aiDims ? 'Scored against the deck.' : 'Unknown firm - run Grade the funds for a read.')))}</div>
     </label>`;
   }).join('');
   const nInc = il.rows.filter(r => r.inc && !r.filed).length;
@@ -2951,6 +2947,68 @@ function exportIntroList(cid){
   URL.revokeObjectURL(a.href);
   toast('Downloaded - send this back to ' + firstName(connName(c)) + ' as the ask list.');
 }
+/* One AI call per fund, shared by the fund drawer button and the connector
+   grading pass. Stores the brief + dims so the whole CRM benefits. */
+async function aiFitFetch(f){
+  const r = await fetch('/api/vc-fit', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fund: {
+      name: f.name, site: f.site, type: f.type, region: f.region, check: f.check,
+      sectors: f.sectors, tier: f.tier, looking: f.looking, dims: f.dims || null,
+      people: (PEOPLE_BY_FUND[f.id] || []).map(p => ({ n: p.name, t: p.title })),
+      ctx: f.ctx || [], paths: f.paths || []
+    }})
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+  const st = FS(f.id);
+  st.aiBrief = data.brief || '';
+  st.aiOneLiner = data.one_liner || '';
+  if (!f.dims && data.dims) { f.dims = data.dims; st.aiDims = data.dims; }
+  return data;
+}
+
+/* The decision pass: grade EVERYTHING this connector can reach - sheet rows
+   and door matches alike - so Cam can decide which intros to actually take. */
+async function gradeConnectorFunds(cid, btn){
+  const c = connectorById(cid);
+  if (!c) return;
+  const il = state.introLists[cid];
+  const fundIds = new Set();
+  (c.matches || []).forEach(pid => { const p = PERSON_BY_ID[pid]; if (p) fundIds.add(p.fundId); });
+  if (il) il.rows.forEach(r => { if (r.fundId) fundIds.add(r.fundId); });
+  const targets = [...fundIds].map(id => FUND_BY_ID[id]).filter(f => f && !f.dims);
+  const sheetOnly = il ? il.rows.filter(r => r.inc && !r.fundId && !r.aiDims && (r.firm || r.name)) : [];
+  const total = targets.length + sheetOnly.length;
+  if (!total) { toast('Everything this connector reaches is already graded.'); return; }
+  let done = 0, failed = 0;
+  for (const f of targets) {
+    if (btn) btn.textContent = `Grading ${++done}/${total}...`;
+    try { await aiFitFetch(f); } catch (e) { failed++; if (failed === 1) toast('AI grading needs the deployed wiki (API key): ' + String(e.message || e)); if (failed > 2) break; }
+    save();
+  }
+  for (const r of sheetOnly) {
+    if (btn) btn.textContent = `Grading ${++done}/${total}...`;
+    try {
+      const resp = await fetch('/api/vc-fit', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ fund: { name: r.firm || r.name, type: r.firm ? '' : 'Angel', region: '', check: null,
+          sectors: [], looking: [r.title, r.note].filter(Boolean).join(' · ') } }) });
+      const d = await resp.json();
+      if (d && d.dims) r.aiDims = d.dims;
+      if (d && d.one_liner) r.aiWhy = d.one_liner;
+      else if (d && d.brief) r.aiWhy = firstSentence(d.brief);
+    } catch (e) { failed++; if (failed > 2) break; }
+    save();
+  }
+  save(); render(); openConnector(cid);
+  toast(`Graded ${done - failed} of ${total}. Every option now has a grade and a why.`);
+}
+function fundWhyLine(f){
+  if (!f) return '';
+  if (f.dims) return firstSentence(f.why || '') || fundFitLine(f) || FS(f.id).aiOneLiner || '';
+  return FS(f.id).aiOneLiner || 'Not graded yet - run "Grade the funds".';
+}
+
 async function aiGradeIntroList(cid, btn){
   const il = state.introLists[cid];
   if (!il) return;
@@ -2975,9 +3033,12 @@ async function aiGradeIntroList(cid, btn){
 function openConnector(id, preselect){
   const c = connectorById(id);
   if (!c) return;
+  $('drawer').classList.add('drawer--conn');
   drawerRef = { kind:'connector', id, preselect };
   const st = CS(id);
   const cst = st.status || 'none';
+  const _il0 = state.introLists[id];
+  const sheetSet = new Set((_il0 ? _il0.rows : []).filter(r => r.fundId && r.name).map(r => r.fundId + '_' + slug(r.name)));
   const seenM = new Set();
   const matches = (c.matches||[]).map(pid => PERSON_BY_ID[pid]).filter(Boolean)
     // prefer records with a real profile URL / fuller name, then dedupe by
@@ -3023,24 +3084,32 @@ function openConnector(id, preselect){
       <span class="d-label">Rapport</span>
       <div class="info-card">${esc(c.rapport||'Add context on how you know them.')}</div>
     </div>
+    ${introListSectionHtml(c)}
     <div class="d-section">
       <div class="d-row" style="justify-content:space-between">
         <span class="d-label">They can open doors to (${matches.length})</span>
-        <button class="mini-btn" id="dAddMatch">+ Add match</button>
+        <div class="d-row">
+          <button class="mini-btn" id="dGradeFunds" style="font-weight:600">Grade the funds</button>
+          <button class="mini-btn" id="dAddMatch">+ Add match</button>
+        </div>
       </div>
       <div>
         ${matches.length ? matches.map(p => {
           const f = FUND_BY_ID[p.fundId];
-          return `<label class="check-row">
+          const note = matchNote(c, p.id) || '';
+          const badge = sheetSet.has(p.id) || /intro list/i.test(note) ? '<span class="src-badge src-badge--sheet">Sheet</span>'
+            : /nfx/i.test(note) || c.id.startsWith('c_nfx_') ? '<span class="src-badge">NFX</span>'
+            : '<span class="src-badge src-badge--li">LinkedIn</span>';
+          return `<label class="check-row" style="flex-wrap:wrap">
             <input type="checkbox" data-inc="${p.id}" ${checkedSet.has(p.id)?'checked':''}>
-            <span><b>${p.tbd ? esc(f.name) : esc(p.name)}</b>${p.tbd ? ' <span style="color:var(--muted-foreground)">· any partner</span>' : ' <span style="color:var(--muted-foreground)">· ' + esc(f.name) + '</span>'}</span>
-            <span class="cr-sub">${grade(f)}${matchNote(c, p.id) ? ' · ' + esc(matchNote(c, p.id)) : ' · ' + P_STATUS[pStatus(p)]}${isExcluded(p)?' · Archived':''}</span>
+            <span style="flex:1;min-width:0"><b>${p.tbd ? esc(f.name) : esc(p.name)}</b>${p.tbd ? ' <span style="color:var(--muted-foreground)">· any partner</span>' : ' <span style="color:var(--muted-foreground)">· ' + esc(f.name) + '</span>'} ${badge}</span>
+            <span class="cr-sub">${grade(f)}${note ? ' · ' + esc(note) : ' · ' + P_STATUS[pStatus(p)]}${isExcluded(p)?' · Archived':''}</span>
+            <div class="cr-why" style="flex-basis:100%">${esc(fundWhyLine(f))}</div>
           </label>`;
         }).join('') : '<div class="info-card">No matches yet. Add one, or sync LinkedIn to match automatically.</div>'}
       </div>
       <span style="font-size:11px;color:var(--grey-1)">Sorted by fund fit; the top 6 are pre-checked. Checked people become the bulleted list in the ask below - keep it short.</span>
     </div>
-    ${introListSectionHtml(c)}
     <div class="d-section">
       <span class="d-label">Ask message</span>
       ${composerHtml('connector', st.draft)}
@@ -3078,6 +3147,7 @@ function openConnector(id, preselect){
     e.target.value = '';
   };
   if ($('dIntroAi')) $('dIntroAi').onclick = e => aiGradeIntroList(id, e.target);
+  if ($('dGradeFunds')) $('dGradeFunds').onclick = e => gradeConnectorFunds(id, e.target);
   if ($('dIntroExport')) $('dIntroExport').onclick = () => exportIntroList(id);
   if ($('dIntroFileBtn')) $('dIntroFileBtn').onclick = () => fileIntroList(id);
   document.querySelectorAll('[data-introinc]').forEach(cb => cb.addEventListener('change', () => {
@@ -3129,6 +3199,7 @@ function showDrawer(){
   $('drawerOverlay').classList.add('show');
 }
 function closeDrawer(){
+  $('drawer').classList.remove('drawer--conn');
   clearTimeout(showDrawer._t);
   $('drawer').style.transform = '';
   $('drawer').classList.remove('show');
