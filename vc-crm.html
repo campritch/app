@@ -519,6 +519,12 @@
     .drawer.show { transform: translateX(0); }
     /* connector drawer = the intro-decision module: two-thirds of the screen */
     .drawer.drawer--conn { width: min(960px, 72vw); }
+    /* quick-look panel: slides out beside the connector module with a gap */
+    .peek-drawer { position: fixed; top: 14px; bottom: 14px; right: calc(min(960px, 72vw) + 14px);
+      width: min(440px, 24vw); background: var(--background); border: 1px solid var(--border);
+      border-radius: 14px; box-shadow: var(--shadow-lg); z-index: 502; overflow-y: auto; padding: 20px;
+      opacity: 0; pointer-events: none; transform: translateX(26px); transition: opacity .2s, transform .2s; }
+    .peek-drawer.open { opacity: 1; pointer-events: auto; transform: none; }
     .src-badge { display:inline-block; font-size:9.5px; font-weight:700; letter-spacing:.04em;
       padding:1px 7px; border-radius:9999px; background:var(--secondary); color:var(--muted-foreground); vertical-align:1px; }
     .src-badge--sheet { background:var(--foreground); color:var(--background); }
@@ -874,6 +880,7 @@ Dana Whitfield, Overline, worked together at Techstars,"></textarea>
 
   <!-- Drawer -->
   <div class="drawer-overlay" id="drawerOverlay"></div>
+  <div class="peek-drawer" id="peekDrawer"></div>
   <div class="drawer" id="drawer">
     <div class="drawer__head">
       <div class="drawer__head-info">
@@ -2806,6 +2813,40 @@ function openFund(id){
    CSV you send back to them. */
 var introStage = 'messaged';
 var connSrcFilter = 'all';
+
+/* Quick look: click a fund name in the connector module and a compact fund
+   panel slides out to the left of it. Click the same name again to dismiss;
+   closing the module takes it with it. */
+var peekFundId = null;
+function closePeek(){ peekFundId = null; const el = $('peekDrawer'); if (el) el.classList.remove('open'); }
+function togglePeek(fid){
+  if (peekFundId === fid) return closePeek();
+  const f = FUND_BY_ID[fid];
+  if (!f) return;
+  peekFundId = fid;
+  const st = FS(fid);
+  const ppl = PEOPLE_BY_FUND[fid] || [];
+  const el = $('peekDrawer');
+  el.innerHTML = `
+    <div style="display:flex;align-items:flex-start;gap:10px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:17px;font-weight:700;letter-spacing:-.02em">${esc(f.name)}${isCompetitor(f)?' <span class="pill--competitor">COMPETITOR</span>':''}</div>
+        <div style="font-size:12px;color:var(--muted-foreground);margin-top:2px">${esc(f.type||'—')} · ${esc(f.region||'—')} · ${checkFmt(f)}${f.site?' · <a href="https://'+esc(f.site)+'" target="_blank" rel="noopener" style="color:#2563eb">'+esc(f.site)+'</a>':''}</div>
+      </div>
+      <button class="x" onclick="closePeek()">✕</button>
+    </div>
+    ${f.dims ? `<div style="display:flex;align-items:center;gap:12px;margin-top:14px">
+      <div class="grade-big ${gradeClass(grade(f))}" style="width:44px;height:44px;font-size:16px">${grade(f)}</div>
+      <div style="flex:1;font-size:12.5px;line-height:1.5">${Math.round(score(f))}/100 · ${esc(fundFitLine(f))}</div>
+    </div>` : '<div class="info-card" style="margin-top:14px">Not graded yet.</div>'}
+    ${st.aiBrief ? `<div class="dhead" style="margin-top:14px">AI read</div><div style="font-size:12.5px;line-height:1.6;color:var(--text-secondary);white-space:pre-wrap">${esc(st.aiBrief)}</div>` : ''}
+    ${f.looking ? `<div class="dhead" style="margin-top:14px">About</div><div style="font-size:12.5px;line-height:1.6;color:var(--text-secondary)">${esc(f.looking)}</div>` : ''}
+    ${(f.ctx||[]).length ? `<div class="dhead" style="margin-top:14px">Context</div>${(f.ctx||[]).slice(0,4).map(cx => `<div style="font-size:12px;margin-top:6px"><b>${esc(cx[0])}</b> · <span style="color:var(--muted-foreground)">${esc(String(cx[1]).slice(0,160))}</span></div>`).join('')}` : ''}
+    ${ppl.length ? `<div class="dhead" style="margin-top:14px">People (${ppl.length})</div>${ppl.slice(0,6).map(pp => `<div style="font-size:12.5px;margin-top:5px"><b>${esc(pp.name||pp.title)}</b> <span style="color:var(--muted-foreground)">· ${esc(pp.title||'')}</span></div>`).join('')}` : ''}
+    ${(f.paths||[]).length ? `<div class="dhead" style="margin-top:14px">Ways in</div>${(f.paths||[]).slice(0,5).map(pa => `<div style="font-size:12px;margin-top:5px"><b>${esc(prettyVia(pa.via))}</b> <span style="color:var(--muted-foreground)">· ${esc(pa.note||pa.kind)}</span></div>`).join('')}` : ''}
+  `;
+  el.classList.add('open');
+}
 function parseIntroSheet(text){
   const lines = (text||'').split(/\r?\n/).filter(l => l.trim());
   if (!lines.length) return [];
@@ -2876,7 +2917,7 @@ function introListSectionHtml(c){
       <input type="checkbox" data-introinc="${i}" ${r.inc ? 'checked' : ''}>
       <span style="flex:0 1 30%;min-width:180px"><b>${esc(r.name || r.firm)}</b>
         <span style="color:var(--muted-foreground)">${r.name && r.firm ? ' · ' + esc(r.firm) : ''}${r.title ? ' · ' + esc(r.title) : ''}</span>
-        ${f ? `<span style="color:var(--muted-foreground)"> → </span><a href="#fund=${f.id}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--muted-foreground);text-decoration:underline dotted;text-underline-offset:2px" title="Open the full fund in a new tab">${esc(f.name)}</a>` : ' <span class="pill pill--needs">new</span>'}
+        ${f ? `<span style="color:var(--muted-foreground)"> → </span><a href="#fund=${f.id}" data-peek="${f.id}" rel="noopener" style="color:var(--muted-foreground);text-decoration:underline dotted;text-underline-offset:2px" title="Quick look (cmd-click opens a new tab)">${esc(f.name)}</a>` : ' <span class="pill pill--needs">new</span>'}
       </span>
       <span class="cr-why" style="flex:1;min-width:0;margin:0 10px">${esc(f ? fundWhyLine(f) : (r.aiWhy || (r.aiDims ? 'Scored against the deck.' : 'Unknown firm - run Grade the funds for a read.')))}</span>
       <b style="flex-shrink:0;font-size:12.5px;width:42px;text-align:right" title="Fit against the deck">${(() => { const sc = introRowScore(r); return sc === null ? '—' : sc + '%'; })()}</b>
@@ -3136,7 +3177,7 @@ function openConnector(id, preselect){
           const pct = f.dims ? Math.round(score(f)) + '%' : '—';
           return `<label class="check-row" style="align-items:center">
             <input type="checkbox" data-inc="${p.id}" ${checkedSet.has(p.id)?'checked':''}>
-            <span style="flex:0 1 30%;min-width:180px"><b>${p.tbd ? esc(f.name) : esc(p.name)}</b>${p.tbd ? ' <span style="color:var(--muted-foreground)">· any partner</span>' : ' <span style="color:var(--muted-foreground)">· </span><a href="#fund=' + f.id + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--muted-foreground);text-decoration:underline dotted;text-underline-offset:2px" title="Open the full fund in a new tab">' + esc(f.name) + '</a>'} ${badge}</span>
+            <span style="flex:0 1 30%;min-width:180px"><b>${p.tbd ? esc(f.name) : esc(p.name)}</b>${p.tbd ? ' <span style="color:var(--muted-foreground)">· any partner</span>' : ' <span style="color:var(--muted-foreground)">· </span><a href="#fund=' + f.id + '" data-peek="' + f.id + '" rel="noopener" style="color:var(--muted-foreground);text-decoration:underline dotted;text-underline-offset:2px" title="Quick look (cmd-click opens a new tab)">' + esc(f.name) + '</a>'} ${badge}</span>
             <span class="cr-why" style="flex:1;min-width:0;margin:0 10px">${esc(fundWhyLine(f))}</span>
             <b style="flex-shrink:0;font-size:12.5px;width:42px;text-align:right" title="Fit against the deck">${pct}</b>
             <span class="cr-sub" style="flex-shrink:0;width:120px;text-align:right">${grade(f)}${isExcluded(p)?' · Archived':' · ' + P_STATUS[pStatus(p)]}</span>
@@ -3239,6 +3280,7 @@ function showDrawer(){
   $('drawerOverlay').classList.add('show');
 }
 function closeDrawer(){
+  closePeek();
   $('drawer').classList.remove('drawer--conn');
   clearTimeout(showDrawer._t);
   $('drawer').style.transform = '';
@@ -3377,6 +3419,11 @@ document.addEventListener('click', e => {
       $('afName').focus();
     }
     return; // 'samples' is handled by its own removeSamplesBtn listener
+  }
+  const peekA = e.target.closest('[data-peek]');
+  if (peekA) {
+    if (!(e.metaKey || e.ctrlKey)) { e.preventDefault(); e.stopPropagation(); togglePeek(peekA.dataset.peek); }
+    return;
   }
   const selAct = e.target.closest('[data-selstage]');
   if (selAct) {
