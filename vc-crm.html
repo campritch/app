@@ -1221,8 +1221,13 @@ function mergeDuplicateConnectors(){
   Object.values(byFirst).forEach(bucket => {
     for (let i = 0; i < bucket.length; i++) for (let j = i+1; j < bucket.length; j++) {
       const a = cnd(bucket[i].name), b = cnd(bucket[j].name);
-      if (a === b || a.length < 10 || b.length < 10) continue;
-      if (dist(a, b) <= 2) {
+      if (a === b) continue;
+      const minLen = Math.min(a.length, b.length);
+      const d = dist(a, b);
+      // one-letter drift merges from 8 chars ("Grant Wins"/"Grant Winns");
+      // two-letter drift needs longer names to stay safe
+      if (minLen < 8 || (d === 2 && minLen < 10) || d > 2) continue;
+      {
         const g = groups[a];
         if (!g.includes(bucket[j])) g.push(bucket[j]);
       }
