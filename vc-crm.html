@@ -1697,6 +1697,11 @@ function onDdChange(ctx, v){
   if (kind === 'sort') { sortBy = v; headSort = { key: null, dir: 1 }; render(); return; }
   if (kind === 'afstage') { afStage = v; renderAfStage(); return; }
   if (kind === 'fsource') { FS(arg).source = v; save(); render(); return; }
+  if (kind === 'connsrc') {
+    connSrcFilter = v;
+    if (drawerRef && drawerRef.kind === 'connector') openConnector(drawerRef.id);
+    return;
+  }
   if (kind === 'introstage') {
     introStage = v;
     const dd = $('dIntroStageDD');
@@ -2800,6 +2805,7 @@ function openFund(id){
    rows pick up the connector's face, and the curated list exports as the
    CSV you send back to them. */
 var introStage = 'messaged';
+var connSrcFilter = 'all';
 function parseIntroSheet(text){
   const lines = (text||'').split(/\r?\n/).filter(l => l.trim());
   if (!lines.length) return [];
@@ -2866,14 +2872,15 @@ function introListSectionHtml(c){
   </div>`;
   const rows = il.rows.map((r,i) => {
     const f = r.fundId ? FUND_BY_ID[r.fundId] : null;
-    return `<label class="check-row" style="align-items:center;flex-wrap:wrap">
+    return `<label class="check-row" style="align-items:center">
       <input type="checkbox" data-introinc="${i}" ${r.inc ? 'checked' : ''}>
-      <span style="flex:1;min-width:0"><b>${esc(r.name || r.firm)}</b>
+      <span style="flex:0 1 30%;min-width:180px"><b>${esc(r.name || r.firm)}</b>
         <span style="color:var(--muted-foreground)">${r.name && r.firm ? ' · ' + esc(r.firm) : ''}${r.title ? ' · ' + esc(r.title) : ''}</span>
-        ${f ? `<span style="color:var(--muted-foreground)"> → ${esc(f.name)}</span>` : ' <span class="pill pill--needs">new</span>'}
+        ${f ? `<span style="color:var(--muted-foreground)"> → </span><a href="#fund=${f.id}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--muted-foreground);text-decoration:underline dotted;text-underline-offset:2px" title="Open the full fund in a new tab">${esc(f.name)}</a>` : ' <span class="pill pill--needs">new</span>'}
       </span>
-      <span class="cr-sub" style="display:inline-flex;gap:6px;align-items:center">${introGradePill(r)}${r.filed ? `<span class="pill pill--type">${F_STAGES[r.filed] || r.filed}</span>` : ''}</span>
-      <div class="cr-why" style="flex-basis:100%">${esc(f ? fundWhyLine(f) : (r.aiWhy || (r.aiDims ? 'Scored against the deck.' : 'Unknown firm - run Grade the funds for a read.')))}</div>
+      <span class="cr-why" style="flex:1;min-width:0;margin:0 10px">${esc(f ? fundWhyLine(f) : (r.aiWhy || (r.aiDims ? 'Scored against the deck.' : 'Unknown firm - run Grade the funds for a read.')))}</span>
+      <b style="flex-shrink:0;font-size:12.5px;width:42px;text-align:right" title="Fit against the deck">${(() => { const sc = introRowScore(r); return sc === null ? '—' : sc + '%'; })()}</b>
+      <span class="cr-sub" style="display:inline-flex;gap:6px;align-items:center;flex-shrink:0">${introGradePill(r)}${r.filed ? `<span class="pill pill--type">${F_STAGES[r.filed] || r.filed}</span>` : ''}</span>
     </label>`;
   }).join('');
   const nInc = il.rows.filter(r => r.inc && !r.filed).length;
@@ -2968,6 +2975,18 @@ async function aiFitFetch(f){
   return data;
 }
 
+/* A firm graded in ANY connector's sheet never gets re-graded elsewhere. */
+function findSheetDims(name){
+  const n = normOrg(name);
+  if (!n) return null;
+  for (const il of Object.values(state.introLists || {})) {
+    for (const r of il.rows || []) {
+      if (r.aiDims && normOrg(r.firm || r.name) === n) return { dims: r.aiDims, why: r.aiWhy || '' };
+    }
+  }
+  return null;
+}
+
 /* The decision pass: grade EVERYTHING this connector can reach - sheet rows
    and door matches alike - so Cam can decide which intros to actually take. */
 async function gradeConnectorFunds(cid, btn){
@@ -2989,6 +3008,8 @@ async function gradeConnectorFunds(cid, btn){
   }
   for (const r of sheetOnly) {
     if (btn) btn.textContent = `Grading ${++done}/${total}...`;
+    const prior = findSheetDims(r.firm || r.name);
+    if (prior) { r.aiDims = prior.dims; if (prior.why) r.aiWhy = prior.why; save(); continue; }
     try {
       const resp = await fetch('/api/vc-fit', { method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ fund: { name: r.firm || r.name, type: r.firm ? '' : 'Angel', region: '', check: null,
@@ -3017,6 +3038,8 @@ async function aiGradeIntroList(cid, btn){
   let done = 0;
   for (const r of todo) {
     if (btn) btn.textContent = `Grading ${++done}/${todo.length}...`;
+    const prior = findSheetDims(r.firm || r.name);
+    if (prior) { r.aiDims = prior.dims; if (prior.why) r.aiWhy = prior.why; save(); continue; }
     try {
       const resp = await fetch('/api/vc-fit', { method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ fund: { name: r.firm || r.name, type: r.firm ? '' : 'Angel', region: '', check: null,
@@ -3039,6 +3062,13 @@ function openConnector(id, preselect){
   const cst = st.status || 'none';
   const _il0 = state.introLists[id];
   const sheetSet = new Set((_il0 ? _il0.rows : []).filter(r => r.fundId && r.name).map(r => r.fundId + '_' + slug(r.name)));
+  if (openConnector._last !== id) { connSrcFilter = 'all'; openConnector._last = id; }
+  const srcKindOf = p => {
+    const note = matchNote(c, p.id) || '';
+    if (sheetSet.has(p.id) || /intro list/i.test(note)) return 'sheet';
+    if (/nfx/i.test(note) || c.id.startsWith('c_nfx_')) return 'nfx';
+    return 'linkedin';
+  };
   const seenM = new Set();
   const matches = (c.matches||[]).map(pid => PERSON_BY_ID[pid]).filter(Boolean)
     // prefer records with a real profile URL / fuller name, then dedupe by
@@ -3087,26 +3117,31 @@ function openConnector(id, preselect){
     ${introListSectionHtml(c)}
     <div class="d-section">
       <div class="d-row" style="justify-content:space-between">
-        <span class="d-label">They can open doors to (${matches.length})</span>
+        <span class="d-label">They can open doors to (${connSrcFilter === 'all' ? matches.length : matches.filter(p => srcKindOf(p) === connSrcFilter).length + ' of ' + matches.length})</span>
         <div class="d-row">
+          ${ddHtml({ ctx:'connsrc', value: connSrcFilter, options: [
+            {v:'all', l:'All sources'}, {v:'sheet', l:'Sheet'}, {v:'linkedin', l:'LinkedIn'}, {v:'nfx', l:'NFX'}
+          ] })}
           <button class="mini-btn" id="dGradeFunds" style="font-weight:600">Grade the funds</button>
           <button class="mini-btn" id="dAddMatch">+ Add match</button>
         </div>
       </div>
       <div>
-        ${matches.length ? matches.map(p => {
+        ${matches.length ? matches.filter(p => connSrcFilter === 'all' || srcKindOf(p) === connSrcFilter).map(p => {
           const f = FUND_BY_ID[p.fundId];
           const note = matchNote(c, p.id) || '';
           const badge = sheetSet.has(p.id) || /intro list/i.test(note) ? '<span class="src-badge src-badge--sheet">Sheet</span>'
             : /nfx/i.test(note) || c.id.startsWith('c_nfx_') ? '<span class="src-badge">NFX</span>'
             : '<span class="src-badge src-badge--li">LinkedIn</span>';
-          return `<label class="check-row" style="flex-wrap:wrap">
+          const pct = f.dims ? Math.round(score(f)) + '%' : '—';
+          return `<label class="check-row" style="align-items:center">
             <input type="checkbox" data-inc="${p.id}" ${checkedSet.has(p.id)?'checked':''}>
-            <span style="flex:1;min-width:0"><b>${p.tbd ? esc(f.name) : esc(p.name)}</b>${p.tbd ? ' <span style="color:var(--muted-foreground)">· any partner</span>' : ' <span style="color:var(--muted-foreground)">· ' + esc(f.name) + '</span>'} ${badge}</span>
-            <span class="cr-sub">${grade(f)}${note ? ' · ' + esc(note) : ' · ' + P_STATUS[pStatus(p)]}${isExcluded(p)?' · Archived':''}</span>
-            <div class="cr-why" style="flex-basis:100%">${esc(fundWhyLine(f))}</div>
+            <span style="flex:0 1 30%;min-width:180px"><b>${p.tbd ? esc(f.name) : esc(p.name)}</b>${p.tbd ? ' <span style="color:var(--muted-foreground)">· any partner</span>' : ' <span style="color:var(--muted-foreground)">· </span><a href="#fund=' + f.id + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--muted-foreground);text-decoration:underline dotted;text-underline-offset:2px" title="Open the full fund in a new tab">' + esc(f.name) + '</a>'} ${badge}</span>
+            <span class="cr-why" style="flex:1;min-width:0;margin:0 10px">${esc(fundWhyLine(f))}</span>
+            <b style="flex-shrink:0;font-size:12.5px;width:42px;text-align:right" title="Fit against the deck">${pct}</b>
+            <span class="cr-sub" style="flex-shrink:0;width:120px;text-align:right">${grade(f)}${isExcluded(p)?' · Archived':' · ' + P_STATUS[pStatus(p)]}</span>
           </label>`;
-        }).join('') : '<div class="info-card">No matches yet. Add one, or sync LinkedIn to match automatically.</div>'}
+        }).join('') : '<div class="info-card">' + (connSrcFilter === 'all' ? 'No matches yet. Add one, or sync LinkedIn to match automatically.' : 'Nothing from this source - switch the filter back to All.') + '</div>'}
       </div>
       <span style="font-size:11px;color:var(--grey-1)">Sorted by fund fit; the top 6 are pre-checked. Checked people become the bulleted list in the ask below - keep it short.</span>
     </div>
@@ -3119,7 +3154,12 @@ function openConnector(id, preselect){
       <textarea class="notes-area" id="dNotes" placeholder="How you know them, what they said...">${esc(st.notes||'')}</textarea>
     </div>`;
 
-  const included = () => [...document.querySelectorAll('[data-inc]')].filter(cb => cb.checked).map(cb => cb.dataset.inc);
+  const included = () => {
+    const visible = new Set([...document.querySelectorAll('[data-inc]')].map(cb => cb.dataset.inc));
+    const checked = [...document.querySelectorAll('[data-inc]')].filter(cb => cb.checked).map(cb => cb.dataset.inc);
+    // a source filter can hide rows - keep their saved checked state
+    return checked.concat((st.included || []).filter(pid => !visible.has(pid)));
+  };
   document.querySelectorAll('[data-inc]').forEach(cb => cb.addEventListener('change', () => { st.included = included(); save(); }));
   st.included = [...checkedSet]; save();
 
@@ -3851,6 +3891,11 @@ rebuild();
 mergeDuplicateConnectors();
 render();
 bootSync();
+// deep link: #fund=<id> opens that fund's drawer (used by new-tab links in the connector module)
+{
+  const m = location.hash.match(/#fund=([A-Za-z0-9_-]+)/);
+  if (m) setTimeout(() => { if (FUND_BY_ID[m[1]]) openFund(m[1]); }, 400);
+}
 </script>
 </body>
 </html>
