@@ -3798,7 +3798,33 @@ $('afCreate').addEventListener('click', () => {
     $('afName').focus(); return;
   }
   const existing = FUNDS.find(x => normOrg(x.name) === normOrg(name));
-  if (existing) { toast('Already in the pipeline - opening it.'); openFund(existing.id); return; }
+  if (existing) {
+    // Already tracked - don't dead-end. Move it to the chosen stage and fill
+    // any blanks from the form, so "add" still does something useful.
+    if (afStage !== 'none') { FS(existing.id).stage = afStage; FS(existing.id).archived = false; }
+    const site = $('afSite') ? $('afSite').value.trim().replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') : '';
+    if (site && !existing.site) { existing.site = site; FS(existing.id).site = site; }
+    if (!existing.check) existing.check = parseCheckRange($('afCheck').value.trim());
+    if (!existing.looking && $('afNotes').value.trim()) existing.looking = $('afNotes').value.trim();
+    const per = $('afPerson').value.trim();
+    if (per && !(PEOPLE_BY_FUND[existing.id]||[]).some(p => p.name && p.name.toLowerCase() === per.toLowerCase())) {
+      const np = { name: per, title: $('afTitle').value.trim() || 'Partner' };
+      if ($('afLi').value.trim()) np.li = $('afLi').value.trim();
+      if ($('afEmail').value.trim()) np.email = $('afEmail').value.trim();
+      const ex = existing.people && existing.people.find(x => x.tbd);
+      if (ex) { ex.n = np.name; ex.t = np.title; ex.tbd = false; if (np.li) ex.li = np.li; if (np.email) ex.email = np.email; }
+      else (existing.people = existing.people || []).push({ n: np.name, t: np.title, li: np.li, email: np.email });
+    }
+    save(); rebuild(); render();
+    ['afName','afPerson','afTitle','afLi','afEmail','afCheck','afRegion','afNotes'].forEach(k => { if ($(k)) $(k).value = ''; });
+    if ($('afSite')) $('afSite').value = '';
+    $('fundSingleWrap').style.display = 'none';
+    const wt = { target:'targets', messaged:'messaged', booked:'booked', pitching:'pitching', closed:'closed', disqualified:'disqualified', future:'future' }[afStage];
+    if (wt && currentTab !== wt && currentTab !== 'funds') switchTab(wt);
+    openFund(existing.id);
+    toast(`${existing.name} was already in the pipeline${afStage !== 'none' ? ' - moved to ' + F_STAGES[afStage] : ''}.`);
+    return;
+  }
   let id = 'cf-' + slug(name);
   while (FUND_BY_ID[id]) id += '-x';
   const f = { id, name, custom: true,
