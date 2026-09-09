@@ -3273,15 +3273,35 @@ function openConnector(id, preselect){
   const cst = st.status || 'none';
   const _il0 = state.introLists[id];
   const sheetSet = new Set((_il0 ? _il0.rows : []).filter(r => r.fundId && r.name).map(r => r.fundId + '_' + slug(r.name)));
+  // Every fund from their uploaded sheet counts as the Sheet source, so the
+  // sheet shows up in the doors list (and its Sheet filter), not only in the
+  // separate intro-list card.
+  const sheetFundIds = new Set((_il0 ? _il0.rows : []).filter(r => r.fundId).map(r => r.fundId));
   const _switched = openConnector._last !== id; openConnector._last = id;
   const srcKindOf = p => {
     const note = matchNote(c, p.id) || '';
-    if (sheetSet.has(p.id) || /intro list/i.test(note)) return 'sheet';
+    if (sheetFundIds.has(p.fundId) || sheetSet.has(p.id) || /intro list/i.test(note)) return 'sheet';
     if (/nfx/i.test(note) || c.id.startsWith('c_nfx_')) return 'nfx';
     return 'linkedin';
   };
+  // Pull the sheet funds into the door matches (one representative person per
+  // fund) so they render, grade, filter and export alongside everything else.
+  const basePids = (c.matches || []).slice();
+  const coveredFunds = new Set(basePids.map(pid => (PERSON_BY_ID[pid] || {}).fundId).filter(Boolean));
+  sheetFundIds.forEach(fid => {
+    if (coveredFunds.has(fid)) return;
+    const f = FUND_BY_ID[fid]; if (!f) return;
+    let rep = (PEOPLE_BY_FUND[fid] || [])[0];
+    if (!rep) {
+      const sid = fid + '_tbd-sheet';
+      rep = PERSON_BY_ID[sid] || (PERSON_BY_ID[sid] = { id: sid, fundId: fid, name: f.name, title: 'Any partner', tbd: true, li0: '', email0: '' });
+      (PEOPLE_BY_FUND[fid] = PEOPLE_BY_FUND[fid] || []).push(rep);
+    }
+    basePids.push(rep.id);
+    coveredFunds.add(fid);
+  });
   const seenM = new Set();
-  const matches = (c.matches||[]).map(pid => PERSON_BY_ID[pid]).filter(Boolean)
+  const matches = basePids.map(pid => PERSON_BY_ID[pid]).filter(Boolean)
     // prefer records with a real profile URL / fuller name, then dedupe by
     // first name within a fund (near-duplicates from merged sources)
     .sort((a,b) => ((b.li0?1:0) - (a.li0?1:0)) || ((b.name||'').length - (a.name||'').length))
@@ -3360,9 +3380,9 @@ function openConnector(id, preselect){
       <div>
         ${matches.length ? matches.filter(p => connSrcFilter === 'all' || srcKindOf(p) === connSrcFilter).map(p => {
           const f = FUND_BY_ID[p.fundId];
-          const note = matchNote(c, p.id) || '';
-          const badge = sheetSet.has(p.id) || /intro list/i.test(note) ? '<span class="src-badge src-badge--sheet">Sheet</span>'
-            : /nfx/i.test(note) || c.id.startsWith('c_nfx_') ? '<span class="src-badge">NFX</span>'
+          const _kind = srcKindOf(p);   // badge matches the source filter
+          const badge = _kind === 'sheet' ? '<span class="src-badge src-badge--sheet">Sheet</span>'
+            : _kind === 'nfx' ? '<span class="src-badge">NFX</span>'
             : '<span class="src-badge src-badge--li">LinkedIn</span>';
           const pct = f.dims ? Math.round(score(f)) + '%' : '—';
           const ex = isExcluded(p);
