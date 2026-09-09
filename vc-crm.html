@@ -3172,8 +3172,9 @@ function openConnector(id, preselect){
     defaultIds.push(p.id);
     if (defaultIds.length >= 6) break;
   }
-  // stored selections count only when hand-curated (small); stale auto-lists are ignored
-  const stored = (st.included && st.included.length && st.included.length <= 12) ? st.included : null;
+  // once the user has curated the selection, restore it EXACTLY (any size) so a
+  // half-finished pass survives closing the drawer; otherwise pre-check the top 6
+  const stored = st.curated ? (st.included || []) : null;
   const checkedSet = new Set(preselect ? [preselect] : (stored || defaultIds));
   const due = connectorFollowUp(c);
   $('dTitle').textContent = connName(c);
@@ -3251,8 +3252,8 @@ function openConnector(id, preselect){
     // a source filter can hide rows - keep their saved checked state
     return checked.concat((st.included || []).filter(pid => !visible.has(pid)));
   };
-  document.querySelectorAll('[data-inc]').forEach(cb => cb.addEventListener('change', () => { st.included = included(); save(); }));
-  st.included = [...checkedSet]; save();
+  document.querySelectorAll('[data-inc]').forEach(cb => cb.addEventListener('change', () => { st.curated = true; st.included = included(); save(); }));
+  if (!st.curated) { st.included = [...checkedSet]; save(); }
 
   $('dAddMatch').onclick = () => {
     const q = prompt('Search a person or fund to match (e.g. "Fabrice" or "NFX"):');
@@ -3309,7 +3310,7 @@ function openConnector(id, preselect){
       const cbs = [...document.querySelectorAll('[data-inc]')];
       const on = !cbs.every(cb => cb.checked);
       cbs.forEach(cb => { cb.checked = on; });
-      st.included = included(); save(); syncLabel();
+      st.curated = true; st.included = included(); save(); syncLabel();
       toast(on ? `${cbs.length} selected` + (connSrcFilter !== 'all' ? ' (shown only)' : '') : 'Selection cleared for shown rows.');
     };
     document.querySelectorAll('[data-inc]').forEach(cb => cb.addEventListener('change', syncLabel));

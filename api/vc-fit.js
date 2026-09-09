@@ -18,7 +18,7 @@ MOAT / WHY THEY WIN: Every competitor (Spotify, Gumball, Acast, CreatorX, Agenti
 
 FIVE THESIS SURFACES a fund can hit: (1) marketplaces / network effects, (2) creator economy / media / entertainment, (3) adtech / ad measurement / martech, (4) AI-native + agentic + data moats, (5) commerce / vertical SaaS for media businesses. Two or more = strong thesis fit. A pure enterprise-infra, biotech, climate, hardware, or fintech-only fund is a weak thesis fit and must score low - do NOT hand out generic "good fit" language to funds that don't actually touch these surfaces.
 
-USE YOUR OWN KNOWLEDGE: You know most of these funds by name (their real thesis, stage, check size, notable portfolio, HQ). Ground the read in what you actually know about THIS fund - name a real portfolio company or their real focus when you can. If you genuinely don't recognize the fund and the row data is thin, say so and score conservatively (still return dims - a low-confidence estimate is fine; only use null if the fund is truly unidentifiable).
+GROUND THE READ IN REAL DATA: When website_text is provided, it was scraped live from the fund's own site just now - treat it as current truth ABOVE your training memory (funds change stage, thesis, and check size). When the web_search tool is available and the provided data is thin, search for the fund (name + 'venture'/'capital') to verify their actual stage, check size, thesis, and recent portfolio BEFORE scoring. Cite a real portfolio company or their stated focus in the brief. Only fall back to memory when neither is available; if the fund is genuinely unidentifiable, say so and use null dims.
 
 RUBRIC DIMS (0-100), weights thesis .30 / stage .25 / check .20 / portfolio .15 / geo .10:
 - thesis: how many of the five surfaces they hit, and how central creator/marketplace/adtech is to them.
@@ -32,6 +32,23 @@ RULES: Be honest and specific - a weak fit gets called weak WITH the concrete re
 Return STRICT JSON only, no markdown fences:
 {"dims": {"thesis":n,"stage":n,"check":n,"portfolio":n,"geo":n}, "one_liner": "under 12 words, the specific verdict", "brief": "2-3 tight sentences grounded in THIS fund's real thesis/portfolio and how it maps (or does not) to a specific SpotsNow surface, plus any provided history"}
 Always return dims unless the fund is genuinely unidentifiable (then dims: null). Do NOT use double quotes or line breaks inside any string value (use single quotes if you must quote).`;
+
+async function fetchSiteText(site) {
+  if (!site) return '';
+  const url = /^https?:\/\//i.test(site) ? site : 'https://' + site;
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 8000);
+    const r = await fetch(url, { signal: ctrl.signal, redirect: 'follow',
+      headers: { 'User-Agent': 'Mozilla/5.0 SpotsNow-fit-check' } });
+    clearTimeout(t);
+    if (!r.ok) return '';
+    let html = await r.text();
+    html = html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ');
+    const text = html.replace(/<[^>]+>/g, ' ').replace(/&[a-z#0-9]+;/gi, ' ').replace(/\s+/g, ' ').trim();
+    return text.slice(0, 4000);
+  } catch { return ''; }
+}
 
 async function authed(req) {
   const secret = process.env.SESSION_SECRET;
@@ -53,7 +70,10 @@ export default async function handler(req, res) {
   const { fund } = req.body || {};
   if (!fund || !fund.name) return res.status(400).json({ error: 'fund required' });
 
-  // Only pass through known fields, trimmed - the model needs signal, not bulk.
+  // Ground the read: pull the fund's live website copy (fast, cheap). If there's
+  // no site, let the model web-search to verify instead.
+  const websiteText = await fetchSiteText(fund.site);
+
   const payload = {
     name: fund.name, site: fund.site, type: fund.type, region: fund.region,
     check_k: fund.check, sectors: fund.sectors, tier: fund.tier,
@@ -61,17 +81,23 @@ export default async function handler(req, res) {
     current_dims: fund.dims || null,
     people: (fund.people || []).slice(0, 5),
     history: (fund.ctx || []).slice(0, 14),
-    paths: (fund.paths || []).slice(0, 6)
+    paths: (fund.paths || []).slice(0, 6),
+    website_text: websiteText || null
   };
 
   try {
     const client = new Anthropic({ apiKey });
-    const msg = await client.messages.create({
+    const req2 = {
       model: MODEL,
       max_tokens: 1000,
       system: SYSTEM,
       messages: [{ role: 'user', content: 'Fund data:\n' + JSON.stringify(payload) }]
-    });
+    };
+    // No live site copy? Give the model a live web search to verify (capped).
+    if (!websiteText) {
+      req2.tools = [{ type: 'web_search_20250305', name: 'web_search', max_uses: 2 }];
+    }
+    const msg = await client.messages.create(req2);
     const text = (msg.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
     const jm = text.match(/\{[\s\S]*\}/);
     if (!jm) return res.status(502).json({ error: 'unparseable model output' });
@@ -105,4 +131,4 @@ export default async function handler(req, res) {
   }
 }
 
-export const config = { maxDuration: 60 };
+export const config = { maxDuration: 120 };
