@@ -30,7 +30,7 @@ RUBRIC DIMS (0-100), weights thesis .30 / stage .25 / check .20 / portfolio .15 
 RULES: Be honest and specific - a weak fit gets called weak WITH the concrete reason (their actual focus). Never invent facts; if unsure, hedge. Vary the language - no boilerplate. American spelling. No em-dashes.
 
 Return STRICT JSON only, no markdown fences:
-{"brief": "2-4 sentences grounded in THIS fund's real thesis/portfolio and how it maps (or doesn't) to a specific SpotsNow surface, plus any provided history", "dims": {"thesis":n,"stage":n,"check":n,"portfolio":n,"geo":n}, "one_liner": "under 12 words, the specific verdict"}
+{"dims": {"thesis":n,"stage":n,"check":n,"portfolio":n,"geo":n}, "one_liner": "under 12 words, the specific verdict", "brief": "2-3 tight sentences grounded in THIS fund's real thesis/portfolio and how it maps (or does not) to a specific SpotsNow surface, plus any provided history"}
 Always return dims unless the fund is genuinely unidentifiable (then dims: null). Do NOT use double quotes or line breaks inside any string value (use single quotes if you must quote).`;
 
 async function authed(req) {
@@ -68,13 +68,13 @@ export default async function handler(req, res) {
     const client = new Anthropic({ apiKey });
     const msg = await client.messages.create({
       model: MODEL,
-      max_tokens: 700,
+      max_tokens: 1000,
       system: SYSTEM,
       messages: [{ role: 'user', content: 'Fund data:\n' + JSON.stringify(payload) }]
     });
     const text = (msg.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
     const jm = text.match(/\{[\s\S]*\}/);
-    if (!jm) return res.status(502).json({ error: 'unparseable model output', stop: msg.stop_reason, rawlen: text.length, raw: text.slice(0,300) });
+    if (!jm) return res.status(502).json({ error: 'unparseable model output' });
     let out;
     try {
       out = JSON.parse(jm[0]);
@@ -90,7 +90,7 @@ export default async function handler(req, res) {
       const br = text.match(/"brief"\s*:\s*"((?:[^"\\]|\\.)*)"/);
       out = { brief: br ? br[1] : '', one_liner: ol ? ol[1] : '',
               dims: Object.keys(dm).length === 5 ? dm : null };
-      if (!out.brief && !out.dims) return res.status(502).json({ error: 'unparseable model output' });
+      if (!out.brief && !out.dims && !out.one_liner) return res.status(502).json({ error: 'unparseable model output' });
     }
     const dims = out.dims && typeof out.dims === 'object'
       && ['thesis','stage','check','portfolio','geo'].every(k => Number.isFinite(out.dims[k]))
