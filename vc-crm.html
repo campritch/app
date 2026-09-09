@@ -3108,6 +3108,14 @@ function fundWhyLine(f){
   const ai = FS(f.id).aiOneLiner || firstSentence(FS(f.id).aiBrief || '');
   if (ai) return ai;                                  // real AI read
   if (f.why) return firstSentence(f.why);             // hand-written
+  // No AI read yet: surface the fund's OWN thesis/About (the rich data in the
+  // peek panel) inline instead of generic rubric boilerplate, so the row is
+  // actually about THIS fund before grading. Fall back to context/sectors.
+  const about = firstSentence(f.looking || '').trim();
+  if (about) return about;
+  const ctxLine = (f.ctx || []).map(c => Array.isArray(c) ? c.join(': ') : String(c)).find(s => s && s.length > 6);
+  if (ctxLine) return ctxLine;
+  if ((f.sectors || []).length) return 'Focus: ' + f.sectors.slice(0, 4).join(', ') + '. Run "Grade the funds" for the fit read.';
   if (f.dims) return 'Rubric estimate: ' + fundFitLine(f); // first-pass, not AI
   return 'Not graded yet - run "Grade the funds".';
 }
