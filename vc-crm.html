@@ -3194,8 +3194,12 @@ function openConnector(id, preselect){
       return true;
     })
     // archived (excluded) rows sink to the bottom so they never waste your time,
-    // but stay in the list so nothing is lost; everything else by fund fit.
-    .sort((a,b) => ((isExcluded(a)?1:0) - (isExcluded(b)?1:0)) || (score(FUND_BY_ID[b.fundId]) - score(FUND_BY_ID[a.fundId])));
+    // but stay in the list so nothing is lost; everything else by fund fit, then
+    // grouped by fund so a fund's people always sit next to each other as you
+    // scroll (fund id is the tiebreaker when scores are equal).
+    .sort((a,b) => ((isExcluded(a)?1:0) - (isExcluded(b)?1:0))
+      || (score(FUND_BY_ID[b.fundId]) - score(FUND_BY_ID[a.fundId]))
+      || (a.fundId < b.fundId ? -1 : a.fundId > b.fundId ? 1 : 0));
   const eligible = matches.filter(p => !isExcluded(p) && !['replied','meeting','passed'].includes(pStatus(p)));
   const usedFunds = new Set();
   const defaultIds = [];
