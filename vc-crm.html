@@ -94,7 +94,7 @@
     /* ── Page card ── */
     .page-card {
       background: var(--card);
-      max-width: 1800px; margin: 24px auto 0; width: calc(100% - 48px);
+      max-width: none; margin: 24px auto 0; width: calc(100% - 48px);
       border-radius: 12px;
       border: 1px solid var(--border);
       box-shadow: var(--shadow-sm);
@@ -675,6 +675,7 @@
     <div class="page-card__inner">
       <div class="tab-row" id="tabRow">
         <button class="tab active" data-tab="funds">All funds <span class="count" id="cntFunds">0</span></button>
+        <button class="tab" data-tab="contacted">Contacted <span class="count" id="cntContacted">0</span></button>
         <button class="tab" data-tab="targets">Targets <span class="count" id="cntTargets">0</span></button>
         <button class="tab" data-tab="messaged">Messaged <span class="count" id="cntMessaged">0</span></button>
         <button class="tab" data-tab="booked">Booked <span class="count" id="cntBooked">0</span></button>
@@ -865,6 +866,7 @@ Dana Whitfield, Overline, worked together at Techstars,"></textarea>
   <!-- Bulk bar -->
   <div class="bulk-bar" id="bulkBar">
     <span class="bulk-bar__count" id="bulkCount">0 selected</span>
+    <button class="bulk-btn bulk-fund" data-bulkstage="contacted">→ Contacted</button>
     <button class="bulk-btn bulk-btn--coral bulk-fund" data-bulkstage="target">→ Targets</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="messaged">→ Messaged</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="booked">→ Booked</button>
@@ -1379,7 +1381,7 @@ const P_STATUS = {
 const C_STATUS = { none:'Not asked', draft:'Ask drafted', asked:'Asked', agreed:'Agreed', declined:'Declined' };
 /* Fund pipeline stages — the core CRM flow. */
 const F_STAGES = { none:'Backlog', target:'\ud83c\udfaf Target', messaged:'\ud83d\udcac Messaged', booked:'\u2705 Booked', pitching:'\ud83c\udfa4 Pitching', closed:'\u274c Closed', disqualified:'\ud83d\udeab Disqualified', future:'\u23f3 Future rounds' };
-const STAGE_TABS = ['funds','targets','messaged','booked','pitching','closed','disqualified','future'];
+const STAGE_TABS = ['funds','contacted','targets','messaged','booked','pitching','closed','disqualified','future'];
 const WARMTH = { hot:'\ud83d\udd25 Hot', warm:'\u2600\ufe0f Warm', cool:'\ud83d\udd35 Cool', cold:'\ud83e\udd76 Cold', na:'\u2014 Not set' };
 const WARMTH_ICON = { na:'\u25cb', hot:'\ud83d\udd25', warm:'\u2600\ufe0f', cool:'\ud83d\udd35', cold:'\ud83e\udd76' };
 /* Where the fund came from: the master lists (grey) or OpenVC (light orange). */
@@ -1550,7 +1552,7 @@ let fundArchiveView = false;
 let headSort = { key: null, dir: 1 };
 let renderCap = 150;
 const HSORT_DEFAULT_DIR = { name:1, profile:1, fit:-1, check:-1, stage:1, people:-1, path:1, status:1, wayin:1 };
-const STAGE_ORDER = { none:0, target:1, messaged:2, booked:3, pitching:4, closed:5, disqualified:6, future:7 };
+const STAGE_ORDER = { none:0, contacted:1, target:2, messaged:3, booked:4, pitching:5, closed:6, disqualified:7, future:8 };
 const hArrow = k => headSort.key === k ? (headSort.dir === 1 ? ' \u2191' : ' \u2193') : '';
 let currentTab = 'funds';
 let searchQ = '';
@@ -1832,6 +1834,7 @@ function render(){
   const activeFunds = FUNDS.filter(f => !isFundArchived(f));
   $('cntFunds').textContent = activeFunds.length;
   const stageCount = s => activeFunds.filter(f => fStage(f) === s).length;
+  $('cntContacted').textContent = stageCount('contacted');
   $('cntTargets').textContent = stageCount('target');
   $('cntMessaged').textContent = stageCount('messaged');
   $('cntBooked').textContent = stageCount('booked');
@@ -2496,7 +2499,7 @@ function openPerson(id){
   const pi = pathInfo(p);
   const due = personFollowUp(p);
   $('dTitle').textContent = p.tbd ? `${f.name} — ${p.title}` : p.name;
-  $('dMeta').innerHTML = `${p.tbd?'<span class="pill pill--needs">Needs name</span>':`<span class="pill pill--type">${esc(p.title)}</span>`} <a href="#" data-openfund="${f.id}" style="font-weight:700">${esc(f.name)}</a> · ${esc(f.region||'—')} · ${checkFmt(f)}`;
+  $('dMeta').innerHTML = `${p.tbd?'<span class="pill pill--needs">Needs name</span>':`<span class="pill pill--type">${esc(p.title)}</span>`} <a href="#" data-openfund="${f.id}" style="font-weight:700">${esc(f.name)}</a> · ${esc(f.region||'—')} · ${checkFmt(f)} · <button class="read-more" id="dEditPersonName" style="border:none;background:none;padding:0;font:inherit;text-decoration:underline;cursor:pointer;color:var(--muted-foreground)">Edit name</button>`;
   $('drawerBody').innerHTML = `
     <div class="d-row" style="justify-content:space-between;flex-wrap:wrap">
       ${ddHtml({ ctx:'dstatus:'+id, value:pStatus(p), options: Object.entries(P_STATUS).map(([k,v]) => ({v:k,l:v,cls:'st-'+k})) })}
@@ -2560,6 +2563,14 @@ function openPerson(id){
       <textarea class="notes-area" id="dNotes" placeholder="Call notes, intro asks, terms...">${esc(st.notes||'')}</textarea>
     </div>`;
 
+  if ($('dEditPersonName')) $('dEditPersonName').onclick = () => {
+    const cur = p.tbd ? '' : (p.name || '');
+    const n = prompt('Edit name for this person at ' + f.name + ':', cur);
+    if (n === null || !n.trim()) return;
+    st.customName = n.trim();
+    save(); rebuild(); render(); openPerson(id);
+    toast('Name updated.');
+  };
   const nameBtn = $('dNamePerson');
   if (nameBtn) nameBtn.onclick = () => {
     const n = prompt('Who is the right person at ' + f.name + '?');
@@ -3471,7 +3482,7 @@ document.addEventListener('click', e => {
     if (act === 'single') {
       if (!STAGE_TABS.includes(currentTab)) switchTab('funds');
       // default the stage to the board you're looking at
-      afStage = { targets:'target', messaged:'messaged', booked:'booked', pitching:'pitching', closed:'closed', disqualified:'disqualified', future:'future' }[currentTab] || 'target';
+      afStage = { contacted:'contacted', targets:'target', messaged:'messaged', booked:'booked', pitching:'pitching', closed:'closed', disqualified:'disqualified', future:'future' }[currentTab] || 'target';
       renderAfStage();
       $('fundPasteWrap').style.display = 'none';
       $('fundSingleWrap').style.display = 'block';
@@ -3844,7 +3855,7 @@ $('afCreate').addEventListener('click', () => {
     ['afName','afPerson','afTitle','afLi','afEmail','afCheck','afRegion','afNotes'].forEach(k => { if ($(k)) $(k).value = ''; });
     if ($('afSite')) $('afSite').value = '';
     $('fundSingleWrap').style.display = 'none';
-    const wt = { target:'targets', messaged:'messaged', booked:'booked', pitching:'pitching', closed:'closed', disqualified:'disqualified', future:'future' }[afStage];
+    const wt = { contacted:'contacted', target:'targets', messaged:'messaged', booked:'booked', pitching:'pitching', closed:'closed', disqualified:'disqualified', future:'future' }[afStage];
     if (wt && currentTab !== wt && currentTab !== 'funds') switchTab(wt);
     openFund(existing.id);
     toast(`${existing.name} was already in the pipeline${afStage !== 'none' ? ' - moved to ' + F_STAGES[afStage] : ''}.`);
@@ -3877,7 +3888,7 @@ $('afCreate').addEventListener('click', () => {
   $('fundSingleWrap').style.display = 'none';
   toast((isAngel ? 'Angel added' : 'Fund added') + ' - filed under ' + F_STAGES[afStage] + '.');
   // land the user on the board the investor was filed into
-  const wantTab = { target:'targets', messaged:'messaged', booked:'booked', pitching:'pitching', closed:'closed', disqualified:'disqualified', future:'future' }[afStage] || 'funds';
+  const wantTab = { contacted:'contacted', target:'targets', messaged:'messaged', booked:'booked', pitching:'pitching', closed:'closed', disqualified:'disqualified', future:'future' }[afStage] || 'funds';
   if (currentTab !== wantTab && currentTab !== 'funds') switchTab(wantTab);
   afStage = 'target'; renderAfStage();
   openFund(id);
