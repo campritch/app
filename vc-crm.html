@@ -604,6 +604,17 @@
     .check-row:hover { background: var(--accent); }
     .check-row input { accent-color: var(--primary); width: 15px; height: 15px; margin: 0; flex-shrink: 0; }
     .check-row .cr-sub { color: var(--muted-foreground); font-size: 12px; margin-left: auto; white-space: nowrap; }
+    .row-arch {
+      flex-shrink: 0; font-size: 10px; font-weight: 600; letter-spacing: .02em;
+      color: var(--muted-foreground); background: transparent; border: 1px solid var(--border);
+      border-radius: 5px; padding: 2px 6px; cursor: pointer; line-height: 1.3;
+    }
+    .row-arch:hover { background: var(--accent); color: var(--foreground); border-color: var(--muted-foreground); }
+    /* archived door: whole row grays out, name included, but stays visible at the bottom */
+    .check-row.cr-archived { opacity: .45; }
+    .check-row.cr-archived:hover { opacity: .7; background: var(--accent); }
+    .check-row.cr-archived b, .check-row.cr-archived a { color: var(--muted-foreground) !important; font-weight: 500; }
+    .check-row.cr-archived .row-arch { opacity: 1; }
 
     .msg-area {
       width: 100%; min-height: 210px; resize: vertical;
@@ -3170,7 +3181,9 @@ function openConnector(id, preselect){
       seenM.add(key);
       return true;
     })
-    .sort((a,b) => score(FUND_BY_ID[b.fundId]) - score(FUND_BY_ID[a.fundId]));
+    // archived (excluded) rows sink to the bottom so they never waste your time,
+    // but stay in the list so nothing is lost; everything else by fund fit.
+    .sort((a,b) => ((isExcluded(a)?1:0) - (isExcluded(b)?1:0)) || (score(FUND_BY_ID[b.fundId]) - score(FUND_BY_ID[a.fundId])));
   const eligible = matches.filter(p => !isExcluded(p) && !['replied','meeting','passed'].includes(pStatus(p)));
   const usedFunds = new Set();
   const defaultIds = [];
@@ -3234,12 +3247,14 @@ function openConnector(id, preselect){
             : /nfx/i.test(note) || c.id.startsWith('c_nfx_') ? '<span class="src-badge">NFX</span>'
             : '<span class="src-badge src-badge--li">LinkedIn</span>';
           const pct = f.dims ? Math.round(score(f)) + '%' : '—';
-          return `<label class="check-row" style="align-items:center">
-            <input type="checkbox" data-inc="${p.id}" ${checkedSet.has(p.id)?'checked':''}>
+          const ex = isExcluded(p);
+          return `<label class="check-row${ex?' cr-archived':''}" style="align-items:center">
+            <input type="checkbox" data-inc="${p.id}" ${checkedSet.has(p.id)?'checked':''} ${ex?'disabled':''}>
+            <button type="button" class="row-arch" data-doorarch="${p.id}" title="${ex?'Restore to the list':'Archive - grays it out and drops it to the bottom, out of your way'}">${ex?'Restore':'Archive'}</button>
             <span style="flex:0 1 30%;min-width:180px"><b>${p.tbd ? esc(f.name) : esc(p.name)}</b>${p.tbd ? ' <span style="color:var(--muted-foreground)">· any partner</span>' : ' <span style="color:var(--muted-foreground)">· </span><a href="#fund=' + f.id + '" data-peek="' + f.id + '" rel="noopener" style="color:var(--muted-foreground);text-decoration:underline dotted;text-underline-offset:2px" title="Quick look (cmd-click opens a new tab)">' + esc(f.name) + '</a>'} ${badge}</span>
             <span class="cr-why" style="flex:1;min-width:0;margin:0 10px">${esc(fundWhyLine(f))}</span>
             <b style="flex-shrink:0;font-size:12.5px;width:42px;text-align:right" title="Fit against the deck">${pct}</b>
-            <span class="cr-sub" style="flex-shrink:0;width:120px;text-align:right">${grade(f)}${isExcluded(p)?' · Archived':' · ' + P_STATUS[pStatus(p)]}</span>
+            <span class="cr-sub" style="flex-shrink:0;width:120px;text-align:right">${grade(f)}${ex?' · Archived':' · ' + P_STATUS[pStatus(p)]}</span>
           </label>`;
         }).join('') : '<div class="info-card">' + (connSrcFilter === 'all' ? 'No matches yet. Add one, or sync LinkedIn to match automatically.' : 'Nothing from this source - switch the filter back to All.') + '</div>'}
       </div>
@@ -3932,6 +3947,21 @@ $('drawerBody').addEventListener('click', e => {
   if (of) { e.preventDefault(); openFund(of.dataset.openfund); return; }
   const op = e.target.closest('[data-openperson]');
   if (op) { openPerson(op.dataset.openperson); return; }
+  const darch = e.target.closest('[data-doorarch]');
+  if (darch) {
+    e.preventDefault(); e.stopPropagation();  // it's inside the row <label> - don't toggle the checkbox
+    const pid = darch.dataset.doorarch;
+    const now = !PS(pid).excluded;
+    PS(pid).excluded = now;
+    if (now && drawerRef && drawerRef.kind === 'connector') {
+      const cs = CS(drawerRef.id);                    // drop it from the curated selection so it won't export
+      if (cs.included) cs.included = cs.included.filter(x => x !== pid);
+    }
+    save();
+    if (drawerRef && drawerRef.kind === 'connector') openConnector(drawerRef.id);
+    else render();
+    return;
+  }
   const parch = e.target.closest('[data-parch]');
   if (parch) {
     PS(parch.dataset.parch).excluded = true;
