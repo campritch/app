@@ -3050,7 +3050,7 @@ async function gradeConnectorFunds(cid, btn){
   const fundIds = new Set();
   (c.matches || []).forEach(pid => { const p = PERSON_BY_ID[pid]; if (p) fundIds.add(p.fundId); });
   if (il) il.rows.forEach(r => { if (r.fundId) fundIds.add(r.fundId); });
-  const targets = [...fundIds].map(id => FUND_BY_ID[id]).filter(f => f && !FS(f.id).aiGraded && !isCompetitor(f));
+  const targets = [...fundIds].map(id => FUND_BY_ID[id]).filter(f => f && !FS(f.id).aiGraded && !f.why && !isCompetitor(f));
   const sheetOnly = il ? il.rows.filter(r => r.inc && !r.fundId && !r.aiDims && (r.firm || r.name)) : [];
   const total = targets.length + sheetOnly.length;
   if (!total) { toast('Everything this connector reaches is already graded.'); return; }
@@ -3187,6 +3187,7 @@ function openConnector(id, preselect){
             {v:'all', l:'All sources'}, {v:'sheet', l:'Sheet'}, {v:'linkedin', l:'LinkedIn'}, {v:'nfx', l:'NFX'}
           ] })}
           <button class="mini-btn" id="dSelectAllInc">Select all</button>
+          <button class="mini-btn" id="dExportInc">Export selected</button>
           <button class="mini-btn" id="dGradeFunds" style="font-weight:600">Grade the funds</button>
           <button class="mini-btn" id="dAddMatch">+ Add match</button>
         </div>
@@ -3253,6 +3254,25 @@ function openConnector(id, preselect){
   };
   if ($('dIntroAi')) $('dIntroAi').onclick = e => aiGradeIntroList(id, e.target);
   if ($('dGradeFunds')) $('dGradeFunds').onclick = e => gradeConnectorFunds(id, e.target);
+  if ($('dExportInc')) $('dExportInc').onclick = () => {
+    const ids = (st.included && st.included.length) ? st.included
+      : [...document.querySelectorAll('[data-inc]:checked')].map(cb => cb.dataset.inc);
+    if (!ids.length) { toast('Check the people you want intros to first.'); return; }
+    const rows = [['Person','Fund','Title','Fit','Grade','Why','LinkedIn','Email','Status'].join(',')];
+    ids.forEach(pid => {
+      const p = PERSON_BY_ID[pid]; if (!p) return;
+      const f = FUND_BY_ID[p.fundId]; if (!f) return;
+      const sc = f.dims ? Math.round(score(f)) + '/100' : '';
+      rows.push([p.tbd ? '' : p.name, f.name, p.title || '', sc, f.dims ? grade(f) : '',
+        fundWhyLine(f), personLi(p) || '', p.email0 || '', 'Requested']
+        .map(v => '"' + String(v||'').replace(/"/g,'""') + '"').join(','));
+    });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([rows.join('\n')], { type:'text/csv' }));
+    a.download = 'intros-' + slug(connName(c)) + '-selected.csv';
+    a.click(); URL.revokeObjectURL(a.href);
+    toast(`Downloaded ${ids.length} - send to ${firstName(connName(c))} to start the intros.`);
+  };
   if ($('dSelectAllInc')) {
     const btn = $('dSelectAllInc');
     const syncLabel = () => {
