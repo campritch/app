@@ -622,6 +622,9 @@
     .check-row.cr-archived:hover { opacity: .7; background: var(--accent); }
     .check-row.cr-archived b, .check-row.cr-archived a { color: var(--muted-foreground) !important; font-weight: 500; }
     .check-row.cr-archived .row-arch { opacity: 1; }
+    /* preferred intro path: the fund you chose to route through THIS connector */
+    .check-row.cr-preferred { background: var(--amber-bg, #fffbeb); box-shadow: inset 3px 0 0 var(--amber-text, #b45309); }
+    .check-row.cr-preferred:hover { background: var(--amber-bg, #fef3c7); }
 
     .msg-area {
       width: 100%; min-height: 210px; resize: vertical;
@@ -1500,6 +1503,24 @@ function viaUrl(via){
   const m = (via || '').match(/https?:\/\/[^\s)]+/);
   return m ? m[0] : '';
 }
+// Full list of connectors that can reach each fund (for the preferred-intro
+// picker), deduped so a connector appears once per fund. Memoized like fundConnMap.
+let fundConnListMemo = null;
+function connectorsForFund(fundId){
+  if (!fundConnListMemo){
+    fundConnListMemo = {};
+    allConnectors().forEach(c => {
+      if (CS(c.id).archived) return;
+      const seen = new Set();
+      (c.matches || []).forEach(m => {
+        const p = PERSON_BY_ID[m]; if (!p || seen.has(p.fundId)) return;
+        seen.add(p.fundId);
+        (fundConnListMemo[p.fundId] || (fundConnListMemo[p.fundId] = [])).push(c.id);
+      });
+    });
+  }
+  return fundConnListMemo[fundId] || [];
+}
 let fundConnMemo = null;
 function fundConnMap(){
   if (fundConnMemo) return fundConnMemo;
@@ -1767,6 +1788,14 @@ function onDdChange(ctx, v){
     }
     return;
   }
+  if (kind === 'prefconn') {
+    const fs = FS(arg);
+    if (v) fs.preferredConn = v; else delete fs.preferredConn;
+    save();
+    if (drawerRef && drawerRef.kind === 'connector') openConnector(drawerRef.id);
+    else render();
+    return;
+  }
   if (kind === 'fwarmth') {
     const fs = FS(arg);
     if (v === 'na') delete fs.warmth; else fs.warmth = v;
@@ -1837,6 +1866,7 @@ function removeFund(id){
 /* ── Main render ── */
 function render(){
   fundConnMemo = null;
+  fundConnListMemo = null;
   const isStageTab = STAGE_TABS.includes(currentTab);
   const isTable = isStageTab || ['people','followups'].includes(currentTab);
   $('tableView').style.display = isTable ? 'block' : 'none';
@@ -3281,12 +3311,19 @@ function openConnector(id, preselect){
           const pct = f.dims ? Math.round(score(f)) + '%' : '—';
           const ex = isExcluded(p);
           const stg = fStage(f);
-          return `<label class="check-row${ex?' cr-archived':''}" style="align-items:center">
+          const prefC = FS(f.id).preferredConn;
+          const isPref = prefC === c.id;                       // this connector is the chosen path
+          const connOpts = connectorsForFund(f.id);
+          const prefDd = connOpts.length > 1 ? ddHtml({ ctx:'prefconn:'+f.id, value: prefC || '', quiet:true, menuRight:true,
+            title:'Preferred person to get this intro through - shows highlighted on their page',
+            options: [{v:'', l:'Intro via…'}].concat(connOpts.map(cid => { const cc = connectorById(cid); return { v:cid, l: firstName(connName(cc)) }; })) }) : '';
+          return `<label class="check-row${ex?' cr-archived':''}${isPref?' cr-preferred':''}" style="align-items:center">
             <input type="checkbox" data-inc="${p.id}" ${checkedSet.has(p.id)?'checked':''} ${ex?'disabled':''}>
             <button type="button" class="row-arch" data-doorarch="${p.id}" title="${ex?'Restore to the list':'Archive - grays it out and drops it to the bottom, out of your way'}">${ex?'Restore':'Archive'}</button>
-            <span style="flex:0 1 30%;min-width:180px"><b>${p.tbd ? esc(f.name) : esc(p.name)}</b>${p.tbd ? ' <span style="color:var(--muted-foreground)">· any partner</span>' : ' <span style="color:var(--muted-foreground)">· </span><a href="#fund=' + f.id + '" data-peek="' + f.id + '" rel="noopener" style="color:var(--muted-foreground);text-decoration:underline dotted;text-underline-offset:2px" title="Quick look (cmd-click opens a new tab)">' + esc(f.name) + '</a>'} ${badge}</span>
+            <span style="flex:0 1 30%;min-width:180px">${isPref?'<span title="Your preferred intro path" style="color:var(--amber-text,#b45309)">★ </span>':''}<b>${p.tbd ? esc(f.name) : esc(p.name)}</b>${p.tbd ? ' <span style="color:var(--muted-foreground)">· any partner</span>' : ' <span style="color:var(--muted-foreground)">· </span><a href="#fund=' + f.id + '" data-peek="' + f.id + '" rel="noopener" style="color:var(--muted-foreground);text-decoration:underline dotted;text-underline-offset:2px" title="Quick look (cmd-click opens a new tab)">' + esc(f.name) + '</a>'} ${badge}</span>
             <span class="cr-why" style="flex:1;min-width:0;margin:0 10px">${esc(fundWhyLine(f))}</span>
             <b style="flex-shrink:0;font-size:12.5px;width:42px;text-align:right" title="Fit against the deck">${pct}</b>
+            ${prefDd}
             <span class="cr-sub" style="flex-shrink:0;text-align:right">${grade(f)}${ex?' · Archived':' · ' + P_STATUS[pStatus(p)]}${(!ex && stg!=='none') ? ` · <span class="pill pill--type">${F_STAGES[stg]}</span>` : ''}</span>
             ${ddHtml({ ctx:'fstage:'+f.id, value: stg, kebab:true, quiet:true, trigger:'⋯', menuRight:true, title:'Move this fund to a stage', options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:v})) })}
           </label>`;
