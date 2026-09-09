@@ -3163,7 +3163,7 @@ function openConnector(id, preselect){
   const cst = st.status || 'none';
   const _il0 = state.introLists[id];
   const sheetSet = new Set((_il0 ? _il0.rows : []).filter(r => r.fundId && r.name).map(r => r.fundId + '_' + slug(r.name)));
-  if (openConnector._last !== id) { connSrcFilter = 'all'; openConnector._last = id; }
+  const _switched = openConnector._last !== id; openConnector._last = id;
   const srcKindOf = p => {
     const note = matchNote(c, p.id) || '';
     if (sheetSet.has(p.id) || /intro list/i.test(note)) return 'sheet';
@@ -3193,6 +3193,10 @@ function openConnector(id, preselect){
     defaultIds.push(p.id);
     if (defaultIds.length >= 6) break;
   }
+  // when this connector has an uploaded sheet (real relationships they gave us),
+  // default the doors list to the Sheet source - that's the list Cam actually
+  // curated, so show it first instead of the broad LinkedIn net.
+  if (_switched) connSrcFilter = matches.some(p => srcKindOf(p) === 'sheet') ? 'sheet' : 'all';
   // once the user has curated the selection, restore it EXACTLY (any size) so a
   // half-finished pass survives closing the drawer; otherwise pre-check the top 6
   const stored = st.curated ? (st.included || []) : null;
