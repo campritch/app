@@ -362,6 +362,7 @@
       transition: background 0.12s;
     }
     .mini-btn:hover { background: var(--accent); }
+    .mini-btn.grading { background: var(--red-bg, #fef2f2); color: var(--red-text, #b91c1c); border-color: var(--red-text, #b91c1c); }
     .inc-btn {
       display: inline-flex; align-items: center; height: 24px; padding: 0 10px;
       border-radius: 9999px; border: 1px solid var(--input); background: var(--background);
@@ -1521,6 +1522,24 @@ function connectorsForFund(fundId){
   }
   return fundConnListMemo[fundId] || [];
 }
+// Match to what we already have: the richest same-name fund in the backlog, so a
+// duplicate created by a sheet import can adopt its grade/description instead of
+// being researched from scratch.
+let seedTwinMemo = null;
+function backlogTwin(f){
+  if (!seedTwinMemo){
+    seedTwinMemo = new Map();
+    for (const s of FUNDS){
+      const n = normOrg(s.name); if (!n) continue;
+      const rich = (s.dims ? 2 : 0) + (s.looking ? 1 : 0);
+      const cur = seedTwinMemo.get(n);
+      if (!cur || rich > cur.rich) seedTwinMemo.set(n, { f: s, rich });
+    }
+  }
+  const n = normOrg(f.name); if (!n) return null;
+  const t = seedTwinMemo.get(n);
+  return (t && t.f.id !== f.id && (t.f.dims || t.f.looking)) ? t.f : null;
+}
 let fundConnMemo = null;
 function fundConnMap(){
   if (fundConnMemo) return fundConnMemo;
@@ -1867,6 +1886,7 @@ function removeFund(id){
 function render(){
   fundConnMemo = null;
   fundConnListMemo = null;
+  seedTwinMemo = null;
   const isStageTab = STAGE_TABS.includes(currentTab);
   const isTable = isStageTab || ['people','followups'].includes(currentTab);
   $('tableView').style.display = isTable ? 'block' : 'none';
@@ -3119,22 +3139,52 @@ function findSheetDims(name){
 
 /* The decision pass: grade EVERYTHING this connector can reach - sheet rows
    and door matches alike - so Cam can decide which intros to actually take. */
-async function gradeConnectorFunds(cid, btn){
+let gradeRun = { cid: null, stop: false, running: false };
+const autoGraded = new Set();     // connectors auto-graded once this session
+function updateGradeBtn(done, total){
+  const btn = $('dGradeFunds');
+  if (!btn) return;
+  if (gradeRun.running) { btn.textContent = `Stop grading (${done}/${total})`; btn.classList.add('grading'); }
+  else { btn.textContent = 'Grade the funds'; btn.classList.remove('grading'); }
+}
+async function gradeConnectorFunds(cid, btn, opts){
   const c = connectorById(cid);
   if (!c) return;
+  if (gradeRun.running) return;    // one run at a time
   const il = state.introLists[cid];
   const fundIds = new Set();
   (c.matches || []).forEach(pid => { const p = PERSON_BY_ID[pid]; if (p) fundIds.add(p.fundId); });
   if (il) il.rows.forEach(r => { if (r.fundId) fundIds.add(r.fundId); });
-  const targets = [...fundIds].map(id => FUND_BY_ID[id]).filter(f => f && !FS(f.id).aiGraded && !f.why && !isCompetitor(f));
+  let targets = [...fundIds].map(id => FUND_BY_ID[id]).filter(f => f && !FS(f.id).aiGraded && !f.why && !isCompetitor(f));
+  // (1) MATCH FIRST: adopt grade/description from a same-name backlog fund we
+  // already have, so we never re-research something already in the CRM.
+  let matched = 0;
+  const remaining = [];
+  for (const f of targets) {
+    const tw = backlogTwin(f);
+    if (tw) {
+      const fs = FS(f.id);
+      if (tw.looking && !f.looking) f.looking = tw.looking;
+      if (tw.site && !f.site && !fs.site) { fs.site = tw.site; f.site = tw.site; }
+      if ((tw.ctx||[]).length && !(f.ctx||[]).length) f.ctx = tw.ctx;
+      if (tw.dims && !f.dims) { f.dims = tw.dims; fs.aiDims = tw.dims; fs.aiGraded = true; matched++; continue; }
+    }
+    remaining.push(f);
+  }
+  targets = remaining;
+  if (matched) save();
   const sheetOnly = il ? il.rows.filter(r => r.inc && !r.fundId && !r.aiDims && (r.firm || r.name)) : [];
   const total = targets.length + sheetOnly.length;
-  if (!total) { toast('Everything this connector reaches is already graded.'); return; }
+  if (!total) { if (!opts || !opts.auto) toast(matched ? `Matched ${matched} to funds already in the CRM. Everything is graded.` : 'Everything this connector reaches is already graded.'); if (matched) { render(); openConnector(cid); } return; }
+  gradeRun = { cid, stop: false, running: true };
+  updateGradeBtn(0, total);
+  if (opts && opts.auto) toast(`Researching ${total} ungraded fund${total>1?'s':''} via AI${matched?` (matched ${matched} already)`:''} - click "Stop grading" any time.`);
   let done = 0, failed = 0, consec = 0;
   // one retry per item; bail only on a long run of consecutive failures
   // (that means the API is actually down, not a stray flake)
   for (const f of targets) {
-    if (btn) btn.textContent = `Grading ${++done}/${total}...`;
+    if (gradeRun.stop) break;
+    done++; updateGradeBtn(done, total);
     let ok = false;
     for (let attempt = 0; attempt < 2 && !ok; attempt++) {
       try { await aiFitFetch(f); ok = true; }
@@ -3145,7 +3195,8 @@ async function gradeConnectorFunds(cid, btn){
     save();
   }
   for (const r of sheetOnly) {
-    if (btn) btn.textContent = `Grading ${++done}/${total}...`;
+    if (gradeRun.stop) break;
+    done++; updateGradeBtn(done, total);
     const prior = findSheetDims(r.firm || r.name);
     if (prior) { r.aiDims = prior.dims; if (prior.why) r.aiWhy = prior.why; save(); continue; }
     let ok = false;
@@ -3165,8 +3216,13 @@ async function gradeConnectorFunds(cid, btn){
     if (consec >= 6) { toast('Grading stopped - the API keeps failing. Try again shortly.'); break; }
     save();
   }
+  const stopped = gradeRun.stop;
+  gradeRun = { cid: null, stop: false, running: false };
   save(); render(); openConnector(cid);
-  toast(`Graded ${done - failed} of ${total}${failed ? ` (${failed} skipped - hit "Grade the funds" again to retry them)` : ''}.`);
+  const gradedNow = done - failed;
+  toast(stopped
+    ? `Stopped. Graded ${gradedNow} so far${matched ? ` (plus ${matched} matched)` : ''} - reopen to finish the rest.`
+    : `Graded ${gradedNow} of ${total}${matched ? ` · matched ${matched} to existing funds` : ''}${failed ? ` (${failed} skipped - retry with "Grade the funds")` : ''}.`);
 }
 function fundWhyLine(f){
   if (!f) return '';
@@ -3376,7 +3432,20 @@ function openConnector(id, preselect){
     e.target.value = '';
   };
   if ($('dIntroAi')) $('dIntroAi').onclick = e => aiGradeIntroList(id, e.target);
-  if ($('dGradeFunds')) $('dGradeFunds').onclick = e => gradeConnectorFunds(id, e.target);
+  if ($('dGradeFunds')) {
+    updateGradeBtn(0, 0);   // reflect running state if a grade pass is live
+    $('dGradeFunds').onclick = e => {
+      if (gradeRun.running) { gradeRun.stop = true; e.target.textContent = 'Stopping...'; }
+      else gradeConnectorFunds(id, e.target);
+    };
+  }
+  // Auto-grade once per connector: when you open it, anything ungraded starts
+  // researching itself via the API (website + web search) so you never paste a
+  // fund name into Google. It only runs once and you can Stop it any time.
+  if (!autoGraded.has(id) && !gradeRun.running) {
+    autoGraded.add(id);
+    setTimeout(() => { if (drawerRef && drawerRef.kind === 'connector' && drawerRef.id === id) gradeConnectorFunds(id, $('dGradeFunds'), { auto: true }); }, 400);
+  }
   if ($('dExportInc')) $('dExportInc').onclick = () => {
     const ids = (st.included && st.included.length) ? st.included
       : [...document.querySelectorAll('[data-inc]:checked')].map(cb => cb.dataset.inc);
