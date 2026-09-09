@@ -3065,29 +3065,43 @@ async function gradeConnectorFunds(cid, btn){
   const sheetOnly = il ? il.rows.filter(r => r.inc && !r.fundId && !r.aiDims && (r.firm || r.name)) : [];
   const total = targets.length + sheetOnly.length;
   if (!total) { toast('Everything this connector reaches is already graded.'); return; }
-  let done = 0, failed = 0;
+  let done = 0, failed = 0, consec = 0;
+  // one retry per item; bail only on a long run of consecutive failures
+  // (that means the API is actually down, not a stray flake)
   for (const f of targets) {
     if (btn) btn.textContent = `Grading ${++done}/${total}...`;
-    try { await aiFitFetch(f); } catch (e) { failed++; if (failed === 1) toast('AI grading needs the deployed wiki (API key): ' + String(e.message || e)); if (failed > 2) break; }
+    let ok = false;
+    for (let attempt = 0; attempt < 2 && !ok; attempt++) {
+      try { await aiFitFetch(f); ok = true; }
+      catch (e) { if (attempt === 0 && failed === 0) toast('AI grading needs the deployed wiki. ' + String(e.message || e)); }
+    }
+    if (ok) consec = 0; else { failed++; consec++; }
+    if (consec >= 6) { toast('Grading stopped - the API keeps failing. Try again shortly.'); break; }
     save();
   }
   for (const r of sheetOnly) {
     if (btn) btn.textContent = `Grading ${++done}/${total}...`;
     const prior = findSheetDims(r.firm || r.name);
     if (prior) { r.aiDims = prior.dims; if (prior.why) r.aiWhy = prior.why; save(); continue; }
-    try {
-      const resp = await fetch('/api/vc-fit', { method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ fund: { name: r.firm || r.name, type: r.firm ? '' : 'Angel', region: '', check: null,
-          sectors: [], looking: [r.title, r.note].filter(Boolean).join(' · ') } }) });
-      const d = await resp.json();
-      if (d && d.dims) r.aiDims = d.dims;
-      if (d && d.one_liner) r.aiWhy = d.one_liner;
-      else if (d && d.brief) r.aiWhy = firstSentence(d.brief);
-    } catch (e) { failed++; if (failed > 2) break; }
+    let ok = false;
+    for (let attempt = 0; attempt < 2 && !ok; attempt++) {
+      try {
+        const resp = await fetch('/api/vc-fit', { method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ fund: { name: r.firm || r.name, type: r.firm ? '' : 'Angel', region: '', check: null,
+            sectors: [], looking: [r.title, r.note].filter(Boolean).join(' · ') } }) });
+        const d = await resp.json();
+        if (!resp.ok) throw new Error(d.error || 'HTTP ' + resp.status);
+        if (d.dims) r.aiDims = d.dims;
+        r.aiWhy = d.one_liner || (d.brief ? firstSentence(d.brief) : r.aiWhy);
+        ok = true;
+      } catch (e) { /* retry once */ }
+    }
+    if (ok) consec = 0; else { failed++; consec++; }
+    if (consec >= 6) { toast('Grading stopped - the API keeps failing. Try again shortly.'); break; }
     save();
   }
   save(); render(); openConnector(cid);
-  toast(`Graded ${done - failed} of ${total}. Every option now has a grade and a why.`);
+  toast(`Graded ${done - failed} of ${total}${failed ? ` (${failed} skipped - hit "Grade the funds" again to retry them)` : ''}.`);
 }
 function fundWhyLine(f){
   if (!f) return '';
