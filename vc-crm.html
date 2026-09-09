@@ -534,6 +534,8 @@
       opacity: 0; pointer-events: none; transform: translateX(26px); transition: opacity .2s, transform .2s;
       overflow-wrap: anywhere; word-break: break-word; }
     .peek-drawer.open { opacity: 1; pointer-events: auto; transform: none; }
+    .peek-edit { border:none; background:none; padding:0; font:inherit; font-size:11px; text-decoration:underline; cursor:pointer; color:var(--muted-foreground); }
+    .peek-edit:hover { color:var(--foreground); }
     .src-badge { display:inline-block; font-size:9.5px; font-weight:700; letter-spacing:.04em;
       padding:1px 7px; border-radius:9999px; background:var(--secondary); color:var(--muted-foreground); vertical-align:1px; }
     .src-badge--sheet { background:var(--foreground); color:var(--background); }
@@ -2926,7 +2928,7 @@ function togglePeek(fid){
     <div style="display:flex;align-items:flex-start;gap:10px">
       <div style="flex:1;min-width:0">
         <div style="font-size:17px;font-weight:700;letter-spacing:-.02em">${esc(f.name)}${isCompetitor(f)?' <span class="pill--competitor">COMPETITOR</span>':''}</div>
-        <div style="font-size:12px;color:var(--muted-foreground);margin-top:2px">${esc(f.type||'—')} · ${esc(f.region||'—')} · ${checkFmt(f)}${f.site?' · <a href="https://'+esc(f.site)+'" target="_blank" rel="noopener" style="color:#2563eb">'+esc(f.site)+'</a>':''}</div>
+        <div style="font-size:12px;color:var(--muted-foreground);margin-top:2px">${esc(f.type||'—')} · ${esc(f.region||'—')} · ${checkFmt(f)} · <span id="peekSiteWrap">${f.site?'<a href="https://'+esc(f.site)+'" target="_blank" rel="noopener" style="color:#2563eb">'+esc(f.site)+'</a> <button class="peek-edit" onclick="peekEditSite(event,\''+f.id+'\')" title="Wrong URL? Click to fix and re-grade">edit</button>':'<button class="peek-edit" onclick="peekEditSite(event,\''+f.id+'\')">+ add website</button>'}</span></div>
       </div>
       <button class="x" onclick="closePeek()">✕</button>
     </div>
@@ -2941,6 +2943,38 @@ function togglePeek(fid){
     ${(f.paths||[]).length ? `<div class="dhead" style="margin-top:14px">Ways in</div>${(f.paths||[]).slice(0,5).map(pa => `<div style="font-size:12px;margin-top:5px"><b>${esc(prettyVia(pa.via))}</b> <span style="color:var(--muted-foreground)">· ${esc(pa.note||pa.kind)}</span></div>`).join('')}` : ''}
   `;
   el.classList.add('open');
+}
+function peekEditSite(ev, fid){
+  if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+  const f = FUND_BY_ID[fid]; if (!f) return;
+  const wrap = $('peekSiteWrap'); if (!wrap) return;
+  wrap.innerHTML = `<input id="peekSiteInput" class="li-input" style="font-size:12px;width:190px" value="${esc(f.site ? 'https://' + f.site : 'https://')}">`;
+  const inp = $('peekSiteInput'); inp.focus(); inp.select();
+  inp.onkeydown = e => {
+    if (e.key === 'Enter') { e.preventDefault(); savePeekSite(fid, inp.value); }
+    if (e.key === 'Escape') { e.preventDefault(); togglePeek(fid); togglePeek(fid); } // rebuild
+  };
+}
+async function savePeekSite(fid, val){
+  const f = FUND_BY_ID[fid]; if (!f) return;
+  const clean = (val || '').trim().replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+  const changed = clean !== (f.site || '');
+  f.site = clean; FS(fid).site = clean;
+  // A corrected URL means the old read was based on the wrong site - clear the AI
+  // grade so it re-reads from the right place.
+  const st = FS(fid);
+  const wasAi = !!st.aiGraded;
+  if (changed) {
+    delete st.aiGraded; delete st.aiBrief; delete st.aiOneLiner;
+    if (wasAi) { delete st.aiDims; delete f.dims; }
+  }
+  save();
+  if (!clean || !changed) { render(); peekFundId = null; togglePeek(fid); toast(clean ? 'Website saved.' : 'Website cleared.'); return; }
+  // Re-grade this one fund now, from the corrected site.
+  toast('Website saved - re-grading from the correct site...');
+  try { await aiFitFetch(f); toast('Re-graded from ' + clean + '.'); }
+  catch (e) { toast('Saved. Re-grade needs the deployed wiki - hit "Grade the funds". ' + String(e.message || e)); }
+  save(); render(); peekFundId = null; togglePeek(fid);
 }
 function parseIntroSheet(text){
   const lines = (text||'').split(/\r?\n/).filter(l => l.trim());
