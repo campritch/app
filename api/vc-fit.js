@@ -74,7 +74,7 @@ export default async function handler(req, res) {
     });
     const text = (msg.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
     const jm = text.match(/\{[\s\S]*\}/);
-    if (!jm) return res.status(502).json({ error: 'unparseable model output' });
+    if (!jm) return res.status(502).json({ error: 'unparseable model output', stop: msg.stop_reason, rawlen: text.length, raw: text.slice(0,300) });
     let out;
     try {
       out = JSON.parse(jm[0]);
