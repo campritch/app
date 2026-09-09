@@ -31,7 +31,7 @@ RULES: Be honest and specific - a weak fit gets called weak WITH the concrete re
 
 Return STRICT JSON only, no markdown fences:
 {"brief": "2-4 sentences grounded in THIS fund's real thesis/portfolio and how it maps (or doesn't) to a specific SpotsNow surface, plus any provided history", "dims": {"thesis":n,"stage":n,"check":n,"portfolio":n,"geo":n}, "one_liner": "under 12 words, the specific verdict"}
-Always return dims unless the fund is genuinely unidentifiable (then dims: null).`;
+Always return dims unless the fund is genuinely unidentifiable (then dims: null). Do NOT use double quotes or line breaks inside any string value (use single quotes if you must quote).`;
 
 async function authed(req) {
   const secret = process.env.SESSION_SECRET;
@@ -75,7 +75,23 @@ export default async function handler(req, res) {
     const text = (msg.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
     const jm = text.match(/\{[\s\S]*\}/);
     if (!jm) return res.status(502).json({ error: 'unparseable model output' });
-    const out = JSON.parse(jm[0]);
+    let out;
+    try {
+      out = JSON.parse(jm[0]);
+    } catch {
+      // Model sometimes emits an unescaped quote/newline in the brief. Salvage
+      // the fields by regex rather than failing the whole read.
+      const dm = {};
+      for (const k of ['thesis','stage','check','portfolio','geo']) {
+        const mm = text.match(new RegExp('"' + k + '"\\s*:\\s*(\\d+(?:\\.\\d+)?)'));
+        if (mm) dm[k] = Number(mm[1]);
+      }
+      const ol = text.match(/"one_liner"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+      const br = text.match(/"brief"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+      out = { brief: br ? br[1] : '', one_liner: ol ? ol[1] : '',
+              dims: Object.keys(dm).length === 5 ? dm : null };
+      if (!out.brief && !out.dims) return res.status(502).json({ error: 'unparseable model output' });
+    }
     const dims = out.dims && typeof out.dims === 'object'
       && ['thesis','stage','check','portfolio','geo'].every(k => Number.isFinite(out.dims[k]))
       ? out.dims : null;
