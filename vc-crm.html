@@ -216,6 +216,13 @@
     .dd-head { padding: 6px 8px 4px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; color: var(--muted-foreground); }
     .dd-item.on { font-weight: 500; }
     .dd-item.on::after { content: '✓'; margin-left: auto; font-size: 12px; color: var(--muted-foreground); }
+    /* kebab (three-dots) trigger for per-row quick actions */
+    .dd--kebab { flex-shrink: 0; }
+    .dd--kebab .dd-btn { border: none; background: transparent; box-shadow: none; height: 26px; width: 24px;
+      padding: 0; border-radius: 6px; font-size: 16px; line-height: 1; color: var(--muted-foreground);
+      justify-content: center; letter-spacing: 1px; }
+    .dd--kebab .dd-btn:hover { background: var(--accent); color: var(--foreground); }
+    .dd-menu--right { left: auto; right: 0; }
 
     /* ── Table ── */
     .table-wrap { overflow-x: auto; }
@@ -1693,11 +1700,11 @@ const PLUS_ICON = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" s
 /* Custom dropdown component. ctx routes the change to the right handler. */
 function ddHtml(o){
   const cur = o.options.find(x => x.v === o.value) || o.options[0];
-  return `<div class="dd ${o.quiet?'dd--quiet':''}" ${o.id?`id="${o.id}"`:''} data-ddctx="${esc(o.ctx)}" data-ddval="${esc(cur.v)}">
-    <button type="button" class="dd-btn ${cur.cls||''}">${esc(cur.l)}
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>
+  return `<div class="dd ${o.quiet?'dd--quiet':''} ${o.kebab?'dd--kebab':''}" ${o.id?`id="${o.id}"`:''} data-ddctx="${esc(o.ctx)}" data-ddval="${esc(cur.v)}">
+    <button type="button" class="dd-btn ${cur.cls||''}"${o.title?` title="${esc(o.title)}"`:''}>${o.trigger ? esc(o.trigger) : esc(cur.l)}
+      ${o.trigger ? '' : '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>'}
     </button>
-    <div class="dd-menu">${o.options.map(x => `<button type="button" class="dd-item ${x.v===cur.v?'on':''}" data-ddv="${esc(x.v)}">${esc(x.l)}</button>`).join('')}</div>
+    <div class="dd-menu${o.menuRight?' dd-menu--right':''}">${o.options.map(x => `<button type="button" class="dd-item ${x.v===cur.v?'on':''}" data-ddv="${esc(x.v)}">${esc(x.l)}</button>`).join('')}</div>
   </div>`;
 }
 function ddVal(id){ const el = $(id); return el ? el.dataset.ddval : null; }
@@ -1753,6 +1760,11 @@ function onDdChange(ctx, v){
     fs.stage = v;
     save(); render();
     if (drawerRef && drawerRef.kind === 'fund' && drawerRef.id === arg) openFund(arg);
+    else if (drawerRef && drawerRef.kind === 'connector') {
+      openConnector(drawerRef.id);
+      const fnm = (FUND_BY_ID[arg] || {}).name || 'Fund';
+      toast(`Moved ${fnm} to ${F_STAGES[v] || v}.`);
+    }
     return;
   }
   if (kind === 'fwarmth') {
@@ -3268,13 +3280,15 @@ function openConnector(id, preselect){
             : '<span class="src-badge src-badge--li">LinkedIn</span>';
           const pct = f.dims ? Math.round(score(f)) + '%' : '—';
           const ex = isExcluded(p);
+          const stg = fStage(f);
           return `<label class="check-row${ex?' cr-archived':''}" style="align-items:center">
             <input type="checkbox" data-inc="${p.id}" ${checkedSet.has(p.id)?'checked':''} ${ex?'disabled':''}>
             <button type="button" class="row-arch" data-doorarch="${p.id}" title="${ex?'Restore to the list':'Archive - grays it out and drops it to the bottom, out of your way'}">${ex?'Restore':'Archive'}</button>
             <span style="flex:0 1 30%;min-width:180px"><b>${p.tbd ? esc(f.name) : esc(p.name)}</b>${p.tbd ? ' <span style="color:var(--muted-foreground)">· any partner</span>' : ' <span style="color:var(--muted-foreground)">· </span><a href="#fund=' + f.id + '" data-peek="' + f.id + '" rel="noopener" style="color:var(--muted-foreground);text-decoration:underline dotted;text-underline-offset:2px" title="Quick look (cmd-click opens a new tab)">' + esc(f.name) + '</a>'} ${badge}</span>
             <span class="cr-why" style="flex:1;min-width:0;margin:0 10px">${esc(fundWhyLine(f))}</span>
             <b style="flex-shrink:0;font-size:12.5px;width:42px;text-align:right" title="Fit against the deck">${pct}</b>
-            <span class="cr-sub" style="flex-shrink:0;width:120px;text-align:right">${grade(f)}${ex?' · Archived':' · ' + P_STATUS[pStatus(p)]}</span>
+            <span class="cr-sub" style="flex-shrink:0;text-align:right">${grade(f)}${ex?' · Archived':' · ' + P_STATUS[pStatus(p)]}${(!ex && stg!=='none') ? ` · <span class="pill pill--type">${F_STAGES[stg]}</span>` : ''}</span>
+            ${ddHtml({ ctx:'fstage:'+f.id, value: stg, kebab:true, quiet:true, trigger:'⋯', menuRight:true, title:'Move this fund to a stage', options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:v})) })}
           </label>`;
         }).join('') : '<div class="info-card">' + (connSrcFilter === 'all' ? 'No matches yet. Add one, or sync LinkedIn to match automatically.' : 'Nothing from this source - switch the filter back to All.') + '</div>'}
       </div>
