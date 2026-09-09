@@ -2916,6 +2916,7 @@ function importIntroList(cid, text){
   if (!rows.length) { toast('Could not read the sheet. Expected columns like: Name, Firm, Title, Email, LinkedIn, Notes.'); return; }
   rows.forEach(r => { r.fundId = matchIntroRow(r); });
   state.introLists[cid] = { rows, uploadedAt: Date.now() };
+  CS(cid).introOpen = true;  // show the freshly uploaded list right away
   save(); openConnector(cid);
   toast(`${rows.length} relationships imported · ${rows.filter(r=>r.fundId).length} matched to funds already in the CRM.`);
 }
@@ -2932,10 +2933,12 @@ function introGradePill(r){
 }
 function introListSectionHtml(c){
   const il = state.introLists[c.id];
+  const open = !!CS(c.id).introOpen;
   const head = `<div class="d-row" style="justify-content:space-between;flex-wrap:wrap">
       <span class="d-label">Intro list${il ? ` (${il.rows.length} · ${il.rows.filter(r=>r.fundId).length} known funds)` : ''}</span>
       <div class="d-row">
-        ${il ? `<button class="mini-btn" id="dIntroAi">AI-grade unknowns</button>
+        ${il ? `<button class="mini-btn" id="dIntroToggle" style="font-weight:600">${open ? 'Hide list' : 'View list'}</button>
+        <button class="mini-btn" id="dIntroAi">AI-grade unknowns</button>
         <button class="mini-btn" id="dIntroExport">Export CSV</button>` : ''}
         <button class="mini-btn" id="dIntroUpload">${il ? 'Replace sheet' : 'Upload their sheet'}</button>
       </div>
@@ -2958,6 +2961,15 @@ function introListSectionHtml(c){
     </label>`;
   }).join('');
   const nInc = il.rows.filter(r => r.inc && !r.filed).length;
+  // Collapsed by default so a long uploaded list doesn't blow out the page - it's
+  // clearly already uploaded, so just show a "View list" card; expand to the full
+  // scrollable list + filing controls in place.
+  if (!open) return `<div class="d-section">${head}
+    <div class="info-card" id="dIntroPeek" style="cursor:pointer;margin-top:6px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <span>${il.rows.length} relationship${il.rows.length===1?'':'s'} uploaded · ${il.rows.filter(r=>r.fundId).length} matched to funds${nInc?` · <b>${nInc} selected</b>`:''}.</span>
+      <b style="text-decoration:underline;white-space:nowrap">View list</b>
+    </div>
+  </div>`;
   return `<div class="d-section">${head}
     <div style="max-height:340px;overflow:auto;border:1px solid var(--border);border-radius:10px;margin-top:6px">${rows}</div>
     <div class="d-row" style="margin-top:10px;flex-wrap:wrap">
@@ -3296,6 +3308,9 @@ function openConnector(id, preselect){
   const introDD = $('dIntroStageDD');
   if (introDD) introDD.innerHTML = ddHtml({ ctx:'introstage', value: introStage,
     options: Object.entries(F_STAGES).filter(([k]) => k !== 'none').map(([k,v]) => ({v:k,l:v})) });
+  const introToggle = () => { CS(id).introOpen = !CS(id).introOpen; save(); openConnector(id); };
+  if ($('dIntroToggle')) $('dIntroToggle').onclick = introToggle;
+  if ($('dIntroPeek')) $('dIntroPeek').onclick = introToggle;
   if ($('dIntroUpload')) $('dIntroUpload').onclick = () => $('dIntroFile').click();
   if ($('dIntroFile')) $('dIntroFile').onchange = e => {
     const file = e.target.files[0];
