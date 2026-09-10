@@ -1789,8 +1789,7 @@ function onDdChange(ctx, v){
   if (kind === 'introstage') {
     introStage = v;
     const dd = $('dIntroStageDD');
-    if (dd) dd.innerHTML = ddHtml({ ctx:'introstage', value: v,
-      options: Object.entries(F_STAGES).filter(([k]) => k !== 'none').map(([k,vv]) => ({v:k,l:vv})) });
+    if (dd) dd.innerHTML = ddHtml({ ctx:'introstage', value: v, options: introStageOptions() });
     return;
   }
   if (kind === 'pstatus') { setPersonStatus(arg, v); return; }
@@ -2996,8 +2995,13 @@ function openFund(id){
    pass, then checked rows file into a pipeline stage in one click, the fund
    rows pick up the connector's face, and the curated list exports as the
    CSV you send back to them. */
-var introStage = 'messaged';
+var introStage = 'none';   // default: file into All (only classify the unclassified)
 var connSrcFilter = 'all';
+// "File checked under" options: All (leave classified funds where they are) + the stages.
+function introStageOptions(){
+  return [{ v:'none', l:'All (leave classified as-is)' }]
+    .concat(Object.entries(F_STAGES).filter(([k]) => k !== 'none').map(([k,v]) => ({ v:k, l:v })));
+}
 
 /* Quick look: click a fund name in the connector module and a compact fund
    panel slides out to the left of it. Click the same name again to dismiss;
@@ -3192,10 +3196,14 @@ function fileIntroList(cid){
       r.fundId = fid;
     }
     const fs = FS(fid);
-    fs.stage = introStage; fs.archived = false;
+    // Only classify funds that aren't already classified. An already-staged fund
+    // keeps its stage; filing under "All" leaves everything in the general list.
+    const cur = fStage(FUND_BY_ID[fid]);
+    const alreadyClassified = cur && cur !== 'none';
+    if (!alreadyClassified && introStage !== 'none') { fs.stage = introStage; fs.archived = false; }
     fs.introFrom = fs.introFrom || [];
     if (!fs.introFrom.includes(cid)) fs.introFrom.push(cid);
-    r.filed = introStage;
+    r.filed = fStage(FUND_BY_ID[fid]) || 'none';
     filed++;
   });
   save(); rebuild();
@@ -3207,7 +3215,8 @@ function fileIntroList(cid){
     }
   });
   save(); render(); openConnector(cid);
-  toast(`${filed} filed under ${F_STAGES[introStage]} - ${connName(c)} is reaching out. Their face is on each fund row.`);
+  const dest = introStage === 'none' ? 'All (unclassified kept in the general list, classified left as-is)' : F_STAGES[introStage];
+  toast(`${filed} filed under ${dest} - ${connName(c)} is reaching out. Their face is on each fund row.`);
 }
 function exportIntroList(cid){
   const c = connectorById(cid), il = state.introLists[cid];
@@ -3575,8 +3584,7 @@ function openConnector(id, preselect){
   $('dNotes').oninput = e => { st.notes = e.target.value; save(); };
   // ── intro list wiring ──
   const introDD = $('dIntroStageDD');
-  if (introDD) introDD.innerHTML = ddHtml({ ctx:'introstage', value: introStage,
-    options: Object.entries(F_STAGES).filter(([k]) => k !== 'none').map(([k,v]) => ({v:k,l:v})) });
+  if (introDD) introDD.innerHTML = ddHtml({ ctx:'introstage', value: introStage, options: introStageOptions() });
   const introToggle = () => { CS(id).introOpen = !CS(id).introOpen; save(); openConnector(id); };
   if ($('dIntroToggle')) $('dIntroToggle').onclick = introToggle;
   if ($('dIntroPeek')) $('dIntroPeek').onclick = introToggle;
