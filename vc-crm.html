@@ -621,6 +621,10 @@
       border-radius: 5px; padding: 2px 6px; cursor: pointer; line-height: 1.3;
     }
     .row-arch:hover { background: var(--accent); color: var(--foreground); border-color: var(--muted-foreground); }
+    .dd--arch { flex-shrink: 0; }
+    .dd--arch .dd-btn { font-size: 10px; font-weight: 600; letter-spacing: .02em; color: var(--muted-foreground);
+      background: transparent; border: 1px solid var(--border); border-radius: 5px; padding: 2px 6px; height: auto; line-height: 1.3; }
+    .dd--arch .dd-btn:hover { background: var(--accent); color: var(--foreground); border-color: var(--muted-foreground); }
     /* archived door: whole row grays out, name included, but stays visible at the bottom */
     .check-row.cr-archived { opacity: .45; }
     .check-row.cr-archived:hover { opacity: .7; background: var(--accent); }
@@ -1145,6 +1149,7 @@ state.funds = state.funds || {};
 state.settings = state.settings || { autoFollowDirect: 0, autoFollowAsk: 0 };
 state.connMatchExtra = state.connMatchExtra || {};
 state.introLists = state.introLists || {};
+state.hiddenMatches = state.hiddenMatches || {};   // {connectorId: [personId]} - bad-data rows deleted from a connector's doors
 // Migrate the old target-list flag into the pipeline.
 Object.values(state.funds).forEach(fs => { if (fs.target && !fs.stage) fs.stage = 'target'; delete fs.target; });
 // v3: adds the 300-char LinkedIn invite template.
@@ -1335,6 +1340,12 @@ function connName(c){ return CS(c.id).customName || c.name; }
 /* Competitor blacklist: funds backing direct competitors (e.g. Agentio's cap
    table). Data can preset it; the drawer toggle (state) always wins. */
 function isCompetitor(f){ const fs = FS(f.id); return fs.competitor !== undefined ? !!fs.competitor : !!f.competitor; }
+// "Parked" stages: a fund here is done being actively chased, so in a connector's
+// doors list it grays out and sinks to the bottom everywhere (a record you keep,
+// never something to think about) - whether it was disqualified, closed, or
+// pushed to a future round.
+const PARKED_STAGES = new Set(['disqualified', 'future', 'closed']);
+function isParkedFund(f){ return !!f && PARKED_STAGES.has(fStage(f)); }
 function renameConnector(id, name){
   name = (name || '').trim();
   if (!name) return;
@@ -1743,7 +1754,7 @@ const PLUS_ICON = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" s
 /* Custom dropdown component. ctx routes the change to the right handler. */
 function ddHtml(o){
   const cur = o.options.find(x => x.v === o.value) || o.options[0];
-  return `<div class="dd ${o.quiet?'dd--quiet':''} ${o.kebab?'dd--kebab':''}" ${o.id?`id="${o.id}"`:''} data-ddctx="${esc(o.ctx)}" data-ddval="${esc(cur.v)}">
+  return `<div class="dd ${o.quiet?'dd--quiet':''} ${o.kebab?'dd--kebab':''} ${o.cls||''}" ${o.id?`id="${o.id}"`:''} data-ddctx="${esc(o.ctx)}" data-ddval="${esc(cur.v)}">
     <button type="button" class="dd-btn ${cur.cls||''}"${o.title?` title="${esc(o.title)}"`:''}>${o.trigger ? esc(o.trigger) : esc(cur.l)}
       ${o.trigger ? '' : '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>'}
     </button>
@@ -1799,6 +1810,25 @@ function onDdChange(ctx, v){
   if (kind === 'setfd') { state.settings.autoFollowDirect = +v; save(); return; }
   if (kind === 'setfa') { state.settings.autoFollowAsk = +v; save(); return; }
   if (kind === 'fstage') {
+    if (v === '__delete') {
+      // Bad-data row: drop every person of this fund from the current connector's
+      // doors (hidden overlay + persisted match sources) so it's gone for good here.
+      const f = FUND_BY_ID[arg];
+      if (!(drawerRef && drawerRef.kind === 'connector')) return;
+      const cid = drawerRef.id, c = connectorById(cid);
+      const pids = (PEOPLE_BY_FUND[arg] || []).map(p => p.id);
+      const set = new Set(state.hiddenMatches[cid] || []);
+      pids.forEach(pid => set.add(pid));
+      state.hiddenMatches[cid] = [...set];
+      if (c && Array.isArray(c.matches)) c.matches = c.matches.filter(pid => !set.has(pid));
+      const ov = state.connMatchExtra[cid];
+      if (ov && ov.matches) ov.matches = ov.matches.filter(pid => !set.has(pid));
+      const il = state.introLists[cid];
+      if (il) il.rows = il.rows.filter(r => r.fundId !== arg);
+      save(); openConnector(cid);
+      toast('Deleted ' + (f ? f.name : 'that row') + ' from this list (bad data).');
+      return;
+    }
     const fs = FS(arg);
     fs.stage = v;
     save(); render();
@@ -1808,6 +1838,28 @@ function onDdChange(ctx, v){
       const fnm = (FUND_BY_ID[arg] || {}).name || 'Fund';
       toast(`Moved ${fnm} to ${F_STAGES[v] || v}.`);
     }
+    return;
+  }
+  if (kind === 'dqreason') {
+    const fs = FS(arg), f = FUND_BY_ID[arg];
+    if (v === '__restore') {
+      if (PARKED_STAGES.has(fs.stage)) delete fs.stage;   // back to active backlog
+      delete fs.archiveReason;
+      (PEOPLE_BY_FUND[arg] || []).forEach(p => { if (PS(p.id).excluded) delete PS(p.id).excluded; });
+      save();
+      if (drawerRef && drawerRef.kind === 'connector') openConnector(drawerRef.id); else render();
+      toast((f ? f.name : 'Fund') + ' restored to the active list.');
+      return;
+    }
+    const labels = { competitor:'Competitor / no fit', passed:'Already passed', badfit:'Bad fit', early:'Too early' };
+    let label = labels[v] || 'Other';
+    if (v === 'other') { const t = prompt('Archive reason:', ''); if (t === null) return; label = t.trim() || 'Other'; }
+    fs.stage = 'disqualified';       // disqualify the whole fund, everywhere
+    fs.archiveReason = label;
+    if (v === 'competitor') fs.competitor = true;
+    save();
+    if (drawerRef && drawerRef.kind === 'connector') openConnector(drawerRef.id); else render();
+    toast((f ? f.name : 'Fund') + ' disqualified - ' + label + '. It stays grayed at the bottom everywhere.');
     return;
   }
   if (kind === 'prefconn') {
@@ -3192,7 +3244,7 @@ async function gradeConnectorFunds(cid, btn, opts){
   const fundIds = new Set();
   (c.matches || []).forEach(pid => { const p = PERSON_BY_ID[pid]; if (p) fundIds.add(p.fundId); });
   if (il) il.rows.forEach(r => { if (r.fundId) fundIds.add(r.fundId); });
-  let targets = [...fundIds].map(id => FUND_BY_ID[id]).filter(f => f && !FS(f.id).aiGraded && !f.why && !isCompetitor(f));
+  let targets = [...fundIds].map(id => FUND_BY_ID[id]).filter(f => f && !FS(f.id).aiGraded && !f.why && !isCompetitor(f) && !isParkedFund(f));
   // (1) MATCH FIRST: adopt grade/description from a same-name backlog fund we
   // already have, so we never re-research something already in the CRM.
   let matched = 0;
@@ -3321,9 +3373,14 @@ function openConnector(id, preselect){
     if (/nfx/i.test(note) || c.id.startsWith('c_nfx_')) return 'nfx';
     return 'linkedin';
   };
+  // A door row is "archived" (gray, sunk to the bottom) when it's excluded, or
+  // its fund is parked in a terminal/future stage - so a disqualified or
+  // future-round fund never resurfaces as an active row on any connector.
+  const isDoorArch = p => isExcluded(p) || isParkedFund(FUND_BY_ID[p.fundId]);
   // Pull the sheet funds into the door matches (one representative person per
   // fund) so they render, grade, filter and export alongside everything else.
-  const basePids = (c.matches || []).slice();
+  const hidden = new Set(state.hiddenMatches[id] || []);   // bad-data rows deleted from this connector
+  const basePids = (c.matches || []).filter(pid => !hidden.has(pid));
   const coveredFunds = new Set(basePids.map(pid => (PERSON_BY_ID[pid] || {}).fundId).filter(Boolean));
   sheetFundIds.forEach(fid => {
     if (coveredFunds.has(fid)) return;
@@ -3352,10 +3409,10 @@ function openConnector(id, preselect){
     // but stay in the list so nothing is lost; everything else by fund fit, then
     // grouped by fund so a fund's people always sit next to each other as you
     // scroll (fund id is the tiebreaker when scores are equal).
-    .sort((a,b) => ((isExcluded(a)?1:0) - (isExcluded(b)?1:0))
+    .sort((a,b) => ((isDoorArch(a)?1:0) - (isDoorArch(b)?1:0))
       || (score(FUND_BY_ID[b.fundId]) - score(FUND_BY_ID[a.fundId]))
       || (a.fundId < b.fundId ? -1 : a.fundId > b.fundId ? 1 : 0));
-  const eligible = matches.filter(p => !isExcluded(p) && !['replied','meeting','passed'].includes(pStatus(p)));
+  const eligible = matches.filter(p => !isDoorArch(p) && !['replied','meeting','passed'].includes(pStatus(p)));
   const usedFunds = new Set();
   const defaultIds = [];
   for (const p of eligible) {
@@ -3422,23 +3479,32 @@ function openConnector(id, preselect){
             : _kind === 'nfx' ? '<span class="src-badge">NFX</span>'
             : '<span class="src-badge src-badge--li">LinkedIn</span>';
           const pct = f.dims ? Math.round(score(f)) + '%' : '—';
-          const ex = isExcluded(p);
+          const arch = isDoorArch(p);
           const stg = fStage(f);
+          const reason = FS(f.id).archiveReason || '';
           const prefC = FS(f.id).preferredConn;
           const isPref = prefC === c.id;                       // this connector is the chosen path
           const connOpts = connectorsForFund(f.id);
           const prefDd = connOpts.length > 1 ? ddHtml({ ctx:'prefconn:'+f.id, value: prefC || '', quiet:true, menuRight:true,
             title:'Preferred person to get this intro through - shows highlighted on their page',
             options: [{v:'', l:'Intro via…'}].concat(connOpts.map(cid => { const cc = connectorById(cid); return { v:cid, l: firstName(connName(cc)) }; })) }) : '';
-          return `<label class="check-row${ex?' cr-archived':''}${isPref?' cr-preferred':''}" style="align-items:center">
-            <input type="checkbox" data-inc="${p.id}" ${checkedSet.has(p.id)?'checked':''} ${ex?'disabled':''}>
-            <button type="button" class="row-arch" data-doorarch="${p.id}" title="${ex?'Restore to the list':'Archive - grays it out and drops it to the bottom, out of your way'}">${ex?'Restore':'Archive'}</button>
+          // Archive-with-reason: disqualifies the fund everywhere; parked stages
+          // (future/closed) reached via the ... menu also show as archived here.
+          const archDd = ddHtml({ ctx:'dqreason:'+f.id, quiet:true, menuRight:true, cls:'dd--arch', value:'',
+            trigger: arch ? 'Restore' : 'Archive',
+            title: arch ? 'Restore this fund to the active list' : 'Archive with a reason - disqualifies the fund everywhere so it never resurfaces',
+            options: arch
+              ? [{v:'__restore', l:'Restore to the active list'}]
+              : [{v:'competitor', l:'Competitor / no fit'}, {v:'passed', l:'Already passed'}, {v:'badfit', l:'Bad fit'}, {v:'early', l:'Too early'}, {v:'other', l:'Other reason...'}] });
+          return `<label class="check-row${arch?' cr-archived':''}${isPref?' cr-preferred':''}" style="align-items:center">
+            <input type="checkbox" data-inc="${p.id}" ${checkedSet.has(p.id)?'checked':''} ${arch?'disabled':''}>
+            ${archDd}
             <span style="flex:0 1 30%;min-width:180px">${isPref?'<span title="Your preferred intro path" style="color:var(--amber-text,#b45309)">★ </span>':''}<b>${p.tbd ? esc(f.name) : esc(p.name)}</b>${p.tbd ? ' <span style="color:var(--muted-foreground)">· any partner</span>' : ' <span style="color:var(--muted-foreground)">· </span><a href="#fund=' + f.id + '" data-peek="' + f.id + '" rel="noopener" style="color:var(--muted-foreground);text-decoration:underline dotted;text-underline-offset:2px" title="Quick look (cmd-click opens a new tab)">' + esc(f.name) + '</a>'} ${badge}</span>
             <span class="cr-why" style="flex:1;min-width:0;margin:0 10px">${esc(fundWhyLine(f))}</span>
             <b style="flex-shrink:0;font-size:12.5px;width:42px;text-align:right" title="Fit against the deck">${pct}</b>
             ${prefDd}
-            <span class="cr-sub" style="flex-shrink:0;text-align:right">${grade(f)}${ex?' · Archived':' · ' + P_STATUS[pStatus(p)]}${(!ex && stg!=='none') ? ` · <span class="pill pill--type">${F_STAGES[stg]}</span>` : ''}</span>
-            ${ddHtml({ ctx:'fstage:'+f.id, value: stg, kebab:true, quiet:true, trigger:'⋯', menuRight:true, title:'Move this fund to a stage', options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:v})) })}
+            <span class="cr-sub" style="flex-shrink:0;text-align:right">${grade(f)}${arch ? ' · Archived' + (reason ? ' (' + esc(reason) + ')' : '') : ' · ' + P_STATUS[pStatus(p)]}${(stg!=='none') ? ` · <span class="pill pill--type">${F_STAGES[stg]}</span>` : ''}</span>
+            ${ddHtml({ ctx:'fstage:'+f.id, value: stg, kebab:true, quiet:true, trigger:'⋯', menuRight:true, title:'Move this fund to a stage', options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:v})).concat([{v:'__delete', l:'🗑 Delete (bad data)'}]) })}
           </label>`;
         }).join('') : '<div class="info-card">' + (connSrcFilter === 'all' ? 'No matches yet. Add one, or sync LinkedIn to match automatically.' : 'Nothing from this source - switch the filter back to All.') + '</div>'}
       </div>
