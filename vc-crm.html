@@ -665,6 +665,7 @@
       max-width: 360px; line-height: 1.5;
     }
     .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-undo { margin-left: 14px; border: none; background: none; padding: 0; font: inherit; font-weight: 700; color: var(--primary); text-decoration: underline; cursor: pointer; }
 
     @media (max-width: 860px) {
       .hide-md { display: none; }
@@ -1817,26 +1818,42 @@ function onDdChange(ctx, v){
       if (!(drawerRef && drawerRef.kind === 'connector')) return;
       const cid = drawerRef.id, c = connectorById(cid);
       const pids = (PEOPLE_BY_FUND[arg] || []).map(p => p.id);
+      const inConnMatches = c && Array.isArray(c.matches) ? c.matches.filter(pid => pids.includes(pid)) : [];
+      const ov = state.connMatchExtra[cid];
+      const inOv = ov && ov.matches ? ov.matches.filter(pid => pids.includes(pid)) : [];
+      const il = state.introLists[cid];
+      const removedRows = il ? il.rows.filter(r => r.fundId === arg) : [];
       const set = new Set(state.hiddenMatches[cid] || []);
       pids.forEach(pid => set.add(pid));
       state.hiddenMatches[cid] = [...set];
       if (c && Array.isArray(c.matches)) c.matches = c.matches.filter(pid => !set.has(pid));
-      const ov = state.connMatchExtra[cid];
       if (ov && ov.matches) ov.matches = ov.matches.filter(pid => !set.has(pid));
-      const il = state.introLists[cid];
       if (il) il.rows = il.rows.filter(r => r.fundId !== arg);
       save(); openConnector(cid);
-      toast('Deleted ' + (f ? f.name : 'that row') + ' from this list (bad data).');
+      toastUndo('Deleted ' + (f ? f.name : 'that row') + ' from this list.', () => {
+        state.hiddenMatches[cid] = (state.hiddenMatches[cid] || []).filter(pid => !pids.includes(pid));
+        if (c && Array.isArray(c.matches)) inConnMatches.forEach(pid => { if (!c.matches.includes(pid)) c.matches.push(pid); });
+        if (ov && ov.matches) inOv.forEach(pid => { if (!ov.matches.includes(pid)) ov.matches.push(pid); });
+        if (il && removedRows.length) il.rows.push(...removedRows);
+        save(); openConnector(cid);
+        toast('Restored ' + (f ? f.name : 'that row') + '.');
+      });
       return;
     }
     const fs = FS(arg);
+    const prevStage = fs.stage;
     fs.stage = v;
     save(); render();
     if (drawerRef && drawerRef.kind === 'fund' && drawerRef.id === arg) openFund(arg);
     else if (drawerRef && drawerRef.kind === 'connector') {
       openConnector(drawerRef.id);
       const fnm = (FUND_BY_ID[arg] || {}).name || 'Fund';
-      toast(`Moved ${fnm} to ${F_STAGES[v] || v}.`);
+      toastUndo(`Moved ${fnm} to ${F_STAGES[v] || v}.`, () => {
+        if (prevStage === undefined) delete fs.stage; else fs.stage = prevStage;
+        save(); render();
+        if (drawerRef && drawerRef.kind === 'connector') openConnector(drawerRef.id);
+        toast(`Moved ${fnm} back.`);
+      });
     }
     return;
   }
@@ -1854,12 +1871,20 @@ function onDdChange(ctx, v){
     const labels = { competitor:'Competitor / no fit', passed:'Already passed', badfit:'Bad fit', early:'Too early' };
     let label = labels[v] || 'Other';
     if (v === 'other') { const t = prompt('Archive reason:', ''); if (t === null) return; label = t.trim() || 'Other'; }
+    const prev = { stage: fs.stage, reason: fs.archiveReason, competitor: fs.competitor };
     fs.stage = 'disqualified';       // disqualify the whole fund, everywhere
     fs.archiveReason = label;
     if (v === 'competitor') fs.competitor = true;
     save();
     if (drawerRef && drawerRef.kind === 'connector') openConnector(drawerRef.id); else render();
-    toast((f ? f.name : 'Fund') + ' disqualified - ' + label + '. It stays grayed at the bottom everywhere.');
+    toastUndo((f ? f.name : 'Fund') + ' disqualified - ' + label + '.', () => {
+      if (prev.stage === undefined) delete fs.stage; else fs.stage = prev.stage;
+      if (prev.reason === undefined) delete fs.archiveReason; else fs.archiveReason = prev.reason;
+      if (prev.competitor === undefined) delete fs.competitor; else fs.competitor = prev.competitor;
+      save();
+      if (drawerRef && drawerRef.kind === 'connector') openConnector(drawerRef.id); else render();
+      toast('Restored ' + (f ? f.name : 'fund') + '.');
+    });
     return;
   }
   if (kind === 'prefconn') {
@@ -3673,6 +3698,20 @@ function toast(msg){
   t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+// Toast with an Undo action that lingers 10s in the corner - for reversible but
+// easy-to-misclick moves (archive, park, delete).
+function toastUndo(msg, onUndo){
+  const t = $('toast');
+  t.innerHTML = '';
+  const span = document.createElement('span'); span.textContent = msg;
+  const btn = document.createElement('button'); btn.className = 'toast-undo'; btn.textContent = 'Undo';
+  t.append(span, btn);
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  const hide = () => { t.classList.remove('show'); setTimeout(() => { if (!t.classList.contains('show')) t.textContent = ''; }, 300); };
+  toastTimer = setTimeout(hide, 10000);
+  btn.onclick = () => { clearTimeout(toastTimer); hide(); try { onUndo(); } catch (e) {} };
 }
 
 /* ── Events ── */
