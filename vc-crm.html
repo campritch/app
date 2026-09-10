@@ -506,6 +506,7 @@
       transition: background 0.12s;
     }
     .bulk-btn:hover { background: var(--accent); }
+    .bulk-btn.on { background: var(--destructive); border-color: var(--destructive); color: #fff; }
     .bulk-btn--coral { background: var(--primary); border-color: var(--primary); color: var(--primary-foreground); }
     .bulk-btn--coral:hover { background: var(--primary); opacity: 0.9; }
     .bulk-bar__close { background: none; border: none; color: var(--muted-foreground); font-size: 15px; padding: 0 6px; }
@@ -1956,7 +1957,7 @@ function personSubRows(f){
   const st = FS(f.id);
   const brief = `<tr class="sub-row fit-brief-row">
     <td class="sub-tick"></td>
-    <td colspan="10"><div class="fit-brief">
+    <td colspan="11"><div class="fit-brief">
       <div class="fit-brief__text">
         ${f.dims ? `<b>${grade(f)} · ${Math.round(score(f))}/100.</b> ` : `<b>Not graded yet.</b> `}${esc(f.looking || 'No thesis notes on this fund yet.')} ${esc(fundFitLine(f))}
         ${f.why ? `<br><b>Our angle:</b> ${esc(f.why)}` : ''}
@@ -1991,7 +1992,7 @@ function personSubRows(f){
   }).join('') + `
     <tr class="sub-row add-person-row" data-addperson="${f.id}">
       <td class="sub-tick"></td>
-      <td colspan="10" style="padding-left:12px"><button class="add-person-btn">+ Add person to ${esc(f.name)}</button></td>
+      <td colspan="11" style="padding-left:12px"><button class="add-person-btn">+ Add person to ${esc(f.name)}</button></td>
     </tr>`;
 }
 
@@ -2054,6 +2055,7 @@ function renderFundsTable(){
           <div class="dd-menu">
             <button type="button" class="dd-item" data-rowact="info:${f.id}">More info</button>
             <button type="button" class="dd-item" data-rowact="addperson:${f.id}">+ Add person</button>
+            <button type="button" class="dd-item" data-rowact="compflag:${f.id}">${isCompetitor(f) ? 'Clear competitive tag' : '🚫 Tag as competitive'}</button>
             <button type="button" class="dd-item" data-rowact="remove:${f.id}" style="color:var(--destructive)">Remove fund</button>
           </div>
         </div>
@@ -2064,6 +2066,7 @@ function renderFundsTable(){
       <div class="d-row" style="gap:8px;flex-wrap:wrap">
         ${Object.entries(F_STAGES).filter(([k]) => k !== 'none' && k !== fStage(f)).map(([k,v]) =>
           `<button class="bulk-btn" data-selstage="${k}" data-selid="${f.id}">→ ${v}</button>`).join('')}
+        <button class="bulk-btn${isCompetitor(f)?' on':''}" data-rowact="compflag:${f.id}" title="Mark this fund as a competitor - grays it out and skips it in grading">${isCompetitor(f) ? '✓ Competitive' : '🚫 Competitive'}</button>
         <button class="bulk-btn" data-selstage="__clear" data-selid="${f.id}" title="Clear selection">✕</button>
       </div></td></tr>` : ''}
     ${open ? personSubRows(f) : ''}`;
@@ -3653,6 +3656,13 @@ document.addEventListener('click', e => {
     if (act === 'info') openFund(id);
     if (act === 'addperson') addPersonTo(id);
     if (act === 'remove') removeFund(id);
+    if (act === 'compflag') {
+      const fs = FS(id), on = !isCompetitor(FUND_BY_ID[id]);
+      fs.competitor = on;
+      if (on) { const n = prompt('Competitor they back (optional - shows on the tag):', FUND_BY_ID[id].competitorNote || ''); if (n && n.trim()) FUND_BY_ID[id].competitorNote = n.trim(); }
+      save(); render();
+      toast(on ? 'Tagged competitive - grayed out with a COMPETITOR tag.' : 'Competitive tag cleared.');
+    }
     if (act === 'reachedout') {
       let n = 0;
       PEOPLE.filter(x => x.fundId === id && !isExcluded(x)).forEach(x => {
