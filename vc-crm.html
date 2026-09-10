@@ -1811,6 +1811,14 @@ function onDdChange(ctx, v){
   if (kind === 'setfd') { state.settings.autoFollowDirect = +v; save(); return; }
   if (kind === 'setfa') { state.settings.autoFollowAsk = +v; save(); return; }
   if (kind === 'fstage') {
+    if (v === '__site') {
+      const f = FUND_BY_ID[arg]; if (!f) return;
+      const val = prompt('Website for ' + f.name + ' (so it grades from the right site):', f.site ? 'https://' + f.site : 'https://');
+      if (val === null) return;
+      const reopen = () => { if (drawerRef && drawerRef.kind === 'connector') openConnector(drawerRef.id); else render(); };
+      saveFundSite(arg, val, reopen);
+      return;
+    }
     if (v === '__delete') {
       // Bad-data row: drop every person of this fund from the current connector's
       // doors (hidden overlay + persisted match sources) so it's gone for good here.
@@ -3035,13 +3043,13 @@ function peekEditSite(ev, fid){
     if (e.key === 'Escape') { e.preventDefault(); togglePeek(fid); togglePeek(fid); } // rebuild
   };
 }
-async function savePeekSite(fid, val){
+// Set a fund's website, clear the now-stale AI read, and re-grade from the
+// corrected site. `reopen` re-renders whatever surface called it.
+async function saveFundSite(fid, val, reopen){
   const f = FUND_BY_ID[fid]; if (!f) return;
   const clean = (val || '').trim().replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
   const changed = clean !== (f.site || '');
   f.site = clean; FS(fid).site = clean;
-  // A corrected URL means the old read was based on the wrong site - clear the AI
-  // grade so it re-reads from the right place.
   const st = FS(fid);
   const wasAi = !!st.aiGraded;
   if (changed) {
@@ -3049,12 +3057,14 @@ async function savePeekSite(fid, val){
     if (wasAi) { delete st.aiDims; delete f.dims; }
   }
   save();
-  if (!clean || !changed) { render(); peekFundId = null; togglePeek(fid); toast(clean ? 'Website saved.' : 'Website cleared.'); return; }
-  // Re-grade this one fund now, from the corrected site.
+  if (!clean || !changed) { render(); reopen(); toast(clean ? 'Website saved.' : 'Website cleared.'); return; }
   toast('Website saved - re-grading from the correct site...');
   try { await aiFitFetch(f); toast('Re-graded from ' + clean + '.'); }
   catch (e) { toast('Saved. Re-grade needs the deployed wiki - hit "Grade the funds". ' + String(e.message || e)); }
-  save(); render(); peekFundId = null; togglePeek(fid);
+  save(); render(); reopen();
+}
+async function savePeekSite(fid, val){
+  return saveFundSite(fid, val, () => { peekFundId = null; togglePeek(fid); });
 }
 function parseIntroSheet(text){
   const lines = (text||'').split(/\r?\n/).filter(l => l.trim());
@@ -3529,7 +3539,7 @@ function openConnector(id, preselect){
             <b style="flex-shrink:0;font-size:12.5px;width:42px;text-align:right" title="Fit against the deck">${pct}</b>
             ${prefDd}
             <span class="cr-sub" style="flex-shrink:0;text-align:right">${grade(f)}${arch ? ' · Archived' + (reason ? ' (' + esc(reason) + ')' : '') : ' · ' + P_STATUS[pStatus(p)]}${(stg!=='none') ? ` · <span class="pill pill--type">${F_STAGES[stg]}</span>` : ''}</span>
-            ${ddHtml({ ctx:'fstage:'+f.id, value: stg, kebab:true, quiet:true, trigger:'⋯', menuRight:true, title:'Move this fund to a stage', options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:v})).concat([{v:'__delete', l:'🗑 Delete (bad data)'}]) })}
+            ${ddHtml({ ctx:'fstage:'+f.id, value: stg, kebab:true, quiet:true, trigger:'⋯', menuRight:true, title:'Move this fund to a stage', options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:v})).concat([{v:'__site', l: f.site ? '🔗 Edit website' : '🔗 Add website'}, {v:'__delete', l:'🗑 Delete (bad data)'}]) })}
           </label>`;
         }).join('') : '<div class="info-card">' + (connSrcFilter === 'all' ? 'No matches yet. Add one, or sync LinkedIn to match automatically.' : 'Nothing from this source - switch the filter back to All.') + '</div>'}
       </div>
