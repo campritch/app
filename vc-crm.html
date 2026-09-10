@@ -3097,7 +3097,14 @@ function parseIntroSheet(text){
   return rows;
 }
 function matchIntroRow(r){
-  if (r.firm) { const f = FUNDS.find(x => normOrg(x.name) === normOrg(r.firm)); if (f) return f.id; }
+  // Match a firm name to a backlog fund. normOrg must be non-empty, else a
+  // stopword-only cell ("VC") would falsely equal another stopword-only fund
+  // name ("Capital Partners") and collapse every row onto one fund.
+  const asFirm = s => { const n = normOrg(s); if (!n) return null; const f = FUNDS.find(x => normOrg(x.name) === n); return f ? f.id : null; };
+  // Try the firm column, then the name column (sheets often shift the firm into
+  // the name column), then name-as-person.
+  const byFirm = asFirm(r.firm) || asFirm(r.name);
+  if (byFirm) return byFirm;
   if (r.name) { const p = PEOPLE.find(pp => pp.name && pp.name.toLowerCase() === r.name.toLowerCase()); if (p) return p.fundId; }
   return null;
 }
@@ -3128,6 +3135,7 @@ function introListSectionHtml(c){
       <span class="d-label">Intro list${il ? ` (${il.rows.length} · ${il.rows.filter(r=>r.fundId).length} known funds)` : ''}</span>
       <div class="d-row">
         ${il ? `<button class="mini-btn" id="dIntroToggle" style="font-weight:600">${open ? 'Hide list' : 'View list'}</button>
+        <button class="mini-btn" id="dIntroRematch" title="Re-match every row to funds in the backlog (fixes bad/collapsed matches)">Re-match</button>
         <button class="mini-btn" id="dIntroAi">AI-grade unknowns</button>
         <button class="mini-btn" id="dIntroExport">Export CSV</button>` : ''}
         <button class="mini-btn" id="dIntroUpload">${il ? 'Replace sheet' : 'Upload their sheet'}</button>
@@ -3588,6 +3596,14 @@ function openConnector(id, preselect){
   const introToggle = () => { CS(id).introOpen = !CS(id).introOpen; save(); openConnector(id); };
   if ($('dIntroToggle')) $('dIntroToggle').onclick = introToggle;
   if ($('dIntroPeek')) $('dIntroPeek').onclick = introToggle;
+  if ($('dIntroRematch')) $('dIntroRematch').onclick = () => {
+    const il = state.introLists[id]; if (!il) return;
+    let changed = 0;
+    il.rows.forEach(r => { const fid = matchIntroRow(r); if (fid !== r.fundId) { r.fundId = fid; changed++; } });
+    const known = il.rows.filter(r => r.fundId).length;
+    save(); render(); openConnector(id);
+    toast(`Re-matched: ${known} of ${il.rows.length} now map to a fund (${changed} changed). Unmatched become new funds when filed.`);
+  };
   if ($('dIntroUpload')) $('dIntroUpload').onclick = () => $('dIntroFile').click();
   if ($('dIntroFile')) $('dIntroFile').onchange = e => {
     const file = e.target.files[0];
