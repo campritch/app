@@ -360,7 +360,7 @@
     .wrow + .wrow { margin-top:8px; }
     /* ─── flight rows: one grid for Needs you and All flights alike ─── */
     .wflight { display:grid; grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 118px 26px; align-items:center; gap:0 14px; padding:10px 14px; }
-    .wflight .wrow__main > b { font-size:13px; font-weight:500; }
+    .wflight .wrow__main > b { font-size:13.5px; font-weight:500; }
     .wflight .wrow__num { width:auto; justify-content:flex-end; }
     .wflight .wrow__num b { font-weight:600; }
     .wflight .btn { width:auto; justify-content:center; padding-left:10px; padding-right:10px; }
@@ -369,7 +369,7 @@
              font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--text-tertiary); }
     .fhead span:nth-child(2),.fhead span:nth-child(3),.fhead span:nth-child(4),.fhead span:nth-child(6) { text-align:center; }
     .fhead span:nth-child(5) { text-align:right; }
-    .fnum { text-align:center; font-size:13px; font-weight:500; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+    .fnum { text-align:center; font-size:13.5px; font-weight:500; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
     .fnum small { display:block; font-size:10.5px; font-weight:500; color:var(--text-tertiary); letter-spacing:0; margin-top:1px; }
     .fran { display:inline-flex; align-items:center; justify-content:center; gap:5px; width:100%; max-width:100%; font-size:12.5px; font-weight:500;
             padding:4px 0; border-radius:7px; border:1px solid var(--border); background:var(--panel); color:var(--text-primary);
@@ -390,8 +390,8 @@
     .wnote__x { background:var(--white); }
     .wnote + .wnote, .wnote + .wrow { margin-top:8px; }
     .wnote__body { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .wnote__body b { font-size:12.5px; }
-    .wnote__txt { font-size:12px; color:var(--text-secondary); margin-left:8px; }
+    .wnote__body b { font-size:13px; }
+    .wnote__txt { font-size:12.5px; color:var(--text-secondary); margin-left:8px; }
     .wnote__x { flex-shrink:0; width:24px; height:24px; border-radius:50%; border:none; background:var(--secondary-lite);
                 color:var(--text-secondary); font-size:11px; line-height:1; cursor:pointer; display:grid; place-items:center; }
     .wnote__x:hover { background:var(--border); color:var(--text-primary); }
@@ -410,8 +410,8 @@
     .wrow--click:hover { border-color:var(--border-strong); box-shadow:var(--shadow-card); }
     .wrow__ico { width:34px; height:34px; border-radius:9px; display:grid; place-items:center; flex-shrink:0; }
     .wrow__main { flex:1; min-width:0; }
-    .wrow__main > b { font-size:13px; font-weight:700; display:block; }
-    .wrow__main span { font-size:12px; color:var(--text-secondary); font-weight:400; }
+    .wrow__main > b { font-size:13.5px; font-weight:700; display:block; }
+    .wrow__main span { font-size:12.5px; color:var(--text-secondary); font-weight:400; }
     .wrow__main span b { font-weight:700; color:var(--text-primary); }
     .wrow__num { width:132px; flex-shrink:0; display:flex; align-items:center; gap:9px; }
     .wrow__num b { font-size:12.5px; min-width:38px; text-align:right; }
@@ -639,7 +639,7 @@
      still useful as an early warning, not something you act on. */
   function verdict(s){
     const pr = projection(s); if(!pr) return { k:'pending', label:'Awaiting episode', tone:'grey' };
-    if(s.dlState==='requested') return { k:'blocked', label:'Waiting on downloads', tone:'purple', pr };
+    if(s.dlState==='requested') return { k:'blocked', label:'Waiting on delivery', tone:'purple', pr };
     if(pr.curvePct < .45 && !pr.confident) return { k:'early', label:'Too early to call', tone:'grey', pr };
     if(!pr.confident){
       if(pr.ratio >= 1.0)     return { k:'trackOver',  label:'Tracking over',        tone:'green',  pr, soft:true };
@@ -1084,7 +1084,15 @@
       <button class="wnote__x" title="Snooze 2 days" onclick="event.stopPropagation();snoozeNote('${d.id}','${label}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
       <button class="wnote__x" title="Done — dismiss" onclick="event.stopPropagation();${clearFn}('${d.id}')">✕</button>
     </div>`;
+    const spotNote=(x,text)=>`<div class="wnote" onclick="openSpot('${x.id}')">
+      <span class="wnote__body"><b>${esc(x.brand)} on ${esc(show(x.showId).name)}</b><span class="wnote__txt" title="${esc(text)}">${esc(text)}</span></span>
+      <button class="wnote__x" title="Snooze 2 days" onclick="event.stopPropagation();snoozeSpotNote('${x.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
+      <button class="wnote__x" title="Done — dismiss" onclick="event.stopPropagation();dismissSpotNote('${x.id}')">✕</button>
+    </div>`;
     const checkRows=[];
+    // The agent marks ads published itself — it only pings when it CAN'T find one (Sydney, Sep 11).
+    SPOTS.filter(x=>x.missed&&!spotNoteHidden(x.id)).forEach(x=>checkRows.push(spotNote(x,`Couldn't find the ad — was due ${fmtDate(x.published)}, rechecking ${show(x.showId).channel} every ${show(x.showId).scanEvery}h.`)));
+    SPOTS.filter(x=>x.status==='scheduled'&&['needs_copy','needs_cta'].includes(x.copyStatus)&&!spotNoteHidden(x.id)).forEach(x=>checkRows.push(spotNote(x,`${x.copyStatus==='needs_copy'?'Ad copy not in yet':'Copy is in but needs a CTA'} — airs ${fmtDate(x.published)}.`)));
     DEALS.filter(d=>d.outcome==='won'&&(d.notes||'').trim()&&!(d.noteSnooze&&d.noteSnooze>TODAY)).forEach(d=>checkRows.push(noteRow(d,'Note',d.notes,'clearDealNote')));
     DEALS.filter(d=>d.checkIn&&d.checkIn<=TODAY).forEach(d=>checkRows.push(noteRow(d,'Check-in',`You set a check-in for ${fmtDate(d.checkIn)} — how's it going?`,'clearCheckIn')));
     const active=ids.filter(x=>!isArchived(x.id)).map(flightRow);
@@ -1101,6 +1109,11 @@
 
 
   function deliveryAttention(){ return { count: workList().count||0 }; }
+  const SPOT_NOTE_HIDE={};
+  const spotNoteHidden=id=>{ const v=SPOT_NOTE_HIDE[id]; return v===true||(v&&v>TODAY); };
+  function snoozeSpotNote(id){ SPOT_NOTE_HIDE[id]=addDays(TODAY,2);
+    toast('Snoozed — back '+dayName(addDays(TODAY,2))+' '+fmtDate(addDays(TODAY,2))+'.'); rerender(); refreshBadges(); }
+  function dismissSpotNote(id){ SPOT_NOTE_HIDE[id]=true; rerender(); refreshBadges(); }
   function snoozeNote(id,kind){ const d=DEALS.find(x=>x.id===id); if(!d) return;
     if(kind==='Check-in') d.checkIn=addDays(TODAY,2); else d.noteSnooze=addDays(TODAY,2);
     toast('Snoozed — back '+dayName(addDays(TODAY,2))+' '+fmtDate(addDays(TODAY,2))+'.');
@@ -1619,7 +1632,7 @@
     const callable=paidLive.filter(s=>projection(s).confident);
     const gC=callable.reduce((a,s)=>a+s.guarantee,0), projC=callable.reduce((a,s)=>a+projection(s).proj,0);
     const blocked = liveSpots.some(s=>verdict(s).k==='blocked');
-    const status = blocked ? {k:'blocked', label:'Waiting on downloads', tone:'purple', rank:1}
+    const status = blocked ? {k:'blocked', label:'Waiting on delivery', tone:'purple', rank:1}
       : !callable.length ? {k:'early', label:'Too early to call', tone:'grey', rank:3}
       : projC>=gC ? {k:'full', label:done?'Delivered in full':'Tracking over', tone:'green', rank:4}
       : mgs.length ? {k:'mg', label:'Make good booked', tone:'purple', rank:2}
@@ -1737,10 +1750,10 @@
   function dealIndexRow(c,i,hideBrand,click,open){
     const tone=toneVar(c.status.tone), max=Math.max(c.g,c.proj)*1.06, w=x=>c.g?Math.min(100,x/max*100):0;
     return `<div class="wrow--click" style="display:grid;grid-template-columns:minmax(0,1fr) 108px 150px 168px 118px 26px;align-items:center;gap:0 13px;padding:10px 14px;${i===0&&!hideBrand?'':'border-top:1px solid var(--border-light)'}" onclick="${click||`go('portal');openDeal('${c.deal.id}')`}">
-      <div style="min-width:0"><b style="font-size:13.5px">${hideBrand?esc(c.title):`${esc(c.brand)} <span style="font-weight:400;color:var(--text-secondary)">· ${esc(c.title)}</span>`}</b>
-        <div class="muted" style="font-size:11.5px">${c.shows.map(x=>show(x).name).join(', ')}</div></div>
-      <div class="muted" style="font-size:11.5px;white-space:nowrap">${esc(c.flight)}</div>
-      <div>${['under','mg','blocked'].includes(c.status.k)?`<b style="font-size:12.5px;display:inline-flex;align-items:center;gap:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${ICO[{under:'warn',mg:'mg',blocked:'clock'}[c.status.k]]}</svg>${c.status.label}</b>`
+      <div style="min-width:0"><b style="font-size:14px">${hideBrand?esc(c.title):`${esc(c.brand)} <span style="font-weight:400;color:var(--text-secondary)">· ${esc(c.title)}</span>`}</b>
+        <div class="muted" style="font-size:12px">${c.shows.map(x=>show(x).name).join(', ')}</div></div>
+      <div class="muted" style="font-size:12px;white-space:nowrap">${esc(c.flight)}</div>
+      <div>${['under','mg','blocked'].includes(c.status.k)?`<b style="font-size:13px;display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${ {under:'var(--orange-text)',mg:'var(--purple-text)',blocked:'var(--blue-text)'}[c.status.k] }" stroke-width="2.1">${ICO[{under:'warn',mg:'mg',blocked:'clock'}[c.status.k]]}</svg>${c.status.label}</b>`
         :`<span class="muted" style="font-size:11.5px">${c.state==='upcoming'?'Starts '+fmtDate(c.spots[0].published):c.state==='complete'?'Complete':''}</span>`}</div>
       <div class="wrow__num" style="width:auto;justify-content:flex-end;display:flex;align-items:center;gap:9px">${c.g?`
         <div style="position:relative;flex:1;height:8px;border-radius:4px;background:var(--secondary-lite)">
