@@ -3560,7 +3560,7 @@ function openConnector(id, preselect){
             title: arch ? 'Restore this fund to the active list' : 'Archive with a reason - disqualifies the fund everywhere so it never resurfaces',
             options: arch
               ? [{v:'__restore', l:'Restore to the active list'}]
-              : [{v:'competitor', l:'Competitor'}, {v:'badfit', l:'Bad fit'}, {v:'passed', l:'Already passed'}, {v:'early', l:'Too early'}, {v:'other', l:'Other reason...'}] });
+              : [{v:'badfit', l:'Bad fit'}, {v:'competitor', l:'Competitor'}, {v:'passed', l:'Already passed'}, {v:'early', l:'Too early'}, {v:'other', l:'Other reason...'}] });
           return `<label class="check-row${arch?' cr-archived':''}${isPref?' cr-preferred':''}" style="align-items:center">
             <input type="checkbox" data-inc="${p.id}" ${checkedSet.has(p.id)?'checked':''} ${arch?'disabled':''}>
             ${archDd}
