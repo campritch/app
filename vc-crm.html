@@ -1879,16 +1879,18 @@ function onDdChange(ctx, v){
       toast((f ? f.name : 'Fund') + ' restored to the active list.');
       return;
     }
-    const labels = { competitor:'Competitor', passed:'Already passed', badfit:'Bad fit', early:'Too early' };
+    const labels = { competitor:'Competitor', passed:'Already passed', badfit:'Bad fit', future:'Future round' };
     let label = labels[v] || 'Other';
     if (v === 'other') { const t = prompt('Archive reason:', ''); if (t === null) return; label = t.trim() || 'Other'; }
+    // "Future round" parks it in the Future rounds tab; every other reason disqualifies.
+    const target = v === 'future' ? 'future' : 'disqualified';
     const prev = { stage: fs.stage, reason: fs.archiveReason, competitor: fs.competitor };
-    fs.stage = 'disqualified';       // disqualify the whole fund, everywhere
+    fs.stage = target;
     fs.archiveReason = label;
     if (v === 'competitor') fs.competitor = true;
     save();
     if (drawerRef && drawerRef.kind === 'connector') openConnector(drawerRef.id); else render();
-    toastUndo((f ? f.name : 'Fund') + ' disqualified - ' + label + '.', () => {
+    toastUndo((f ? f.name : 'Fund') + (target === 'future' ? ' moved to Future rounds' : ' disqualified') + ' - ' + label + '.', () => {
       if (prev.stage === undefined) delete fs.stage; else fs.stage = prev.stage;
       if (prev.reason === undefined) delete fs.archiveReason; else fs.archiveReason = prev.reason;
       if (prev.competitor === undefined) delete fs.competitor; else fs.competitor = prev.competitor;
@@ -3560,7 +3562,7 @@ function openConnector(id, preselect){
             title: arch ? 'Restore this fund to the active list' : 'Archive with a reason - disqualifies the fund everywhere so it never resurfaces',
             options: arch
               ? [{v:'__restore', l:'Restore to the active list'}]
-              : [{v:'badfit', l:'Bad fit'}, {v:'competitor', l:'Competitor'}, {v:'passed', l:'Already passed'}, {v:'early', l:'Too early'}, {v:'other', l:'Other reason...'}] });
+              : [{v:'badfit', l:'Bad fit'}, {v:'competitor', l:'Competitor'}, {v:'passed', l:'Already passed'}, {v:'future', l:'Future round'}, {v:'other', l:'Other reason...'}] });
           return `<label class="check-row${arch?' cr-archived':''}${isPref?' cr-preferred':''}" style="align-items:center">
             <input type="checkbox" data-inc="${p.id}" ${checkedSet.has(p.id)?'checked':''} ${arch?'disabled':''}>
             ${archDd}
