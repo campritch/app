@@ -406,8 +406,10 @@
     .statedit:hover, .statedit:focus { border-bottom-color:var(--border-strong); outline:none; }
     .warch { width:26px; height:26px; border-radius:7px; border:none; background:none; color:var(--text-tertiary); font-size:12px; justify-self:center; }
     .warch:hover { background:var(--nav-hover); color:var(--text-primary); }
-    .wrow--click { cursor:pointer; transition:border-color .12s, box-shadow .12s; }
-    .wrow--click:hover { border-color:var(--border-strong); box-shadow:var(--shadow-card); }
+    .wrow--click { cursor:pointer; transition:border-color .12s, box-shadow .12s, background .12s; }
+    .wrow--click:hover { border-color:var(--border-strong); box-shadow:var(--shadow-card); background:var(--page-bg); }
+    .pctchip { display:inline-block; font-size:12px; font-weight:700; padding:2.5px 9px; border-radius:999px;
+               min-width:48px; text-align:center; font-variant-numeric:tabular-nums; }
     .wrow__ico { width:34px; height:34px; border-radius:9px; display:grid; place-items:center; flex-shrink:0; }
     .wrow__main { flex:1; min-width:0; }
     .wrow__main > b { font-size:13.5px; font-weight:700; display:block; }
@@ -869,6 +871,7 @@
   }
 
   /* ═══════════════════════════ SHARED ═══════════════════════════ */
+  const toneBg = t => ({green:'var(--green-bg)',red:'var(--red-bg)',orange:'var(--orange-bg)',blue:'var(--blue-bg)',purple:'var(--purple-bg)'}[t]||'var(--secondary-lite)');
   const toneVar = t => ({green:'var(--green-text)',red:'var(--red-text)',orange:'var(--orange-text)',blue:'var(--blue-text)',purple:'var(--purple-text)',grey:'var(--text-tertiary)'}[t]||'var(--text-secondary)');
   function projBar(s){
     const pr=projection(s); if(!pr) return '';
@@ -1050,7 +1053,7 @@
         : `<span class="fran fran--no">${s.status==='scheduled'?'due '+fmtDate(s.published):s.missed?'Overdue '+fmtDate(s.published):'due today'}</span>`}
         ${s.kind!=='paid'?`<span style="font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--purple-text);text-align:center">${s.kind==='bonus'?'Bonus':'Make good'}</span>`:''}</div>
       <div class="fnum">${pr?K(pr.got):dash}${pr&&sh.simulcast?`<small>${K(s.views||0)} vid · ${s.dlState==='requested'?'?':K(s.downloads||0)} aud</small>`:pr?'<small>video</small>':''}</div>
-      <div class="wrow__num">${pr?`${projBar(s)}<b style="color:${toneVar(v.tone)}">${Math.round(pr.ratio*100)}%</b>`:'<span style="flex:1;text-align:left;font-size:12px;color:var(--text-tertiary)">Not started</span>'}</div>
+      <div class="wrow__num">${pr?`${projBar(s)}<b class="pctchip" style="color:${toneVar(v.tone)};background:${toneBg(v.tone)}">${Math.round(pr.ratio*100)}%</b>`:'<span style="flex:1;text-align:left;font-size:12px;color:var(--text-tertiary)">Not started</span>'}</div>
       <span onclick="event.stopPropagation()">${cta(c.label,`openSpot('${s.id}')`,c.dark)}</span>
       <span onclick="event.stopPropagation()"><button class="wdots" title="More" onclick="rowMenu(event,'${s.id}')">⋮</button></span>
     </div>`;
@@ -1080,19 +1083,21 @@
     // Deal-level check-ins: admin notes and the check-in date Sydney sets.
     // One quiet line each, pinned above the table until she clears them (Aug 24, 9:37).
     const noteRow=(d,label,text,clearFn)=>`<div class="wnote" onclick="go('portal');openDeal('${d.id}')">
+      <span style="width:7px;height:7px;border-radius:50%;background:${label==='Check-in'?'var(--purple-text)':'var(--text-tertiary)'};flex-shrink:0"></span>
       <span class="wnote__body"><b>${esc(d.brand)} · ${esc(d.title||'Flight')}</b><span class="wnote__txt" title="${esc(text)}">${esc(text)}</span></span>
       <button class="wnote__x" title="Snooze 2 days" onclick="event.stopPropagation();snoozeNote('${d.id}','${label}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
       <button class="wnote__x" title="Done — dismiss" onclick="event.stopPropagation();${clearFn}('${d.id}')">✕</button>
     </div>`;
-    const spotNote=(x,text)=>`<div class="wnote" onclick="openSpot('${x.id}')">
+    const spotNote=(x,text,dot)=>`<div class="wnote" onclick="openSpot('${x.id}')">
+      <span style="width:7px;height:7px;border-radius:50%;background:${dot||'var(--text-tertiary)'};flex-shrink:0"></span>
       <span class="wnote__body"><b>${esc(x.brand)} on ${esc(show(x.showId).name)}</b><span class="wnote__txt" title="${esc(text)}">${esc(text)}</span></span>
       <button class="wnote__x" title="Snooze 2 days" onclick="event.stopPropagation();snoozeSpotNote('${x.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
       <button class="wnote__x" title="Done — dismiss" onclick="event.stopPropagation();dismissSpotNote('${x.id}')">✕</button>
     </div>`;
     const checkRows=[];
     // The agent marks ads published itself — it only pings when it CAN'T find one (Sydney, Sep 11).
-    SPOTS.filter(x=>x.missed&&!spotNoteHidden(x.id)).forEach(x=>checkRows.push(spotNote(x,`Couldn't find the ad — was due ${fmtDate(x.published)}, rechecking ${show(x.showId).channel} every ${show(x.showId).scanEvery}h.`)));
-    SPOTS.filter(x=>x.status==='scheduled'&&['needs_copy','needs_cta'].includes(x.copyStatus)&&!spotNoteHidden(x.id)).forEach(x=>checkRows.push(spotNote(x,`${x.copyStatus==='needs_copy'?'Ad copy not in yet':'Copy is in but needs a CTA'} — airs ${fmtDate(x.published)}.`)));
+    SPOTS.filter(x=>x.missed&&!spotNoteHidden(x.id)).forEach(x=>checkRows.push(spotNote(x,`Couldn't find the ad — was due ${fmtDate(x.published)}, rechecking ${show(x.showId).channel} every ${show(x.showId).scanEvery}h.`,'var(--red-text)')));
+    SPOTS.filter(x=>x.status==='scheduled'&&['needs_copy','needs_cta'].includes(x.copyStatus)&&!spotNoteHidden(x.id)).forEach(x=>checkRows.push(spotNote(x,`${x.copyStatus==='needs_copy'?'Ad copy not in yet':'Copy is in but needs a CTA'} — airs ${fmtDate(x.published)}.`,'var(--blue-text)')));
     DEALS.filter(d=>d.outcome==='won'&&(d.notes||'').trim()&&!(d.noteSnooze&&d.noteSnooze>TODAY)).forEach(d=>checkRows.push(noteRow(d,'Note',d.notes,'clearDealNote')));
     DEALS.filter(d=>d.checkIn&&d.checkIn<=TODAY).forEach(d=>checkRows.push(noteRow(d,'Check-in',`You set a check-in for ${fmtDate(d.checkIn)} — how's it going?`,'clearCheckIn')));
     const active=ids.filter(x=>!isArchived(x.id)).map(flightRow);
@@ -1760,7 +1765,7 @@
           <div style="position:absolute;inset:0 auto 0 0;width:${w(c.proj)}%;border-radius:4px;background:${tone};opacity:.28"></div>
           <div style="position:absolute;inset:0 auto 0 0;width:${w(c.got)}%;border-radius:4px;background:${tone}"></div>
           <div style="position:absolute;top:-2px;bottom:-2px;left:${w(c.g*IAB_FULL)}%;width:2px;background:var(--green-text)"></div>
-        </div><b style="font-size:12px;color:${tone};min-width:36px;text-align:right">${c.pct}%</b>`
+        </div><b class="pctchip" style="color:${tone};background:${toneBg(c.status.tone)}">${c.pct}%</b>`
         :'<span style="flex:1;text-align:left;font-size:12px;color:var(--text-tertiary)">Not started</span>'}</div>
       <div style="text-align:right"><span class="muted" style="font-size:11.5px">${c.g?K(c.got)+' of '+K(c.g):K(c.spots.reduce((a,s)=>a+s.guarantee,0))+' booked'}</span></div>
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.4" style="justify-self:center;transition:transform .15s;transform:rotate(${open?90:0}deg)"><path d="M9 6l6 6-6 6"/></svg>
