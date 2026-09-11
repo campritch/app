@@ -519,7 +519,9 @@
     }
     .drawer-overlay.show { opacity: 1; pointer-events: auto; }
     .drawer {
-      position: fixed; top: 0; right: 0; bottom: 0; z-index: 501;
+      /* above the peek panel (502) so the drawer's dropdown menus, which can
+         extend left over the peek, are never clipped behind it */
+      position: fixed; top: 0; right: 0; bottom: 0; z-index: 503;
       width: 500px; max-width: 94vw; background: var(--background);
       border-left: 1px solid var(--border); box-shadow: var(--shadow-lg);
       transform: translateX(100%); transition: transform 0.25s ease;
@@ -1759,7 +1761,7 @@ function ddHtml(o){
     <button type="button" class="dd-btn ${cur.cls||''}"${o.title?` title="${esc(o.title)}"`:''}>${o.trigger ? esc(o.trigger) : esc(cur.l)}
       ${o.trigger ? '' : '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>'}
     </button>
-    <div class="dd-menu${o.menuRight?' dd-menu--right':''}">${o.options.map(x => `<button type="button" class="dd-item ${x.v===cur.v?'on':''}" data-ddv="${esc(x.v)}">${esc(x.l)}</button>`).join('')}</div>
+    <div class="dd-menu${o.menuRight?' dd-menu--right':''}">${o.options.map(x => `<button type="button" class="dd-item ${(!o.noCheck && x.v===cur.v)?'on':''}" data-ddv="${esc(x.v)}">${esc(x.l)}</button>`).join('')}</div>
   </div>`;
 }
 function ddVal(id){ const el = $(id); return el ? el.dataset.ddval : null; }
@@ -1875,7 +1877,7 @@ function onDdChange(ctx, v){
       toast((f ? f.name : 'Fund') + ' restored to the active list.');
       return;
     }
-    const labels = { competitor:'Competitor / no fit', passed:'Already passed', badfit:'Bad fit', early:'Too early' };
+    const labels = { competitor:'Competitor', passed:'Already passed', badfit:'Bad fit', early:'Too early' };
     let label = labels[v] || 'Other';
     if (v === 'other') { const t = prompt('Archive reason:', ''); if (t === null) return; label = t.trim() || 'Other'; }
     const prev = { stage: fs.stage, reason: fs.archiveReason, competitor: fs.competitor };
@@ -3542,12 +3544,12 @@ function openConnector(id, preselect){
             options: [{v:'', l:'Intro via…'}].concat(connOpts.map(cid => { const cc = connectorById(cid); return { v:cid, l: firstName(connName(cc)) }; })) }) : '';
           // Archive-with-reason: disqualifies the fund everywhere; parked stages
           // (future/closed) reached via the ... menu also show as archived here.
-          const archDd = ddHtml({ ctx:'dqreason:'+f.id, quiet:true, menuRight:true, cls:'dd--arch', value:'',
+          const archDd = ddHtml({ ctx:'dqreason:'+f.id, quiet:true, menuRight:true, cls:'dd--arch', value:'', noCheck:true,
             trigger: arch ? 'Restore' : 'Archive',
             title: arch ? 'Restore this fund to the active list' : 'Archive with a reason - disqualifies the fund everywhere so it never resurfaces',
             options: arch
               ? [{v:'__restore', l:'Restore to the active list'}]
-              : [{v:'competitor', l:'Competitor / no fit'}, {v:'passed', l:'Already passed'}, {v:'badfit', l:'Bad fit'}, {v:'early', l:'Too early'}, {v:'other', l:'Other reason...'}] });
+              : [{v:'competitor', l:'Competitor'}, {v:'badfit', l:'Bad fit'}, {v:'passed', l:'Already passed'}, {v:'early', l:'Too early'}, {v:'other', l:'Other reason...'}] });
           return `<label class="check-row${arch?' cr-archived':''}${isPref?' cr-preferred':''}" style="align-items:center">
             <input type="checkbox" data-inc="${p.id}" ${checkedSet.has(p.id)?'checked':''} ${arch?'disabled':''}>
             ${archDd}
