@@ -3564,7 +3564,7 @@ function openConnector(id, preselect){
               ? [{v:'__restore', l:'Restore to the active list'}]
               : [{v:'badfit', l:'Bad fit'}, {v:'competitor', l:'Competitor'}, {v:'passed', l:'Already passed'}, {v:'future', l:'Future round'}, {v:'other', l:'Other reason...'}] });
           return `<label class="check-row${arch?' cr-archived':''}${isPref?' cr-preferred':''}" style="align-items:center">
-            <input type="checkbox" data-inc="${p.id}" ${checkedSet.has(p.id)?'checked':''} ${arch?'disabled':''}>
+            <input type="checkbox" data-inc="${p.id}" ${(checkedSet.has(p.id) && !arch)?'checked':''} ${arch?'disabled':''}>
             ${archDd}
             <span style="flex:0 1 30%;min-width:180px">${isPref?'<span title="Your preferred intro path" style="color:var(--amber-text,#b45309)">★ </span>':''}${p.tbd ? '<a href="#fund=' + f.id + '" data-peek="' + f.id + '" rel="noopener" style="font-weight:700;color:inherit;text-decoration:underline dotted;text-underline-offset:2px" title="Quick look (cmd-click opens a new tab)">' + esc(f.name) + '</a> <span style="color:var(--muted-foreground)">· any partner</span>' : '<b>' + esc(p.name) + '</b> <span style="color:var(--muted-foreground)">· </span><a href="#fund=' + f.id + '" data-peek="' + f.id + '" rel="noopener" style="color:var(--muted-foreground);text-decoration:underline dotted;text-underline-offset:2px" title="Quick look (cmd-click opens a new tab)">' + esc(f.name) + '</a>'} ${badge}</span>
             <span class="cr-why" style="flex:1;min-width:0;margin:0 10px">${esc(fundWhyLine(f))}</span>
@@ -3586,11 +3586,14 @@ function openConnector(id, preselect){
       <textarea class="notes-area" id="dNotes" placeholder="How you know them, what they said...">${esc(st.notes||'')}</textarea>
     </div>`;
 
+  // Archived (disqualified/future/excluded) rows never count as selected - they
+  // make no sense in an intro export even if they were checked before archiving.
+  const pidArchived = pid => { const p = PERSON_BY_ID[pid]; return p ? isDoorArch(p) : false; };
   const included = () => {
     const visible = new Set([...document.querySelectorAll('[data-inc]')].map(cb => cb.dataset.inc));
     const checked = [...document.querySelectorAll('[data-inc]')].filter(cb => cb.checked).map(cb => cb.dataset.inc);
     // a source filter can hide rows - keep their saved checked state
-    return checked.concat((st.included || []).filter(pid => !visible.has(pid)));
+    return checked.concat((st.included || []).filter(pid => !visible.has(pid))).filter(pid => !pidArchived(pid));
   };
   document.querySelectorAll('[data-inc]').forEach(cb => cb.addEventListener('change', () => { st.curated = true; st.included = included(); save(); }));
   if (!st.curated) { st.included = [...checkedSet]; save(); }
@@ -3644,8 +3647,8 @@ function openConnector(id, preselect){
     setTimeout(() => { if (drawerRef && drawerRef.kind === 'connector' && drawerRef.id === id) gradeConnectorFunds(id, $('dGradeFunds'), { auto: true }); }, 400);
   }
   if ($('dExportInc')) $('dExportInc').onclick = () => {
-    const ids = (st.included && st.included.length) ? st.included
-      : [...document.querySelectorAll('[data-inc]:checked')].map(cb => cb.dataset.inc);
+    const ids = ((st.included && st.included.length) ? st.included
+      : [...document.querySelectorAll('[data-inc]:checked')].map(cb => cb.dataset.inc)).filter(pid => !pidArchived(pid));
     if (!ids.length) { toast('Check the people you want intros to first.'); return; }
     const rows = [['Person','Fund','Title','Fit','Grade','Why','LinkedIn','Email','Status'].join(',')];
     ids.forEach(pid => {
@@ -3664,13 +3667,15 @@ function openConnector(id, preselect){
   };
   if ($('dSelectAllInc')) {
     const btn = $('dSelectAllInc');
+    // only operate on selectable (non-archived) rows
+    const selectable = () => [...document.querySelectorAll('[data-inc]:not([disabled])')];
     const syncLabel = () => {
-      const cbs = [...document.querySelectorAll('[data-inc]')];
+      const cbs = selectable();
       btn.textContent = cbs.length && cbs.every(cb => cb.checked) ? 'Clear all' : 'Select all';
     };
     syncLabel();
     btn.onclick = () => {
-      const cbs = [...document.querySelectorAll('[data-inc]')];
+      const cbs = selectable();
       const on = !cbs.every(cb => cb.checked);
       cbs.forEach(cb => { cb.checked = on; });
       st.curated = true; st.included = included(); save(); syncLabel();
