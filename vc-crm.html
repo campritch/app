@@ -3674,7 +3674,7 @@ function openConnector(id, preselect){
     if (!ids.length) { toast('Check the people you want intros to first.'); return; }
     const btn = $('dExportInc');
     const doExport = () => {
-      const rows = [['Person','Fund','Title','Fit','Grade','Why it fits','Intro angle (why SpotsNow fits them)','LinkedIn','Email','Status'].join(',')];
+      const rows = [['Person','Fund','Title','Fit','Grade','Why it fits','Outreach line (paste into your email)','LinkedIn','Email','Status'].join(',')];
       ids.forEach(pid => {
         const p = PERSON_BY_ID[pid]; if (!p) return;
         const f = FUND_BY_ID[p.fundId]; if (!f) return;
@@ -3696,12 +3696,18 @@ function openConnector(id, preselect){
     if (!need.length) { doExport(); return; }
     if (btn) { btn.disabled = true; }
     let done = 0;
-    toast(`Writing intro angles for ${need.length} fund${need.length===1?'':'s'}...`);
+    toast(`Writing outreach lines for ${need.length} fund${need.length===1?'':'s'}...`);
     (async () => {
-      for (const f of need) {
-        try { await aiAngleFetch(f); } catch (e) {}
-        done++; if (btn) btn.textContent = `Angles ${done}/${need.length}...`;
-      }
+      // run several at once so a big selection finishes in ~a minute, not ten
+      let i = 0;
+      const worker = async () => {
+        while (i < need.length) {
+          const f = need[i++];
+          try { await aiAngleFetch(f); } catch (e) {}
+          done++; if (btn) btn.textContent = `Lines ${done}/${need.length}...`;
+        }
+      };
+      await Promise.all(Array.from({ length: Math.min(6, need.length) }, worker));
       if (btn) { btn.disabled = false; btn.textContent = 'Export selected'; }
       doExport();
     })();

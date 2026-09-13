@@ -119,7 +119,7 @@ export default async function handler(req, res) {
     try {
       const t3 = await callLLM({ system: SYSTEM, maxTokens: 300,
         user: 'Fund data:\n' + JSON.stringify(anglePayload) +
-          '\n\nWrite ONE sentence (max 28 words): the single strongest, SPECIFIC reason SpotsNow is a compelling fit for THIS fund - the connect-the-dots angle Cam can hand a connector to justify a warm intro. Tie it to their actual thesis, portfolio, or a named bet. Confident but honest; no hype words, no em-dashes. Return STRICT JSON only: {"angle":"..."}' });
+          "\n\nWrite ONE warm, first-person sentence in Cam's voice that he can paste straight into an outreach email to THIS fund. It must make clear WHY SpotsNow is specifically relevant to them by tying a concrete SpotsNow strength to their actual thesis, portfolio, or a named bet - so it reads like Cam genuinely knows and wants this fund, not a mail-merge. Casual founder tone, confident, specific, no hype words, no buzzwords, no em-dashes, American spelling, use contractions. Use the fund's real name and start with 'Would love to include " + (fund.name || 'them') + " ...' or very similar. Example of the STYLE only (do not copy the content - adapt entirely to THIS fund): 'Would love to include Courtside in the round given our media presence in sports and the rise of athletes starting shows.' Return STRICT JSON only: {\"angle\":\"...\"}" });
       let a = '';
       const jm3 = t3.match(/\{[\s\S]*\}/);
       if (jm3) { try { a = JSON.parse(jm3[0]).angle || ''; } catch { const mm = t3.match(/"angle"\s*:\s*"((?:[^"\\]|\\.)*)"/); a = mm ? mm[1] : ''; } }
