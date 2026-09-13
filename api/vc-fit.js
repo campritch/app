@@ -1,10 +1,38 @@
-// AI fit read for the VC CRM (/raise): given one fund's data, Claude writes a
+// AI fit read for the VC CRM (/raise): given one fund's data, the model writes a
 // short honest brief on whether it's a real fit for the SpotsNow seed round,
 // and proposes rubric dims when the fund is ungraded. Auth: sn_vc cookie.
+// Provider: OpenAI when OPENAI_API_KEY is set, else Anthropic (ANTHROPIC_API_KEY).
 import Anthropic from '@anthropic-ai/sdk';
 import { verifySession } from '../lib/auth.js';
 
 const MODEL = 'claude-sonnet-5';
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o';
+
+// One text-in / text-out call, routed to whichever provider is configured.
+// Prefers OpenAI (JSON mode) so the CRM keeps working while Anthropic is capped.
+async function callLLM({ system, user, maxTokens }) {
+  const oaiKey = process.env.OPENAI_API_KEY;
+  if (oaiKey) {
+    const r = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + oaiKey },
+      body: JSON.stringify({
+        model: OPENAI_MODEL,
+        max_tokens: maxTokens,
+        response_format: { type: 'json_object' },
+        messages: [{ role: 'system', content: system }, { role: 'user', content: user }]
+      })
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error((d.error && d.error.message) || ('OpenAI HTTP ' + r.status));
+    return (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
+  }
+  const anthKey = process.env.ANTHROPIC_API_KEY;
+  if (!anthKey) throw new Error('No OPENAI_API_KEY or ANTHROPIC_API_KEY configured');
+  const client = new Anthropic({ apiKey: anthKey });
+  const msg = await client.messages.create({ model: MODEL, max_tokens: maxTokens, system, messages: [{ role: 'user', content: user }] });
+  return (msg.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+}
 
 const SYSTEM = `You grade venture funds for SpotsNow's $3M seed raise and write short, SPECIFIC fit briefs. Cam Pritchard is the founder/CEO.
 
@@ -20,7 +48,7 @@ MOAT / WHY THEY WIN: Every competitor (Spotify, Gumball, Acast, CreatorX, Agenti
 
 FIVE THESIS SURFACES a fund can hit: (1) marketplaces / network effects, (2) creator economy / media / entertainment, (3) adtech / ad measurement / martech, (4) AI-native + agentic + data moats, (5) commerce / vertical SaaS for media businesses. Two or more = strong thesis fit. A pure enterprise-infra, biotech, climate, hardware, or fintech-only fund is a weak thesis fit and must score low - do NOT hand out generic "good fit" language to funds that don't actually touch these surfaces.
 
-GROUND THE READ IN REAL DATA: When website_text is provided, it was scraped live from the fund's own site just now - treat it as current truth ABOVE your training memory (funds change stage, thesis, and check size). When the web_search tool is available and the provided data is thin, search for the fund (name + 'venture'/'capital') to verify their actual stage, check size, thesis, and recent portfolio BEFORE scoring. Cite a real portfolio company or their stated focus in the brief. Only fall back to memory when neither is available; if the fund is genuinely unidentifiable, say so and use null dims.
+GROUND THE READ IN REAL DATA: When website_text is provided, it was scraped live from the fund's own site just now - treat it as current truth ABOVE your training memory (funds change stage, thesis, and check size). Cite a real portfolio company or their stated focus in the brief. When there is no website_text, use your best knowledge of the fund by name; if the fund is genuinely unidentifiable, say so and use null dims rather than inventing details.
 
 RUBRIC DIMS (0-100), weights thesis .30 / stage .25 / check .20 / portfolio .15 / geo .10:
 - thesis: how many of the five surfaces they hit, and how central creator/marketplace/adtech is to them.
@@ -66,14 +94,15 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'POST only' });
   }
   if (!(await authed(req))) return res.status(401).json({ error: 'locked' });
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
+  if (!process.env.OPENAI_API_KEY && !process.env.ANTHROPIC_API_KEY) {
+    return res.status(500).json({ error: 'No OPENAI_API_KEY or ANTHROPIC_API_KEY configured' });
+  }
 
   const { fund, angle } = req.body || {};
   if (!fund || !fund.name) return res.status(400).json({ error: 'fund required' });
 
   // Ground the read: pull the fund's live website copy (fast, cheap). If there's
-  // no site, let the model web-search to verify instead.
+  // no site, the model uses its own knowledge of the fund by name.
   const websiteText = await fetchSiteText(fund.site);
 
   // Angle mode: one persuasive sentence connecting SpotsNow to THIS fund, for a
@@ -85,15 +114,9 @@ export default async function handler(req, res) {
       website_text: websiteText || null
     };
     try {
-      const client = new Anthropic({ apiKey });
-      const req3 = {
-        model: MODEL, max_tokens: 300, system: SYSTEM,
-        messages: [{ role: 'user', content: 'Fund data:\n' + JSON.stringify(anglePayload) +
-          '\n\nWrite ONE sentence (max 28 words): the single strongest, SPECIFIC reason SpotsNow is a compelling fit for THIS fund - the connect-the-dots angle Cam can hand a connector to justify a warm intro. Tie it to their actual thesis, portfolio, or a named bet. Confident but honest; no hype words, no em-dashes. Return STRICT JSON only: {"angle":"..."}' }]
-      };
-      if (!websiteText) req3.tools = [{ type: 'web_search_20250305', name: 'web_search', max_uses: 2 }];
-      const m3 = await client.messages.create(req3);
-      const t3 = (m3.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+      const t3 = await callLLM({ system: SYSTEM, maxTokens: 300,
+        user: 'Fund data:\n' + JSON.stringify(anglePayload) +
+          '\n\nWrite ONE sentence (max 28 words): the single strongest, SPECIFIC reason SpotsNow is a compelling fit for THIS fund - the connect-the-dots angle Cam can hand a connector to justify a warm intro. Tie it to their actual thesis, portfolio, or a named bet. Confident but honest; no hype words, no em-dashes. Return STRICT JSON only: {"angle":"..."}' });
       let a = '';
       const jm3 = t3.match(/\{[\s\S]*\}/);
       if (jm3) { try { a = JSON.parse(jm3[0]).angle || ''; } catch { const mm = t3.match(/"angle"\s*:\s*"((?:[^"\\]|\\.)*)"/); a = mm ? mm[1] : ''; } }
@@ -116,19 +139,8 @@ export default async function handler(req, res) {
   };
 
   try {
-    const client = new Anthropic({ apiKey });
-    const req2 = {
-      model: MODEL,
-      max_tokens: 1000,
-      system: SYSTEM,
-      messages: [{ role: 'user', content: 'Fund data:\n' + JSON.stringify(payload) }]
-    };
-    // No live site copy? Give the model a live web search to verify (capped).
-    if (!websiteText) {
-      req2.tools = [{ type: 'web_search_20250305', name: 'web_search', max_uses: 2 }];
-    }
-    const msg = await client.messages.create(req2);
-    const text = (msg.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+    const text = await callLLM({ system: SYSTEM, maxTokens: 1000,
+      user: 'Fund data:\n' + JSON.stringify(payload) });
     const jm = text.match(/\{[\s\S]*\}/);
     if (!jm) return res.status(502).json({ error: 'unparseable model output' });
     let out;
