@@ -69,12 +69,40 @@ export default async function handler(req, res) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
 
-  const { fund } = req.body || {};
+  const { fund, angle } = req.body || {};
   if (!fund || !fund.name) return res.status(400).json({ error: 'fund required' });
 
   // Ground the read: pull the fund's live website copy (fast, cheap). If there's
   // no site, let the model web-search to verify instead.
   const websiteText = await fetchSiteText(fund.site);
+
+  // Angle mode: one persuasive sentence connecting SpotsNow to THIS fund, for a
+  // warm intro. Positive and specific - the reason a connector would make the intro.
+  if (angle) {
+    const anglePayload = {
+      name: fund.name, site: fund.site, sectors: fund.sectors, region: fund.region,
+      about: (fund.looking || '').slice(0, 900), history: (fund.ctx || []).slice(0, 10),
+      website_text: websiteText || null
+    };
+    try {
+      const client = new Anthropic({ apiKey });
+      const req3 = {
+        model: MODEL, max_tokens: 300, system: SYSTEM,
+        messages: [{ role: 'user', content: 'Fund data:\n' + JSON.stringify(anglePayload) +
+          '\n\nWrite ONE sentence (max 28 words): the single strongest, SPECIFIC reason SpotsNow is a compelling fit for THIS fund - the connect-the-dots angle Cam can hand a connector to justify a warm intro. Tie it to their actual thesis, portfolio, or a named bet. Confident but honest; no hype words, no em-dashes. Return STRICT JSON only: {"angle":"..."}' }]
+      };
+      if (!websiteText) req3.tools = [{ type: 'web_search_20250305', name: 'web_search', max_uses: 2 }];
+      const m3 = await client.messages.create(req3);
+      const t3 = (m3.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+      let a = '';
+      const jm3 = t3.match(/\{[\s\S]*\}/);
+      if (jm3) { try { a = JSON.parse(jm3[0]).angle || ''; } catch { const mm = t3.match(/"angle"\s*:\s*"((?:[^"\\]|\\.)*)"/); a = mm ? mm[1] : ''; } }
+      if (!a) a = t3.trim();
+      return res.status(200).json({ angle: String(a || '').replace(/^["']|["']$/g, '').slice(0, 240) });
+    } catch (err) {
+      return res.status(500).json({ error: String(err?.message || err) });
+    }
+  }
 
   const payload = {
     name: fund.name, site: fund.site, type: fund.type, region: fund.region,

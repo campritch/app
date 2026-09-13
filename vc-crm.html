@@ -3281,6 +3281,24 @@ async function aiFitFetch(f){
   return data;
 }
 
+// One-sentence "why SpotsNow is a strong fit for this fund" intro angle, cached
+// on the fund so it's generated once and dropped into the export CSV.
+async function aiAngleFetch(f){
+  if (!f) return '';
+  if (FS(f.id).introAngle) return FS(f.id).introAngle;
+  const r = await fetch('/api/vc-fit', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ angle: true, fund: {
+      name: f.name, site: f.site, type: f.type, region: f.region, check: f.check,
+      sectors: f.sectors, tier: f.tier, looking: f.looking,
+      ctx: f.ctx || []
+    }})
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+  if (data.angle) { FS(f.id).introAngle = data.angle; save(); }
+  return FS(f.id).introAngle || '';
+}
 /* A firm graded in ANY connector's sheet never gets re-graded elsewhere. */
 function findSheetDims(name){
   const n = normOrg(name);
@@ -3595,7 +3613,11 @@ function openConnector(id, preselect){
     // a source filter can hide rows - keep their saved checked state
     return checked.concat((st.included || []).filter(pid => !visible.has(pid))).filter(pid => !pidArchived(pid));
   };
-  document.querySelectorAll('[data-inc]').forEach(cb => cb.addEventListener('change', () => { st.curated = true; st.included = included(); save(); }));
+  document.querySelectorAll('[data-inc]').forEach(cb => cb.addEventListener('change', () => {
+    st.curated = true; st.included = included(); save();
+    // generate the intro angle in the background as soon as it's checked (cached)
+    if (cb.checked) { const p = PERSON_BY_ID[cb.dataset.inc]; const f = p && FUND_BY_ID[p.fundId]; if (f && !FS(f.id).introAngle) aiAngleFetch(f).catch(() => {}); }
+  }));
   if (!st.curated) { st.included = [...checkedSet]; save(); }
 
   $('dAddMatch').onclick = () => {
@@ -3650,20 +3672,39 @@ function openConnector(id, preselect){
     const ids = ((st.included && st.included.length) ? st.included
       : [...document.querySelectorAll('[data-inc]:checked')].map(cb => cb.dataset.inc)).filter(pid => !pidArchived(pid));
     if (!ids.length) { toast('Check the people you want intros to first.'); return; }
-    const rows = [['Person','Fund','Title','Fit','Grade','Why','LinkedIn','Email','Status'].join(',')];
-    ids.forEach(pid => {
-      const p = PERSON_BY_ID[pid]; if (!p) return;
-      const f = FUND_BY_ID[p.fundId]; if (!f) return;
-      const sc = f.dims ? Math.round(score(f)) + '/100' : '';
-      rows.push([p.tbd ? '' : p.name, f.name, p.title || '', sc, f.dims ? grade(f) : '',
-        fundWhyLine(f), personLi(p) || '', p.email0 || '', 'Requested']
-        .map(v => '"' + String(v||'').replace(/"/g,'""') + '"').join(','));
-    });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([rows.join('\n')], { type:'text/csv' }));
-    a.download = 'intros-' + slug(connName(c)) + '-selected.csv';
-    a.click(); URL.revokeObjectURL(a.href);
-    toast(`Downloaded ${ids.length} - send to ${firstName(connName(c))} to start the intros.`);
+    const btn = $('dExportInc');
+    const doExport = () => {
+      const rows = [['Person','Fund','Title','Fit','Grade','Why it fits','Intro angle (why SpotsNow fits them)','LinkedIn','Email','Status'].join(',')];
+      ids.forEach(pid => {
+        const p = PERSON_BY_ID[pid]; if (!p) return;
+        const f = FUND_BY_ID[p.fundId]; if (!f) return;
+        const sc = f.dims ? Math.round(score(f)) + '/100' : '';
+        rows.push([p.tbd ? '' : p.name, f.name, p.title || '', sc, f.dims ? grade(f) : '',
+          fundWhyLine(f), FS(f.id).introAngle || '', personLi(p) || '', p.email0 || '', 'Requested']
+          .map(v => '"' + String(v||'').replace(/"/g,'""') + '"').join(','));
+      });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([rows.join('\n')], { type:'text/csv' }));
+      a.download = 'intros-' + slug(connName(c)) + '-selected.csv';
+      a.click(); URL.revokeObjectURL(a.href);
+      toast(`Downloaded ${ids.length} - send to ${firstName(connName(c))} to start the intros.`);
+    };
+    // Fill any missing intro angles first (checked-but-not-yet-generated, e.g. from Select all).
+    const need = ids.map(pid => (PERSON_BY_ID[pid]||{}).fundId).filter(Boolean)
+      .filter((fid, i, arr) => arr.indexOf(fid) === i)
+      .map(fid => FUND_BY_ID[fid]).filter(f => f && !FS(f.id).introAngle);
+    if (!need.length) { doExport(); return; }
+    if (btn) { btn.disabled = true; }
+    let done = 0;
+    toast(`Writing intro angles for ${need.length} fund${need.length===1?'':'s'}...`);
+    (async () => {
+      for (const f of need) {
+        try { await aiAngleFetch(f); } catch (e) {}
+        done++; if (btn) btn.textContent = `Angles ${done}/${need.length}...`;
+      }
+      if (btn) { btn.disabled = false; btn.textContent = 'Export selected'; }
+      doExport();
+    })();
   };
   if ($('dSelectAllInc')) {
     const btn = $('dSelectAllInc');
