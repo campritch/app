@@ -10,9 +10,11 @@ const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o';
 
 // One text-in / text-out call, routed to whichever provider is configured.
 // Prefers OpenAI (JSON mode) so the CRM keeps working while Anthropic is capped.
+let LAST_PROVIDER = null;   // which provider answered the most recent call
 async function callLLM({ system, user, maxTokens }) {
   const oaiKey = process.env.OPENAI_API_KEY;
   if (oaiKey) {
+    LAST_PROVIDER = 'openai:' + OPENAI_MODEL;
     const r = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + oaiKey },
@@ -29,6 +31,7 @@ async function callLLM({ system, user, maxTokens }) {
   }
   const anthKey = process.env.ANTHROPIC_API_KEY;
   if (!anthKey) throw new Error('No OPENAI_API_KEY or ANTHROPIC_API_KEY configured');
+  LAST_PROVIDER = 'anthropic:' + MODEL;
   const client = new Anthropic({ apiKey: anthKey });
   const msg = await client.messages.create({ model: MODEL, max_tokens: maxTokens, system, messages: [{ role: 'user', content: user }] });
   return (msg.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
@@ -121,7 +124,7 @@ export default async function handler(req, res) {
       const jm3 = t3.match(/\{[\s\S]*\}/);
       if (jm3) { try { a = JSON.parse(jm3[0]).angle || ''; } catch { const mm = t3.match(/"angle"\s*:\s*"((?:[^"\\]|\\.)*)"/); a = mm ? mm[1] : ''; } }
       if (!a) a = t3.trim();
-      return res.status(200).json({ angle: String(a || '').replace(/^["']|["']$/g, '').slice(0, 240) });
+      return res.status(200).json({ angle: String(a || '').replace(/^["']|["']$/g, '').slice(0, 240), provider: LAST_PROVIDER });
     } catch (err) {
       return res.status(500).json({ error: String(err?.message || err) });
     }
@@ -166,7 +169,8 @@ export default async function handler(req, res) {
     return res.status(200).json({
       brief: String(out.brief || '').slice(0, 1200),
       one_liner: String(out.one_liner || '').slice(0, 120),
-      dims: dims
+      dims: dims,
+      provider: LAST_PROVIDER
     });
   } catch (err) {
     return res.status(500).json({ error: String(err?.message || err) });
