@@ -244,7 +244,8 @@
 
     .fund-cell { display: flex; flex-direction: column; gap: 2px; min-width: 160px; }
     .fund-name { font-weight: 500; color: var(--foreground); display: flex; align-items: center; gap: 6px; font-size: 13px; }
-    .fund-info { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; padding: 0; border: none; background: none; border-radius: 999px; color: var(--muted-foreground); cursor: pointer; opacity: .5; transition: opacity .12s, background .12s, color .12s; flex-shrink: 0; }
+    .fund-subrow { display: flex; align-items: center; gap: 8px; }
+    .fund-info { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; padding: 0; border: none; background: none; border-radius: 999px; color: var(--muted-foreground); cursor: pointer; opacity: .55; transition: opacity .12s, background .12s, color .12s; flex-shrink: 0; }
     tr:hover .fund-info { opacity: 1; }
     .fund-info:hover { background: var(--accent); color: var(--primary); }
     .fund-sub { font-size: 11.5px; color: var(--muted-foreground); }
@@ -1049,7 +1050,7 @@ function rebuild(){
   // AI-proposed dims for previously ungraded funds, persisted in state.
   FUNDS.forEach(f => {
     const st = state.funds && state.funds[f.id];
-    if (!f.dims && st && st.aiDims) f.dims = st.aiDims;
+    if (st && st.aiDims) f.dims = st.aiDims;   // a real AI grade overrides the seed rubric estimate
     if (st && st.site) f.site = st.site;
   });
   // Persisted match additions for the built-in connectors (their objects are code constants).
@@ -2151,7 +2152,7 @@ function renderFundsTable(){
     <th class="hide-md">Why it fits</th>
     <th class="hide-md" style="width:74px">Source</th>
     <th class="sortable" data-hsort="stage" style="width:96px">Stage${hArrow('stage')}</th>
-    <th class="sortable" data-hsort="people" style="width:52px">People${hArrow('people')}</th>
+    <th class="sortable" data-hsort="people" style="width:74px">People${hArrow('people')}</th>
     <th style="width:34px"></th>
     <th style="width:150px"></th>
   </tr>`;
@@ -2164,8 +2165,11 @@ function renderFundsTable(){
     return `<tr data-fundrow="${f.id}" class="${selected.has(f.id)?'selected':''} ${open?'expanded':''} ${fundArchiveView?'arch-dim':''} ${isCompetitor(f)?'competitor-dim':''}">
       <td><input type="checkbox" class="row-check" data-check="${f.id}" ${selected.has(f.id)?'checked':''}></td>
       <td class="fund-td"><div class="fund-cell">
-        <span class="fund-name">${esc(f.name)}${isCompetitor(f)?' <span class="pill--competitor" title="'+esc(f.competitorNote||'Backs a direct competitor')+'">COMPETITOR</span>':''}${introAvatarsHtml(f)}<button type="button" class="fund-info" title="Quick look - the full fund read" onclick="event.stopPropagation();togglePeek('${f.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button></span>
-        ${f.site ? `<a class="fund-site" href="https://${esc(f.site)}" target="_blank" rel="noopener" data-noopen title="Open website">${esc(f.site)}</a>` : ''}
+        <span class="fund-name">${esc(f.name)}${isCompetitor(f)?' <span class="pill--competitor" title="'+esc(f.competitorNote||'Backs a direct competitor')+'">COMPETITOR</span>':''}${introAvatarsHtml(f)}</span>
+        <div class="fund-subrow">
+          ${f.site ? `<a class="fund-site" href="https://${esc(f.site)}" target="_blank" rel="noopener" data-noopen title="Open website">${esc(f.site)}</a>` : ''}
+          <button type="button" class="fund-info" title="Quick look - the full fund read" onclick="event.stopPropagation();togglePeek('${f.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>
+        </div>
       </div></td>
       <td>${gradePillHtml(f)}</td>
       <td style="white-space:nowrap;font-weight:600">${checkFmt(f)}</td>
@@ -2177,7 +2181,7 @@ function renderFundsTable(){
       <td><div style="display:flex;gap:6px;align-items:center;white-space:nowrap">
         <span style="font-weight:700">${ppl.length}</span>
         <button class="add-ava" data-addperson="${f.id}" title="Add person to ${esc(f.name)}">${PLUS_ICON}</button>
-        ${tbd ? `<span class="pill pill--needs">${tbd} unmapped</span>` : ''}
+        ${tbd ? `<span class="pill pill--needs" title="${tbd} partner${tbd>1?'s':''} not yet mapped - add their name">⚠ ${tbd}</span>` : ''}
       </div></td>
       <td>${warmthCellHtml(f)}</td>
       <td style="text-align:right"><div class="row-actions">
