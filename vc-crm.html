@@ -717,6 +717,7 @@
     <div class="page-card__inner">
       <div class="tab-row" id="tabRow">
         <button class="tab active" data-tab="funds">All funds <span class="count" id="cntFunds">0</span></button>
+        <button class="tab" data-tab="todo">To-do <span class="count" id="cntTodo">0</span></button>
         <button class="tab" data-tab="contacted">Contacted <span class="count" id="cntContacted">0</span></button>
         <button class="tab" data-tab="targets">Targets <span class="count" id="cntTargets">0</span></button>
         <button class="tab" data-tab="needintros">Need intros <span class="count" id="cntNeedintros">0</span></button>
@@ -726,7 +727,7 @@
         <button class="tab" data-tab="closed">Closed <span class="count" id="cntClosed">0</span></button>
         <button class="tab" data-tab="disqualified">Disqualified <span class="count" id="cntDisqualified">0</span></button>
         <button class="tab" data-tab="followups">Follow-ups <span class="count" id="cntFollowups">0</span></button>
-        <button class="tab" data-tab="future">Future rounds <span class="count" id="cntFuture">0</span></button>
+        <button class="tab" data-tab="future">Future <span class="count" id="cntFuture">0</span></button>
       </div>
     </div>
 
@@ -1432,8 +1433,9 @@ const P_STATUS = {
 };
 const C_STATUS = { none:'Not asked', draft:'Ask drafted', asked:'Asked', agreed:'Agreed', declined:'Declined' };
 /* Fund pipeline stages — the core CRM flow. */
-const F_STAGES = { none:'Backlog', contacted:'\ud83d\udce8 Contacted', target:'\ud83c\udfaf Target', needintros:'\ud83e\udd1d Need intros', messaged:'\ud83d\udcac Messaged', booked:'\u2705 Booked', pitching:'\ud83c\udfa4 Pitching', closed:'\u274c Closed', disqualified:'\ud83d\udeab Disqualified', future:'\u23f3 Future rounds' };
-const STAGE_TABS = ['funds','contacted','targets','needintros','messaged','booked','pitching','closed','disqualified','future'];
+const F_STAGES = { none:'Backlog', contacted:'\ud83d\udce8 Contacted', target:'\ud83c\udfaf Target', needintros:'\ud83e\udd1d Need intros', messaged:'\ud83d\udcac Messaged', booked:'\u2705 Booked', pitching:'\ud83c\udfa4 Pitching', closed:'\u274c Closed', disqualified:'\ud83d\udeab Disqualified', future:'\u23f3 Future' };
+// 'todo' is a virtual tab = unassigned funds (stage none); it maps to stage 'none'.
+const STAGE_TABS = ['funds','todo','contacted','targets','needintros','messaged','booked','pitching','closed','disqualified','future'];
 const WARMTH = { hot:'\ud83d\udd25 Hot', warm:'\u2600\ufe0f Warm', cool:'\ud83d\udd35 Cool', cold:'\ud83e\udd76 Cold', na:'\u2014 Not set' };
 const WARMTH_ICON = { na:'\u25cb', hot:'\ud83d\udd25', warm:'\u2600\ufe0f', cool:'\ud83d\udd35', cold:'\ud83e\udd76' };
 /* Where the fund came from: the master lists (grey) or OpenVC (light orange). */
@@ -1762,7 +1764,7 @@ function visibleFunds(){
   let rows = FUNDS.filter(f => fundMatchesFilters(f) && (!searchQ || [f.name,(f.sectors||[]).join(' '),f.looking,f.region,f.type,(f.people||[]).map(p=>p.n).join(' ')].join(' ').toLowerCase().includes(searchQ)));
   rows = rows.filter(f => isFundArchived(f) === fundArchiveView);
   if (!fundArchiveView && currentTab !== 'funds' && STAGE_TABS.includes(currentTab)) {
-    const want = currentTab === 'targets' ? 'target' : currentTab;
+    const want = currentTab === 'targets' ? 'target' : currentTab === 'todo' ? 'none' : currentTab;
     rows = rows.filter(f => fStage(f) === want);
   }
   const peopleCount = f => PEOPLE.filter(p => p.fundId === f.id).length;
@@ -2046,6 +2048,7 @@ function render(){
   const activeFunds = FUNDS.filter(f => !isFundArchived(f));
   $('cntFunds').textContent = activeFunds.length;
   const stageCount = s => activeFunds.filter(f => fStage(f) === s).length;
+  $('cntTodo').textContent = stageCount('none');
   $('cntContacted').textContent = stageCount('contacted');
   $('cntTargets').textContent = stageCount('target');
   $('cntNeedintros').textContent = stageCount('needintros');
