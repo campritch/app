@@ -226,7 +226,7 @@
 
     /* ── Table ── */
     .table-wrap { overflow-x: auto; }
-    table { width: 100%; min-width: 1080px; border-collapse: collapse; table-layout: fixed; }
+    table { width: 100%; min-width: 940px; border-collapse: collapse; table-layout: fixed; }
     thead th {
       text-align: left; font-size: 12.5px; font-weight: 500;
       color: var(--muted-foreground); text-transform: none; letter-spacing: 0;
@@ -350,7 +350,7 @@
     .intro-ava i { font-style: normal; font-size: 8.5px; font-weight: 700; letter-spacing: 0; }
     .intro-ava img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
     .why-cell {
-      font-size: 11.5px; color: var(--text-secondary); line-height: 1.45; max-width: 260px;
+      font-size: 11.5px; color: var(--text-secondary); line-height: 1.45; max-width: none;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
 
@@ -2143,17 +2143,17 @@ function personSubRows(f){
 function renderFundsTable(){
   $('tableHead').innerHTML = `<tr>
     <th style="width:34px"><input type="checkbox" class="row-check" id="checkAll"></th>
-    <th class="sortable" data-hsort="name" style="width:168px">Fund${hArrow('name')}</th>
-    <th class="sortable" data-hsort="fit" style="width:78px">Fit${hArrow('fit')}</th>
-    <th class="sortable" data-hsort="check" style="width:100px">Check${hArrow('check')}</th>
-    <th class="sortable" data-hsort="wayin" style="width:128px">Way in${hArrow('wayin')}</th>
-    <th class="sortable hide-md" data-hsort="profile" style="width:138px">Profile${hArrow('profile')}</th>
+    <th class="sortable" data-hsort="name" style="width:154px">Fund${hArrow('name')}</th>
+    <th class="sortable" data-hsort="fit" style="width:74px">Fit${hArrow('fit')}</th>
+    <th class="sortable" data-hsort="check" style="width:90px">Check${hArrow('check')}</th>
+    <th class="sortable" data-hsort="wayin" style="width:104px">Way in${hArrow('wayin')}</th>
+    <th class="sortable hide-md" data-hsort="profile" style="width:118px">Profile${hArrow('profile')}</th>
     <th class="hide-md">Why it fits</th>
-    <th class="hide-md" style="width:88px">Source</th>
-    <th class="sortable" data-hsort="stage" style="width:104px">Stage${hArrow('stage')}</th>
-    <th class="sortable" data-hsort="people" style="width:56px">People${hArrow('people')}</th>
-    <th style="width:36px"></th>
-    <th style="width:142px"></th>
+    <th class="hide-md" style="width:74px">Source</th>
+    <th class="sortable" data-hsort="stage" style="width:96px">Stage${hArrow('stage')}</th>
+    <th class="sortable" data-hsort="people" style="width:52px">People${hArrow('people')}</th>
+    <th style="width:34px"></th>
+    <th style="width:150px"></th>
   </tr>`;
   const rows = visibleFunds();
   const shown = rows.slice(0, renderCap);
