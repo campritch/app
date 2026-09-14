@@ -422,6 +422,8 @@
       font-size: 12px; font-weight: 600;
     }
     .connector-card__name { font-size: 14px; font-weight: 600; letter-spacing: -0.1px; }
+    .req-check { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 999px; background: #16a34a; color: #fff; font-size: 10px; font-weight: 800; flex-shrink: 0; }
+    .req-pill { background: #dcfce7; color: #15803d; font-weight: 700; }
     .connector-card__role { font-size: 12.5px; color: var(--muted-foreground); }
     .connector-card__matches { display: flex; flex-wrap: wrap; gap: 4px; }
     .connector-card__foot { display: flex; align-items: center; justify-content: space-between; margin-top: 2px; }
@@ -1564,6 +1566,18 @@ function backlogTwin(f){
   const t = seedTwinMemo.get(n);
   return (t && t.f.id !== f.id && (t.f.dims || t.f.looking)) ? t.f : null;
 }
+// How many funds you've marked as intro-requested from each connector (for the
+// checkmark on the connector card). Rebuilt on render.
+let requestedConnMemo = null;
+function requestedCountFor(cid){
+  if (!requestedConnMemo) {
+    requestedConnMemo = {};
+    Object.values(state.funds || {}).forEach(fs => {
+      (fs.requestedFrom || []).forEach(id => { requestedConnMemo[id] = (requestedConnMemo[id] || 0) + 1; });
+    });
+  }
+  return requestedConnMemo[cid] || 0;
+}
 let fundConnMemo = null;
 function fundConnMap(){
   if (fundConnMemo) return fundConnMemo;
@@ -2003,6 +2017,7 @@ function render(){
   fundConnMemo = null;
   fundConnListMemo = null;
   seedTwinMemo = null;
+  requestedConnMemo = null;
   const isStageTab = STAGE_TABS.includes(currentTab);
   const isTable = isStageTab || ['people','followups'].includes(currentTab);
   $('tableView').style.display = isTable ? 'block' : 'none';
@@ -2306,12 +2321,13 @@ function connectorCardHtml(c){
   const cst = st.status || 'none';
   const due = connectorFollowUp(c);
   const matches = (c.matches||[]).map(pid => PERSON_BY_ID[pid]).filter(Boolean);
+  const reqCount = requestedCountFor(c.id);
   return `<div class="connector-card ${connSelected.has(c.id)?'selected-card':''} ${isSuper(c)?'superc':''}" data-conn="${c.id}">
     <div class="connector-card__top">
       <span class="partner-ava">${esc((c.name||'?').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase())}</span>
       <div style="min-width:0;flex:1">
         <div class="connector-card__name" style="display:flex;align-items:center;gap:6px">${esc(connName(c))}
-          <a class="li-link" href="${esc(c.li || ('https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(c.name)))}" target="_blank" rel="noopener" title="Open LinkedIn">${LI_ICON}</a></div>
+          <a class="li-link" href="${esc(c.li || ('https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(c.name)))}" target="_blank" rel="noopener" title="Open LinkedIn">${LI_ICON}</a>${reqCount ? `<span class="req-check" title="You've requested ${reqCount} intro${reqCount===1?'':'s'} from ${esc(firstName(connName(c)))}">✓</span>` : ''}</div>
         <div class="connector-card__role">${esc(c.role||'')}</div>
       </div>
       <input type="checkbox" class="done-check" data-connsel="${c.id}" ${connSelected.has(c.id)?'checked':''} title="Select for bulk actions">
@@ -2325,6 +2341,7 @@ function connectorCardHtml(c){
     </div>
     <div class="connector-card__foot">
       <span class="pill pill--cst-${cst}">${C_STATUS[cst]}</span>
+      ${reqCount ? `<span class="pill req-pill" title="Intros you've requested from ${esc(firstName(connName(c)))}">\u2713 ${reqCount} requested</span>` : ''}
       <button type="button" class="mini-btn superc-btn ${isSuper(c)?'on':''}" data-supertoggle="${c.id}" style="border:none;box-shadow:none;background:none;padding:0 4px">${isSuper(c) ? 'Super connector \u2713' : 'Mark super connector'}</button>
       ${due ? `<span class="pill ${due.cls}">${due.label}</span>` : `<span style="font-size:12px;color:var(--muted-foreground)">${matches.length} match${matches.length===1?'':'es'}</span>`}
     </div>
@@ -3724,8 +3741,7 @@ function openConnector(id, preselect){
       a.href = URL.createObjectURL(new Blob([rows.join('\n')], { type:'text/csv' }));
       a.download = 'intros-' + slug(connName(c)) + '-selected.csv';
       a.click(); URL.revokeObjectURL(a.href);
-      markRequested(ids, c.id);   // exporting = you've asked this connector for these intros
-      toast(`Downloaded ${ids.length} - marked as requested from ${firstName(connName(c))}.`);
+      toast(`Downloaded ${ids.length} - send to ${firstName(connName(c))} to start the intros.`);
     };
     // Fill any missing intro angles first (checked-but-not-yet-generated, e.g. from Select all).
     const need = ids.map(pid => (PERSON_BY_ID[pid]||{}).fundId).filter(Boolean)
