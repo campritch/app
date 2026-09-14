@@ -919,6 +919,7 @@ Dana Whitfield, Overline, worked together at Techstars,"></textarea>
     <button class="bulk-btn bulk-fund" data-bulkstage="closed">→ Closed</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="disqualified">→ Disqualified</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="future">→ Future rounds</button>
+    <button class="bulk-btn bulk-fund" id="bulkGrade" style="font-weight:600">✨ Grade selected</button>
     <button class="bulk-btn bulk-people" id="bulkArchiveP">Archive</button>
     <button class="bulk-btn bulk-people" id="bulkPaths">Find connector paths</button>
     <button class="bulk-btn bulk-fund" id="bulkRemove">Remove funds</button>
@@ -4529,6 +4530,28 @@ $('bulkRemove').addEventListener('click', () => {
   selected.clear();
   save(); rebuild(); render();
   toast('Removed.');
+});
+$('bulkGrade').addEventListener('click', async () => {
+  if (!STAGE_TABS.includes(currentTab) || !selected.size) return;
+  const btn = $('bulkGrade');
+  const targets = [...selected].map(id => FUND_BY_ID[id]).filter(f => f && !FS(f.id).aiGraded && !isCompetitor(f));
+  if (!targets.length) { toast('Those are already graded (or competitors). Nothing to grade.'); return; }
+  btn.disabled = true;
+  let done = 0, failed = 0;
+  toast(`Grading ${targets.length} selected fund${targets.length===1?'':'s'}...`);
+  let i = 0;
+  const worker = async () => {
+    while (i < targets.length) {
+      const f = targets[i++];
+      try { await aiFitFetch(f); } catch (e) { failed++; }
+      done++; btn.textContent = `Grading ${done}/${targets.length}...`;
+      if (done % 3 === 0) { save(); render(); }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(5, targets.length) }, worker));
+  btn.disabled = false; btn.textContent = '✨ Grade selected';
+  save(); render();
+  toast(`Graded ${done - failed} of ${targets.length}${failed ? ` (${failed} failed - try again)` : ''}.`);
 });
 $('bulkClear').addEventListener('click', () => { selected.clear(); connSelected.clear(); render(); });
 $('bulkBar').addEventListener('click', e => {

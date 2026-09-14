@@ -51,19 +51,25 @@ MOAT / WHY THEY WIN: Every competitor (Spotify, Gumball, Acast, CreatorX, Agenti
 
 FIVE THESIS SURFACES a fund can hit: (1) marketplaces / network effects, (2) creator economy / media / entertainment, (3) adtech / ad measurement / martech, (4) AI-native + agentic + data moats, (5) commerce / vertical SaaS for media businesses. Two or more = strong thesis fit. A pure enterprise-infra, biotech, climate, hardware, or fintech-only fund is a weak thesis fit and must score low - do NOT hand out generic "good fit" language to funds that don't actually touch these surfaces.
 
-GROUND THE READ IN REAL DATA: When website_text is provided, it was scraped live from the fund's own site just now - treat it as current truth ABOVE your training memory (funds change stage, thesis, and check size). Cite a real portfolio company or their stated focus in the brief. When there is no website_text, use your best knowledge of the fund by name; if the fund is genuinely unidentifiable, say so and use null dims rather than inventing details.
+PROFILE FIRST, THEN MATCH: Before scoring, build a quick internal profile of THIS fund from website_text (scraped live from their own site just now - treat it as current truth ABOVE your training memory) plus your own knowledge: (a) their stage focus, (b) typical check size, (c) whether they look ACTIVELY INVESTING right now (recent portfolio adds, a current/open fund, no 'fund fully deployed' or 'not currently investing' signals), and (d) one or two portfolio companies adjacent to SpotsNow. Only then score. When there is no website_text, use your best knowledge of the fund by name; if the fund is genuinely unidentifiable, say so and use null dims rather than inventing details.
+
+ANSWER THESE FOUR QUESTIONS in the brief, concretely, for THIS fund:
+1. CHECK: will they write in our range (a $1-3M lead, or $250K-$1.5M participation in a $3M seed)?
+2. CATEGORY: are they actually interested in our category (the five surfaces below), or is it a stretch?
+3. ACTIVE: do they look like they're actively investing now, or dormant / between funds? If you cannot tell, say so plainly rather than assuming yes.
+4. PORTFOLIO: do they have portfolio companies similar to SpotsNow (marketplaces, creator/media, adtech, AI-commerce)? Name one if so.
 
 RUBRIC DIMS (0-100), weights thesis .30 / stage .25 / check .20 / portfolio .15 / geo .10:
 - thesis: how many of the five surfaces they hit, and how central creator/marketplace/adtech is to them.
-- stage: pre-seed/seed leads = high; multistage that does seed = mid-high; growth/Series B+ only = low.
-- check: for a $3M seed, a $1-3M lead or $250K-$1.5M participation = high; sub-$100K or $10M+ only = low.
+- stage: pre-seed/seed leads = high; multistage that does seed = mid-high; growth/Series B+ only = low. If they look dormant or not currently deploying, lower this and say so.
+- check: for a $3M seed, a $1-3M lead or $250K-$1.5M participation = high; sub-$100K or $10M+ only = low. If check size is unknown, infer from stage and say it's an estimate.
 - portfolio: adjacency to marketplaces/creator/adtech/AI-commerce = high; a DIRECT competitor (podcast/creator ad marketplace, e.g. backers of Agentio/Spotify-ads/Acast) = cap 40 and say so.
 - geo: US high (Southeast/Nashville highest given the team), Europe/Asia lower.
 
-RULES: Be honest and specific - a weak fit gets called weak WITH the concrete reason (their actual focus). Never invent facts; if unsure, hedge. Vary the language - no boilerplate. American spelling. No em-dashes.
+RULES: Be honest and specific - a weak fit gets called weak WITH the concrete reason (their actual focus). Never invent facts; if unsure, hedge and lower the score. Vary the language - no boilerplate. American spelling. No em-dashes.
 
 Return STRICT JSON only, no markdown fences:
-{"dims": {"thesis":n,"stage":n,"check":n,"portfolio":n,"geo":n}, "one_liner": "under 12 words, the specific verdict", "brief": "2-3 tight sentences grounded in THIS fund's real thesis/portfolio and how it maps (or does not) to a specific SpotsNow surface, plus any provided history"}
+{"dims": {"thesis":n,"stage":n,"check":n,"portfolio":n,"geo":n}, "one_liner": "under 12 words, the specific verdict", "brief": "2-4 tight sentences that concretely answer the four questions above (check range, category, actively investing, similar portfolio) grounded in THIS fund's real data, plus any provided history"}
 Always return dims unless the fund is genuinely unidentifiable (then dims: null). Do NOT use double quotes or line breaks inside any string value (use single quotes if you must quote).`;
 
 async function fetchSiteText(site) {
