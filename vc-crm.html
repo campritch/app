@@ -364,6 +364,8 @@
     }
     .mini-btn:hover { background: var(--accent); }
     .mini-btn.grading { background: var(--red-bg, #fef2f2); color: var(--red-text, #b91c1c); border-color: var(--red-text, #b91c1c); }
+    .mini-btn.req-done { background: #dcfce7; color: #15803d; border-color: #16a34a; }
+    .mini-btn.req-done:hover { background: #bbf7d0; }
     .inc-btn {
       display: inline-flex; align-items: center; height: 24px; padding: 0 10px;
       border-radius: 9999px; border: 1px solid var(--input); background: var(--background);
@@ -1611,9 +1613,13 @@ function fundPathInfo(f){
 // "Intro requested" marker: which connectors you've already asked for an intro
 // to this fund (set on export, or via the Mark requested button).
 function requestedLineHtml(f){
-  const reqs = (FS(f.id).requestedFrom || []).map(cid => { const c = connectorById(cid); return c ? firstName(connName(c)) : null; }).filter(Boolean);
-  if (!reqs.length) return '';
-  return `<div class="req-line" title="Intro requested - waiting to hear back from ${esc(reqs.join(', '))}">⏳ Requested · ${esc(reqs.join(', '))}</div>`;
+  const cids = FS(f.id).requestedFrom || [];
+  const shorts = cids.map(cid => { const c = connectorById(cid); return c ? firstName(connName(c)) : null; }).filter(Boolean);
+  const fulls = cids.map(cid => { const c = connectorById(cid); return c ? connName(c) : null; }).filter(Boolean);
+  if (!shorts.length) return '';
+  // ⏳ + who you asked (first names inline to save room); the tooltip lists
+  // everyone who's been asked, in full.
+  return `<div class="req-line" title="Requested by ${esc(fulls.join(', '))}">⏳ ${esc(shorts.join(', '))}</div>`;
 }
 // Record that intros to these people's funds were requested from a connector.
 function markRequested(pids, cid){
@@ -3558,8 +3564,16 @@ function openConnector(id, preselect){
   const stored = st.curated ? (st.included || []) : null;
   const checkedSet = new Set(preselect ? [preselect] : (stored || defaultIds));
   const due = connectorFollowUp(c);
+  // Are the currently-checked funds already requested from this connector? Drives
+  // the button's done-state so you get confirmation after marking.
+  const selFundIds = [...new Set([...checkedSet].map(pid => (PERSON_BY_ID[pid] || {}).fundId).filter(Boolean))];
+  const reqSelCount = selFundIds.filter(fid => (FS(fid).requestedFrom || []).includes(id)).length;
+  const allSelRequested = selFundIds.length > 0 && reqSelCount === selFundIds.length;
+  const markReqBtnHtml = (elId, extraStyle) => allSelRequested
+    ? `<button class="mini-btn req-done" id="${elId}" ${extraStyle} title="These funds are marked requested from ${esc(firstName(connName(c)))} - click again to re-mark any newly checked">✓ Requested</button>`
+    : `<button class="mini-btn" id="${elId}" ${extraStyle} title="Mark the checked funds as intros you've requested from this connector">✅ Mark requested</button>`;
   $('dTitle').textContent = connName(c);
-  if ($('dHeadExtra')) $('dHeadExtra').innerHTML = '<button class="mini-btn" id="dHeadMarkReq" style="font-weight:600" title="Mark the checked funds as intros you\'ve requested from this connector - they show ⏳ Requested and you\'re now waiting">✅ Mark requested</button>';
+  if ($('dHeadExtra')) $('dHeadExtra').innerHTML = markReqBtnHtml('dHeadMarkReq', 'style="font-weight:600"');
   $('dMeta').innerHTML = `<span class="pill pill--type">Connector</span>${isSuper(c) ? ' <span class="pill" style="background:var(--red-bg);color:var(--red-text)">Super connector</span>' : ''} ${esc(c.role||'')}${c.li ? ` · <a href="${esc(c.li)}" target="_blank" rel="noopener" style="font-weight:600;color:#0a66c2">LinkedIn</a>` : ''} · <button class="read-more" id="dConnRename" style="border:none;background:none;padding:0;font:inherit;text-decoration:underline;cursor:pointer;color:var(--muted-foreground)">Edit name</button> · <button class="read-more" id="dConnArchive" style="border:none;background:none;padding:0;font:inherit;text-decoration:underline;cursor:pointer;color:var(--muted-foreground)">${CS(id).archived ? 'Restore' : 'Archive'}</button>`;
   setTimeout(() => { const ab = $('dConnArchive'); if (ab) ab.onclick = () => {
     const st2 = CS(id);
@@ -3596,7 +3610,7 @@ function openConnector(id, preselect){
           ] })}
           <button class="mini-btn" id="dSelectAllInc">Select all</button>
           <button class="mini-btn" id="dExportInc">Export selected</button>
-          <button class="mini-btn" id="dMarkReq" title="Mark the checked funds as intros you've requested from this connector - they show '⏳ Requested' on the fund and you're now waiting">Mark requested</button>
+          ${markReqBtnHtml('dMarkReq', '')}
           <button class="mini-btn" id="dGradeFunds" style="font-weight:600">Grade the funds</button>
           <button class="mini-btn" id="dAddMatch">+ Add match</button>
         </div>
