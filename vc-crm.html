@@ -682,6 +682,13 @@
     }
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast-undo { margin-left: 14px; border: none; background: none; padding: 0; font: inherit; font-weight: 700; color: var(--primary); text-decoration: underline; cursor: pointer; }
+    .dq-overlay { position: fixed; inset: 0; z-index: 620; background: rgb(0 0 0 / 0.4); display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .dq-card { background: var(--background); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-lg); padding: 20px; width: min(360px, 92vw); }
+    .dq-title { font-size: 15px; font-weight: 700; letter-spacing: -.01em; margin-bottom: 14px; }
+    .dq-btns { display: flex; flex-direction: column; gap: 8px; }
+    .dq-btn { text-align: left; padding: 11px 14px; border: 1px solid var(--border); border-radius: 9px; background: var(--background); font: inherit; font-size: 13.5px; font-weight: 500; color: var(--foreground); cursor: pointer; transition: background .12s, border-color .12s; }
+    .dq-btn:hover { background: var(--accent); border-color: var(--muted-foreground); }
+    .dq-btn--muted { color: var(--muted-foreground); font-weight: 400; }
 
     @media (max-width: 860px) {
       .hide-md { display: none; }
@@ -1900,6 +1907,15 @@ function onDdChange(ctx, v){
         if (il && removedRows.length) il.rows.push(...removedRows);
         save(); openConnector(cid);
         toast('Restored ' + (f ? f.name : 'that row') + '.');
+      });
+      return;
+    }
+    if (v === 'disqualified') {
+      // disqualifying always asks why
+      askDisqualifyReason([arg], () => {
+        render();
+        if (drawerRef && drawerRef.kind === 'fund' && drawerRef.id === arg) openFund(arg);
+        else if (drawerRef && drawerRef.kind === 'connector') openConnector(drawerRef.id);
       });
       return;
     }
@@ -3901,6 +3917,36 @@ function toastUndo(msg, onUndo){
   btn.onclick = () => { clearTimeout(toastTimer); hide(); try { onUndo(); } catch (e) {} };
 }
 
+// Disqualifying always asks why. Sets stage 'disqualified' + archiveReason on every
+// fund in fids, then calls done() to re-render. Clicking outside cancels (no change).
+function askDisqualifyReason(fids, done){
+  fids = (fids || []).filter(id => FUND_BY_ID[id]);
+  if (!fids.length) return;
+  const label = fids.length === 1 ? (FUND_BY_ID[fids[0]].name || 'this fund') : (fids.length + ' funds');
+  const reasons = ['Not a fit for fund', 'No thesis', 'Wrong fit', 'Other', 'No reason'];
+  const ov = document.createElement('div');
+  ov.className = 'dq-overlay';
+  ov.innerHTML = `<div class="dq-card">
+    <div class="dq-title">Disqualify ${esc(label)} - why?</div>
+    <div class="dq-btns">${reasons.map(r => `<button type="button" class="dq-btn${r==='No reason'?' dq-btn--muted':''}" data-dqr="${esc(r)}">${esc(r)}</button>`).join('')}</div>
+  </div>`;
+  document.body.appendChild(ov);
+  const finish = () => { ov.remove(); if (done) done(); };
+  ov.addEventListener('click', e => {
+    if (e.target === ov) return finish();   // click outside = cancel, no change
+    const b = e.target.closest('[data-dqr]');
+    if (!b) return;
+    let reason = b.dataset.dqr;
+    if (reason === 'Other') { const t = prompt('Disqualify reason:', ''); if (t === null) return finish(); reason = t.trim() || 'Other'; }
+    const store = reason === 'No reason' ? '' : reason;
+    fids.forEach(id => { const fs = FS(id); fs.stage = 'disqualified'; fs.archived = false; if (store) fs.archiveReason = store; else delete fs.archiveReason; });
+    save();
+    toast(`Disqualified ${label}${store ? ' - ' + store : ''}.`);
+    finish();
+  });
+  document.addEventListener('keydown', function esc(e){ if (e.key === 'Escape') { document.removeEventListener('keydown', esc); finish(); } });
+}
+
 /* ── Events ── */
 function switchTab(tab){
   currentTab = tab;
@@ -3968,7 +4014,7 @@ document.addEventListener('click', e => {
     }
     if (act === 'bookedq') { FS(id).stage = 'booked'; save(); render(); toast('Logged: meeting booked \u2705'); }
     if (act === 'passedq') { FS(id).stage = 'closed'; save(); render(); toast('Logged: they passed - moved to Closed.'); }
-    if (act === 'dqq') { FS(id).stage = 'disqualified'; save(); render(); toast('Disqualified - filed with the bad VCs.'); }
+    if (act === 'dqq') { askDisqualifyReason([id], render); }
     if (act === 'archiveq') {
       FS(id).archived = true;
       selected.delete(id);
@@ -4564,6 +4610,11 @@ $('bulkBar').addEventListener('click', e => {
   const b = e.target.closest('[data-bulkstage]');
   if (!b || !STAGE_TABS.includes(currentTab)) return;
   const stage = b.dataset.bulkstage;
+  if (stage === 'disqualified') {
+    const ids = [...selected].filter(id => FUND_BY_ID[id]);
+    askDisqualifyReason(ids, () => { selected.clear(); render(); });
+    return;
+  }
   let n = 0;
   selected.forEach(id => { if (FUND_BY_ID[id]) { const fs = FS(id); fs.stage = stage; fs.archived = false; n++; } });
   selected.clear();
