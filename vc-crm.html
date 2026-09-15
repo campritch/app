@@ -326,6 +326,8 @@
     .path-text { font-size: 12px; font-weight: 400; color: var(--foreground); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
     .path-text b { font-weight: 500; }
     .req-line { font-size: 10.5px; font-weight: 600; color: var(--amber-text, #b45309); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dq-reason-line { font-size: 10.5px; font-weight: 600; color: var(--destructive, #dc2626); margin-top: 2px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dq-reason-line:hover { text-decoration: underline; }
     .path-text .sub { color: var(--muted-foreground); font-weight: 400; font-size: 11.5px; }
     .path-text .link { text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
     .path-text.muted { color: var(--muted-foreground); font-weight: 400; }
@@ -1654,7 +1656,11 @@ function fundPathCellHtml(f){
   else if (pi.kind === 'connector') base = `<div class="path-text"><span class="link" data-openconn="${pi.c.id}">via ${esc(pi.c.name)}</span></div>`;
   else if (pi.kind === 'nfx') base = `<div class="path-text muted" title="Investor intro routes via NFX Signal - open the side panel">NFX only</div>`;
   else base = `<div class="path-text muted">No path</div>`;
-  return base + req;
+  // disqualified funds show their reason here, click to change it
+  const dq = fStage(f) === 'disqualified'
+    ? `<div class="dq-reason-line" data-dqedit="${f.id}" title="Click to change the disqualify reason">🚫 ${esc(FS(f.id).archiveReason || 'add reason')}</div>`
+    : '';
+  return base + dq + req;
 }
 function fundPathRank(f){
   const k = fundPathInfo(f).kind;
@@ -3923,7 +3929,7 @@ function askDisqualifyReason(fids, done){
   fids = (fids || []).filter(id => FUND_BY_ID[id]);
   if (!fids.length) return;
   const label = fids.length === 1 ? (FUND_BY_ID[fids[0]].name || 'this fund') : (fids.length + ' funds');
-  const reasons = ['Not a fit for fund', 'No thesis', 'Wrong fit', 'Other', 'No reason'];
+  const reasons = ['Not a fit for fund', 'No thesis', 'Wrong fit', 'Competitor', 'Other', 'No reason'];
   const ov = document.createElement('div');
   ov.className = 'dq-overlay';
   ov.innerHTML = `<div class="dq-card">
@@ -3939,7 +3945,7 @@ function askDisqualifyReason(fids, done){
     let reason = b.dataset.dqr;
     if (reason === 'Other') { const t = prompt('Disqualify reason:', ''); if (t === null) return finish(); reason = t.trim() || 'Other'; }
     const store = reason === 'No reason' ? '' : reason;
-    fids.forEach(id => { const fs = FS(id); fs.stage = 'disqualified'; fs.archived = false; if (store) fs.archiveReason = store; else delete fs.archiveReason; });
+    fids.forEach(id => { const fs = FS(id); fs.stage = 'disqualified'; fs.archived = false; if (store) fs.archiveReason = store; else delete fs.archiveReason; if (reason === 'Competitor') fs.competitor = true; });
     save();
     toast(`Disqualified ${label}${store ? ' - ' + store : ''}.`);
     finish();
@@ -4200,6 +4206,8 @@ $('tableBody').addEventListener('click', e => {
   if (op) { e.stopPropagation(); openPerson(op.dataset.openperson); return; }
   const connChip = e.target.closest('[data-openconn]');
   if (connChip) { e.stopPropagation(); openConnector(connChip.dataset.openconn); return; }
+  const dqEdit = e.target.closest('[data-dqedit]');
+  if (dqEdit) { e.stopPropagation(); askDisqualifyReason([dqEdit.dataset.dqedit], render); return; }
   const addRow = e.target.closest('[data-addperson]');
   if (addRow) { addPersonTo(addRow.dataset.addperson); return; }
   const fu = e.target.closest('[data-fu]');
