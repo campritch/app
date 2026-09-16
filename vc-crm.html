@@ -3574,7 +3574,20 @@ function openConnector(id, preselect){
   sheetFundIds.forEach(fid => {
     if (coveredFunds.has(fid)) return;
     const f = FUND_BY_ID[fid]; if (!f) return;
-    let rep = (PEOPLE_BY_FUND[fid] || [])[0];
+    // Prefer the person THIS connector actually listed in their sheet for this
+    // fund - so a Sheet row always shows their real contact, never a CRM lead
+    // partner they never mentioned (which reads to the connector as a bogus
+    // match). This also makes any residual mis-match self-evident: the worst
+    // case shows their own row back to them, never a stranger.
+    let rep = null;
+    const sheetRow = (_il0 ? _il0.rows : []).find(r => r.fundId === fid && r.name && r.name.trim());
+    if (sheetRow) {
+      const pid = fid + '_' + slug(sheetRow.name);
+      rep = PERSON_BY_ID[pid] || (PERSON_BY_ID[pid] = { id: pid, fundId: fid, name: sheetRow.name.trim(),
+        title: sheetRow.title || 'Their contact', tbd: true, li0: sheetRow.li || '', email0: sheetRow.email || '' });
+      if (!(PEOPLE_BY_FUND[fid] || []).some(x => x.id === pid)) (PEOPLE_BY_FUND[fid] = PEOPLE_BY_FUND[fid] || []).push(rep);
+    }
+    if (!rep) rep = (PEOPLE_BY_FUND[fid] || [])[0];
     if (!rep) {
       const sid = fid + '_tbd-sheet';
       rep = PERSON_BY_ID[sid] || (PERSON_BY_ID[sid] = { id: sid, fundId: fid, name: f.name, title: 'Any partner', tbd: true, li0: '', email0: '' });
