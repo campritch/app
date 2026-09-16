@@ -3209,7 +3209,22 @@ function matchIntroRow(r){
   // the name column), then name-as-person.
   const byFirm = asFirm(r.firm) || asFirm(r.name);
   if (byFirm) return byFirm;
-  if (r.name) { const p = PEOPLE.find(pp => pp.name && pp.name.toLowerCase() === r.name.toLowerCase()); if (p) return p.fundId; }
+  // Person-name fallback: only match FULL names (2+ tokens on BOTH sides). A
+  // bare first name in the sheet ("Lisa", "Josh", "Sam") must never match on
+  // its own - a fund's people list can contain a bare-first-name placeholder
+  // (e.g. Threshold Ventures has a person just called "Lisa"), and a loose
+  // first-name match silently attributes an unrelated fund to the connector's
+  // sheet (their "Lisa @ Ninety Nine VC" became "Threshold Ventures").
+  if (r.name) {
+    const rn = r.name.trim();
+    if (rn.split(/\s+/).length >= 2) {
+      const rnl = rn.toLowerCase();
+      const p = PEOPLE.find(pp => pp.name
+        && pp.name.trim().split(/\s+/).length >= 2
+        && pp.name.toLowerCase().trim() === rnl);
+      if (p) return p.fundId;
+    }
+  }
   return null;
 }
 function importIntroList(cid, text){
