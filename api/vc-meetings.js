@@ -2,13 +2,15 @@
 // Fathom transcript cache in Vercel Blob: search cached meetings by fund /
 // person terms, or view one record (summary + transcript) for a warmth read.
 // Auth: the sn_vc workspace cookie — no extra password prompt in the UI.
-import { verifySession } from '../lib/auth.js';
+import { verifySession, classifyEmail } from '../lib/auth.js';
 import { listCachedDetailed, readCached } from './_tools/fathom.js';
 
 async function authed(req) {
   const secret = process.env.SESSION_SECRET;
   if (!secret) return false;
   const cookie = req.headers.cookie || '';
+  const gm = cookie.match(/(?:^|; )sn_user=([^;]+)/);
+  if (gm) { const s = await verifySession(gm[1], secret); if (s && ['ceo','team'].includes(classifyEmail(s.email))) return true; }
   const m = cookie.match(/(?:^|; )sn_vc=([^;]+)/);
   return m ? !!(await verifySession(m[1], secret)) : false;
 }

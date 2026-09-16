@@ -4,14 +4,18 @@
 // and is shared by everyone with the workspace password. A daily backup
 // snapshot (vc-crm/backup-YYYY-MM-DD.json) is written on first save each day.
 // Auth: sn_vc cookie (same gate as the page itself).
-import { verifySession } from '../lib/auth.js';
+import { verifySession, classifyEmail } from '../lib/auth.js';
 
 const BLOB_KEY = 'vc-crm/state.json';
 
+// Accept a SpotsNow-team Google session (sn_user, @spotsnow.io / @dropstation.io)
+// or the shared workspace password (sn_vc) as a fallback.
 async function authed(req) {
   const secret = process.env.SESSION_SECRET;
   if (!secret) return false;
   const cookie = req.headers.cookie || '';
+  const gm = cookie.match(/(?:^|; )sn_user=([^;]+)/);
+  if (gm) { const s = await verifySession(gm[1], secret); if (s && ['ceo','team'].includes(classifyEmail(s.email))) return true; }
   const m = cookie.match(/(?:^|; )sn_vc=([^;]+)/);
   return m ? !!(await verifySession(m[1], secret)) : false;
 }

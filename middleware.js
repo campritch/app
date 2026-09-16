@@ -79,18 +79,25 @@ export default async function middleware(request) {
   const url = new URL(request.url);
   const pathname = url.pathname;
 
-  // ── VC outreach workspace (own password, checked first) ──
+  // ── VC outreach workspace ──
+  // SpotsNow team members sign in with their @spotsnow.io / @dropstation.io
+  // Google account (team tier). The shared workspace password still works as a
+  // fallback so nothing breaks mid-transition.
   if (VC_PATHS.has(pathname)) {
     const secret = process.env.SESSION_SECRET;
     if (!secret) return; // not configured -> leave open (matches tier behavior)
     const cookie = request.headers.get('cookie') || '';
+    const gm = cookie.match(/(?:^|; )sn_user=([^;]+)/);
+    const gsession = gm ? await verifySession(gm[1], secret) : null;
+    if (gsession && hasAccess(classifyEmail(gsession.email), 'team')) return;
     const m = cookie.match(/(?:^|; )sn_vc=([^;]+)/);
     const ok = m ? await verifySession(m[1], secret) : null;
     if (ok) return;
     return new Response(loginPage(pathname + url.search, false, {
       title: 'SpotsNow raise',
-      sub: 'Enter the workspace password.',
-      action: '/api/vc-login'
+      sub: 'Sign in with your SpotsNow email.',
+      action: '/api/vc-login',
+      google: '/api/google-login?next=' + encodeURIComponent(pathname + url.search)
     }), {
       status: 401,
       headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }

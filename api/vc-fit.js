@@ -3,7 +3,7 @@
 // and proposes rubric dims when the fund is ungraded. Auth: sn_vc cookie.
 // Provider: OpenAI when OPENAI_API_KEY is set, else Anthropic (ANTHROPIC_API_KEY).
 import Anthropic from '@anthropic-ai/sdk';
-import { verifySession } from '../lib/auth.js';
+import { verifySession, classifyEmail } from '../lib/auth.js';
 
 const MODEL = 'claude-sonnet-5';
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o';
@@ -93,6 +93,8 @@ async function authed(req) {
   const secret = process.env.SESSION_SECRET;
   if (!secret) return false;
   const cookie = req.headers.cookie || '';
+  const gm = cookie.match(/(?:^|; )sn_user=([^;]+)/);
+  if (gm) { const s = await verifySession(gm[1], secret); if (s && ['ceo','team'].includes(classifyEmail(s.email))) return true; }
   const m = cookie.match(/(?:^|; )sn_vc=([^;]+)/);
   return m ? !!(await verifySession(m[1], secret)) : false;
 }
