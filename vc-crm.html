@@ -691,6 +691,17 @@
     .dq-btn { text-align: left; padding: 11px 14px; border: 1px solid var(--border); border-radius: 9px; background: var(--background); font: inherit; font-size: 13.5px; font-weight: 500; color: var(--foreground); cursor: pointer; transition: background .12s, border-color .12s; }
     .dq-btn:hover { background: var(--accent); border-color: var(--muted-foreground); }
     .dq-btn--muted { color: var(--muted-foreground); font-weight: 400; }
+    /* In-app prompt/confirm modals (replace native prompt()/confirm()) */
+    .am-msg { font-size: 13px; color: var(--muted-foreground); margin-bottom: 14px; line-height: 1.45; white-space: pre-wrap; }
+    .am-input { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--border); border-radius: 9px; font: inherit; font-size: 13.5px; color: var(--foreground); background: var(--background); margin-bottom: 14px; }
+    .am-input:focus { outline: none; border-color: var(--muted-foreground); box-shadow: 0 0 0 3px rgb(0 0 0 / 0.06); }
+    .am-actions { display: flex; justify-content: flex-end; gap: 8px; }
+    .am-btn { padding: 9px 16px; border-radius: 9px; border: 1px solid var(--border); background: var(--background); font: inherit; font-size: 13px; font-weight: 600; color: var(--foreground); cursor: pointer; transition: background .12s, border-color .12s, opacity .12s; }
+    .am-btn:hover { background: var(--accent); border-color: var(--muted-foreground); }
+    .am-btn--primary { background: var(--foreground); color: var(--background); border-color: var(--foreground); }
+    .am-btn--primary:hover { background: var(--foreground); opacity: .88; }
+    .am-btn--danger { background: var(--red-text); color: #fff; border-color: var(--red-text); }
+    .am-btn--danger:hover { background: var(--red-text); opacity: .9; }
 
     @media (max-width: 860px) {
       .hide-md { display: none; }
@@ -1843,7 +1854,7 @@ function setPersonStatus(pid, v){
   if (['replied','meeting','passed','none'].includes(v)) delete st.followUp;
   save(); render();
 }
-function onDdChange(ctx, v){
+async function onDdChange(ctx, v){
   const i = ctx.indexOf(':');
   const kind = i === -1 ? ctx : ctx.slice(0, i);
   const arg = i === -1 ? null : ctx.slice(i + 1);
@@ -1881,7 +1892,7 @@ function onDdChange(ctx, v){
   if (kind === 'fstage') {
     if (v === '__site') {
       const f = FUND_BY_ID[arg]; if (!f) return;
-      const val = prompt('Website for ' + f.name + ' (so it grades from the right site):', f.site ? 'https://' + f.site : 'https://');
+      const val = await appPrompt('Website for ' + f.name + ' (so it grades from the right site):', f.site ? 'https://' + f.site : 'https://');
       if (val === null) return;
       const reopen = () => { if (drawerRef && drawerRef.kind === 'connector') openConnector(drawerRef.id); else render(); };
       saveFundSite(arg, val, reopen);
@@ -1955,7 +1966,7 @@ function onDdChange(ctx, v){
     }
     const labels = { competitor:'Competitor', passed:'Already passed', badfit:'Bad fit', future:'Future round' };
     let label = labels[v] || 'Other';
-    if (v === 'other') { const t = prompt('Archive reason:', ''); if (t === null) return; label = t.trim() || 'Other'; }
+    if (v === 'other') { const t = await appPrompt('Archive reason:', ''); if (t === null) return; label = t.trim() || 'Other'; }
     // "Future round" parks it in the Future rounds tab; every other reason disqualifies.
     const target = v === 'future' ? 'future' : 'disqualified';
     const prev = { stage: fs.stage, reason: fs.archiveReason, competitor: fs.competitor };
@@ -2039,9 +2050,9 @@ function pArchBtnHtml(p){
     ? `<button class="icon-sq" data-prestore="${p.id}" title="Restore to outreach">${RESTORE_ICON}</button>`
     : `<button class="icon-sq" data-parch="${p.id}" title="Archive - hides them from outreach">${ARCHIVE_ICON}</button>`;
 }
-function removeFund(id){
+async function removeFund(id){
   const f = FUND_BY_ID[id];
-  if (!f || !confirm('Remove ' + f.name + ' from the list?')) return;
+  if (!f || !(await appConfirm('Remove ' + f.name + ' from the list?', { okLabel: 'Remove', danger: true }))) return;
   if (SEED_FUNDS.some(x => x.id === id)) { if (!state.hiddenFunds.includes(id)) state.hiddenFunds.push(id); }
   else state.extraFunds = state.extraFunds.filter(x => x.id !== id);
   save(); rebuild(); render();
@@ -2815,17 +2826,17 @@ function openPerson(id){
       <textarea class="notes-area" id="dNotes" placeholder="Call notes, intro asks, terms...">${esc(st.notes||'')}</textarea>
     </div>`;
 
-  if ($('dEditPersonName')) $('dEditPersonName').onclick = () => {
+  if ($('dEditPersonName')) $('dEditPersonName').onclick = async () => {
     const cur = p.tbd ? '' : (p.name || '');
-    const n = prompt('Edit name for this person at ' + f.name + ':', cur);
+    const n = await appPrompt('Edit name for this person at ' + f.name + ':', cur);
     if (n === null || !n.trim()) return;
     st.customName = n.trim();
     save(); rebuild(); render(); openPerson(id);
     toast('Name updated.');
   };
   const nameBtn = $('dNamePerson');
-  if (nameBtn) nameBtn.onclick = () => {
-    const n = prompt('Who is the right person at ' + f.name + '?');
+  if (nameBtn) nameBtn.onclick = async () => {
+    const n = await appPrompt('Who is the right person at ' + f.name + '?');
     if (!n) return;
     st.customName = n.trim();
     save(); rebuild(); render(); openPerson(id);
@@ -2897,12 +2908,12 @@ function openPerson(id){
   showDrawer();
 }
 
-function addPersonTo(fundId, after){
+async function addPersonTo(fundId, after){
   const f = FUND_BY_ID[fundId];
   if (!f) return;
-  const n = prompt('Person name at ' + f.name + ':');
+  const n = await appPrompt('Person name at ' + f.name + ':');
   if (!n) return;
-  const t = prompt('Their title:', 'Partner') || 'Partner';
+  const t = (await appPrompt('Their title:', 'Partner')) || 'Partner';
   const pid = f.id + '_' + slug(n);
   if (!PERSON_BY_ID[pid]) {
     if (f.custom) f.people.push({ n: n.trim(), t: t.trim() });
@@ -3061,8 +3072,8 @@ function openFund(id){
     }
   };
   $('dRemoveFund').onclick = () => removeFund(id);
-  if ($('dEditSite')) $('dEditSite').onclick = () => {
-    const v = prompt('Website for ' + f.name + ':', f.site ? 'https://' + f.site : 'https://');
+  if ($('dEditSite')) $('dEditSite').onclick = async () => {
+    const v = await appPrompt('Website for ' + f.name + ':', f.site ? 'https://' + f.site : 'https://');
     if (v === null) return;
     const clean = v.trim().replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
     f.site = clean;
@@ -3747,8 +3758,8 @@ function openConnector(id, preselect){
   }));
   if (!st.curated) { st.included = [...checkedSet]; save(); }
 
-  $('dAddMatch').onclick = () => {
-    const q = prompt('Search a person or fund to match (e.g. "Fabrice" or "NFX"):');
+  $('dAddMatch').onclick = async () => {
+    const q = await appPrompt('Search a person or fund to match (e.g. "Fabrice" or "NFX"):');
     if (!q) return;
     const ql = q.toLowerCase();
     const hit = PEOPLE.find(p => (p.name && p.name.toLowerCase().includes(ql)) || FUND_BY_ID[p.fundId].name.toLowerCase().includes(ql));
@@ -3966,12 +3977,12 @@ function askDisqualifyReason(fids, done){
   </div>`;
   document.body.appendChild(ov);
   const finish = () => { ov.remove(); if (done) done(); };
-  ov.addEventListener('click', e => {
+  ov.addEventListener('click', async e => {
     if (e.target === ov) return finish();   // click outside = cancel, no change
     const b = e.target.closest('[data-dqr]');
     if (!b) return;
     let reason = b.dataset.dqr;
-    if (reason === 'Other') { const t = prompt('Disqualify reason:', ''); if (t === null) return finish(); reason = t.trim() || 'Other'; }
+    if (reason === 'Other') { const t = await appPrompt('Disqualify reason:', ''); if (t === null) return finish(); reason = t.trim() || 'Other'; }
     const store = reason === 'No reason' ? '' : reason;
     fids.forEach(id => { const fs = FS(id); fs.stage = 'disqualified'; fs.archived = false; if (store) fs.archiveReason = store; else delete fs.archiveReason; if (reason === 'Competitor') fs.competitor = true; });
     save();
@@ -3979,6 +3990,66 @@ function askDisqualifyReason(fids, done){
     finish();
   });
   document.addEventListener('keydown', function esc(e){ if (e.key === 'Escape') { document.removeEventListener('keydown', esc); finish(); } });
+}
+
+/* In-app replacements for the native prompt()/confirm() dialogs - same
+   look as the disqualify modal, promise-based so callers `await` them. */
+function appPrompt(message, defValue = '') {
+  return new Promise(resolve => {
+    const ov = document.createElement('div');
+    ov.className = 'dq-overlay';
+    ov.innerHTML = `<div class="dq-card">
+      <div class="dq-title">${esc(message)}</div>
+      <input class="am-input" type="text">
+      <div class="am-actions">
+        <button type="button" class="am-btn" data-am="cancel">Cancel</button>
+        <button type="button" class="am-btn am-btn--primary" data-am="ok">OK</button>
+      </div>
+    </div>`;
+    document.body.appendChild(ov);
+    const input = ov.querySelector('.am-input');
+    input.value = defValue == null ? '' : String(defValue);
+    setTimeout(() => { input.focus(); input.select(); }, 0);
+    const close = val => { document.removeEventListener('keydown', onKey); ov.remove(); resolve(val); };
+    const onKey = e => {
+      if (e.key === 'Escape') { e.preventDefault(); close(null); }
+      else if (e.key === 'Enter') { e.preventDefault(); close(input.value); }
+    };
+    document.addEventListener('keydown', onKey);
+    ov.addEventListener('click', e => {
+      if (e.target === ov) return close(null);
+      const b = e.target.closest('[data-am]'); if (!b) return;
+      close(b.dataset.am === 'ok' ? input.value : null);
+    });
+  });
+}
+function appConfirm(message, opts = {}) {
+  return new Promise(resolve => {
+    const ov = document.createElement('div');
+    ov.className = 'dq-overlay';
+    const okCls = opts.danger ? 'am-btn--danger' : 'am-btn--primary';
+    ov.innerHTML = `<div class="dq-card">
+      <div class="dq-title">${esc(opts.title || 'Confirm')}</div>
+      <div class="am-msg">${esc(message)}</div>
+      <div class="am-actions">
+        <button type="button" class="am-btn" data-am="cancel">${esc(opts.cancelLabel || 'Cancel')}</button>
+        <button type="button" class="am-btn ${okCls}" data-am="ok">${esc(opts.okLabel || 'OK')}</button>
+      </div>
+    </div>`;
+    document.body.appendChild(ov);
+    setTimeout(() => { const okb = ov.querySelector('[data-am="ok"]'); if (okb) okb.focus(); }, 0);
+    const close = val => { document.removeEventListener('keydown', onKey); ov.remove(); resolve(val); };
+    const onKey = e => {
+      if (e.key === 'Escape') { e.preventDefault(); close(false); }
+      else if (e.key === 'Enter') { e.preventDefault(); close(true); }
+    };
+    document.addEventListener('keydown', onKey);
+    ov.addEventListener('click', e => {
+      if (e.target === ov) return close(false);
+      const b = e.target.closest('[data-am]'); if (!b) return;
+      close(b.dataset.am === 'ok');
+    });
+  });
 }
 
 /* ── Events ── */
@@ -4014,7 +4085,7 @@ $('tableHead').addEventListener('click', e => {
 });
 
 /* One document-level click handler: custom dropdowns + filter popovers */
-document.addEventListener('click', e => {
+document.addEventListener('click', async e => {
   const ract = e.target.closest('[data-rowact]');
   if (ract) {
     const i = ract.dataset.rowact.indexOf(':');
@@ -4031,7 +4102,7 @@ document.addEventListener('click', e => {
     if (act === 'compflag') {
       const fs = FS(id), on = !isCompetitor(FUND_BY_ID[id]);
       fs.competitor = on;
-      if (on) { const n = prompt('Competitor they back (optional - shows on the tag):', FUND_BY_ID[id].competitorNote || ''); if (n && n.trim()) FUND_BY_ID[id].competitorNote = n.trim(); }
+      if (on) { const n = await appPrompt('Competitor they back (optional - shows on the tag):', FUND_BY_ID[id].competitorNote || ''); if (n && n.trim()) FUND_BY_ID[id].competitorNote = n.trim(); }
       save(); render();
       toast(on ? 'Tagged competitive - grayed out with a COMPETITOR tag.' : 'Competitive tag cleared.');
     }
@@ -4063,7 +4134,7 @@ document.addEventListener('click', e => {
       toast('Follow-up scheduled.');
     }
     if (act === 'fupick') {
-      const d = prompt('Follow up on (YYYY-MM-DD):');
+      const d = await appPrompt('Follow up on (YYYY-MM-DD):');
       if (d) {
         const t = new Date(d + 'T12:00:00').getTime();
         if (!isNaN(t)) { PS(id).followUp = t; save(); render(); toast('Follow-up scheduled.'); }
@@ -4569,11 +4640,11 @@ $('templatesView').addEventListener('input', e => {
   const tb = e.target.closest('[data-tbody]');
   if (tb) { templates()[+tb.dataset.tbody].body = tb.value; save(); return; }
 });
-$('templatesView').addEventListener('click', e => {
+$('templatesView').addEventListener('click', async e => {
   const del = e.target.closest('[data-tdel]');
   if (del) {
     const i = +del.dataset.tdel;
-    if (confirm('Delete template "' + templates()[i].name + '"?')) {
+    if (await appConfirm('Delete template "' + templates()[i].name + '"?', { okLabel: 'Delete', danger: true })) {
       templates().splice(i, 1); save(); renderTemplates();
     }
   }
@@ -4582,8 +4653,8 @@ $('newTplBtn').addEventListener('click', () => {
   templates().push({ id: 't_custom_' + Math.floor(Math.random()*100000), name: 'New template', audience: 'person', body: 'Hey {{first}},\n\n' });
   save(); renderTemplates();
 });
-$('resetTplBtn').addEventListener('click', () => {
-  if (!confirm('Reset all templates and round variables to defaults? Your edits will be lost.')) return;
+$('resetTplBtn').addEventListener('click', async () => {
+  if (!(await appConfirm('Reset all templates and round variables to defaults? Your edits will be lost.', { okLabel: 'Reset', danger: true }))) return;
   state.templates = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
   state.vars = { ...DEFAULT_VARS };
   save(); renderTemplates();
@@ -4608,9 +4679,9 @@ $('bulkPaths').addEventListener('click', () => {
   ids.forEach(id => kinds[pathInfo(PERSON_BY_ID[id]).kind]++);
   toast(`${kinds.direct} direct · ${kinds.existing} existing · ${kinds.connector} LinkedIn connector · ${kinds.nfx} NFX only · ${kinds.none} no path.`);
 });
-$('bulkRemove').addEventListener('click', () => {
+$('bulkRemove').addEventListener('click', async () => {
   if (!STAGE_TABS.includes(currentTab) || !selected.size) return;
-  if (!confirm('Remove ' + selected.size + ' fund' + (selected.size===1?'':'s') + ' from the list?')) return;
+  if (!(await appConfirm('Remove ' + selected.size + ' fund' + (selected.size===1?'':'s') + ' from the list?', { okLabel: 'Remove', danger: true }))) return;
   selected.forEach(id => {
     if (SEED_FUNDS.some(f => f.id === id)) { if (!state.hiddenFunds.includes(id)) state.hiddenFunds.push(id); }
     else state.extraFunds = state.extraFunds.filter(f => f.id !== id);
