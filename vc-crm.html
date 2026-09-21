@@ -3238,14 +3238,49 @@ function matchIntroRow(r){
   }
   return null;
 }
+/* Every included intro that didn't match an existing fund becomes a real
+   (custom, unclassified) fund record - so the whole connector's list shows in
+   the doors list and each one is openable to add a website, grade, etc. This
+   is the fund-creation half of fileIntroList, minus the stage-filing; File is
+   then only for classifying to a stage. Idempotent: skips rows that already
+   have a fundId, so reopening a connector never duplicates. */
+function ensureIntroRecords(cid){
+  const il = state.introLists[cid];
+  if (!il) return 0;
+  let created = 0;
+  il.rows.forEach(r => {
+    if (r.fundId || r.inc === false) return;      // matched, or the user unchecked it
+    if (!(r.firm || r.name)) return;
+    let fid = 'cf-' + slug(r.firm || r.name);
+    while (FUND_BY_ID[fid] && normOrg(FUND_BY_ID[fid].name) !== normOrg(r.firm || r.name)) fid += '-x';
+    if (!FUND_BY_ID[fid]) {
+      const nf = { id: fid, name: r.firm || r.name, custom: true, type: r.firm ? 'Seed' : 'Angel',
+        region: '—', check: null, sectors: [], site: '', looking: r.note || '', people: [] };
+      if (r.name) {
+        const p = { n: r.name, t: r.title || (r.firm ? 'Partner' : 'Angel investor') };
+        if (r.email) p.email = r.email;
+        if (r.li && /\/in\//.test(r.li)) p.li = r.li;
+        nf.people.push(p);
+      } else nf.people.push({ n: '', t: 'Partner', tbd: true });
+      if (r.aiDims) nf.dims = r.aiDims;
+      state.extraFunds.push(nf);
+      created++;
+    }
+    r.fundId = fid;
+  });
+  if (created) { save(); rebuild(); }
+  return created;
+}
 function importIntroList(cid, text){
   const rows = parseIntroSheet(text);
   if (!rows.length) { toast('Could not read the sheet. Expected columns like: Name, Firm, Title, Email, LinkedIn, Notes.'); return; }
   rows.forEach(r => { r.fundId = matchIntroRow(r); });
   state.introLists[cid] = { rows, uploadedAt: Date.now() };
   CS(cid).introOpen = true;  // show the freshly uploaded list right away
+  const matched = rows.filter(r => r.fundId).length;
+  const created = ensureIntroRecords(cid);   // unmatched -> new editable fund records
   save(); openConnector(cid);
-  toast(`${rows.length} relationships imported · ${rows.filter(r=>r.fundId).length} matched to funds already in the CRM.`);
+  toast(`${rows.length} relationships imported · ${matched} matched to existing funds · ${created} added as new fund${created===1?'':'s'} to fill in.`);
 }
 function introRowScore(r){
   if (r.fundId && FUND_BY_ID[r.fundId] && FUND_BY_ID[r.fundId].dims) return Math.round(score(FUND_BY_ID[r.fundId]));
@@ -3556,6 +3591,9 @@ async function aiGradeIntroList(cid, btn){
 function openConnector(id, preselect){
   const c = connectorById(id);
   if (!c) return;
+  // Materialize any unmatched sheet intros into real fund records so they show
+  // in the doors list and are editable. Idempotent - only acts the first time.
+  ensureIntroRecords(id);
   $('drawer').classList.add('drawer--conn');
   drawerRef = { kind:'connector', id, preselect };
   const st = CS(id);
