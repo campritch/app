@@ -1407,13 +1407,36 @@ function templates(){
   return state.templates;
 }
 
-/* LinkedIn URL per person: saved profile URL wins, else a prefilled search. */
-function personLi(p){
+/* Real LinkedIn profile URL for a person, or '' if we genuinely don't have one.
+   Checks the saved profile, the seed URL, then backfills from Cam's own
+   LinkedIn export (state.liConnections) by matching full name + firm - a
+   reliable, no-guess source. NEVER fabricates a search URL. */
+function personProfileUrl(p){
   const st = PS(p.id);
   if (st.li) return st.li;
   if (p.li0) return p.li0;
   const f = FUND_BY_ID[p.fundId];
-  const q = encodeURIComponent(((p.tbd ? '' : p.name + ' ') + f.name).trim());
+  if (!p.tbd && p.name && f) {
+    const full = p.name.toLowerCase().trim();
+    const fn = normOrg(f.name);
+    const hit = (state.liConnections || []).find(r => {
+      if (!r.url) return false;
+      const rn = ((r.first || '') + ' ' + (r.last || '')).toLowerCase().trim();
+      return rn === full && (!fn || normOrg(r.company) === fn);   // name AND firm must match
+    });
+    if (hit) return hit.url;
+  }
+  return '';
+}
+/* Convenience link for UI icons only: the real profile if we have one, else a
+   prefilled people-search (fine for a click-to-look icon). NEVER use this in an
+   outreach message - the ask (peopleListFor) uses personProfileUrl and omits
+   the link when there's no real profile. */
+function personLi(p){
+  const real = personProfileUrl(p);
+  if (real) return real;
+  const f = FUND_BY_ID[p.fundId];
+  const q = encodeURIComponent(((p.tbd ? '' : p.name + ' ') + (f ? f.name : '')).trim());
   return 'https://www.linkedin.com/search/results/people/?keywords=' + q;
 }
 
@@ -1446,8 +1469,9 @@ function peopleListFor(personIds){
     const p = PERSON_BY_ID[pid];
     if (!p) return null;
     const f = FUND_BY_ID[p.fundId];
-    if (p.tbd) return `• Anyone at ${f.name} - ${personLi(p)}`;
-    return `• ${firstName(p.name)} from ${f.name} - ${personLi(p)}`;
+    const li = personProfileUrl(p);   // real profile only - no fabricated search links in the ask
+    if (p.tbd) return `• Anyone at ${f.name}${li ? ' - ' + li : ''}`;
+    return `• ${firstName(p.name)} from ${f.name}${li ? ' - ' + li : ''}`;
   }).filter(Boolean).join('\n');
 }
 
