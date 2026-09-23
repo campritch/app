@@ -837,7 +837,9 @@ Acme Ventures, Jane Doe, Partner, https://linkedin.com/in/janedoe, Seed, $250k-$
           <div class="sync-card__result" id="syncResult"></div>
         </div>
         <input type="file" id="csvInput" accept=".csv" style="display:none" />
+        <input type="file" id="investorScanInput" accept=".csv" style="display:none" />
         <button class="btn-primary" id="uploadBtn">Upload Connections.csv</button>
+        <button class="btn-ghost" id="investorScanBtn">Import super-connector scan</button>
         <button class="btn-ghost" id="sampleBtn">Try with sample data</button>
         <button class="btn-ghost" id="addConnectorBtn">+ Add connector</button>
         <button class="btn-ghost" id="scanImportBtn">Import scan results</button>
@@ -4504,6 +4506,14 @@ $('scanImportBtn').addEventListener('click', () => {
   const w = $('scanWrap');
   w.style.display = w.style.display === 'none' ? 'block' : 'none';
 });
+$('investorScanBtn').addEventListener('click', () => $('investorScanInput').click());
+$('investorScanInput').addEventListener('change', e => {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => importInvestorScan(reader.result);
+  reader.readAsText(file);
+  e.target.value = '';
+});
 $('scanCancel').addEventListener('click', () => { $('scanWrap').style.display = 'none'; });
 $('scanImport').addEventListener('click', () => {
   importScanEdges($('scanArea').value);
@@ -4562,6 +4572,74 @@ function importScanEdges(text){
   state.synced = msg;
   mergeDuplicateConnectors();
   save(); render();
+  toast(msg);
+}
+
+/* Firm-name candidates pulled from a free-text LinkedIn headline. */
+function headlineFirms(h){
+  const out = []; if (!h) return out;
+  const push = s => { s = (s||'').trim(); if (s) out.push(s); };
+  let m;
+  const reAt = /(?:\bat\b|@)\s+([^|;,&/·]+)/gi;
+  while ((m = reAt.exec(h))) push(m[1]);
+  const reRole = /(?:general partner|managing partner|managing director|partner|principal|associate|investor|founder|gp|md)\s*,\s*([^|;,&/·]+)/gi;
+  while ((m = reRole.exec(h))) push(m[1]);
+  push(h.split(/[|;·]/)[0]);
+  return out;
+}
+function headlineRole(h){
+  const m = (h||'').match(/\b(General Partner|Managing Partner|Managing Director|Partner|Principal|Associate|Founder|GP|Investor|Angel)\b/i);
+  return m ? m[1] : 'Investor';
+}
+/* Import a "Super Connector, Name, Degree, Headline, Location, LinkedIn URL,
+   Mutuals" 2nd-degree scan: for each row whose headline firm matches a TARGET
+   fund, add the person to that fund (with their real LinkedIn URL) and link the
+   super connector to them as an intro path. Rows we can't confidently match to
+   a target fund are skipped - never mis-attributed. */
+function importInvestorScan(text){
+  const lines = (text||'').split(/\r?\n/).filter(l => l.trim());
+  if (!lines.length) { toast('Nothing to import.'); return; }
+  const h0 = csvLine(lines[0]).map(x => x.trim().toLowerCase().replace(/^﻿/,''));
+  const idx = k => h0.indexOf(k);
+  const ci = { conn: idx('super connector'), name: idx('name'), deg: idx('degree to you'),
+    head: idx('headline'), url: idx('linkedin url'), mut: idx('other mutual connections') };
+  if (ci.conn === -1 || ci.name === -1) { toast('Expected columns: Super Connector, Name, Degree to You, Headline, Location, LinkedIn URL, Other Mutual Connections.'); return; }
+  const fundByNorm = new Map();
+  FUNDS.forEach(f => { const n = normOrg(f.name); if (n && !fundByNorm.has(n)) fundByNorm.set(n, f); });
+  const edges = []; let skipped = 0;
+  for (let i = 1; i < lines.length; i++) {
+    const c = csvLine(lines[i]).map(x => (x||'').trim().replace(/^﻿/,''));
+    const connName = c[ci.conn], person = c[ci.name];
+    if (!connName || !person) continue;
+    const head = ci.head >= 0 ? c[ci.head] : '';
+    let fund = null;
+    for (const cand of headlineFirms(head)) { const f = fundByNorm.get(normOrg(cand)); if (f) { fund = f; break; } }
+    if (!fund) { skipped++; continue; }
+    const deg = ci.deg >= 0 ? c[ci.deg] : '', mut = ci.mut >= 0 ? c[ci.mut] : '';
+    const note = [deg && (deg + ' degree'), mut && (mut + ' mutual'), head].filter(Boolean).join(' · ');
+    edges.push({ connName, fundId: fund.id, person, title: headlineRole(head), url: ci.url >= 0 ? c[ci.url] : '', note });
+  }
+  if (!edges.length) { toast(`No rows matched a target fund (checked ${lines.length-1}).`); return; }
+  // 1) upsert people onto their funds (with real LinkedIn URLs), then rebuild so PERSON_BY_ID has them
+  edges.forEach(e => {
+    const pid = e.fundId + '_' + slug(e.person);
+    if (!PERSON_BY_ID[pid]) PS(pid).added = { name: e.person, title: e.title };
+    if (e.url) PS(pid).li = e.url;
+    e.pid = pid;
+  });
+  rebuild();
+  // 2) link super connectors -> those people
+  let newConn = 0; const conns = new Set(), fundsHit = new Set();
+  edges.forEach(e => {
+    let conn = allConnectors().find(x => x.name.toLowerCase() === e.connName.toLowerCase());
+    if (!conn) { conn = { id: 'c_scan_' + slug(e.connName), name: e.connName, role: 'Super connector', rapport: 'From LinkedIn 2nd-degree scan.', li: '', matches: [], source: 'scan' }; state.extraConnectors.push(conn); newConn++; }
+    addMatch(conn, e.pid, e.note);
+    conns.add(conn.id); fundsHit.add(e.fundId);
+  });
+  mergeDuplicateConnectors();
+  save(); rebuild(); render();
+  const msg = `${edges.length} intro paths · ${fundsHit.size} target funds reachable · ${conns.size} connectors (${newConn} new) · ${skipped} rows skipped (not a target fund)`;
+  state.synced = msg;
   toast(msg);
 }
 
