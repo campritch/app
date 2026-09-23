@@ -3191,8 +3191,8 @@ function parseIntroSheet(text){
   let head = csvLine(lines[0]).map(h => h.trim().toLowerCase());
   const col = names => { for (const n of names) { const i = head.indexOf(n); if (i >= 0) return i; } return -1; };
   let ci = {
-    name: col(['name','investor','contact','person','full name']),
-    firm: col(['firm','fund','company','investor firm','organization']),
+    name: col(['name','contact','person','full name','contact name']),
+    firm: col(['firm','fund','vc','v.c.','company','investor','investor firm','fund name','firm name','organization']),
     title: col(['title','role','position']),
     email: col(['email','e-mail']),
     li: col(['linkedin','linkedin url','url','profile']),
@@ -3263,6 +3263,7 @@ function ensureIntroRecords(cid){
         nf.people.push(p);
       } else nf.people.push({ n: '', t: 'Partner', tbd: true });
       if (r.aiDims) nf.dims = r.aiDims;
+      nf.autoIntroCid = cid;   // provenance: auto-created for this connector's sheet, so re-upload can clean stale ones
       state.extraFunds.push(nf);
       created++;
     }
@@ -3271,9 +3272,30 @@ function ensureIntroRecords(cid){
   if (created) { save(); rebuild(); }
   return created;
 }
+/* Re-uploading a connector's sheet: drop funds that the PREVIOUS upload
+   auto-created but were never classified/kept - so a corrected re-upload cleans
+   up the junk a mis-parsed one left behind (e.g. person-named "funds" from a
+   sheet whose firm column wasn't recognized). Keeps anything filed/staged. */
+function cleanupAutoIntroFunds(cid){
+  const prior = state.introLists[cid];
+  if (!prior || !prior.rows) return 0;
+  const priorIds = new Set(prior.rows.map(r => 'cf-' + slug(r.firm || r.name)));
+  let removed = 0;
+  state.extraFunds = (state.extraFunds || []).filter(f => {
+    if (!f.custom) return true;
+    if (!(f.autoIntroCid === cid || priorIds.has(f.id))) return true;
+    const fs = FS(f.id);
+    if ((fs.stage && fs.stage !== 'none') || (fs.introFrom || []).length) return true; // keep filed/staged
+    removed++;
+    return false;
+  });
+  if (removed) rebuild();
+  return removed;
+}
 function importIntroList(cid, text){
   const rows = parseIntroSheet(text);
   if (!rows.length) { toast('Could not read the sheet. Expected columns like: Name, Firm, Title, Email, LinkedIn, Notes.'); return; }
+  cleanupAutoIntroFunds(cid);   // clear junk from a prior (possibly mis-parsed) upload before re-matching
   rows.forEach(r => { r.fundId = matchIntroRow(r); });
   state.introLists[cid] = { rows, uploadedAt: Date.now() };
   CS(cid).introOpen = true;  // show the freshly uploaded list right away
