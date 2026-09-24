@@ -1,0 +1,2165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acme Network — Delivery</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%2064%2064%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2213%22%20fill%3D%22%23141519%22/%3E%3Ctext%20x%3D%2234.5%22%20y%3D%2233.5%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2CArial%2Csans-serif%22%20font-weight%3D%22900%22%20font-size%3D%2219%22%20letter-spacing%3D%225%22%20fill%3D%22%23fff%22%3EACME%3C/text%3E%3Ctext%20x%3D%2233.6%22%20y%3D%2245%22%20text-anchor%3D%22middle%22%20font-family%3D%22Helvetica%2CArial%2Csans-serif%22%20font-weight%3D%22700%22%20font-size%3D%225.8%22%20letter-spacing%3D%223.2%22%20fill%3D%22%23fff%22%3ENETWORK%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #17212B; --primary-hover: #282828;
+      --accent: #17212B; --accent-hover: #282828; --accent-soft: #F3F4F6;
+      --text-primary: #1D2027; --text-secondary: #707481; --text-tertiary: #9CA3AF;
+      --border: #E4E6ED; --border-light: #EDEEF1; --border-strong: #C5CBD5;
+      --white: #ffffff; --secondary-lite: #F3F4F6;
+      --nav: #F3F4F6; --nav-current: #E4E6ED; --nav-hover: #EBEDF2;
+      --page-bg: #F9FAFB; --panel: #ffffff;
+      --green-text: #0E6832; --green-bg: #D6F1E0;
+      --blue-text: #1435C0; --blue-bg: #C7E0FF;
+      --orange-text: #C2410C; --orange-bg: #FFEDD5;
+      --red-text: #B42318; --red-bg: #FEE4E2;
+      --purple-text: #6941C6; --purple-bg: #EBE9FE;
+      --shadow-post: 0 0 2px 0 rgba(166,175,195,.40);
+      --shadow-btn: 0 1px 3px 0 rgba(166,175,195,.20);
+      --shadow-card: 0 1px 2px rgba(166,175,195,.18);
+      --shadow-hover: 0 12px 34px rgba(120,130,150,.18);
+      --radius-card: 12px; --radius-btn: 7px; --radius-pill: 999px;
+      /* categorical chart palette */
+      --c1:#17212B; --c2:#3B82F6; --c3:#10B981; --c4:#F59E0B; --c5:#8B5CF6; --c6:#EC4899; --c7:#06B6D4;
+    }
+    body.dark {
+      --primary:#F3F4F6; --primary-hover:#E4E6ED;
+      --text-primary:#F0F1F4; --text-secondary:#AAB2BF; --text-tertiary:#848D9C;
+      --border:#2A2F38; --border-light:#232830; --border-strong:#3C434E;
+      --white:#161A20; --panel:#161A20; --secondary-lite:#212630; --page-bg:#0D1015;
+      --nav:#212630; --nav-current:#2A2F38; --nav-hover:#212630;
+      --green-bg:#12351F; --blue-bg:#152A47; --orange-bg:#3A2410; --red-bg:#3D1A18; --purple-bg:#241C42;
+      --green-text:#5BD68F; --blue-text:#7FB4FF; --orange-text:#F0A868; --red-text:#F58B84; --purple-text:#B69BF5;
+      --shadow-card:0 1px 2px rgba(0,0,0,.4); --shadow-btn:0 1px 3px rgba(0,0,0,.35); --shadow-hover:0 12px 34px rgba(0,0,0,.5);
+    }
+    body.dark .btn--primary, body.dark .pill--solid, body.dark .askwrap__go, body.dark .tb-av { color:#12161C; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: var(--page-bg); color: var(--text-primary);
+      -webkit-font-smoothing: antialiased; line-height: 1.45; letter-spacing: -.01em;
+      display: flex; gap: 0; height: 100vh; overflow: hidden; padding: 0;
+    }
+    button { font-family: inherit; cursor: pointer; }
+    a { color: inherit; }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar { width: 228px; flex-shrink: 0; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 16px 13px 13px; overflow: hidden; }
+    body.embedded .sidebar { display: none !important; }
+    .sb-brand { display: flex; align-items: center; gap: 11px; padding: 4px 8px 18px; }
+    .sb-brand__mark { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; overflow: hidden; }
+    .sb-brand__mark svg { display: block; width: 100%; height: 100%; }
+    .sb-brand__name b { display: block; color: var(--text-primary); font-size: 15px; font-weight: 800; letter-spacing: -.02em; }
+    .sb-brand__name span { display: block; color: var(--text-tertiary); font-size: 10px; font-weight: 700; letter-spacing: .14em; margin-top: 1px; }
+    .sb-scroll { overflow-y: auto; flex: 1; margin: 0 -6px; padding: 0 6px; }
+    .sb-scroll::-webkit-scrollbar { width: 0; }
+    .sb-group { margin-top: 14px; }
+    .sb-group__label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-tertiary); padding: 8px 12px 8px; }
+    .nav-item { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: none; background: none; border-radius: 12px; color: var(--text-secondary); font-size: 13.5px; font-weight: 600; text-align: left; transition: background .12s, color .12s; position: relative; }
+    .nav-item + .nav-item { margin-top: 2px; }
+    .nav-item svg { width: 17px; height: 17px; flex-shrink: 0; opacity: .85; }
+    .nav-item:hover { background: var(--nav-hover); color: var(--text-primary); }
+    .nav-item.active { background: var(--nav-current); color: var(--text-primary); }
+    .nav-item.active svg { opacity: 1; }
+    .nav-item .dot { width: 6px; height: 6px; border-radius: 50%; background: #3FB87C; margin-left: auto; box-shadow: 0 0 0 0 rgba(63,184,124,.6); animation: pulse 2.2s infinite; }
+    .nav-item .badge { margin-left: auto; background: var(--red-bg); color: var(--red-text); font-size: 10.5px; font-weight: 800; padding: 1px 7px; border-radius: 999px; }
+    @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(63,184,124,.5);} 70%{box-shadow:0 0 0 5px rgba(63,184,124,0);} 100%{box-shadow:0 0 0 0 rgba(63,184,124,0);} }
+    .sb-foot { padding-top: 10px; border-top: 1px solid var(--border-light); margin-top: 8px; }
+    .sb-user { display: flex; align-items: center; gap: 10px; padding: 10px 8px 2px; }
+    .sb-user__av { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 12px; }
+    .sb-user__name { color: var(--text-primary); font-size: 12.5px; font-weight: 700; line-height: 1.2; }
+
+
+    /* ─── table toolbar + sortable header, network.spotsnow pattern ─── */
+    .tbar { display:flex; align-items:center; gap:14px; padding:10px 14px; border-bottom:1px solid var(--border-light); }
+    .tbar--bare { padding:0; border:none; }
+    .tbar--bare .tbar__search input { width:150px; }
+    .cmp-inp--link { color:var(--blue-text); text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
+    .cmp-copy { position:absolute; right:5px; top:50%; transform:translateY(-50%); width:24px; height:24px;
+                border:none; background:none; color:var(--text-tertiary); cursor:pointer; display:grid; place-items:center; border-radius:6px; }
+    .cmp-copy:hover { color:var(--text-primary); background:var(--secondary-lite); }
+    .tbar__search { position:relative; }
+    .tbar__search svg { position:absolute; left:9px; top:50%; transform:translateY(-50%); width:13px; height:13px; color:var(--text-tertiary); }
+    .tbar__search input { width:210px; padding:6px 10px 6px 29px; border:1px solid var(--border); border-radius:8px;
+                          font:inherit; font-size:12px; background:var(--white); color:var(--text-primary); }
+    .tbar__search input:focus { outline:none; border-color:var(--border-strong); }
+    .tsel { border:none; background:transparent; font:inherit; font-size:12px; font-weight:600; color:var(--text-primary); cursor:pointer; }
+    .shead { display:grid; align-items:center; gap:0 13px; padding:8px 14px; border-bottom:1px solid var(--border-light); }
+    .shead button, .shead span { border:none; background:none; padding:0; text-align:left; font-family:inherit;
+                                 font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+                                 color:var(--text-tertiary); cursor:pointer; white-space:nowrap; }
+    .shead button:hover { color:var(--text-primary); }
+    /* ─── flat list card: rows divided by hairlines, one border around ─── */
+    .listcard { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .listcard .fhead { padding: 8px 14px; margin: 0; border-bottom: 1px solid var(--border-light); }
+    .listcard .wrow { border: none; border-radius: 0; background: none; }
+    .listcard .wrow + .wrow { margin-top: 0; border-top: 1px solid var(--border-light); }
+    .listcard .archdiv { margin: 4px 0; padding: 8px 16px; }
+    .listcard .archdiv::after { display: none; }
+    /* report stat tiles — the lead one goes dark, like the network's impressions card */
+    .pstat { background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; padding: 9px 12px; }
+    .pstat__l { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-tertiary); }
+    .pstat__v { font-size: 18px; font-weight: 800; letter-spacing: -.03em; margin-top: 3px; }
+    .pstat--dark { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .pstat--dark .pstat__l { color: inherit; opacity: .65; }
+    .pstat--dark .pstat__v { font-size: 24px; }
+    body.dark .pstat--dark { color: #12161C; }
+
+    /* ─── TOP BAR ─── */
+    .topbar { display: flex; align-items: center; gap: 4px; justify-content: flex-end; padding: 13px 18px 0; flex-shrink: 0; }
+    .nav-item .dot { width: 6px; height: 6px; border-radius: 50%; background: #3FB87C; margin-left: auto; }
+    .nav-item { border: none; background: none; border-radius: 8px; padding: 6px 11px; color: var(--text-tertiary); font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+    .nav-item:hover { color: var(--text-primary); background: var(--nav-hover); }
+    .nav-item.active { color: var(--text-primary); background: var(--nav-current); }
+    .nav-item .badge { background: var(--red-bg); color: var(--red-text); font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 999px; }
+    .nav-item .dot { width: 6px; height: 6px; border-radius: 50%; background: #3FB87C; }
+    /* sidebar nav re-asserted over the topbar redefinition: chunky Acme Network pills */
+    .sidebar .nav-item { display: flex; width: 100%; padding: 12px 14px; border-radius: 10px; font-size: 13.5px; color: var(--text-secondary); gap: 12px; }
+    .sidebar .nav-item:hover { background: var(--nav-hover); color: var(--text-primary); }
+    .sidebar .nav-item.active { background: var(--secondary-lite); color: var(--text-primary); }
+    .tb-plain { display: inline-flex; align-items: center; gap: 6px; border: none; background: none; padding: 6px 8px;
+                border-radius: 8px; color: var(--text-secondary); font-size: 12px; font-weight: 600; }
+    .tb-plain:hover { background: var(--nav-hover); color: var(--text-primary); }
+    .tb-plain svg { width: 14px; height: 14px; }
+    .tb-btn { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--panel); color: var(--text-secondary); font-size: 12px; font-weight: 600; margin-left: 6px; }
+    .tb-btn:hover { border-color: var(--border-strong); color: var(--text-primary); }
+    .tb-btn.active { background: var(--nav-current); color: var(--text-primary); border-color: transparent; }
+    .tb-btn svg { width: 13px; height: 13px; }
+    .tb-av { width: 30px; height: 30px; border-radius: 9px; background: var(--primary); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 11px; margin-left: 6px; border: none; flex-shrink: 0; }
+
+    /* ─── MAIN ─── */
+    .main { flex: 1; min-width: 0; background: var(--panel); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+    .views { flex: 1; overflow-y: auto; }
+    .view { display: none; }
+    .view.active { display: block; }
+    .inner { max-width: 1220px; margin: 0 auto; padding: 16px 28px 70px; }
+    .pagebar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; gap: 16px; flex-wrap: wrap; }
+    .head h1 { font-size: 20px; font-weight: 700; letter-spacing: -.035em; display: flex; align-items: center; gap: 11px; }
+    .head p { color: var(--text-secondary); font-size: 12.5px; margin-top: 4px; font-weight: 500; max-width: 640px; }
+    .pagebar__right { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+    .live-dot { display: inline-flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 700; color: var(--green-text); background: var(--green-bg); padding: 4px 10px; border-radius: var(--radius-pill); }
+    .live-dot i { width: 6px; height: 6px; border-radius: 50%; background: var(--green-text); animation: pulse 2s infinite; }
+
+    /* filters */
+    .seg { display: inline-flex; background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 3px; box-shadow: var(--shadow-btn); }
+    .seg button { border: none; background: none; padding: 6px 13px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); border-radius: 7px; }
+    .seg button.active { background: var(--primary); color: #fff; }
+
+    /* buttons */
+    .btn { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; border-radius: var(--radius-btn); padding: 9px 15px; font-size: 13px; font-weight: 600; border: 1px solid transparent; transition: .13s; }
+    .btn svg { width: 15px; height: 15px; }
+    .btn--primary { background: var(--primary); color: #fff; }
+    .btn--primary:hover { background: var(--primary-hover); }
+    .btn--ghost { background: var(--white); border-color: var(--border); color: var(--text-secondary); box-shadow: var(--shadow-btn); }
+    .btn--ghost:hover { border-color: var(--border-strong); color: var(--text-primary); }
+    .btn--sm { padding: 6px 11px; font-size: 12px; }
+    .btn--green { background: var(--green-text); color: #fff; }
+    .btn--green:hover { filter: brightness(1.08); }
+
+    /* cards + grid */
+    .grid { display: grid; gap: 16px; }
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-card); }
+    .card__pad { padding: 15px 18px; }
+    .card__head { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border-light); }
+    .card__title { font-size: 14px; font-weight: 700; letter-spacing: -.02em; display:flex; align-items:center; gap:8px; }
+    .card__sub { font-size: 12px; color: var(--text-tertiary); font-weight: 500; margin-top: 2px; }
+
+    /* stat tiles */
+    .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .tile { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 13px 15px; box-shadow: var(--shadow-card); }
+    .tile__label { font-size: 11.5px; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+    .tile__val { font-size: 26px; font-weight: 800; letter-spacing: -.03em; margin-top: 7px; }
+    .tile__delta { font-size: 11.5px; font-weight: 700; margin-top: 5px; display: inline-flex; align-items: center; gap: 4px; }
+    .up { color: var(--green-text); } .down { color: var(--red-text); }
+
+    /* tags */
+    .tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; letter-spacing: -.01em; }
+    .tag--green { background: var(--green-bg); color: var(--green-text); }
+    .tag--blue { background: var(--blue-bg); color: var(--blue-text); }
+    .tag--orange { background: var(--orange-bg); color: var(--orange-text); }
+    .tag--red { background: var(--red-bg); color: var(--red-text); }
+    .tag--purple { background: var(--purple-bg); color: var(--purple-text); }
+    .tag--grey { background: var(--secondary-lite); color: var(--text-secondary); }
+    .tag i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    /* tables */
+    table { width: 100%; border-collapse: collapse; }
+    thead th { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-tertiary); text-align: left; padding: 11px 20px; border-bottom: 1px solid var(--border-light); }
+    tbody td { font-size: 13px; padding: 13px 20px; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr.clickable:hover { background: var(--page-bg); cursor: pointer; }
+    .num { font-variant-numeric: tabular-nums; }
+    .right { text-align: right; }
+
+    /* progress / pacing bar */
+    .pace { height: 8px; border-radius: 999px; background: var(--secondary-lite); overflow: hidden; position: relative; }
+    .pace__fill { height: 100%; border-radius: 999px; background: var(--primary); transition: width .5s; }
+    .pace--good .pace__fill { background: var(--green-text); }
+    .pace--warn .pace__fill { background: var(--orange-text); }
+    .pace--bad .pace__fill { background: var(--red-text); }
+
+    /* progress ring */
+    .ringwrap { display:flex; align-items:center; gap:14px; }
+
+    /* coach */
+    .coach-card { display: flex; gap: 14px; padding: 16px 18px; border-radius: 12px; border: 1px solid var(--border-light); background: var(--white); }
+    .coach-card + .coach-card { margin-top: 12px; }
+    .coach-ico { width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0; display: grid; place-items: center; }
+    .coach-card b { font-size: 13.5px; font-weight: 700; }
+    .coach-card p { font-size: 12.5px; color: var(--text-secondary); margin-top: 3px; line-height: 1.5; }
+    .coach-act { margin-top: 9px; font-size: 12px; font-weight: 700; color: var(--primary); display: inline-flex; align-items: center; gap: 5px; }
+
+    /* modal / drawer */
+    .scrim { position: fixed; inset: 0; background: rgba(20,25,35,.44); backdrop-filter: blur(2px); z-index: 60; display: none; }
+    .scrim.open { display: block; }
+    .drawer { position: fixed; top: 0; right: 0; height: 100vh; width: 560px; max-width: 94vw; background: var(--white); z-index: 61; box-shadow: -10px 0 40px rgba(20,25,35,.16); transform: translateX(100%); transition: transform .28s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; }
+    .drawer.open { transform: translateX(0); }
+    /* full-screen variant — the episode view opened from a show record */
+    .drawer--full { width: min(1020px, 96vw); max-width: none; left: 50%; right: auto; top: 20px; height: calc(100vh - 20px);
+                    border-radius: 16px 16px 0 0; transform: translate(-50%, 102%); box-shadow: 0 -12px 48px rgba(20,25,35,.22); }
+    .drawer--full.open { transform: translate(-50%, 0); }
+    /* wide variant — the flight drawer runs two columns: numbers left, video + links right */
+    .drawer--wide { width: min(1120px, 96vw); }
+    .spotcols { display:grid; grid-template-columns:1fr 1.05fr; gap:0 26px; align-items:start; }
+    @media (max-width: 1040px){ .spotcols { grid-template-columns:1fr; } }
+    .drawer__head { padding: 20px 24px; border-bottom: 1px solid var(--border-light); display: flex; align-items: flex-start; justify-content: space-between; }
+    .drawer__body { padding: 22px 24px; overflow-y: auto; flex: 1; }
+    .drawer__foot { padding: 16px 24px; border-top: 1px solid var(--border-light); display: flex; gap: 10px; justify-content: flex-end; }
+    .x { border: none; background: var(--secondary-lite); width: 30px; height: 30px; border-radius: 8px; color: var(--text-secondary); font-size: 16px; display: grid; place-items: center; }
+
+    /* modal center */
+    .modal { position: fixed; z-index: 61; top: 50%; left: 50%; transform: translate(-50%,-46%); width: 720px; max-width: 94vw; max-height: 90vh; overflow-y: auto; background: var(--white); border-radius: 16px; box-shadow: var(--shadow-hover); opacity: 0; pointer-events: none; transition: .22s; }
+    .modal.open { opacity: 1; pointer-events: auto; transform: translate(-50%,-50%); }
+
+    .kv dt { color: var(--text-tertiary); font-weight: 600; }
+    .kv dd { font-weight: 600; }
+
+    .field { margin-bottom: 15px; }
+    .field label { display: block; font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; }
+    .field input, .field select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 9px; font-size: 13.5px; font-family: inherit; color: var(--text-primary); background: var(--white); }
+    .field input:focus, .field select:focus { outline: none; border-color: var(--primary); }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .footnote { margin-top: 26px; font-size: 11.5px; color: var(--text-tertiary); text-align: center; }
+    .muted { color: var(--text-tertiary); }
+    .empty { text-align: center; padding: 40px 20px; color: var(--text-tertiary); font-size: 13px; }
+
+    /* air check agent scan */
+    .scanbar { height: 4px; background: var(--secondary-lite); border-radius: 999px; overflow: hidden; }
+    .scanbar__fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--c2), var(--c3)); transition: width .3s; }
+    .agentrow { display: flex; align-items: center; gap: 12px; padding: 13px 18px; border: 1px solid var(--border-light); border-radius: 12px; background: var(--white); }
+    .agentrow + .agentrow { margin-top: 10px; }
+    .thumb { width: 92px; height: 52px; border-radius: 8px; object-fit: cover; background: var(--secondary-lite); flex-shrink: 0; }
+    .pulse-blue { animation: pulseb 1.4s infinite; }
+    /* flight-row CTAs: one min-width for all so the column never shifts;
+       In progress is a quiet underlined link until it becomes a real ask */
+    .fcta { min-width: 92px; justify-content: center; text-align: center; }
+    .fcta--quiet { background: none; border: none; font-family: inherit; font-size: 12px; font-weight: 600;
+                   color: var(--text-secondary); text-decoration: underline; text-underline-offset: 3px;
+                   cursor: pointer; padding: 0; }
+    .fcta--quiet:hover { color: var(--text-primary); }
+    @keyframes pulseb { 0%,100%{opacity:1;} 50%{opacity:.45;} }
+
+    /* proof reel */
+    .reel-stage { background: #0b0f14; border-radius: 14px; overflow: hidden; position: relative; aspect-ratio: 16/9; display: grid; place-items: center; }
+    .reel-stage iframe { width: 100%; height: 100%; border: 0; }
+    .reel-strip { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px; }
+    .reel-clip { width: 150px; flex-shrink: 0; border-radius: 10px; overflow: hidden; border: 2px solid transparent; background: var(--white); box-shadow: var(--shadow-card); }
+    .reel-clip.active { border-color: var(--c2); }
+    .reel-clip img { width: 100%; height: 84px; object-fit: cover; display: block; background:#222; }
+    .reel-clip__meta { padding: 7px 9px; }
+
+    /* deliverables & compliance (North Station pattern) */
+    .ai-tag { font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; background: var(--purple-bg); color: var(--purple-text); padding: 3px 8px; border-radius: 999px; }
+    .cmp-hint { font-size: 11.5px; color: var(--text-tertiary); margin: 6px 0 2px; line-height: 1.45; }
+    .cmp-row { border: 1px solid transparent; border-radius: 10px; padding: 11px 12px; margin-top: 9px; background: var(--page-bg); }
+    .cmp-row__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
+    .cmp-row__date { font-size: 12px; font-weight: 700; }
+    .cmp-status { font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+    .cmp-status.ok { background: var(--green-bg); color: var(--green-text); }
+    .cmp-status.pend { background: var(--secondary-lite); color: var(--text-secondary); }
+    .cmp-inp { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; font-family: inherit; margin-top: 6px; color: var(--text-primary); background: var(--white); }
+    .cmp-inp:focus { outline: none; border-color: var(--primary); }
+    .cmp-inp::placeholder { color: var(--text-tertiary); }
+
+    /* advertiser portal */
+
+
+    /* ─── chat-first hero (matches the SpotsNow Intelligence layout) ─── */
+    .hero { max-width:720px; margin:0 auto; padding:44px 0 0; text-align:center; }
+    .hero h1 { font-size:34px; font-weight:800; letter-spacing:-.04em; }
+    .hero p { color:var(--text-secondary); font-size:14px; font-weight:500; line-height:1.6; max-width:560px; margin:12px auto 0; }
+    .hero__pills { display:flex; gap:9px; justify-content:center; margin-top:18px; }
+    .pill { display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:500; padding:7px 14px; border-radius:999px; border:1px solid var(--border); background:var(--white); color:var(--text-secondary); box-shadow:var(--shadow-btn); }
+    .pill--solid { background:var(--primary); border-color:var(--primary); color:#fff; }
+    .pill i { width:7px; height:7px; border-radius:50%; background:currentColor; }
+    .askwrap { position:relative; margin-top:26px; }
+    .askwrap input { width:100%; padding:16px 92px 16px 18px; border:1px solid var(--border); border-radius:13px; font-size:14.5px; font-family:inherit; background:var(--white); box-shadow:var(--shadow-card); color:var(--text-primary); }
+    .askwrap input:focus { outline:none; border-color:var(--border-strong); box-shadow:var(--shadow-hover); }
+    .askwrap input::placeholder { color:var(--text-tertiary); }
+    .askwrap__go { position:absolute; right:9px; top:50%; transform:translateY(-50%); width:36px; height:36px; border-radius:9px; border:none; background:var(--primary); color:#fff; display:grid; place-items:center; }
+
+    /* ─── MANAGE SHOWS GRID (ported from inventory-demo3) ─── */
+    .msheet-card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-card); overflow: hidden; }
+    .msheet-toolbar { display: flex; align-items: center; gap: 12px; padding: 13px 15px; border-bottom: 1px solid var(--border); }
+    .msheet-search { flex: 1; max-width: 320px; display: flex; align-items: center; gap: 9px; background: var(--panel); border: 1px solid var(--border); border-radius: 9px; padding: 7px 12px; color: var(--text-tertiary); }
+    .msheet-search input { border: none; outline: none; background: none; font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text-primary); width: 100%; }
+    .msheet-tools { display: flex; align-items: center; gap: 7px; margin-left: auto; }
+    .msheet-scroll { overflow-x: auto; }
+    .msheet { border-collapse: collapse; width: 100%; }
+    .msheet .mh { background: var(--secondary-lite); border-bottom: 1px solid var(--border); border-right: 1px solid var(--border-light); padding: 11px 10px; font-size: 11px; font-weight: 700; color: var(--text-secondary); text-align: center; white-space: nowrap; }
+    .msheet .mh--show { text-align: left; padding-left: 16px; width: 210px; min-width: 210px; position: sticky; left: 0; z-index: 3; }
+    .msheet .mtd { border-bottom: 1px solid var(--border-light); border-right: 1px solid var(--border-light); height: 50px; padding: 0; vertical-align: middle; background: var(--panel); }
+    .msheet .mrow:hover .mtd { background: var(--nav-hover); }
+    .mtd--show { position: sticky; left: 0; z-index: 1; width: 210px; min-width: 210px; box-shadow: 1px 0 0 var(--border-light); }
+    .mshowcell--btn { width:100%; border:none; background:none; font-family:inherit; text-align:left; cursor:pointer; }
+    .mshowcell--btn:hover { background: var(--secondary-lite); }
+    .mshowdetail { display:flex; align-items:center; gap:1px; font-size:10.5px; font-weight:600; color:var(--blue-text); margin-top:1px; }
+    .mshowcell--btn:hover .mshowdetail { text-decoration: underline; }
+    .mshowcell { display: flex; align-items: center; gap: 10px; padding: 0 14px; height: 50px; overflow: hidden; }
+    .mthumb { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); color: var(--panel); display: grid; place-items: center; font-size: 11px; font-weight: 800; flex-shrink: 0; letter-spacing: -.02em; }
+    .mshowname { font-size: 12.5px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mshowsub { font-size: 10.5px; font-weight: 600; color: var(--text-tertiary); }
+    .mcell { position: relative; height: 50px; display: flex; align-items: center; justify-content: center; padding: 0 4px; cursor: cell; }
+    .mcell--sel { box-shadow: inset 0 0 0 2px var(--primary); border-radius: 3px; z-index: 3; }
+    .mcell--range { background: var(--nav-current); box-shadow: inset 0 0 0 1px var(--border-strong); }
+    .mfill { position: absolute; right: -1px; bottom: -1px; width: 9px; height: 9px; background: var(--primary); border: 1.5px solid var(--panel); cursor: crosshair; z-index: 5; }
+    .mctl { font-family: inherit; border: none; background: transparent; outline: none; color: var(--text-primary); font-weight: 400; }
+    .mctl--num { width: 100%; text-align: center; font-size: 13px; }
+    .mnum { display: inline-flex; align-items: center; justify-content: center; gap: 1px; width: 100%; }
+    .maffix { font-size: 12px; font-weight: 400; color: var(--text-tertiary); }
+    .mctl--pick { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+                  font-size: 12.5px; padding: 0 4px; cursor: pointer; border-radius: 7px; }
+    .mctl--pick:hover { background: var(--nav-hover); }
+    .msheet-foot { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; border-top: 1px solid var(--border); }
+    .msheet-total { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+
+    /* ─── transcript ─── */
+    .txwrap { border:1px solid var(--border-light); border-radius:11px; overflow:hidden; }
+    .txhd { display:flex; align-items:center; justify-content:space-between; padding:9px 12px; background:var(--secondary-lite); border-bottom:1px solid var(--border-light); }
+    .txhd span { font-size:10px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--text-tertiary); }
+    .txbody { max-height:238px; overflow-y:auto; padding:6px; }
+    .tx { display:flex; gap:10px; width:100%; text-align:left; padding:6px 8px; border:none; background:none; border-radius:7px; font-family:inherit; font-size:12.5px; line-height:1.55; color:var(--text-secondary); cursor:pointer; }
+    .tx:hover { background:var(--nav-hover); color:var(--text-primary); }
+    .tx time { font-variant-numeric:tabular-nums; color:var(--text-tertiary); font-size:11px; font-weight:700; flex-shrink:0; width:38px; padding-top:1px; }
+    .tx--ad { color:var(--text-primary); background:var(--blue-bg); box-shadow:inset 2px 0 0 var(--blue-text); }
+    .tx--ad:hover { background:var(--blue-bg); filter:brightness(.97); }
+    .tx--ad time { color:var(--blue-text); }
+
+
+    /* ─── one work row, used for every kind of item ─── */
+    .wrow { display:flex; align-items:center; gap:13px; padding:11px 14px; border:1px solid var(--border-light); border-radius:10px; background:var(--white); }
+    .wrow + .wrow { margin-top:8px; }
+    /* ─── flight rows: one grid for Needs you and All flights alike ─── */
+    .wflight { display:grid; grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 118px 26px; align-items:center; gap:0 14px; padding:10px 14px; }
+    .wflight .wrow__main > b { font-size:13px; font-weight:500; }
+    .wflight .wrow__num { width:auto; justify-content:flex-end; }
+    .wflight .wrow__num b { font-weight:600; }
+    .wflight .btn { width:auto; justify-content:center; padding-left:10px; padding-right:10px; }
+    .wflight > span { text-align:center; }
+    .fhead { display:grid; grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 118px 26px; gap:0 14px; padding:0 18px 9px;
+             font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--text-tertiary); }
+    .fhead span:nth-child(2),.fhead span:nth-child(3),.fhead span:nth-child(4),.fhead span:nth-child(6) { text-align:center; }
+    .fhead span:nth-child(5) { text-align:right; }
+    .fnum { text-align:center; font-size:13px; font-weight:500; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+    .fnum small { display:block; font-size:10.5px; font-weight:500; color:var(--text-tertiary); letter-spacing:0; margin-top:1px; }
+    .fran { display:inline-flex; align-items:center; justify-content:center; gap:5px; width:100%; max-width:100%; font-size:12.5px; font-weight:500;
+            padding:4px 0; border-radius:7px; border:1px solid var(--border); background:var(--panel); color:var(--text-primary);
+            font-variant-numeric:tabular-nums; cursor:pointer; overflow:hidden; }
+    .fran:hover { border-color:var(--border-strong); }
+    .fran--no { border-style:dashed; color:var(--text-tertiary); font-weight:400; cursor:default; white-space:nowrap; font-size:11px; }
+    .wdots { width:26px; height:26px; border:none; border-radius:8px; background:none; color:var(--text-tertiary);
+             display:grid; place-items:center; padding:0; cursor:pointer; justify-self:center; font-size:14px; font-weight:800; letter-spacing:1px; }
+    .wdots:hover { background:var(--nav-hover); color:var(--text-primary); }
+    .wrow--dim { opacity:.55; }
+    .wpop { position:fixed; z-index:90; min-width:172px; background:var(--panel); border:1px solid var(--border); border-radius:11px;
+            box-shadow:var(--shadow-hover); padding:5px; }
+    .wpop button { display:block; width:100%; text-align:left; border:none; background:none; border-radius:7px;
+                   padding:8px 11px; font-size:12.5px; font-weight:600; color:var(--text-primary); cursor:pointer; }
+    .wpop button:hover { background:var(--nav-hover); }
+    .wnote { display:flex; align-items:center; gap:11px; padding:8px 10px 8px 14px; background:var(--page-bg);
+             border:1px solid var(--border-light); border-radius:12px; cursor:pointer; }
+    .wnote__x { background:var(--white); }
+    .wnote + .wnote, .wnote + .wrow { margin-top:8px; }
+    .wnote__body { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .wnote__body b { font-size:12.5px; }
+    .wnote__txt { font-size:12px; color:var(--text-secondary); margin-left:8px; }
+    .wnote__x { flex-shrink:0; width:24px; height:24px; border-radius:50%; border:none; background:var(--secondary-lite);
+                color:var(--text-secondary); font-size:11px; line-height:1; cursor:pointer; display:grid; place-items:center; }
+    .wnote__x:hover { background:var(--border); color:var(--text-primary); }
+    .archdiv { display:flex; align-items:center; gap:9px; width:100%; margin:22px 0 10px; padding:0 2px; font-size:11px; font-weight:800;
+               letter-spacing:.07em; text-transform:uppercase; color:var(--text-tertiary); border:none; background:none; cursor:pointer; font-family:inherit; }
+    .archdiv:hover { color:var(--text-secondary); }
+    .archdiv::after { content:''; flex:1; height:1px; background:var(--border-light); }
+    .archdiv svg { transition:transform .15s; }
+
+    .statedit { border:none; background:none; font:inherit; font-size:14px; font-weight:700; color:inherit;
+                padding:0; margin-top:2px; width:100%; border-bottom:1px dashed transparent; }
+    .statedit:hover, .statedit:focus { border-bottom-color:var(--border-strong); outline:none; }
+    .warch { width:26px; height:26px; border-radius:7px; border:none; background:none; color:var(--text-tertiary); font-size:12px; justify-self:center; }
+    .warch:hover { background:var(--nav-hover); color:var(--text-primary); }
+    .wrow--click { cursor:pointer; transition:border-color .12s, box-shadow .12s; }
+    .wrow--click:hover { border-color:var(--border-strong); box-shadow:var(--shadow-card); }
+    .wrow__ico { width:34px; height:34px; border-radius:9px; display:grid; place-items:center; flex-shrink:0; }
+    .wrow__main { flex:1; min-width:0; }
+    .wrow__main > b { font-size:13px; font-weight:700; display:block; }
+    .wrow__main span { font-size:12px; color:var(--text-secondary); font-weight:400; }
+    .wrow__main span b { font-weight:700; color:var(--text-primary); }
+    .wrow__num { width:132px; flex-shrink:0; display:flex; align-items:center; gap:9px; }
+    .wrow__num b { font-size:12.5px; min-width:38px; text-align:right; }
+    .wrow button { flex-shrink:0; }
+    .answer { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:14px 16px; font-size:13px; line-height:1.6; margin-bottom:18px; box-shadow:var(--shadow-card); }
+    .thread { max-width:720px; margin:30px auto 0; }
+    .thread__hd { display:flex; align-items:center; justify-content:space-between; padding:0 2px 10px; }
+    .thread__hd span { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-tertiary); }
+    .thread__hd button { border:none; background:none; color:var(--text-tertiary); font-size:11.5px; font-weight:700; padding:3px 7px; border-radius:6px; }
+    .thread__hd button:hover { color:var(--text-primary); background:var(--nav-hover); }
+    .turn + .turn { margin-top:8px; border-top:1px solid var(--border-light); padding-top:18px; }
+    .turn__q { font-size:14.5px; font-weight:700; letter-spacing:-.02em; margin-bottom:9px; }
+    .turn__a { font-size:13px; line-height:1.65; color:var(--text-secondary); }
+    .turn__a b { color:var(--text-primary); }
+
+    /* ─── show / brand sign-off toggles ─── */
+    .tog { display:flex; align-items:center; gap:11px; padding:11px 13px; border:1px solid var(--border-light); border-radius:11px; background:var(--white); }
+    .tog__sw { width:42px; height:24px; border-radius:999px; background:var(--border-strong); position:relative; flex-shrink:0; transition:.16s; border:none; }
+    .tog__sw i { position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff; transition:.16s; box-shadow:0 1px 2px rgba(0,0,0,.2); }
+    .tog__sw.on { background:var(--green-text); } .tog__sw.on i { left:21px; }
+    .tog b { font-size:12.5px; display:block; } .tog small { font-size:11px; color:var(--text-tertiary); font-weight:500; }
+
+    /* ─── curve / projection chart ─── */
+    .curvewrap { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px 14px 10px; }
+    .curvekey { display:flex; flex-wrap:wrap; gap:14px; padding:2px 4px 0; }
+    .curvekey span { display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:400; color:var(--text-secondary); }
+    .curvekey i { width:14px; height:0; border-top:2px solid; border-radius:2px; }
+
+        .kv { display:flex; align-items:baseline; justify-content:space-between; gap:20px; font-size:13px; padding:10px 0; border-bottom:1px solid var(--border-light); }
+    .kv:last-child { border-bottom:0; }
+    .kv span { color:var(--text-secondary); font-weight:500; white-space:nowrap; }
+    .kv b { font-weight:700; text-align:right; }
+    .kv b em { font-style:normal; font-weight:500; color:var(--text-tertiary); }
+    .dhead { font-size:11px; font-weight:700; letter-spacing:.04em; color:var(--text-primary); margin:18px 0 2px; }
+    .srcpill { font-size:9.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; padding:2px 6px; border-radius:5px; background:var(--secondary-lite); color:var(--text-tertiary); }
+    .srcpill.adserver { background:var(--purple-bg); color:var(--purple-text); }
+
+    @media (max-width: 900px) { .tiles { grid-template-columns: repeat(2,1fr); } }
+  </style>
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="sb-brand" onclick="go('overview')" style="cursor:pointer" title="Back to the Command Center">
+      <div class="sb-brand__name">
+        <b style="font-size:19px;font-weight:700;letter-spacing:-.03em;color:var(--text-primary)">Delivery</b>
+        <span style="font-size:12.5px;font-weight:500;letter-spacing:normal;text-transform:none;color:var(--text-tertiary)">Campaign delivery &amp; pacing</span>
+      </div>
+    </div>
+    <div class="sb-scroll">
+      <div class="sb-group">
+        <div class="sb-group__label">Planning</div>
+        <button class="nav-item active" data-view="overview" onclick="go('overview')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Command Center</button>
+        <button class="nav-item" data-view="delivery" onclick="go('delivery')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Delivery <span class="badge" id="nav-del-badge"></span></button>
+        <button class="nav-item" data-view="portal" onclick="go('portal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg>Campaign Portal <span class="dot"></span></button>
+      </div>
+    </div>
+    <div class="sb-foot">
+      <div class="sb-user" style="justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:10px"><div class="sb-user__av">CP</div>
+        <div class="sb-user__name">You</div></div>
+        <button class="tb-plain" data-view="settings" onclick="go('settings')" title="Settings" style="padding:6px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:8px;margin-right:auto"><span id="tbBack"></span><span class="tag tag--green"><i></i>CRM connected</span></div>
+      <button class="tb-btn" id="resetBtn" onclick="location.reload()" title="Restart the demo from a clean slate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Reset demo</button>
+      <button class="tb-btn" id="remBtn" onclick="remOpen=true;RENDER.overview();document.getElementById('remInp').focus()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add reminder</button>
+      <button class="tb-btn" data-view="shows" onclick="go('shows')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 4v16"/></svg>Shows</button>
+      <button class="tb-btn" onclick="toggleDark()" id="dmBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>Dark Mode</button>
+    </div>
+    <div class="views" id="main">
+      <section class="view active" id="view-overview"></section>
+      <section class="view" id="view-delivery"></section>
+      <section class="view" id="view-portal"></section>
+      <section class="view" id="view-shows"></section>
+      <section class="view" id="view-settings"></section>
+    </div>
+  </main>
+
+  <!-- overlays -->
+  <div class="scrim" id="scrim" onclick="closeOverlays()"></div>
+  <aside class="drawer" id="drawer"></aside>
+  <div class="modal" id="modal"></div>
+
+  <script>
+  /* ═══════════════════════════ SEED / STORE ═══════════════════════════ */
+  const TODAY = '2026-08-17';                 // Monday
+  const money = n => '$' + Math.round(n).toLocaleString('en-US');
+  const K = n => n >= 1000 ? (n/1000).toFixed(n>=10000?0:1)+'k' : ''+n;
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const dt = s => new Date(s+'T00:00:00');
+  const daysBetween = (a,b) => Math.round((dt(b)-dt(a))/864e5);
+  const fmtDate = s => dt(s).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const addDays = (s,n) => { const d=dt(s); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); };
+  const dayName = s => dt(s).toLocaleDateString('en-US',{weekday:'short'});
+  const mmss = sec => Math.floor(sec/60)+':'+String(Math.floor(sec%60)).padStart(2,'0');
+  const hms = sec => { const h=Math.floor(sec/3600), m=Math.floor(sec%3600/60), x=Math.floor(sec%60); return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0'); };
+  const adSecs = s => parseInt(s.length)||60;
+  const epLenOf = s => s.epLen || 3600;
+  const clipUrl = s => `https://www.youtube.com/watch?v=${s.yt}&t=${s.ts}s`;
+  const monthKey = s => s.slice(0,7);
+  const pctOf = (a,b) => Math.round(a/Math.max(b,1)*100);
+
+  /* ── IAB: full delivery is 90% of the guarantee. Anything over 100% is bonus. ── */
+  const IAB_FULL = 0.90;
+  /* ── The make-good call gets made as soon as the show's own curve is settled
+        enough to trust, not on a fixed day-10 rule and not at day 30. Warren
+        Smith is callable on day 3; Sage Steele needs to day 13. ── */
+  const FINAL_DAY = 30, CALL_AT = 0.90;
+
+  /* ═══ LEARNED VIEW CURVES ═══
+     Cumulative share of the 30-day number by day. The agent refits these from
+     every read it verifies, so each show gets its own shape:
+       Warren Smith front-loads (~85% inside 2 days) · Sage Steele has a long tail. */
+  const CURVES = {
+    fast:   {0:0, 1:.55, 2:.83, 3:.90, 5:.95, 7:.97, 10:.985, 14:.99, 21:.997, 30:1},
+    quick:  {0:0, 1:.42, 2:.68, 3:.79, 5:.89, 7:.93, 10:.96, 14:.98, 21:.995, 30:1},
+    medium: {0:0, 1:.30, 2:.50, 3:.63, 5:.76, 7:.84, 10:.90, 14:.94, 21:.98, 30:1},
+    steady: {0:0, 1:.22, 2:.38, 3:.50, 5:.66, 7:.76, 10:.85, 14:.91, 21:.96, 30:1},
+    slow:   {0:0, 1:.06, 2:.18, 3:.34, 5:.62, 7:.75, 10:.85, 14:.92, 21:.97, 30:1},
+  };
+  // First day this show's curve is settled enough to call the number.
+  const _ci={};
+  function checkInDay(sh){
+    if(_ci[sh.id]!=null) return _ci[sh.id];
+    let d=3; while(d<30 && curveAt(sh.curve,d)<CALL_AT) d++;
+    return _ci[sh.id]=d;
+  }
+  const checkInDate = s => addDays(s.published, checkInDay(show(s.showId)));
+
+  function curveAt(key, day){
+    const c=CURVES[key]||CURVES.medium; const ks=Object.keys(c).map(Number).sort((a,b)=>a-b);
+    if(day<=0) return 0; if(day>=30) return 1;
+    for(let i=0;i<ks.length-1;i++){ const a=ks[i], b=ks[i+1];
+      if(day>=a && day<=b) return c[a] + (c[b]-c[a])*((day-a)/(b-a)); }
+    return 1;
+  }
+
+  const REPS = ['Marcus Bell','Priya Shah','Devin Cole'];
+
+  /* ═══ SHOW SETUP LAYER ═══
+     The inventory record from the call: how often it publishes, how many ad
+     positions exist per episode (the cap the ad server knows and the system doesn't),
+     where the audio downloads come from, and whether a make-good needs the
+     show's sign-off or can just be scheduled. */
+  const SHOWS = [
+    { id:'rubin',  name:'The Rubin Report', host:'Dave Rubin',    publishDays:['Mon','Tue','Wed','Thu','Fri'], epsPerWeek:5, positionsPerEp:4, curve:'medium', samples:46, simulcast:true,  audioSrc:'hosting', scanEvery:24, revShare:0.65, mgPolicy:'auto', guarantee:95000,  cpm:26, category:'Politics / Culture', channel:'@rubinreport',   src:'adserver' },
+    { id:'sage',   name:'Sage Steele',      host:'Sage Steele',   publishDays:['Wed'],                         epsPerWeek:1, positionsPerEp:4, curve:'slow',   samples:19, simulcast:true,  audioSrc:'hosting', scanEvery:24, revShare:0.70, mgPolicy:'auto', guarantee:120000, cpm:28, category:'Sports / Culture',   channel:'@sagesteele',    src:'adserver' },
+    { id:'warren', name:'Warren Smith',     host:'Warren Smith',  publishDays:['Tue','Thu'],                   epsPerWeek:2.5, positionsPerEp:3, curve:'fast', samples:23, simulcast:false, audioSrc:'none',    scanEvery:12, revShare:0.60, mgPolicy:'ask',  guarantee:85000,  cpm:24, category:'Interview',          channel:'@warrensmith',   src:'adserver' },
+    { id:'action', name:'Action Friends',   host:'The Action crew',publishDays:['Fri'],                        epsPerWeek:1, positionsPerEp:3, curve:'quick',  samples:15, simulcast:false, audioSrc:'none',    scanEvery:24, revShare:0.60, mgPolicy:'ask',  guarantee:70000,  cpm:22, category:'Comedy',             channel:'@actionfriends', src:'adserver' },
+    { id:'nate',   name:'Nate',             host:'Nate',          publishDays:['Mon','Thu'],                   epsPerWeek:2, positionsPerEp:3, curve:'medium', samples:11, simulcast:false, audioSrc:'none',    scanEvery:24, revShare:0.55, mgPolicy:'ask',  guarantee:60000,  cpm:20, category:'Business',           channel:'@nate',          src:'manual' },
+    { id:'clinton',name:'Clinton',          host:'Clinton',       publishDays:['Tue'],                         epsPerWeek:1, positionsPerEp:2, curve:'steady', samples:7,  simulcast:true,  audioSrc:'request', scanEvery:48, revShare:0.55, mgPolicy:'ask',  guarantee:45000,  cpm:19, category:'Health',             channel:'@clinton',       src:'manual' },
+  ];
+  const show = id => SHOWS.find(s=>s.id===id) || SHOWS[0];
+
+  const DEALS = [
+    { id:'d1', title:'July flight',  brand:'Kalshi',     showId:'rubin',   gross:16400, sellType:'month', createdDate:'2026-06-18', closeDate:'2026-06-24', outcome:'won', rep:'Marcus Bell' },
+    { id:'d2', title:'July flight',  brand:'DraftKings', showId:'sage',    gross:18900, sellType:'month', createdDate:'2026-06-02', closeDate:'2026-06-09', outcome:'won', rep:'Priya Shah' },
+    { id:'d3', title:'Q3 flight',  brand:'Ramp',       showId:'warren',  gross:11200, sellType:'month', createdDate:'2026-06-20', closeDate:'2026-07-01', outcome:'won', rep:'Devin Cole' },
+    { id:'d4', title:'August flight',  brand:'Ritual',     showId:'clinton', gross:6400,  sellType:'month', createdDate:'2026-07-08', closeDate:'2026-07-14', outcome:'won', rep:'Priya Shah' },
+    { id:'d5', title:'August flight', checkIn:'2026-08-16', brand:'Kalshi',     showId:'sage',    gross:14800, sellType:'month', createdDate:'2026-07-11', closeDate:'2026-07-19', outcome:'won', rep:'Marcus Bell' },
+    { id:'d6', title:'Q3 flight', notes:'Chase the gift-card redemptions — only a few shows have. Brand wants addresses by Friday.', brand:'BetterHelp', showId:'warren',  gross:9800,  sellType:'month', createdDate:'2026-07-02', closeDate:'2026-07-16', outcome:'won', rep:'Priya Shah' },
+    { id:'d7', title:'August flight',  brand:'Notion',     showId:'rubin',   gross:12600, sellType:'month', createdDate:'2026-07-05', closeDate:'2026-07-20', outcome:'won', rep:'Devin Cole' },
+    { id:'d8', title:'August flight',  brand:'DraftKings', showId:'action',  gross:8300,  sellType:'month', createdDate:'2026-07-09', closeDate:'2026-07-21', outcome:'won', rep:'Marcus Bell' },
+    { id:'d9', title:'August flight',  brand:'Ramp',       showId:'nate',    gross:7100,  sellType:'month', createdDate:'2026-07-22', closeDate:'2026-07-30', outcome:'won', rep:'Devin Cole' },
+    { id:'d10', title:'August flight', brand:'AG1',        showId:'rubin',   gross:10400, sellType:'month', createdDate:'2026-07-28', closeDate:'2026-08-04', outcome:'won', rep:'Priya Shah' },
+    { id:'d11', title:'September flight', brand:'AG1', showId:'sage', gross:15600, sellType:'month', createdDate:'2026-08-18', closeDate:'2026-08-20', outcome:'won', rep:'Priya Shah' },
+  ];
+  DEALS.forEach(d => { d.net = Math.round(d.gross*0.85); d.netToCreator = Math.round(d.net*0.6); });
+  const deal = id => DEALS.find(d=>d.id===id);
+  const wonDeals = () => DEALS.filter(d=>d.outcome==='won');
+
+  /* ═══ AD SPOTS ═══
+     status:  scheduled → aired (agent hunting) → found (link+timestamp) → verified (you approved)
+     kind:    paid | makegood | bonus            copyStatus: needs_copy | needs_cta | sent | seen
+     Delivery is YouTube views + audio downloads for simulcast shows. */
+  const SPOTS = [
+    // ── closed out: past the 30-day mark ──
+    { id:'s1', dealId:'d1', brand:'Kalshi', showId:'rubin', kind:'paid', published:'2026-07-15', guarantee:95000, views:88000, downloads:15200, dlState:'auto', status:'verified', length:'60s', yt:'dQw4w9WgXcQ', ts:412, epLen:5412, copyStatus:'seen', copy:['Named the brand','Read promo code KALSHI','Free-trial CTA'] },
+    { id:'s2', dealId:'d2', brand:'DraftKings', showId:'sage', kind:'paid', published:'2026-07-15', guarantee:120000, views:104000, downloads:22000, dlState:'auto', status:'verified', length:'60s', yt:'M7lc1UVf-VE', ts:198, epLen:4980, copyStatus:'seen', copy:['Named the brand','Read promo code DK50','Age/geo disclaimer'] },
+    { id:'s3', dealId:'d3', brand:'Ramp', showId:'warren', kind:'paid', published:'2026-07-24', guarantee:80000, views:62000, downloads:0, dlState:'none', status:'verified', length:'60s', yt:'aqz-KE-bpKQ', ts:305, epLen:3620, copyStatus:'seen', copy:['Named the brand','Value prop read','URL CTA'] },
+
+    // ── DECISION WINDOW · day 10–14 · the make-good call gets made here ──
+    { id:'s6', dealId:'d6', brand:'BetterHelp', showId:'warren', kind:'paid', published:'2026-08-05', guarantee:85000, views:58000, downloads:0, dlState:'none', status:'verified', length:'60s', yt:'ScMzIvxBSi4', ts:640, epLen:6300, copyStatus:'seen', copy:['Named the brand','Mental-health disclaimer','URL CTA'] },
+    { id:'s7', dealId:'d7', brand:'Notion', showId:'rubin', kind:'paid', published:'2026-08-06', guarantee:95000, views:52000, downloads:9000, dlState:'auto', status:'verified', length:'45s', yt:'jNQXAC9IVRw', ts:734, epLen:5680, copyStatus:'seen', copy:['Named the brand','URL CTA read'] },
+    { id:'s4', dealId:'d4', brand:'Ritual', showId:'clinton', kind:'paid', published:'2026-08-04', guarantee:45000, views:28000, downloads:null, dlState:'requested', status:'verified', length:'60s', yt:'9bZkp7q19f0', ts:221, epLen:2940, copyStatus:'seen', copy:['Named the brand','Wellness disclaimer read'] },
+    { id:'s8', dealId:'d8', brand:'DraftKings', showId:'action', kind:'paid', published:'2026-08-07', guarantee:70000, views:66000, downloads:0, dlState:'none', status:'verified', length:'45s', yt:'aqz-KE-bpKQ', ts:512, epLen:4100, copyStatus:'seen', copy:['Named the brand','Read promo code DK50'] },
+
+    // ── live and pacing · day 1–9 · weekly check ──
+    { id:'s5',  dealId:'d5',  brand:'Kalshi', showId:'sage', kind:'paid', published:'2026-08-12', guarantee:120000, views:62000, downloads:13000, dlState:'auto', status:'verified', length:'60s', yt:'M7lc1UVf-VE', ts:286, epLen:5100, copyStatus:'seen', copy:['Named the brand','Read promo code KALSHI','Free-trial CTA'] },
+    { id:'s9',  dealId:'d9',  brand:'Ramp', showId:'nate', kind:'paid', published:'2026-08-14', guarantee:60000, views:34000, downloads:0, dlState:'none', status:'verified', length:'45s', yt:'9bZkp7q19f0', ts:194, epLen:3300, copyStatus:'seen', copy:['Named the brand','URL CTA read'] },
+    { id:'s10', dealId:'d10', brand:'AG1', showId:'rubin', kind:'paid', published:'2026-08-15', guarantee:95000, views:24000, downloads:4000, dlState:'auto', status:'verified', length:'60s', yt:'dQw4w9WgXcQ', ts:388, epLen:5240, copyStatus:'seen', copy:['Named the brand','Value prop read'] },
+
+    // ── airing today · the daily check the agent runs ──
+    { id:'s11', dealId:'d1', brand:'Kalshi', showId:'rubin', kind:'paid', published:TODAY, guarantee:95000, views:null, downloads:null, dlState:'auto', status:'aired', length:'60s', yt:'', ts:null, copyStatus:'seen', copy:[] },
+    { id:'s12', dealId:'d6', brand:'BetterHelp', showId:'warren', kind:'paid', published:TODAY, guarantee:85000, views:null, downloads:null, dlState:'none', status:'aired', length:'60s', yt:'', ts:null, copyStatus:'seen', copy:[] },
+    { id:'s13', dealId:'d9', brand:'Ramp', showId:'nate', kind:'paid', published:TODAY, guarantee:60000, views:null, downloads:null, dlState:'none', status:'aired', length:'45s', yt:'', ts:null, copyStatus:'seen', copy:[] },
+
+    // ── booked, not yet aired · copy pipeline ──
+    { id:'s14', dealId:'d6', brand:'BetterHelp', showId:'sage', kind:'paid', published:'2026-08-19', guarantee:120000, views:null, downloads:null, dlState:'auto', status:'scheduled', length:'60s', yt:'', ts:null, copyStatus:'needs_copy', copy:[] },
+    { id:'s15', dealId:'d7', brand:'Notion', showId:'action', kind:'paid', published:'2026-08-21', guarantee:70000, views:null, downloads:null, dlState:'none', status:'scheduled', length:'45s', yt:'', ts:null, copyStatus:'sent', copySent:'2026-08-14', copySeen:null, copy:[] },
+    { id:'s16', dealId:'d3', brand:'Ramp', showId:'clinton', kind:'paid', published:'2026-08-25', guarantee:45000, views:null, downloads:null, dlState:'request', status:'scheduled', length:'60s', yt:'', ts:null, copyStatus:'needs_cta', copy:[] },
+    { id:'s17', dealId:'d5', brand:'Kalshi', showId:'sage', kind:'paid', published:'2026-08-26', guarantee:120000, views:null, downloads:null, dlState:'auto', status:'scheduled', length:'60s', yt:'', ts:null, copyStatus:'seen', copySent:'2026-08-12', copySeen:'2026-08-12', copy:[] },
+    // ── the make-good that already ran the full loop ──
+    { id:'s18', dealId:'d3', brand:'Ramp', showId:'warren', kind:'makegood', published:'2026-08-20', guarantee:0, views:null, downloads:null, dlState:'none', status:'scheduled', length:'60s', yt:'', ts:null, copyStatus:'seen', copy:[] },
+    { id:'s20', dealId:'d8', brand:'DraftKings', showId:'action', kind:'bonus', published:'2026-08-28', guarantee:0, views:null, downloads:null, dlState:'none', status:'scheduled', length:'45s', yt:'', ts:null, copyStatus:'seen', copy:[] },
+    { id:'s19', dealId:'d11', brand:'AG1', showId:'sage', kind:'paid', published:'2026-09-02', guarantee:120000, views:null, downloads:null, dlState:'auto', status:'scheduled', length:'60s', yt:'', ts:null, copyStatus:'needs_copy', copy:[] },
+  ];
+  const spot = id => SPOTS.find(s=>s.id===id);
+
+  /* ═══ DELIVERY MATH ═══ */
+  const delivered = s => s.views==null ? null : (s.views + (s.downloads||0));
+  const liveDays  = s => s.status==='scheduled' ? -1 : daysBetween(s.published, TODAY);
+  function projection(s){
+    const d = liveDays(s), sh = show(s.showId), got = delivered(s);
+    if(d < 0 || got == null) return null;
+    const p = curveAt(sh.curve, Math.max(d,1));
+    const proj = d >= FINAL_DAY ? got : Math.round(got / Math.max(p,.02));
+    return { day:d, curvePct:p, got, proj, ratio: proj/Math.max(s.guarantee,1), rawRatio: got/Math.max(s.guarantee,1),
+             final: d >= FINAL_DAY, confident: d >= checkInDay(sh), callAt: checkInDay(sh), samples: sh.samples };
+  }
+  /* verdict — the projection is always reported, but only a *firm* one raises a
+     make good. Firm means the day 10–14 window is open, or enough of the curve
+     is already in that the number can't move much. Before that it's indicative:
+     still useful as an early warning, not something you act on. */
+  function verdict(s){
+    const pr = projection(s); if(!pr) return { k:'pending', label:'Awaiting episode', tone:'grey' };
+    if(s.dlState==='requested') return { k:'blocked', label:'Waiting on downloads', tone:'purple', pr };
+    if(pr.curvePct < .45 && !pr.confident) return { k:'early', label:'Too early to call', tone:'grey', pr };
+    if(!pr.confident){
+      if(pr.ratio >= 1.0)     return { k:'trackOver',  label:'Tracking over',        tone:'green',  pr, soft:true };
+      if(pr.ratio >= IAB_FULL) return { k:'trackFull', label:'Tracking to clear 90%', tone:'green',  pr, soft:true };
+      return { k:'trackLight', label:'Tracking light', tone:'orange', pr, soft:true };
+    }
+    if(pr.ratio >= 1.0) return { k:'bonus', label:pr.final?'Delivered + bonus':'Tracking over', tone:'green', pr };
+    if(pr.ratio >= IAB_FULL) return { k:'full', label:pr.final?'Delivered in full':'On track to 90%', tone:'green', pr };
+    return { k:'short', label:pr.final?'Under-delivered':'Projected short', tone:'red', pr };
+  }
+  // what the advertiser paid for this read, at the show's rate
+  const spotCost = s => Math.round(s.guarantee/1000 * show(s.showId).cpm);
+  const shortfall = s => { const pr=projection(s); return pr?Math.max(0, Math.round(s.guarantee - pr.proj)):0; };
+
+  /* ═══ AVAILS ═══ The system knows what's booked; the ad server knows the cap per episode. ═══ */
+  function nextEpisodes(showId, n=4, from){
+    const sh=show(showId), out=[]; let d=from||addDays(TODAY,1);
+    for(let i=0;i<45 && out.length<n;i++,d=addDays(d,1)){
+      if(!sh.publishDays.includes(dayName(d))) continue;
+      const booked = SPOTS.filter(x=>x.showId===showId && x.published===d).length;
+      out.push({ date:d, booked, cap:sh.positionsPerEp, open:Math.max(0, sh.positionsPerEp-booked) });
+    }
+    return out;
+  }
+
+  /* ═══ MAKE GOODS ═══ the loop from the call: recommend → approve date → draft to
+     show + brand → two sign-offs → write back to the system as a Make Good. ═══ */
+  const MAKEGOODS = [
+    { id:'mg1', spotId:'s3', date:'2026-08-20', status:'scheduled', showOk:true, brandOk:true,
+      showVia:'gmail', brandVia:'gmail', note:'Written to the system as Make Good · Aug 20.' },
+    { id:'mg3', spotId:'s7', date:'2026-08-19', status:'awaiting', showOk:true, brandOk:null,
+      showVia:'auto', brandVia:null, sentBrand:'2026-08-16' },
+    // Ops note (Aug 24): bonus spots — $0 reads to lift performance — are more
+    // common than make goods and were never tracked, so the inventory vanished.
+    { id:'mgB1', kind:'bonus', spotId:'s8', date:'2026-08-28', position:'Mid-roll', status:'scheduled',
+      showOk:true, brandOk:'skip', showVia:'auto', brandVia:null },
+  ];
+  let MG_SEQ = 10;
+  const mg = id => MAKEGOODS.find(m=>m.id===id);
+  const mgForSpot = id => MAKEGOODS.find(m=>m.spotId===id);
+  // Any spot projected short that hasn't got a make-good yet
+  const needsMakegood = () => SPOTS.filter(s=>verdict(s).k==='short' && !mgForSpot(s.id));
+
+  // A make good is inventory given away. Value it at the show's own rate.
+  const mgValue = m => { const sp=spot(m.spotId);
+    const imps = m.kind==='bonus' ? sp.guarantee : shortfall(sp);
+    return Math.round(imps/1000*show(sp.showId).cpm); };
+  function mgStats(){
+    const sched=MAKEGOODS.filter(m=>m.status==='scheduled'), open=MAKEGOODS.filter(m=>m.status!=='scheduled');
+    const imps=sched.reduce((a,m)=>a+shortfall(spot(m.spotId)),0);
+    const val=sched.reduce((a,m)=>a+mgValue(m),0);
+    const f=fillStats();
+    const byShow={};
+    MAKEGOODS.forEach(m=>{ const sp=spot(m.spotId), id=sp.showId;
+      byShow[id]=byShow[id]||{showId:id,n:0,imps:0,val:0};
+      byShow[id].n++; byShow[id].imps+=shortfall(sp); byShow[id].val+=mgValue(m); });
+    return { sched:sched.length, open:open.length, imps, val, ...f,
+             shows:Object.values(byShow).sort((a,b)=>b.val-a.val) };
+  }
+
+  /* ═══ WHAT THE AGENT LEARNED ═══ the guarantee-tuning + fill-rate read ═══ */
+  function fillStats(){
+    const ran = SPOTS.filter(s=>s.status==='verified' || s.kind!=='paid');
+    const paid = ran.filter(s=>s.kind==='paid').length;
+    const free = ran.filter(s=>s.kind!=='paid').length;
+    return { paid, free, total:paid+free, rate: pctOf(paid, paid+free) };
+  }
+  function guaranteeAdvice(){
+    const out=[];
+    SHOWS.forEach(sh=>{
+      const ran = SPOTS.filter(s=>s.showId===sh.id && s.kind==='paid' && projection(s));
+      if(ran.length < 2) return;
+      const shortCount = ran.filter(s=>['short'].includes(verdict(s).k)).length;
+      if(!shortCount) return;
+      const typical = Math.round(ran.reduce((a,s)=>a+(projection(s).proj||0),0)/ran.length);
+      const suggest = Math.round(typical*0.95/1000)*1000;
+      if(suggest >= sh.guarantee) return;
+      out.push({ showId:sh.id, shortCount, flights:ran.length, current:sh.guarantee, suggest, typical });
+    });
+    return out.sort((a,b)=>b.shortCount-a.shortCount);
+  }
+
+  /* ═══ CREATIVE ═══ the assets attached to a campaign — copy, code, landing page ═══ */
+  const CREATIVE = {
+    Kalshi:{ code:'KALSHI', url:'kalshi.com/acme', cta:'$25 in trade credit', placement:'Mid-roll', len:'60s',
+      copy:'Kalshi is the first federally regulated prediction market in the US. You can trade on how real events turn out — elections, the Fed, the weather, award shows. Head to kalshi.com slash acme and use code KALSHI to get twenty five dollars in trade credit on your first trade.',
+      points:['Named the brand','Read promo code KALSHI','Landing page read aloud','Regulatory disclaimer'] },
+    DraftKings:{ code:'DK50', url:'draftkings.com/acme', cta:'Bet $5, get $150', placement:'Mid-roll', len:'60s',
+      copy:'DraftKings Sportsbook is the official partner of this show. New customers bet five dollars and get one hundred and fifty in bonus bets instantly. Download the DraftKings app and use code DK50. Must be twenty one or older, gambling problem call one eight hundred gambler.',
+      points:['Named the brand','Read promo code DK50','Age and geo disclaimer','Responsible gambling line'] },
+    BetterHelp:{ code:'ACME', url:'betterhelp.com/acme', cta:'10% off first month', placement:'Mid-roll', len:'60s',
+      copy:'BetterHelp connects you with a licensed therapist entirely online. Fill out a short questionnaire and get matched in under forty eight hours. Visit betterhelp.com slash acme for ten percent off your first month.',
+      points:['Named the brand','Landing page read aloud','Mental-health disclaimer','Discount CTA'] },
+    Ramp:{ code:'', url:'ramp.com/acme', cta:'Free demo', placement:'Mid-roll', len:'60s',
+      copy:'Ramp is the corporate card and spend management platform that automates your expense reports. Businesses using Ramp save an average of five percent a year. Go to ramp.com slash acme to get started for free.',
+      points:['Named the brand','Value prop read','Landing page read aloud'] },
+    Notion:{ code:'', url:'notion.com/acme', cta:'Free plan', placement:'Pre-roll', len:'45s',
+      copy:'Notion is the connected workspace where better, faster work happens. Notes, docs, projects and AI in one place. Try Notion free at notion.com slash acme.',
+      points:['Named the brand','Landing page read aloud'] },
+    Ritual:{ code:'RITUAL25', url:'ritual.com/acme', cta:'25% off first month', placement:'Mid-roll', len:'60s',
+      copy:'Ritual makes a multivitamin with traceable ingredients and no shady additives. Third party tested, made for real bodies. Get twenty five percent off your first month at ritual.com slash acme.',
+      points:['Named the brand','Read promo code RITUAL25','Supplement disclaimer'] },
+    AG1:{ code:'', url:'drinkag1.com/acme', cta:'Free vitamin D + 5 travel packs', placement:'Mid-roll', len:'60s',
+      copy:'AG1 is one scoop, once a day, covering your daily nutritional bases. Subscribe today and get a free year supply of vitamin D and five free travel packs at drinkag1.com slash acme.',
+      points:['Named the brand','Landing page read aloud','Subscription offer'] },
+  };
+  const creative = b => CREATIVE[b] || { code:'', url:'', cta:'', placement:'Mid-roll', len:'60s', copy:'Copy not logged for this flight.', points:[] };
+
+  // episode the read landed in
+  const EPISODES = {
+    s1:'The Case For Optimism In 2026', s2:'Why Nobody Trusts The Numbers Anymore',
+    s3:'What Everyone Gets Wrong About Focus', s4:'The Sleep Episode',
+    s5:'Live From The Convention Floor', s6:'A Conversation About Burnout',
+    s7:'The Productivity Trap', s8:'Friday Free-For-All #212',
+    s9:'Building In Public, Year Three', s10:'Morning Routines That Actually Stick',
+    s11:'The Monday Briefing', s12:'What The Data Actually Says',
+  };
+  const epTitle = s => EPISODES[s.id] || `${show(s.showId).name} · ${fmtDate(s.published)}`;
+
+  const BRAND_DOMAIN = { Kalshi:'kalshi.com', DraftKings:'draftkings.com', Ritual:'ritual.com', Ramp:'ramp.com', Notion:'notion.so', BetterHelp:'betterhelp.com', AG1:'drinkag1.com' };
+
+  // Ad-read quality score — read completeness, delivery, placement, verification
+  function qualityScore(s){
+    const copyPts = Math.min((s.copy||[]).length,3)/3;
+    const pr = projection(s);
+    const deliv = Math.min((pr?pr.ratio:0),1.2)/1.2;
+    const pos = (s.ts||0)/epLenOf(s);
+    const placement = (pos>=0.08 && pos<=0.75) ? 1 : (pos<0.08 ? 0.7 : 0.55);
+    const verified = s.status==='verified' ? 1 : 0.6;
+    const score = Math.round((copyPts*0.30 + deliv*0.30 + placement*0.20 + verified*0.20)*100);
+    const grade = score>=90?'A':score>=80?'B':score>=70?'C':'D';
+    const tone = score>=90?'green':score>=80?'blue':score>=70?'orange':'red';
+    return { score, grade, tone, factors:[
+      {k:'Copy read complete', v:Math.round(copyPts*100)},
+      {k:'Projected delivery', v:Math.round(deliv*100)},
+      {k:'Mid-roll placement', v:Math.round(placement*100)},
+      {k:'Air check verified', v:Math.round(verified*100)},
+    ]};
+  }
+
+  /* ═══════════════════════════ CHART HELPERS (inline SVG) ═══════════════════════════ */
+  const PAL = ['var(--c1)','var(--c2)','var(--c3)','var(--c4)','var(--c5)','var(--c6)','var(--c7)'];
+  function ring(pct, {size=64,thick=8,color='var(--green-text)'}={}){
+    const r=(size-thick)/2,c=size/2,C=2*Math.PI*r,len=Math.min(pct,150)/100*C;
+    return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}"><circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--secondary-lite)" stroke-width="${thick}"/><circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${color}" stroke-width="${thick}" stroke-linecap="round" stroke-dasharray="${len} ${C}" transform="rotate(-90 ${c} ${c})"/><text x="${c}" y="${c+4}" text-anchor="middle" font-size="14" font-weight="800" fill="var(--text-primary)">${pct}%</text></svg>`;
+  }
+
+  /* ═══════════════════════════ NAV ═══════════════════════════ */
+  const RENDER = {};
+  let CURRENT='overview';
+  function go(v){
+    document.querySelectorAll('[data-view]').forEach(n=>n.classList.toggle('active',n.dataset.view===v));
+    document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
+    document.getElementById('view-'+v).classList.add('active');
+    document.getElementById('main').scrollTop=0;
+    CURRENT=v;
+    if(v!=='portal'&&v!=='shows') setBack('');
+    const rb=document.getElementById('remBtn'); if(rb) rb.style.display=v==='overview'?'':'none';
+    if(RENDER[v]) RENDER[v]();
+  }
+  function rerender(){ if(RENDER[CURRENT]) RENDER[CURRENT](); }
+  // Embedded in the Acme OS shell: hide our own sidebar (the shell nests our
+  // sections under its "Delivery" nav) and let the shell drive our views.
+  if (window.self !== window.top) document.body.classList.add('embedded');
+  window.addEventListener('message', function(e){ var d=e.data; if(d && d.type==='delnav' && typeof go==='function') go(d.view); });
+  const setBack=h=>{ document.getElementById('tbBack').innerHTML=h||''; }
+  function refreshBadges(){
+    const el=document.getElementById('nav-del-badge'); if(!el) return;
+    const n=workList().length; el.textContent=n; el.style.display=n?'':'none';
+  }
+
+  /* ═══════════════════════════ OVERLAYS ═══════════════════════════ */
+  function openDrawer(html,full,wide){ const d=document.getElementById('drawer'); d.innerHTML=html; d.classList.toggle('drawer--full',!!full); d.classList.toggle('drawer--wide',!!wide&&!full); d.classList.add('open'); document.getElementById('scrim').classList.add('open'); }
+  function openModal(html){ const m=document.getElementById('modal'); m.innerHTML=html; m.classList.add('open'); document.getElementById('scrim').classList.add('open'); }
+  function closeOverlays(){ SELFOR=null; document.getElementById('drawer').classList.remove('open'); document.getElementById('modal').classList.remove('open'); document.getElementById('scrim').classList.remove('open'); }
+
+  /* ═══════════════════════════ ASK ═══════════════════════════ */
+  let CHATS=[];
+  function newChat(){ CHATS=[]; go('overview'); }
+  function askAcme(q){
+    const el=document.querySelector('.view.active #acAsk'); const t=q||(el?el.value.trim():''); if(!t) return;
+    CHATS.unshift({ q:t, a:answerQuery(t) }); CHATS=CHATS.slice(0,20);
+    if(el) el.value='';
+    if(CURRENT!=='overview') go('overview'); else rerender();
+  }
+  const goChip=(label,view)=>`<button class="btn btn--ghost btn--sm" style="margin-top:10px" onclick="go('${view}')">${label}</button>`;
+  const nameOf = s => `${esc(s.brand)} on ${esc(show(s.showId).name)}`;
+  function answerQuery(raw){
+    const q=raw.toLowerCase().trim();
+    const live=SPOTS.filter(s=>projection(s));
+    const brandHit=[...new Set(SPOTS.map(s=>s.brand))].find(b=>q.includes(b.toLowerCase()));
+    const showHit=SHOWS.find(s=>q.includes(s.name.toLowerCase())||q.includes(s.host.toLowerCase()));
+    if(brandHit && showHit){
+      const sp=live.filter(s=>s.brand===brandHit&&s.showId===showHit.id).sort((x,y)=>liveDays(y)-liveDays(x))[0];
+      if(sp){ const v=verdict(sp), pr=v.pr;
+        return `<b>${nameOf(sp)}</b> is day ${pr.day} of 30. ${K(pr.got)} delivered against ${K(sp.guarantee)} — reads <b>${Math.round(pr.rawRatio*100)}%</b> raw, but ${esc(showHit.name)} only has ${Math.round(pr.curvePct*100)}% of views in by now. Projects <b>${K(pr.proj)}</b> = <b>${Math.round(pr.ratio*100)}%</b>. ${v.k==='short'?'Lands short — make good needed.':'Clears the 90% line.'}`; }
+    }
+    if(/make ?good|short|under.?deliver/.test(q)){
+      const need=needsMakegood();
+      return need.length?`${need.length} flight${need.length>1?'s':''} project${need.length>1?'':'s'} under 90%: `+need.map(x=>`<b>${nameOf(x)}</b> (${Math.round(verdict(x).pr.ratio*100)}%, ${K(shortfall(x))} short)`).join(', ')+`.`:`Nothing new projecting short.`;
+    }
+    if(/behind|pacing|pace|track/.test(q)){
+      const soft=live.filter(x=>{const v=verdict(x);return v.pr&&v.pr.rawRatio<0.75&&v.k!=='short';});
+      const bad=live.filter(x=>verdict(x).k==='short');
+      return (bad.length?`Behind: `+bad.map(x=>`<b>${nameOf(x)}</b> (${Math.round(verdict(x).pr.ratio*100)}%)`).join(', ')+`. `:`Nothing behind. `)
+        +(soft.length?`${soft.map(x=>`<b>${nameOf(x)}</b>`).join(', ')} look${soft.length>1?'':'s'} light on raw numbers but the curve says ${soft.length>1?'they land':'it lands'} fine.`:'');
+    }
+    if(/check.?in|note/.test(q)){
+      const notes=DEALS.filter(d=>d.outcome==='won'&&(d.notes||'').trim());
+      const due=DEALS.filter(d=>d.checkIn&&d.checkIn<=TODAY);
+      return (notes.length||due.length)
+        ? (notes.map(d=>`<b>${esc(d.brand)} · ${esc(d.title)}</b>: ${esc(d.notes)}`).join('<br>')
+          +(due.length?`<br>Check-in due: ${due.map(d=>esc(d.brand)+' · '+esc(d.title)).join(', ')}.`:''))+goChip('Open Delivery →','delivery')
+        : `No open check-ins or admin notes.`;
+    }
+    if(/copy|cta|opened/.test(q)){
+      const n=SPOTS.filter(x=>['needs_copy','needs_cta'].includes(x.copyStatus)), u=SPOTS.filter(x=>x.copyStatus==='sent');
+      return (n.length?`${n.length} spot${n.length>1?'s':''} need copy or a CTA: `+n.map(x=>`<b>${nameOf(x)}</b>`).join(', ')+`. `:`All copy is in. `)+(u.length?`${u.length} copy email${u.length>1?'s':''} sent but not opened.`:'');
+    }
+    if(/guarantee|too high|fill rate|bonus/.test(q)){
+      const adv=guaranteeAdvice(), f=fillStats();
+      return `Paid fill rate is <b>${f.rate}%</b> (${f.paid} sold, ${f.free} given).`+(adv.length?` <b>${esc(show(adv[0].showId).name)}</b> needed a make good on ${adv[0].shortCount} of its last ${adv[0].flights} flights — reads land near ${K(adv[0].typical)}, so drop the guarantee to ${K(adv[0].suggest)} from ${K(adv[0].current)}.`:'')+goChip('Open Shows →','shows');
+    }
+    if(showHit) return `<b>${esc(showHit.name)}</b> publishes ${showHit.publishDays.join('/')}, ${showHit.positionsPerEp} positions an episode, ${K(showHit.guarantee)} guarantee. <b>${Math.round(curveAt(showHit.curve,2)*100)}%</b> of views land inside 48h, off ${showHit.samples} reads.`+goChip('Open Shows →','shows');
+    if(brandHit){
+      const sp=live.filter(x=>x.brand===brandHit); if(!sp.length) return `${esc(brandHit)} has nothing live.`;
+      const g=sp.reduce((t,x)=>t+x.guarantee,0), pj=sp.reduce((t,x)=>t+projection(x).proj,0);
+      return `<b>${esc(brandHit)}</b> — ${sp.length} flight${sp.length>1?'s':''}, projecting ${K(pj)} against ${K(g)} = <b>${pctOf(pj,g)}%</b>.`+goChip('Open Portal →','portal');
+    }
+    return `Try "will Kalshi on Sage Steele deliver?", "what needs a make good?", or "which guarantees are too high?"`;
+  }
+
+  /* ═══════════════════════════ SHARED ═══════════════════════════ */
+  const toneVar = t => ({green:'var(--green-text)',red:'var(--red-text)',orange:'var(--orange-text)',blue:'var(--blue-text)',purple:'var(--purple-text)',grey:'var(--text-tertiary)'}[t]||'var(--text-secondary)');
+  function projBar(s){
+    const pr=projection(s); if(!pr) return '';
+    const max=Math.max(s.guarantee,pr.proj)*1.06, w=v=>Math.min(100,v/max*100), tone=toneVar(verdict(s).tone);
+    return `<div style="position:relative;flex:1;height:8px;border-radius:4px;background:var(--secondary-lite)">
+      <div style="position:absolute;inset:0 auto 0 0;width:${w(pr.proj)}%;border-radius:4px;background:${tone};opacity:.3"></div>
+      <div style="position:absolute;inset:0 auto 0 0;width:${w(pr.got)}%;border-radius:4px;background:${tone}"></div>
+      <div title="90% IAB line" style="position:absolute;top:-3px;bottom:-3px;left:${w(s.guarantee*IAB_FULL)}%;width:2px;background:var(--green-text)"></div></div>`;
+  }
+  const nextCheck = s => { const pr=projection(s); if(!pr||pr.final) return null;
+    const sh=show(s.showId);
+    return [...new Set([1,7,checkInDay(sh),14,21,30])].sort((a,b)=>a-b).find(d=>d>pr.day) || 30; };
+
+  /* One line for what landed, one dashed line for where it goes, one goal.
+     The goal drawn is the 90% IAB line — the number that actually decides. */
+  /* The record's graph covers the whole deal by default; click reads in the
+     deliverables list to include or exclude them. Selection dies with the
+     drawer, so it always reopens on the full picture. */
+  let SELSET=null, SELFOR=null;
+  function toggleSel(id){ if(!SELSET) return;
+    const all=flightRows(spot(DRAWER_SPOT)).filter(x=>projection(x)).map(x=>x.id);
+    if(SELSET.size===1&&SELSET.has(id)) SELSET=new Set(all); else SELSET=new Set([id]);
+    openSpot(DRAWER_SPOT); }
+  let DRAWER_SPOT=null, DRAWER_FULL=false;
+
+  /* One line per episode when several are selected (Aug 31 review) — click a
+     cluster to isolate its line; a single selection reads like before. */
+  function dealChart(sel,{w=470,h=200}={}){
+    const spots=sel.filter(x=>projection(x)); if(!spots.length) return '<div class="empty">Nothing selected.</div>';
+    const start=spots.map(x=>x.published).sort()[0];
+    const end=spots.map(x=>addDays(x.published,30)).sort().slice(-1)[0];
+    const span=Math.max(daysBetween(start,end),1), today=Math.min(Math.max(daysBetween(start,TODAY),0),span);
+    const goal=Math.round(spots.reduce((a,x)=>a+x.guarantee,0)*IAB_FULL);
+    const fnOf=x=>{ const off=daysBetween(start,x.published), pr=projection(x);
+      return d=>{ const dd=d-off; return dd<=0?0:curveAt(show(x.showId).curve,Math.min(dd,30))*pr.proj; }; };
+    const fns=spots.map(fnOf), multi=spots.length>1;
+    const totalAt=d=>fns.reduce((a,f)=>a+f(d),0);
+    const peak=multi?Math.max(...fns.map(f=>f(span))):totalAt(span);
+    const padL=14,padR=52,padT=18,padB=26, max=Math.max(goal,peak,1)*1.15;
+    const X=d=>padL+(w-padL-padR)*(d/span), Y=v=>h-padB-(h-padT-padB)*(v/max);
+    const line=(f,color,wd,r)=>{ const pts=[]; for(let d=0;d<=span;d++) pts.push([X(d),Y(f(d))]);
+      const solid=pts.slice(0,today+1).map(pt=>pt[0].toFixed(1)+' '+pt[1].toFixed(1));
+      const dash=pts.slice(Math.max(today,0)).map(pt=>pt[0].toFixed(1)+' '+pt[1].toFixed(1));
+      return `${dash.length>1?`<path d="M${dash.join(' L')}" fill="none" stroke="${color}" stroke-width="${(wd*.75).toFixed(1)}" stroke-dasharray="5 4" opacity=".5"/>`:''}
+      <path d="M${solid.join(' L')}" fill="none" stroke="${color}" stroke-width="${wd}" stroke-linecap="round"/>
+      <circle cx="${X(today)}" cy="${Y(f(today))}" r="${r}" fill="${color}" stroke="var(--panel)" stroke-width="2"/>
+      <text x="${X(span)}" y="${Y(f(span))-8}" text-anchor="end" font-size="10.5" font-weight="800" fill="${color}">${K(Math.round(f(span)))}</text>`; };
+    const col=i=>PAL[(i+1)%PAL.length];
+    return `<svg viewBox="0 0 ${w} ${h}" width="100%">
+      <line x1="${padL}" x2="${w-padR}" y1="${h-padB}" y2="${h-padB}" stroke="var(--border)"/>
+      ${spots.map(x=>{ const d=daysBetween(start,x.published);
+        return `<line x1="${X(d)}" x2="${X(d)}" y1="${h-padB}" y2="${h-padB+4}" stroke="var(--text-tertiary)" stroke-width="1.5"/>
+        <text x="${X(d)}" y="${h-9}" text-anchor="middle" font-size="9" font-weight="600" fill="var(--text-tertiary)">${fmtDate(x.published)}</text>`; }).join('')}
+      <line x1="${padL}" x2="${w-padR}" y1="${Y(goal)}" y2="${Y(goal)}" stroke="var(--text-tertiary)" stroke-width="1.5" stroke-dasharray="6 5"/>
+      <text x="${w-padR+7}" y="${Y(goal)+3.5}" font-size="10.5" font-weight="700" fill="var(--text-secondary)">Goal ${K(goal)}</text>
+      ${multi?fns.map((f,i)=>line(f,col(i),2.2,3.6)).join(''):line(totalAt,'var(--green-text)',2.8,4.5)}
+    </svg>
+    <div class="curvekey">${multi
+      ?spots.map((x,i)=>`<span><i style="border-color:${col(i)}"></i>${fmtDate(x.published)}</span>`).join('')
+      :`<span><i style="border-color:var(--green-text)"></i>Delivered</span>
+        <span><i style="border-color:var(--green-text);border-top-style:dashed"></i>Where it lands</span>`}</div>`;
+  }
+
+
+  function sparkline(k,{w=88,h=26}={}){
+    const pts=[]; for(let d=0;d<=30;d++) pts.push((2+(w-4)*(d/30)).toFixed(1)+' '+(h-2-(h-6)*curveAt(k,d)).toFixed(1));
+    return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"><path d="M${pts.join(' L')}" fill="none" stroke="var(--c2)" stroke-width="2" stroke-linecap="round"/></svg>`;
+  }
+
+  /* ═══════════════════════════ THE WORK LIST ═══════════════════════════
+     Everything that wants a human, in one flat list. No sub-tabs, no
+     section headers — just the next thing to do. */
+  const ICO={ mic:'<path d="M12 2a3 3 0 013 3v6a3 3 0 01-6 0V5a3 3 0 013-3z"/><path d="M19 10a7 7 0 01-14 0M12 17v4"/>',
+    warn:'<path d="M12 9v4M12 17h.01M10.3 3.9L2 18a2 2 0 001.7 3h16.6A2 2 0 0022 18L13.7 3.9a2 2 0 00-3.4 0z"/>',
+    doc:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>',
+    mg:'<path d="M3 12a9 9 0 1015-6.7L21 8"/><path d="M21 3v5h-5"/>',
+    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    wave:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+    check:'<path d="M20 6L9 17l-5-5"/>' };
+  const icoBox=(k,tone)=>`<div class="wrow__ico" style="background:var(--${tone}-bg)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--${tone}-text)" stroke-width="2.1">${ICO[k]}</svg></div>`;
+  const row=(lead,title,sub,num,action,click)=>`<div class="wrow${click?' wrow--click':''}"${click?` onclick="${click}"`:''}>${lead}<div class="wrow__main"><b>${title}</b><span>${sub}</span></div>${num||''}${action?`<span onclick="event.stopPropagation()">${action}</span>`:''}</div>`;
+  const spotNum=s=>{ const pr=projection(s); if(!pr) return ''; const v=verdict(s);
+    return `<div class="wrow__num">${projBar(s)}<b style="color:${toneVar(v.tone)}">${Math.round(pr.ratio*100)}%</b></div>`; };
+
+  const warch=(kind,id)=>kind?`<button class="warch" title="Archive" onclick="event.stopPropagation();archiveItem('${kind}','${id}')">✕</button>`:'<span></span>';
+  const ARCHIVED={};
+  function toggleArchive(id){ ARCHIVED['w:'+id]=!ARCHIVED['w:'+id]; closeRowMenu(); rerender(); refreshBadges(); }
+  const archiveItem=(kind,id)=>toggleArchive(id);
+  const isArchived=id=>!!ARCHIVED['w:'+id];
+  const unarchived=(kind,id)=>!isArchived(id);
+
+  let ARCH_OPEN=false, ROWMENU=null;
+  function closeRowMenu(){ if(ROWMENU){ ROWMENU.remove(); ROWMENU=null; document.removeEventListener('click',closeRowMenu); } }
+  function setVerify(id,v){ spot(id).copyCheck=v; closeRowMenu(); rerender(); }
+  function verifyMenu(ev,id){
+    ev.stopPropagation(); closeRowMenu();
+    const el=document.createElement('div'); el.className='wpop';
+    el.innerHTML=['Copy verified','Needs review'].map(o=>`<button onclick="setVerify('${id}','${o}')">${o}</button>`).join('');
+    document.body.appendChild(el); ROWMENU=el;
+    const r=ev.currentTarget.getBoundingClientRect();
+    el.style.top=Math.min(innerHeight-el.offsetHeight-10, r.bottom+6)+'px';
+    el.style.left=Math.max(10, r.right-el.offsetWidth)+'px';
+    setTimeout(()=>document.addEventListener('click',closeRowMenu),0);
+  }
+  const CHEV=`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="flex-shrink:0;opacity:.6"><path d="M6 9l6 6 6-6"/></svg>`;
+  let REM_LINK='';
+  const REM_LINKS=[['','No link'],['delivery','Delivery'],['portal','Campaign Portal'],['shows','Shows']];
+  function openPick(ev,kind,a,b){
+    ev.stopPropagation(); ev.preventDefault(); closeRowMenu();
+    let opts=[], cur='', apply=null;
+    if(kind==='cell'){ const col=SHEET_COLS.find(c=>c.key===b); opts=col.opts; cur=cellGet(show(a),b); apply=v=>gridCommit(a,b,v); }
+    else if(kind==='brand'){ opts=['All brands',...[...new Set(DEALS.filter(d=>d.outcome==='won').map(d=>d.brand))].sort()]; cur=dealBrandF; apply=v=>{ dealBrandF=v; RENDER.portal(); }; }
+    else if(kind==='show'){ opts=['All shows',...SHOWS.map(x=>x.name)]; cur=delShowF; apply=v=>{ delShowF=v; RENDER.delivery(); }; }
+    else if(kind==='time'){ opts=['All time','This week','This month','August','July','June']; cur=delTime; apply=v=>{ delTime=v; RENDER.delivery(); }; }
+    else if(kind==='status'){ opts=['All statuses','In progress','Tracking over','On track','Tracking under','Not started','Complete']; cur=delStatus; apply=v=>{ delStatus=v; RENDER.delivery(); }; }
+    else if(kind==='rem'){ opts=REM_LINKS.map(x=>x[1]); cur=(REM_LINKS.find(x=>x[0]===REM_LINK)||REM_LINKS[0])[1];
+      apply=v=>{ REM_LINK=(REM_LINKS.find(x=>x[1]===v)||REM_LINKS[0])[0];
+        const btn=document.getElementById('remLinkBtn'); if(btn) btn.innerHTML=esc(v)+' '+CHEV; }; }
+    const el=document.createElement('div'); el.className='wpop';
+    el.innerHTML=opts.map(o=>`<button style="display:flex;align-items:center;justify-content:space-between;gap:14px">${esc(String(o))}${String(o)===String(cur)?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6L9 17l-5-5"/></svg>':''}</button>`).join('');
+    document.body.appendChild(el); ROWMENU=el;
+    [...el.children].forEach((btn,i)=>btn.onclick=()=>{ closeRowMenu(); apply(opts[i]); });
+    const r=ev.currentTarget.getBoundingClientRect();
+    el.style.top=Math.min(innerHeight-el.offsetHeight-10, r.bottom+6)+'px';
+    el.style.left=Math.max(10, Math.min(innerWidth-el.offsetWidth-10, r.left))+'px';
+    setTimeout(()=>document.addEventListener('click',closeRowMenu),0);
+  }
+  function rowMenu(ev,id){
+    ev.stopPropagation(); closeRowMenu();
+    const s=spot(id), c=ctaFor(s), m=mgForSpot(id);
+    const el=document.createElement('div'); el.className='wpop';
+    el.innerHTML=[
+      `<button onclick="closeRowMenu();openSpot('${id}')">Open record</button>`,
+      s.yt?`<button onclick="closeRowMenu();playClip('${s.yt}',${s.ts})">Hear the read</button>`:'',
+      verdict(s).k==='short'&&!m&&dealShort(s)?`<button onclick="closeRowMenu();createMakegood('${id}')">Set up make good</button>`:'',
+      m?`<button onclick="closeRowMenu();openMg('${m.id}')">Open ${m.kind==='bonus'?'bonus spot':'make good'}</button>`:'',
+      `<button onclick="toggleArchive('${id}')">${isArchived(id)?'Restore':'Mark done · archive'}</button>`,
+    ].join('');
+    document.body.appendChild(el); ROWMENU=el;
+    const r=ev.currentTarget.getBoundingClientRect();
+    el.style.top=Math.min(innerHeight-el.offsetHeight-10, r.bottom+6)+'px';
+    el.style.left=Math.max(10, r.right-el.offsetWidth)+'px';
+    setTimeout(()=>document.addEventListener('click',closeRowMenu),0);
+  }
+
+  /* One sorter for every flight table - Needs you and All flights sort alike.
+     Spots without a projection sort to the bottom on numeric keys. */
+  function sortFlights(list){
+    const fv={ad:s=>nameOf(s).toLowerCase(), day:s=>projection(s)?projection(s).day:-1,
+              delivered:s=>projection(s)?projection(s).got:-1, pacing:s=>projection(s)?projection(s).ratio:-1};
+    const f=fv[delSort.k]; if(!f) return list;
+    return list.slice().sort((a,b)=>{ const x=f(a),y=f(b); return (x>y?1:x<y?-1:0)*delSort.dir; });
+  }
+
+  /* Three words on the button, and only one of them is dark.
+     In progress → running, nothing to do. Verified → it landed.
+     Make good → it came in under, and that is the only thing worth shouting. */
+  // A short flight only raises a make good if its CAMPAIGN projects short —
+  // one flight over covers another under, per the deal-level 90% rule.
+  function dealShort(s){ const d=DEALS.find(x=>x.id===s.dealId); if(!d) return true;
+    const c=dealSummary(d); return ['under','mg'].includes(c.status.k); }
+  function ctaFor(s){
+    const pr=projection(s), v=verdict(s), m=mgForSpot(s.id);
+    if(v.k==='short' && (m || dealShort(s))) return { label:'Make good', dark:!m };
+    if(!pr || !pr.confident || s.status!=='verified') return { label:'In progress', dark:false };
+    return { label:'Review', dark:false };
+  }
+
+  /* One row, used by Needs you and All flights alike. Six columns:
+     the ad · did it run · what it delivered · how it is pacing · make good · action */
+  function flightRow(s){
+    const pr=projection(s), v=verdict(s), sh=show(s.showId), m=mgForSpot(s.id), c=ctaFor(s);
+    const dash='<span class="muted">—</span>';
+    return `<div class="wrow wflight wrow--click" onclick="openSpot('${s.id}')">
+      <div class="wrow__main"><b>${nameOf(s)}</b></div>
+      <div class="fnum" style="white-space:nowrap">${pr?`${Math.min(pr.day,30)}/30 <span class="muted" style="font-size:10px">d</span>`:'—'}</div>
+      <div onclick="event.stopPropagation()" style="display:flex;flex-direction:column;align-items:stretch;gap:4px">${s.yt
+        ? `<button class="fran" onclick="playClip('${s.yt}',${s.ts})" title="Hear the read"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>${mmss(s.ts)}</button>`
+        : `<span class="fran fran--no">${s.status==='scheduled'?'due '+fmtDate(s.published):s.missed?'Overdue '+fmtDate(s.published):'due today'}</span>`}
+        ${s.kind!=='paid'?`<span style="font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--purple-text);text-align:center">${s.kind==='bonus'?'Bonus':'Make good'}</span>`:''}</div>
+      <div class="fnum">${pr?K(pr.got):dash}${pr&&sh.simulcast?`<small>${K(s.views||0)} vid · ${s.dlState==='requested'?'?':K(s.downloads||0)} aud</small>`:pr?'<small>video</small>':''}</div>
+      <div class="wrow__num">${pr?`${projBar(s)}<b style="color:${toneVar(v.tone)}">${Math.round(pr.ratio*100)}%</b>`:'<span style="flex:1;text-align:left;font-size:12px;color:var(--text-tertiary)">Not started</span>'}</div>
+      <span onclick="event.stopPropagation()">${cta(c.label,`openSpot('${s.id}')`,c.dark)}</span>
+      <span onclick="event.stopPropagation()"><button class="wdots" title="More" onclick="rowMenu(event,'${s.id}')">⋮</button></span>
+    </div>`;
+  }
+  /* In progress is a quiet underlined link — nothing to do yet. The moment it
+     turns into Review or Make good it becomes a real button: time to act.
+     All three share one min-width so the column never shifts. */
+  const dcta=(label,onclick,dark)=>label==='In progress'
+    ? `<button class="fcta fcta--quiet" onclick="${onclick}">${label}</button>`
+    : `<button class="btn ${dark?'btn--primary':'btn--ghost'} btn--sm fcta" onclick="${onclick}">${label}</button>`;
+  const cta=dcta;
+
+
+  // Needs you: the same rows, filtered to the ads that want something.
+  function workList(){
+    const wants=new Set();
+    SPOTS.filter(s=>s.status==='aired'&&s.missed).forEach(s=>wants.add(s.id));
+    needsMakegood().forEach(s=>wants.add(s.id));
+    MAKEGOODS.filter(m=>m.status!=='scheduled').forEach(m=>wants.add(m.spotId));
+    SPOTS.filter(s=>s.dlState==='requested').forEach(s=>wants.add(s.id));
+    SPOTS.filter(s=>['needs_copy','needs_cta','sent'].includes(s.copyStatus)).forEach(s=>wants.add(s.id));
+    SPOTS.filter(s=>closedOut(s)&&!s.completed).forEach(s=>wants.add(s.id));
+    let ids=[...wants].map(spot).sort((a,b)=>liveDays(b)-liveDays(a));
+    if(delShowF!=='All shows') ids=ids.filter(s=>show(s.showId).name===delShowF);
+    if(delQ2.trim()){ const q=delQ2.trim().toLowerCase(); ids=ids.filter(s=>nameOf(s).toLowerCase().includes(q)); }
+    ids=sortFlights(ids);
+    // Deal-level check-ins: admin notes and the check-in date you set.
+    // One quiet line each, pinned above the table until she clears them (Aug 24, 9:37).
+    const noteRow=(d,label,text,clearFn)=>`<div class="wnote" onclick="go('portal');openDeal('${d.id}')">
+      <span class="wnote__body"><b>${esc(d.brand)} · ${esc(d.title||'Flight')}</b><span class="wnote__txt" title="${esc(text)}">${esc(text)}</span></span>
+      <button class="wnote__x" title="Snooze 2 days" onclick="event.stopPropagation();snoozeNote('${d.id}','${label}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
+      <button class="wnote__x" title="Done — dismiss" onclick="event.stopPropagation();${clearFn}('${d.id}')">✕</button>
+    </div>`;
+    const checkRows=[];
+    DEALS.filter(d=>d.outcome==='won'&&(d.notes||'').trim()&&!(d.noteSnooze&&d.noteSnooze>TODAY)).forEach(d=>checkRows.push(noteRow(d,'Note',d.notes,'clearDealNote')));
+    DEALS.filter(d=>d.checkIn&&d.checkIn<=TODAY).forEach(d=>checkRows.push(noteRow(d,'Check-in',`You set a check-in for ${fmtDate(d.checkIn)} — how's it going?`,'clearCheckIn')));
+    const active=ids.filter(x=>!isArchived(x.id)).map(flightRow);
+    const arch=ids.filter(x=>isArchived(x.id));
+    if(arch.length){
+      // archived: up to the five most recent, one crossed-out mid-gray line each - no controls
+      active.push(`<div style="border-top:1px solid var(--border-light);margin-top:6px;padding:6px 0 2px">${arch.slice(0,5).map(x=>
+        `<div onclick="openSpot('${x.id}')" style="font-size:12.5px;color:var(--text-secondary);text-decoration:line-through;padding:6px 14px;cursor:pointer">${nameOf(x)}</div>`).join('')}</div>`);
+    }
+    active.count=ids.length-arch.length+checkRows.length;
+    active.checks=checkRows.join('');
+    return active;
+  }
+
+
+  function deliveryAttention(){ return { count: workList().count||0 }; }
+  function snoozeNote(id,kind){ const d=DEALS.find(x=>x.id===id); if(!d) return;
+    if(kind==='Check-in') d.checkIn=addDays(TODAY,2); else d.noteSnooze=addDays(TODAY,2);
+    toast('Snoozed — back '+dayName(addDays(TODAY,2))+' '+fmtDate(addDays(TODAY,2))+'.');
+    rerender(); refreshBadges(); }
+  function clearDealNote(id){ const d=DEALS.find(x=>x.id===id); d.notes=''; rerender(); refreshBadges();
+    toast(`Note cleared for ${d.brand} · ${d.title}. It stays in the deal history.`); }
+  function clearCheckIn(id){ const d=DEALS.find(x=>x.id===id); d.checkIn=null; rerender(); refreshBadges();
+    toast(`Check-in cleared for ${d.brand} · ${d.title}.`); }
+
+  /* ═══════════════════════════ VIEW: COMMAND CENTER ═══════════════════════════
+     The glance. Three numbers, the next three things, one thing worth knowing.
+     Everything else lives one click away in Delivery. */
+  RENDER.settings = () => {
+    const kvrow=(l,v)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-light);font-size:12.5px"><span class="muted">${l}</span><span style="font-weight:600">${v}</span></div>`;
+    document.getElementById('view-settings').innerHTML=`
+    <div class="inner" style="max-width:1080px">
+      <div class="pagebar"><div class="head"><h1>Settings</h1></div></div>
+      <div class="card">
+        <div class="card__head"><div class="card__title">Workspace</div></div>
+        <div class="card__pad" style="padding-top:4px">
+          ${kvrow('Network','Acme Network')}
+          ${kvrow('Reports sent from','adops@acmenetwork.com')}
+          ${kvrow('Members','You and the team')}
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <div class="card__head"><div class="card__title">Delivery rules</div></div>
+        <div class="card__pad" style="padding-top:4px">
+          ${kvrow('Full delivery','90% of guarantee (IAB)')}
+          ${kvrow('Measurement window','30 days from publish')}
+          ${kvrow('Check-in date','Set per show from its view curve')}
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <div class="card__head"><div class="card__title">Data sources</div></div>
+        <div class="card__pad" style="padding-top:4px">
+          ${kvrow('CRM','<span class="tag tag--green"><i></i>Connected</span>')}
+          ${kvrow('Ad server inventory export','Last synced Aug 28')}
+          ${kvrow('YouTube air checks','<span class="tag tag--green"><i></i>Scanning every 6h</span>')}
+        </div>
+      </div>
+    </div>`;
+  };
+
+  /* Reminders you write yourself - same visual grammar as the agent's
+     notifications, optionally linked to an area of the app. */
+  let REMINDERS=[], remOpen=false, REM_SEQ=0;
+  function addReminder(){
+    const t=(document.getElementById('remInp')?.value||'').trim();
+    if(!t){ toast('Type the reminder first.'); return; }
+    REMINDERS.push({ id:'rm'+(++REM_SEQ), text:t, link:REM_LINK||'' });
+    REM_LINK='';
+    remOpen=false; RENDER.overview();
+  }
+  function dismissReminder(id){ REMINDERS=REMINDERS.filter(r=>r.id!==id); RENDER.overview(); }
+
+  RENDER.overview = () => {
+    const work=workList();
+    document.getElementById('view-overview').innerHTML=`
+    <div class="inner" style="max-width:940px;padding-top:8px">
+      <div class="hero">
+        <h1>Command Center</h1>
+        <p>Ask anything about the network — delivery pacing, what needs a make good, which guarantees are running hot. Answered off the system and the ad server.</p>
+        <div class="hero__pills">
+          <span class="pill"><i style="background:var(--green-text)"></i>Agent checked ${LAST_CHECK}</span>
+          <button class="pill pill--solid" onclick="go('delivery')">${work.length} need${work.length===1?'s':''} you</button>
+        </div>
+        <div class="askwrap">
+          <input id="acAsk" placeholder="Ask anything…" onkeydown="if(event.key==='Enter')askAcme()">
+          <button class="askwrap__go" onclick="askAcme()" aria-label="Ask">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h13M12 5l7 7-7 7"/></svg></button>
+        </div>
+      </div>
+      <div style="max-width:720px;margin:18px auto 0;text-align:left">
+        ${work.checks||''}
+        ${REMINDERS.map(rm=>`<div class="wnote" ${rm.link?`onclick="go('${rm.link}')"`:''} style="${REMINDERS.length||work.checks?'margin-top:8px':''}">
+          <span class="wnote__body"><b>Reminder</b><span class="wnote__txt" title="${esc(rm.text)}">${esc(rm.text)}</span>${rm.link?`<span class="tag tag--grey" style="margin-left:8px;flex-shrink:0">${({delivery:'Delivery',portal:'Campaign Portal',shows:'Shows'})[rm.link]}</span>`:''}</span>
+          <button class="wnote__x" title="Dismiss" onclick="event.stopPropagation();dismissReminder('${rm.id}')">✕</button>
+        </div>`).join('')}
+        ${remOpen?`<div class="wnote" style="cursor:default;margin-top:8px" onclick="event.stopPropagation()">
+          <input id="remInp" placeholder="What should we remind you about?" onkeydown="if(event.key==='Enter')addReminder()"
+            style="flex:1;border:none;background:none;font:inherit;font-size:12.5px;color:var(--text-primary);outline:none">
+          <button id="remLinkBtn" class="tsel" style="flex-shrink:0;display:inline-flex;align-items:center;gap:6px" onclick="openPick(event,'rem')">${esc((REM_LINKS.find(x=>x[0]===REM_LINK)||REM_LINKS[0])[1])} ${CHEV}</button>
+          <button class="btn btn--primary btn--sm" style="flex-shrink:0" onclick="addReminder()">Add</button>
+          <button class="wnote__x" title="Cancel" onclick="remOpen=false;RENDER.overview()">✕</button>
+        </div>`
+        :''}
+      </div>
+
+      ${(()=>{ const mgOpen=mgStats().open,
+          under=DEALS.filter(d=>d.outcome==='won').map(dealSummary).filter(c=>['under','mg'].includes(c.status.k)&&c.state==='live').length;
+        const t=(label,n,sub,click)=>`<div class="tile" style="cursor:pointer" onclick="${click}">
+          <div class="tile__label">${label}</div>
+          <div class="tile__val" style="color:${n?'var(--text-primary)':'var(--text-tertiary)'}">${n}</div>
+          <div class="tile__delta"><span class="muted">${sub}</span></div></div>`;
+        return `<div class="tiles" style="grid-template-columns:repeat(3,1fr);margin-top:18px">
+          ${t('Needs you',work.length,'flights wanting a look',"go('delivery')")}
+          ${t('Make goods open',mgOpen,'waiting on a date or position',"delTab='mg';go('delivery')")}
+          ${t('Campaigns under',under,'projecting below the 90% line',"go('portal')")}
+        </div>`; })()}
+      ${CHATS.length?`<div class="thread">
+        <div class="thread__hd"><span>Conversation</span><button onclick="newChat()">Clear</button></div>
+        ${CHATS.map(c=>`<div class="turn"><div class="turn__q">${esc(c.q)}</div><div class="turn__a">${c.a}</div></div>`).join('')}
+      </div>`:''}
+    </div>`;
+    const el=document.querySelector('.view.active #acAsk'); if(el&&CHATS.length) el.focus();
+  };
+
+  /* ═══════════════════════════ VIEW: DELIVERY ═══════════════════════════ */
+  let delTab='work';
+  RENDER.delivery = () => {
+    const work=workList();
+    let live=(delStatus==='Not started'?SPOTS.filter(s=>!projection(s)):SPOTS.filter(s=>projection(s))).sort((a,b)=>liveDays(b)-liveDays(a));
+    const DMONTH={June:'06',July:'07',August:'08',September:'09'};
+    if(delTime!=='All time') live=live.filter(s=>{ const p=s.published;
+      if(delTime==='This week'){ const d=daysBetween(p,TODAY); return d>=-7&&d<=7; }
+      if(delTime==='This month') return p.slice(5,7)===TODAY.slice(5,7);
+      return p.slice(5,7)===DMONTH[delTime]; });
+    if(delStatus!=='All statuses'&&delStatus!=='Not started') live=live.filter(s=>{ const pr=projection(s); if(!pr) return false;
+      if(delStatus==='In progress') return !pr.final;
+      if(delStatus==='Complete') return pr.final; const k=verdict(s).k;
+      if(delStatus==='Tracking over') return !pr.final&&k==='bonus';
+      if(delStatus==='Tracking under') return !pr.final&&k==='short';
+      return !pr.final&&k!=='bonus'&&k!=='short'; });
+    if(delShowF!=='All shows') live=live.filter(s=>show(s.showId).name===delShowF);
+    if(delQ2.trim()){ const q=delQ2.trim().toLowerCase(); live=live.filter(s=>nameOf(s).toLowerCase().includes(q)); }
+    live=sortFlights(live);
+    const delBar=`<div class="tbar tbar--bare">
+      <div class="tbar__search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="delQInp" placeholder="Search flights…" value="${esc(delQ2)}" oninput="delQ2=this.value;FOCUS_Q='delQInp';RENDER.delivery()"></div>
+      <button class="tsel" style="display:inline-flex;align-items:center;gap:6px" onclick="openPick(event,'show')">${esc(delShowF)} ${CHEV}</button>
+      <button class="tsel" style="display:inline-flex;align-items:center;gap:6px" onclick="openPick(event,'time')">${esc(delTime)} ${CHEV}</button>
+      <button class="tsel" style="display:inline-flex;align-items:center;gap:6px" onclick="openPick(event,'status')">${esc(delStatus)} ${CHEV}</button>
+    </div>`;
+    const delHead=`<div class="shead" style="grid-template-columns:minmax(0,1fr) 56px 92px 118px 168px 118px 26px">${[['ad','Ad'],['day','Day'],[null,'Ran'],['delivered','Delivered'],['pacing','Pacing']].map(([k,l])=>k?`<button onclick="setDelSort('${k}')">${l}${delSort.k===k?(delSort.dir>0?' ↑':' ↓'):''}</button>`:`<span>${l}</span>`).join('')}<span></span><span></span></div>`;
+    document.getElementById('view-delivery').innerHTML=`
+    <div class="inner" style="max-width:1080px">
+      <div class="pagebar">
+        <div class="head"><h1>Delivery</h1></div>
+        <div class="pagebar__right">${delTab!=='mg'?delBar:''}<div class="seg">
+          <button class="${delTab==='work'?'active':''}" onclick="delTab='work';RENDER.delivery()">Needs you${work.length?' · '+work.length:''}</button>
+          <button class="${delTab==='all'?'active':''}" onclick="delTab='all';RENDER.delivery()">All flights</button>
+          <button class="${delTab==='mg'?'active':''}" onclick="delTab='mg';RENDER.delivery()">Make goods${MAKEGOODS.length?' · '+MAKEGOODS.length:''}</button></div></div>
+      </div>
+      <div id="scanPanel"></div>
+      ${delTab==='mg' ? makeGoodsPanel() : delTab==='work'
+        ? (work.length?`<div class="listcard">${delHead}${work.join('')}</div>`:`<div class="card"><div class="empty">✨ Nothing needs you — every flight projects over the 90% line.</div></div>`)
+        : `<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><div class="seg">
+            <button class="${delMode==='campaigns'?'active':''}" onclick="delMode='campaigns';RENDER.delivery()">By campaign</button>
+            <button class="${delMode==='episodes'?'active':''}" onclick="delMode='episodes';RENDER.delivery()">By episode</button></div></div>
+          ${delMode==='campaigns'
+            ? (()=>{ const cs=DEALS.filter(d=>d.outcome==='won').map(dealSummary).filter(c=>c.state==='live')
+                .sort((a,b)=>(b.spots[0]?dt(b.spots[0].published):0)-(a.spots[0]?dt(a.spots[0].published):0));
+                return `<div class="listcard">${cs.length?cs.map((c,i)=>
+                  dealIndexRow(c,i+1,false,`toggleDelDeal('${c.deal.id}')`,!!DEL_OPEN[c.deal.id])
+                  +(DEL_OPEN[c.deal.id]?`<div style="background:var(--page-bg);box-shadow:inset 0 1px 0 var(--border-light)">${
+                      SPOTS.filter(x=>x.dealId===c.deal.id&&projection(x)).sort((a,b)=>liveDays(b)-liveDays(a)).map(flightRow).join('')
+                    }</div>`:'')
+                ).join(''):'<div class="empty">No live campaigns.</div>'}</div>`; })()
+            : `<div class="listcard">${delHead}${live.length?live.map(flightRow).join(''):'<div class="empty">No flights match.</div>'}</div>`}`}
+      <div class="footnote">Projections come from each show's own curve, refit every time a read is verified.</div>
+    </div>`;
+    refocusQ();
+  };
+
+  /* Every make good, in every state, plus what they have cost. The flowchart's
+     back half: written to the system, flagged in the ad server, and the analytics that
+     come out of tracking sold against given. */
+  /* One quiet row per make good / bonus. The number that matters, the state,
+     one button. Everything else lives in the drawer. */
+  function makeGoodsPanel(){
+    const st=mgStats();
+    const row=m=>{ const sp=spot(m.spotId), sh=show(sp.showId), done=m.status==='scheduled';
+      const next=!m.date?'Pick a date':!m.position?'Pick position':'Book it';
+      return `<div class="wrow wrow--click" onclick="openMg('${m.id}')">
+        <div class="wrow__main"><b>${esc(sp.brand)} on ${esc(sh.name)}${m.kind==='bonus'?' <span class="tag tag--purple">Bonus</span>':''}</b></div>
+        <span class="muted" style="font-size:12.5px;flex-shrink:0">${m.kind==='bonus'?`$0 bonus · worth ${money(mgValue(m))}`:`${K(shortfall(sp))} short · worth ${money(mgValue(m))}`}</span>
+        <span onclick="event.stopPropagation()" style="flex-shrink:0">${done
+          ?`<span class="tag tag--green"><i></i>Booked ${fmtDate(m.date)}</span>`
+          :cta(next,`openMg('${m.id}')`,true)}</span>
+      </div>`; };
+    return `
+      <div class="tiles" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px">
+        <div class="tile"><div class="tile__label">Given away</div><div class="tile__val">${money(st.val)}</div><div class="tile__delta"><span class="muted">${K(st.imps)} impressions</span></div></div>
+        <div class="tile"><div class="tile__label">Paid fill rate</div><div class="tile__val">${st.rate}%</div><div class="tile__delta"><span class="muted">${st.paid} sold · ${st.free} given</span></div></div>
+        <div class="tile"><div class="tile__label">Still open</div><div class="tile__val" style="color:${st.open?'var(--orange-text)':'var(--text-primary)'}">${st.open}</div></div>
+      </div>
+      ${MAKEGOODS.length?`<div class="listcard">${MAKEGOODS.map(row).join('')}</div>`:'<div class="card"><div class="empty">No make goods.</div></div>'}
+      ${st.shows.length?`<div class="card" style="margin-top:16px">
+        <div class="card__head"><div class="card__title">Cost by show</div></div>
+        <table><thead><tr><th>Show</th><th class="num">Given</th><th class="num">Impressions</th><th class="num">Value</th><th></th></tr></thead>
+        <tbody>${st.shows.map(r=>{ const sh=show(r.showId), adv=guaranteeAdvice().find(a=>a.showId===r.showId);
+          return `<tr><td><b>${esc(sh.name)}</b></td><td class="num">${r.n}</td><td class="num">${K(r.imps)}</td><td class="num">${money(r.val)}</td>
+            <td class="right">${adv?`<button class="btn btn--ghost btn--sm" onclick="applyGuarantee('${sh.id}',${adv.suggest})">Guarantee too high — drop to ${K(adv.suggest)}</button>`
+                     :'<span class="muted" style="font-size:12px">—</span>'}</td></tr>`; }).join('')}</tbody></table>
+      </div>`:''}`;
+  }
+
+  /* ── the one drawer that explains a call ── */
+  // Every read booked on the same deal — the flight this one belongs to.
+  const flightRows = s => SPOTS.filter(x=>x.dealId===s.dealId&&x.showId===s.showId).sort((x,y)=>dt(x.published)-dt(y.published));
+  const reelStat=(l,v,edit)=>`<div><div style="font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--text-tertiary);text-transform:uppercase">${l}</div>${edit?`<input class="statedit" value="${v}" onchange="${edit}" title="Click to correct">`:`<div style="font-size:14px;font-weight:700;margin-top:2px">${v}</div>`}</div>`;
+  // The agent's auto-detected numbers, hand-correctable when they land slightly off.
+  const parseClock=t=>{ const p=String(t).trim().replace(/s$/,'').split(':').map(Number); return p.some(isNaN)?null:p.reduce((a,x)=>a*60+x,0); };
+  function setSpotStat(id,f,v){ const s=spot(id);
+    if(f==='placement'){ const t=(v||'').trim(); if(t) s.placement=t; }
+    else { const secs=parseClock(v);
+      if(secs!=null){ if(f==='epLen') s.epLen=secs; else if(f==='ts') s.ts=secs;
+        else if(f==='dur') s.length=secs+'s';
+        else if(f==='end'&&s.ts!=null&&secs>s.ts) s.length=(secs-s.ts)+'s'; } }
+    rerender(); openSpot(id); }
+
+  function openSpot(id,full){
+    const s=spot(id), sh=show(s.showId), pr=projection(s), v=verdict(s), m=mgForSpot(s.id), cr=creative(s.brand);
+    if(full!==undefined) DRAWER_FULL=!!full; else if(DRAWER_SPOT!==id) DRAWER_FULL=false;
+    DRAWER_SPOT=id;
+    if(SELFOR!==s.dealId){ SELSET=new Set(flightRows(s).filter(x=>projection(x)).map(x=>x.id)); SELFOR=s.dealId; }
+    const q = pr ? qualityScore(s) : null, end = s.ts!=null ? s.ts+adSecs(s) : null, nx = pr ? nextCheck(s) : null;
+    const frAll=flightRows(s).filter(x=>projection(x));
+    const gotT=frAll.reduce((a,x)=>a+(delivered(x)||0),0), gT=frAll.reduce((a,x)=>a+x.guarantee,0)||s.guarantee;
+    const ratioT=gotT/Math.max(gT,1);
+    const actBtns=`${s.missed?`<button class="btn btn--primary btn--sm" onclick="closeOverlays();nudgeEpisode('${s.id}')">Nudge show</button>`
+        :v.k==='short'&&!m?`<button class="btn btn--primary btn--sm" onclick="closeOverlays();createMakegood('${s.id}')">Set up make good</button>`
+        :m?`<button class="btn btn--primary btn--sm" onclick="closeOverlays();openMg('${m.id}')">Open ${m.kind==='bonus'?'bonus spot':'make good'}</button>`
+        :closedOut(s)&&!s.reportSent?`<button class="btn btn--primary btn--sm" onclick="closeOverlays();sendDeliveryReport('${s.id}')">Send delivery report</button>`
+        :closedOut(s)&&!s.completed?`<button class="btn btn--primary btn--sm" onclick="closeOverlays();markComplete('${s.id}')">Mark complete</button>`
+        :pr?`<button class="btn btn--primary btn--sm" onclick="closeOverlays();go('portal');openDeal('${s.dealId}')">See in the report</button>`:''}`;
+    openDrawer(`<div class="drawer__head"><div>
+        <span class="tag tag--${v.tone}"><i></i>${esc(v.label)}</span>
+        <h2 style="font-size:18px;font-weight:800;margin-top:8px">${esc(s.brand)} · ${esc(sh.name)}</h2>
+        <div class="muted" style="font-size:12px">${pr?`${s.yt?`<a href="https://www.youtube.com/watch?v=${esc(s.yt)}" target="_blank" rel="noopener" style="color:var(--blue-text);text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${esc(epTitle(s))}</a>`:esc(epTitle(s))} · published ${fmtDate(s.published)}`:`Airs ${fmtDate(s.published)}`} · ${esc(cr.len)} ${esc(cr.placement).toLowerCase()}</div>
+      </div>
+      <div style="margin-left:auto;margin-right:16px;display:flex;align-items:center;gap:14px;align-self:center">
+        ${actBtns}
+      </div>
+      <button class="x" onclick="closeOverlays()">✕</button></div>
+    <div class="drawer__body">
+    ${!pr?(()=>{ const kv=(l,v)=>`<div class="kv"><span>${l}</span><b>${v}</b></div>`;
+      const copyLabel = s.copyStatus==='needs_copy'?'<span style="color:var(--blue-text)">Not in yet</span>'
+        : s.copyStatus==='needs_cta'?'<span style="color:var(--blue-text)">In · needs a CTA</span>'
+        : s.copyStatus==='sent'?`Sent ${fmtDate(s.copySent)} · <span style="color:var(--orange-text)">not opened</span>`
+        : s.copySeen?`Sent · opened ${fmtDate(s.copySeen)}`:'In and confirmed';
+      return `
+      <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:10px">
+        ${kpiBox(s.missed?'Booked for':'Airs', fmtDate(s.published), dayName(s.published)+(s.missed?' · nothing posted yet':''))}
+        ${kpiBox('Guarantee', K(s.guarantee), '90% = '+K(Math.round(s.guarantee*IAB_FULL)))}
+        ${kpiBox('Check-in', 'day '+checkInDay(sh), 'call it '+fmtDate(addDays(s.published,checkInDay(sh))))}
+      </div>
+
+      <div style="margin-top:8px">
+        ${kv('Ad copy', copyLabel)}
+        ${kv('Placement', `${esc(cr.placement)} · ${esc(cr.len)}`)}
+        ${cr.code?kv('Promo code', `<span style="font-family:ui-monospace,monospace;letter-spacing:.03em">${esc(cr.code)}</span>`):''}
+        ${cr.cta?kv('Offer', esc(cr.cta)):''}
+        ${cr.url?kv('Landing', `<a href="https://${esc(cr.url)}" target="_blank" style="color:var(--blue-text);text-decoration:none">${esc(cr.url)} ↗</a>`):''}
+        ${kv('Air check', s.missed?`Scanned ${esc(sh.channel)} — no episode yet · rechecks every ${sh.scanEvery}h`:`Starts ${fmtDate(s.published)} · every ${sh.scanEvery}h on ${esc(sh.channel)}`)}
+      </div>
+
+      <div class="dhead">What the host reads</div>
+      <div style="background:var(--page-bg);border:1px solid var(--border-light);border-radius:11px;padding:13px 15px;font-size:12.5px;line-height:1.7;margin-top:8px">${esc(cr.copy)}</div>
+
+      <div class="dhead">${esc(sh.name)}'s next episodes</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${nextEpisodes(s.showId,5,s.published).map(ep=>`<span class="tag ${ep.date===s.published?'tag--blue':ep.open?'tag--green':'tag--grey'}">${dayName(ep.date)} ${fmtDate(ep.date)} · ${ep.open}/${ep.cap}${ep.date===s.published?' · this ad':''}</span>`).join('')}</div>
+      `; })():`
+      <div class="spotcols">
+      <div>
+      <div>
+        <div class="cmp-row" style="margin-top:0">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <span style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em">Campaign delivery</span>
+            <span style="font-size:12px;font-weight:700">${K(gotT)} of ${K(gT)} · ${Math.round(ratioT*100)}%</span>
+          </div>
+          <div class="pace ${ratioT>=IAB_FULL?'pace--good':''}" style="height:6px;margin-top:8px"><div class="pace__fill" style="width:${Math.min(ratioT*100,100)}%"></div></div>
+        </div>
+        ${flightRows(s).map((e,ci)=>{ const epr=projection(e), passed=e.status==='verified'&&!!e.yt;
+          const inSel=SELSET&&SELSET.has(e.id), selectable=!!epr;
+          return `<div class="cmp-row" style="${selectable?(inSel?'':'opacity:.45;border-style:dashed;border-color:var(--border);'):''}">
+          <div class="cmp-row__top" ${selectable?`style="cursor:pointer" onclick="toggleSel('${e.id}')"`:''}><span class="cmp-row__date">${fmtDate(e.published)} · ${dayName(e.published)}${epr?` <span class="muted" style="font-weight:500">· ${K(epr.got)} impressions</span>`:''}</span>
+            <span style="display:inline-flex;align-items:center;gap:7px">
+              ${ci===0?`<button class="btn btn--ghost btn--sm" style="padding:3px 9px" onclick="event.stopPropagation();copyDeliverables('${s.id}')">Copy all</button>`:''}
+              <span class="cmp-status ${passed?'ok':'pend'}">${passed?'✓ Passed':'Pending'}</span>
+              ${selectable?`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.4" style="transition:transform .15s;transform:rotate(${inSel&&SELSET&&SELSET.size===1?180:0}deg)"><path d="M6 9l6 6 6-6"/></svg>`:''}</span></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="position:relative;flex:1;margin-top:6px">
+              <input class="cmp-inp${e.yt?' cmp-inp--link':''}" style="width:100%;padding-right:56px" value="${e.yt?esc('youtu.be/'+e.yt+'?t='+e.ts):''}" placeholder="Video link" title="Paste a new link if the wrong one was picked up" onmousedown="event.stopPropagation()" onchange="setSpotLink('${e.id}',this.value)">
+              ${e.yt?`<button class="cmp-copy" style="right:31px" title="Open on YouTube" onclick="event.stopPropagation();window.open('https://youtu.be/${e.yt}?t=${e.ts}','_blank')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg></button>`:''}
+              ${e.yt?`<button class="cmp-copy" title="Copy link" onclick="event.stopPropagation();copyDeliverable('${e.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2"/></svg></button>`:''}
+            </div>
+            <span class="tag tag--grey" style="margin-top:6px;flex-shrink:0;font-variant-numeric:tabular-nums">${e.ts!=null?mmss(e.ts)+'–'+mmss(e.ts+adSecs(e)):'—'}</span>
+          </div>
+          ${show(e.showId).simulcast?`<div style="display:flex;align-items:center;gap:8px">
+            <div style="position:relative;flex:1;margin-top:6px">
+              <input class="cmp-inp" style="width:100%;padding-right:32px" value="${e.yt?esc(e.brand.toLowerCase()+'-'+e.showId+'-'+e.published+'.mp3'):''}" placeholder="Audio file">
+              ${e.yt?`<button class="cmp-copy" title="Copy file name" onclick="event.stopPropagation();copyAudio('${e.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2"/></svg></button>`:''}
+            </div>
+            <button class="btn btn--ghost btn--sm" style="margin-top:6px;flex-shrink:0" onclick="event.stopPropagation();toast('Downloading the baked-in audio file. The feed itself can carry dynamic ads, so we hand over the file, not the link.')">↓ MP3</button>
+          </div>`:''}
+          ${inSel&&SELSET&&SELSET.size===1&&epr?(()=>{ const qf=qualityScore(e), endf=e.ts!=null?e.ts+adSecs(e):null, crf=creative(e.brand);
+            return `<div style="background:var(--white);border:1px solid var(--border-light);border-radius:8px;padding:13px 15px;margin-top:9px">
+            <div style="display:flex;gap:16px">
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <span style="font-size:10.5px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em">Quality</span>
+                  <span class="tag tag--${qf.tone}" style="font-weight:800">${qf.grade}</span>
+                </div>
+                <div style="font-size:30px;font-weight:800;letter-spacing:-.03em;margin-top:2px">${qf.score}</div>
+                <div style="margin-top:8px;display:flex;flex-direction:column;gap:7px">${qf.factors.map(f=>`<div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-secondary)"><span>${f.k}</span><span>${f.v}</span></div><div class="pace ${f.v>=90?'pace--good':f.v>=75?'':'pace--warn'}" style="height:4px;margin-top:3px"><div class="pace__fill" style="width:${f.v}%"></div></div></div>`).join('')}</div>
+              </div>
+              <div style="flex:1;border-left:1px solid var(--border-light);padding-left:16px;display:grid;grid-template-columns:1fr 1fr;gap:11px 13px;align-content:start">
+                ${reelStat('Episode length', hms(epLenOf(e)), `setSpotStat('${e.id}','epLen',this.value)`)}
+                ${reelStat('Ad start', e.ts!=null?mmss(e.ts):'—', `setSpotStat('${e.id}','ts',this.value)`)}
+                ${reelStat('Ad end', endf!=null?mmss(endf):'—', `setSpotStat('${e.id}','end',this.value)`)}
+                ${reelStat('Read duration', adSecs(e)+'s', `setSpotStat('${e.id}','dur',this.value)`)}
+                ${reelStat('Placement', esc(e.placement||crf.placement), `setSpotStat('${e.id}','placement',this.value)`)}
+              </div>
+            </div></div>`; })():''}
+        </div>`; }).join('')}
+      </div>
+      </div>
+      <div>
+      ${(()=>{ const fr=flightRows(s).filter(x=>projection(x)); const sel=fr.filter(x=>SELSET&&SELSET.has(x.id));
+        const selG=sel.reduce((a,x)=>a+x.guarantee,0), selGot=sel.reduce((a,x)=>a+(delivered(x)||0),0), selProj=sel.reduce((a,x)=>a+projection(x).proj,0);
+        return `<div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:9px">
+          <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em">Deal delivery${sel.length<fr.length?` · ${sel.length} of ${fr.length} reads`:''}</div>
+          <span class="muted" style="font-size:11.5px">${K(selGot)} delivered · projecting ${K(selProj)} of ${K(selG)}</span>
+        </div>
+        <div class="curvewrap">${dealChart(sel)}</div></div>`; })()}
+      </div>
+      </div>`}
+    </div>
+    `,DRAWER_FULL,!!pr);
+  }
+
+
+  function createMakegood(spotId){
+    const ex=mgForSpot(spotId); if(ex){ openMg(ex.id); return; }
+    const s=spot(spotId), sh=show(s.showId), av=nextEpisodes(s.showId,4).find(e=>e.open>0);
+    const m={ id:'mg'+(++MG_SEQ), spotId, date:av?av.date:null, status:'proposed',
+      showOk: sh.mgPolicy==='auto'?true:null, brandOk:null, showVia: sh.mgPolicy==='auto'?'auto':null, brandVia:null };
+    MAKEGOODS.push(m); rerender(); refreshBadges(); openMg(m.id);
+  }
+  /* A bonus spot: same machinery as a make good — avails, position, optional
+     drafts, written to the system at $0 — but it exists to lift performance, not
+     to replace a shortfall, and it gets tracked so the inventory is visible. */
+  function createBonus(dealId){
+    const anchor=SPOTS.find(x=>x.dealId===dealId&&x.kind==='paid'); if(!anchor) return;
+    const sh=show(anchor.showId), av=nextEpisodes(anchor.showId,4).find(e=>e.open>0);
+    const m={ id:'mg'+(++MG_SEQ), kind:'bonus', spotId:anchor.id, date:av?av.date:null, status:'proposed',
+      showOk: sh.mgPolicy==='auto'?true:null, brandOk:null, showVia: sh.mgPolicy==='auto'?'auto':null, brandVia:null };
+    MAKEGOODS.push(m); rerender(); refreshBadges(); openMg(m.id);
+  }
+  function setMgDate(id,d){ mg(id).date=d; openMg(id); rerender(); }
+  function setMgPosition(id,pos){ mg(id).position=pos; openMg(id); rerender(); }
+  function toggleMg(id,key){ const m=mg(id); m[key]=m[key]===true?null:true; openMg(id); rerender(); refreshBadges(); }
+  function commitMg(id){
+    const m=mg(id), s=spot(m.spotId), sh=show(s.showId);
+    m.status='scheduled';
+    SPOTS.push({ id:'mgs'+m.id, dealId:s.dealId, brand:s.brand, showId:s.showId, kind:m.kind||'makegood', published:m.date,
+      position:m.position||'Mid-roll',
+      guarantee:0, views:null, downloads:null, dlState:sh.simulcast?'auto':'none', status:'scheduled',
+      length:s.length, yt:'', ts:null, copyStatus:'seen', copy:[] });
+    closeOverlays(); rerender(); refreshBadges();
+    toast(`${s.brand} ${m.kind==='bonus'?'bonus spot':'make good'} scheduled — ${m.position||'mid-roll'} on ${sh.name}, ${fmtDate(m.date)}. Written to the system as "${m.kind==='bonus'?'Bonus':'Make Good'}" and flagged in the ad server so the slot can't be sold twice.`);
+  }
+  /* Make good, in the order the Aug 21 call asked for: date, position, drafts
+     you can send (or not), then Notified toggles that are guidance — never a
+     gate. Writing to the system needs only a date and a position (27:08). */
+  const noteState=v=>v===true?'✓ Notified':v==='skip'?'– Skipped':'○ Not sent';
+  function dismissMg(id,key){ const m=mg(id); m[key]=m[key]==='skip'?null:'skip'; openMg(id); rerender(); refreshBadges(); }
+  function openMg(id){
+    const m=mg(id), s=spot(m.spotId), sh=show(s.showId), pr=projection(s), auto=sh.mgPolicy==='auto';
+    if(!m.position&&creative(s.brand).placement) m.position=creative(s.brand).placement;
+    const d=m.date?fmtDate(m.date):'[date]', ready=!!m.date&&!!m.position;
+    const noteRow=(key,label,note)=>`<div class="tog">
+      <button class="tog__sw ${m[key]===true?'on':''}" onclick="toggleMg('${id}','${key}')"><i></i></button>
+      <div style="flex:1"><b>${label} ${m[key]==='skip'?'<span class="muted">· skipped</span>':''}</b><small>${note}</small></div>
+      <button class="btn btn--ghost btn--sm" style="flex-shrink:0" onclick="dismissMg('${id}','${key}')">${m[key]==='skip'?'Undo':'Dismiss'}</button></div>`;
+    const bonus=m.kind==='bonus';
+    openDrawer(`<div class="drawer__head"><div>${bonus
+        ?`<span class="tag tag--purple"><i></i>$0 bonus · performance</span>`
+        :`<span class="tag tag--orange"><i></i>${K(shortfall(s))} short</span>`}
+      <h2 style="font-size:18px;font-weight:800;margin-top:8px">${bonus?'Bonus spot':'Make good'} · ${esc(s.brand)} on ${esc(sh.name)}</h2>
+      <div class="muted" style="font-size:12px">${bonus?'A no-charge read to lift performance — tracked so the inventory doesn\'t vanish':`Projecting ${K(pr?pr.proj:0)} against a ${K(s.guarantee)} guarantee`}</div></div>
+      <button class="x" onclick="closeOverlays()">✕</button></div>
+    <div class="drawer__body">
+      <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:7px">Date · from ${esc(sh.name)}'s avails</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">${nextEpisodes(s.showId,4).map(e=>`<button class="tag ${m.date===e.date?'tag--blue':'tag--grey'}" style="padding:7px 11px;cursor:${e.open?'pointer':'not-allowed'};opacity:${e.open?1:.45}" ${e.open?`onclick="setMgDate('${id}','${e.date}')"`:''}>${dayName(e.date)} ${fmtDate(e.date)} · ${e.open}/${e.cap}</button>`).join('')}
+        <label class="tag ${m.date&&!nextEpisodes(s.showId,4).some(e=>e.date===m.date)?'tag--blue':'tag--grey'}" style="padding:6px 11px;cursor:pointer">Custom
+          <input type="date" value="${m.date&&!nextEpisodes(s.showId,4).some(e=>e.date===m.date)?m.date:''}" onchange="setMgDate('${id}',this.value)" style="border:none;background:none;font:inherit;color:inherit;margin-left:5px;width:110px;cursor:pointer">
+        </label></div>
+
+      <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary);margin:16px 0 7px">Position</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">${['Pre-roll','Mid-roll','Post-roll'].map(pos=>`<button class="tag ${m.position===pos?'tag--blue':'tag--grey'}" style="padding:7px 13px;cursor:pointer" onclick="setMgPosition('${id}','${pos}')">${pos}${pos===creative(s.brand).placement?' · same as original':''}</button>`).join('')}</div>
+
+      <div style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary);margin:18px 0 7px">Drafts · sending is optional</div>
+      ${auto?`<div class="muted" style="font-size:12px;margin-bottom:9px">${esc(sh.name)} auto-schedules, so the show doesn't need an ask — the draft is here if you want to give them a heads-up anyway.</div>`:''}
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--text-tertiary);margin:8px 0 6px">To ${esc(sh.host)}</div>
+      <textarea class="cmp-inp" style="min-height:100px;line-height:1.6;font-size:12.5px">Hey ${esc(sh.host.split(' ')[0])} — ${bonus?`we want to add a bonus ${esc(s.length)} ${m.position?m.position.toLowerCase():'read'} for ${esc(s.brand)} on ${d} to help the campaign perform. Same copy, no charge to them, no change to your split. Thanks`:`the ${esc(s.brand)} read from ${fmtDate(s.published)} is tracking to land near ${K(pr?pr.proj:0)} against a ${K(s.guarantee)} guarantee, so we owe them a make good. Can we put a free ${esc(s.length)} ${m.position?m.position.toLowerCase():'read'} on ${d}? Same copy — comes out of our end, no change to your split. Thanks`}</textarea>
+      <button class="btn btn--ghost btn--sm" style="margin-top:7px" onclick="sendMg('${id}','show')">Send to show</button>
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;color:var(--text-tertiary);margin:14px 0 6px">To ${esc(s.brand)}</div>
+      <textarea class="cmp-inp" style="min-height:100px;line-height:1.6;font-size:12.5px">Hi ${esc(s.brand)} team — ${bonus?`good news — we've added a bonus ${m.position?m.position.toLowerCase():'read'} on ${esc(sh.name)} for ${d}, at no cost, to give the campaign a push. Nothing needed on your end. Thanks`:`heads up on the ${esc(sh.name)} read from ${fmtDate(s.published)}. It's pacing a little under the guarantee, so we've queued an additional ${m.position?m.position.toLowerCase():'read'} on ${d} at no cost to bring the flight back over. Nothing needed on your end. Thanks`}</textarea>
+      <button class="btn btn--ghost btn--sm" style="margin-top:7px" onclick="sendMg('${id}','brand')">Send to brand</button>
+
+      <div style="display:flex;flex-direction:column;gap:9px;margin-top:18px">
+        ${noteRow('showOk','Show notified', auto?'Auto-schedules — a courtesy, not an ask':m.showVia==='gmail'?'Detected from the reply in adops@':'Flips when the reply lands, or set it yourself')}
+        ${noteRow('brandOk','Brand notified', m.sentBrand?`Sent ${fmtDate(m.sentBrand)} · no reply yet`:'Flips when the reply lands, or set it yourself')}
+      </div>
+      <div class="muted" style="font-size:11.5px;margin-top:10px">These track who's been told — they're guidance, not a gate. Every situation is different.</div>
+    </div>
+    <div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Close</button>
+      <button class="btn btn--green" ${ready?'':'disabled style="opacity:.45"'} onclick="commitMg('${id}')">✓ Write to the system</button></div>`);
+  }
+
+  function sendMg(id,who){ const m=mg(id), s=spot(m.spotId);
+    if(who==='show') toast(`Sent to ${show(s.showId).host} from adops@. The agent reads the reply and flips the toggle.`);
+    else { m.sentBrand=TODAY; toast(`Sent to ${s.brand} in the existing thread.`); }
+    m.status='awaiting'; openMg(id); rerender(); refreshBadges(); }
+
+  /* "Yes - Good" on the flowchart: the flight cleared the line, so the report
+     goes to the brand with adops@ copied, then the spot is marked complete —
+     100% in the system, colour changed, campaign ends. */
+  function sendDeliveryReport(id){
+    const s=spot(id); s.reportSent=TODAY; rerender(); refreshBadges();
+    toast(`Delivery report sent to ${s.brand}, adops@ copied. Every read, the tape and the final numbers attached.`);
+  }
+  function markComplete(id){
+    const s=spot(id); s.completed=TODAY; rerender(); refreshBadges();
+    toast(`${s.brand} on ${show(s.showId).name} marked complete — 100% written to the system, colour changed, campaign closed.`);
+  }
+  const closedOut = s => { const pr=projection(s);
+    return pr && pr.final && verdict(s).k!=='short' && s.dlState!=='requested'; };
+
+  const deliverableLine = e => `${spot(e).brand} on ${show(spot(e).showId).name} · ${fmtDate(spot(e).published)} · youtu.be/${spot(e).yt}?t=${spot(e).ts} · ad at ${mmss(spot(e).ts)}–${mmss(spot(e).ts+adSecs(spot(e)))}`;
+  function setSpotLink(id,val){ const e=spot(id), m=String(val).match(/(?:youtu\.be\/|[?&]v=|\/embed\/)([\w-]{6,})/);
+    if(!m){ toast('Could not read that link — paste a YouTube URL.'); openSpot(DRAWER_SPOT); return; }
+    e.yt=m[1]; const t=String(val).match(/[?&]t=(\d+)/); if(t) e.ts=parseInt(t[1]);
+    toast('Link replaced — the air check will re-verify against the new tape.');
+    rerender(); openSpot(DRAWER_SPOT); }
+  function copyAudio(id){ const e=spot(id), f=e.brand.toLowerCase()+'-'+e.showId+'-'+e.published+'.mp3';
+    navigator.clipboard&&navigator.clipboard.writeText(f); toast('Copied '+f); }
+  function copyDeliverable(id){ const line=deliverableLine(id);
+    navigator.clipboard&&navigator.clipboard.writeText(line); toast('Copied — ready to paste: '+line.slice(0,60)+'…'); }
+  function copyDeliverables(id){ const s=spot(id);
+    const lines=flightRows(s).filter(e=>e.yt).map(e=>deliverableLine(e.id)).join('\n');
+    navigator.clipboard&&navigator.clipboard.writeText(lines);
+    toast('Copied every read on this deal — paste it straight into an email.'); }
+
+  function nudgeEpisode(id){ const s=spot(id); toast(`Nudged ${show(s.showId).host} from adops@. The agent keeps checking every 24h.`); }
+  function chaseDownloads(id){ const s=spot(id); s.dlState='received'; s.downloads=Math.round(s.views*0.24); rerender(); refreshBadges();
+    toast(`Requested downloads from ${show(s.showId).host} — ${K(s.downloads)} came back and were added to the total.`); }
+  function markCopy(id){ const s=spot(id); s.copyStatus='sent'; s.copySent=TODAY; rerender(); refreshBadges();
+    toast(`Copy written to the ${s.brand} spot in the system. Auto-email sent to ${show(s.showId).host}.`); }
+  function nudgeShow(id){ const s=spot(id); s.copyStatus='seen'; s.copySeen=TODAY; rerender(); refreshBadges();
+    toast(`Nudged ${show(s.showId).host} — opened it right after.`); }
+
+  /* ── daily air check ── */
+  let agentRunning=false, LAST_CHECK='2h ago';
+  async function runAgent(){
+    if(agentRunning) return; agentRunning=true;
+    const q=sel=>document.querySelector('.view.active '+sel);   // both views carry these ids
+    const btn=q('#runBtn'); if(btn){ btn.textContent='Scanning…'; btn.disabled=true; }
+    const panel=q('#scanPanel');
+    if(panel) panel.innerHTML=`<div class="card" style="margin-bottom:12px"><div class="card__pad">
+      <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;margin-bottom:8px"><span id="scanLabel">Scanning channels…</span><span id="scanPct" class="muted">0%</span></div>
+      <div class="scanbar"><div class="scanbar__fill" id="scanFill"></div></div></div></div>`;
+    const finds={ s11:{yt:'dQw4w9WgXcQ',ts:455,epLen:5380,views:9200,downloads:1400,copy:['Named the brand','Read promo code KALSHI','Free-trial CTA']},
+                  s12:{yt:'ScMzIvxBSi4',ts:612,epLen:6100,views:31000,downloads:0,copy:['Named the brand','URL CTA']}, s13:{miss:true} };
+    const steps=['Scanning channels…','The Rubin Report posted 3h ago — pulling transcript…','Matching the read to the Kalshi copy…','Warren Smith posted 6h ago — reading views…','Nate has no episode yet — flagging…','Writing links + timestamps to the system…'];
+    for(let i=0;i<steps.length;i++){ const l=q('#scanLabel'); if(l) l.textContent=steps[i];
+      const p=Math.round((i+1)/steps.length*100); const f=q('#scanFill'); if(f) f.style.width=p+'%';
+      const pc=q('#scanPct'); if(pc) pc.textContent=p+'%'; await sleep(560); }
+    try{ const r=await fetch('/api/transcript',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:'https://www.youtube.com/watch?v='+finds.s11.yt})});
+      if(r.ok){ const j=await r.json(); const seg=findAd(j,'Kalshi'); if(seg) finds.s11.ts=Math.round(seg.start); }
+    }catch(e){}
+    SPOTS.filter(s=>s.status==='aired').forEach(s=>{ const f=finds[s.id]; if(!f) return;
+      if(f.miss){ s.missed=true; return; } Object.assign(s,f,{status:'verified'}); });
+    agentRunning=false; rerender(); refreshBadges();
+    LAST_CHECK='just now'; rerender();
+    toast('Air check: 2 reads found and timestamped, 1 show has no episode up yet.');
+  }
+  function findAd(json,brand){ const arr=json.transcript||json.segments||json.data||[]; const b=brand.toLowerCase();
+    for(const seg of arr){ if((seg.text||'').toLowerCase().includes(b)) return {start:seg.start||seg.offset||0}; } return null; }
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  function playClip(yt,ts){ openModal(`<div class="drawer__head"><h2 style="font-size:16px;font-weight:700">Ad read · ${mmss(ts)}</h2><button class="x" onclick="closeOverlays()">✕</button></div>
+    <div class="reel-stage"><iframe src="https://www.youtube.com/embed/${yt}?start=${ts}&autoplay=1" allow="autoplay" allowfullscreen></iframe></div>`); }
+
+  /* ═══════════════════════════ VIEW: CAMPAIGN PORTAL ═══════════════════════════ */
+  /* ═══ BRAND → DEAL → REPORT (Aug 21 call, 9:25-16:57) ═══
+     A brand holds several deals closed at different times; the report and the
+     guarantee live at the deal. The index defaults to live deals for speed. */
+  let portalDeal=null, portalFilter='live';
+  let dealQ='', dealBrandF='All brands', dealSort={k:'date',dir:-1}, FOCUS_Q=null;
+  let delQ2='', delShowF='All shows', delSort={k:'day',dir:-1};
+  let delTime='All time', delStatus='All statuses', delMode='campaigns';
+  const DEL_OPEN={};
+  function toggleDelDeal(id){ DEL_OPEN[id]=!DEL_OPEN[id]; RENDER.delivery(); }
+  function setDealSort(k){ dealSort = dealSort.k===k?{k,dir:-dealSort.dir}:{k,dir:1}; RENDER.portal(); }
+  function setDelSort(k){ delSort = delSort.k===k?{k,dir:-delSort.dir}:{k,dir:1}; RENDER.delivery(); }
+  function refocusQ(){ if(!FOCUS_Q) return; const el=document.getElementById(FOCUS_Q);
+    if(el){ el.focus(); el.selectionStart=el.selectionEnd=el.value.length; } FOCUS_Q=null; }
+  function openDeal(id){ portalDeal=id; RENDER.portal(); document.querySelector('.views').scrollTop=0; }
+  function closeDeal(){ portalDeal=null; RENDER.portal(); document.querySelector('.views').scrollTop=0; }
+  // back-compat: anything still pointing at a brand opens its most recent live deal
+  function openCampaign(b){ const d=DEALS.filter(x=>x.brand===b).map(x=>dealSummary(x)).sort((p,q)=>(p.state==='live'?0:1)-(q.state==='live'?0:1))[0]; if(d) openDeal(d.deal.id); }
+  const closeCampaign=closeDeal;
+
+  function dealSummary(d){
+    const spots=SPOTS.filter(s=>s.dealId===d.id).sort((x,y)=>dt(x.published)-dt(y.published));
+    const liveSpots=spots.filter(s=>projection(s));
+    const mgs=spots.filter(s=>s.kind!=='paid');
+    const paidLive=liveSpots.filter(s=>s.kind==='paid');
+    const g=paidLive.reduce((a,s)=>a+s.guarantee,0), got=liveSpots.reduce((a,s)=>a+(delivered(s)||0),0);
+    const proj=liveSpots.reduce((a,s)=>a+projection(s).proj,0), paid=paidLive.reduce((a,s)=>a+spotCost(s),0);
+    const done=paidLive.length&&paidLive.every(s=>projection(s).final)&&!spots.some(s=>s.status==='scheduled'||s.status==='aired');
+    const state = !liveSpots.length ? 'upcoming' : done ? 'complete' : 'live';
+    const callable=paidLive.filter(s=>projection(s).confident);
+    const gC=callable.reduce((a,s)=>a+s.guarantee,0), projC=callable.reduce((a,s)=>a+projection(s).proj,0);
+    const blocked = liveSpots.some(s=>verdict(s).k==='blocked');
+    const status = blocked ? {k:'blocked', label:'Waiting on downloads', tone:'purple', rank:1}
+      : !callable.length ? {k:'early', label:'Too early to call', tone:'grey', rank:3}
+      : projC>=gC ? {k:'full', label:done?'Delivered in full':'Tracking over', tone:'green', rank:4}
+      : mgs.length ? {k:'mg', label:'Make good booked', tone:'purple', rank:2}
+      : {k:'under', label:'Tracking under', tone:'orange', rank:0};
+    const first=spots[0], last=spots[spots.length-1];
+    return { deal:d, brand:d.brand, title:d.title||'Flight', spots, liveSpots, paidLive, mgs, g, got, proj, paid, done, state, status,
+      shows:[...new Set(spots.map(s=>s.showId))],
+      yt:liveSpots.reduce((a,s)=>a+(s.views||0),0), aud:liveSpots.reduce((a,s)=>a+(s.downloads||0),0),
+      pct: callable.length?pctOf(projC,gC):(g?pctOf(proj,g):0),
+      flight: spots.length?`${fmtDate(first.published)} – ${fmtDate(addDays(last.published,30))}`:'—' };
+  }
+
+  const DEAL_FILTERS=[['live','Live'],['upcoming','Upcoming'],['complete','Complete'],['all','All'],['brands','Brands']];
+
+  function sendDealReport(id){
+    const ds=dealSummary(DEALS.find(x=>x.id===id));
+    const doneReads=ds.spots.filter(s=>closedOut(s));
+    doneReads.forEach(s=>s.reportSent=TODAY); rerender(); refreshBadges();
+    toast(`Delivery report for ${ds.brand} · ${ds.title} sent, adops@ copied.`);
+  }
+
+  RENDER.portal = () => {
+    if(portalDeal===null){ setBack(''); return renderDealIndex(); }
+    const d=DEALS.find(x=>x.id===portalDeal); if(!d){ portalDeal=null; return renderDealIndex(); }
+    const c=dealSummary(d), cr=creative(d.brand);
+    const {spots,liveSpots,mgs,g,got,proj,paid,yt,aud,shows,flight,done}=c;
+    const verified=spots.filter(s=>s.status==='verified'&&s.yt).length;
+    const full=c.pct>=Math.round(IAB_FULL*100);   // 90% is full delivery under IAB
+    const mgsMg=mgs.filter(x=>x.kind==='makegood'), mgsBonus=mgs.filter(x=>x.kind==='bonus');
+    const paidLiveSpots=liveSpots.filter(s=>s.kind==='paid');
+    const callableSpots=paidLiveSpots.filter(s=>projection(s).confident);
+    const reachBasis=callableSpots.length?callableSpots:paidLiveSpots;   // same rule as the headline
+    const byShow={}; reachBasis.forEach(s=>{ const k=s.showId;
+      byShow[k]=byShow[k]||{showId:k,n:0,got:0,g:0,proj:0};
+      byShow[k].n++; byShow[k].got+=delivered(s)||0; byShow[k].g+=s.guarantee; byShow[k].proj+=projection(s).proj; });
+
+    document.getElementById('view-portal').innerHTML=`
+    <div class="inner" style="max-width:1080px">
+      ${setBack(`<button class="tb-plain" onclick="closeDeal()">← All deals</button>`)||''}
+      <div class="pagebar">
+        <div class="head">
+          <h1>${esc(d.brand)} on Acme Network</h1>
+          <div class="muted" style="font-size:12.5px;margin-top:3px">Delivery report · ${esc(c.title)} · ${flight}</div>
+        </div>
+        <div class="pagebar__right" style="text-align:right">
+          <div style="display:flex;gap:9px;justify-content:flex-end">
+            <button class="btn btn--ghost btn--sm" onclick="toast('Copied acme.live/${d.brand.toLowerCase()}-${d.id} — read-only, admin notes stay internal.')">🔗 Copy link</button>
+            <button class="btn btn--ghost btn--sm" onclick="createBonus('${d.id}')">+ Make good</button>
+            <button class="btn btn--primary btn--sm" onclick="sendDealReport('${d.id}')">Send report</button>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--page-bg);border-radius:11px;padding:9px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        ${pStat('Imp delivered',K(got),1)}
+        ${pStat('Of booked impressions',`<span style="color:${full?'var(--green-text)':'var(--orange-text)'}">${c.pct}%</span>`)}
+        ${pStat('Delivered CPM','$'+(got?(paid/(got/1000)):0).toFixed(2))}
+        ${pStat('YouTube reach',K(yt))}
+        ${pStat('Audio reach',K(aud))}
+        ${pStat('Shows',shows.length)}
+        ${pStat('Verified reads',verified+'/'+spots.filter(s=>s.kind==='paid').length)}
+      </div>
+
+      <textarea id="dealNotes" class="cmp-inp" style="margin-top:14px;min-height:42px;line-height:1.6;font-size:12.5px" placeholder="Note — internal, never on the shared link. e.g. Chase the gift-card redemptions, brand wants addresses by Friday." onchange="saveDealNotes('${d.id}')">${esc(d.notes||'')}</textarea>
+
+
+      ${full&&done&&c.pct>=100?`<div class="card" style="margin-top:16px;border-color:var(--green-bg)"><div class="card__pad" style="display:flex;align-items:center;gap:14px">
+        <div style="flex:1"><b style="font-size:13.5px">This deal over-delivered (${c.pct}%) — renewal moment</b>
+          <div class="muted" style="font-size:12.5px">The numbers are already attached. Pitch the next flight while it's hot.</div></div>
+        <button class="btn btn--green btn--sm" onclick="toast('Renewal pitch drafted for ${esc(d.brand)} with the live numbers attached.')">Draft renewal</button></div></div>`
+      :!full&&c.state==='live'?`<div class="card" style="margin-top:16px;border-color:var(--orange-bg)"><div class="card__pad" style="display:flex;align-items:center;gap:14px">
+        <div style="flex:1"><b style="font-size:13.5px">${mgsMg.length?`${mgsMg.length} additional read${mgsMg.length>1?'s':''} booked at no cost`:'Tracking under the guarantee'}</b>
+          <div class="muted" style="font-size:12.5px">${mgsMg.length?`On ${mgsMg.map(m=>fmtDate(m.published)).join(', ')}, to bring the flight back over the line.`:'We will add reads at no cost to close the gap.'}</div></div></div></div>`
+      :mgsBonus.length?`<div class="card" style="margin-top:16px"><div class="card__pad" style="display:flex;align-items:center;gap:14px">
+        <div style="flex:1"><b style="font-size:13.5px">${mgsBonus.length} bonus read${mgsBonus.length>1?'s':''} added at no cost</b>
+          <div class="muted" style="font-size:12.5px">On ${mgsBonus.map(m=>fmtDate(m.published)).join(', ')} — performance support, no charge.</div></div></div></div>`:''}
+
+      <div class="card" style="margin-top:16px">
+        <div class="card__head"><div class="card__title">Delivery</div></div>
+        ${Object.keys(byShow).length>1?`<div class="card__pad" style="padding-bottom:2px">${Object.values(byShow).map(r=>{ const pct=pctOf(r.proj,r.g);
+          return `<div style="margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:600">
+              <span>${esc(show(r.showId).name)} <span class="muted" style="font-weight:400">· ${r.n} read${r.n>1?'s':''}</span></span>
+              <span>${K(r.got)} · ${pct}%</span></div>
+            <div class="pace ${pct>=90?'pace--good':'pace--warn'}" style="margin-top:5px"><div class="pace__fill" style="width:${Math.min(pct,100)}%"></div></div>
+          </div>`; }).join('')}</div>`:''}
+        <table><thead><tr><th style="min-width:190px">Show</th><th>Published</th><th class="num">Impressions</th><th>Verified</th><th>Ad read</th><th></th></tr></thead>
+        <tbody>${liveSpots.filter(s=>s.kind==='paid').map(s=>{ const pr=projection(s);
+          return `<tr><td style="white-space:nowrap"><b>${esc(show(s.showId).name)}</b>
+            ${s.yt?`<a href="${clipUrl(s)}" target="_blank" title="Opens the episode at ${mmss(s.ts)}" style="display:block;font-size:11.5px;color:var(--blue-text);font-weight:600;text-decoration:none;max-width:230px;overflow:hidden;text-overflow:ellipsis">${esc(epTitle(s))}</a>`
+                 :`<div class="muted" style="font-size:11.5px;max-width:230px;overflow:hidden;text-overflow:ellipsis">${esc(epTitle(s))}</div>`}</td>
+            <td>${fmtDate(s.published)}</td>
+            <td class="num"><b>${K(pr.got)}</b>${pr.confident?`<div class="muted" style="font-size:11px">${Math.round(pr.ratio*100)}% of goal</div>`:'<div class="muted" style="font-size:11px">still building</div>'}</td>
+            <td style="white-space:nowrap">${s.yt?`<span style="font-size:12.5px;font-weight:600;color:${(s.copyCheck||'Copy verified')==='Copy verified'?'var(--text-primary)':'var(--orange-text)'}">${esc(s.copyCheck||'Copy verified')}</span><button class="wdots" style="width:20px;height:20px;display:inline-grid;vertical-align:middle;margin-left:2px" onclick="verifyMenu(event,'${s.id}')" title="Change state"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 9l6 6 6-6"/></svg></button>`:'<span class="muted">—</span>'}</td>
+            <td>${s.yt?`<button class="btn btn--ghost btn--sm" onclick="playClip('${s.yt}',${s.ts})">${mmss(s.ts)}–${mmss(s.ts+adSecs(s))}</button>`:'<span class="muted" style="font-size:12px">audio</span>'}</td>
+
+            <td class="right"><button class="btn btn--ghost btn--sm" onclick="openRead('${s.id}')">More info</button></td></tr>`; }).join('')}
+          ${spots.filter(s=>s.status==='scheduled'&&s.kind==='paid').map(s=>`<tr><td><b>${esc(show(s.showId).name)}</b></td>
+            <td>${fmtDate(s.published)}</td><td class="num muted">booked</td><td colspan="3"><span class="muted" style="font-size:12px">Due ${dayName(s.published)} ${fmtDate(s.published)}</span></td></tr>`).join('')}
+          ${mgs.map(s=>`<tr style="background:rgba(235,233,254,.28)"><td><b>${esc(show(s.showId).name)}</b> <span class="tag tag--purple">Added at no cost</span></td>
+            <td>${fmtDate(s.published)}</td><td class="num muted">scheduled</td><td colspan="3"><span class="muted" style="font-size:12px">${s.kind==='bonus'?'Bonus spot — performance support, no charge':'Make good — replaces the shortfall, no charge'}</span></td></tr>`).join('')}
+        </tbody></table>
+      </div>
+      <div class="footnote">This is the advertiser's view of this deal. Read-only for them, updates as reads land — admin notes never leave the building.</div>
+    </div>`;
+  };
+  function saveDealNotes(id){ const d=DEALS.find(x=>x.id===id); d.notes=document.getElementById('dealNotes').value;
+    toast('Notes saved — internal only, and the Dashboard reads them for check-ins.'); }
+
+  /* The index: full-width brand rows, deals always visible under them (13:33 —
+     "the default should go straight to the deals for speed"). */
+  let BRAND_OPEN={};
+  /* Two ways in (Cam): the deal tabs are a flat stack — brand bold, campaign
+     after it. The Brands tab is a closed stack of brands; click one to see
+     its deals. */
+  function dealIndexRow(c,i,hideBrand,click,open){
+    const tone=toneVar(c.status.tone), max=Math.max(c.g,c.proj)*1.06, w=x=>c.g?Math.min(100,x/max*100):0;
+    return `<div class="wrow--click" style="display:grid;grid-template-columns:minmax(0,1fr) 108px 150px 168px 118px 26px;align-items:center;gap:0 13px;padding:10px 14px;${i===0&&!hideBrand?'':'border-top:1px solid var(--border-light)'}" onclick="${click||`go('portal');openDeal('${c.deal.id}')`}">
+      <div style="min-width:0"><b style="font-size:13.5px">${hideBrand?esc(c.title):`${esc(c.brand)} <span style="font-weight:400;color:var(--text-secondary)">· ${esc(c.title)}</span>`}</b>
+        <div class="muted" style="font-size:11.5px">${c.shows.map(x=>show(x).name).join(', ')}</div></div>
+      <div class="muted" style="font-size:11.5px;white-space:nowrap">${esc(c.flight)}</div>
+      <div>${['under','mg','blocked'].includes(c.status.k)?`<b style="font-size:12.5px;display:inline-flex;align-items:center;gap:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${ICO[{under:'warn',mg:'mg',blocked:'clock'}[c.status.k]]}</svg>${c.status.label}</b>`
+        :`<span class="muted" style="font-size:11.5px">${c.state==='upcoming'?'Starts '+fmtDate(c.spots[0].published):c.state==='complete'?'Complete':''}</span>`}</div>
+      <div class="wrow__num" style="width:auto;justify-content:flex-end;display:flex;align-items:center;gap:9px">${c.g?`
+        <div style="position:relative;flex:1;height:8px;border-radius:4px;background:var(--secondary-lite)">
+          <div style="position:absolute;inset:0 auto 0 0;width:${w(c.proj)}%;border-radius:4px;background:${tone};opacity:.28"></div>
+          <div style="position:absolute;inset:0 auto 0 0;width:${w(c.got)}%;border-radius:4px;background:${tone}"></div>
+          <div style="position:absolute;top:-2px;bottom:-2px;left:${w(c.g*IAB_FULL)}%;width:2px;background:var(--green-text)"></div>
+        </div><b style="font-size:12px;color:${tone};min-width:36px;text-align:right">${c.pct}%</b>`
+        :'<span style="flex:1;text-align:left;font-size:12px;color:var(--text-tertiary)">Not started</span>'}</div>
+      <div style="text-align:right"><span class="muted" style="font-size:11.5px">${c.g?K(c.got)+' of '+K(c.g):K(c.spots.reduce((a,s)=>a+s.guarantee,0))+' booked'}</span></div>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.4" style="justify-self:center;transition:transform .15s;transform:rotate(${open?90:0}deg)"><path d="M9 6l6 6-6 6"/></svg>
+    </div>`;
+  }
+  function renderDealIndex(){
+    const all=DEALS.filter(d=>d.outcome==='won').map(dealSummary);
+    const totG=all.filter(c=>c.state==='live').reduce((a,c)=>a+c.g,0);
+    const totP=all.filter(c=>c.state==='live').reduce((a,c)=>a+c.proj,0);
+    const brands=[...new Set(all.map(c=>c.brand))].sort();
+    let body;
+    if(portalFilter==='brands'){
+      body=`<div style="display:flex;flex-direction:column;gap:10px">
+        ${brands.map(b=>{ const bd=all.filter(c=>c.brand===b), open=!!BRAND_OPEN[b];
+          const delivered=bd.reduce((a,c)=>a+c.got,0);
+          return `<div class="card">
+          <button style="width:100%;border:none;background:none;font-family:inherit;color:var(--text-primary);text-align:left;padding:11px 14px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="BRAND_OPEN['${esc(b)}']=!BRAND_OPEN['${esc(b)}'];RENDER.portal()">
+            <b style="font-size:14.5px;letter-spacing:-.02em;flex:1">${esc(b)}</b>
+            <span class="muted" style="font-size:11.5px">${K(delivered)} delivered to date · ${bd.length} deal${bd.length!==1?'s':''}</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.4" style="transform:rotate(${open?90:0}deg);transition:.15s"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+          ${open?`<div style="border-top:1px solid var(--border-light)">${bd.map((c,i)=>dealIndexRow(c,i+1,true)).join('')}</div>`:''}
+          </div>`; }).join('')}
+      </div>`;
+    } else {
+      let cs=all.filter(c=>portalFilter==='all'||c.state===portalFilter);
+      if(dealBrandF!=='All brands') cs=cs.filter(c=>c.brand===dealBrandF);
+      if(dealQ.trim()){ const q=dealQ.trim().toLowerCase();
+        cs=cs.filter(c=>(c.brand+' '+c.title+' '+c.shows.map(x=>show(x).name).join(' ')).toLowerCase().includes(q)); }
+      const dv={deal:c=>c.brand.toLowerCase(), date:c=>c.spots[0]?dt(c.spots[0].published):0,
+                status:c=>({under:0,mg:1,blocked:2}[c.status.k]??3), pacing:c=>c.pct||0, delivered:c=>c.got||0};
+      const sf=dv[dealSort.k]||dv.date;
+      cs=cs.slice().sort((a,b)=>{ const x=sf(a),y=sf(b); return (x>y?1:x<y?-1:0)*dealSort.dir; });
+      const head=`<div class="shead" style="grid-template-columns:minmax(0,1fr) 108px 150px 168px 118px 26px">${[['deal','Deal'],['date','Dates'],['status','Status'],['pacing','Pacing'],['delivered','Delivered']].map(([k,l])=>`<button onclick="setDealSort('${k}')">${l}${dealSort.k===k?(dealSort.dir>0?' ↑':' ↓'):''}</button>`).join('')}<span></span></div>`;
+      body=`<div class="card" style="overflow:hidden">${head}${cs.length?cs.map((c,i)=>dealIndexRow(c,i+1,false)).join(''):'<div class="empty">No deals match.</div>'}</div>`;
+    }
+    document.getElementById('view-portal').innerHTML=`
+    <div class="inner" style="max-width:1080px">
+      <div class="pagebar"><div class="head"><h1>Campaign Portal</h1></div>
+        <div class="pagebar__right">${portalFilter!=='brands'?`<div class="tbar tbar--bare">
+          <div class="tbar__search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="dealQInp" placeholder="Search deals…" value="${esc(dealQ)}" oninput="dealQ=this.value;FOCUS_Q='dealQInp';RENDER.portal()"></div>
+          <button class="tsel" style="display:inline-flex;align-items:center;gap:6px" onclick="openPick(event,'brand')">${esc(dealBrandF)} ${CHEV}</button>
+        </div>`:''}<div class="seg">${DEAL_FILTERS.map(([k,label])=>{ const n=k==='brands'?brands.length:all.filter(c=>k==='all'||c.state===k).length;
+          return `<button class="${portalFilter===k?'active':''}" onclick="portalFilter='${k}';RENDER.portal()">${label}${k==='all'?'':' · '+n}</button>`; }).join('')}</div></div>
+      </div>
+      ${body}
+      <div class="footnote">Every deal opens its own read-only report. Live deals projecting ${pctOf(totP,totG)}%.</div>
+    </div>`;
+    refocusQ();
+  }
+
+  const pStat=(l,v,dark)=>`<div class="pstat${dark?' pstat--dark':''}"><div class="pstat__l">${l}</div><div class="pstat__v">${v}</div></div>`;
+
+
+  // Plain English, written for the advertiser reading the report.
+  const PRE_LINES={
+    rubin:"…and that's the part nobody wants to say out loud. Alright — quick word from a partner and we'll get straight back into it.",
+    sage:"…which is exactly why the reaction was so overblown. Let me pause there for one second, because this one I actually use.",
+    warren:"…so I sat with that for a while before I had an answer. Before we go on, a word from someone supporting the show.",
+    action:"…absolutely not, and I stand by that. Okay — quick break, then we're straight into the second half.",
+    nate:"…and that changed how I think about the whole category. One quick thing before we keep going.",
+    clinton:"…which took me years to work out for myself. Quick word from a sponsor, then we'll pick this back up." };
+  const POST_LINES={
+    rubin:"Right — back to where we were, because this next part is the bit that actually matters.",
+    sage:"Okay, so, back to it. I promised I'd explain why that number is misleading.",
+    warren:"So — back in. And I want to pick up on something you said before the break.",
+    action:"And we're back. Second half, and this is where it gets properly stupid.",
+    nate:"Okay, back to it. So the thing I keep coming back to is…",
+    clinton:"Right, where were we. I want to come back to what you asked earlier." };
+
+  function transcript(s){
+    const cr=creative(s.brand), sh=show(s.showId), dur=adSecs(s), start=s.ts;
+    const words=cr.copy.split(/\s+/), lines=[]; let cur=[];
+    words.forEach(w=>{ cur.push(w); if(cur.length>=11){ lines.push(cur.join(' ')); cur=[]; } });
+    if(cur.length) lines.push(cur.join(' '));
+    const step=dur/Math.max(lines.length,1);
+    const out=[{ t:Math.max(0,start-13), text:PRE_LINES[sh.id]||'…and we will pick that back up in a moment. Quick word from a partner first.', ad:false }];
+    lines.forEach((l,i)=>out.push({ t:Math.round(start+i*step), text:l, ad:true }));
+    out.push({ t:start+dur+4, text:POST_LINES[sh.id]||'Right — back to it.', ad:false });
+    return out;
+  }
+  function transcriptBlock(s){
+    if(!s.yt) return '';
+    const cr=creative(s.brand);
+    return `<div class="txwrap">
+      <div class="txhd"><span>Episode transcript</span>
+        <span style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--text-tertiary)">Read at ${mmss(s.ts)}–${mmss(s.ts+adSecs(s))} · click a line to play from there</span></div>
+      <div class="txbody">${transcript(s).map(l=>
+        `<button class="tx${l.ad?' tx--ad':''}" onclick="event.stopPropagation();playClip('${s.yt}',${l.t})">
+          <time>${mmss(l.t)}</time><span>${esc(l.text)}</span></button>`).join('')}</div>
+    </div>
+    <div class="muted" style="font-size:11.5px;margin-top:8px;line-height:1.5">Pulled from the episode and matched against the brief${(s.copy||cr.points).length?` — ${(s.copy||cr.points).join(', ').toLowerCase()} all present`:''}.</div>`;
+  }
+
+
+  function readNote(s){
+    const pr=projection(s), v=verdict(s), m=mgForSpot(s.id);
+    if(s.dlState==='requested') return 'Video counted. Waiting on the audio numbers from the show.';
+    // A read that cannot be called yet gets a factual line, not a verdict. Views
+    // build for a month, and a low early number is normal — not a warning.
+    if(!pr.confident) return `Just live. ${esc(show(s.showId).name)} builds views over the first month; the number closes ${fmtDate(addDays(s.published,30))}.`;
+    if(v.k==='bonus') return pr.final?`Delivered in full, plus ${K(pr.proj-s.guarantee)} bonus impressions.`:'Tracking over the guarantee.';
+    if(v.k==='full')  return pr.final?'Delivered in full.':'On track to full delivery.';
+    return m&&m.date?`Under the guarantee. An extra read is booked for ${fmtDate(m.date)} at no cost.`
+                    :'Under the guarantee. We are adding a read at no cost.';
+  }
+  function openRead(id){
+    const s=spot(id), sh=show(s.showId), pr=projection(s), v=verdict(s), cr=creative(s.brand);
+    const waiting=s.dlState==='requested';
+    const fact=(l,val)=>`<div><div style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-tertiary)">${l}</div><div style="font-size:14px;font-weight:700;margin-top:3px">${val}</div></div>`;
+    openDrawer(`<div class="drawer__head"><div>
+        ${pr.confident?`<span class="tag tag--${v.tone}"><i></i>${Math.round(pr.ratio*100)}% of guarantee</span>`:'<span class="tag tag--blue"><i></i>Just live</span>'}
+        <h2 style="font-size:18px;font-weight:800;margin-top:8px">${esc(epTitle(s))}</h2>
+        <div class="muted" style="font-size:12px">${esc(sh.name)} · ${fmtDate(s.published)} · ${esc(cr.len)} ${esc(cr.placement).toLowerCase()}</div>
+      </div><button class="x" onclick="closeOverlays()">✕</button></div>
+    <div class="drawer__body">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+        ${fact('Delivered',K(pr.got))}
+        ${fact(pr.final?'Final':'Projected',pr.confident?K(pr.proj):'<span class="muted">building</span>')}
+        ${fact('Video',K(s.views||0))}
+        ${fact('Audio',sh.simulcast?(waiting?'<span class="muted">pending</span>':K(s.downloads||0)):'<span class="muted">—</span>')}
+      </div>
+      <div class="muted" style="font-size:12.5px;margin-top:11px;line-height:1.55">${esc(readNote(s))}</div>
+
+      ${s.yt?`<div style="margin-top:16px;background:var(--primary);border-radius:12px;padding:14px 16px;color:var(--panel);display:flex;align-items:center;gap:14px">
+        <button onclick="playClip('${s.yt}',${s.ts})" style="width:40px;height:40px;border-radius:50%;border:none;background:rgba(128,128,128,.28);color:inherit;font-size:14px;flex-shrink:0">▶</button>
+        <div style="flex:1;min-width:0"><b style="font-size:13px">Hear the read · ${mmss(s.ts)}–${mmss(s.ts+adSecs(s))}</b>
+        <div style="font-size:11.5px;opacity:.72;margin-top:2px">${(s.copy||cr.points).join(' · ')}</div></div>
+      </div>
+      <div style="margin-top:16px">${transcriptBlock(s)}</div>`:''}
+
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light)">
+        <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em">What the host was briefed to read</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:13px 0">
+          ${fact('Placement',esc(cr.placement))}${fact('Read length',esc(cr.len))}
+          ${fact('Promo code',cr.code?esc(cr.code):'<span class="muted">none</span>')}${fact('Offer',esc(cr.cta)||'—')}
+        </div>
+        <div style="background:var(--page-bg);border:1px solid var(--border-light);border-radius:11px;padding:13px 15px;font-size:12.5px;line-height:1.7">${esc(cr.copy)}</div>
+        ${cr.url?`<div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+          <span style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-tertiary)">Landing</span>
+          <a href="https://${esc(cr.url)}" target="_blank" style="font-size:12.5px;color:var(--blue-text);font-weight:600;text-decoration:none">${esc(cr.url)} ↗</a></div>`:''}
+      </div>
+    </div>
+    <div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Close</button>
+      ${s.yt?`<a href="${clipUrl(s)}" target="_blank" class="btn btn--primary" style="text-decoration:none">Open the episode ↗</a>`:''}</div>`);
+  }
+
+
+
+
+  /* ═══════════════════════════ VIEW: SHOWS ═══════════════════════════ */
+  /* ═══════════════════════════ MANAGE SHOWS GRID ═══════════════════════════
+     Ported from the inventory demo: editable cells with a drag-fill handle.
+     This is where show setup gets changed. Everything else only reads it. */
+  const SHEET_COLS=[
+    { key:'cpm',            label:'CPM',             type:'money',  w:82  },
+    { key:'guarantee',      label:'Impr. guarantee', type:'int',    w:124 },
+    { key:'epsPerWeek',     label:'Releases/wk',     type:'num',    w:102 },
+    { key:'positionsPerEp', label:'Ad positions',    type:'int',    w:104 },
+    { key:'delivery',       label:'Delivery',        type:'select', opts:['Video Only','Simulcast','Audio Only'], w:118 },
+    { key:'audioSrc',       label:'Audio numbers',   type:'select', opts:['auto from host','request creator','n/a'], w:130 },
+    { key:'scanEvery',      label:'Scan every',      type:'select', opts:['12h','24h','48h'], w:98 },
+    { key:'revShare',       label:'Rev share',       type:'pct',    w:90  },
+    { key:'mgPolicy',       label:'Make goods',      type:'select', opts:['auto','ask first'], w:104 },
+  ];
+  const AUDIO_LABEL={hosting:'auto from host', request:'request creator', none:'n/a'};
+  const AUDIO_VALUE={'auto from host':'hosting','request creator':'request','n/a':'none'};
+
+  function cellGet(sh,key){
+    if(key==='delivery') return sh.simulcast?'Simulcast':(sh.audioSrc==='none'?'Video Only':'Audio Only');
+    if(key==='audioSrc') return AUDIO_LABEL[sh.audioSrc]||'n/a';
+    if(key==='scanEvery') return sh.scanEvery+'h';
+    if(key==='revShare')  return Math.round(sh.revShare*100);
+    if(key==='mgPolicy')  return sh.mgPolicy==='auto'?'auto':'ask first';
+    return sh[key];
+  }
+  function cellSet(sh,key,raw){
+    if(key==='delivery'){
+      sh.simulcast = raw==='Simulcast';
+      if(raw==='Video Only') sh.audioSrc='none';
+      else if(sh.audioSrc==='none') sh.audioSrc='hosting';
+      return;
+    }
+    if(key==='audioSrc'){ sh.audioSrc=AUDIO_VALUE[raw]||'none'; if(sh.audioSrc==='none') sh.simulcast=false; return; }
+    if(key==='scanEvery'){ sh.scanEvery=parseInt(raw)||24; return; }
+    if(key==='revShare'){ sh.revShare=Math.min(100,Math.max(0,parseFloat(raw)||0))/100; return; }
+    if(key==='mgPolicy'){ sh.mgPolicy = raw==='auto'?'auto':'ask'; return; }
+    const n=parseFloat(String(raw).replace(/[^0-9.]/g,''));
+    if(!isNaN(n)) sh[key]= key==='epsPerWeek' ? n : Math.round(n);
+  }
+
+  let gridSel=null, gridDrag=null, gridQuery='', gridDirty=false;
+  const gridRows = () => { const q=gridQuery.trim().toLowerCase();
+    return q?SHOWS.filter(x=>x.name.toLowerCase().includes(q)||x.host.toLowerCase().includes(q)):SHOWS; };
+
+  function selectCell(id,key){ gridSel={id,key}; renderGrid(); }
+  function startFill(e,id,key){ e.stopPropagation(); e.preventDefault();
+    const rows=gridRows(); gridDrag={key, from:rows.findIndex(x=>x.id===id), to:rows.findIndex(x=>x.id===id), srcId:id}; }
+  function fillEnter(id){ if(!gridDrag) return; const rows=gridRows();
+    const i=rows.findIndex(x=>x.id===id); if(i>=gridDrag.from){ gridDrag.to=i; renderGrid(); } }
+  function endFill(){
+    if(!gridDrag) return;
+    const rows=gridRows(), {key,from,to,srcId}=gridDrag; gridDrag=null;
+    if(to>from){
+      const src=cellGet(show(srcId),key);
+      for(let i=from+1;i<=to;i++) cellSet(rows[i],key,src);
+      gridDirty=true; renderGrid(); refreshBadges();
+      toast(`Filled ${SHEET_COLS.find(c=>c.key===key).label} down ${to-from} row${to-from>1?'s':''}.`);
+    } else renderGrid();
+  }
+  document.addEventListener('mouseup', endFill);
+
+  function gridEdit(id,key,raw){ cellSet(show(id),key,raw); gridDirty=true; markGridDirty(); }
+  function gridCommit(id,key,raw){ cellSet(show(id),key,raw); gridDirty=true; renderGrid(); refreshBadges(); }
+  function markGridDirty(){ const b=document.getElementById('gridSave'); if(b){ b.textContent='Save and update'; b.disabled=false; } }
+  function saveGrid(){ gridDirty=false; renderGrid(); refreshBadges();
+    toast('Show setup saved. Guarantees, positions and scan cadence written back to the ad server and the system.'); }
+
+  function addShow(){
+    const n=SHOWS.length+1;
+    SHOWS.push({ id:'new'+n, name:'New show '+n, host:'—', publishDays:['Mon'], epsPerWeek:1, positionsPerEp:2,
+      curve:'medium', samples:0, simulcast:false, audioSrc:'none', scanEvery:24, revShare:0.60, mgPolicy:'ask',
+      guarantee:50000, cpm:20, category:'—', channel:'@new', src:'manual' });
+    gridDirty=true; renderGrid(); toast('Show added. Fill in its setup, then save.');
+  }
+  function deleteShow(id){
+    if(SPOTS.some(x=>x.showId===id)){ toast(`${show(id).name} has spots booked — clear them before removing it.`); return; }
+    const i=SHOWS.findIndex(x=>x.id===id); if(i>-1) SHOWS.splice(i,1);
+    gridDirty=true; renderGrid(); refreshBadges(); toast('Show removed.');
+  }
+
+  function sheetControl(sh,col){
+    const v=cellGet(sh,col.key);
+    if(col.type==='select') return `<button class="mctl mctl--pick" onmousedown="event.stopPropagation()" onclick="openPick(event,'cell','${sh.id}','${col.key}')">${esc(v)} ${CHEV}</button>`;
+    const pre=col.type==='money'?'<span class="maffix">$</span>':'';
+    const suf=col.type==='pct'?'<span class="maffix">%</span>':'';
+    return `<span class="mnum">${pre}<input class="mctl mctl--num" type="text" inputmode="decimal" value="${v}"
+      onmousedown="event.stopPropagation()"
+      oninput="gridEdit('${sh.id}','${col.key}',this.value)"
+      onchange="gridCommit('${sh.id}','${col.key}',this.value)">${suf}</span>`;
+  }
+
+  function renderGrid(){
+    const host=document.getElementById('gridHost'); if(!host) return;
+    const rows=gridRows();
+    host.innerHTML=`
+      <div class="msheet-card">
+        <div class="msheet-toolbar">
+          <div class="msheet-search">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input placeholder="Search shows…" value="${esc(gridQuery)}" oninput="gridQuery=this.value;renderGrid()">
+          </div>
+          <div class="msheet-tools">
+            <button class="btn btn--primary btn--sm" onclick="addShow()">+ Add show</button>
+            <button class="btn btn--ghost btn--sm" onclick="toast('Paste a CSV of shows to add them in bulk.')">⬆ Bulk CSV</button>
+            <button class="btn btn--ghost btn--sm" onclick="toast('Exported acme-shows.xlsx')">⬇ Export .xlsx</button>
+          </div>
+        </div>
+        <div class="msheet-scroll"><table class="msheet">
+          <thead><tr><th class="mh mh--show">Shows</th>
+            ${SHEET_COLS.map(c=>`<th class="mh" style="width:${c.w}px;min-width:${c.w}px">${c.label}</th>`).join('')}
+            <th class="mh" style="width:46px"></th></tr></thead>
+          <tbody>${rows.map((sh,ri)=>`<tr class="mrow" onmouseenter="fillEnter('${sh.id}')">
+            <td class="mtd mtd--show"><button class="mshowcell mshowcell--btn" onclick="openShow('${sh.id}')" title="Open the full show record">
+              <div class="mthumb">${esc(sh.name.split(' ').map(w=>w[0]).slice(0,2).join(''))}</div>
+              <div style="min-width:0"><div class="mshowname">${esc(sh.name)}</div>
+              <div class="mshowdetail">Details<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></div></div></button></td>
+            ${SHEET_COLS.map(c=>{
+              const sel = gridSel && gridSel.id===sh.id && gridSel.key===c.key;
+              const inR = gridDrag && gridDrag.key===c.key && ri>gridDrag.from && ri<=gridDrag.to;
+              return `<td class="mtd" style="width:${c.w}px;min-width:${c.w}px">
+                <div class="mcell${sel?' mcell--sel':''}${inR?' mcell--range':''}" onmousedown="selectCell('${sh.id}','${c.key}')">
+                  ${sheetControl(sh,c)}
+                  ${sel?`<span class="mfill" onmousedown="startFill(event,'${sh.id}','${c.key}')"></span>`:''}
+                </div></td>`; }).join('')}
+            <td class="mtd" style="text-align:center"><button class="wdots" style="width:28px;height:28px;margin:0 auto" onclick="deleteShow('${sh.id}')" title="Remove show"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/></svg></button></td>
+          </tr>`).join('')}</tbody>
+        </table></div>
+        <div class="msheet-foot">
+          <span class="msheet-total">${rows.length} show${rows.length!==1?'s':''}${gridQuery?' matched':''} · click a cell, then drag the corner handle to fill down</span>
+          <button class="btn btn--primary btn--sm" id="gridSave" onclick="saveGrid()" ${gridDirty?'':'disabled style="opacity:.5"'}>${gridDirty?'Save and update':'Saved ✓'}</button>
+        </div>
+      </div>`;
+  }
+
+  /* Each show gets its own page inside the Shows view — same page grammar as
+     the rest of the app (back link, pagebar, cards), not a drawer. */
+  let SHOW_PAGE=null;
+  function openShow(id){ SHOW_PAGE=id; if(CURRENT!=='shows'){ go('shows'); } else RENDER.shows(); document.getElementById('main').scrollTop=0; }
+  function closeShow(){ SHOW_PAGE=null; RENDER.shows(); document.getElementById('main').scrollTop=0; }
+
+  function renderShowPage(sh){
+    const id=sh.id;
+    const live=SPOTS.filter(x=>x.showId===id&&projection(x)).sort((a,b)=>liveDays(a)-liveDays(b));
+    const booked=SPOTS.filter(x=>x.showId===id&&x.status==='scheduled');
+    const ran=SPOTS.filter(x=>x.showId===id&&x.kind==='paid'&&projection(x));
+    const shorts=ran.filter(x=>verdict(x).k==='short').length;
+    const owed=wonDeals().filter(d=>d.showId===id).reduce((a,d)=>a+Math.round(d.gross*0.85*sh.revShare),0);
+    const adv=guaranteeAdvice().find(x=>x.showId===id);
+    const kv=(l,v)=>`<div class="kv"><span>${l}</span><b>${v}</b></div>`;
+    document.getElementById('view-shows').innerHTML=`
+    <div class="inner" style="max-width:1080px">
+      ${setBack(`<button class="tb-plain" onclick="closeShow()">← All shows</button>`)||''}
+      <div class="pagebar">
+        <div class="head">
+          <h1>${esc(sh.name)}</h1>
+          <div class="muted" style="font-size:12.5px;margin-top:3px">${esc(sh.host)} · ${esc(sh.category)} · ${esc(sh.channel)}</div>
+        </div>
+        <div class="pagebar__right"><span class="srcpill ${sh.src==='adserver'?'adserver':''}">${sh.src==='adserver'?'Ad server':sh.src}</span></div>
+      </div>
+
+      <div class="grid" style="grid-template-columns:repeat(4,1fr);gap:10px">
+        ${kpiBox('Guarantee',K(sh.guarantee),`90% = ${K(Math.round(sh.guarantee*IAB_FULL))}`)}
+        ${kpiBox('Check-in','day '+checkInDay(sh),'set by its own curve')}
+        ${kpiBox('Live reads',live.length,live.length?live.map(x=>esc(x.brand)).join(', '):'none right now')}
+        ${kpiBox('Owed',money(owed),`${Math.round(sh.revShare*100)}% rev share`)}
+      </div>
+
+      <textarea class="cmp-inp" style="margin-top:12px;min-height:42px;line-height:1.6;font-size:12.5px" placeholder="Note — internal, the show and brands never see this. e.g. Takes August off every year · no onboarding calls." onchange="show('${id}').adminNotes=this.value;toast('Saved — internal only.')">${esc(sh.adminNotes||'')}</textarea>
+
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;align-items:start">
+        <div class="card">
+          <div class="card__head"><div><div class="card__title">Show setup</div><div class="card__sub">Maps 1:1 to the the system show page; positions and the guarantee come from the ad server.</div></div></div>
+          <div class="card__pad" style="padding-top:2px">
+            ${kv('Publishes', sh.publishDays.join(' · '))}
+            ${kv('Episodes a week', sh.epsPerWeek)}
+            ${kv('Ad positions an episode', `${sh.positionsPerEp} <em>the ad server cap</em>`)}
+            ${kv('Rate', money(sh.cpm)+' CPM')}
+            ${kv('Delivery numbers', sh.simulcast?`Video + audio <em>${sh.audioSrc==='hosting'?'auto from host':'requested from creator'}</em>`:'Video only')}
+            ${kv('Channel scan', 'Every '+sh.scanEvery+'h')}
+            ${kv('Rev share', `${Math.round(sh.revShare*100)}% <em>${money(owed)} owed</em>`)}
+            ${kv('Make goods', sh.mgPolicy==='auto'?'Auto-schedule':'Ask the show first')}
+          </div>
+        </div>
+        <div class="card">
+          <div class="card__head"><div><div class="card__title">Pacing</div><div class="card__sub">Fitted from ${sh.samples} verified reads on this channel.</div></div></div>
+          <div class="card__pad" style="padding-top:2px">
+            <p style="font-size:13px;line-height:1.6;color:var(--text-secondary);margin:0">
+              <b style="color:var(--text-primary)">${Math.round(curveAt(sh.curve,2)*100)}%</b> of a read's views land inside 48 hours and
+              <b style="color:var(--text-primary)">${Math.round(curveAt(sh.curve,7)*100)}%</b> by day 7.
+              That is why the call gets made on day ${checkInDay(sh)} here rather than on a fixed rule.
+              ${shorts?` ${shorts} of the last ${ran.length} flights came in under.`:''}
+            </p>
+            ${adv?`<div style="margin-top:12px;padding:12px 14px;border:1px solid var(--orange-bg);background:rgba(255,237,213,.4);border-radius:11px;display:flex;align-items:center;gap:11px">
+              <div style="flex:1;font-size:12.5px">The guarantee is set above what the show does — reads land near ${K(adv.typical)}.</div>
+              <button class="btn btn--ghost btn--sm" onclick="applyGuarantee('${sh.id}',${adv.suggest})">Drop to ${K(adv.suggest)}</button></div>`:''}
+            <div class="dhead" style="margin-top:14px">Next avails</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${nextEpisodes(id,5).map(e=>`<span class="tag ${e.open?'tag--green':'tag--grey'}">${dayName(e.date)} ${fmtDate(e.date)} · ${e.open}/${e.cap}</span>`).join('')}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <div class="card__head"><div><div class="card__title">How it's tracking</div><div class="card__sub">Every read on this show — live flights project from the show's own curve.</div></div></div>
+        <div class="card__pad" style="padding-top:2px;display:flex;flex-direction:column;gap:7px">
+          ${live.length||booked.length?`
+          ${live.map(x=>{ const pr=projection(x), vv=verdict(x);
+            return `<div class="wrow wrow--click" style="padding:11px 13px" onclick="openSpot('${x.id}',1)">
+              <div class="wrow__main"><b>${esc(x.brand)}</b><span>Day ${pr.day} · ${K(pr.got)} of ${K(x.guarantee)}</span></div>
+              <div class="wrow__num" style="width:120px">${projBar(x)}<b style="color:${toneVar(vv.tone)}">${Math.round(pr.ratio*100)}%</b></div></div>`; }).join('')}
+          ${booked.map(x=>`<div class="wrow" style="padding:11px 13px;border-style:dashed">
+            <div class="wrow__main"><b>${esc(x.brand)}</b><span>Booked ${dayName(x.published)} ${fmtDate(x.published)}${x.kind!=='paid'?' · '+esc(x.kind):''}</span></div></div>`).join('')}`
+          :`<div class="empty" style="padding:18px 0">No reads on this show yet.</div>`}
+        </div>
+      </div>
+      <div class="footnote">Everything here maps 1:1 to the show page you keep in the system — this is its live view.</div>
+    </div>`;
+  }
+
+  const kpiBox=(l,v,sub)=>`<div style="border:1px solid var(--border-light);border-radius:11px;padding:12px 14px"><div style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-tertiary)">${l}</div><div style="font-size:21px;font-weight:800;letter-spacing:-.03em;margin-top:3px">${v}</div><div class="muted" style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sub}</div></div>`;
+
+  RENDER.shows = () => {
+    if(SHOW_PAGE){ const sh=show(SHOW_PAGE); if(sh) return renderShowPage(sh); SHOW_PAGE=null; }
+    setBack('');
+    const f=fillStats();
+    document.getElementById('view-shows').innerHTML=`
+    <div class="inner" style="max-width:1180px">
+      <div class="pagebar">
+        <div class="head"><h1>Shows</h1></div>
+        <div class="pagebar__right"><span class="tag tag--purple">${SHOWS.filter(x=>x.src==='adserver').length} of ${SHOWS.length} synced from the ad server</span></div>
+      </div>
+      <div id="gridHost"></div>
+      <div class="footnote">Positions and the guarantee come from the ad server; everything else maps 1:1 to the show page you keep in the system, so this pulls straight from there. Paid fill rate is ${f.rate}% — ${f.paid} spots sold, ${f.free} given as make goods or bonus.</div>
+    </div>`;
+    renderGrid();
+  };
+
+
+  function toggleDark(){
+    document.body.classList.toggle('dark');
+    const d=document.body.classList.contains('dark'), b=document.getElementById('dmBtn');
+    if(b) b.lastChild.textContent = d?'Light Mode':'Dark Mode';
+  }
+  function applyGuarantee(showId,v){ show(showId).guarantee=v; rerender(); toast(`${show(showId).name} guarantee set to ${K(v)}. Written back to the ad server and the system.`); }
+
+  /* ═══════════════════════════ TOAST ═══════════════════════════ */
+  let toastT;
+  function toast(msg){ let el=document.getElementById('toast'); if(!el){ el=document.createElement('div'); el.id='toast'; el.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--primary);color:#fff;padding:12px 18px;border-radius:11px;font-size:13px;font-weight:600;z-index:80;box-shadow:var(--shadow-hover);opacity:0;transition:.25s;max-width:460px'; document.body.appendChild(el); }
+    el.textContent=msg; requestAnimationFrame(()=>{el.style.opacity=1;el.style.transform='translateX(-50%) translateY(0)';}); clearTimeout(toastT); toastT=setTimeout(()=>{el.style.opacity=0;el.style.transform='translateX(-50%) translateY(20px)';},3400); }
+
+  /* init */
+  refreshBadges(); RENDER.overview();
+  // The agent is not something you start — it has already run by the time you look.
+  setTimeout(()=>{ if(SPOTS.some(s=>s.status==='aired')) runAgent(); }, 900);
+  </script>
+</body>
+</html>

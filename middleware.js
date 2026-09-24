@@ -27,7 +27,13 @@ const TEAM_PATHS = new Set([
   '/homepage', '/homepage.html',
   '/landing', '/landing.html',
   '/media-plans', '/media-plans.html',
-  '/new-homepage', '/new-homepage.html'
+  '/new-homepage', '/new-homepage.html',
+  // Acme Network OS demo — gated to SpotsNow accounts (Google SSO team tier).
+  // The shell plus every module file it iframes must be listed so no page is
+  // reachable ungated.
+  '/acme', '/acme-os.html',
+  '/acme-inventory.html', '/acme-vetting.html',
+  '/acme-outbound-bw.html', '/acme-delivery.html'
 ]);
 
 // Shared-password demo area. Includes the clean rewrite paths AND the real
@@ -35,8 +41,6 @@ const TEAM_PATHS = new Set([
 // ungated.
 const DEMO_PATHS = new Set([
   '/demos', '/demos.html',
-  '/acme', '/acme-os.html',
-  '/acme-inventory.html', '/acme-vetting.html',
   '/outbound', '/acme-outbound.html',
   '/financialdashboard', '/financial-dashboard-preview.html'
 ]);
@@ -70,6 +74,7 @@ export const config = {
     '/demos', '/demos.html',
     '/acme', '/acme-os.html',
     '/acme-inventory.html', '/acme-vetting.html',
+    '/acme-outbound-bw.html', '/acme-delivery.html',
     '/outbound', '/acme-outbound.html',
     '/financialdashboard', '/financial-dashboard-preview.html'
   ]

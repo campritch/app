@@ -19,6 +19,10 @@ rm -f dist/vetting-demo.html
 cp acme-vetting-locked.html dist/acme-vetting.html
 # Pulled offline: Magellan pixel-setup flow (tracking-pixel pages). Keep source, never publish.
 rm -f dist/pixel-setup.html dist/submit-creative.html
+# NDA / scratch: raw un-rebranded module sources and one-off scratch pages must
+# never publish. The Acme OS demo ships acme-outbound-bw.html (scrubbed), NOT the
+# raw bw-outbound-source.html which still carries the original client identity.
+rm -f dist/bw-outbound-source.html dist/partner-leads.html dist/brand-dashboard.html dist/scratch_io_terms.html
 # Privacy: Relationship Intelligence holds real personal contact data (contacts-data.js).
 # Keep source, never publish to the public (unauthenticated) wiki.
 rm -f dist/contacts.html
