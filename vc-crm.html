@@ -1110,7 +1110,10 @@ function grade(f){
 }
 function gradeClass(g){ return { 'A+':'aplus', 'A':'a', 'A-':'aminus', 'B+':'bplus', 'B':'b' }[g] || 'c'; }
 function gradePillHtml(f){
-  if (!f.dims) return `<span class="pill pill--grade-c" title="Not graded against the pitch yet">Not graded</span>`;
+  if (!f.dims) {
+    if (FS(f.id).aiUnidentified) return `<span class="pill pill--grade-c" title="The AI couldn't identify this fund from its name/website. Add a website and re-grade.">Unidentified</span>`;
+    return `<span class="pill pill--grade-c" title="Not graded against the pitch yet">Not graded</span>`;
+  }
   const g = grade(f), s = Math.round(score(f));
   // Grade+score are only shown in color once the fund is AI-graded. A rubric
   // estimate (dims but no aiGraded) shows the number grayed, so at scale you
@@ -3542,9 +3545,13 @@ async function aiFitFetch(f){
   const st = FS(f.id);
   st.aiBrief = data.brief || '';
   st.aiOneLiner = data.one_liner || '';
-  // a real AI read replaces the rubric first-pass numbers
-  if (data.dims) { f.dims = data.dims; st.aiDims = data.dims; }
-  st.aiGraded = true;
+  // a real AI read replaces the rubric first-pass numbers. Only count it as
+  // "graded" when the AI actually returned dims - if it returned dims:null
+  // (a fund it genuinely couldn't identify), mark it Unidentified instead of
+  // silently flagging it graded (which made it show "Not graded" yet skip
+  // re-grading forever).
+  if (data.dims) { f.dims = data.dims; st.aiDims = data.dims; st.aiGraded = true; delete st.aiUnidentified; }
+  else { st.aiUnidentified = true; delete st.aiGraded; }
   return data;
 }
 
@@ -3596,7 +3603,7 @@ async function gradeConnectorFunds(cid, btn, opts){
   const fundIds = new Set();
   (c.matches || []).forEach(pid => { const p = PERSON_BY_ID[pid]; if (p) fundIds.add(p.fundId); });
   if (il) il.rows.forEach(r => { if (r.fundId) fundIds.add(r.fundId); });
-  let targets = [...fundIds].map(id => FUND_BY_ID[id]).filter(f => f && !FS(f.id).aiGraded && !f.why && !isCompetitor(f) && !isParkedFund(f));
+  let targets = [...fundIds].map(id => FUND_BY_ID[id]).filter(f => f && !(FS(f.id).aiGraded && f.dims) && !FS(f.id).aiUnidentified && !f.why && !isCompetitor(f) && !isParkedFund(f));
   // (1) MATCH FIRST: adopt grade/description from a same-name backlog fund we
   // already have, so we never re-research something already in the CRM.
   let matched = 0;
@@ -4995,8 +5002,12 @@ $('bulkRemove').addEventListener('click', async () => {
 $('bulkGrade').addEventListener('click', async () => {
   if (!STAGE_TABS.includes(currentTab) || !selected.size) return;
   const btn = $('bulkGrade');
-  const targets = [...selected].map(id => FUND_BY_ID[id]).filter(f => f && !FS(f.id).aiGraded && !isCompetitor(f));
-  if (!targets.length) { toast('Those are already graded (or competitors). Nothing to grade.'); return; }
+  // A fund needs grading unless it already has a real AI grade (aiGraded WITH
+  // dims), was already tried and came back unidentifiable, or is a competitor.
+  // Rubric-estimate funds (dims but not aiGraded) and mislabeled ones (aiGraded
+  // but no dims) are included so they get a real read.
+  const targets = [...selected].map(id => FUND_BY_ID[id]).filter(f => f && !(FS(f.id).aiGraded && f.dims) && !FS(f.id).aiUnidentified && !isCompetitor(f));
+  if (!targets.length) { toast('Nothing to grade here - these are already graded, unidentifiable, or competitors.'); return; }
   btn.disabled = true;
   let done = 0, failed = 0;
   toast(`Grading ${targets.length} selected fund${targets.length===1?'':'s'}...`);
