@@ -280,7 +280,9 @@
     th.sortable { cursor: pointer; user-select: none; }
     th.sortable:hover { color: var(--foreground); }
     tr.arch-dim td { opacity: 0.6; }
-    tr.arch-dim td:last-child { opacity: 1; }
+    /* dim the actions too, so a passed/disqualified row reads as fully spent
+       (no crisp white "Message" cell standing out over the faded row) */
+    tr.arch-dim td:last-child { opacity: 0.6; }
     .li-link { display: inline-flex; color: #0a66c2; flex-shrink: 0; }
     .li-link:hover { opacity: 0.75; }
 
@@ -755,9 +757,10 @@
         <button class="tab" data-tab="messaged">Messaged <span class="count" id="cntMessaged">0</span></button>
         <button class="tab" data-tab="booked">Booked <span class="count" id="cntBooked">0</span></button>
         <button class="tab" data-tab="pitching">Pitching <span class="count" id="cntPitching">0</span></button>
-        <button class="tab" data-tab="closed">Past <span class="count" id="cntClosed">0</span></button>
+        <button class="tab" data-tab="closed">Passed <span class="count" id="cntClosed">0</span></button>
         <button class="tab" data-tab="disqualified">Disqualified <span class="count" id="cntDisqualified">0</span></button>
         <button class="tab" data-tab="future">Future <span class="count" id="cntFuture">0</span></button>
+        <button class="tab" data-tab="won">Closed <span class="count" id="cntWon">0</span></button>
       </div>
     </div>
 
@@ -948,9 +951,10 @@ Dana Whitfield, Overline, worked together at Techstars,"></textarea>
     <button class="bulk-btn bulk-fund" data-bulkstage="messaged">→ Messaged</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="booked">→ Booked</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="pitching">→ Pitching</button>
-    <button class="bulk-btn bulk-fund" data-bulkstage="closed">→ Past</button>
+    <button class="bulk-btn bulk-fund" data-bulkstage="closed">→ Passed</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="disqualified">→ Disqualified</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="future">→ Future rounds</button>
+    <button class="bulk-btn bulk-fund" data-bulkstage="won">→ Closed</button>
     <button class="bulk-btn bulk-fund" id="bulkGrade" style="font-weight:600">✨ Grade selected</button>
     <button class="bulk-btn bulk-people" id="bulkArchiveP">Archive</button>
     <button class="bulk-btn bulk-people" id="bulkPaths">Find connector paths</button>
@@ -1511,9 +1515,12 @@ const P_STATUS = {
 };
 const C_STATUS = { none:'Not asked', draft:'Ask drafted', asked:'Asked', agreed:'Agreed', declined:'Declined' };
 /* Fund pipeline stages — the core CRM flow. */
-const F_STAGES = { none:'Backlog', contacted:'\ud83d\udce8 Contacted', target:'\ud83c\udfaf Target', needintros:'\ud83e\udd1d Need intros', messaged:'\ud83d\udcac Messaged', booked:'\u2705 Booked', pitching:'\ud83c\udfa4 Pitching', closed:'\u{1F44B} Past', disqualified:'\ud83d\udeab Disqualified', future:'\u23f3 Future' };
+const F_STAGES = { none:'Backlog', contacted:'\ud83d\udce8 Contacted', target:'\ud83c\udfaf Target', needintros:'\ud83e\udd1d Need intros', messaged:'\ud83d\udcac Messaged', booked:'\u2705 Booked', pitching:'\ud83c\udfa4 Pitching', closed:'\u{1F44B} Passed', disqualified:'\ud83d\udeab Disqualified', future:'\u23f3 Future', won:'\u{1F91D} Closed' };
 // 'todo' is a virtual tab = unassigned funds (stage none); it maps to stage 'none'.
-const STAGE_TABS = ['funds','todo','contacted','targets','needintros','messaged','booked','pitching','closed','disqualified','future'];
+// NOTE: internal key 'closed' is the "Passed" stage (they passed on us); 'won'
+// is the "Closed" stage (committed/invested). Kept this way to avoid migrating
+// existing stored data that already uses 'closed' for passed.
+const STAGE_TABS = ['funds','todo','contacted','targets','needintros','messaged','booked','pitching','closed','disqualified','future','won'];
 const WARMTH = { hot:'\ud83d\udd25 Hot', warm:'\u2600\ufe0f Warm', cool:'\ud83d\udd35 Cool', cold:'\ud83e\udd76 Cold', na:'\u2014 Not set' };
 const WARMTH_ICON = { na:'\u25cb', hot:'\ud83d\udd25', warm:'\u2600\ufe0f', cool:'\ud83d\udd35', cold:'\ud83e\udd76' };
 /* Where the fund came from: the master lists (grey) or OpenVC (light orange). */
@@ -1758,7 +1765,7 @@ let fundArchiveView = false;
 let headSort = { key: null, dir: 1 };
 let renderCap = 150;
 const HSORT_DEFAULT_DIR = { name:1, profile:1, fit:-1, check:-1, stage:1, people:-1, path:1, status:1, wayin:1 };
-const STAGE_ORDER = { none:0, contacted:1, target:2, needintros:3, messaged:4, booked:5, pitching:6, closed:7, disqualified:8, future:9 };
+const STAGE_ORDER = { none:0, contacted:1, target:2, needintros:3, messaged:4, booked:5, pitching:6, closed:7, disqualified:8, future:9, won:10 };
 const hArrow = k => headSort.key === k ? (headSort.dir === 1 ? ' \u2191' : ' \u2193') : '';
 let currentTab = 'funds';
 let searchQ = '';
@@ -2158,6 +2165,7 @@ function render(){
   $('cntClosed').textContent = stageCount('closed');
   $('cntDisqualified').textContent = stageCount('disqualified');
   $('cntFuture').textContent = stageCount('future');
+  { const cw = $('cntWon'); if (cw) cw.textContent = stageCount('won'); }
   const cf = $('cntFollowups');   // tab removed - guard in case the element is gone
   if (cf) { cf.textContent = allFollow; cf.classList.toggle('hot', (dueP + dueC) > 0); }
 
@@ -2256,7 +2264,7 @@ function renderFundsTable(){
     const ppl = PEOPLE.filter(p => p.fundId === f.id && !isExcluded(p));
     const tbd = ppl.filter(p => p.tbd).length;
     const open = expandedFunds.has(f.id);
-    return `<tr data-fundrow="${f.id}" class="${selected.has(f.id)?'selected':''} ${open?'expanded':''} ${fundArchiveView?'arch-dim':''} ${isCompetitor(f)?'competitor-dim':''}">
+    return `<tr data-fundrow="${f.id}" class="${selected.has(f.id)?'selected':''} ${open?'expanded':''} ${(fundArchiveView || ['closed','disqualified'].includes(fStage(f)))?'arch-dim':''} ${isCompetitor(f)?'competitor-dim':''}">
       <td><input type="checkbox" class="row-check" data-check="${f.id}" ${selected.has(f.id)?'checked':''}></td>
       <td class="fund-td"><div class="fund-cell">
         <span class="fund-name">${esc(f.name)}${fundCrown(f)}${isCompetitor(f)?' <span class="pill--competitor" title="'+esc(f.competitorNote||'Backs a direct competitor')+'">COMPETITOR</span>':''}${introAvatarsHtml(f)}</span>
@@ -2289,7 +2297,7 @@ function renderFundsTable(){
             <div class="dd-head">What happened?</div>
             <button type="button" class="dd-item" data-rowact="reachedout:${f.id}">Reached out - message sent</button>
             <button type="button" class="dd-item" data-rowact="bookedq:${f.id}">Meeting booked</button>
-            <button type="button" class="dd-item" data-rowact="passedq:${f.id}">They passed - move to Past</button>
+            <button type="button" class="dd-item" data-rowact="passedq:${f.id}">They passed - move to Passed</button>
             <button type="button" class="dd-item" data-rowact="dqq:${f.id}">Not a fit - disqualify</button>
             <button type="button" class="dd-item" data-rowact="archiveq:${f.id}">Done - archive</button>
           </div>
