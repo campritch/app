@@ -711,6 +711,14 @@
     .am-btn--primary:hover { background: var(--foreground); opacity: .88; }
     .am-btn--danger { background: var(--red-text); color: #fff; border-color: var(--red-text); }
     .am-btn--danger:hover { background: var(--red-text); opacity: .9; }
+    /* Import progress / result modal */
+    .imp-spinner { width: 24px; height: 24px; border: 2.5px solid var(--border); border-top-color: var(--foreground); border-radius: 50%; animation: imp-spin .7s linear infinite; margin: 6px auto 14px; }
+    @keyframes imp-spin { to { transform: rotate(360deg); } }
+    .imp-fields { font-size: 11.5px; color: var(--muted-foreground); margin-bottom: 12px; line-height: 1.5; }
+    .imp-fields b { color: var(--foreground); font-weight: 600; }
+    .imp-stat { display: flex; justify-content: space-between; gap: 16px; font-size: 13px; padding: 4px 0; border-top: 1px solid var(--border); }
+    .imp-stat:first-of-type { border-top: none; }
+    .imp-stat span:last-child { font-weight: 700; font-variant-numeric: tabular-nums; }
 
     @media (max-width: 860px) {
       .hide-md { display: none; }
@@ -2651,17 +2659,33 @@ function applyMatching(rows, norms){
 }
 function importConnections(text){
   const rows = parseConnectionsCsv(text);
-  if (!rows.length) { toast('Could not read that file. Export Connections.csv from LinkedIn and try again.'); return; }
-  rows.forEach(r => {
-    const key = (r.url || (r.first + ' ' + r.last)).toLowerCase();
-    if (!state.liConnections.some(x => (x.url || (x.first + ' ' + x.last)).toLowerCase() === key))
-      state.liConnections.push(r);
-  });
-  const res = applyMatching(rows);
-  state.synced = `${rows.length} connections parsed · ${res.direct} direct paths to fund people · ${res.newConn} new connector${res.newConn===1?'':'s'}${res.updated?` · ${res.updated} updated`:''}`;
-  mergeDuplicateConnectors();
-  save(); render();
-  toast(state.synced);
+  if (!rows.length) {
+    finishImportModal(showImportModal('Couldn’t read that file', ''), 'Couldn’t read that file',
+      `<div class="am-msg">Expected LinkedIn's <b>Connections.csv</b> (a header row with First Name, Last Name, Company, Position, URL). Try exporting it again from LinkedIn.</div>`);
+    return;
+  }
+  const total = rows.length;
+  const ov = showImportModal('Importing LinkedIn connections…',
+    `<div class="imp-spinner"></div><div class="imp-fields">Recognized: <b>First Name, Last Name, Company, Position, URL</b><br>Matching ${total} connections to your target funds…</div>`);
+  setTimeout(() => {
+    rows.forEach(r => {
+      const key = (r.url || (r.first + ' ' + r.last)).toLowerCase();
+      if (!state.liConnections.some(x => (x.url || (x.first + ' ' + x.last)).toLowerCase() === key))
+        state.liConnections.push(r);
+    });
+    const res = applyMatching(rows);
+    const surfaced = res.direct + res.newConn;
+    state.synced = `${total} connections parsed · ${res.direct} direct paths · ${res.newConn} new connectors`;
+    mergeDuplicateConnectors();
+    save(); render();
+    finishImportModal(ov, 'Import complete',
+      `<div class="imp-stat"><span>Connections read</span><span>${total}</span></div>` +
+      `<div class="imp-stat"><span>Direct paths (you know someone AT a fund)</span><span>${res.direct}</span></div>` +
+      `<div class="imp-stat"><span>New connectors created</span><span>${res.newConn}</span></div>` +
+      (res.updated ? `<div class="imp-stat"><span>Connectors updated</span><span>${res.updated}</span></div>` : '') +
+      `<div class="imp-stat"><span>Kept for matching + LinkedIn URLs</span><span>${Math.max(0, total - surfaced)}</span></div>` +
+      `<div class="am-msg" style="margin-top:12px">Only connections whose company is one of your target funds become searchable connectors. The rest are kept quietly to match future funds and fill in real LinkedIn URLs.</div>`);
+  }, 50);
 }
 
 /* ── Fund list import ── */
@@ -4681,51 +4705,82 @@ function headlineRole(h){
    fund, add the person to that fund (with their real LinkedIn URL) and link the
    super connector to them as an intro path. Rows we can't confidently match to
    a target fund are skipped - never mis-attributed. */
+/* Upload progress/result modal - so an import always shows what it recognized
+   and what it did (no more guessing whether it worked). */
+function showImportModal(title, bodyHtml){
+  const ov = document.createElement('div'); ov.className = 'dq-overlay';
+  ov.innerHTML = `<div class="dq-card"><div class="dq-title imp-t">${esc(title)}</div><div class="imp-b">${bodyHtml}</div></div>`;
+  document.body.appendChild(ov);
+  return ov;
+}
+function finishImportModal(ov, title, bodyHtml){
+  if (!ov) return;
+  ov.querySelector('.imp-t').textContent = title;
+  ov.querySelector('.imp-b').innerHTML = bodyHtml + `<div class="am-actions" style="margin-top:16px"><button type="button" class="am-btn am-btn--primary" data-impclose>Done</button></div>`;
+  ov.querySelector('[data-impclose]').onclick = () => ov.remove();
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+}
 function importInvestorScan(text){
   const lines = (text||'').split(/\r?\n/).filter(l => l.trim());
-  if (!lines.length) { toast('Nothing to import.'); return; }
+  if (!lines.length) { toast('That file was empty.'); return; }
   const h0 = csvLine(lines[0]).map(x => x.trim().toLowerCase().replace(/^﻿/,''));
   const idx = k => h0.indexOf(k);
   const ci = { conn: idx('super connector'), name: idx('name'), deg: idx('degree to you'),
     head: idx('headline'), url: idx('linkedin url'), mut: idx('other mutual connections') };
-  if (ci.conn === -1 || ci.name === -1) { toast('Expected columns: Super Connector, Name, Degree to You, Headline, Location, LinkedIn URL, Other Mutual Connections.'); return; }
-  const fundByNorm = new Map();
-  FUNDS.forEach(f => { const n = normOrg(f.name); if (n && !fundByNorm.has(n)) fundByNorm.set(n, f); });
-  const edges = []; let skipped = 0;
-  for (let i = 1; i < lines.length; i++) {
-    const c = csvLine(lines[i]).map(x => (x||'').trim().replace(/^﻿/,''));
-    const connName = c[ci.conn], person = c[ci.name];
-    if (!connName || !person) continue;
-    const head = ci.head >= 0 ? c[ci.head] : '';
-    let fund = null;
-    for (const cand of headlineFirms(head)) { const f = fundByNorm.get(normOrg(cand)); if (f) { fund = f; break; } }
-    if (!fund) { skipped++; continue; }
-    const deg = ci.deg >= 0 ? c[ci.deg] : '', mut = ci.mut >= 0 ? c[ci.mut] : '';
-    const note = [deg && (deg + ' degree'), mut && (mut + ' mutual'), head].filter(Boolean).join(' · ');
-    edges.push({ connName, fundId: fund.id, person, title: headlineRole(head), url: ci.url >= 0 ? c[ci.url] : '', note });
+  if (ci.conn === -1 || ci.name === -1) {
+    finishImportModal(showImportModal('Couldn’t read that file', ''), 'Couldn’t read that file',
+      `<div class="am-msg">Expected a header with <b>Super Connector</b> and <b>Name</b> columns (the LinkedIn 2nd-degree export). Found: ${esc(h0.join(', ') || '(none)')}.</div>`);
+    return;
   }
-  if (!edges.length) { toast(`No rows matched a target fund (checked ${lines.length-1}).`); return; }
-  // 1) upsert people onto their funds (with real LinkedIn URLs), then rebuild so PERSON_BY_ID has them
-  edges.forEach(e => {
-    const pid = e.fundId + '_' + slug(e.person);
-    if (!PERSON_BY_ID[pid]) PS(pid).added = { name: e.person, title: e.title };
-    if (e.url) PS(pid).li = e.url;
-    e.pid = pid;
-  });
-  rebuild();
-  // 2) link super connectors -> those people
-  let newConn = 0; const conns = new Set(), fundsHit = new Set();
-  edges.forEach(e => {
-    let conn = allConnectors().find(x => x.name.toLowerCase() === e.connName.toLowerCase());
-    if (!conn) { conn = { id: 'c_scan_' + slug(e.connName), name: e.connName, role: 'Super connector', rapport: 'From LinkedIn 2nd-degree scan.', li: '', matches: [], source: 'scan' }; state.extraConnectors.push(conn); newConn++; }
-    addMatch(conn, e.pid, e.note);
-    conns.add(conn.id); fundsHit.add(e.fundId);
-  });
-  mergeDuplicateConnectors();
-  save(); rebuild(); render();
-  const msg = `${edges.length} intro paths · ${fundsHit.size} target funds reachable · ${conns.size} connectors (${newConn} new) · ${skipped} rows skipped (not a target fund)`;
-  state.synced = msg;
-  toast(msg);
+  const recognized = [['Super Connector',ci.conn],['Name',ci.name],['Headline',ci.head],['LinkedIn URL',ci.url],['Degree',ci.deg],['Mutuals',ci.mut]].filter(([,i]) => i >= 0).map(([n]) => n);
+  const total = lines.length - 1;
+  const ov = showImportModal('Importing super-connector scan…',
+    `<div class="imp-spinner"></div><div class="imp-fields">Recognized columns: <b>${esc(recognized.join(', '))}</b><br>Matching ${total} rows to your target funds…</div>`);
+  setTimeout(() => {
+    const fundByNorm = new Map();
+    FUNDS.forEach(f => { const n = normOrg(f.name); if (n && !fundByNorm.has(n)) fundByNorm.set(n, f); });
+    const edges = []; let skipped = 0;
+    for (let i = 1; i < lines.length; i++) {
+      const c = csvLine(lines[i]).map(x => (x||'').trim().replace(/^﻿/,''));
+      const connName = c[ci.conn], person = c[ci.name];
+      if (!connName || !person) continue;
+      const head = ci.head >= 0 ? c[ci.head] : '';
+      let fund = null;
+      for (const cand of headlineFirms(head)) { const f = fundByNorm.get(normOrg(cand)); if (f) { fund = f; break; } }
+      if (!fund) { skipped++; continue; }
+      const deg = ci.deg >= 0 ? c[ci.deg] : '', mut = ci.mut >= 0 ? c[ci.mut] : '';
+      const note = [deg && (deg + ' degree'), mut && (mut + ' mutual'), head].filter(Boolean).join(' · ');
+      edges.push({ connName, fundId: fund.id, person, title: headlineRole(head), url: ci.url >= 0 ? c[ci.url] : '', note });
+    }
+    if (!edges.length) {
+      finishImportModal(ov, 'Nothing matched', `<div class="am-msg">Read ${total} rows, but none of the headlines matched a fund in your list. Nothing was changed.</div>`);
+      return;
+    }
+    edges.forEach(e => {
+      const pid = e.fundId + '_' + slug(e.person);
+      if (!PERSON_BY_ID[pid]) PS(pid).added = { name: e.person, title: e.title };
+      if (e.url) PS(pid).li = e.url;
+      e.pid = pid;
+    });
+    rebuild();
+    let newConn = 0; const conns = new Set(), fundsHit = new Set();
+    edges.forEach(e => {
+      let conn = allConnectors().find(x => x.name.toLowerCase() === e.connName.toLowerCase());
+      if (!conn) { conn = { id: 'c_scan_' + slug(e.connName), name: e.connName, role: 'Super connector', rapport: 'From LinkedIn 2nd-degree scan.', li: '', matches: [], source: 'scan' }; state.extraConnectors.push(conn); newConn++; }
+      CS(conn.id).superc = true;   // these ARE super connectors - flag so the Super tab shows them
+      addMatch(conn, e.pid, e.note);
+      conns.add(conn.id); fundsHit.add(e.fundId);
+    });
+    mergeDuplicateConnectors();
+    save(); rebuild(); render();
+    state.synced = `${edges.length} intro paths · ${fundsHit.size} funds · ${conns.size} connectors`;
+    finishImportModal(ov, 'Import complete',
+      `<div class="imp-stat"><span>Rows read</span><span>${total}</span></div>` +
+      `<div class="imp-stat"><span>Intro paths added</span><span>${edges.length}</span></div>` +
+      `<div class="imp-stat"><span>Target funds reachable</span><span>${fundsHit.size}</span></div>` +
+      `<div class="imp-stat"><span>Super connectors</span><span>${conns.size} (${newConn} new)</span></div>` +
+      `<div class="imp-stat"><span>Rows skipped (not a target fund)</span><span>${skipped}</span></div>`);
+  }, 50);
 }
 
 /* Fund import */
