@@ -305,6 +305,8 @@
     .pill--grade-bplus  { background: #fef08a; color: #854d0e; }
     .pill--grade-b      { background: #fde68a; color: #92400e; }
     .pill--grade-c  { background: transparent; border-color: var(--border); color: var(--muted-foreground); }
+    /* Rubric estimate only - grade shown but grayed until AI-graded. */
+    .pill--grade-estimate { background: transparent; border: 1px dashed var(--border); color: var(--muted-foreground); opacity: 0.85; }
     .pill--type     { background: var(--secondary); color: var(--secondary-foreground); font-weight: 500; }
     .pill--sector   { background: transparent; border-color: var(--border); color: var(--text-secondary); font-weight: 500; }
     .pill--due, .pill--overdue { background: none; border: none; padding: 0; height: auto; border-radius: 0; font-size: 11px; font-weight: 400; color: var(--muted-foreground); }
@@ -1093,9 +1095,30 @@ function grade(f){
 function gradeClass(g){ return { 'A+':'aplus', 'A':'a', 'A-':'aminus', 'B+':'bplus', 'B':'b' }[g] || 'c'; }
 function gradePillHtml(f){
   if (!f.dims) return `<span class="pill pill--grade-c" title="Not graded against the pitch yet">Not graded</span>`;
-  const g = grade(f);
-  return `<span class="pill pill--grade-${gradeClass(g)}" title="Fit ${Math.round(score(f))}/100">${g} · ${Math.round(score(f))}</span>`;
+  const g = grade(f), s = Math.round(score(f));
+  // Grade+score are only shown in color once the fund is AI-graded. A rubric
+  // estimate (dims but no aiGraded) shows the number grayed, so at scale you
+  // can trust a colored badge = properly graded.
+  if (!FS(f.id).aiGraded) {
+    return `<span class="pill pill--grade-estimate" title="Rubric estimate only - not AI-graded yet. Run 'Grade the funds'.">${g} · ${s}</span>`;
+  }
+  return `<span class="pill pill--grade-${gradeClass(g)}" title="Fit ${s}/100 (AI-graded)">${g} · ${s}</span>`;
 }
+/* Crown a fund that's properly (AI) graded AND a strong fit (score >= 70). */
+function fundCrown(f){ return (f && FS(f.id).aiGraded && score(f) >= 70) ? '\u{1F451} ' : ''; }
+/* Crown a connector who can open a door to any crowned (strong-fit) fund. */
+function connReachesCrown(c){
+  const ids = new Set(c.matches || []);
+  const ov = state.connMatchExtra && state.connMatchExtra[c.id];
+  if (ov && ov.matches) ov.matches.forEach(id => ids.add(id));
+  for (const pid of ids) {
+    const p = PERSON_BY_ID[pid]; if (!p) continue;
+    const f = FUND_BY_ID[p.fundId];
+    if (f && FS(f.id).aiGraded && score(f) >= 70) return true;
+  }
+  return false;
+}
+function connCrown(c){ return connReachesCrown(c) ? '\u{1F451} ' : ''; }
 
 /* ── Default templates + round variables ── */
 const DEFAULT_TEMPLATES = [
@@ -2224,7 +2247,7 @@ function renderFundsTable(){
     return `<tr data-fundrow="${f.id}" class="${selected.has(f.id)?'selected':''} ${open?'expanded':''} ${fundArchiveView?'arch-dim':''} ${isCompetitor(f)?'competitor-dim':''}">
       <td><input type="checkbox" class="row-check" data-check="${f.id}" ${selected.has(f.id)?'checked':''}></td>
       <td class="fund-td"><div class="fund-cell">
-        <span class="fund-name">${esc(f.name)}${isCompetitor(f)?' <span class="pill--competitor" title="'+esc(f.competitorNote||'Backs a direct competitor')+'">COMPETITOR</span>':''}${introAvatarsHtml(f)}</span>
+        <span class="fund-name">${fundCrown(f)}${esc(f.name)}${isCompetitor(f)?' <span class="pill--competitor" title="'+esc(f.competitorNote||'Backs a direct competitor')+'">COMPETITOR</span>':''}${introAvatarsHtml(f)}</span>
         <div class="fund-subrow">
           ${f.site ? `<a class="fund-site" href="https://${esc(f.site)}" target="_blank" rel="noopener" data-noopen title="Open website">${esc(f.site)}</a>` : ''}
           <button type="button" class="fund-info" title="Quick look - the full fund read" onclick="event.stopPropagation();togglePeek('${f.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>
@@ -2404,7 +2427,7 @@ function connectorCardHtml(c){
     <div class="connector-card__top">
       <span class="partner-ava">${esc((c.name||'?').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase())}</span>
       <div style="min-width:0;flex:1">
-        <div class="connector-card__name" style="display:flex;align-items:center;gap:6px">${esc(connName(c))}
+        <div class="connector-card__name" style="display:flex;align-items:center;gap:6px">${connCrown(c)}${esc(connName(c))}
           <a class="li-link" href="${esc(c.li || ('https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(c.name)))}" target="_blank" rel="noopener" title="Open LinkedIn">${LI_ICON}</a>${reqCount ? `<span class="req-check" title="You've requested ${reqCount} intro${reqCount===1?'':'s'} from ${esc(firstName(connName(c)))}">✓</span>` : ''}</div>
         <div class="connector-card__role">${esc(c.role||'')}</div>
       </div>
@@ -2959,7 +2982,7 @@ function openFund(id){
   const ppl = PEOPLE.filter(p => p.fundId === id);
   closePeek();   // one or the other - a full drawer replaces the quick-look
   if ($('dHeadExtra')) $('dHeadExtra').innerHTML = '';
-  $('dTitle').textContent = f.name;
+  $('dTitle').textContent = fundCrown(f) + f.name;
   $('dMeta').innerHTML = `<span class="pill pill--type">${esc(f.type||'—')}</span> ${esc(f.region||'—')} · ${checkFmt(f)}${f.site ? ` · <a href="https://${esc(f.site)}" target="_blank" rel="noopener" style="color:#2563eb;font-weight:600">${esc(f.site)}</a>` : ''} · <button class="read-more" id="dEditSite" style="border:none;background:none;padding:0;font:inherit;text-decoration:underline;cursor:pointer;color:var(--muted-foreground)">${f.site ? 'Edit site' : 'Add website'}</button>`;
   const meetings = FS(id).meetings || [];
   $('drawerBody').innerHTML = `
@@ -3737,7 +3760,7 @@ function openConnector(id, preselect){
   const markReqBtnHtml = (elId, extraStyle) => allSelRequested
     ? `<button class="mini-btn req-done" id="${elId}" ${extraStyle} title="These funds are marked requested from ${esc(firstName(connName(c)))} - click again to re-mark any newly checked">✓ Requested</button>`
     : `<button class="mini-btn" id="${elId}" ${extraStyle} title="Mark the checked funds as intros you've requested from this connector">✅ Mark requested</button>`;
-  $('dTitle').textContent = connName(c);
+  $('dTitle').textContent = connCrown(c) + connName(c);
   if ($('dHeadExtra')) $('dHeadExtra').innerHTML = markReqBtnHtml('dHeadMarkReq', 'style="font-weight:600"');
   $('dMeta').innerHTML = `<span class="pill pill--type">Connector</span>${isSuper(c) ? ' <span class="pill" style="background:var(--red-bg);color:var(--red-text)">Super connector</span>' : ''} ${esc(c.role||'')}${c.li ? ` · <a href="${esc(c.li)}" target="_blank" rel="noopener" style="font-weight:600;color:#0a66c2">LinkedIn</a>` : ''} · <button class="read-more" id="dConnRename" style="border:none;background:none;padding:0;font:inherit;text-decoration:underline;cursor:pointer;color:var(--muted-foreground)">Edit name</button> · <button class="read-more" id="dConnArchive" style="border:none;background:none;padding:0;font:inherit;text-decoration:underline;cursor:pointer;color:var(--muted-foreground)">${CS(id).archived ? 'Restore' : 'Archive'}</button>`;
   setTimeout(() => { const ab = $('dConnArchive'); if (ab) ab.onclick = () => {
