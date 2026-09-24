@@ -330,6 +330,11 @@
     .req-line { font-size: 10.5px; font-weight: 600; color: var(--amber-text, #b45309); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .dq-reason-line { font-size: 10.5px; font-weight: 600; color: var(--destructive, #dc2626); margin-top: 2px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .dq-reason-line:hover { text-decoration: underline; }
+    /* "Why they passed" — Past-fund reason badge + free-text detail, shown in the Why column */
+    .why-passed { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .pass-badge { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .02em; padding: 1px 8px; border-radius: 9999px; background: var(--secondary); color: var(--foreground); cursor: pointer; white-space: nowrap; }
+    .pass-badge:hover { filter: brightness(0.96); text-decoration: underline; }
+    .pass-note { font-size: 11.5px; color: var(--muted-foreground); }
     .path-text .sub { color: var(--muted-foreground); font-weight: 400; font-size: 11.5px; }
     .path-text .link { text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
     .path-text.muted { color: var(--muted-foreground); font-weight: 400; }
@@ -750,9 +755,8 @@
         <button class="tab" data-tab="messaged">Messaged <span class="count" id="cntMessaged">0</span></button>
         <button class="tab" data-tab="booked">Booked <span class="count" id="cntBooked">0</span></button>
         <button class="tab" data-tab="pitching">Pitching <span class="count" id="cntPitching">0</span></button>
-        <button class="tab" data-tab="closed">Closed <span class="count" id="cntClosed">0</span></button>
+        <button class="tab" data-tab="closed">Past <span class="count" id="cntClosed">0</span></button>
         <button class="tab" data-tab="disqualified">Disqualified <span class="count" id="cntDisqualified">0</span></button>
-        <button class="tab" data-tab="followups">Follow-ups <span class="count" id="cntFollowups">0</span></button>
         <button class="tab" data-tab="future">Future <span class="count" id="cntFuture">0</span></button>
       </div>
     </div>
@@ -944,7 +948,7 @@ Dana Whitfield, Overline, worked together at Techstars,"></textarea>
     <button class="bulk-btn bulk-fund" data-bulkstage="messaged">→ Messaged</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="booked">→ Booked</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="pitching">→ Pitching</button>
-    <button class="bulk-btn bulk-fund" data-bulkstage="closed">→ Closed</button>
+    <button class="bulk-btn bulk-fund" data-bulkstage="closed">→ Past</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="disqualified">→ Disqualified</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="future">→ Future rounds</button>
     <button class="bulk-btn bulk-fund" id="bulkGrade" style="font-weight:600">✨ Grade selected</button>
@@ -1507,7 +1511,7 @@ const P_STATUS = {
 };
 const C_STATUS = { none:'Not asked', draft:'Ask drafted', asked:'Asked', agreed:'Agreed', declined:'Declined' };
 /* Fund pipeline stages — the core CRM flow. */
-const F_STAGES = { none:'Backlog', contacted:'\ud83d\udce8 Contacted', target:'\ud83c\udfaf Target', needintros:'\ud83e\udd1d Need intros', messaged:'\ud83d\udcac Messaged', booked:'\u2705 Booked', pitching:'\ud83c\udfa4 Pitching', closed:'\u274c Closed', disqualified:'\ud83d\udeab Disqualified', future:'\u23f3 Future' };
+const F_STAGES = { none:'Backlog', contacted:'\ud83d\udce8 Contacted', target:'\ud83c\udfaf Target', needintros:'\ud83e\udd1d Need intros', messaged:'\ud83d\udcac Messaged', booked:'\u2705 Booked', pitching:'\ud83c\udfa4 Pitching', closed:'\u{1F44B} Past', disqualified:'\ud83d\udeab Disqualified', future:'\u23f3 Future' };
 // 'todo' is a virtual tab = unassigned funds (stage none); it maps to stage 'none'.
 const STAGE_TABS = ['funds','todo','contacted','targets','needintros','messaged','booked','pitching','closed','disqualified','future'];
 const WARMTH = { hot:'\ud83d\udd25 Hot', warm:'\u2600\ufe0f Warm', cool:'\ud83d\udd35 Cool', cold:'\ud83e\udd76 Cold', na:'\u2014 Not set' };
@@ -1985,6 +1989,15 @@ async function onDdChange(ctx, v){
       });
       return;
     }
+    if (v === 'closed') {
+      // "Past" (they passed on us) always asks why
+      askPassReason([arg], () => {
+        render();
+        if (drawerRef && drawerRef.kind === 'fund' && drawerRef.id === arg) openFund(arg);
+        else if (drawerRef && drawerRef.kind === 'connector') openConnector(drawerRef.id);
+      });
+      return;
+    }
     const fs = FS(arg);
     const prevStage = fs.stage;
     fs.stage = v;
@@ -2145,9 +2158,8 @@ function render(){
   $('cntClosed').textContent = stageCount('closed');
   $('cntDisqualified').textContent = stageCount('disqualified');
   $('cntFuture').textContent = stageCount('future');
-  const cf = $('cntFollowups');
-  cf.textContent = allFollow;
-  cf.classList.toggle('hot', (dueP + dueC) > 0);
+  const cf = $('cntFollowups');   // tab removed - guard in case the element is gone
+  if (cf) { cf.textContent = allFollow; cf.classList.toggle('hot', (dueP + dueC) > 0); }
 
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === currentTab));
   $('tbPeople').classList.toggle('on', currentTab === 'people');
@@ -2257,7 +2269,9 @@ function renderFundsTable(){
       <td style="white-space:nowrap;font-weight:600">${checkFmt(f)}</td>
       <td>${fundPathCellHtml(f)}</td>
       <td class="hide-md"><span class="fund-sub">${esc(f.type||'—')} · ${esc(f.region||'—')}${(f.sectors||[]).length ? ' · ' + esc(f.sectors.slice(0,2).join(', ')) : ''}</span></td>
-      <td class="hide-md"><div class="why-cell" title="${esc(((f.looking||'') + ' ' + fundFitLine(f)).trim())}">${esc((firstSentence(f.looking) + ' ' + fundFitLine(f)).trim() || 'Add fund notes - they feed the fit read.')}</div></td>
+      <td class="hide-md">${fStage(f) === 'closed'
+        ? passReasonHtml(f)
+        : `<div class="why-cell" title="${esc(((f.looking||'') + ' ' + fundFitLine(f)).trim())}">${esc((firstSentence(f.looking) + ' ' + fundFitLine(f)).trim() || 'Add fund notes - they feed the fit read.')}</div>`}</td>
       <td class="hide-md">${sourceCellHtml(f)}</td>
       <td>${ddHtml({ ctx:'fstage:'+f.id, value:fStage(f), quiet:true, options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:v,cls:k==='none'?'st-backlog':''})) })}</td>
       <td><div style="display:flex;gap:6px;align-items:center;white-space:nowrap">
@@ -2275,7 +2289,7 @@ function renderFundsTable(){
             <div class="dd-head">What happened?</div>
             <button type="button" class="dd-item" data-rowact="reachedout:${f.id}">Reached out - message sent</button>
             <button type="button" class="dd-item" data-rowact="bookedq:${f.id}">Meeting booked</button>
-            <button type="button" class="dd-item" data-rowact="passedq:${f.id}">They passed - move to Closed</button>
+            <button type="button" class="dd-item" data-rowact="passedq:${f.id}">They passed - move to Past</button>
             <button type="button" class="dd-item" data-rowact="dqq:${f.id}">Not a fit - disqualify</button>
             <button type="button" class="dd-item" data-rowact="archiveq:${f.id}">Done - archive</button>
           </div>
@@ -4101,6 +4115,44 @@ function askDisqualifyReason(fids, done){
   document.addEventListener('keydown', function esc(e){ if (e.key === 'Escape') { document.removeEventListener('keydown', esc); finish(); } });
 }
 
+/* "Past" = they passed on us. Always asks for a reason (badge) and an optional
+   free-text detail (shown as "why they passed" in the Why column). Stores
+   passReason + passNote on the fund and moves it to the 'closed' (Past) stage. */
+function askPassReason(fids, done){
+  fids = (fids || []).filter(id => FUND_BY_ID[id]);
+  if (!fids.length) return;
+  const label = fids.length === 1 ? (FUND_BY_ID[fids[0]].name || 'this fund') : (fids.length + ' funds');
+  const reasons = ['Too early / stage', 'Not a fit / thesis', 'Check size', 'Timing', 'No response', 'Valuation', 'Other', 'No reason'];
+  const ov = document.createElement('div');
+  ov.className = 'dq-overlay';
+  ov.innerHTML = `<div class="dq-card">
+    <div class="dq-title">${esc(label)} passed - why?</div>
+    <div class="dq-btns">${reasons.map(r => `<button type="button" class="dq-btn${r==='No reason'?' dq-btn--muted':''}" data-pr="${esc(r)}">${esc(r)}</button>`).join('')}</div>
+  </div>`;
+  document.body.appendChild(ov);
+  const finish = () => { ov.remove(); if (done) done(); };
+  ov.addEventListener('click', async e => {
+    if (e.target === ov) return finish();   // click outside = cancel
+    const b = e.target.closest('[data-pr]');
+    if (!b) return;
+    let reason = b.dataset.pr, note = '';
+    if (reason === 'Other') { const t = await appPrompt('Why did they pass?', ''); if (t === null) return finish(); reason = t.trim() || 'Other'; }
+    else if (reason !== 'No reason') { const t = await appPrompt('Add detail - why they passed (optional):', ''); if (t === null) return finish(); note = t.trim(); }
+    const store = reason === 'No reason' ? '' : reason;
+    fids.forEach(id => { const fs = FS(id); fs.stage = 'closed'; fs.archived = false; if (store) fs.passReason = store; else delete fs.passReason; if (note) fs.passNote = note; else delete fs.passNote; });
+    save();
+    toast(`Marked ${label} as passed${store ? ' - ' + store : ''}.`);
+    finish();
+  });
+  document.addEventListener('keydown', function esc(e){ if (e.key === 'Escape') { document.removeEventListener('keydown', esc); finish(); } });
+}
+/* "Why they passed" cell content for a Past fund: reason badge (click to edit) + detail. */
+function passReasonHtml(f){
+  const fs = FS(f.id);
+  const badge = `<span class="pass-badge" data-passedit="${f.id}" title="Click to change why they passed">\u{1F44B} ${esc(fs.passReason || 'add reason')}</span>`;
+  return `<div class="why-passed">${badge}${fs.passNote ? `<span class="pass-note">${esc(fs.passNote)}</span>` : ''}</div>`;
+}
+
 /* In-app replacements for the native prompt()/confirm() dialogs - same
    look as the disqualify modal, promise-based so callers `await` them. */
 function appPrompt(message, defValue = '') {
@@ -4227,7 +4279,7 @@ document.addEventListener('click', async e => {
       toast(`Logged: reached out. ${n} ${n===1?'person':'people'} marked Direct sent.`);
     }
     if (act === 'bookedq') { FS(id).stage = 'booked'; save(); render(); toast('Logged: meeting booked \u2705'); }
-    if (act === 'passedq') { FS(id).stage = 'closed'; save(); render(); toast('Logged: they passed - moved to Closed.'); }
+    if (act === 'passedq') { askPassReason([id], render); }
     if (act === 'dqq') { askDisqualifyReason([id], render); }
     if (act === 'archiveq') {
       FS(id).archived = true;
@@ -4416,6 +4468,8 @@ $('tableBody').addEventListener('click', e => {
   if (connChip) { e.stopPropagation(); openConnector(connChip.dataset.openconn); return; }
   const dqEdit = e.target.closest('[data-dqedit]');
   if (dqEdit) { e.stopPropagation(); askDisqualifyReason([dqEdit.dataset.dqedit], render); return; }
+  const passEdit = e.target.closest('[data-passedit]');
+  if (passEdit) { e.stopPropagation(); askPassReason([passEdit.dataset.passedit], render); return; }
   const addRow = e.target.closest('[data-addperson]');
   if (addRow) { addPersonTo(addRow.dataset.addperson); return; }
   const fu = e.target.closest('[data-fu]');
@@ -4905,6 +4959,11 @@ $('bulkBar').addEventListener('click', e => {
   if (stage === 'disqualified') {
     const ids = [...selected].filter(id => FUND_BY_ID[id]);
     askDisqualifyReason(ids, () => { selected.clear(); render(); });
+    return;
+  }
+  if (stage === 'closed') {
+    const ids = [...selected].filter(id => FUND_BY_ID[id]);
+    askPassReason(ids, () => { selected.clear(); render(); });
     return;
   }
   let n = 0;
