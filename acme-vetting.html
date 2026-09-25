@@ -136,10 +136,10 @@
     .stage__foot { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--border-light); }
     .stage__note { font-size: 12px; color: var(--text-tertiary); font-weight: 500; max-width: 540px; line-height: 1.5; }
 
-    /* BOOSTER REQUEST CARD */
-    .booster { border: 1px solid var(--border); border-radius: 11px; overflow: hidden; }
-    .booster__bar { display: flex; align-items: center; gap: 9px; padding: 9px 13px; background: #F9FAFB; border-bottom: 1px solid var(--border); font-size: 11.5px; font-weight: 700; color: var(--text-secondary); }
-    .booster__bar .src { margin-left: auto; font-weight: 600; color: var(--text-tertiary); font-size: 11px; }
+    /* AD REQUEST CARD */
+    .adreq { border: 1px solid var(--border); border-radius: 11px; overflow: hidden; }
+    .adreq__bar { display: flex; align-items: center; gap: 9px; padding: 9px 13px; background: #F9FAFB; border-bottom: 1px solid var(--border); font-size: 11.5px; font-weight: 700; color: var(--text-secondary); }
+    .adreq__bar .src { margin-left: auto; font-weight: 600; color: var(--text-tertiary); font-size: 11px; }
     .kv { display: grid; grid-template-columns: 150px 1fr; gap: 0; }
     .kv > div { padding: 11px 14px; border-bottom: 1px solid var(--border-light); font-size: 13px; }
     .kv > div:nth-child(odd) { font-weight: 600; color: var(--text-tertiary); font-size: 12px; background: #FCFCFD; }
@@ -498,14 +498,14 @@
     .msh-foot__r { display: flex; align-items: center; gap: 10px; }
 
     /* ─── MESSAGES (operator) — ported from community-web messages UI ─── */
-    .msg { display: grid; grid-template-columns: 360px 1fr; gap: 18px; align-items: start; }
+    .msg { display: grid; grid-template-columns: 248px 1fr; gap: 18px; align-items: start; }
     .msg > * { min-width: 0; }
     .msg-pane { background: var(--white); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: 0 1px 2px rgba(16,19,35,.04); }
     .inbox2__head { padding: 18px 20px 14px; }
     .inbox2__title { font-size: 19px; font-weight: 700; letter-spacing: -.01em; }
     .inbox2__search { margin-top: 13px; display: flex; align-items: center; gap: 9px; background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; color: var(--text-tertiary); }
     .inbox2__search input { border: none; outline: none; background: none; font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text-primary); width: 100%; }
-    .conv { display: flex; gap: 11px; padding: 14px 18px; border-top: 1px solid var(--border-light); cursor: pointer; width: 100%; text-align: left; background: none; border-left: none; border-right: none; border-bottom: none; }
+    .conv { display: flex; gap: 11px; padding: 10px 16px; border-top: 1px solid var(--border-light); cursor: pointer; width: 100%; text-align: left; background: none; border-left: none; border-right: none; border-bottom: none; }
     .conv:hover { background: #FCFCFD; }
     .conv.on { background: var(--secondary-lite); }
     .conv__av { width: 36px; height: 36px; border-radius: 50%; background: #E4E6ED; color: var(--text-secondary); display: grid; place-items: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
@@ -697,31 +697,35 @@ Acme Network`
     const REQ_DATES = ["Jul 7 – 28","Jul 14 – Aug 4","Jul 1 – 28","Jul 7 – Aug 4","Jul 14 – 28"];
     const REQ_EPS = [8,8,6,8,4];
     const reqRev = (s)=> Math.round(s.cpm * s.dl * 8 / 1000);
-    function StageReceived({ onNext }){
+    function StageReceived({ onNext, primaryLabel, note, hideCta }){
       const totalReq = SHOWS.reduce((a,s)=>a+reqRev(s),0);
+      const [exp,setExp]=useState(false);
       return (
         <div className="card stage">
-          <div className="stage__head">
-            <div>
-              <div className="stage__h">Inbound request from the ad server</div>
-              <div className="stage__desc">The ad server mapped the show list to product names and pushed it to the vetting inbox. This is the start of the flow — the AE has already entered the deal upstream.</div>
-            </div>
+          <div className="stage__head" style={{marginBottom:"12px"}}>
+            <div className="stage__desc" style={{margin:0}}>Parsed from the ad server — the AE already entered the deal upstream. Nothing goes out until you approve.</div>
             <span className="ai-tag"><i></i>Parsed automatically</span>
           </div>
-          <div className="booster">
-            <div className="booster__bar">
+          <div className="adreq">
+            <div className="adreq__bar">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
               AdApproval intake · Thrive Cosmetics
               <span className="src">via the ad server → vetting inbox</span>
             </div>
             <div className="kv">
+              {exp && <React.Fragment>
               <div>Advertiser</div><div>Thrive Cosmetics <span style={{color:"var(--text-tertiary)",fontWeight:600}}>· clean beauty / cosmetics</span></div>
               <div>Campaign</div><div>July 2026 flight</div>
               <div>Agency / template</div><div>Oxford Road — Q3 Host-Read RFP <span className="chip" style={{marginLeft:6}}>Google Sheet</span></div>
               <div>Requested shows</div><div><b>15 shows</b> mapped by the ad server</div>
+              </React.Fragment>}
               <div>Additional asks</div><div><div className="chiplist"><span className="chip">Host read</span><span className="chip">Personal endorsement</span><span className="chip">Social add-on</span><span className="chip">Usage rights</span></div></div>
               <div>Due date</div><div style={{fontWeight:700}}>24 hours — EOD tomorrow</div>
             </div>
+            <button onClick={()=>setExp(v=>!v)} style={{border:"none",background:"none",padding:"12px 14px 4px",font:"inherit",fontSize:"12px",fontWeight:600,color:"var(--text-tertiary)",cursor:"pointer",display:"inline-flex",alignItems:"center",gap:"5px"}}>
+              {exp ? "Hide details" : "Advertiser, campaign, agency & shows"}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{transform:exp?"rotate(180deg)":"none"}}><path d="m6 9 6 6 6-6"/></svg>
+            </button>
           </div>
           <div className="recv-head">
             <div className="recv-label" style={{margin:0}}>Shows selected by the AE <span>· 15 requested</span></div>
@@ -740,25 +744,30 @@ Acme Network`
             ))}
           </div>
           <div className="stage__foot">
-            <div className="stage__note">Next, the system checks each requested show for category conflicts, July avails, and historical host preferences before anything goes out — so the AE gets feedback before the request is committed.</div>
-            <button className="btn btn--primary" onClick={onNext}>Run conflict + avails pre-check
+            <div className="stage__note">{note || "Next, the system checks each requested show for category conflicts, July avails, and historical host preferences before anything goes out — so the AE gets feedback before the request is committed."}</div>
+            {!hideCta && <button className="btn btn--primary" onClick={onNext}>{primaryLabel || "Run conflict + avails pre-check"}
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            </button>
+            </button>}
           </div>
         </div>
       );
     }
 
     /* ═══════════════ STAGE: PRECHECK ═══════════════ */
-    function StagePrecheck({ onNext }){
+    function StagePrecheck({ onNext, embed }){
       const clear = SHOWS.filter(s=>s.precheck==="clear");
       const conflict = SHOWS.filter(s=>s.precheck==="conflict");
       const sold = SHOWS.filter(s=>s.precheck==="sold");
       const soft = SHOWS.filter(s=>s.soft);
+      const [sel,setSel]=useState(()=>new Set(clear.map(s=>s.id)));
+      const toggle=(id)=>setSel(p=>{const n=new Set(p); n.has(id)?n.delete(id):n.add(id); return n;});
       const row = (s)=>{
         const cls = s.precheck==="conflict"?"conflict":s.precheck==="sold"?"sold":"";
+        const pickable = s.precheck==="clear";
+        const on = sel.has(s.id);
         return (
-          <div className={"pc-row "+cls} key={s.id}>
+          <div className={"pc-row "+cls} key={s.id} onClick={pickable?()=>toggle(s.id):undefined} style={pickable?{cursor:"pointer"}:undefined}>
+            {pickable && <span style={{width:"19px",height:"19px",borderRadius:"6px",border:"1.5px solid "+(on?"var(--primary)":"var(--border)"),background:on?"var(--primary)":"var(--white)",display:"grid",placeItems:"center",flexShrink:0}}>{on && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>}</span>}
             <div className="pc-thumb">{initials(s.name)}</div>
             <div className="pc-row__body">
               <div className="pc-row__name">{s.name}</div>
@@ -791,12 +800,12 @@ Acme Network`
           {[...conflict,...sold].map(row)}
           <div style={{fontSize:"11px",fontWeight:700,letterSpacing:".05em",textTransform:"uppercase",color:"var(--text-tertiary)",margin:"16px 0 9px"}}>Clear to vet (11)</div>
           {clear.map(row)}
-          <div className="stage__foot">
+          {!embed && <div className="stage__foot">
             <div className="stage__note"><b>Conflicts flag, they don't block.</b> {soft.length>0 && "The Wellness Hour historically declined color cosmetics — surfaced as a soft flag so you can still ask. "}The 4 filtered shows go back to the AE instantly so they're never pitched on a dead deal.</div>
             <button className="btn btn--primary" onClick={onNext}>Draft 11 vetting emails
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </button>
-          </div>
+          </div>}
         </div>
       );
     }
@@ -818,7 +827,7 @@ Quick note on what a yes means: vetting just confirms the host is open to the ca
 Reply all so the whole team's looped in. Thanks!
 Acme Network`;
 
-    function StageVetting({ onNext }){
+    function StageVetting({ onNext, embed }){
       const clear = SHOWS.filter(s=>s.precheck==="clear");
       const ids = clear.map(s=>s.id);
       const byId = (id)=>clear.find(s=>s.id===id);
@@ -887,12 +896,12 @@ Acme Network`;
                 ); })}
           </div>
 
-          <div className="stage__foot">
+          {!embed && <div className="stage__foot">
             <div className="stage__note"><b>{bulk.length} shared · {indiv.length} individual.</b> All {total} go out one-to-one with the <b>AdApproval:</b> prefix so replies thread back clean, and each send logs to the vetting history.</div>
             <button className="btn btn--primary" onClick={onNext} disabled={total===0}>Approve &amp; send {total}
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </button>
-          </div>
+          </div>}
         </div>
       );
     }
@@ -988,7 +997,7 @@ Acme Network`;
     }
 
     /* ═══════════════ STAGE: SHEET ═══════════════ */
-    function StageSheet({ onNext }){
+    function StageSheet({ onNext, embed }){
       // viable = yes + conditional + dailyedit (recovered follow-up → yes)
       const viableIds = ["honestly","mombrain","wellnesshour","realtalk","selfcare","hustle","unwind","afterhours","dailyedit"];
       const viable = viableIds.map(id=>SHOWS.find(s=>s.id===id));
@@ -1039,12 +1048,12 @@ Acme Network`;
             </div>
             <div className="gs-foot"><span>9 shows · {viable.reduce((a,s)=>a+s.units,0)} units · July flight</span><span>Total: {fmtUSD(total)}</span></div>
           </div>
-          <div className="stage__foot">
+          {!embed && <div className="stage__foot">
             <div className="stage__note"><b>Pricing keeps a human touch.</b> Rate card pre-fills every row; you can override any cell (a new-show deal, a loyalty rate) before it goes out. The conditional exclusion is already noted on The Wellness Hour.</div>
             <button className="btn btn--primary" onClick={onNext}>Approve &amp; return to AE
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </button>
-          </div>
+          </div>}
         </div>
       );
     }
@@ -1082,6 +1091,7 @@ Acme Network`;
     };
     const REQ_ORDER = ["thrive","liquiddeath","rocket","hellofresh"];
     const REQ_TIME = { thrive:"6h", liquiddeath:"1d", rocket:"2h", hellofresh:"now" };
+    const REQ_VET = { thrive:[11,15], liquiddeath:[13,22], rocket:[10,12], hellofresh:[0,18] };
     const STAGE_SUMMARY = {
       received: "Request received from the ad server",
       precheck: "Conflict & avails pre-check",
@@ -1101,12 +1111,111 @@ Acme Network`;
     const IcCheck = ({faint})=> <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={faint?{opacity:.5}:{}}><path d="M20 6 9 17l-5-5"/></svg>;
     const IcClock = ()=> <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>;
 
+    /* Green "done" check badge shown next to the request name once the sheet is returned */
+    const DoneBadge = ({size})=> <span title="Filled sheet returned to the AE" style={{display:"inline-grid",placeItems:"center",width:(size||20)+"px",height:(size||20)+"px",borderRadius:"50%",background:"var(--yes-bg)",border:"1px solid var(--yes-line)",color:"var(--yes-text)",flexShrink:0}}><svg width={(size||20)*0.62} height={(size||20)*0.62} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>;
+
+    /* ═══════════════ SENT LIST — status per show after vetting emails go out ═══════════════ */
+    // Realistic mix across the 11 cleared shows: 4 approved, 2 approved-with-conditions, 3 awaiting, 2 sent.
+    const VET_STATUS = {
+      honestly:"approved", mombrain:"approved", hustle:"approved", afterhours:"approved",
+      wellnesshour:"cond", selfcare:"cond",
+      realtalk:"await", unwind:"await", bookmarked:"await",
+      dailyedit:"sent", coffee:"sent",
+    };
+    const VET_COND = {
+      wellnesshour:["Category exclusivity — no competing beauty brand that week","Skincare line only — no color cosmetics on the read","Promo code required in the read"],
+      selfcare:["Category exclusivity — no competing beauty brand that week","Min 6-episode commitment","Promo code required in the read"],
+    };
+    const VET_SENT_TIME = ["2h ago","2h ago","1h ago","1h ago","54m ago","48m ago","32m ago","29m ago","17m ago","11m ago","6m ago"];
+    const STATUS_LABEL = { approved:"Approved", cond:"Approved with conditions", await:"Awaiting", sent:"Sent" };
+    const statusPill = (st)=>{
+      if(st==="approved") return <span className="verdict yes">Approved</span>;
+      if(st==="cond") return <span className="verdict cond">Approved with conditions</span>;
+      return <span className="verdict sent">{st==="await"?"Awaiting":"Sent"}</span>;
+    };
+
+    function SentList({ onSendRfp, done, onExec }){
+      const clear = SHOWS.filter(s=>s.precheck==="clear");
+      const [open,setOpen]=useState(null);
+      const n = { approved:0, cond:0, await:0, sent:0 };
+      clear.forEach(s=>n[VET_STATUS[s.id]]++);
+      return (
+        <React.Fragment>
+          <div className="card">
+            <div className="stage__head" style={{padding:"16px 20px 12px",margin:0,borderBottom:"1px solid var(--border-light)"}}>
+              <div>
+                <div className="stage__h">Vetting emails sent · {clear.length} shows</div>
+                <div className="stage__desc">One email per show, sent one-to-one. The agent watches each thread and logs replies as they land — {n.approved} approved, {n.cond} approved with conditions, {n.await+n.sent} still out.</div>
+              </div>
+              <span className="ai-tag"><i></i>Monitoring threads</span>
+            </div>
+            {clear.map((s,i)=>{ const st=VET_STATUS[s.id]; const isOpen=open===s.id; return (
+              <div key={s.id} style={{borderBottom:"1px solid var(--border-light)"}}>
+                <button onClick={()=>setOpen(o=>o===s.id?null:s.id)} style={{width:"100%",display:"flex",alignItems:"center",gap:"13px",padding:"13px 20px",background:isOpen?"var(--secondary-lite)":"none",border:"none",font:"inherit",textAlign:"left",cursor:"pointer"}}>
+                  <div className="pc-thumb">{initials(s.name)}</div>
+                  <div style={{flex:"1.3",minWidth:0}}>
+                    <div style={{fontSize:"13.5px",fontWeight:700,letterSpacing:"-.01em"}}>{s.name}</div>
+                    <div style={{fontSize:"11.5px",color:"var(--text-tertiary)",fontWeight:600}}>{s.cat}</div>
+                  </div>
+                  <div style={{flex:"1",minWidth:0}}>
+                    <div style={{fontSize:"12px",fontWeight:600,color:"var(--text-secondary)"}}>{s.contact}</div>
+                    <div style={{fontSize:"11px",color:"var(--text-tertiary)",fontWeight:600,overflow:"hidden",textOverflow:"ellipsis"}}>{s.email}</div>
+                  </div>
+                  <div style={{fontSize:"11.5px",color:"var(--text-tertiary)",fontWeight:600,width:"64px",textAlign:"right",flexShrink:0}}>{VET_SENT_TIME[i]}</div>
+                  <div style={{width:"172px",textAlign:"right",flexShrink:0}}>{statusPill(st)}</div>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,transition:"transform .18s",transform:isOpen?"rotate(180deg)":"none"}}><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                {isOpen && <div style={{padding:"2px 22px 16px 66px"}}>
+                  {st==="approved" && <div style={{display:"inline-flex",alignItems:"center",gap:"8px",fontSize:"12.5px",fontWeight:600,color:"var(--yes-text)",background:"var(--yes-bg)",border:"1px solid var(--yes-line)",borderRadius:"9px",padding:"9px 12px"}}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    Cleared — no conditions. Host confirmed read, PE, and social.
+                  </div>}
+                  {st==="cond" && <div>
+                    <div style={{fontSize:"11px",fontWeight:700,letterSpacing:".05em",textTransform:"uppercase",color:"var(--text-tertiary)",margin:"4px 0 8px"}}>Conditions on the yes</div>
+                    {VET_COND[s.id].map((c,ci)=>(
+                      <div key={ci} className="flagline" style={{marginTop:ci?"7px":0}}>
+                        <span>⚑</span><span>{c}</span>
+                      </div>
+                    ))}
+                  </div>}
+                  {(st==="await"||st==="sent") && <div style={{display:"inline-flex",alignItems:"center",gap:"8px",fontSize:"12.5px",fontWeight:600,color:"var(--text-secondary)",background:"var(--white)",border:"1px dashed var(--border)",borderRadius:"9px",padding:"9px 12px"}}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                    Waiting on reply · reminder auto-drafts at 24h
+                  </div>}
+                </div>}
+              </div>
+            ); })}
+          </div>
+          {done ? (
+            <div className="card" style={{marginTop:"14px",padding:"16px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"14px"}}>
+              <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
+                <DoneBadge size={30} />
+                <div>
+                  <div style={{fontSize:"14px",fontWeight:700}}>Filled sheet returned to the AE</div>
+                  <div style={{fontSize:"12px",color:"var(--text-tertiary)",fontWeight:500,marginTop:"2px"}}>Linked back into the ad server deal — 9 vetted-and-priced shows. Clock stopped.</div>
+                </div>
+              </div>
+              <button className="btn btn--outline" onClick={onExec}>See the pipeline view
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </button>
+            </div>
+          ) : (
+            <div style={{marginTop:"16px"}}>
+              <div className="stage__note" style={{maxWidth:"640px"}}>Approvals are in for enough shows to build the sheet. Price the vetted rows on the agency template and return it to the AE — the rest stay tracked as replies land. Use <b>Send RFP</b> up top when you're ready.</div>
+            </div>
+          )}
+        </React.Fragment>
+      );
+    }
+
     /* ═══════════════ OPERATOR VIEW — clean Messages two-pane (no red) ═══════════════ */
     function OperatorView({ stages, setStages, onExec }){
       const [sel,setSel]=useState("thrive");
       const [q,setQ]=useState("");
-      const advance = ()=> setStages(s=>({...s,[sel]:Math.min(s[sel]+1,6)}));
-      const reset = ()=> setStages(s=>({...s,[sel]:0}));
+      // Thrive's new two-action flow: intake → sent-list → done (independent of the old stage stepper)
+      const [thriveStep,setThriveStep]=useState("intake");
+      const thriveDone = thriveStep==="done";
+      const thriveLabel = thriveStep==="intake" ? "To vet" : thriveStep==="sent" ? "Vetting sent" : "Returned";
       const list = REQ_ORDER.filter(id=> !q.trim() || REQ_META[id].adv.toLowerCase().includes(q.trim().toLowerCase()));
       return (
         <div className="msg">
@@ -1119,57 +1228,123 @@ Acme Network`;
               </div>
             </div>
             <div>
-              {list.map(id=>{ const meta=REQ_META[id]; return (
+              {list.map(id=>{ const meta=REQ_META[id]; const isThrive=id==="thrive"; const stg=isThrive?thriveLabel:STEP_SHORT[STAGES[stages[id]].key]; const vt=REQ_VET[id]; const done=vt[0]===vt[1] && vt[1]>0; const pill={display:"inline-flex",alignItems:"center",gap:"4px",fontSize:"10.5px",fontWeight:500,padding:"3px 8px",borderRadius:"999px",background:"var(--secondary-lite)",color:"var(--text-secondary)",whiteSpace:"nowrap"}; return (
                 <button key={id} className={"conv"+(sel===id?" on":"")} onClick={()=>setSel(id)}>
-                  <div className="conv__av">{initials(meta.adv)}</div>
                   <div className="conv__body">
-                    <div className="conv__top"><div className="conv__name">{meta.adv}</div><div className="conv__time">{REQ_TIME[id]}</div></div>
-                    <div className="conv__prev">{REQ_PREVIEW[id]}</div>
+                    <div className="conv__top"><div className="conv__name" style={{display:"flex",alignItems:"center",gap:"7px"}}>{meta.adv}{isThrive && thriveDone && <DoneBadge size={18} />}</div></div>
+                    <div style={{display:"flex",flexWrap:"wrap",gap:"6px",marginTop:"3px"}}>
+                      <span style={pill}>{stg}</span>
+                      <span style={pill}>{REQ_TIME[id]}</span>
+                      <span style={{...pill, background:done?"var(--yes-bg)":"var(--secondary-lite)", color:done?"var(--yes-text)":"var(--text-secondary)"}}>{vt[0]}/{vt[1]}</span>
+                    </div>
                   </div>
                 </button>
               ); })}
             </div>
           </div>
           <div className="thread">
-            <ThreadPanel sel={sel} idx={stages[sel]} onNext={advance} onReset={reset} onExec={onExec} onJump={(i)=>setStages(s=>({...s,[sel]:i}))} />
+            <ThreadPanel sel={sel} onExec={onExec} thriveStep={thriveStep} setThriveStep={setThriveStep} />
           </div>
         </div>
       );
     }
 
-    function ThreadPanel({ sel, idx, onNext, onReset, onExec, onJump }){
-      const meta = REQ_META[sel], key = STAGES[idx].key, pct = Math.round((idx+1)/7*100);
-      const canNav = sel==="thrive";
+    function ThreadPanel({ sel, onExec, thriveStep, setThriveStep }){
+      const meta = REQ_META[sel];
+      const [vetOpen,setVetOpen]=useState(false);   // right drawer: pre-check + vetting emails (~480px)
+      const [rfpOpen,setRfpOpen]=useState(false);   // wide right drawer: return the filled RFP (~680px)
+      const [tpl,setTpl]=useState("Oxford Road — Q3 Host-Read RFP");
+      const done = thriveStep==="done";
       return (
         <React.Fragment>
           <div className="thread__head">
             <div className="thread__av">{initials(meta.adv)}</div>
-            <div><div className="thread__title">{meta.adv}</div><div className="thread__sub">{meta.sub}</div></div>
-          </div>
-          <div className="scard" style={{padding:"18px 22px 14px"}}>
-            <div className="hstep">
-              {STAGES.map((st,i)=>{ const state = i<idx?"done": i===idx?"cur":"future"; return (
-                <React.Fragment key={st.key}>
-                  {i>0 && <div className={"hstep__bar"+(i<=idx?" fill":"")}></div>}
-                  <button className={"hstep__item "+state+(canNav?" nav":"")} onClick={()=> canNav && onJump(i)}>
-                    <div className="hstep__dot">{state==="done" ? <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg> : i+1}</div>
-                    <div className="hstep__label">{STEP_SHORT[st.key]}</div>
-                  </button>
-                </React.Fragment>
-              ); })}
+            <div>
+              <div className="thread__title" style={{display:"flex",alignItems:"center",gap:"10px"}}>{meta.adv}{sel==="thrive" && done && <DoneBadge size={26} />}</div>
+              <div className="thread__sub">{meta.sub}</div>
             </div>
+            {sel==="thrive" && !done &&
+              <button className="btn btn--primary" style={{marginLeft:"auto",flexShrink:0,alignSelf:"center"}} onClick={()=> thriveStep==="intake" ? setVetOpen(true) : setRfpOpen(true)}>
+                {thriveStep==="intake" ? "Vet shows" : "Send RFP"}
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </button>}
           </div>
           {sel==="thrive" ? <React.Fragment>
-            {key==="received" && <StageReceived onNext={onNext} />}
-            {key==="precheck" && <StagePrecheck onNext={onNext} />}
-            {key==="drafted" && <StageVetting onNext={onNext} />}
-            {key==="sent" && <StageSent onNext={onNext} />}
-            {key==="replies" && <StageReplies onNext={onNext} />}
-            {key==="sheet" && <StageSheet onNext={onNext} />}
-            {key==="returned" && <StageReturned onReset={onReset} onExec={onExec} />}
+            {thriveStep==="intake"
+              ? <StageReceived hideCta onNext={()=>setVetOpen(true)} primaryLabel="Vet shows" note="Vet the 15 requested shows for the July flight. The agent pre-checks category conflicts and avails, then sends one vetting email per cleared show. Nothing goes out until you approve." />
+              : <SentList onSendRfp={()=>setRfpOpen(true)} done={done} onExec={onExec} />}
+
+            {/* ─── Drawer 1: Vet shows (pre-check + vetting emails) ─── */}
+            <div className={"rd-overlay"+(vetOpen?" open":"")} onClick={()=>setVetOpen(false)}></div>
+            <div className={"rdrawer"+(vetOpen?" open":"")} style={{width:"580px",minWidth:"580px",maxWidth:"94vw"}}>
+              <div className="rd-head">
+                <button className="rd-close" onClick={()=>setVetOpen(false)}>×</button>
+                <div className="rd-head__top">
+                  <div>
+                    <div className="rd-eyebrow">Vet shows · Thrive Cosmetics</div>
+                    <div className="rd-title">Pre-check & vetting emails</div>
+                    <div className="rd-subtitle">Conflicts and July avails, then one email per cleared show.</div>
+                  </div>
+                </div>
+              </div>
+              <div className="rd-body">
+                <div style={{fontSize:"11px",fontWeight:700,letterSpacing:".05em",textTransform:"uppercase",color:"var(--text-tertiary)",margin:"0 0 10px"}}>1 · Pre-check</div>
+                <StagePrecheck embed />
+                <div style={{fontSize:"11px",fontWeight:700,letterSpacing:".05em",textTransform:"uppercase",color:"var(--text-tertiary)",margin:"22px 0 10px"}}>2 · Vetting emails</div>
+                <StageVetting embed />
+              </div>
+              <div style={{borderTop:"1px solid var(--border)",background:"var(--white)",padding:"14px 26px",display:"flex",justifyContent:"flex-end"}}>
+                <button className="btn btn--primary" onClick={()=>{ setVetOpen(false); setThriveStep("sent"); }}>Send vetting emails
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </button>
+              </div>
+            </div>
+
+            {/* ─── Drawer 2: Send RFP (upload / template + filled sheet) ─── */}
+            <div className={"rd-overlay"+(rfpOpen?" open":"")} onClick={()=>setRfpOpen(false)}></div>
+            <div className={"rdrawer"+(rfpOpen?" open":"")} style={{width:"680px",minWidth:"680px",maxWidth:"94vw"}}>
+              <div className="rd-head">
+                <button className="rd-close" onClick={()=>setRfpOpen(false)}>×</button>
+                <div className="rd-head__top">
+                  <div>
+                    <div className="rd-eyebrow">Return to AE · Thrive Cosmetics</div>
+                    <div className="rd-title">Return the filled RFP</div>
+                    <div className="rd-subtitle">Drop the agency's formatted sheet or pick a template, then send the priced rows back.</div>
+                  </div>
+                </div>
+              </div>
+              <div className="rd-body">
+                <div style={{display:"flex",gap:"14px",flexWrap:"wrap",marginBottom:"22px"}}>
+                  <div style={{flex:"1 1 300px"}}>
+                    <div style={{fontSize:"12.5px",fontWeight:700,marginBottom:"8px"}}>Upload the formatted sheet</div>
+                    <div className="dropzone" style={{padding:"26px 20px"}}>
+                      <div className="dz-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 5v12"/></svg></div>
+                      <div style={{fontSize:"13px",fontWeight:700}}>Drop the formatted sheet</div>
+                      <div style={{fontSize:"11.5px",color:"var(--text-tertiary)",fontWeight:600,marginTop:"4px"}}>Excel or CSV — any layout the agency sent</div>
+                    </div>
+                  </div>
+                  <div style={{flex:"1 1 240px"}}>
+                    <div style={{fontSize:"12.5px",fontWeight:700,marginBottom:"8px"}}>Or choose a template</div>
+                    <select value={tpl} onChange={e=>setTpl(e.target.value)} style={{width:"100%",border:"1px solid var(--border)",borderRadius:"11px",padding:"12px 13px",font:"inherit",fontSize:"13px",fontWeight:600,color:"var(--text-primary)",background:"var(--white)"}}>
+                      <option>Oxford Road — Q3 Host-Read RFP</option>
+                      <option>AdResults — Standard</option>
+                      <option>Adopter — Host-Read</option>
+                    </select>
+                    <div style={{fontSize:"11.5px",color:"var(--text-tertiary)",fontWeight:500,marginTop:"9px",lineHeight:1.5}}>The agent fills the chosen layout from your vetted show data and rate card.</div>
+                  </div>
+                </div>
+                <div style={{fontSize:"11px",fontWeight:700,letterSpacing:".05em",textTransform:"uppercase",color:"var(--text-tertiary)",margin:"0 0 10px"}}>RFP fields · priced & vetted rows</div>
+                <StageSheet embed />
+              </div>
+              <div style={{borderTop:"1px solid var(--border)",background:"var(--white)",padding:"14px 26px",display:"flex",justifyContent:"flex-end"}}>
+                <button className="btn btn--primary" onClick={()=>{ setRfpOpen(false); setThriveStep("done"); }}>Return filled sheet
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </button>
+              </div>
+            </div>
           </React.Fragment> : (
             <div className="scard">
-              <div className="scard__h">{STAGES[idx].label}</div>
+              <div className="scard__h">{REQ_META[sel].adv}</div>
               <div className="stage__note" style={{marginTop:"8px",fontSize:"13px",lineHeight:1.6}}>{REQ_PREVIEW[sel]} The full interactive workflow is wired on <b>Thrive Cosmetics</b> — open that one to walk every step.</div>
             </div>
           )}
@@ -1803,21 +1978,14 @@ Acme Network`;
       const addTemplate=(t)=>setTemplates(ts=> ts.find(x=>x.id===t.id)? ts : [...ts, t]);
       return (
         <div className="wrap">
-          <div className="topbar">
+          <div className="topbar" style={{justifyContent:"flex-start",gap:"22px"}}>
             <div className="brand">
               <div style={{display:"flex",flexDirection:"column",gap:"2px"}}>
                 <div style={{fontSize:"19px",fontWeight:700,letterSpacing:"-.03em",color:"var(--text-primary)"}}>Vetting Agent</div>
                 <div style={{fontSize:"12.5px",fontWeight:500,color:"var(--text-tertiary)"}}>RFP intake → priced media plan</div>
               </div>
             </div>
-            <div className="topbar__right">
-              <div className="date-pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>July 2026 cycle</div>
-              <button className="sf-btn" title="Synced with your CRM"><span className="dot"></span>CRM connected</button>
-              <div className="avatar">CP</div>
-            </div>
-          </div>
-
-          <div className="tabs">
+            <div className="tabs" style={{margin:0}}>
             <button className={"tab"+(tab==="operator"?" active":"")} onClick={()=>setTab("operator")}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
               Operator
@@ -1828,12 +1996,14 @@ Acme Network`;
             </button>
             <button className={"tab"+(tab==="shows"?" active":"")} onClick={()=>setTab("shows")}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></svg>
-              Shows <small>· source data</small>
+              Shows
             </button>
             <button className={"tab"+(tab==="templates"?" active":"")} onClick={()=>setTab("templates")}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
               Forms <small>· {templates.length}</small>
             </button>
+            </div>
+            <div className="avatar" style={{marginLeft:"auto"}}>CP</div>
           </div>
 
           {tab==="operator" && <OperatorView stages={stages} setStages={setStages} onExec={()=>setTab("exec")} />}

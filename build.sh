@@ -12,11 +12,11 @@ node scripts/scan-secrets.mjs
 mkdir -p dist dist/data dist/api dist/cutouts
 
 cp *.html dist/
-# NDA: never publish the vetting demo to the live site. The Acme OS shell
-# iframes acme-vetting.html, so ship a clean placeholder in its place instead
-# of a dead link. Real vetting demo source stays local-only.
+# The Acme OS vetting agent (acme-vetting.html) ships live. It is rebranded to
+# Acme Network, scrubbed of client identifiers, AND gated to SpotsNow accounts
+# only (Google SSO team tier in middleware.js) - so it is never reachable by the
+# public. The old raw source (vetting-demo.html) is never published.
 rm -f dist/vetting-demo.html
-cp acme-vetting-locked.html dist/acme-vetting.html
 # Pulled offline: Magellan pixel-setup flow (tracking-pixel pages). Keep source, never publish.
 rm -f dist/pixel-setup.html dist/submit-creative.html
 # NDA / scratch: raw un-rebranded module sources and one-off scratch pages must
