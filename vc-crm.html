@@ -3390,6 +3390,21 @@ function cleanupAutoIntroFunds(cid){
   if (removed) rebuild();
   return removed;
 }
+/* Reset a connector to a clean slate: drops their uploaded sheet, all matched
+   funds, and any unclassified funds their sheet auto-created. Funds you've
+   already staged/classified are kept (cleanupAutoIntroFunds only removes the
+   untouched ones). Use before re-uploading a corrected sheet. */
+function clearConnectorMatches(cid){
+  const c = connectorById(cid); if (!c) return;
+  cleanupAutoIntroFunds(cid);
+  delete state.introLists[cid];
+  if (Array.isArray(c.matches)) c.matches = [];
+  if (c.matchNotes) c.matchNotes = {};
+  delete state.connMatchExtra[cid];
+  delete state.hiddenMatches[cid];
+  save(); rebuild(); render(); openConnector(cid);
+  toast(`Cleared ${connName(c)}'s sheet and matches - re-upload a clean sheet when ready.`);
+}
 function importIntroList(cid, text){
   const rows = parseIntroSheet(text);
   if (!rows.length) { toast('Could not read the sheet. Expected columns like: Name, Firm, Title, Email, LinkedIn, Notes.'); return; }
@@ -3815,7 +3830,10 @@ function openConnector(id, preselect){
     : `<button class="mini-btn" id="${elId}" ${extraStyle} title="Mark the checked funds as intros you've requested from this connector">✅ Mark requested</button>`;
   $('dTitle').textContent = connName(c) + connCrown(c);
   if ($('dHeadExtra')) $('dHeadExtra').innerHTML = markReqBtnHtml('dHeadMarkReq', 'style="font-weight:600"');
-  $('dMeta').innerHTML = `<span class="pill pill--type">Connector</span>${isSuper(c) ? ' <span class="pill" style="background:var(--red-bg);color:var(--red-text)">Super connector</span>' : ''} ${esc(c.role||'')}${c.li ? ` · <a href="${esc(c.li)}" target="_blank" rel="noopener" style="font-weight:600;color:#0a66c2">LinkedIn</a>` : ''} · <button class="read-more" id="dConnRename" style="border:none;background:none;padding:0;font:inherit;text-decoration:underline;cursor:pointer;color:var(--muted-foreground)">Edit name</button> · <button class="read-more" id="dConnArchive" style="border:none;background:none;padding:0;font:inherit;text-decoration:underline;cursor:pointer;color:var(--muted-foreground)">${CS(id).archived ? 'Restore' : 'Archive'}</button>`;
+  $('dMeta').innerHTML = `<span class="pill pill--type">Connector</span>${isSuper(c) ? ' <span class="pill" style="background:var(--red-bg);color:var(--red-text)">Super connector</span>' : ''} ${esc(c.role||'')}${c.li ? ` · <a href="${esc(c.li)}" target="_blank" rel="noopener" style="font-weight:600;color:#0a66c2">LinkedIn</a>` : ''} · <button class="read-more" id="dConnRename" style="border:none;background:none;padding:0;font:inherit;text-decoration:underline;cursor:pointer;color:var(--muted-foreground)">Edit name</button> · <button class="read-more" id="dConnArchive" style="border:none;background:none;padding:0;font:inherit;text-decoration:underline;cursor:pointer;color:var(--muted-foreground)">${CS(id).archived ? 'Restore' : 'Archive'}</button> · <button class="read-more" id="dConnClear" style="border:none;background:none;padding:0;font:inherit;text-decoration:underline;cursor:pointer;color:var(--red-text,#dc2626)">Clear all</button>`;
+  setTimeout(() => { const cb = $('dConnClear'); if (cb) cb.onclick = async () => {
+    if (await appConfirm(`Clear everything for ${connName(c)}? Removes their uploaded sheet and all their matched funds. Funds you've already staged/classified are kept.`, { okLabel: 'Clear all', danger: true })) clearConnectorMatches(id);
+  }; }, 0);
   setTimeout(() => { const ab = $('dConnArchive'); if (ab) ab.onclick = () => {
     const st2 = CS(id);
     st2.archived = !st2.archived;
