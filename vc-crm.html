@@ -352,7 +352,7 @@
     tr.competitor-dim td.fund-td .fund-site { color: var(--muted-foreground); }
     .pill--competitor { display: inline-block; background: var(--destructive); color: #fff;
       font-size: 10px; font-weight: 700; letter-spacing: .05em; padding: 2px 8px;
-      border-radius: 9999px; vertical-align: 1px; }
+      border-radius: 9999px; vertical-align: 1px; cursor: pointer; }
     /* connector faces on fund rows - intro in motion */
     .intro-avas { display: inline-flex; align-items: center; margin-left: 8px; vertical-align: middle; }
     .intro-ava { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--background);
@@ -1426,6 +1426,15 @@ function connName(c){ return CS(c.id).customName || c.name; }
 /* Competitor blacklist: funds backing direct competitors (e.g. Agentio's cap
    table). Data can preset it; the drawer toggle (state) always wins. */
 function isCompetitor(f){ const fs = FS(f.id); return fs.competitor !== undefined ? !!fs.competitor : !!f.competitor; }
+/* The named competitor a fund backs (persisted on fs, falls back to seed). */
+function competitorName(f){ return (FS(f.id).competitorNote || f.competitorNote || '').trim(); }
+/* Competitor badge - always shows WHO they back (or prompts to name them), and
+   is clickable to set/change it. A competitor claim must be substantiated. */
+function competitorBadge(f){
+  if (!isCompetitor(f)) return '';
+  const n = competitorName(f);
+  return ` <span class="pill--competitor" data-compedit="${f.id}" title="${n ? 'Backs ' + esc(n) + ' - click to change' : 'Click to name the competitor they back'}">COMPETITOR${n ? ' · ' + esc(n) : ' · name?'}</span>`;
+}
 // "Parked" stages: a fund here is done being actively chased, so in a connector's
 // doors list it grays out and sinks to the bottom everywhere (a record you keep,
 // never something to think about) - whether it was disqualified, closed, or
@@ -2278,7 +2287,7 @@ function renderFundsTable(){
     return `<tr data-fundrow="${f.id}" class="${selected.has(f.id)?'selected':''} ${open?'expanded':''} ${(fundArchiveView || ['closed','disqualified'].includes(fStage(f)))?'arch-dim':''} ${isCompetitor(f)?'competitor-dim':''}">
       <td><input type="checkbox" class="row-check" data-check="${f.id}" ${selected.has(f.id)?'checked':''}></td>
       <td class="fund-td"><div class="fund-cell">
-        <span class="fund-name">${esc(f.name)}${fundCrown(f)}${isCompetitor(f)?' <span class="pill--competitor" title="'+esc(f.competitorNote||'Backs a direct competitor')+'">COMPETITOR</span>':''}${introAvatarsHtml(f)}</span>
+        <span class="fund-name">${esc(f.name)}${fundCrown(f)}${competitorBadge(f)}${introAvatarsHtml(f)}</span>
         <div class="fund-subrow">
           ${f.site ? `<a class="fund-site" href="https://${esc(f.site)}" target="_blank" rel="noopener" data-noopen title="Open website">${esc(f.site)}</a>` : ''}
           <button type="button" class="fund-info" title="Quick look - the full fund read" onclick="event.stopPropagation();togglePeek('${f.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>
@@ -3223,7 +3232,7 @@ function togglePeek(fid){
   el.innerHTML = `
     <div style="display:flex;align-items:flex-start;gap:10px">
       <div style="flex:1;min-width:0">
-        <div style="font-size:17px;font-weight:700;letter-spacing:-.02em"><button class="peek-title" onclick="peekGoogle('${f.id}')" title="Click to copy the name and open a Google search - grab their website fast">${esc(f.name)}</button>${isCompetitor(f)?' <span class="pill--competitor">COMPETITOR</span>':''}</div>
+        <div style="font-size:17px;font-weight:700;letter-spacing:-.02em"><button class="peek-title" onclick="peekGoogle('${f.id}')" title="Click to copy the name and open a Google search - grab their website fast">${esc(f.name)}</button>${competitorBadge(f)}</div>
         <div style="font-size:12px;color:var(--muted-foreground);margin-top:2px">${esc(f.type||'—')} · ${esc(f.region||'—')} · ${checkFmt(f)} · <span id="peekSiteWrap">${f.site?'<a href="https://'+esc(f.site)+'" target="_blank" rel="noopener" style="color:#2563eb">'+esc(f.site)+'</a> <button class="peek-edit" onclick="peekEditSite(event,\''+f.id+'\')" title="Wrong URL? Click to fix and re-grade">edit</button>':'<button class="peek-edit" onclick="peekEditSite(event,\''+f.id+'\')">+ add website</button>'}</span></div>
       </div>
       <button class="x" onclick="closePeek()">✕</button>
@@ -4164,7 +4173,13 @@ function askDisqualifyReason(fids, done){
     let reason = b.dataset.dqr;
     if (reason === 'Other') { const t = await appPrompt('Disqualify reason:', ''); if (t === null) return finish(); reason = t.trim() || 'Other'; }
     const store = reason === 'No reason' ? '' : reason;
-    fids.forEach(id => { const fs = FS(id); fs.stage = 'disqualified'; fs.archived = false; if (store) fs.archiveReason = store; else delete fs.archiveReason; if (reason === 'Competitor') fs.competitor = true; });
+    let compName = '';
+    if (reason === 'Competitor') {
+      const t = await appPrompt('Which competitor do they back? (name it - a competitor tag needs a reason)', '');
+      if (t === null) return finish();
+      compName = t.trim();
+    }
+    fids.forEach(id => { const fs = FS(id); fs.stage = 'disqualified'; fs.archived = false; if (store) fs.archiveReason = store; else delete fs.archiveReason; if (reason === 'Competitor') { fs.competitor = true; if (compName) fs.competitorNote = compName; else delete fs.competitorNote; } });
     save();
     toast(`Disqualified ${label}${store ? ' - ' + store : ''}.`);
     finish();
@@ -4320,7 +4335,8 @@ document.addEventListener('click', async e => {
     if (act === 'compflag') {
       const fs = FS(id), on = !isCompetitor(FUND_BY_ID[id]);
       fs.competitor = on;
-      if (on) { const n = await appPrompt('Competitor they back (optional - shows on the tag):', FUND_BY_ID[id].competitorNote || ''); if (n && n.trim()) FUND_BY_ID[id].competitorNote = n.trim(); }
+      if (on) { const n = await appPrompt('Which competitor do they back? (name it)', competitorName(FUND_BY_ID[id])); if (n && n.trim()) fs.competitorNote = n.trim(); }
+      else delete fs.competitorNote;
       save(); render();
       toast(on ? 'Tagged competitive - grayed out with a COMPETITOR tag.' : 'Competitive tag cleared.');
     }
@@ -4527,6 +4543,19 @@ $('tableBody').addEventListener('click', e => {
   if (dqEdit) { e.stopPropagation(); askDisqualifyReason([dqEdit.dataset.dqedit], render); return; }
   const passEdit = e.target.closest('[data-passedit]');
   if (passEdit) { e.stopPropagation(); askPassReason([passEdit.dataset.passedit], render); return; }
+  const compEdit = e.target.closest('[data-compedit]');
+  if (compEdit) {
+    e.stopPropagation();
+    const id = compEdit.dataset.compedit;
+    appPrompt('Which competitor do they back? (clear to drop the claim)', competitorName(FUND_BY_ID[id])).then(n => {
+      if (n === null) return;
+      const fs = FS(id);
+      if (n.trim()) { fs.competitor = true; fs.competitorNote = n.trim(); }
+      else { delete fs.competitorNote; }   // no name = no substantiated claim text (tag stays but reads "name?")
+      save(); render();
+    });
+    return;
+  }
   const addRow = e.target.closest('[data-addperson]');
   if (addRow) { addPersonTo(addRow.dataset.addperson); return; }
   const fu = e.target.closest('[data-fu]');
