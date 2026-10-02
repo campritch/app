@@ -337,6 +337,8 @@
     .pass-badge { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .02em; padding: 1px 8px; border-radius: 9999px; background: var(--secondary); color: var(--foreground); cursor: pointer; white-space: nowrap; }
     .pass-badge:hover { filter: brightness(0.96); text-decoration: underline; }
     .pass-note { font-size: 11.5px; color: var(--muted-foreground); }
+    .check-edit { cursor: pointer; border-bottom: 1px dashed transparent; }
+    .check-edit:hover { border-bottom-color: var(--muted-foreground); }
     .path-text .sub { color: var(--muted-foreground); font-weight: 400; font-size: 11.5px; }
     .path-text .link { text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
     .path-text.muted { color: var(--muted-foreground); font-weight: 400; }
@@ -1899,9 +1901,10 @@ function visibleFunds(){
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const checkFmt = f => {
-  if (!f.check || f.check[0] == null) return '—';
+  const chk = (FS(f.id).check) || f.check;   // an edited override wins over the imported value
+  if (!chk || chk[0] == null) return '—';
   const k = v => v >= 1000 ? ('$' + (v/1000).toFixed(v%1000?1:0) + 'M') : ('$' + v + 'k');
-  return k(f.check[0]) + ' – ' + k(f.check[1]);
+  return k(chk[0]) + ' – ' + k(chk[1]);
 };
 const LI_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>`;
 const ARCHIVE_ICON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>`;
@@ -2294,7 +2297,7 @@ function renderFundsTable(){
         </div>
       </div></td>
       <td>${gradePillHtml(f)}</td>
-      <td style="white-space:nowrap;font-weight:600">${checkFmt(f)}</td>
+      <td style="white-space:nowrap;font-weight:600"><span class="check-edit" data-checkedit="${f.id}" title="Click to edit the check size">${checkFmt(f)}</span></td>
       <td>${fundPathCellHtml(f)}</td>
       <td class="hide-md"><span class="fund-sub">${esc(f.type||'—')} · ${esc(f.region||'—')}${(f.sectors||[]).length ? ' · ' + esc(f.sectors.slice(0,2).join(', ')) : ''}</span></td>
       <td class="hide-md">${fStage(f) === 'closed'
@@ -2373,7 +2376,7 @@ function renderPeopleTable(){
         <span class="fund-sub">${p.tbd?'':esc(p.title)+' · '}${esc(f.name)}</span>
       </div></td>
       <td>${gradePillHtml(f)}</td>
-      <td class="hide-md" style="white-space:nowrap;font-weight:600">${checkFmt(f)}</td>
+      <td class="hide-md" style="white-space:nowrap;font-weight:600"><span class="check-edit" data-checkedit="${f.id}" title="Click to edit the check size">${checkFmt(f)}</span></td>
       <td>${pathCellHtml(p)}</td>
       <td><div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start">
         ${statusDdHtml(p)}
@@ -4543,6 +4546,20 @@ $('tableBody').addEventListener('click', e => {
   if (dqEdit) { e.stopPropagation(); askDisqualifyReason([dqEdit.dataset.dqedit], render); return; }
   const passEdit = e.target.closest('[data-passedit]');
   if (passEdit) { e.stopPropagation(); askPassReason([passEdit.dataset.passedit], render); return; }
+  const checkEdit = e.target.closest('[data-checkedit]');
+  if (checkEdit) {
+    e.stopPropagation();
+    const id = checkEdit.dataset.checkedit, f = FUND_BY_ID[id];
+    appPrompt('Check size (e.g. "500k - 3M"):', checkFmt(f) === '—' ? '' : checkFmt(f)).then(v => {
+      if (v === null) return;
+      const fs = FS(id);
+      if (!v.trim()) { delete fs.check; save(); render(); return; }
+      const parsed = parseCheckRange(v);
+      if (!parsed) { toast('Couldn’t read that - try like "500k - 3M".'); return; }
+      fs.check = parsed; save(); render();
+    });
+    return;
+  }
   const compEdit = e.target.closest('[data-compedit]');
   if (compEdit) {
     e.stopPropagation();
