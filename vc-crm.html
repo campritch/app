@@ -3453,9 +3453,11 @@ function introListSectionHtml(c){
         <button class="mini-btn" id="dIntroAi">AI-grade unknowns</button>
         <button class="mini-btn" id="dIntroExport">Export CSV</button>` : ''}
         <button class="mini-btn" id="dIntroUpload">${il ? 'Replace sheet' : 'Upload their sheet'}</button>
+        <button class="mini-btn" id="dScanUpload" title="Import a LinkedIn connections scan for this person - auto-matches their connections to your target funds">Import LinkedIn scan</button>
       </div>
     </div>
-    <input type="file" id="dIntroFile" accept=".csv,.txt" style="display:none">`;
+    <input type="file" id="dIntroFile" accept=".csv,.txt" style="display:none">
+    <input type="file" id="dScanFile" accept=".csv,.txt" style="display:none">`;
   if (!il) return `<div class="d-section">${head}
     <div class="info-card">Upload the relationships sheet they gave you (CSV with Name, Firm, Title, Email, LinkedIn, Notes - save Excel as CSV first, or drop the Excel into Claude and it will convert).</div>
   </div>`;
@@ -4013,6 +4015,14 @@ function openConnector(id, preselect){
     const known = il.rows.filter(r => r.fundId).length;
     save(); render(); openConnector(id);
     toast(`Re-matched: ${known} of ${il.rows.length} now map to a fund (${changed} changed). Unmatched become new funds when filed.`);
+  };
+  if ($('dScanUpload')) $('dScanUpload').onclick = () => $('dScanFile').click();
+  if ($('dScanFile')) $('dScanFile').onchange = e => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => importConnectorScan(id, reader.result);
+    reader.readAsText(file);
+    e.target.value = '';
   };
   if ($('dIntroUpload')) $('dIntroUpload').onclick = () => $('dIntroFile').click();
   if ($('dIntroFile')) $('dIntroFile').onchange = e => {
@@ -4822,6 +4832,61 @@ function headlineRole(h){
    fund, add the person to that fund (with their real LinkedIn URL) and link the
    super connector to them as an intro path. Rows we can't confidently match to
    a target fund are skipped - never mis-attributed. */
+/* Per-connector LinkedIn scan: import ONE connector's connections (a 2nd-degree
+   scan export, or a LinkedIn Connections.csv) and auto-attach the ones at a
+   target fund as their intro paths. The connector is the one whose modal is
+   open - no "Super Connector" column needed. (The scan itself is produced by an
+   external tool; the CRM can't crawl LinkedIn.) */
+function importConnectorScan(cid, text){
+  const c = connectorById(cid); if (!c) return;
+  const lines = (text||'').split(/\r?\n/).filter(l => l.trim());
+  if (!lines.length) { toast('That file was empty.'); return; }
+  let start = lines.findIndex(l => /\b(name|headline|company|linkedin|first name)\b/i.test(l));
+  if (start < 0) start = 0;
+  const head = csvLine(lines[start]).map(x => x.trim().toLowerCase().replace(/^﻿/,''));
+  const col = ks => { for (const k of ks) { const i = head.indexOf(k); if (i >= 0) return i; } return -1; };
+  const ci = { name: col(['name','full name','contact']), first: col(['first name']), last: col(['last name']),
+    firm: col(['company','firm','fund','organization']), head: col(['headline','position','title']),
+    url: col(['linkedin url','url','profile','linkedin']) };
+  if (ci.name === -1 && ci.first === -1 && ci.firm === -1 && ci.head === -1) {
+    finishImportModal(showImportModal('Couldn’t read that file', ''), 'Couldn’t read that file',
+      `<div class="am-msg">Expected a header with a Name (or First/Last) plus a Company or Headline column. Found: ${esc(head.join(', ') || '(none)')}.</div>`);
+    return;
+  }
+  const recognized = [['Name', ci.name >= 0 || ci.first >= 0], ['Company', ci.firm >= 0], ['Headline/Title', ci.head >= 0], ['LinkedIn URL', ci.url >= 0]].filter(([, ok]) => ok).map(([n]) => n);
+  const total = lines.length - 1 - start;
+  const ov = showImportModal(`Scanning ${connName(c)}’s connections…`,
+    `<div class="imp-spinner"></div><div class="imp-fields">Recognized: <b>${esc(recognized.join(', '))}</b><br>Matching ${total} connections to your target funds…</div>`);
+  setTimeout(() => {
+    const fundByNorm = new Map();
+    FUNDS.forEach(f => { const n = normOrg(f.name); if (n && !fundByNorm.has(n)) fundByNorm.set(n, f); });
+    const edges = []; let skipped = 0;
+    for (let i = start + 1; i < lines.length; i++) {
+      const cc = csvLine(lines[i]).map(x => (x||'').trim().replace(/^﻿/,''));
+      const person = ci.name >= 0 ? cc[ci.name] : [ci.first >= 0 ? cc[ci.first] : '', ci.last >= 0 ? cc[ci.last] : ''].join(' ').trim();
+      const headTxt = ci.head >= 0 ? cc[ci.head] : '';
+      const firmCol = ci.firm >= 0 ? cc[ci.firm] : '';
+      if (!person && !firmCol && !headTxt) continue;
+      let fund = firmCol ? fundByNorm.get(normOrg(firmCol)) : null;
+      if (!fund) for (const cand of headlineFirms(headTxt)) { const f = fundByNorm.get(normOrg(cand)); if (f) { fund = f; break; } }
+      if (!fund) { skipped++; continue; }
+      edges.push({ fundId: fund.id, person: person || '(their contact)', title: headlineRole(headTxt || firmCol), url: ci.url >= 0 ? cc[ci.url] : '' });
+    }
+    if (!edges.length) { finishImportModal(ov, 'Nothing matched', `<div class="am-msg">Read ${total} connections, but none are at a fund in your list. Nothing was changed.</div>`); return; }
+    edges.forEach(e => { const pid = e.fundId + '_' + slug(e.person); if (!PERSON_BY_ID[pid]) PS(pid).added = { name: e.person, title: e.title }; if (e.url) PS(pid).li = e.url; e.pid = pid; });
+    rebuild();
+    const fundsHit = new Set();
+    edges.forEach(e => { addMatch(c, e.pid, 'From their LinkedIn scan'); fundsHit.add(e.fundId); });
+    CS(c.id).superc = true;
+    mergeDuplicateConnectors();
+    save(); rebuild(); render(); openConnector(cid);
+    finishImportModal(ov, 'Scan imported',
+      `<div class="imp-stat"><span>Connections read</span><span>${total}</span></div>` +
+      `<div class="imp-stat"><span>Intro paths to target funds</span><span>${edges.length}</span></div>` +
+      `<div class="imp-stat"><span>Target funds reachable</span><span>${fundsHit.size}</span></div>` +
+      `<div class="imp-stat"><span>Skipped (not a target fund)</span><span>${skipped}</span></div>`);
+  }, 50);
+}
 /* Upload progress/result modal - so an import always shows what it recognized
    and what it did (no more guessing whether it worked). */
 function showImportModal(title, bodyHtml){
