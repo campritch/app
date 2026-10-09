@@ -862,6 +862,7 @@ Acme Ventures, Jane Doe, Partner, https://linkedin.com/in/janedoe, Seed, $250k-$
         <button class="btn-ghost" id="sampleBtn">Try with sample data</button>
         <button class="btn-ghost" id="addConnectorBtn">+ Add connector</button>
         <button class="btn-ghost" id="scanImportBtn">Import scan results</button>
+        <button class="btn-primary btn-primary--coral" id="gradeAllConnBtn" title="Run &quot;Grade the funds&quot; for every active connector, one after another">Grade all connectors</button>
       </div>
       <div id="scanWrap" style="display:none">
         <div class="tpl-card" style="gap:10px">
@@ -969,6 +970,7 @@ Dana Whitfield, Overline, worked together at Techstars,"></textarea>
     <button class="bulk-btn bulk-people" id="bulkArchiveP">Archive</button>
     <button class="bulk-btn bulk-people" id="bulkPaths">Find connector paths</button>
     <button class="bulk-btn bulk-fund" id="bulkRemove">Remove funds</button>
+    <button class="bulk-btn bulk-conn" id="bulkGradeConn" style="font-weight:600">✨ Grade selected</button>
     <button class="bulk-btn bulk-btn--coral bulk-conn" id="bulkArchiveConn">Archive selected</button>
     <button class="bulk-bar__close" id="bulkClear" title="Clear selection">✕</button>
   </div>
@@ -3650,16 +3652,18 @@ async function gradeConnectorFunds(cid, btn, opts){
   if (matched) save();
   const sheetOnly = il ? il.rows.filter(r => r.inc && !r.fundId && !r.aiDims && (r.firm || r.name)) : [];
   const total = targets.length + sheetOnly.length;
-  if (!total) { if (!opts || !opts.auto) toast(matched ? `Matched ${matched} to funds already in the CRM. Everything is graded.` : 'Everything this connector reaches is already graded.'); if (matched) { render(); openConnector(cid); } return; }
+  const batch = !!(opts && opts.batch);
+  if (!total) { if (batch) { if (matched) save(); return { graded: 0, failed: 0, matched, stopped: false }; } if (!opts || !opts.auto) toast(matched ? `Matched ${matched} to funds already in the CRM. Everything is graded.` : 'Everything this connector reaches is already graded.'); if (matched) { render(); openConnector(cid); } return; }
   gradeRun = { cid, stop: false, running: true };
+  if (batch) gradeRun.stop = gradeAll.stop;
   updateGradeBtn(0, total);
   if (opts && opts.auto) toast(`Researching ${total} ungraded fund${total>1?'s':''} via AI${matched?` (matched ${matched} already)`:''} - click "Stop grading" any time.`);
   let done = 0, failed = 0, consec = 0;
   // one retry per item; bail only on a long run of consecutive failures
   // (that means the API is actually down, not a stray flake)
   for (const f of targets) {
-    if (gradeRun.stop) break;
-    done++; updateGradeBtn(done, total);
+    if (gradeRun.stop || (batch && gradeAll.stop)) break;
+    done++; updateGradeBtn(done, total); if (batch) updateGradeAllBtn(done, total);
     let ok = false;
     for (let attempt = 0; attempt < 2 && !ok; attempt++) {
       try { await aiFitFetch(f); ok = true; }
@@ -3670,8 +3674,8 @@ async function gradeConnectorFunds(cid, btn, opts){
     save();
   }
   for (const r of sheetOnly) {
-    if (gradeRun.stop) break;
-    done++; updateGradeBtn(done, total);
+    if (gradeRun.stop || (batch && gradeAll.stop)) break;
+    done++; updateGradeBtn(done, total); if (batch) updateGradeAllBtn(done, total);
     const prior = findSheetDims(r.firm || r.name);
     if (prior) { r.aiDims = prior.dims; if (prior.why) r.aiWhy = prior.why; save(); continue; }
     let ok = false;
@@ -3691,13 +3695,49 @@ async function gradeConnectorFunds(cid, btn, opts){
     if (consec >= 6) { toast('Grading stopped - the API keeps failing. Try again shortly.'); break; }
     save();
   }
-  const stopped = gradeRun.stop;
+  const stopped = gradeRun.stop || (batch && gradeAll.stop);
   gradeRun = { cid: null, stop: false, running: false };
-  save(); render(); openConnector(cid);
   const gradedNow = done - failed;
+  if (batch) {
+    save();
+    if (drawerRef && drawerRef.kind === 'connector' && drawerRef.id === cid) openConnector(cid);
+    return { graded: gradedNow, failed, matched, stopped };
+  }
+  save(); render(); openConnector(cid);
   toast(stopped
     ? `Stopped. Graded ${gradedNow} so far${matched ? ` (plus ${matched} matched)` : ''} - reopen to finish the rest.`
     : `Graded ${gradedNow} of ${total}${matched ? ` · matched ${matched} to existing funds` : ''}${failed ? ` (${failed} skipped - retry with "Grade the funds")` : ''}.`);
+}
+/* Run the "Grade the funds" pass across many connectors, one after another.
+   Each connector's pass already skips anything graded, so re-running is cheap. */
+let gradeAll = { running: false, stop: false, i: 0, n: 0 };
+function updateGradeAllBtn(done, total){
+  const label = gradeAll.running
+    ? `Stop (${gradeAll.i}/${gradeAll.n} connectors${total ? ` · ${done}/${total} funds` : ''})`
+    : null;
+  const b = $('gradeAllConnBtn');
+  if (b) b.textContent = label || 'Grade all connectors';
+  const bb = $('bulkGradeConn');
+  if (bb) bb.textContent = label || '✨ Grade selected';
+}
+async function gradeAllConnectors(ids){
+  if (gradeAll.running) { gradeAll.stop = true; toast('Stopping after the current fund...'); return; }
+  if (gradeRun.running) { toast('A grading pass is already running - stop it first.'); return; }
+  if (!ids.length) { toast('No connectors to grade.'); return; }
+  gradeAll = { running: true, stop: false, i: 0, n: ids.length };
+  toast(`Grading funds across ${ids.length} connector${ids.length===1?'':'s'} - click Stop any time.`);
+  let graded = 0, failed = 0, matched = 0;
+  for (const id of ids) {
+    if (gradeAll.stop) break;
+    gradeAll.i++; autoGraded.add(id); updateGradeAllBtn(0, 0);
+    const r = await gradeConnectorFunds(id, null, { batch: true });
+    if (r) { graded += r.graded; failed += r.failed; matched += r.matched; }
+  }
+  const stopped = gradeAll.stop, reached = gradeAll.i;
+  gradeAll = { running: false, stop: false, i: 0, n: 0 };
+  updateGradeAllBtn(0, 0);
+  save(); render();
+  toast(`${stopped ? `Stopped after ${reached} of ${ids.length} connectors. ` : `Done - ${ids.length} connector${ids.length===1?'':'s'}. `}Graded ${graded} fund${graded===1?'':'s'}${matched ? ` · matched ${matched} existing` : ''}${failed ? ` · ${failed} skipped` : ''}.`);
 }
 function fundWhyLine(f){
   if (!f) return '';
@@ -4666,6 +4706,12 @@ $('connSelectAll').addEventListener('click', () => {
   const allSel = visible.every(c => connSelected.has(c.id));
   connSelected = allSel ? new Set() : new Set(visible.map(c => c.id));
   render();
+});
+$('gradeAllConnBtn').addEventListener('click', () => {
+  gradeAllConnectors(allConnectors().filter(c => !CS(c.id).archived).map(c => c.id));
+});
+$('bulkGradeConn').addEventListener('click', () => {
+  gradeAllConnectors(gradeAll.running ? [] : [...connSelected]);
 });
 $('bulkArchiveConn').addEventListener('click', () => {
   if (!connSelected.size) return;
