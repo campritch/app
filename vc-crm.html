@@ -3987,8 +3987,22 @@ function openConnector(id, preselect){
   };
   document.querySelectorAll('[data-inc]').forEach(cb => cb.addEventListener('change', () => {
     st.curated = true; st.included = included(); save();
-    // generate the intro angle in the background as soon as it's checked (cached)
-    if (cb.checked) { const p = PERSON_BY_ID[cb.dataset.inc]; const f = p && FUND_BY_ID[p.fundId]; if (f && !FS(f.id).introAngle) aiAngleFetch(f).catch(() => {}); }
+    if (cb.checked) {
+      const p = PERSON_BY_ID[cb.dataset.inc]; const f = p && FUND_BY_ID[p.fundId];
+      if (f) {
+        if (!FS(f.id).introAngle) aiAngleFetch(f).catch(() => {});   // cache the intro angle in the background
+        // checking a fund here promotes it to Target - unless it's already in
+        // an active/further stage or has been ruled out (don't downgrade or resurrect).
+        const fs = FS(f.id), cur = fStage(f);
+        if (!cur || cur === 'none' || cur === 'future') {
+          const prev = fs.stage;
+          fs.stage = 'target'; fs.archived = false; save();
+          const sub = cb.closest('.check-row') ? cb.closest('.check-row').querySelector('.cr-sub') : null;
+          if (sub && !/pill--type/.test(sub.innerHTML)) sub.insertAdjacentHTML('beforeend', ` · <span class="pill pill--type">${F_STAGES['target']}</span>`);
+          toastUndo(`Moved ${f.name} to ${F_STAGES['target']}.`, () => { if (prev === undefined) delete fs.stage; else fs.stage = prev; save(); openConnector(id); });
+        }
+      }
+    }
   }));
   if (!st.curated) { st.included = [...checkedSet]; save(); }
 
