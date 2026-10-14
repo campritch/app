@@ -1528,7 +1528,7 @@ function peopleListFor(personIds){
     const f = FUND_BY_ID[p.fundId];
     const li = personProfileUrl(p);   // real profile only - no fabricated search links in the ask
     if (p.tbd) return `• Anyone at ${f.name}${li ? ' - ' + li : ''}`;
-    return `• ${firstName(p.name)} from ${f.name}${li ? ' - ' + li : ''}`;
+    return `• ${p.name} from ${f.name}${li ? ' - ' + li : ''}`;
   }).filter(Boolean).join('\n');
 }
 
