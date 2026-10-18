@@ -339,6 +339,10 @@
     .pass-note { font-size: 11.5px; color: var(--muted-foreground); }
     .check-edit { cursor: pointer; border-bottom: 1px dashed transparent; }
     .check-edit:hover { border-bottom-color: var(--muted-foreground); }
+    /* Blue "verified" check: a fund that's had a deep (web-grounded) grade */
+    .deep-check { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; background: #2563eb; color: #fff; font-size: 9.5px; font-weight: 800; vertical-align: 1px; margin-left: 4px; }
+    /* Priority doors row: a Need-intros fund this connector can actually reach */
+    .check-row.cr-priority { outline: 1.5px solid rgba(0,0,0,0.38); outline-offset: -1px; border-radius: 8px; }
     .path-text .sub { color: var(--muted-foreground); font-weight: 400; font-size: 11.5px; }
     .path-text .link { text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
     .path-text.muted { color: var(--muted-foreground); font-weight: 400; }
@@ -1130,6 +1134,8 @@ function gradePillHtml(f){
 }
 /* Crown a fund that's properly (AI) graded AND a strong fit (score >= 70). */
 function fundCrown(f){ return (f && FS(f.id).aiGraded && score(f) >= 70) ? ' \u{1F451}' : ''; }
+/* Blue verified check once a fund has had a deep (web-grounded) grade. */
+function deepBadge(f){ return (f && FS(f.id).deepGraded) ? '<span class="deep-check" title="Deep-graded - web-verified fit read">✓</span>' : ''; }
 /* Crown a connector who can open a door to any crowned (strong-fit) fund. */
 function connReachesCrown(c){
   const ids = new Set(c.matches || []);
@@ -2296,7 +2302,7 @@ function renderFundsTable(){
     return `<tr data-fundrow="${f.id}" class="${selected.has(f.id)?'selected':''} ${open?'expanded':''} ${(fundArchiveView || ['closed','disqualified'].includes(fStage(f)))?'arch-dim':''} ${isCompetitor(f)?'competitor-dim':''}">
       <td><input type="checkbox" class="row-check" data-check="${f.id}" ${selected.has(f.id)?'checked':''}></td>
       <td class="fund-td"><div class="fund-cell">
-        <span class="fund-name">${esc(f.name)}${fundCrown(f)}${competitorBadge(f)}${introAvatarsHtml(f)}</span>
+        <span class="fund-name">${esc(f.name)}${fundCrown(f)}${competitorBadge(f)}${deepBadge(f) || introAvatarsHtml(f)}</span>
         <div class="fund-subrow">
           ${f.site ? `<a class="fund-site" href="https://${esc(f.site)}" target="_blank" rel="noopener" data-noopen title="Open website">${esc(f.site)}</a>` : ''}
           <button type="button" class="fund-info" title="Quick look - the full fund read" onclick="event.stopPropagation();togglePeek('${f.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>
@@ -3859,6 +3865,9 @@ function openConnector(id, preselect){
     // grouped by fund so a fund's people always sit next to each other as you
     // scroll (fund id is the tiebreaker when scores are equal).
     .sort((a,b) => ((isDoorArch(a)?1:0) - (isDoorArch(b)?1:0))
+      // Need-intros funds this connector can reach float to the very top - that's
+      // where to start: the fund needs an intro and this person can make it.
+      || ((fStage(FUND_BY_ID[b.fundId])==='needintros'?1:0) - (fStage(FUND_BY_ID[a.fundId])==='needintros'?1:0))
       || (score(FUND_BY_ID[b.fundId]) - score(FUND_BY_ID[a.fundId]))
       || (a.fundId < b.fundId ? -1 : a.fundId > b.fundId ? 1 : 0));
   const eligible = matches.filter(p => !isDoorArch(p) && !['replied','meeting','passed'].includes(pStatus(p)));
@@ -3958,7 +3967,7 @@ function openConnector(id, preselect){
             options: arch
               ? [{v:'__restore', l:'Restore to the active list'}]
               : [{v:'badfit', l:'Bad fit'}, {v:'competitor', l:'Competitor'}, {v:'passed', l:'Already passed'}, {v:'future', l:'Future round'}, {v:'other', l:'Other reason...'}] });
-          return `<label class="check-row${arch?' cr-archived':''}${isPref?' cr-preferred':''}" style="align-items:center">
+          return `<label class="check-row${arch?' cr-archived':''}${isPref?' cr-preferred':''}${(!arch && fStage(f)==='needintros')?' cr-priority':''}" style="align-items:center">
             <input type="checkbox" data-inc="${p.id}" ${(checkedSet.has(p.id) && !arch)?'checked':''} ${arch?'disabled':''}>
             ${archDd}
             <span style="flex:0 1 30%;min-width:180px">${isPref?'<span title="Your preferred intro path" style="color:var(--amber-text,#b45309)">★ </span>':''}${p.tbd ? '<a href="#fund=' + f.id + '" data-peek="' + f.id + '" rel="noopener" style="font-weight:700;color:inherit;text-decoration:underline dotted;text-underline-offset:2px" title="Quick look (cmd-click opens a new tab)">' + esc(f.name) + '</a> <span style="color:var(--muted-foreground)">· any partner</span>' : '<b>' + esc(p.name) + '</b> <span style="color:var(--muted-foreground)">· </span><a href="#fund=' + f.id + '" data-peek="' + f.id + '" rel="noopener" style="color:var(--muted-foreground);text-decoration:underline dotted;text-underline-offset:2px" title="Quick look (cmd-click opens a new tab)">' + esc(f.name) + '</a>'} ${badge}${isCompetitor(f) ? ' <span class="pill--competitor" data-compedit="' + f.id + '" title="' + (competitorName(f) ? 'Backs ' + esc(competitorName(f)) : 'Click to name the competitor they back') + '">COMPETITOR</span>' : ''}</span>
