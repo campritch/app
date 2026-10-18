@@ -967,6 +967,7 @@ Dana Whitfield, Overline, worked together at Techstars,"></textarea>
     <button class="bulk-btn bulk-fund" data-bulkstage="future">→ Future rounds</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="won">→ Closed</button>
     <button class="bulk-btn bulk-fund" id="bulkGrade" style="font-weight:600">✨ Grade selected</button>
+    <button class="bulk-btn bulk-fund" id="bulkDeepGrade" style="font-weight:600" title="Deep grade: googles each selected fund and grades on its real recent deals/stage/check/portfolio. Slower (~5-10s each) and higher cost - use on your low-conviction set.">🔎 Deep grade selected</button>
     <button class="bulk-btn bulk-people" id="bulkArchiveP">Archive</button>
     <button class="bulk-btn bulk-people" id="bulkPaths">Find connector paths</button>
     <button class="bulk-btn bulk-fund" id="bulkRemove">Remove funds</button>
@@ -2238,6 +2239,7 @@ function personSubRows(f){
         ${st.aiBrief ? `<div class="fit-brief__ai"><b>AI read${st.aiOneLiner ? ' - ' + esc(st.aiOneLiner) : ''}:</b> ${esc(st.aiBrief)}</div>` : ''}
       </div>
       <button class="mini-btn" data-aifit="${f.id}" style="flex-shrink:0">${st.aiBrief ? 'Re-run AI fit read' : 'Run AI fit read'}</button>
+      <button class="mini-btn" data-deepfit="${f.id}" style="flex-shrink:0" title="Deep grade: googles the fund and grades on its recent deals, stage, check size and portfolio (slower, higher cost, more accurate)">${st.deepGraded ? 'Re-run deep grade \u{1F50E}' : 'Deep grade \u{1F50E}'}</button>
     </div></td>
   </tr>`;
   return brief + ppl.map(p => {
@@ -2800,17 +2802,18 @@ function importFunds(text){
 }
 
 /* ── AI fit read (calls api/vc-fit, Claude-backed on the deployed wiki) ── */
-async function runAiFit(fid, btn){
+async function runAiFit(fid, btn, opts){
   const f = FUND_BY_ID[fid];
   if (!f) return;
-  if (btn) { btn.textContent = 'Thinking...'; btn.disabled = true; }
+  const deep = !!(opts && opts.deep);
+  if (btn) { btn.textContent = deep ? 'Searching…' : 'Thinking...'; btn.disabled = true; }
   try {
-    const data = await aiFitFetch(f);
+    const data = await aiFitFetch(f, { deep });
     save(); render();
-    toast('AI fit read done' + (data.one_liner ? ': ' + data.one_liner : '.'));
+    toast((deep ? 'Deep grade done' : 'AI fit read done') + (data.one_liner ? ': ' + data.one_liner : '.'));
   } catch (err) {
-    if (btn) { btn.textContent = 'Run AI fit read'; btn.disabled = false; }
-    toast('AI fit read runs on the deployed wiki (needs the API key). ' + String(err.message || err));
+    if (btn) { btn.textContent = deep ? 'Deep grade \u{1F50E}' : 'Run AI fit read'; btn.disabled = false; }
+    toast('Grade runs on the deployed wiki (needs the API key). ' + String(err.message || err));
   }
 }
 
@@ -3563,10 +3566,10 @@ function exportIntroList(cid){
 }
 /* One AI call per fund, shared by the fund drawer button and the connector
    grading pass. Stores the brief + dims so the whole CRM benefits. */
-async function aiFitFetch(f){
+async function aiFitFetch(f, opts){
   const r = await fetch('/api/vc-fit', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fund: {
+    body: JSON.stringify({ deep: !!(opts && opts.deep), fund: {
       name: f.name, site: f.site, type: f.type, region: f.region, check: f.check,
       sectors: f.sectors, tier: f.tier, looking: f.looking, dims: f.dims || null,
       people: (PEOPLE_BY_FUND[f.id] || []).map(p => ({ n: p.name, t: p.title })),
@@ -3583,8 +3586,8 @@ async function aiFitFetch(f){
   // (a fund it genuinely couldn't identify), mark it Unidentified instead of
   // silently flagging it graded (which made it show "Not graded" yet skip
   // re-grading forever).
-  if (data.dims) { f.dims = data.dims; st.aiDims = data.dims; st.aiGraded = true; delete st.aiUnidentified; }
-  else { st.aiUnidentified = true; delete st.aiGraded; }
+  if (data.dims) { f.dims = data.dims; st.aiDims = data.dims; st.aiGraded = true; if (opts && opts.deep) st.deepGraded = true; delete st.aiUnidentified; }
+  else { st.aiUnidentified = true; delete st.aiGraded; if (opts && opts.deep) st.deepTried = true; }
   return data;
 }
 
@@ -4588,6 +4591,8 @@ $('tableBody').addEventListener('click', e => {
   if (info) { e.stopPropagation(); openFund(info.dataset.openfundinfo); return; }
   const aifit = e.target.closest('[data-aifit]');
   if (aifit) { e.stopPropagation(); runAiFit(aifit.dataset.aifit, aifit); return; }
+  const deepfit = e.target.closest('[data-deepfit]');
+  if (deepfit) { e.stopPropagation(); runAiFit(deepfit.dataset.deepfit, deepfit, { deep: true }); return; }
   const msgf = e.target.closest('[data-msgfund]');
   if (msgf) {
     e.stopPropagation();
@@ -5215,6 +5220,32 @@ $('bulkGrade').addEventListener('click', async () => {
   btn.disabled = false; btn.textContent = '✨ Grade selected';
   save(); render();
   toast(`Graded ${done - failed} of ${targets.length}${failed ? ` (${failed} failed - try again)` : ''}.`);
+});
+$('bulkDeepGrade').addEventListener('click', async () => {
+  if (!STAGE_TABS.includes(currentTab) || !selected.size) return;
+  const btn = $('bulkDeepGrade');
+  // Deep-grade anything not already deep-graded (includes shallow-graded AND
+  // previously-unidentifiable funds - a web search can identify those). Skip
+  // competitors and ones already deep-graded.
+  const targets = [...selected].map(id => FUND_BY_ID[id]).filter(f => f && !FS(f.id).deepGraded && !isCompetitor(f));
+  if (!targets.length) { toast('Nothing to deep-grade - these are already deep-graded or competitors.'); return; }
+  if (!(await appConfirm(`Deep-grade ${targets.length} fund${targets.length===1?'':'s'}? Each one googles the fund (~5-10s, higher cost than the normal grade). Best run on your low-conviction set, not the whole backlog.`, { okLabel: 'Deep grade' }))) return;
+  btn.disabled = true;
+  let done = 0, failed = 0;
+  toast(`Deep-grading ${targets.length} fund${targets.length===1?'':'s'} - this is slower (web search per fund)...`);
+  let i = 0;
+  const worker = async () => {
+    while (i < targets.length) {
+      const f = targets[i++];
+      try { await aiFitFetch(f, { deep: true }); } catch (e) { failed++; }
+      done++; btn.textContent = `Deep-grading ${done}/${targets.length}...`;
+      if (done % 2 === 0) { save(); render(); }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(3, targets.length) }, worker));   // fewer in parallel - search is heavier
+  btn.disabled = false; btn.textContent = '🔎 Deep grade selected';
+  save(); render();
+  toast(`Deep-graded ${done - failed} of ${targets.length}${failed ? ` (${failed} failed - try again)` : ''}.`);
 });
 $('bulkClear').addEventListener('click', () => { selected.clear(); connSelected.clear(); render(); });
 $('bulkBar').addEventListener('click', e => {

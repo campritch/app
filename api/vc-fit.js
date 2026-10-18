@@ -7,6 +7,7 @@ import { verifySession, classifyEmail } from '../lib/auth.js';
 
 const MODEL = 'claude-sonnet-5';
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o';
+const OPENAI_DEEP_MODEL = process.env.OPENAI_DEEP_MODEL || 'gpt-4o';   // model used for the web-search "deep grade"
 
 // One text-in / text-out call, routed to whichever provider is configured.
 // Prefers OpenAI (JSON mode) so the CRM keeps working while Anthropic is capped.
@@ -35,6 +36,38 @@ async function callLLM({ system, user, maxTokens }) {
   const client = new Anthropic({ apiKey: anthKey });
   const msg = await client.messages.create({ model: MODEL, max_tokens: maxTokens, system, messages: [{ role: 'user', content: user }] });
   return (msg.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+}
+
+// Web-search-grounded call (OpenAI Responses API + web_search tool): the model
+// googles the fund, reads the results, and reasons over them - for a
+// high-conviction "deep" grade instead of a homepage read. JSON mode isn't
+// available alongside the search tool, so we instruct JSON and the caller parses
+// tolerantly (same extractor as the normal grade).
+async function callLLMSearch({ system, user, maxTokens }) {
+  const oaiKey = process.env.OPENAI_API_KEY;
+  if (!oaiKey) throw new Error('OPENAI_API_KEY required for the deep (web) grade');
+  LAST_PROVIDER = 'openai-search:' + OPENAI_DEEP_MODEL;
+  const r = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + oaiKey },
+    body: JSON.stringify({
+      model: OPENAI_DEEP_MODEL,
+      tools: [{ type: 'web_search_preview' }],
+      instructions: system,
+      input: user,
+      max_output_tokens: maxTokens
+    })
+  });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error((d.error && d.error.message) || ('OpenAI HTTP ' + r.status));
+  if (typeof d.output_text === 'string' && d.output_text.trim()) return d.output_text;
+  if (Array.isArray(d.output)) {
+    return d.output
+      .filter(o => o.type === 'message')
+      .flatMap(o => (o.content || []).filter(c => typeof c.text === 'string').map(c => c.text))
+      .join('\n');
+  }
+  return '';
 }
 
 const SYSTEM = `You grade venture funds for SpotsNow's $3M seed raise and write short, SPECIFIC fit briefs. Cam Pritchard is the founder/CEO.
@@ -109,7 +142,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'No OPENAI_API_KEY or ANTHROPIC_API_KEY configured' });
   }
 
-  const { fund, angle } = req.body || {};
+  const { fund, angle, deep } = req.body || {};
   if (!fund || !fund.name) return res.status(400).json({ error: 'fund required' });
 
   // Ground the read: pull the fund's live website copy (fast, cheap). If there's
@@ -150,8 +183,17 @@ export default async function handler(req, res) {
   };
 
   try {
-    const text = await callLLM({ system: SYSTEM, maxTokens: 1000,
-      user: 'Fund data:\n' + JSON.stringify(payload) });
+    const text = deep
+      ? await callLLMSearch({ system: SYSTEM, maxTokens: 1400,
+          user: 'Fund data (verify and ENRICH this with a live web search before grading):\n' + JSON.stringify(payload) +
+            '\n\nSearch the web NOW for this specific fund and ground the grade in what you find:\n' +
+            '- Their most recent investments (last ~12-24 months) and the stage of those deals.\n' +
+            '- Typical check size, and whether they lead or follow.\n' +
+            '- Whether they are ACTIVELY investing right now (a current/open fund or recent deals) vs fully deployed / between funds / winding down.\n' +
+            '- Portfolio companies adjacent to SpotsNow (marketplaces, creator/media, adtech/measurement, AI-native/agentic, commerce) - name them.\n' +
+            'Base every dim on what you actually found. In the brief, cite concrete portfolio companies and recent facts (with the year). If after searching you still cannot verify a fund, say so plainly and return dims:null rather than guessing. Return STRICT JSON only, in the exact schema specified - no citations markup, no markdown.' })
+      : await callLLM({ system: SYSTEM, maxTokens: 1000,
+          user: 'Fund data:\n' + JSON.stringify(payload) });
     const jm = text.match(/\{[\s\S]*\}/);
     if (!jm) return res.status(502).json({ error: 'unparseable model output' });
     let out;
