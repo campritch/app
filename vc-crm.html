@@ -3595,9 +3595,10 @@ async function aiFitFetch(f, opts){
   // re-grading forever).
   if (data.dims) {
     f.dims = data.dims; st.aiDims = data.dims; st.aiGraded = true; if (opts && opts.deep) st.deepGraded = true; delete st.aiUnidentified;
-    // strong fit -> auto-queue for intros. Only promote from an untargeted stage
-    // (don't downgrade contacted/messaged/etc. or resurrect passed/disqualified).
-    if (score(f) >= 78 && !isCompetitor(f)) { const cur = fStage(f); if (!cur || ['none','target','future'].includes(cur)) st.stage = 'needintros'; }
+    // strong fit -> auto-queue for intros, but ONLY on a deep (web-verified) grade.
+    // Only promote from an untargeted stage (don't downgrade contacted/messaged/etc.
+    // or resurrect passed/disqualified).
+    if (opts && opts.deep && score(f) >= 78 && !isCompetitor(f)) { const cur = fStage(f); if (!cur || ['none','target','future'].includes(cur)) st.stage = 'needintros'; }
   }
   else { st.aiUnidentified = true; delete st.aiGraded; if (opts && opts.deep) st.deepTried = true; }
   return data;
