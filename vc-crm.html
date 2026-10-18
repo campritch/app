@@ -2303,7 +2303,7 @@ function renderFundsTable(){
     return `<tr data-fundrow="${f.id}" class="${selected.has(f.id)?'selected':''} ${open?'expanded':''} ${(fundArchiveView || ['closed','disqualified'].includes(fStage(f)))?'arch-dim':''} ${isCompetitor(f)?'competitor-dim':''}">
       <td><input type="checkbox" class="row-check" data-check="${f.id}" ${selected.has(f.id)?'checked':''}></td>
       <td class="fund-td"><div class="fund-cell">
-        <span class="fund-name">${esc(f.name)}${fundCrown(f)}${competitorBadge(f)}${deepBadge(f) || introAvatarsHtml(f)}</span>
+        <span class="fund-name">${esc(f.name)}${fundCrown(f)}${deepBadge(f)}${competitorBadge(f)}${introAvatarsHtml(f)}</span>
         <div class="fund-subrow">
           ${f.site ? `<a class="fund-site" href="https://${esc(f.site)}" target="_blank" rel="noopener" data-noopen title="Open website">${esc(f.site)}</a>` : ''}
           <button type="button" class="fund-info" title="Quick look - the full fund read" onclick="event.stopPropagation();togglePeek('${f.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>
