@@ -1804,6 +1804,7 @@ let currentTab = 'funds';
 let searchQ = '';
 let sortBy = 'grade';
 let selected = new Set();          // person ids (people) or fund ids (funds)
+let lastCheckId = null;            // anchor row for shift-click range selection
 let expandedFunds = new Set();
 
 function fundMatchesFilters(f){
@@ -4577,7 +4578,23 @@ $('tableBody').addEventListener('click', e => {
   const chk = e.target.closest('[data-check]');
   if (chk) {
     e.stopPropagation();
-    chk.checked ? selected.add(chk.dataset.check) : selected.delete(chk.dataset.check);
+    const id = chk.dataset.check;
+    if (e.shiftKey && lastCheckId && lastCheckId !== id) {
+      // Range select: apply the clicked box's new state to every row between
+      // the last-clicked anchor and this one (in the current table order).
+      const all = [...document.querySelectorAll('[data-check]')].map(c => c.dataset.check);
+      let i = all.indexOf(lastCheckId), j = all.indexOf(id);
+      if (i > -1 && j > -1) {
+        if (i > j) { const t = i; i = j; j = t; }
+        const want = chk.checked;
+        for (let k = i; k <= j; k++) { want ? selected.add(all[k]) : selected.delete(all[k]); }
+      } else {
+        chk.checked ? selected.add(id) : selected.delete(id);
+      }
+    } else {
+      chk.checked ? selected.add(id) : selected.delete(id);
+    }
+    lastCheckId = id;
     render();
     return;
   }
