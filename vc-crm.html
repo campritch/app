@@ -326,6 +326,8 @@
     .fit-brief__text { font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; max-width: 760px; }
     .fit-brief__text b { color: var(--foreground); }
     .fit-brief__ai { margin-top: 8px; padding: 10px 12px; background: rgb(244 244 245 / 0.6); border-radius: 8px; }
+    .fit-brief__conns { margin-top: 8px; font-size: 12.5px; color: var(--text-secondary); }
+    .fit-brief__conns .link { font-weight: 600; cursor: pointer; }
     .fit-brief button { margin-left: auto; }
     .path-text { font-size: 12px; font-weight: 400; color: var(--foreground); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
     .path-text b { font-weight: 500; }
@@ -1559,6 +1561,20 @@ const WARMTH_ICON = { na:'\u25cb', hot:'\ud83d\udd25', warm:'\u2600\ufe0f', cool
 /* Where the fund came from: the master lists (grey) or OpenVC (light orange). */
 /* Connector faces on a fund row - who's making the intro. Photo if we have
    one, initials circle otherwise; stacked when several are reaching out. */
+// The connectors who can actually intro you to this fund (real humans, not the
+// NFX signal network), rendered as clickable names that open the connector's
+// modal. Shown in the expanded fit-brief so you can jump straight to who to ask.
+function introLinksHtml(f){
+  const ids = connectorsForFund(f.id);
+  if (!ids.length) return '';
+  const chips = ids.map(cid => {
+    const c = connectorById(cid);
+    if (!c || c.source === 'nfx' || CS(cid).archived) return '';
+    return `<span class="link" data-openconn="${cid}" title="Open ${esc(connName(c))} - they can intro you here">${esc(connName(c))}</span>`;
+  }).filter(Boolean).join(', ');
+  if (!chips) return '';
+  return `<div class="fit-brief__conns"><b>Can intro:</b> ${chips}</div>`;
+}
 function introAvatarsHtml(f){
   const ids = FS(f.id).introFrom || [];
   if (!ids.length) return '';
@@ -2244,6 +2260,7 @@ function personSubRows(f){
         ${f.dims ? `<b>${grade(f)} · ${Math.round(score(f))}/100.</b> ` : `<b>Not graded yet.</b> `}${esc(f.looking || 'No thesis notes on this fund yet.')} ${esc(fundFitLine(f))}
         ${f.why ? `<br><b>Our angle:</b> ${esc(f.why)}` : ''}
         ${st.aiBrief ? `<div class="fit-brief__ai"><b>AI read${st.aiOneLiner ? ' - ' + esc(st.aiOneLiner) : ''}:</b> ${esc(st.aiBrief)}</div>` : ''}
+        ${introLinksHtml(f)}
       </div>
       <button class="mini-btn" data-aifit="${f.id}" style="flex-shrink:0">${st.aiBrief ? 'Re-run AI fit read' : 'Run AI fit read'}</button>
       <button class="mini-btn" data-deepfit="${f.id}" style="flex-shrink:0" title="Deep grade: googles the fund and grades on its recent deals, stage, check size and portfolio (slower, higher cost, more accurate)">${st.deepGraded ? 'Re-run deep grade \u{1F50E}' : 'Deep grade \u{1F50E}'}</button>
