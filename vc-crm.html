@@ -346,6 +346,7 @@
     .check-edit:hover { border-bottom-color: var(--muted-foreground); }
     /* Blue "verified" check: a fund that's had a deep (web-grounded) grade */
     .deep-check { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; flex-shrink: 0; border-radius: 50%; background: #2563eb; color: #fff; font-size: 9.5px; font-weight: 800; vertical-align: 1px; margin-left: 4px; }
+    .deep-check--weak { background: #9ca3af; }
     /* Priority doors row: a Need-intros fund this connector can actually reach */
     .check-row.cr-priority { outline: 1.5px solid rgba(0,0,0,0.38); outline-offset: -1px; border-radius: 8px; }
     .path-text .sub { color: var(--muted-foreground); font-weight: 400; font-size: 11.5px; }
@@ -1140,7 +1141,11 @@ function gradePillHtml(f){
 /* Crown a fund that's properly (AI) graded AND a strong fit (score >= 70). */
 function fundCrown(f){ return (f && FS(f.id).aiGraded && score(f) >= 70) ? ' \u{1F451}' : ''; }
 /* Blue verified check once a fund has had a deep (web-grounded) grade. */
-function deepBadge(f){ return (f && FS(f.id).deepGraded) ? '<span class="deep-check" title="Deep-graded - web-verified fit read">✓</span>' : ''; }
+function deepBadge(f){
+  if (!(f && FS(f.id).deepGraded)) return '';
+  const strong = score(f) > 70;   // blue = strong fit, grey = weaker, at a glance
+  return `<span class="deep-check${strong ? '' : ' deep-check--weak'}" title="Deep-graded - web-verified fit read (${Math.round(score(f))}%)">✓</span>`;
+}
 /* Crown a connector who can open a door to any crowned (strong-fit) fund. */
 function connReachesCrown(c){
   const ids = new Set(c.matches || []);
