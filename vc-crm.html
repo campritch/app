@@ -3662,42 +3662,51 @@ function findSheetDims(name){
 let gradeRun = { cid: null, stop: false, running: false };
 const autoGraded = new Set();     // connectors auto-graded once this session
 function updateGradeBtn(done, total){
-  const btn = $('dGradeFunds');
-  if (!btn) return;
-  if (gradeRun.running) { btn.textContent = `Stop grading (${done}/${total})`; btn.classList.add('grading'); }
-  else { btn.textContent = 'Grade the funds'; btn.classList.remove('grading'); }
+  const shallow = $('dGradeFunds'), deepBtn = $('dDeepGradeFunds');
+  if (shallow) { shallow.classList.remove('grading'); shallow.textContent = 'Grade the funds'; }
+  if (deepBtn) { deepBtn.classList.remove('grading'); deepBtn.textContent = '\u{1F50E} Deep grade all'; }
+  if (!gradeRun.running) return;
+  const active = gradeRun.deep ? deepBtn : shallow;
+  if (active) { active.classList.add('grading'); active.textContent = (gradeRun.deep ? 'Stop deep grading' : 'Stop grading') + ` (${done}/${total})`; }
 }
 async function gradeConnectorFunds(cid, btn, opts){
   const c = connectorById(cid);
   if (!c) return;
   if (gradeRun.running) return;    // one run at a time
+  const deep = !!(opts && opts.deep);
   const il = state.introLists[cid];
   const fundIds = new Set();
   (c.matches || []).forEach(pid => { const p = PERSON_BY_ID[pid]; if (p) fundIds.add(p.fundId); });
   if (il) il.rows.forEach(r => { if (r.fundId) fundIds.add(r.fundId); });
-  let targets = [...fundIds].map(id => FUND_BY_ID[id]).filter(f => f && !(FS(f.id).aiGraded && f.dims) && !FS(f.id).aiUnidentified && !f.why && !isCompetitor(f) && !isParkedFund(f));
+  // Deep pass targets anything not yet web-verified; shallow pass targets the
+  // ungraded (and leaves funds that already have a manual angle alone).
+  let targets = [...fundIds].map(id => FUND_BY_ID[id]).filter(f => f && !isCompetitor(f) && !isParkedFund(f) &&
+    (deep ? !FS(f.id).deepGraded : (!(FS(f.id).aiGraded && f.dims) && !FS(f.id).aiUnidentified && !f.why)));
   // (1) MATCH FIRST: adopt grade/description from a same-name backlog fund we
-  // already have, so we never re-research something already in the CRM.
+  // already have, so we never re-research something already in the CRM. Skipped
+  // on a deep pass - deep grading wants a fresh web-grounded read, not a copy.
   let matched = 0;
-  const remaining = [];
-  for (const f of targets) {
-    const tw = backlogTwin(f);
-    if (tw) {
-      const fs = FS(f.id);
-      if (tw.looking && !f.looking) f.looking = tw.looking;
-      if (tw.site && !f.site && !fs.site) { fs.site = tw.site; f.site = tw.site; }
-      if ((tw.ctx||[]).length && !(f.ctx||[]).length) f.ctx = tw.ctx;
-      if (tw.dims && !f.dims) { f.dims = tw.dims; fs.aiDims = tw.dims; fs.aiGraded = true; matched++; continue; }
+  if (!deep) {
+    const remaining = [];
+    for (const f of targets) {
+      const tw = backlogTwin(f);
+      if (tw) {
+        const fs = FS(f.id);
+        if (tw.looking && !f.looking) f.looking = tw.looking;
+        if (tw.site && !f.site && !fs.site) { fs.site = tw.site; f.site = tw.site; }
+        if ((tw.ctx||[]).length && !(f.ctx||[]).length) f.ctx = tw.ctx;
+        if (tw.dims && !f.dims) { f.dims = tw.dims; fs.aiDims = tw.dims; fs.aiGraded = true; matched++; continue; }
+      }
+      remaining.push(f);
     }
-    remaining.push(f);
+    targets = remaining;
+    if (matched) save();
   }
-  targets = remaining;
-  if (matched) save();
-  const sheetOnly = il ? il.rows.filter(r => r.inc && !r.fundId && !r.aiDims && (r.firm || r.name)) : [];
+  const sheetOnly = il ? il.rows.filter(r => r.inc && !r.fundId && (deep ? !r.deepGraded : !r.aiDims) && (r.firm || r.name)) : [];
   const total = targets.length + sheetOnly.length;
   const batch = !!(opts && opts.batch);
   if (!total) { if (batch) { if (matched) save(); return { graded: 0, failed: 0, matched, stopped: false }; } if (!opts || !opts.auto) toast(matched ? `Matched ${matched} to funds already in the CRM. Everything is graded.` : 'Everything this connector reaches is already graded.'); if (matched) { render(); openConnector(cid); } return; }
-  gradeRun = { cid, stop: false, running: true };
+  gradeRun = { cid, stop: false, running: true, deep };
   if (batch) gradeRun.stop = gradeAll.stop;
   updateGradeBtn(0, total);
   if (opts && opts.auto) toast(`Researching ${total} ungraded fund${total>1?'s':''} via AI${matched?` (matched ${matched} already)`:''} - click "Stop grading" any time.`);
@@ -3709,7 +3718,7 @@ async function gradeConnectorFunds(cid, btn, opts){
     done++; updateGradeBtn(done, total); if (batch) updateGradeAllBtn(done, total);
     let ok = false;
     for (let attempt = 0; attempt < 2 && !ok; attempt++) {
-      try { await aiFitFetch(f); ok = true; }
+      try { await aiFitFetch(f, deep ? { deep: true } : undefined); ok = true; }
       catch (e) { if (attempt === 0 && failed === 0) toast('AI grading needs the deployed wiki. ' + String(e.message || e)); }
     }
     if (ok) consec = 0; else { failed++; consec++; }
@@ -3725,12 +3734,13 @@ async function gradeConnectorFunds(cid, btn, opts){
     for (let attempt = 0; attempt < 2 && !ok; attempt++) {
       try {
         const resp = await fetch('/api/vc-fit', { method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ fund: { name: r.firm || r.name, type: r.firm ? '' : 'Angel', region: '', check: null,
+          body: JSON.stringify({ deep, fund: { name: r.firm || r.name, type: r.firm ? '' : 'Angel', region: '', check: null,
             sectors: [], looking: [r.title, r.note].filter(Boolean).join(' · ') } }) });
         const d = await resp.json();
         if (!resp.ok) throw new Error(d.error || 'HTTP ' + resp.status);
         if (d.dims) r.aiDims = d.dims;
         r.aiWhy = d.one_liner || (d.brief ? firstSentence(d.brief) : r.aiWhy);
+        if (deep) r.deepGraded = true;
         ok = true;
       } catch (e) { /* retry once */ }
     }
@@ -3747,9 +3757,10 @@ async function gradeConnectorFunds(cid, btn, opts){
     return { graded: gradedNow, failed, matched, stopped };
   }
   save(); render(); openConnector(cid);
+  const verb = deep ? 'Deep graded' : 'Graded';
   toast(stopped
-    ? `Stopped. Graded ${gradedNow} so far${matched ? ` (plus ${matched} matched)` : ''} - reopen to finish the rest.`
-    : `Graded ${gradedNow} of ${total}${matched ? ` · matched ${matched} to existing funds` : ''}${failed ? ` (${failed} skipped - retry with "Grade the funds")` : ''}.`);
+    ? `Stopped. ${verb} ${gradedNow} so far${matched ? ` (plus ${matched} matched)` : ''} - reopen to finish the rest.`
+    : `${verb} ${gradedNow} of ${total}${matched ? ` · matched ${matched} to existing funds` : ''}${failed ? ` (${failed} skipped - retry)` : ''}.`);
 }
 /* Run the "Grade the funds" pass across many connectors, one after another.
    Each connector's pass already skips anything graded, so re-running is cheap. */
@@ -3969,6 +3980,7 @@ function openConnector(id, preselect){
           <button class="mini-btn" id="dExportInc">Export selected</button>
           ${markReqBtnHtml('dMarkReq', '')}
           <button class="mini-btn" id="dGradeFunds" style="font-weight:600">Grade the funds</button>
+          <button class="mini-btn" id="dDeepGradeFunds" style="font-weight:600" title="Deep grade every door this connector can open - googles each fund and grades on its real recent deals, stage, check and portfolio. Slower and higher cost; strong fits (>=78%) auto-move to Need intros.">\u{1F50E} Deep grade all</button>
           <button class="mini-btn" id="dAddMatch">+ Add match</button>
         </div>
       </div>
@@ -4098,6 +4110,12 @@ function openConnector(id, preselect){
     $('dGradeFunds').onclick = e => {
       if (gradeRun.running) { gradeRun.stop = true; e.target.textContent = 'Stopping...'; }
       else gradeConnectorFunds(id, e.target);
+    };
+  }
+  if ($('dDeepGradeFunds')) {
+    $('dDeepGradeFunds').onclick = e => {
+      if (gradeRun.running) { gradeRun.stop = true; e.target.textContent = 'Stopping...'; }
+      else gradeConnectorFunds(id, e.target, { deep: true });
     };
   }
   // Per-row deep grade: web-verified fit read on a single door. runAiFit reopens
