@@ -3705,7 +3705,7 @@ async function gradeConnectorFunds(cid, btn, opts){
   const sheetOnly = il ? il.rows.filter(r => r.inc && !r.fundId && (deep ? !r.deepGraded : !r.aiDims) && (r.firm || r.name)) : [];
   const total = targets.length + sheetOnly.length;
   const batch = !!(opts && opts.batch);
-  if (!total) { if (batch) { if (matched) save(); return { graded: 0, failed: 0, matched, stopped: false }; } if (!opts || !opts.auto) toast(matched ? `Matched ${matched} to funds already in the CRM. Everything is graded.` : 'Everything this connector reaches is already graded.'); if (matched) { render(); openConnector(cid); } return; }
+  if (!total) { if (batch) { if (matched) save(); return { graded: 0, failed: 0, matched, stopped: false }; } if (!opts || !opts.auto) toast(matched ? `Matched ${matched} to funds already in the CRM. Everything is graded.` : (deep ? 'Every door here is already deep graded - nothing to re-run.' : 'Everything this connector reaches is already graded.')); if (matched) { render(); openConnector(cid); } return; }
   gradeRun = { cid, stop: false, running: true, deep };
   if (batch) gradeRun.stop = gradeAll.stop;
   updateGradeBtn(0, total);
