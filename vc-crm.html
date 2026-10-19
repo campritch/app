@@ -326,6 +326,9 @@
     .fit-brief__text { font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; max-width: 760px; }
     .fit-brief__text b { color: var(--foreground); }
     .fit-brief__ai { margin-top: 8px; padding: 10px 12px; background: rgb(244 244 245 / 0.6); border-radius: 8px; }
+    .cr-deep { flex-shrink: 0; border: 1px solid var(--border, #e4e4e7); background: #fff; border-radius: 7px; padding: 2px 6px; font-size: 12px; line-height: 1.3; cursor: pointer; opacity: 0.72; }
+    .cr-deep:hover { opacity: 1; background: #f4f4f5; }
+    .cr-deep--done { border-color: #2563eb; background: rgb(37 99 235 / 0.08); opacity: 1; }
     .fit-brief__conns { margin-top: 8px; font-size: 12.5px; color: var(--text-secondary); }
     .fit-brief__conns .link { font-weight: 600; cursor: pointer; }
     .fit-brief button { margin-left: auto; }
@@ -2834,6 +2837,9 @@ async function runAiFit(fid, btn, opts){
   try {
     const data = await aiFitFetch(f, { deep });
     save(); render();
+    // Refresh the open connector drawer so the row's %, blue check and any
+    // >=78% deep-grade auto-promote show up without closing/reopening.
+    if (drawerRef && drawerRef.kind === 'connector') openConnector(drawerRef.id);
     toast((deep ? 'Deep grade done' : 'AI fit read done') + (data.one_liner ? ': ' + data.one_liner : '.'));
   } catch (err) {
     if (btn) { btn.textContent = deep ? 'Deep grade \u{1F50E}' : 'Run AI fit read'; btn.disabled = false; }
@@ -3994,11 +4000,12 @@ function openConnector(id, preselect){
           return `<label class="check-row${arch?' cr-archived':''}${isPref?' cr-preferred':''}${(!arch && fStage(f)==='needintros')?' cr-priority':''}" style="align-items:center">
             <input type="checkbox" data-inc="${p.id}" ${(checkedSet.has(p.id) && !arch)?'checked':''} ${arch?'disabled':''}>
             ${archDd}
-            <span style="flex:0 1 30%;min-width:180px">${isPref?'<span title="Your preferred intro path" style="color:var(--amber-text,#b45309)">★ </span>':''}${p.tbd ? '<a href="#fund=' + f.id + '" data-peek="' + f.id + '" rel="noopener" style="font-weight:700;color:inherit;text-decoration:underline dotted;text-underline-offset:2px" title="Quick look (cmd-click opens a new tab)">' + esc(f.name) + '</a> <span style="color:var(--muted-foreground)">· any partner</span>' : '<b>' + esc(p.name) + '</b> <span style="color:var(--muted-foreground)">· </span><a href="#fund=' + f.id + '" data-peek="' + f.id + '" rel="noopener" style="color:var(--muted-foreground);text-decoration:underline dotted;text-underline-offset:2px" title="Quick look (cmd-click opens a new tab)">' + esc(f.name) + '</a>'} ${badge}${isCompetitor(f) ? ' <span class="pill--competitor" data-compedit="' + f.id + '" title="' + (competitorName(f) ? 'Backs ' + esc(competitorName(f)) : 'Click to name the competitor they back') + '">COMPETITOR</span>' : ''}</span>
+            <span style="flex:0 1 30%;min-width:180px">${isPref?'<span title="Your preferred intro path" style="color:var(--amber-text,#b45309)">★ </span>':''}${p.tbd ? '<a href="#fund=' + f.id + '" data-peek="' + f.id + '" rel="noopener" style="font-weight:700;color:inherit;text-decoration:underline dotted;text-underline-offset:2px" title="Quick look (cmd-click opens a new tab)">' + esc(f.name) + '</a> <span style="color:var(--muted-foreground)">· any partner</span>' : '<b>' + esc(p.name) + '</b> <span style="color:var(--muted-foreground)">· </span><a href="#fund=' + f.id + '" data-peek="' + f.id + '" rel="noopener" style="color:var(--muted-foreground);text-decoration:underline dotted;text-underline-offset:2px" title="Quick look (cmd-click opens a new tab)">' + esc(f.name) + '</a>'}${deepBadge(f)} ${badge}${isCompetitor(f) ? ' <span class="pill--competitor" data-compedit="' + f.id + '" title="' + (competitorName(f) ? 'Backs ' + esc(competitorName(f)) : 'Click to name the competitor they back') + '">COMPETITOR</span>' : ''}</span>
             <span class="cr-why" style="flex:1;min-width:0;margin:0 10px">${esc(fundWhyLine(f))}</span>
             <b style="flex-shrink:0;font-size:12.5px;width:42px;text-align:right" title="Fit against the deck">${pct}</b>
             ${prefDd}
             <span class="cr-sub" style="flex-shrink:0;text-align:right">${grade(f)}${arch ? ' · Archived' + (reason ? ' (' + esc(reason) + ')' : '') : ' · ' + P_STATUS[pStatus(p)]}${(stg!=='none') ? ` · <span class="pill pill--type">${F_STAGES[stg]}</span>` : ''}</span>
+            <button type="button" class="cr-deep${FS(f.id).deepGraded?' cr-deep--done':''}" data-rowdeep="${f.id}" title="${FS(f.id).deepGraded ? 'Re-run deep grade - web-verified fit read' : 'Deep grade: googles the fund and grades on its real recent deals, stage, check and portfolio'}">🔎</button>
             ${ddHtml({ ctx:'fstage:'+f.id, value: stg, kebab:true, quiet:true, trigger:'⋯', menuRight:true, title:'Move this fund to a stage', options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:v})).concat([{v:'__site', l: f.site ? '🔗 Edit website' : '🔗 Add website'}, {v:'__delete', l:'🗑 Delete (bad data)'}]) })}
           </label>`;
         }).join('') : '<div class="info-card">' + (connSrcFilter === 'all' ? 'No matches yet. Add one, or sync LinkedIn to match automatically.' : 'Nothing from this source - switch the filter back to All.') + '</div>'}
@@ -4093,6 +4100,12 @@ function openConnector(id, preselect){
       else gradeConnectorFunds(id, e.target);
     };
   }
+  // Per-row deep grade: web-verified fit read on a single door. runAiFit reopens
+  // this drawer on success, so the %, blue check and stage refresh in place.
+  document.querySelectorAll('[data-rowdeep]').forEach(btn => btn.onclick = e => {
+    e.preventDefault(); e.stopPropagation();
+    runAiFit(btn.dataset.rowdeep, btn, { deep: true });
+  });
   // Auto-grade once per connector: when you open it, anything ungraded starts
   // researching itself via the API (website + web search) so you never paste a
   // fund name into Google. It only runs once and you can Stop it any time.
