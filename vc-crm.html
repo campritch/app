@@ -4634,16 +4634,19 @@ $('tableBody').addEventListener('click', e => {
     e.stopPropagation();
     const id = chk.dataset.check;
     if (e.shiftKey && lastCheckId && lastCheckId !== id) {
-      // Range select: apply the clicked box's new state to every row between
-      // the last-clicked anchor and this one (in the current table order).
+      // Range select: select every row between the last-clicked anchor and this
+      // one (in current table order). We always SELECT the range rather than
+      // mirror chk.checked - a shift-click makes the browser extend a text
+      // selection, which suppresses the checkbox's own toggle, so chk.checked
+      // is unreliable here and would otherwise leave the range unselected.
       const all = [...document.querySelectorAll('[data-check]')].map(c => c.dataset.check);
       let i = all.indexOf(lastCheckId), j = all.indexOf(id);
       if (i > -1 && j > -1) {
         if (i > j) { const t = i; i = j; j = t; }
-        const want = chk.checked;
-        for (let k = i; k <= j; k++) { want ? selected.add(all[k]) : selected.delete(all[k]); }
+        for (let k = i; k <= j; k++) selected.add(all[k]);
+        try { window.getSelection().removeAllRanges(); } catch (_) {}
       } else {
-        chk.checked ? selected.add(id) : selected.delete(id);
+        selected.add(id);
       }
     } else {
       chk.checked ? selected.add(id) : selected.delete(id);
