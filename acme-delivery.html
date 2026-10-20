@@ -654,8 +654,13 @@
   .rpt-read__body .rpt-factor__fill { animation:fillin .7s ease; }
   /* operator compliance scoring checklist */
   .cplist { margin-top:18px; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
-  .cplist__hd { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 15px; background:var(--page-bg); border-bottom:1px solid var(--border-light); }
+  .cplist__hd { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 15px; background:var(--page-bg); border-bottom:1px solid var(--border-light); cursor:pointer; list-style:none; user-select:none; }
+  .cplist__hd::-webkit-details-marker { display:none; }
+  .cplist:not([open]) .cplist__hd { border-bottom:none; }
+  .cplist__hd:hover { background:var(--border-light); }
   .cplist__hd b { font-size:13px; font-weight:700; }
+  .cplist__chev { color:var(--text-tertiary); flex-shrink:0; transition:transform .18s ease; }
+  .cplist[open] .cplist__chev { transform:rotate(180deg); }
   .cplist__score { font-size:12px; font-weight:700; padding:3px 10px; border-radius:999px; }
   .cplist__score.ok { background:var(--green-bg); color:var(--green-text); }
   .cplist__score.warn { background:var(--orange-bg); color:var(--orange-text); }
@@ -2236,11 +2241,13 @@
     if(typeof DRAWER_SPOT!=='undefined' && DRAWER_SPOT) openSpot(DRAWER_SPOT); else openRead(id); }
   function complianceBlock(s){
     const items=complianceItems(s), met=items.filter(function(x){return x.met;}).length, tot=items.length, missed=tot-met;
-    return `<div class="cplist" style="margin-top:13px">
-      <div class="cplist__hd"><b>Compliance — scored against ${esc(s.brand)}'s brief</b><span class="cplist__score ${missed?'warn':'ok'}">${met}/${tot} met</span></div>
+    // Collapsed by default when everything passed - nothing to review. Auto-opens
+    // only when a requirement is missed, so the operator's eye goes to the problem.
+    return `<details class="cplist" ${missed?'open':''} style="margin-top:13px">
+      <summary class="cplist__hd"><b>Compliance — scored against ${esc(s.brand)}'s brief</b><span style="margin-left:auto;display:flex;align-items:center;gap:8px"><span class="cplist__score ${missed?'warn':'ok'}">${missed?`${missed} to review`:`${met}/${tot} met`}</span><svg class="cplist__chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></span></summary>
       ${items.map(function(it,i){ return `<div class="cprow" onclick="event.stopPropagation();toggleCompliance('${s.id}',${i})"><span class="cprow__ic ${it.met?'met':'no'}">${it.met?CK_SVG:CX_SVG}</span><span class="cprow__t">${esc(it.label)}</span><span class="cprow__hint">${it.met?'met':'not met'}</span></div>`; }).join('')}
       <div class="cplist__foot"><button class="btn btn--ghost btn--sm" onclick="event.stopPropagation();toast('Air-check MP3 + transcript downloaded.')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>Download air check</button>${missed?`<button class="btn btn--primary btn--sm" style="margin-left:auto" onclick="event.stopPropagation();toast('Flag email drafted to the host for ${missed} missed requirement'+(${missed}>1?'s':'')+'.')">Draft host flag</button>`:'<span class="muted" style="font-size:12px;margin-left:auto">All requirements met — nothing to flag.</span>'}</div>
-    </div>`;
+    </details>`;
   }
   function openRead(id){
     const s=spot(id), sh=show(s.showId), pr=projection(s), v=verdict(s), cr=creative(s.brand);
@@ -2267,15 +2274,7 @@
       </div>
       <div style="margin-top:16px">${transcriptBlock(s)}</div>`:''}
 
-      ${(function(){ const items=complianceItems(s), met=items.filter(function(x){return x.met;}).length, tot=items.length, missed=tot-met;
-        return `<div class="cplist">
-          <div class="cplist__hd"><b>Compliance — scored against ${esc(s.brand)}'s brief</b><span class="cplist__score ${missed?'warn':'ok'}">${met}/${tot} met</span></div>
-          ${items.map(function(it,i){ return `<div class="cprow" onclick="toggleCompliance('${s.id}',${i})"><span class="cprow__ic ${it.met?'met':'no'}">${it.met?CK_SVG:CX_SVG}</span><span class="cprow__t">${esc(it.label)}</span><span class="cprow__hint">${it.met?'met':'not met'}</span></div>`; }).join('')}
-          <div class="cplist__foot">
-            <button class="btn btn--ghost btn--sm" onclick="toast('Air-check MP3 + transcript downloaded — ${esc(s.brand)} on ${esc(sh.name)}.')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>Download air check</button>
-            ${missed?`<button class="btn btn--primary btn--sm" style="margin-left:auto" onclick="toast('Flag email drafted to the host for ${missed} missed requirement${missed>1?'s':''}.')">Draft host flag</button>`:'<span class="muted" style="font-size:12px;margin-left:auto">All requirements met — nothing to flag.</span>'}
-          </div>
-        </div>`; })()}
+      ${complianceBlock(s)}
 
       <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light)">
         <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em">The compliance requirements — what the host was briefed to read</div>
