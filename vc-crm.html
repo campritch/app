@@ -1329,7 +1329,9 @@ async function bootSync(){
     state._dirty = false;
     persistLocal();
     mergeDuplicateConnectors();
-    rebuild(); render();
+    rebuild();
+    { const bf = backfillDeepIntros(); if (bf) { save(); toast(`Moved ${bf} deep-graded fund${bf===1?'':'s'} (>=78%) to Need intros.`); } }
+    render();
     setSyncUI('saved');
   } catch (e) {
     setSyncUI('local');
@@ -1469,6 +1471,22 @@ function competitorBadge(f){
 // pushed to a future round.
 const PARKED_STAGES = new Set(['disqualified', 'future', 'closed']);
 function isParkedFund(f){ return !!f && PARKED_STAGES.has(fStage(f)); }
+// One-time catch-up: funds deep-graded BEFORE the >=78 auto-promote shipped never
+// got moved to Need intros (and a later deep-grade run skips already-deep-graded
+// funds, so they'd never be caught). Sweep them in once. Only promotes from an
+// untargeted stage and skips competitors, so it won't fight a manual placement.
+function backfillDeepIntros(){
+  if (state.migDeepIntro78) return 0;
+  let n = 0;
+  FUNDS.forEach(f => {
+    const fs = FS(f.id);
+    if (!fs.deepGraded || isCompetitor(f) || score(f) < 78) return;
+    const cur = fStage(f);
+    if (!cur || cur === 'none' || cur === 'target' || cur === 'future') { fs.stage = 'needintros'; n++; }
+  });
+  state.migDeepIntro78 = true;
+  return n;
+}
 function renameConnector(id, name){
   name = (name || '').trim();
   if (!name) return;
@@ -5422,6 +5440,7 @@ $('exportBtn').addEventListener('click', () => {
 
 rebuild();
 mergeDuplicateConnectors();
+{ const bf = backfillDeepIntros(); if (bf) save(); }
 render();
 bootSync();
 // deep link: #fund=<id> opens that fund's drawer (used by new-tab links in the connector module)
