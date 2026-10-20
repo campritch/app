@@ -339,9 +339,12 @@
     .dq-reason-line:hover { text-decoration: underline; }
     /* "Why they passed" — Past-fund reason badge + free-text detail, shown in the Why column */
     .why-passed { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .pass-badge { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .02em; padding: 1px 8px; border-radius: 9999px; background: var(--secondary); color: var(--foreground); cursor: pointer; white-space: nowrap; }
-    .pass-badge:hover { filter: brightness(0.96); text-decoration: underline; }
-    .pass-note { font-size: 11.5px; color: var(--muted-foreground); }
+    .pass-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; letter-spacing: .01em; padding: 5px 11px; border-radius: 8px; border: 1px solid var(--border, #e4e4e7); background: var(--secondary); color: var(--foreground); cursor: pointer; white-space: nowrap; line-height: 1.2; }
+    .pass-badge:hover { filter: brightness(0.97); border-color: var(--grey-1, #a1a1aa); }
+    .pass-why { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; flex-shrink: 0; border-radius: 8px; border: 1px solid var(--border, #e4e4e7); background: #fff; color: var(--muted-foreground); cursor: pointer; }
+    .pass-why:hover { background: #f4f4f5; color: var(--foreground); }
+    .pass-why--has { border-color: #2563eb; color: #2563eb; background: rgb(37 99 235 / 0.08); }
+    .am-input--area { width: 100%; resize: vertical; min-height: 96px; font: inherit; line-height: 1.5; }
     .check-edit { cursor: pointer; border-bottom: 1px dashed transparent; }
     .check-edit:hover { border-bottom-color: var(--muted-foreground); }
     /* Blue "verified" check: a fund that's had a deep (web-grounded) grade */
@@ -4360,25 +4363,45 @@ function askPassReason(fids, done){
   });
   document.addEventListener('keydown', function esc(e){ if (e.key === 'Escape') { document.removeEventListener('keydown', esc); finish(); } });
 }
-/* "Why they passed" cell content for a Past fund: reason badge (click to edit) + detail. */
+/* "Why they passed" cell content for a Past fund: reason box (click to change
+   the category) + a chat icon that opens the full "why they said no" note. */
 function passReasonHtml(f){
   const fs = FS(f.id);
-  const badge = `<span class="pass-badge" data-passedit="${f.id}" title="Click to change why they passed">\u{1F44B} ${esc(fs.passReason || 'add reason')}</span>`;
-  return `<div class="why-passed">${badge}${fs.passNote ? `<span class="pass-note">${esc(fs.passNote)}</span>` : ''}</div>`;
+  const hasNote = !!(fs.passNote && fs.passNote.trim());
+  const badge = `<button type="button" class="pass-badge" data-passedit="${f.id}" title="Click to change the pass reason">\u{1F44B} ${esc(fs.passReason || 'Add reason')}</button>`;
+  const chat = `<button type="button" class="pass-why${hasNote ? ' pass-why--has' : ''}" data-passwhy="${f.id}" title="${hasNote ? 'See why they said no' : 'Add why they said no'}">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  </button>`;
+  return `<div class="why-passed">${badge}${chat}</div>`;
+}
+/* Read / add the free-text note on why a fund passed. */
+async function openPassWhy(fid){
+  const f = FUND_BY_ID[fid]; if (!f) return;
+  const fs = FS(fid);
+  const t = await appPrompt(`Why ${f.name} said no`, fs.passNote || '',
+    { multiline: true, placeholder: 'Paste or type what they told you...', okLabel: 'Save' });
+  if (t === null) return;
+  const v = t.trim();
+  if (v) fs.passNote = v; else delete fs.passNote;
+  save(); render();
 }
 
 /* In-app replacements for the native prompt()/confirm() dialogs - same
    look as the disqualify modal, promise-based so callers `await` them. */
-function appPrompt(message, defValue = '') {
+function appPrompt(message, defValue = '', opts = {}) {
   return new Promise(resolve => {
     const ov = document.createElement('div');
     ov.className = 'dq-overlay';
+    const ph = opts.placeholder ? ` placeholder="${esc(opts.placeholder)}"` : '';
+    const field = opts.multiline
+      ? `<textarea class="am-input am-input--area" rows="5"${ph}></textarea>`
+      : `<input class="am-input" type="text"${ph}>`;
     ov.innerHTML = `<div class="dq-card">
       <div class="dq-title">${esc(message)}</div>
-      <input class="am-input" type="text">
+      ${field}
       <div class="am-actions">
-        <button type="button" class="am-btn" data-am="cancel">Cancel</button>
-        <button type="button" class="am-btn am-btn--primary" data-am="ok">OK</button>
+        <button type="button" class="am-btn" data-am="cancel">${esc(opts.cancelLabel || 'Cancel')}</button>
+        <button type="button" class="am-btn am-btn--primary" data-am="ok">${esc(opts.okLabel || 'OK')}</button>
       </div>
     </div>`;
     document.body.appendChild(ov);
@@ -4388,7 +4411,9 @@ function appPrompt(message, defValue = '') {
     const close = val => { document.removeEventListener('keydown', onKey); ov.remove(); resolve(val); };
     const onKey = e => {
       if (e.key === 'Escape') { e.preventDefault(); close(null); }
-      else if (e.key === 'Enter') { e.preventDefault(); close(input.value); }
+      // single-line submits on Enter; multiline keeps Enter for newlines and
+      // submits on Cmd/Ctrl+Enter so pasted notes can span lines.
+      else if (e.key === 'Enter' && (!opts.multiline || e.metaKey || e.ctrlKey)) { e.preventDefault(); close(input.value); }
     };
     document.addEventListener('keydown', onKey);
     ov.addEventListener('click', e => {
@@ -4704,6 +4729,8 @@ $('tableBody').addEventListener('click', e => {
   if (connChip) { e.stopPropagation(); openConnector(connChip.dataset.openconn); return; }
   const dqEdit = e.target.closest('[data-dqedit]');
   if (dqEdit) { e.stopPropagation(); askDisqualifyReason([dqEdit.dataset.dqedit], render); return; }
+  const passWhy = e.target.closest('[data-passwhy]');
+  if (passWhy) { e.stopPropagation(); openPassWhy(passWhy.dataset.passwhy); return; }
   const passEdit = e.target.closest('[data-passedit]');
   if (passEdit) { e.stopPropagation(); askPassReason([passEdit.dataset.passedit], render); return; }
   const checkEdit = e.target.closest('[data-checkedit]');
