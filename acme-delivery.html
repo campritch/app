@@ -451,6 +451,224 @@
     .srcpill.adserver { background:var(--purple-bg); color:var(--purple-text); }
 
     @media (max-width: 900px) { .tiles { grid-template-columns: repeat(2,1fr); } }
+  /* ═══ modern brand-facing campaign report ═══ */
+  .rpt { max-width:1120px; margin:0 auto; }
+  .rpt-hero { border-radius:20px; padding:22px 24px; background:linear-gradient(135deg, var(--primary) 0%, #223041 100%); color:#fff; position:relative; overflow:hidden; }
+  .rpt-hero::after { content:""; position:absolute; right:-60px; top:-60px; width:260px; height:260px; border-radius:50%; background:rgba(255,255,255,.05); }
+  .rpt-hero__top { display:flex; align-items:center; gap:14px; position:relative; z-index:1; }
+  .rpt-logo { width:52px; height:52px; border-radius:13px; display:grid; place-items:center; font-weight:800; font-size:18px; color:#fff; flex-shrink:0; box-shadow:0 2px 10px rgba(0,0,0,.25); }
+  .rpt-hero__name { font-size:21px; font-weight:800; letter-spacing:-.03em; }
+  .rpt-hero__name .x { opacity:.5; font-weight:500; margin:0 3px; }
+  .rpt-hero__sub { font-size:12.5px; color:rgba(255,255,255,.7); font-weight:500; margin-top:2px; }
+  .rpt-status { margin-left:auto; display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; padding:6px 13px; border-radius:999px; white-space:nowrap; }
+  .rpt-status::before { content:""; width:7px; height:7px; border-radius:50%; background:currentColor; }
+  .rpt-status.green { background:rgba(91,214,143,.16); color:#7EE6A8; }
+  .rpt-status.orange { background:rgba(240,168,104,.16); color:#F3B979; }
+  .rpt-status.red { background:rgba(245,139,132,.16); color:#F7A099; }
+  .rpt-hero__actions { display:flex; gap:9px; margin-top:18px; position:relative; z-index:1; flex-wrap:wrap; }
+  .rpt-btn { display:inline-flex; align-items:center; gap:7px; font-family:inherit; font-size:12.5px; font-weight:600; padding:9px 14px; border-radius:10px; cursor:pointer; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.08); color:#fff; }
+  .rpt-btn:hover { background:rgba(255,255,255,.16); }
+  .rpt-btn--solid { background:#fff; color:var(--primary); border-color:#fff; }
+  .rpt-btn--solid:hover { background:#f0f0f0; }
+  .rpt-btn svg { width:14px; height:14px; }
+
+  .rpt-deliv { display:grid; grid-template-columns:300px 1fr; gap:18px; margin-top:16px; background:var(--panel); border:1px solid var(--border); border-radius:18px; padding:20px 22px; }
+  @media (max-width:760px){ .rpt-deliv{ grid-template-columns:1fr; } }
+  .rpt-deliv__big { font-size:40px; font-weight:800; letter-spacing:-.04em; line-height:1; }
+  .rpt-deliv__of { font-size:12.5px; color:var(--text-secondary); font-weight:500; margin-top:5px; }
+  .rpt-deliv__pct { display:inline-block; margin-top:11px; font-size:13px; font-weight:800; padding:3px 11px; border-radius:999px; }
+  .rpt-deliv__pct.green { background:var(--green-bg); color:var(--green-text); }
+  .rpt-deliv__pct.orange { background:var(--orange-bg); color:var(--orange-text); }
+  .rpt-deliv__pct.red { background:var(--red-bg); color:var(--red-text); }
+  .rpt-chips { display:flex; flex-wrap:wrap; gap:7px 16px; margin-top:16px; }
+  .rpt-chip__l { font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-tertiary); }
+  .rpt-chip__v { font-size:15px; font-weight:800; letter-spacing:-.02em; }
+  .rpt-chart { position:relative; }
+  .rpt-chart svg { width:100%; height:auto; display:block; overflow:visible; }
+  .rpt-chart__legend { display:flex; gap:16px; margin-top:8px; font-size:11px; font-weight:600; color:var(--text-secondary); }
+  .rpt-chart__legend i { display:inline-block; width:14px; height:3px; border-radius:2px; vertical-align:middle; margin-right:5px; }
+
+  .rpt-callout { display:flex; align-items:center; gap:14px; border-radius:14px; padding:14px 18px; margin-top:16px; }
+  .rpt-callout.green { background:var(--green-bg); }
+  .rpt-callout.orange { background:var(--orange-bg); }
+  .rpt-callout.purple { background:var(--purple-bg); }
+  .rpt-callout b { font-size:13.5px; }
+  .rpt-callout .muted { font-size:12.5px; }
+
+  .rpt-sec { display:flex; align-items:center; gap:10px; margin:22px 2px 12px; }
+  .rpt-sec h2 { font-size:15px; font-weight:800; letter-spacing:-.02em; margin:0; }
+  .rpt-sec .muted { font-size:12px; color:var(--text-tertiary); font-weight:500; }
+  .rpt-seg { margin-left:auto; display:inline-flex; background:var(--secondary-lite); border-radius:9px; padding:3px; }
+  .rpt-seg button { font-family:inherit; font-size:12px; font-weight:600; color:var(--text-secondary); background:none; border:none; border-radius:7px; padding:6px 12px; cursor:pointer; }
+  .rpt-seg button.active { background:var(--panel); color:var(--text-primary); box-shadow:0 1px 3px rgba(0,0,0,.08); }
+
+  .rpt-read { background:var(--panel); border:1px solid var(--border); border-radius:14px; margin-bottom:10px; overflow:hidden; transition:border-color .12s; }
+  .rpt-read:hover { border-color:var(--border-strong); }
+  .rpt-read__head { display:flex; align-items:center; gap:14px; padding:13px 16px; cursor:pointer; }
+  .rpt-read__logo { width:40px; height:40px; border-radius:10px; display:grid; place-items:center; color:#fff; font-weight:800; font-size:13px; flex-shrink:0; }
+  .rpt-read__main { flex:1; min-width:0; }
+  .rpt-read__show { font-size:13.5px; font-weight:700; }
+  .rpt-read__ep { font-size:11.5px; color:var(--text-secondary); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rpt-read__imp { text-align:right; flex-shrink:0; }
+  .rpt-read__imp b { font-size:14px; font-weight:800; }
+  .rpt-read__imp span { display:block; font-size:10.5px; color:var(--text-tertiary); font-weight:600; }
+  .rpt-grade { width:38px; height:38px; border-radius:50%; display:grid; place-items:center; font-weight:800; font-size:14px; flex-shrink:0; }
+  .rpt-grade.green { background:var(--green-bg); color:var(--green-text); }
+  .rpt-grade.blue { background:var(--blue-bg); color:var(--blue-text); }
+  .rpt-grade.orange { background:var(--orange-bg); color:var(--orange-text); }
+  .rpt-grade.red { background:var(--red-bg); color:var(--red-text); }
+  .rpt-chev { width:16px; height:16px; color:var(--text-tertiary); transition:transform .18s; flex-shrink:0; }
+  .rpt-read.open .rpt-chev { transform:rotate(180deg); }
+  .rpt-read__body { display:none; padding:20px 16px 18px; border-top:1px solid var(--border-light); }
+  .rpt-read.open .rpt-read__body { display:block; }
+  .rpt-vbadge { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:2px 9px; border-radius:999px; background:var(--green-bg); color:var(--green-text); }
+  .rpt-vbadge svg { width:11px; height:11px; }
+  .rpt-ac { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
+  @media (max-width:620px){ .rpt-ac{ grid-template-columns:1fr; } }
+  .rpt-ac__panel { background:var(--page-bg); border-radius:11px; padding:13px 15px; }
+  .rpt-ac__h { font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:10px; }
+  .rpt-factor { margin-bottom:10px; }
+  .rpt-factor__top { display:flex; justify-content:space-between; font-size:12px; font-weight:600; margin-bottom:4px; }
+  .rpt-factor__bar { height:6px; border-radius:4px; background:var(--secondary-lite); overflow:hidden; }
+  .rpt-factor__fill { height:100%; border-radius:4px; }
+  .rpt-cpl { display:flex; align-items:flex-start; gap:9px; padding:8px 0; border-top:1px solid var(--border-light); font-size:12px; }
+  .rpt-cpl:first-child { border-top:none; }
+  .rpt-cpl__ic { width:18px; height:18px; border-radius:50%; background:var(--green-bg); color:var(--green-text); display:grid; place-items:center; flex-shrink:0; }
+  .rpt-cpl__ic svg { width:11px; height:11px; }
+  .rpt-cpl__ic.warn { background:var(--orange-bg); color:var(--orange-text); }
+  .rpt-metaline { display:flex; flex-wrap:wrap; gap:7px 18px; margin-top:12px; font-size:12px; color:var(--text-secondary); font-weight:500; }
+  .rpt-metaline b { color:var(--text-primary); font-weight:700; }
+  .rpt-booked { display:flex; align-items:center; gap:12px; padding:12px 16px; border:1px dashed var(--border-strong); border-radius:12px; margin-bottom:10px; font-size:12.5px; color:var(--text-secondary); }
+  .rpt-booked__logo { width:34px; height:34px; border-radius:9px; background:var(--secondary-lite); display:grid; place-items:center; font-weight:800; font-size:11px; color:var(--text-secondary); flex-shrink:0; }
+
+  /* ═══ report-as-side-modal (consumer-grade) ═══ */
+  .drawer--report { width:min(1140px,97vw); max-width:none; padding:0; background:var(--page-bg); }
+  .rpt-scroll { flex:1; overflow-y:auto; overflow-x:hidden; }
+  .rpt-close { position:absolute; top:16px; right:18px; z-index:5; width:34px; height:34px; border-radius:50%; border:none; background:rgba(255,255,255,.14); color:#fff; font-size:17px; cursor:pointer; display:grid; place-items:center; backdrop-filter:blur(4px); transition:background .14s; }
+  .rpt-close:hover { background:rgba(255,255,255,.26); }
+  .rpt-pad { padding:0 26px 30px; }
+  .rpt-hero { position:relative; overflow:hidden; border-radius:0; min-height:260px; padding:22px 26px 46px; display:flex; flex-direction:column; background:#0f141b; }
+  .rpt-hero::after { display:none; }
+  .rpt-hero__cover { position:absolute; inset:0; z-index:0; }
+  .rpt-hero__cover::after { content:attr(data-mono); position:absolute; right:3%; top:50%; transform:translateY(-58%); font-size:188px; font-weight:800; letter-spacing:-.06em; color:rgba(255,255,255,.06); line-height:1; pointer-events:none; }
+  .rpt-hero__scrim { position:absolute; inset:0; z-index:1; background:linear-gradient(to bottom, rgba(8,11,16,.52) 0%, rgba(8,11,16,.12) 33%, rgba(8,11,16,.42) 66%, rgba(8,11,16,.93) 100%); }
+  .rpt-hero__content { position:relative; z-index:2; display:flex; flex-direction:column; flex:1; }
+  .rpt-hero__content .rpt-hero__row { margin-top:auto; }
+  .rpt-hero__eyebrow { font-size:10.5px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:rgba(255,255,255,.5); margin-bottom:9px; }
+  .rpt-hero__head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding-right:46px; margin-bottom:16px; }
+  .rpt-hero__head .rpt-hero__eyebrow { margin-bottom:0; align-self:center; }
+  .rpt-hero__head .rpt-hero__actions { margin-top:0; }
+  .rpt-hero__row { display:flex; align-items:center; gap:15px; }
+  .rpt-hero__row .rpt-logo { width:54px; height:54px; }
+  .rpt-hero__name2 { font-size:24px; font-weight:800; letter-spacing:-.035em; line-height:1.05; }
+
+  /* now-playing hero player */
+  .npl { margin-top:-18px; position:relative; z-index:2; background:var(--panel); border:1px solid var(--border); border-radius:18px; box-shadow:0 10px 34px rgba(20,25,35,.1); padding:16px 18px; display:flex; align-items:center; gap:16px; }
+  .npl__art { width:60px; height:60px; border-radius:13px; display:grid; place-items:center; color:#fff; font-weight:800; font-size:17px; flex-shrink:0; position:relative; overflow:hidden; }
+  .npl__art::after { content:""; position:absolute; inset:0; background:linear-gradient(160deg,rgba(255,255,255,.18),transparent 60%); }
+  .npl__mid { flex:1; min-width:0; }
+  .npl__ey { font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-tertiary); }
+  .npl__title { font-size:14.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin:2px 0 1px; }
+  .npl__show { font-size:12px; color:var(--text-secondary); font-weight:500; }
+  .npl__seekwrap { margin-top:10px; }
+  .npl__times { display:flex; justify-content:space-between; font-size:10.5px; font-weight:600; color:var(--text-tertiary); font-variant-numeric:tabular-nums; margin-bottom:4px; }
+  .npl__seek { position:relative; height:7px; border-radius:5px; background:var(--secondary-lite); cursor:pointer; }
+  .npl__ad { position:absolute; top:0; height:7px; border-radius:5px; background:rgba(14,104,50,.22); }
+  .npl__fill { position:absolute; left:0; top:0; height:7px; border-radius:5px; background:var(--green-text); width:0%; }
+  .npl__thumb { position:absolute; top:50%; width:13px; height:13px; border-radius:50%; background:#fff; border:2px solid var(--green-text); transform:translate(-50%,-50%); left:0%; box-shadow:0 1px 4px rgba(0,0,0,.2); }
+  .npl__play { width:50px; height:50px; border-radius:50%; background:var(--primary); color:#fff; border:none; display:grid; place-items:center; cursor:pointer; flex-shrink:0; transition:transform .12s; }
+  .npl__play:hover { transform:scale(1.06); }
+  .npl__play svg { width:19px; height:19px; }
+
+  .rpt-grid2 { display:grid; grid-template-columns:1.3fr 1fr; gap:14px; margin-top:16px; }
+  @media (max-width:820px){ .rpt-grid2{ grid-template-columns:1fr; } }
+  .rpt-card { background:var(--panel); border:1px solid var(--border); border-radius:18px; padding:18px 20px; }
+  .rpt-card__h { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:14px; }
+  .showbar { margin-bottom:14px; }
+  .showbar:last-child { margin-bottom:0; }
+  .showbar__top { display:flex; justify-content:space-between; align-items:baseline; font-size:12.5px; margin-bottom:6px; gap:12px; }
+  .showbar__name { font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .showbar__num { color:var(--text-secondary); font-weight:500; white-space:nowrap; flex-shrink:0; }
+  .showbar__num b { color:var(--text-primary); font-weight:800; }
+  .showbar__track { height:9px; border-radius:5px; background:var(--secondary-lite); overflow:hidden; }
+  .showbar__track i { display:block; height:100%; border-radius:5px; background:var(--green-text); }
+
+  /* vertical by-show chart + What's next side by side */
+  .rpt-twocol2 { display:grid; grid-template-columns:1fr 300px; gap:14px; margin-top:14px; align-items:start; }
+  .rpt-twocol2--solo { grid-template-columns:1fr; }
+  @media (max-width:820px){ .rpt-twocol2{ grid-template-columns:1fr; } }
+  .vbars { display:flex; align-items:flex-end; gap:10px; padding-top:4px; overflow-x:auto; }
+  .vbar { display:flex; flex-direction:column; align-items:center; flex:1 1 0; min-width:34px; }
+  .vbar__num { font-size:11px; font-weight:800; margin-bottom:6px; white-space:nowrap; }
+  .vbar__track { width:24px; height:130px; border-radius:6px; background:var(--secondary-lite); position:relative; overflow:hidden; display:flex; align-items:flex-end; }
+  .vbar__track i { width:100%; border-radius:6px 6px 0 0; background:var(--green-text); transition:height .5s ease; }
+  .vbar__goal { position:absolute; left:0; right:0; top:0; height:2px; background:var(--border-strong); z-index:1; }
+  .vbar__pct { font-size:11px; font-weight:800; margin-top:7px; }
+  .vbar__name { font-size:10px; color:var(--text-secondary); font-weight:600; margin-top:2px; max-width:46px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .vbars__legend { display:flex; gap:16px; margin-top:13px; font-size:10.5px; font-weight:600; color:var(--text-secondary); }
+  .vbars__legend i { display:inline-block; width:12px; height:8px; border-radius:2px; vertical-align:middle; margin-right:5px; }
+  .nextstack { display:flex; flex-direction:column; gap:10px; }
+  .nextrow { display:flex; gap:11px; align-items:flex-start; }
+  .nextrow__when { font-size:9.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--text-tertiary); width:50px; flex-shrink:0; padding-top:1px; }
+  .nextrow__when.soon { color:var(--orange-text); }
+  .nextrow__show { font-size:12.5px; font-weight:700; }
+  .nextrow__meta { font-size:11px; color:var(--text-secondary); font-weight:500; margin-top:1px; }
+
+  /* what's next rail */
+  .nextrail { display:flex; gap:10px; overflow-x:auto; padding-bottom:4px; scrollbar-width:thin; }
+  .nextcard { flex:0 0 auto; width:188px; background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:13px 15px; }
+  .nextcard__when { font-size:10.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--green-text); margin-bottom:7px; display:flex; align-items:center; gap:6px; }
+  .nextcard__when.soon { color:var(--orange-text); }
+  .nextcard__show { font-size:13px; font-weight:700; }
+  .nextcard__meta { font-size:11.5px; color:var(--text-secondary); font-weight:500; margin-top:3px; }
+  .nextcard__tag { margin-top:9px; display:inline-block; font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:999px; background:var(--secondary-lite); color:var(--text-secondary); }
+
+  /* collapsed read row: delivery progress + labeled grade */
+  .rpt-read__deliv { min-width:132px; flex-shrink:0; }
+  .rpt-read__deliv-row { display:flex; align-items:baseline; justify-content:flex-end; gap:5px; font-size:11px; color:var(--text-secondary); font-weight:600; }
+  .rpt-read__deliv-row b { font-size:14.5px; color:var(--text-primary); font-weight:800; }
+  .rpt-read__deliv-row .pct { font-size:11.5px; font-weight:800; }
+  .rpt-read__dbar { height:5px; border-radius:3px; background:var(--secondary-lite); overflow:hidden; margin-top:5px; }
+  .rpt-read__dbar i { display:block; height:100%; border-radius:3px; }
+  .rpt-read__bld { font-size:10px; color:var(--text-tertiary); font-weight:600; text-align:right; margin-top:3px; }
+  .rpt-gradechip { display:flex; flex-direction:column; align-items:center; padding:4px 10px; border-radius:10px; background:var(--secondary-lite); flex-shrink:0; line-height:1.05; }
+  .rpt-gradechip span { font-size:7.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-tertiary); }
+  .rpt-gradechip b { font-size:15px; font-weight:800; }
+  .rpt-gradechip.green b { color:var(--green-text); } .rpt-gradechip.blue b { color:var(--blue-text); }
+  .rpt-gradechip.orange b { color:var(--orange-text); } .rpt-gradechip.red b { color:var(--red-text); }
+
+  .npl--embed { margin-top:0; margin-bottom:18px; box-shadow:none; border:1px solid var(--border); }
+  .rpt-readfoot { display:flex; align-items:center; gap:12px; margin-top:0; }
+  .rpt-footlinks { margin-left:auto; display:flex; align-items:center; gap:16px; }
+  .rpt-len { font-size:12.5px; font-weight:700; color:var(--text-primary); }
+  .rpt-stat { display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; padding:4px 11px; border-radius:999px; }
+  .rpt-stat svg { width:12px; height:12px; }
+  .rpt-stat.green { background:var(--green-bg); color:var(--green-text); }
+  .rpt-stat.orange { background:var(--orange-bg); color:var(--orange-text); }
+  .rpt-mp3 { font-size:12px; font-weight:600; color:var(--text-secondary); cursor:pointer; }
+  .rpt-mp3:hover { color:var(--text-primary); }
+
+  .rpt-draw { animation:rptdraw 1.1s ease forwards; }
+  @keyframes rptdraw { from{ stroke-dashoffset:var(--len); } to{ stroke-dashoffset:0; } }
+  @keyframes fillin { from{ width:0; } }
+  .rpt-read__body .rpt-factor__fill { animation:fillin .7s ease; }
+  /* operator compliance scoring checklist */
+  .cplist { margin-top:18px; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  .cplist__hd { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 15px; background:var(--page-bg); border-bottom:1px solid var(--border-light); }
+  .cplist__hd b { font-size:13px; font-weight:700; }
+  .cplist__score { font-size:12px; font-weight:700; padding:3px 10px; border-radius:999px; }
+  .cplist__score.ok { background:var(--green-bg); color:var(--green-text); }
+  .cplist__score.warn { background:var(--orange-bg); color:var(--orange-text); }
+  .cprow { display:flex; align-items:center; gap:11px; padding:10px 15px; border-top:1px solid var(--border-light); cursor:pointer; }
+  .cprow:first-child { border-top:none; }
+  .cprow:hover { background:var(--page-bg); }
+  .cprow__ic { width:22px; height:22px; border-radius:50%; display:grid; place-items:center; flex-shrink:0; }
+  .cprow__ic svg { width:13px; height:13px; }
+  .cprow__ic.met { background:var(--green-bg); color:var(--green-text); }
+  .cprow__ic.no { background:var(--red-bg); color:var(--red-text); }
+  .cprow__t { flex:1; font-size:13px; font-weight:600; }
+  .cprow__hint { font-size:10.5px; color:var(--text-tertiary); font-weight:600; text-transform:uppercase; letter-spacing:.04em; }
+  .cplist__foot { display:flex; align-items:center; gap:10px; padding:11px 15px; border-top:1px solid var(--border-light); background:var(--page-bg); }
   </style>
 </head>
 <body>
@@ -568,6 +786,8 @@
     { id:'action', name:'Action Friends',   host:'The Action crew',publishDays:['Fri'],                        epsPerWeek:1, positionsPerEp:3, curve:'quick',  samples:15, simulcast:false, audioSrc:'none',    scanEvery:24, revShare:0.60, mgPolicy:'ask',  guarantee:70000,  cpm:22, category:'Comedy',             channel:'@actionfriends', src:'adserver' },
     { id:'nate',   name:'Nate',             host:'Nate',          publishDays:['Mon','Thu'],                   epsPerWeek:2, positionsPerEp:3, curve:'medium', samples:11, simulcast:false, audioSrc:'none',    scanEvery:24, revShare:0.55, mgPolicy:'ask',  guarantee:60000,  cpm:20, category:'Business',           channel:'@nate',          src:'manual' },
     { id:'clinton',name:'Clinton',          host:'Clinton',       publishDays:['Tue'],                         epsPerWeek:1, positionsPerEp:2, curve:'steady', samples:7,  simulcast:true,  audioSrc:'request', scanEvery:48, revShare:0.55, mgPolicy:'ask',  guarantee:45000,  cpm:19, category:'Health',             channel:'@clinton',       src:'manual' },
+    { id:'maddox', name:'The Maddox Show',   host:'Jay Maddox',    publishDays:['Mon','Wed','Fri'],             epsPerWeek:3, positionsPerEp:3, curve:'medium', samples:21, simulcast:true,  audioSrc:'hosting', scanEvery:24, revShare:0.62, mgPolicy:'auto', guarantee:110000, cpm:25, category:'News / Culture',      channel:'@maddoxshow',    src:'adserver' },
+    { id:'rivera', name:'Rivera Tonight',    host:'Elena Rivera',  publishDays:['Tue','Thu'],                   epsPerWeek:2, positionsPerEp:3, curve:'fast',   samples:17, simulcast:false, audioSrc:'none',    scanEvery:24, revShare:0.60, mgPolicy:'ask',  guarantee:75000,  cpm:23, category:'Interview',          channel:'@riveratonight', src:'adserver' },
   ];
   const show = id => SHOWS.find(s=>s.id===id) || SHOWS[0];
 
@@ -583,6 +803,7 @@
     { id:'d9', title:'August flight',  brand:'Ramp',       showId:'nate',    gross:7100,  sellType:'month', createdDate:'2026-07-22', closeDate:'2026-07-30', outcome:'won', rep:'Devin Cole' },
     { id:'d10', title:'August flight', brand:'AG1',        showId:'rubin',   gross:10400, sellType:'month', createdDate:'2026-07-28', closeDate:'2026-08-04', outcome:'won', rep:'Priya Shah' },
     { id:'d11', title:'September flight', brand:'AG1', showId:'sage', gross:15600, sellType:'month', createdDate:'2026-08-18', closeDate:'2026-08-20', outcome:'won', rep:'Priya Shah' },
+    { id:'d12', title:'Q4 network takeover', brand:'DraftKings', showId:'rubin', gross:42000, sellType:'month', createdDate:'2026-08-01', closeDate:'2026-08-10', outcome:'won', rep:'Marcus Bell' },
   ];
   DEALS.forEach(d => { d.net = Math.round(d.gross*0.85); d.netToCreator = Math.round(d.net*0.6); });
   const deal = id => DEALS.find(d=>d.id===id);
@@ -608,6 +829,16 @@
     { id:'s5',  dealId:'d5',  brand:'Kalshi', showId:'sage', kind:'paid', published:'2026-08-12', guarantee:120000, views:62000, downloads:13000, dlState:'auto', status:'verified', length:'60s', yt:'M7lc1UVf-VE', ts:286, epLen:5100, copyStatus:'seen', copy:['Named the brand','Read promo code KALSHI','Free-trial CTA'] },
     { id:'s9',  dealId:'d9',  brand:'Ramp', showId:'nate', kind:'paid', published:'2026-08-14', guarantee:60000, views:34000, downloads:0, dlState:'none', status:'verified', length:'45s', yt:'9bZkp7q19f0', ts:194, epLen:3300, copyStatus:'seen', copy:['Named the brand','URL CTA read'] },
     { id:'s10', dealId:'d10', brand:'AG1', showId:'rubin', kind:'paid', published:'2026-08-15', guarantee:95000, views:24000, downloads:4000, dlState:'auto', status:'verified', length:'60s', yt:'dQw4w9WgXcQ', ts:388, epLen:5240, copyStatus:'seen', copy:['Named the brand','Value prop read'] },
+
+    // ── 8-show network takeover (d12 · DraftKings) · mixed delivery across shows ──
+    { id:'n1', dealId:'d12', brand:'DraftKings', showId:'rubin',   kind:'paid', published:'2026-08-12', guarantee:95000,  views:78000,  downloads:12000, dlState:'auto', status:'verified',  length:'60s', yt:'dQw4w9WgXcQ', ts:420, epLen:5400, copyStatus:'seen', copy:['Named the brand','Read promo code DK50','Age/geo disclaimer','Responsible gambling line'] },
+    { id:'n2', dealId:'d12', brand:'DraftKings', showId:'sage',    kind:'paid', published:'2026-08-12', guarantee:120000, views:112000, downloads:20000, dlState:'auto', status:'verified',  length:'60s', yt:'M7lc1UVf-VE', ts:210, epLen:5000, copyStatus:'seen', copy:['Named the brand','Read promo code DK50','Age/geo disclaimer','Responsible gambling line'] },
+    { id:'n3', dealId:'d12', brand:'DraftKings', showId:'warren',  kind:'paid', published:'2026-08-13', guarantee:85000,  views:50000,  downloads:0,     dlState:'none', status:'verified',  length:'60s', yt:'aqz-KE-bpKQ', ts:300, epLen:3600, copyStatus:'seen', copy:['Named the brand','Read promo code DK50','Responsible gambling line'] },
+    { id:'n4', dealId:'d12', brand:'DraftKings', showId:'action',  kind:'paid', published:'2026-08-15', guarantee:70000,  views:68000,  downloads:0,     dlState:'none', status:'verified',  length:'45s', yt:'aqz-KE-bpKQ', ts:500, epLen:4000, copyStatus:'seen', copy:['Named the brand','Read promo code DK50'] },
+    { id:'n5', dealId:'d12', brand:'DraftKings', showId:'clinton', kind:'paid', published:'2026-08-14', guarantee:45000,  views:36000,  downloads:4000,  dlState:'auto', status:'verified',  length:'60s', yt:'9bZkp7q19f0', ts:230, epLen:2900, copyStatus:'seen', copy:['Named the brand','Read promo code DK50','Responsible gambling line'] },
+    { id:'n6', dealId:'d12', brand:'DraftKings', showId:'maddox',  kind:'paid', published:'2026-08-13', guarantee:110000, views:60000,  downloads:10000, dlState:'auto', status:'verified',  length:'60s', yt:'jNQXAC9IVRw', ts:360, epLen:4800, copyStatus:'seen', copy:['Named the brand','Read promo code DK50','Age/geo disclaimer'] },
+    { id:'n7', dealId:'d12', brand:'DraftKings', showId:'nate',    kind:'paid', published:'2026-08-26', guarantee:60000,  views:null,   downloads:null,  dlState:'none', status:'scheduled', length:'45s', yt:'', ts:null, copyStatus:'seen', copy:[] },
+    { id:'n8', dealId:'d12', brand:'DraftKings', showId:'rivera',  kind:'paid', published:'2026-08-27', guarantee:75000,  views:null,   downloads:null,  dlState:'none', status:'scheduled', length:'60s', yt:'', ts:null, copyStatus:'seen', copy:[] },
 
     // ── airing today · the daily check the agent runs ──
     { id:'s11', dealId:'d1', brand:'Kalshi', showId:'rubin', kind:'paid', published:TODAY, guarantee:95000, views:null, downloads:null, dlState:'auto', status:'aired', length:'60s', yt:'', ts:null, copyStatus:'seen', copy:[] },
@@ -816,7 +1047,7 @@
   }
 
   /* ═══════════════════════════ OVERLAYS ═══════════════════════════ */
-  function openDrawer(html,full,wide){ const d=document.getElementById('drawer'); d.innerHTML=html; d.classList.toggle('drawer--full',!!full); d.classList.toggle('drawer--wide',!!wide&&!full); d.classList.add('open'); document.getElementById('scrim').classList.add('open'); }
+  function openDrawer(html,full,wide){ const d=document.getElementById('drawer'); d.innerHTML=html; d.classList.remove('drawer--report'); d.classList.toggle('drawer--full',!!full); d.classList.toggle('drawer--wide',!!wide&&!full); d.classList.add('open'); document.getElementById('scrim').classList.add('open'); }
   function openModal(html){ const m=document.getElementById('modal'); m.innerHTML=html; m.classList.add('open'); document.getElementById('scrim').classList.add('open'); }
   function closeOverlays(){ SELFOR=null; document.getElementById('drawer').classList.remove('open'); document.getElementById('modal').classList.remove('open'); document.getElementById('scrim').classList.remove('open'); }
 
@@ -1423,7 +1654,7 @@
                 ${reelStat('Read duration', adSecs(e)+'s', `setSpotStat('${e.id}','dur',this.value)`)}
                 ${reelStat('Placement', esc(e.placement||crf.placement), `setSpotStat('${e.id}','placement',this.value)`)}
               </div>
-            </div></div>`; })():''}
+            </div>${complianceBlock(e)}</div>`; })():''}
         </div>`; }).join('')}
       </div>
       </div>
@@ -1609,8 +1840,10 @@
   function setDelSort(k){ delSort = delSort.k===k?{k,dir:-delSort.dir}:{k,dir:1}; RENDER.delivery(); }
   function refocusQ(){ if(!FOCUS_Q) return; const el=document.getElementById(FOCUS_Q);
     if(el){ el.focus(); el.selectionStart=el.selectionEnd=el.value.length; } FOCUS_Q=null; }
-  function openDeal(id){ portalDeal=id; RENDER.portal(); document.querySelector('.views').scrollTop=0; }
-  function closeDeal(){ portalDeal=null; RENDER.portal(); document.querySelector('.views').scrollTop=0; }
+  function openDeal(id){ portalDeal=id; const d=DEALS.find(x=>x.id===id); if(!d) return; renderDealIndex();
+    const dr=document.getElementById('drawer'); dr.innerHTML=dealReportHTML(d); dr.classList.remove('drawer--full','drawer--wide'); dr.classList.add('drawer--report','open'); document.getElementById('scrim').classList.add('open');
+    const sc=dr.querySelector('.rpt-scroll'); if(sc) sc.scrollTop=0; }
+  function closeDeal(){ portalDeal=null; const dr=document.getElementById('drawer'); dr.classList.remove('open','drawer--report'); document.getElementById('scrim').classList.remove('open'); }
   // back-compat: anything still pointing at a brand opens its most recent live deal
   function openCampaign(b){ const d=DEALS.filter(x=>x.brand===b).map(x=>dealSummary(x)).sort((p,q)=>(p.state==='live'?0:1)-(q.state==='live'?0:1))[0]; if(d) openDeal(d.deal.id); }
   const closeCampaign=closeDeal;
@@ -1649,92 +1882,212 @@
     toast(`Delivery report for ${ds.brand} · ${ds.title} sent, adops@ copied.`);
   }
 
-  RENDER.portal = () => {
-    if(portalDeal===null){ setBack(''); return renderDealIndex(); }
-    const d=DEALS.find(x=>x.id===portalDeal); if(!d){ portalDeal=null; return renderDealIndex(); }
-    const c=dealSummary(d), cr=creative(d.brand);
-    const {spots,liveSpots,mgs,g,got,proj,paid,yt,aud,shows,flight,done}=c;
-    const verified=spots.filter(s=>s.status==='verified'&&s.yt).length;
-    const full=c.pct>=Math.round(IAB_FULL*100);   // 90% is full delivery under IAB
-    const mgsMg=mgs.filter(x=>x.kind==='makegood'), mgsBonus=mgs.filter(x=>x.kind==='bonus');
-    const paidLiveSpots=liveSpots.filter(s=>s.kind==='paid');
-    const callableSpots=paidLiveSpots.filter(s=>projection(s).confident);
-    const reachBasis=callableSpots.length?callableSpots:paidLiveSpots;   // same rule as the headline
-    const byShow={}; reachBasis.forEach(s=>{ const k=s.showId;
-      byShow[k]=byShow[k]||{showId:k,n:0,got:0,g:0,proj:0};
-      byShow[k].n++; byShow[k].got+=delivered(s)||0; byShow[k].g+=s.guarantee; byShow[k].proj+=projection(s).proj; });
+  RENDER.portal = () => { setBack(''); renderDealIndex(); };
 
-    document.getElementById('view-portal').innerHTML=`
-    <div class="inner" style="max-width:1080px">
-      ${setBack(`<button class="tb-plain" onclick="closeDeal()">← All deals</button>`)||''}
-      <div class="pagebar">
-        <div class="head">
-          <h1>${esc(d.brand)} on Acme Network</h1>
-          <div class="muted" style="font-size:12.5px;margin-top:3px">Delivery report · ${esc(c.title)} · ${flight}</div>
-        </div>
-        <div class="pagebar__right" style="text-align:right">
-          <div style="display:flex;gap:9px;justify-content:flex-end">
-            <button class="btn btn--ghost btn--sm" onclick="toast('Copied acme.live/${d.brand.toLowerCase()}-${d.id} — read-only, admin notes stay internal.')">🔗 Copy link</button>
-            <button class="btn btn--ghost btn--sm" onclick="createBonus('${d.id}')">+ Make good</button>
-            <button class="btn btn--primary btn--sm" onclick="sendDealReport('${d.id}')">Send report</button>
+  const PLAY_SVG='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+  const PAUSE_SVG='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
+  let PLAYING={};
+  function playRead(id, epLen){
+    const fill=document.getElementById('npl-fill-'+id), thumb=document.getElementById('npl-thumb-'+id), cur=document.getElementById('npl-cur-'+id), btn=document.getElementById('npl-btn-'+id);
+    if(!fill) return;
+    if(PLAYING[id]){ cancelAnimationFrame(PLAYING[id]); PLAYING[id]=null; if(btn) btn.innerHTML=PLAY_SVG; return; }
+    const dur=7000, t0=performance.now();
+    if(btn) btn.innerHTML=PAUSE_SVG;
+    (function step(now){ const p=Math.min(1,(now-t0)/dur); fill.style.width=(p*100)+'%'; if(thumb) thumb.style.left=(p*100)+'%'; if(cur) cur.textContent=mmss(Math.round(p*epLen));
+      if(p<1){ PLAYING[id]=requestAnimationFrame(step); } else { PLAYING[id]=null; if(btn) btn.innerHTML=PLAY_SVG; } })(t0);
+  }
+
+  function playerCard(s,d,pid,eyebrow,embed){
+    const epLen=epLenOf(s), adL=(s.ts||0)/epLen*100, adW=Math.max(2,adSecs(s)/epLen*100);
+    return `<div class="npl${embed?' npl--embed':''}">
+      <div class="npl__art" style="background:${brandCol(d.brand)}">${initials(show(s.showId).name)}</div>
+      <button class="npl__play" id="npl-btn-${pid}" onclick="playRead('${pid}',${epLen})">${PLAY_SVG}</button>
+      <div class="npl__mid">
+        ${eyebrow?`<div class="npl__ey">${eyebrow}</div>`:''}
+        <div class="npl__title">${esc(epTitle(s))}</div>
+        <div class="npl__show">${esc(show(s.showId).name)} · aired ${fmtDate(s.published)} · ${adSecs(s)}s read</div>
+        <div class="npl__seekwrap">
+          <div class="npl__times"><span id="npl-cur-${pid}">0:00</span><span>${mmss(epLen)}</span></div>
+          <div class="npl__seek" onclick="playRead('${pid}',${epLen})">
+            <div class="npl__ad" style="left:${adL.toFixed(1)}%;width:${adW.toFixed(1)}%"></div>
+            <div class="npl__fill" id="npl-fill-${pid}"></div>
+            <div class="npl__thumb" id="npl-thumb-${pid}"></div>
           </div>
         </div>
       </div>
-      <div style="background:var(--page-bg);border-radius:11px;padding:9px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-        ${pStat('Imp delivered',K(got),1)}
-        ${pStat('Of booked impressions',`<span style="color:${full?'var(--green-text)':'var(--orange-text)'}">${c.pct}%</span>`)}
-        ${pStat('Delivered CPM','$'+(got?(paid/(got/1000)):0).toFixed(2))}
-        ${pStat('YouTube reach',K(yt))}
-        ${pStat('Audio reach',K(aud))}
-        ${pStat('Shows',shows.length)}
-        ${pStat('Verified reads',verified+'/'+spots.filter(s=>s.kind==='paid').length)}
-      </div>
-
-      <textarea id="dealNotes" class="cmp-inp" style="margin-top:14px;min-height:42px;line-height:1.6;font-size:12.5px" placeholder="Note — internal, never on the shared link. e.g. Chase the gift-card redemptions, brand wants addresses by Friday." onchange="saveDealNotes('${d.id}')">${esc(d.notes||'')}</textarea>
-
-
-      ${full&&done&&c.pct>=100?`<div class="card" style="margin-top:16px;border-color:var(--green-bg)"><div class="card__pad" style="display:flex;align-items:center;gap:14px">
-        <div style="flex:1"><b style="font-size:13.5px">This deal over-delivered (${c.pct}%) — renewal moment</b>
-          <div class="muted" style="font-size:12.5px">The numbers are already attached. Pitch the next flight while it's hot.</div></div>
-        <button class="btn btn--green btn--sm" onclick="toast('Renewal pitch drafted for ${esc(d.brand)} with the live numbers attached.')">Draft renewal</button></div></div>`
-      :!full&&c.state==='live'?`<div class="card" style="margin-top:16px;border-color:var(--orange-bg)"><div class="card__pad" style="display:flex;align-items:center;gap:14px">
-        <div style="flex:1"><b style="font-size:13.5px">${mgsMg.length?`${mgsMg.length} additional read${mgsMg.length>1?'s':''} booked at no cost`:'Tracking under the guarantee'}</b>
-          <div class="muted" style="font-size:12.5px">${mgsMg.length?`On ${mgsMg.map(m=>fmtDate(m.published)).join(', ')}, to bring the flight back over the line.`:'We will add reads at no cost to close the gap.'}</div></div></div></div>`
-      :mgsBonus.length?`<div class="card" style="margin-top:16px"><div class="card__pad" style="display:flex;align-items:center;gap:14px">
-        <div style="flex:1"><b style="font-size:13.5px">${mgsBonus.length} bonus read${mgsBonus.length>1?'s':''} added at no cost</b>
-          <div class="muted" style="font-size:12.5px">On ${mgsBonus.map(m=>fmtDate(m.published)).join(', ')} — performance support, no charge.</div></div></div></div>`:''}
-
-      <div class="card" style="margin-top:16px">
-        <div class="card__head"><div class="card__title">Delivery</div></div>
-        ${Object.keys(byShow).length>1?`<div class="card__pad" style="padding-bottom:2px">${Object.values(byShow).map(r=>{ const pct=pctOf(r.proj,r.g);
-          return `<div style="margin-bottom:12px">
-            <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:600">
-              <span>${esc(show(r.showId).name)} <span class="muted" style="font-weight:400">· ${r.n} read${r.n>1?'s':''}</span></span>
-              <span>${K(r.got)} · ${pct}%</span></div>
-            <div class="pace ${pct>=90?'pace--good':'pace--warn'}" style="margin-top:5px"><div class="pace__fill" style="width:${Math.min(pct,100)}%"></div></div>
-          </div>`; }).join('')}</div>`:''}
-        <table><thead><tr><th style="min-width:190px">Show</th><th>Published</th><th class="num">Impressions</th><th>Verified</th><th>Ad read</th><th></th></tr></thead>
-        <tbody>${liveSpots.filter(s=>s.kind==='paid').map(s=>{ const pr=projection(s);
-          return `<tr><td style="white-space:nowrap"><b>${esc(show(s.showId).name)}</b>
-            ${s.yt?`<a href="${clipUrl(s)}" target="_blank" title="Opens the episode at ${mmss(s.ts)}" style="display:block;font-size:11.5px;color:var(--blue-text);font-weight:600;text-decoration:none;max-width:230px;overflow:hidden;text-overflow:ellipsis">${esc(epTitle(s))}</a>`
-                 :`<div class="muted" style="font-size:11.5px;max-width:230px;overflow:hidden;text-overflow:ellipsis">${esc(epTitle(s))}</div>`}</td>
-            <td>${fmtDate(s.published)}</td>
-            <td class="num"><b>${K(pr.got)}</b>${pr.confident?`<div class="muted" style="font-size:11px">${Math.round(pr.ratio*100)}% of goal</div>`:'<div class="muted" style="font-size:11px">still building</div>'}</td>
-            <td style="white-space:nowrap">${s.yt?`<span style="font-size:12.5px;font-weight:600;color:${(s.copyCheck||'Copy verified')==='Copy verified'?'var(--text-primary)':'var(--orange-text)'}">${esc(s.copyCheck||'Copy verified')}</span><button class="wdots" style="width:20px;height:20px;display:inline-grid;vertical-align:middle;margin-left:2px" onclick="verifyMenu(event,'${s.id}')" title="Change state"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 9l6 6 6-6"/></svg></button>`:'<span class="muted">—</span>'}</td>
-            <td>${s.yt?`<button class="btn btn--ghost btn--sm" onclick="playClip('${s.yt}',${s.ts})">${mmss(s.ts)}–${mmss(s.ts+adSecs(s))}</button>`:'<span class="muted" style="font-size:12px">audio</span>'}</td>
-
-            <td class="right"><button class="btn btn--ghost btn--sm" onclick="openRead('${s.id}')">More info</button></td></tr>`; }).join('')}
-          ${spots.filter(s=>s.status==='scheduled'&&s.kind==='paid').map(s=>`<tr><td><b>${esc(show(s.showId).name)}</b></td>
-            <td>${fmtDate(s.published)}</td><td class="num muted">booked</td><td colspan="3"><span class="muted" style="font-size:12px">Due ${dayName(s.published)} ${fmtDate(s.published)}</span></td></tr>`).join('')}
-          ${mgs.map(s=>`<tr style="background:rgba(235,233,254,.28)"><td><b>${esc(show(s.showId).name)}</b> <span class="tag tag--purple">Added at no cost</span></td>
-            <td>${fmtDate(s.published)}</td><td class="num muted">scheduled</td><td colspan="3"><span class="muted" style="font-size:12px">${s.kind==='bonus'?'Bonus spot — performance support, no charge':'Make good — replaces the shortfall, no charge'}</span></td></tr>`).join('')}
-        </tbody></table>
-      </div>
-      <div class="footnote">This is the advertiser's view of this deal. Read-only for them, updates as reads land — admin notes never leave the building.</div>
     </div>`;
-  };
-  function saveDealNotes(id){ const d=DEALS.find(x=>x.id===id); d.notes=document.getElementById('dealNotes').value;
-    toast('Notes saved — internal only, and the Dashboard reads them for check-ins.'); }
+  }
+  function nowPlaying(s,d){
+    if(!s) return '';
+    const vr=(s.status==='verified'&&s.yt);
+    return playerCard(s,d,'top-'+s.id,'Latest read'+(vr?' · verified':''),false);
+  }
+
+  function dealReportHTML(d){
+    const c=dealSummary(d);
+    const {spots,liveSpots,mgs,g,got,proj,paid,yt,aud,shows,flight,done}=c;
+    const verified=spots.filter(s=>s.status==='verified'&&s.yt).length;
+    const full=c.pct>=Math.round(IAB_FULL*100);
+    const mgsMg=mgs.filter(x=>x.kind==='makegood'), mgsBonus=mgs.filter(x=>x.kind==='bonus');
+    const paidCount=spots.filter(s=>s.kind==='paid').length;
+    const aired=liveSpots.filter(s=>s.kind==='paid');
+    // per-show: delivered so far vs what was bought (sum of guarantees)
+    const byShow={};
+    spots.filter(s=>s.kind==='paid').forEach(function(s){ const k=s.showId; (byShow[k]=byShow[k]||{showId:k,got:0,bought:0}); byShow[k].bought+=s.guarantee; byShow[k].got+=delivered(s)||0; });
+    // total booked across every bought show (headline, chart and by-show all use this)
+    const booked=Object.values(byShow).reduce(function(a,r){return a+r.bought;},0)||g;
+    const cc=Object.assign({},c,{g:booked});
+    const featured=aired.filter(s=>s.ts!=null).sort((a,b)=>b.published<a.published?-1:1)[0] || aired[0];
+    const nextUp=[].concat(
+      spots.filter(s=>s.status==='scheduled'&&s.kind==='paid').map(s=>({s,kind:'Scheduled'})),
+      mgs.map(s=>({s,kind:s.kind==='bonus'?'Bonus':'Make good'}))
+    ).sort((a,b)=>a.s.published<b.s.published?-1:1);
+
+    return `
+    <button class="rpt-close" onclick="closeDeal()">✕</button>
+    <div class="rpt-scroll">
+      <!-- HERO -->
+      <div class="rpt-hero">
+        <div class="rpt-hero__cover" data-mono="${initials(featured?show(featured.showId).name:d.brand)}" style="background:radial-gradient(82% 120% at 78% 4%, rgba(255,255,255,.16), transparent 56%), linear-gradient(150deg, ${brandCol(d.brand)} 0%, #0f141b 80%)"></div>
+        <div class="rpt-hero__scrim"></div>
+        <div class="rpt-hero__content">
+          <div class="rpt-hero__head">
+            <div class="rpt-hero__eyebrow">Campaign delivery report</div>
+            <div class="rpt-hero__actions">
+              <button class="rpt-btn rpt-btn--solid" onclick="sendDealReport('${d.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg>Send to ${esc(d.brand)}</button>
+              <button class="rpt-btn" onclick="toast('Copied acme.live/${d.brand.toLowerCase()}-${d.id} — read-only link, internal notes stay out.')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>Share link</button>
+              <button class="rpt-btn" onclick="toast('Report exported as PDF for ${esc(d.brand)}.')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>Download</button>
+            </div>
+          </div>
+          <div class="rpt-hero__row">
+            <div class="rpt-logo" style="background:${brandCol(d.brand)}">${initials(d.brand)}</div>
+            <div style="flex:1;min-width:0">
+              <div class="rpt-hero__name2">${esc(d.brand)}</div>
+              <div class="rpt-hero__sub">${esc(c.title)} · ${flight} · ${shows.length} show${shows.length>1?'s':''} on Acme Network</div>
+            </div>
+            <span class="rpt-status ${heroTone(c)}">${heroLabel(c,mgsBonus)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="rpt-pad">
+        <!-- TRACKING -->
+        <div class="rpt-deliv" style="margin-top:20px">
+          <div>
+            <div class="rpt-deliv__big">${K(got)}</div>
+            <div class="rpt-deliv__of">of ${K(booked)} booked impressions</div>
+            <div class="rpt-deliv__pct ${pctTone(c.pct)}">${c.done?pctOf(got,booked)+'% delivered':c.pct+'% pacing'}</div>
+            <div class="rpt-chips">
+              <div><div class="rpt-chip__l">Delivered CPM</div><div class="rpt-chip__v">$${(got?(paid/(got/1000)):0).toFixed(2)}</div></div>
+              <div><div class="rpt-chip__l">YouTube reach</div><div class="rpt-chip__v">${K(yt)}</div></div>
+              <div><div class="rpt-chip__l">Audio reach</div><div class="rpt-chip__v">${K(aud)}</div></div>
+              <div><div class="rpt-chip__l">Verified reads</div><div class="rpt-chip__v">${verified}/${paidCount}</div></div>
+            </div>
+          </div>
+          <div class="rpt-chart">${brandDealChart(cc)}
+            <div class="rpt-chart__legend"><span><i style="background:var(--green-text)"></i>Delivered</span><span><i style="background:var(--green-text);opacity:.5"></i>Where it lands</span><span><i style="background:var(--border-strong)"></i>Goal</span></div>
+          </div>
+        </div>
+
+        <!-- DELIVERY BY SHOW (vertical) + WHAT'S NEXT -->
+        ${Object.keys(byShow).length?`<div class="rpt-twocol2${nextUp.length?'':' rpt-twocol2--solo'}">
+          <div class="rpt-card">
+            <div class="rpt-card__h">Delivery by show — delivered vs bought</div>
+            <div class="vbars">
+              ${Object.values(byShow).sort((a,b)=>b.bought-a.bought).map(function(r){ const pct=Math.round(r.got/Math.max(r.bought,1)*100), tone=pct>=90?'var(--green-text)':pct>=60?'var(--text-primary)':'var(--orange-text)', nm=show(r.showId).name.replace(/^The /,'').split(' ')[0];
+                return `<div class="vbar" title="${esc(show(r.showId).name)} — ${K(r.got)} of ${K(r.bought)} (${pct}%)"><div class="vbar__num">${K(r.got)}</div><div class="vbar__track"><div class="vbar__goal"></div><i style="height:${Math.min(100,pct)}%"></i></div><div class="vbar__pct" style="color:${tone}">${pct}%</div><div class="vbar__name">${esc(nm)}</div></div>`; }).join('')}
+            </div>
+            <div class="vbars__legend"><span><i style="background:var(--secondary-lite);border-top:2px solid var(--border-strong)"></i>Expected (bought)</span><span><i style="background:var(--green-text)"></i>Delivered</span></div>
+          </div>
+          ${nextUp.length?`<div class="rpt-card"><div class="rpt-card__h">What's next · ${nextUp.length} coming up</div>
+            <div class="nextstack">${nextUp.slice(0,6).map(function(x,i){ return `<div class="nextrow"><div class="nextrow__when ${i===0?'soon':''}">${i===0?'Next up':dayName(x.s.published)}</div><div><div class="nextrow__show">${esc(show(x.s.showId).name)}</div><div class="nextrow__meta">${fmtDate(x.s.published)} · ${adSecs(x.s)}s · ${x.kind}${x.kind!=='Scheduled'?' · no charge':''}</div></div></div>`; }).join('')}</div>
+          </div>`:''}
+        </div>`:''}
+
+        <!-- EVERY READ -->
+        <div class="rpt-sec"><h2>Every read</h2><span class="muted">${verified}/${paidCount} air-checked · tap a read for its scorecard</span></div>
+        ${aired.map(s=>readCard(s,d)).join('')}
+
+        <div class="footnote">This is ${esc(d.brand)}'s live view — read-only, and it updates as reads land. Internal notes never appear here.</div>
+      </div>
+    </div>`;
+  }
+  function saveDealNotes(id){ const d=DEALS.find(x=>x.id===id); const el=document.getElementById('dealNotes'); if(el){ d.notes=el.value;
+    toast('Notes saved — internal only, and the Dashboard reads them for check-ins.'); } }
+
+  /* ═══ modern brand-report helpers ═══ */
+  const BRAND_COL = { Kalshi:'#10a37f', DraftKings:'#111827', Ritual:'#be123c', Ramp:'#b45309', Notion:'#0f172a', BetterHelp:'#1d4ed8', AG1:'#14532d' };
+  function brandCol(b){ return BRAND_COL[b]||'#334155'; }
+  function initials(str){ const up=(str||'').replace(/[^A-Za-z]/g,''); const caps=(str||'').replace(/[^A-Z]/g,''); return (caps.length>=2?caps.slice(0,2):up.slice(0,2)).toUpperCase()||'AN'; }
+  function heroTone(c){ return c.pct>=90?'green': c.pct>=70?'orange':'red'; }
+  function heroLabel(c,bonus){ if(c.done&&c.pct>=100) return (bonus&&bonus.length)?'Delivered + bonus':'Delivered'; if(c.pct>=90) return 'On track'; if(c.state==='upcoming') return 'Scheduled'; return 'Tracking under'; }
+  function pctTone(p){ return p>=90?'green': p>=70?'orange':'red'; }
+  let READ_OPEN={};
+  function toggleRead(id){ READ_OPEN[id]=!READ_OPEN[id]; const el=document.getElementById('rd-'+id); if(el) el.classList.toggle('open', READ_OPEN[id]); }
+
+  function brandDealChart(c){
+    const W=560,H=150,pad=10;
+    // "where it lands" is pacing-consistent with the headline: a well-pacing live
+    // deal projects to clear its goal; an under-pacing one lands short.
+    const land=c.done?c.got:Math.max(c.proj, Math.round(c.g*c.pct/100));
+    const max=Math.max(c.g,land,c.got)*1.14||1;
+    const yOf=v=>H-pad-(v/max)*(H-2*pad);
+    const solidEnd=c.done?0.98:0.70, nS=16, nP=9;
+    const dPts=[],pPts=[]; let i;
+    for(i=0;i<=nS;i++){ const t=i/nS, x=pad+t*solidEnd*(W-2*pad), ease=1-Math.pow(1-t,2.3); dPts.push([x,yOf(c.got*ease)]); }
+    for(i=0;i<=nP;i++){ const t=i/nP, x=pad+(solidEnd+(1-solidEnd)*t)*(W-2*pad), v=c.got+(land-c.got)*(1-Math.pow(1-t,2)); pPts.push([x,yOf(v)]); }
+    const path=pts=>pts.map((p,j)=>(j?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+    const last=dPts[dPts.length-1], end=pPts[pPts.length-1];
+    const area=path(dPts)+` L ${last[0].toFixed(1)} ${H-pad} L ${pad} ${H-pad} Z`;
+    const goalY=yOf(c.g);
+    return `<svg viewBox="0 0 ${W} ${H}">
+      <defs><linearGradient id="rgrad" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--green-text)" stop-opacity=".16"/><stop offset="1" stop-color="var(--green-text)" stop-opacity="0"/></linearGradient></defs>
+      <path d="${area}" fill="url(#rgrad)"/>
+      <line x1="${pad}" x2="${W-pad}" y1="${goalY.toFixed(1)}" y2="${goalY.toFixed(1)}" stroke="var(--border-strong)" stroke-width="1.5" stroke-dasharray="4 4"/>
+      <text x="${pad+2}" y="${(goalY-6).toFixed(1)}" text-anchor="start" font-size="10" font-weight="700" fill="var(--text-tertiary)">Goal ${K(c.g)}</text>
+      <path d="${path(dPts)}" fill="none" stroke="var(--green-text)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+      ${c.done?'':`<path d="${path(pPts)}" fill="none" stroke="var(--green-text)" stroke-width="2" stroke-dasharray="5 4" opacity=".5"/>`}
+      <circle cx="${end[0].toFixed(1)}" cy="${end[1].toFixed(1)}" r="4" fill="var(--green-text)"/>
+      <text x="${end[0].toFixed(1)}" y="${(end[1]-9).toFixed(1)}" text-anchor="end" font-size="11" font-weight="800" fill="var(--text-primary)">${K(land)}</text>
+    </svg>`;
+  }
+
+  function readCard(s,d){
+    const pr=projection(s), vr=(s.status==='verified'&&s.yt);
+    const dpct=Math.round(pr.got/Math.max(s.guarantee,1)*100);
+    const dtone=dpct>=90?'var(--green-text)':'var(--text-primary)';
+    const under=pr.confident && pr.ratio<IAB_FULL;
+    const open=READ_OPEN[s.id], ep=epTitle(s);
+    return `<div class="rpt-read ${open?'open':''}" id="rd-${s.id}">
+      <div class="rpt-read__head" onclick="toggleRead('${s.id}')">
+        <div class="rpt-read__logo" style="background:${brandCol(d.brand)}">${initials(show(s.showId).name)}</div>
+        <div class="rpt-read__main">
+          <div class="rpt-read__show">${esc(show(s.showId).name)}</div>
+          <div class="rpt-read__ep">${esc(ep)} · ${fmtDate(s.published)} · ${adSecs(s)}s read</div>
+        </div>
+        <div class="rpt-read__deliv">
+          <div class="rpt-read__deliv-row"><b>${K(pr.got)}</b><span>of ${K(s.guarantee)}</span><b class="pct" style="color:${dtone}">${dpct}%</b></div>
+          <div class="rpt-read__dbar"><i style="width:${Math.min(100,dpct)}%;background:var(--green-text)"></i></div>
+          ${vr?'':`<div class="rpt-read__bld">still building</div>`}
+        </div>
+        ${vr?`<span class="rpt-vbadge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Verified</span>`:`<span class="rpt-vbadge" style="background:var(--orange-bg);color:var(--orange-text)">On air</span>`}
+        <svg class="rpt-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <div class="rpt-read__body">
+        ${playerCard(s,d,s.id,null,true)}
+        <div class="rpt-readfoot">
+          <span class="rpt-len">${adSecs(s)}s read</span>
+          ${under
+            ?`<span class="rpt-stat orange"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>Make-good needed</span>`
+            :`<span class="rpt-stat green"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>On track</span>`}
+          <span class="rpt-footlinks">
+            ${s.yt?`<a class="rpt-mp3" href="${clipUrl(s)}" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;gap:5px"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23 7.1a3 3 0 0 0-2.1-2.1C19 4.5 12 4.5 12 4.5s-7 0-8.9.5A3 3 0 0 0 1 7.1 31 31 0 0 0 .5 12 31 31 0 0 0 1 16.9a3 3 0 0 0 2.1 2.1c1.9.5 8.9.5 8.9.5s7 0 8.9-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 23.5 12 31 31 0 0 0 23 7.1zM9.75 15.5v-7l6 3.5z"/></svg>Watch on YouTube</a>`:''}
+            <span class="rpt-mp3" onclick="toast('Air-check MP3 downloaded.')">↓ MP3</span>
+          </span>
+        </div>
+      </div>
+    </div>`;
+  }
 
   /* The index: full-width brand rows, deals always visible under them (13:33 —
      "the default should go straight to the deals for speed"). */
@@ -1862,6 +2215,33 @@
     return m&&m.date?`Under the guarantee. An extra read is booked for ${fmtDate(m.date)} at no cost.`
                     :'Under the guarantee. We are adding a read at no cost.';
   }
+  const CK_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>';
+  const CX_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+  let COMPLIANCE_STATE={};
+  function complianceItems(s){
+    const cr=creative(s.brand), q=qualityScore(s), items=[];
+    (cr.points||[]).forEach(function(p){ items.push({k:'pt:'+p, label:p}); });
+    items.push({k:'cta', label:'Landing / CTA read as written'});
+    if(cr.code) items.push({k:'code', label:'Promo code '+cr.code+' read'});
+    items.push({k:'place', label:cr.placement+' placement', auto:q.factors[2].v>=70});
+    items.push({k:'len', label:'On-length ('+cr.len+')'});
+    items.push({k:'fresh', label:'Fresh read this week — not recycled'});
+    if(cr.url) items.push({k:'url', label:'Landing URL in the episode description'});
+    const st=COMPLIANCE_STATE[s.id]||{};
+    items.forEach(function(it){ it.met=(st[it.k]!==undefined)?st[it.k]:(it.auto!==undefined?it.auto:true); });
+    return items;
+  }
+  function toggleCompliance(id,i){ const items=complianceItems(spot(id)), it=items[i]; if(!it) return;
+    COMPLIANCE_STATE[id]=COMPLIANCE_STATE[id]||{}; COMPLIANCE_STATE[id][it.k]=!it.met;
+    if(typeof DRAWER_SPOT!=='undefined' && DRAWER_SPOT) openSpot(DRAWER_SPOT); else openRead(id); }
+  function complianceBlock(s){
+    const items=complianceItems(s), met=items.filter(function(x){return x.met;}).length, tot=items.length, missed=tot-met;
+    return `<div class="cplist" style="margin-top:13px">
+      <div class="cplist__hd"><b>Compliance — scored against ${esc(s.brand)}'s brief</b><span class="cplist__score ${missed?'warn':'ok'}">${met}/${tot} met</span></div>
+      ${items.map(function(it,i){ return `<div class="cprow" onclick="event.stopPropagation();toggleCompliance('${s.id}',${i})"><span class="cprow__ic ${it.met?'met':'no'}">${it.met?CK_SVG:CX_SVG}</span><span class="cprow__t">${esc(it.label)}</span><span class="cprow__hint">${it.met?'met':'not met'}</span></div>`; }).join('')}
+      <div class="cplist__foot"><button class="btn btn--ghost btn--sm" onclick="event.stopPropagation();toast('Air-check MP3 + transcript downloaded.')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>Download air check</button>${missed?`<button class="btn btn--primary btn--sm" style="margin-left:auto" onclick="event.stopPropagation();toast('Flag email drafted to the host for ${missed} missed requirement'+(${missed}>1?'s':'')+'.')">Draft host flag</button>`:'<span class="muted" style="font-size:12px;margin-left:auto">All requirements met — nothing to flag.</span>'}</div>
+    </div>`;
+  }
   function openRead(id){
     const s=spot(id), sh=show(s.showId), pr=projection(s), v=verdict(s), cr=creative(s.brand);
     const waiting=s.dlState==='requested';
@@ -1887,8 +2267,18 @@
       </div>
       <div style="margin-top:16px">${transcriptBlock(s)}</div>`:''}
 
+      ${(function(){ const items=complianceItems(s), met=items.filter(function(x){return x.met;}).length, tot=items.length, missed=tot-met;
+        return `<div class="cplist">
+          <div class="cplist__hd"><b>Compliance — scored against ${esc(s.brand)}'s brief</b><span class="cplist__score ${missed?'warn':'ok'}">${met}/${tot} met</span></div>
+          ${items.map(function(it,i){ return `<div class="cprow" onclick="toggleCompliance('${s.id}',${i})"><span class="cprow__ic ${it.met?'met':'no'}">${it.met?CK_SVG:CX_SVG}</span><span class="cprow__t">${esc(it.label)}</span><span class="cprow__hint">${it.met?'met':'not met'}</span></div>`; }).join('')}
+          <div class="cplist__foot">
+            <button class="btn btn--ghost btn--sm" onclick="toast('Air-check MP3 + transcript downloaded — ${esc(s.brand)} on ${esc(sh.name)}.')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>Download air check</button>
+            ${missed?`<button class="btn btn--primary btn--sm" style="margin-left:auto" onclick="toast('Flag email drafted to the host for ${missed} missed requirement${missed>1?'s':''}.')">Draft host flag</button>`:'<span class="muted" style="font-size:12px;margin-left:auto">All requirements met — nothing to flag.</span>'}
+          </div>
+        </div>`; })()}
+
       <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light)">
-        <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em">What the host was briefed to read</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em">The compliance requirements — what the host was briefed to read</div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:13px 0">
           ${fact('Placement',esc(cr.placement))}${fact('Read length',esc(cr.len))}
           ${fact('Promo code',cr.code?esc(cr.code):'<span class="muted">none</span>')}${fact('Offer',esc(cr.cta)||'—')}
