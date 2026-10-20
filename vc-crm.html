@@ -1827,7 +1827,7 @@ const CHECK_BUCKETS = [
 ];
 const FILTER_DEFS = [
   { key:'grade', label:'Grade', options:['A+','A','A-','B+','B','C','Not graded'] },
-  { key:'deepstatus', label:'Grading', options:['Deep-verified','Graded, not deep','Ungraded'], fundsOnly:true },
+  { key:'deepstatus', label:'Grading', options:['Deep-verified','Not deep graded'], fundsOnly:true },
   { key:'type', label:'Type', options:() => [...new Set(FUNDS.map(f=>f.type||'—'))] },
   { key:'check', label:'Check size', options: CHECK_BUCKETS.map(b=>b[0]) },
   { key:'region', label:'Location', options:() => [...new Set(FUNDS.map(f=>f.region||'—'))].sort() },
@@ -1861,7 +1861,7 @@ function fundMatchesFilters(f){
     if (!sel || !sel.size) continue;
     if (def.key === 'grade' && !sel.has(f.dims ? grade(f) : 'Not graded')) return false;
     if (def.key === 'deepstatus') {
-      const lab = FS(f.id).deepGraded ? 'Deep-verified' : (f.dims ? 'Graded, not deep' : 'Ungraded');
+      const lab = FS(f.id).deepGraded ? 'Deep-verified' : 'Not deep graded';
       if (!sel.has(lab)) return false;
     }
     if (def.key === 'type' && !sel.has(f.type||'—')) return false;
