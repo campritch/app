@@ -1124,7 +1124,7 @@ function rebuild(){
   });
 }
 
-function score(f){ return f.dims ? PITCH_DIMS.reduce((s,[k,,w]) => s + (f.dims[k]||0)*w, 0) : -1; }
+function score(f){ if (FS(f.id).notInvestor) return -2; return f.dims ? PITCH_DIMS.reduce((s,[k,,w]) => s + (f.dims[k]||0)*w, 0) : -1; }
 function grade(f){
   if (!f.dims) return '—';
   const s = score(f);
@@ -1133,6 +1133,7 @@ function grade(f){
 }
 function gradeClass(g){ return { 'A+':'aplus', 'A':'a', 'A-':'aminus', 'B+':'bplus', 'B':'b' }[g] || 'c'; }
 function gradePillHtml(f){
+  if (FS(f.id).notInvestor) return `<span class="pill pill--grade-c" title="Graded as a non-investor (university, research lab, company, etc.) - not a venture fund. Sorted to the bottom.">Not a fund</span>`;
   if (!f.dims) {
     if (FS(f.id).aiUnidentified) return `<span class="pill pill--grade-c" title="The AI couldn't identify this fund from its name/website. Add a website and re-grade.">Unidentified</span>`;
     return `<span class="pill pill--grade-c" title="Not graded against the pitch yet">Not graded</span>`;
@@ -2357,7 +2358,7 @@ function renderFundsTable(){
     const ppl = PEOPLE.filter(p => p.fundId === f.id && !isExcluded(p));
     const tbd = ppl.filter(p => p.tbd).length;
     const open = expandedFunds.has(f.id);
-    return `<tr data-fundrow="${f.id}" class="${selected.has(f.id)?'selected':''} ${open?'expanded':''} ${(fundArchiveView || ['closed','disqualified'].includes(fStage(f)))?'arch-dim':''} ${isCompetitor(f)?'competitor-dim':''}">
+    return `<tr data-fundrow="${f.id}" class="${selected.has(f.id)?'selected':''} ${open?'expanded':''} ${(fundArchiveView || FS(f.id).notInvestor || ['closed','disqualified'].includes(fStage(f)))?'arch-dim':''} ${isCompetitor(f)?'competitor-dim':''}">
       <td><input type="checkbox" class="row-check" data-check="${f.id}" ${selected.has(f.id)?'checked':''}></td>
       <td class="fund-td"><div class="fund-cell">
         <span class="fund-name">${esc(f.name)}${deepBadge(f)}${competitorBadge(f)}</span>
@@ -3653,14 +3654,22 @@ async function aiFitFetch(f, opts){
   // (a fund it genuinely couldn't identify), mark it Unidentified instead of
   // silently flagging it graded (which made it show "Not graded" yet skip
   // re-grading forever).
-  if (data.dims) {
+  if (data.not_investor) {
+    // Not a venture investor at all (university, lab, company, etc). Flag it,
+    // drop any stale fit dims, and let score() sink it to the bottom.
+    st.notInvestor = true; f.dims = null; st.aiDims = null;
+    delete st.aiGraded; delete st.aiUnidentified;
+    if (opts && opts.deep) st.deepGraded = true;
+  }
+  else if (data.dims) {
+    delete st.notInvestor;
     f.dims = data.dims; st.aiDims = data.dims; st.aiGraded = true; if (opts && opts.deep) st.deepGraded = true; delete st.aiUnidentified;
     // strong fit -> auto-queue for intros, but ONLY on a deep (web-verified) grade.
     // Only promote from an untargeted stage (don't downgrade contacted/messaged/etc.
     // or resurrect passed/disqualified).
     if (opts && opts.deep && score(f) >= 78 && !isCompetitor(f)) { const cur = fStage(f); if (!cur || ['none','target','future'].includes(cur)) st.stage = 'needintros'; }
   }
-  else { st.aiUnidentified = true; delete st.aiGraded; if (opts && opts.deep) st.deepTried = true; }
+  else { delete st.notInvestor; st.aiUnidentified = true; delete st.aiGraded; if (opts && opts.deep) st.deepTried = true; }
   return data;
 }
 
@@ -3718,7 +3727,7 @@ async function gradeConnectorFunds(cid, btn, opts){
   // Deep pass targets anything not yet web-verified; shallow pass targets the
   // ungraded (and leaves funds that already have a manual angle alone).
   let targets = [...fundIds].map(id => FUND_BY_ID[id]).filter(f => f && !isCompetitor(f) && !isParkedFund(f) &&
-    (deep ? !FS(f.id).deepGraded : (!(FS(f.id).aiGraded && f.dims) && !FS(f.id).aiUnidentified && !f.why)));
+    (deep ? !FS(f.id).deepGraded : (!(FS(f.id).aiGraded && f.dims) && !FS(f.id).aiUnidentified && !FS(f.id).notInvestor && !f.why)));
   // (1) MATCH FIRST: adopt grade/description from a same-name backlog fund we
   // already have, so we never re-research something already in the CRM. Skipped
   // on a deep pass - deep grading wants a fresh web-grounded read, not a copy.
@@ -5346,7 +5355,7 @@ $('bulkGrade').addEventListener('click', async () => {
   // dims), was already tried and came back unidentifiable, or is a competitor.
   // Rubric-estimate funds (dims but not aiGraded) and mislabeled ones (aiGraded
   // but no dims) are included so they get a real read.
-  const targets = [...selected].map(id => FUND_BY_ID[id]).filter(f => f && !(FS(f.id).aiGraded && f.dims) && !FS(f.id).aiUnidentified && !isCompetitor(f));
+  const targets = [...selected].map(id => FUND_BY_ID[id]).filter(f => f && !(FS(f.id).aiGraded && f.dims) && !FS(f.id).aiUnidentified && !FS(f.id).notInvestor && !isCompetitor(f));
   if (!targets.length) { toast('Nothing to grade here - these are already graded, unidentifiable, or competitors.'); return; }
   btn.disabled = true;
   let done = 0, failed = 0;

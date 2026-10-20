@@ -99,11 +99,13 @@ RUBRIC DIMS (0-100), weights thesis .30 / stage .25 / check .20 / portfolio .15 
 - portfolio: adjacency to marketplaces/creator/adtech/AI-commerce = high; a DIRECT competitor (podcast/creator ad marketplace, e.g. backers of Agentio/Spotify-ads/Acast) = cap 40 and say so.
 - geo: US high (Southeast/Nashville highest given the team), Europe/Asia lower.
 
+NOT AN INVESTOR: First decide whether this entity even IS a venture investor - a VC firm, micro-fund, angel, syndicate, accelerator, family office, or CVC that writes equity checks into startups. If instead it is a university, research lab or institute, government or public body, a nonprofit, a service/consulting/operating company, a bank/lender, or anything that does NOT make venture equity investments, it CANNOT be graded as a fund. In that case set "not_investor": true, set dims to null, and make the one_liner say what it actually is (e.g. 'University research lab, not an investor'). Do not hand it a fit score. When in doubt about a borderline case, say so in the brief and still grade it, but a clear non-investor (university, laboratory, research centre, ministry, operating company) is always not_investor:true.
+
 RULES: Be honest and specific - a weak fit gets called weak WITH the concrete reason (their actual focus). Never invent facts; if unsure, hedge and lower the score. Vary the language - no boilerplate. American spelling. No em-dashes.
 
 Return STRICT JSON only, no markdown fences:
-{"dims": {"thesis":n,"stage":n,"check":n,"portfolio":n,"geo":n}, "one_liner": "under 12 words, the specific verdict", "brief": "2-4 tight sentences that concretely answer the four questions above (check range, category, actively investing, similar portfolio) grounded in THIS fund's real data, plus any provided history"}
-Always return dims unless the fund is genuinely unidentifiable (then dims: null). Do NOT use double quotes or line breaks inside any string value (use single quotes if you must quote).`;
+{"not_investor": false, "dims": {"thesis":n,"stage":n,"check":n,"portfolio":n,"geo":n}, "one_liner": "under 12 words, the specific verdict", "brief": "2-4 tight sentences that concretely answer the four questions above (check range, category, actively investing, similar portfolio) grounded in THIS fund's real data, plus any provided history"}
+Set not_investor:true (and dims:null) when the entity is not a venture investor at all. Otherwise return dims unless the fund is genuinely unidentifiable (then dims: null). Do NOT use double quotes or line breaks inside any string value (use single quotes if you must quote).`;
 
 async function fetchSiteText(site) {
   if (!site) return '';
@@ -213,13 +215,15 @@ export default async function handler(req, res) {
               dims: Object.keys(dm).length === 5 ? dm : null };
       if (!out.brief && !out.dims && !out.one_liner) return res.status(502).json({ error: 'unparseable model output' });
     }
-    const dims = out.dims && typeof out.dims === 'object'
-      && ['thesis','stage','check','portfolio','geo'].every(k => Number.isFinite(out.dims[k]))
+    const notInvestor = out.not_investor === true || out.not_investor === 'true';
+    const dims = (!notInvestor && out.dims && typeof out.dims === 'object'
+      && ['thesis','stage','check','portfolio','geo'].every(k => Number.isFinite(out.dims[k])))
       ? out.dims : null;
     return res.status(200).json({
       brief: String(out.brief || '').slice(0, 1200),
       one_liner: String(out.one_liner || '').slice(0, 120),
       dims: dims,
+      not_investor: notInvestor,
       provider: LAST_PROVIDER
     });
   } catch (err) {
