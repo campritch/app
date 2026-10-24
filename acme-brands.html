@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Acme Network — Brands</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --primary:#17212B; --primary-hover:#282828; --secondary:#E4E6ED;
+    --accent:#FF6267; --accent-hover:#ff4d52; --accent-soft:#FFF1F1;
+    --text-primary:#0E1323; --text-secondary:#707481; --text-tertiary: #707481;
+    --border:#DEE0E4; --border-light:#EDEEF1; --border-strong:#C5CBD5;
+    --white:#ffffff; --secondary-lite:#F3F4F6;
+    --page-bg:#F9FAFB; --panel:#ffffff;
+    --green-text:#0E6832; --green-bg:#D6F1E0;
+    --red-text:#B42318; --red-bg:#FCE8E6;
+    --orange-text:#9A5B00; --orange-bg:#FBEBD2;
+    --blue-text:#1D4ED8; --blue-bg:#E4ECFE;
+    --shadow:none;
+    --shadow-btn:none;
+    --radius:16px; --radius-panel:12px;
+  }
+  body.dark {
+    --primary:#F3F4F6; --primary-hover:#E4E6ED;
+    --text-primary:#F0F1F4; --text-secondary:#AAB2BF; --text-tertiary:#848D9C;
+    --border:#2A2F38; --border-light:#232830; --border-strong:#3C434E;
+    --white:#161A20; --panel:#161A20; --secondary-lite:#212630; --page-bg:#0D1015;
+    --green-bg:#12351F; --green-text:#5BD68F;
+    --red-bg:#3D1A18; --red-text:#F58B84;
+    --orange-bg:#3A2410; --orange-text:#F0A868;
+    --blue-bg:#152A47; --blue-text:#7FB4FF;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 22px rgba(0,0,0,.34);
+  }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; }
+  body {
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--page-bg); color:var(--text-primary);
+    display:flex; -webkit-font-smoothing:antialiased; letter-spacing:-.01em;
+  }
+  body.dark .btn--primary, body.dark .pill--solid { color:#12161C; }
+
+  /* ── sidebar (hidden when embedded in the shell) ── */
+  .sidebar { width:230px; flex-shrink:0; background:var(--white); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:16px 12px; }
+  body.embedded .sidebar { display:none !important; }
+  .sb-brand { padding:6px 10px 14px; }
+  .sb-brand b { font-size:19px; font-weight:700; letter-spacing:-.03em; color:var(--text-primary); display:block; }
+  .sb-brand span { font-size:12.5px; font-weight:500; color:var(--text-tertiary); }
+  .sb-group__label { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-tertiary); padding:10px 12px 6px; }
+  .nav-item { width:100%; display:flex; align-items:center; gap:11px; padding:11px 13px; border:none; background:none; border-radius:11px; color:var(--text-secondary); font-size:13.5px; font-weight:600; text-align:left; cursor:pointer; }
+  .nav-item svg { width:17px; height:17px; flex-shrink:0; }
+  .nav-item:hover { background:var(--secondary-lite); color:var(--text-primary); }
+  .nav-item.active { background:var(--primary); color:#fff; }
+  .nav-item .b { margin-left:auto; font-size:11px; font-weight:700; background:var(--red-bg); color:var(--red-text); border-radius:999px; padding:1px 7px; }
+  .nav-item.active .b { background:rgba(255,255,255,.18); color:#fff; }
+  .sb-foot { margin-top:auto; border-top:1px solid var(--border-light); padding-top:12px; }
+  .sb-user { display:flex; align-items:center; gap:10px; padding:4px 8px; }
+  .sb-av { width:32px; height:32px; border-radius:50%; background:var(--primary); color:#fff; display:grid; place-items:center; font-weight:700; font-size:12px; }
+  .sb-user small { color:var(--text-tertiary); font-size:11px; }
+
+  /* ── main ── */
+  .main { flex:1; min-width:0; display:flex; flex-direction:column; height:100vh; }
+  .topbar { display:flex; align-items:center; gap:8px; padding:13px 20px 0; flex-shrink:0; }
+  .tag { display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; padding:4px 9px; border-radius:999px; border:1px solid var(--border); color:var(--text-secondary); background:var(--white); }
+  .tag i { width:6px; height:6px; border-radius:50%; background:#27B36B; }
+  .tb-btn { display:inline-flex; align-items:center; gap:7px; font-family:inherit; font-size:12.5px; font-weight:600; color:var(--text-secondary); background:var(--white); border:1px solid var(--border); border-radius:10px; padding:8px 12px; cursor:pointer; }
+  .tb-btn:hover { color:var(--text-primary); border-color:var(--border-strong); }
+  .tb-btn svg { width:15px; height:15px; }
+  .tb-av { width:30px; height:30px; border-radius:50%; background:var(--primary); color:#fff; display:grid; place-items:center; font-weight:700; font-size:11px; margin-left:4px; }
+  /* internal tab bar — shown only when embedded under the Delivery agent */
+  .ctabs { display:none; gap:4px; padding:14px 20px 0; flex-wrap:wrap; flex-shrink:0; border-bottom:1px solid var(--border-light); }
+  body.embedded .ctabs { display:flex; }
+  .ctabs button { font-family:inherit; font-size:13px; font-weight:600; color:var(--text-secondary); background:none; border:none; border-radius:9px 9px 0 0; padding:9px 14px; cursor:pointer; display:inline-flex; align-items:center; gap:7px; margin-bottom:-1px; border-bottom:2px solid transparent; }
+  .ctabs button:hover { color:var(--text-primary); }
+  .ctabs button.active { color:var(--text-primary); border-bottom-color:var(--primary); }
+  .ctabs .tb-badge { font-size:11px; font-weight:700; background:var(--red-bg); color:var(--red-text); border-radius:999px; padding:1px 7px; }
+  .views { flex:1; overflow-y:auto; padding:20px; }
+  .view { display:none; }
+  .view.active { display:block; }
+  .wrap { max-width:1140px; margin:0 auto; }
+
+  h1.title { font-size:23px; font-weight:700; letter-spacing:-.035em; margin:2px 0 3px; }
+  .sub { font-size:13.5px; color:var(--text-secondary); font-weight:500; margin:0 0 20px; }
+  .eyebrow { display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:600; color:var(--text-secondary); background:var(--white); border:1px solid var(--border); border-radius:999px; padding:5px 12px; margin-bottom:14px; }
+  .eyebrow b { color:var(--text-primary); }
+
+  /* kpis */
+  .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+  .kpi { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow); }
+  .kpi__label { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-tertiary); }
+  .kpi__num { font-size:30px; font-weight:700; letter-spacing:-.04em; margin:6px 0 2px; }
+  .kpi__sub { font-size:12px; color:var(--text-secondary); font-weight:500; }
+  .kpi--flag .kpi__num { color:var(--orange-text); }
+
+  .card { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); }
+  .card__head { display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid var(--border-light); }
+  .card__head h2 { font-size:14.5px; font-weight:700; letter-spacing:-.02em; margin:0; }
+  .card__head .muted { font-size:12px; color:var(--text-tertiary); font-weight:500; }
+  .savings { display:flex; align-items:center; gap:14px; background:linear-gradient(90deg, var(--green-bg), transparent); border:1px solid var(--border); border-radius:var(--radius); padding:15px 18px; margin-bottom:20px; }
+  .savings__big { font-size:26px; font-weight:700; letter-spacing:-.04em; color:var(--green-text); }
+  .savings__txt { font-size:13px; color:var(--text-secondary); font-weight:500; }
+  .savings__txt b { color:var(--text-primary); font-weight:700; }
+
+  /* pills */
+  .pill { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap; }
+  .pill--ok { background:var(--green-bg); color:var(--green-text); }
+  .pill--bad { background:var(--red-bg); color:var(--red-text); }
+  .pill--warn { background:var(--orange-bg); color:var(--orange-text); }
+  .pill--mute { background:var(--secondary-lite); color:var(--text-secondary); }
+  .pill--blue { background:var(--blue-bg); color:var(--blue-text); }
+
+  /* flag rows on overview */
+  .flagrow { display:flex; align-items:center; gap:13px; padding:12px 18px; border-top:1px solid var(--border-light); cursor:pointer; }
+  .flagrow:hover { background:var(--secondary-lite); }
+  .flagrow__logo { width:34px; height:34px; border-radius:9px; background:var(--secondary-lite); display:grid; place-items:center; font-weight:700; font-size:12px; color:var(--text-primary); flex-shrink:0; }
+  .flagrow__main { min-width:0; flex:1; }
+  .flagrow__t { font-size:13px; font-weight:700; }
+  .flagrow__s { font-size:12px; color:var(--text-secondary); font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* review table */
+  .toolbar { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:14px; }
+  .sel { position:relative; }
+  .sel select { appearance:none; font-family:inherit; font-size:12.5px; font-weight:600; color:var(--text-primary); background:var(--white); border:1px solid var(--border); border-radius:10px; padding:8px 30px 8px 12px; cursor:pointer; }
+  .sel::after { content:"▾"; position:absolute; right:11px; top:50%; transform:translateY(-50%); color:var(--text-tertiary); font-size:11px; pointer-events:none; }
+  .search { position:relative; flex:1; min-width:180px; }
+  .search input { width:100%; font-family:inherit; font-size:12.5px; border:1px solid var(--border); border-radius:10px; padding:8px 12px 8px 32px; background:var(--white); color:var(--text-primary); }
+  .search svg { position:absolute; left:11px; top:50%; transform:translateY(-50%); width:14px; height:14px; color:var(--text-tertiary); }
+
+  .ctable { width:100%; }
+  .chead, .crow { display:grid; grid-template-columns:minmax(0,2.3fr) 1fr 72px 78px 56px minmax(0,1.6fr) 118px; align-items:center; gap:0 12px; }
+  .chead { padding:9px 18px; border-bottom:1px solid var(--border-light); font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-tertiary); }
+  .crow { padding:11px 18px; border-top:1px solid var(--border-light); cursor:pointer; }
+  .crow:first-of-type { border-top:none; }
+  .crow:hover { background:var(--secondary-lite); }
+  .c-show { display:flex; align-items:center; gap:10px; min-width:0; }
+  .c-logo { width:30px; height:30px; border-radius:8px; background:var(--secondary-lite); display:grid; place-items:center; font-weight:700; font-size:11px; flex-shrink:0; }
+  .c-show__t { font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .c-show__s { font-size:11.5px; color:var(--text-tertiary); font-weight:500; }
+  .c-brand { font-size:12.5px; font-weight:600; }
+  .c-mut { font-size:12px; color:var(--text-secondary); font-weight:500; }
+  .c-flags { font-size:11.5px; color:var(--text-secondary); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .c-flags.none { color:var(--green-text); }
+  .conf { display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; }
+  .conf__bar { width:34px; height:5px; border-radius:3px; background:var(--secondary-lite); overflow:hidden; }
+  .conf__fill { height:100%; border-radius:3px; }
+
+  /* drawer */
+  .overlay { position:fixed; inset:0; background:rgba(17,23,33,.42); opacity:0; pointer-events:none; transition:opacity .2s; z-index:40; }
+  .overlay.on { opacity:1; pointer-events:auto; }
+  .cdrawer { position:fixed; top:0; right:0; height:100%; width:min(680px,94vw); background:var(--page-bg); border-left:1px solid var(--border); transform:translateX(100%); transition:transform .24s cubic-bezier(.4,0,.2,1); z-index:50; display:flex; flex-direction:column; }
+  .cdrawer.on { transform:translateX(0); }
+  .cd-head { display:flex; align-items:flex-start; gap:13px; padding:18px 20px; border-bottom:1px solid var(--border); background:var(--white); }
+  .cd-head__logo { width:42px; height:42px; border-radius:10px; background:var(--secondary-lite); display:grid; place-items:center; font-weight:700; font-size:14px; flex-shrink:0; }
+  .cd-head h2 { font-size:16px; font-weight:700; letter-spacing:-.03em; margin:0 0 2px; }
+  .cd-head p { font-size:12.5px; color:var(--text-secondary); font-weight:500; margin:0; }
+  .cd-x { margin-left:auto; border:none; background:none; color:var(--text-tertiary); font-size:22px; cursor:pointer; line-height:1; padding:2px 6px; }
+  .cd-body { flex:1; overflow-y:auto; padding:18px 20px 30px; }
+
+  .player { display:flex; align-items:center; gap:12px; background:var(--white); border:1px solid var(--border); border-radius:12px; padding:11px 14px; margin-bottom:16px; }
+  .player__play { width:38px; height:38px; border-radius:50%; background:var(--primary); color:#fff; border:none; display:grid; place-items:center; cursor:pointer; flex-shrink:0; }
+  .player__play svg { width:15px; height:15px; margin-left:2px; }
+  .player__meta { flex:1; min-width:0; }
+  .player__t { font-size:12.5px; font-weight:700; }
+  .player__s { font-size:11.5px; color:var(--text-secondary); font-weight:500; }
+  .player__wave { display:flex; align-items:center; gap:2px; height:22px; }
+  .player__wave i { width:2px; background:var(--border-strong); border-radius:2px; }
+
+  .conf-wrap { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:16px; }
+  .conf-wrap__top { display:flex; align-items:center; justify-content:space-between; margin-bottom:9px; }
+  .conf-wrap__lab { font-size:12.5px; font-weight:700; }
+  .conf-wrap__big { font-size:15px; font-weight:700; }
+  .conf-track { height:8px; border-radius:5px; background:var(--secondary-lite); overflow:hidden; }
+  .conf-track i { display:block; height:100%; border-radius:5px; }
+  .conf-note { font-size:12px; color:var(--text-secondary); font-weight:500; margin-top:8px; }
+
+  .twocol { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px; }
+  @media (max-width:640px){ .twocol{ grid-template-columns:1fr; } }
+  .panel { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+  .panel__h { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:10px; display:flex; align-items:center; gap:7px; }
+  .brief-line { font-size:12.5px; margin-bottom:9px; line-height:1.45; }
+  .brief-line b { font-weight:700; }
+  .brief-line .lab { color:var(--text-tertiary); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.04em; display:block; margin-bottom:1px; }
+  .quote { font-size:12.5px; font-style:italic; color:var(--text-primary); background:var(--secondary-lite); border-radius:8px; padding:8px 11px; line-height:1.5; }
+
+  .chk__row { display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-top:1px solid var(--border-light); }
+  .chk__row:first-child { border-top:none; }
+  .chk__ic { width:20px; height:20px; border-radius:50%; display:grid; place-items:center; flex-shrink:0; margin-top:1px; }
+  .chk__ic svg { width:12px; height:12px; }
+  .ic-ok { background:var(--green-bg); color:var(--green-text); }
+  .ic-bad { background:var(--red-bg); color:var(--red-text); }
+  .ic-warn { background:var(--orange-bg); color:var(--orange-text); }
+  .chk__main { flex:1; min-width:0; }
+  .chk__t { font-size:13px; font-weight:700; }
+  .chk__d { font-size:12px; color:var(--text-secondary); font-weight:500; line-height:1.45; margin-top:1px; }
+
+  .draft { background:var(--white); border:1px solid var(--border); border-radius:12px; margin-top:16px; overflow:hidden; }
+  .draft__head { display:flex; align-items:center; gap:8px; padding:11px 15px; border-bottom:1px solid var(--border-light); font-size:12px; font-weight:700; color:var(--text-secondary); }
+  .draft__body { padding:13px 15px; font-size:12.5px; line-height:1.55; white-space:pre-wrap; color:var(--text-primary); }
+  .draft__to { font-size:11.5px; color:var(--text-tertiary); font-weight:600; margin-bottom:8px; }
+
+  .cd-foot { display:flex; gap:10px; padding:14px 20px; border-top:1px solid var(--border); background:var(--white); }
+  .btn { font-family:inherit; font-size:13.5px; font-weight:600; border-radius:8px; padding:9px 15px; cursor:pointer; border:1px solid var(--border); background:var(--white); color:var(--text-primary); box-shadow:var(--shadow-btn); transition:all .18s; }
+  .btn--primary { background:var(--accent); color:#fff; border-color:var(--accent); box-shadow:none; }
+  .btn--primary:hover { background:var(--accent-hover); border-color:var(--accent-hover); }
+  .btn--ghost:hover { background:var(--secondary); border-color:var(--secondary); box-shadow:none; }
+  .btn--grow { flex:1; }
+
+  /* briefs */
+  .briefgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px; }
+  .brief { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow); }
+  .brief__top { display:flex; align-items:center; gap:11px; margin-bottom:12px; }
+  .brief__logo { width:38px; height:38px; border-radius:10px; background:var(--secondary-lite); display:grid; place-items:center; font-weight:700; font-size:13px; }
+  .brief__name { font-size:14.5px; font-weight:700; letter-spacing:-.02em; }
+  .brief__cat { font-size:11.5px; color:var(--text-tertiary); font-weight:600; }
+  .brief__rules { list-style:none; margin:0; padding:0; }
+  .brief__rules li { display:flex; gap:9px; font-size:12.5px; padding:7px 0; border-top:1px solid var(--border-light); line-height:1.45; }
+  .brief__rules li:first-child { border-top:none; }
+  .brief__rules .k { color:var(--text-tertiary); font-weight:600; width:86px; flex-shrink:0; }
+  .brief__rules .v { font-weight:500; flex:1; }
+  .req-edit { display:inline-flex; align-items:center; gap:4px; flex-shrink:0; align-self:center; border:1px solid var(--border); background:var(--white); border-radius:6px; padding:3px 10px; font-family:inherit; font-size:11.5px; font-weight:600; color:var(--text-secondary); cursor:pointer; transition:all .12s; }
+  .req-edit:hover { background:var(--secondary); border-color:var(--secondary); color:var(--text-primary); }
+  .brief__sync { font-size:11px; color:var(--text-tertiary); font-weight:600; margin-top:11px; display:flex; align-items:center; gap:6px; }
+
+  /* compact brand list */
+  .brandlist { display:flex; flex-direction:column; gap:8px; }
+  .brow { background:var(--white); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  .brow__head { display:flex; align-items:center; gap:14px; padding:16px 18px; cursor:pointer; }
+  .brow__head:hover { background:var(--page-bg); }
+  .brow__logo { width:40px; height:40px; border-radius:10px; background:var(--secondary-lite); display:grid; place-items:center; font-weight:700; font-size:13px; color:var(--text-primary); flex-shrink:0; }
+  .brow__main { flex-shrink:0; width:172px; }
+  .brow__name { font-size:15px; font-weight:700; letter-spacing:-.01em; }
+  .brow__cat { font-size:12px; color:var(--text-secondary); font-weight:500; margin-top:1px; }
+  .brow__sum { flex:1; min-width:0; font-size:12.5px; color:var(--text-secondary); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .brow__edit { padding:5px 12px; flex-shrink:0; }
+  .brow__chev { width:16px; height:16px; color:var(--text-tertiary); flex-shrink:0; transition:transform .18s; }
+  .brow.open .brow__chev { transform:rotate(180deg); }
+  .brow__body { display:none; padding:2px 16px 12px 63px; border-top:1px solid var(--border-light); }
+  .brow.open .brow__body { display:block; }
+  .brow--generic { border-style:dashed; background:var(--secondary-lite); }
+
+  /* outbox */
+  .ob { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:14px; overflow:hidden; }
+  .ob__head { display:flex; align-items:center; gap:10px; padding:13px 18px; border-bottom:1px solid var(--border-light); }
+  .ob__head h3 { font-size:13.5px; font-weight:700; margin:0; }
+  .ob__head .muted { font-size:12px; color:var(--text-tertiary); font-weight:500; }
+  .ob__item { display:flex; align-items:center; gap:13px; padding:12px 18px; border-top:1px solid var(--border-light); cursor:pointer; }
+  .ob__item:first-child { border-top:none; }
+  .ob__item:hover { background:var(--secondary-lite); }
+  .ob__ic { width:32px; height:32px; border-radius:8px; background:var(--secondary-lite); display:grid; place-items:center; color:var(--text-secondary); flex-shrink:0; }
+  .ob__ic svg { width:15px; height:15px; }
+  .ob__main { flex:1; min-width:0; }
+  .ob__t { font-size:13px; font-weight:700; }
+  .ob__s { font-size:12px; color:var(--text-secondary); font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .empty { text-align:center; color:var(--text-tertiary); font-size:13px; font-weight:500; padding:50px 20px; }
+  .foothint { font-size:11.5px; color:var(--text-tertiary); font-weight:500; text-align:center; margin-top:22px; }
+
+  /* ── rings ── */
+  .ringwrap { position:relative; display:inline-grid; place-items:center; flex-shrink:0; }
+  .ringwrap svg { position:absolute; inset:0; }
+  .ringwrap__v { font-weight:700; letter-spacing:-.02em; z-index:1; }
+
+  /* ── ad scorecard LIST (Campaigns › Ads grid) ── */
+  .sc-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:14px; }
+  .sc-card { background:var(--white); border:1px solid var(--border); border-radius:16px; padding:13px; cursor:pointer; transition:border-color .12s, box-shadow .12s; }
+  .sc-card:hover { border-color:var(--border-strong); box-shadow:var(--shadow); }
+  .sc-top { display:flex; gap:12px; }
+  .sc-thumb { width:52px; height:52px; border-radius:11px; display:grid; place-items:center; color:#fff; font-weight:700; font-size:16px; flex-shrink:0; position:relative; overflow:hidden; }
+  .sc-thumb__play { position:absolute; inset:0; background:rgba(13,16,21,.28); display:grid; place-items:center; opacity:0; transition:opacity .12s; }
+  .sc-thumb:hover .sc-thumb__play { opacity:1; }
+  .sc-thumb__play svg { width:16px; height:16px; color:#fff; }
+  .sc-main { flex:1; min-width:0; }
+  .sc-row1 { display:flex; align-items:baseline; gap:8px; }
+  .sc-title { font-size:13.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; }
+  .sc-date { font-size:11px; color:var(--text-tertiary); font-weight:600; flex-shrink:0; }
+  .sc-desc { font-size:12px; color:var(--text-secondary); font-weight:500; line-height:1.4; margin-top:3px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .sc-stats { display:flex; align-items:center; gap:16px; margin-top:12px; padding-top:11px; border-top:1px solid var(--border-light); }
+  .sc-stat { font-size:12px; color:var(--text-secondary); font-weight:600; }
+  .sc-stat b { color:var(--text-primary); font-weight:700; }
+  .sc-stat.dur { margin-left:auto; font-size:13px; color:var(--text-primary); font-weight:700; }
+  .sc-flagchip { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:700; color:var(--red-text); background:var(--red-bg); border-radius:999px; padding:2px 8px; }
+  .sc-flagchip.ok { color:var(--green-text); background:var(--green-bg); }
+  .sc-deliv { margin-top:11px; }
+  .sc-deliv__row { display:flex; align-items:center; justify-content:space-between; font-size:11.5px; font-weight:600; margin-bottom:5px; }
+  .sc-deliv__row b { font-weight:700; }
+  .sc-deliv__bar { height:6px; border-radius:4px; background:var(--secondary-lite); overflow:hidden; }
+  .sc-deliv__fill { height:100%; border-radius:4px; background:var(--primary); }
+
+  /* ── scorecard DETAIL ── */
+  .sc-deliverypanel { display:flex; align-items:center; gap:14px; justify-content:flex-end; margin-bottom:14px; }
+  .sc-deliverypanel .lab { font-size:12px; font-weight:700; color:var(--text-secondary); }
+  .sc-deliverypanel .val { font-size:14px; font-weight:700; }
+  .sc-deliverypanel .track { flex:1; max-width:240px; height:7px; border-radius:5px; background:var(--secondary-lite); overflow:hidden; }
+  .sc-deliverypanel .track i { display:block; height:100%; background:var(--primary); border-radius:5px; }
+  .overall { display:flex; gap:14px; align-items:flex-start; background:var(--white); border:1px solid var(--border); border-radius:14px; padding:16px 18px; }
+  .overall__main { flex:1; min-width:0; }
+  .overall__t { font-size:15px; font-weight:700; letter-spacing:-.02em; display:flex; align-items:center; gap:6px; }
+  .overall__d { font-size:12.5px; color:var(--text-secondary); font-weight:500; line-height:1.5; margin-top:5px; }
+  .ipill { display:inline-grid; place-items:center; width:15px; height:15px; border-radius:50%; background:var(--secondary-lite); color:var(--text-tertiary); font-size:10px; font-weight:700; cursor:default; }
+  .tiles { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .tile { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:13px 15px; display:flex; align-items:center; justify-content:space-between; }
+  .tile__l { font-size:12.5px; font-weight:700; color:var(--text-secondary); }
+  .tile__v { font-size:20px; font-weight:700; letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
+  .ovrow { display:grid; grid-template-columns:minmax(0,1.35fr) 1fr; gap:12px; margin-bottom:16px; }
+  @media (max-width:620px){ .ovrow{ grid-template-columns:1fr; } .tiles{ grid-template-columns:1fr 1fr; } }
+  .subs { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px; }
+  @media (max-width:620px){ .subs{ grid-template-columns:1fr; } }
+  .subcard { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:14px 15px; display:flex; gap:12px; align-items:center; }
+  .subcard__main { flex:1; min-width:0; }
+  .subcard__t { font-size:13px; font-weight:700; display:flex; align-items:center; gap:6px; }
+  .subcard__d { font-size:11.5px; color:var(--text-secondary); font-weight:500; line-height:1.4; margin-top:3px; }
+  .subcard__badge { font-size:10.5px; font-weight:700; color:var(--text-secondary); background:var(--secondary-lite); border-radius:6px; padding:2px 7px; margin-top:7px; display:inline-block; }
+
+  /* ── episode + audio player with ad markers ── */
+  .epbar { display:flex; align-items:center; gap:11px; margin:4px 0 12px; }
+  .epbar__img { width:44px; height:44px; border-radius:9px; background:var(--secondary-lite); display:grid; place-items:center; font-weight:700; font-size:13px; flex-shrink:0; }
+  .epbar__t { font-size:13.5px; font-weight:700; }
+  .epbar__d { font-size:12px; color:var(--text-secondary); font-weight:500; }
+  .strip { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:12px; }
+  .strip__tile { width:34px; height:34px; border-radius:8px; display:grid; place-items:center; color:#fff; font-weight:700; font-size:11px; }
+  .strip__tile.ghost { background:var(--secondary-lite); color:var(--text-tertiary); border:1px solid var(--border); }
+  .aud { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:13px 15px; }
+  .aud__row { display:flex; align-items:center; gap:12px; }
+  .aud__play { width:38px; height:38px; border-radius:50%; background:var(--primary); color:#fff; border:none; display:grid; place-items:center; cursor:pointer; flex-shrink:0; }
+  .aud__play svg { width:15px; height:15px; margin-left:2px; }
+  .aud__track { flex:1; }
+  .aud__markers { position:relative; height:6px; margin-bottom:5px; }
+  .aud__markers i { position:absolute; top:0; height:6px; border-radius:4px; opacity:.9; }
+  .aud__seek { height:6px; border-radius:4px; background:var(--secondary-lite); position:relative; }
+  .aud__seek i { position:absolute; left:0; top:0; height:6px; border-radius:4px; background:var(--primary); }
+  .aud__seek b { position:absolute; top:50%; width:11px; height:11px; border-radius:50%; background:#fff; border:1px solid var(--border-strong); transform:translate(-50%,-50%); }
+  .aud__dur { font-size:12px; font-weight:700; color:var(--text-secondary); font-variant-numeric:tabular-nums; }
+  .sec-rule { border:0; border-top:1px solid var(--border); margin:18px 0; }
+  .sec-h { font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:12px; display:flex; align-items:center; gap:7px; }
+  .cd-linkbtns { display:flex; gap:8px; margin-top:8px; }
+  .cd-linkbtn { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--text-secondary); background:var(--white); border:1px solid var(--border); border-radius:9px; padding:7px 11px; cursor:pointer; }
+  .cd-linkbtn:hover { border-color:var(--border-strong); color:var(--text-primary); }
+  .cd-linkbtn svg { width:13px; height:13px; }
+</style>
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="sb-brand" onclick="go('briefs')" style="cursor:pointer">
+      <b>Brands</b>
+      <span>Compliance setup per brand</span>
+    </div>
+    <div class="sb-group__label">Setup</div>
+    <button class="nav-item active" data-view="briefs" onclick="go('briefs')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg>Brand briefs</button>
+    <div class="sb-foot">
+      <div class="sb-user"><div class="sb-av">CP</div><div><div style="font-size:12.5px;font-weight:700">You</div><small>Acme Network</small></div></div>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="tag" style="margin-right:auto"><i></i>Salesforce connected</span>
+      <button class="tb-btn" id="resetBtn" onclick="location.reload()" title="Restart the demo from a clean slate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Reset demo</button>
+      <button class="tb-btn" onclick="toggleDark()" id="dmBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>Dark</button>
+      <div class="tb-av">CP</div>
+    </div>
+    <div class="views">
+      <section class="view active" id="view-briefs"></section>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+  <aside class="cdrawer" id="cdrawer"></aside>
+
+<script>
+/* ───────── demo data ───────── */
+var WEEK = "Oct 13 – Oct 19";
+var SHOWS = {
+  rubin:    { name:"The Rubin Report",       logo:"RR" },
+  huberman: { name:"Huberman Lab",           logo:"HL" },
+  chd:      { name:"Call Her Daddy",         logo:"CD" },
+  armchair: { name:"Armchair Expert",        logo:"AE" },
+  mel:      { name:"The Mel Robbins Podcast", logo:"MR" },
+  smartless:{ name:"SmartLess",              logo:"SL" },
+  rogan:    { name:"The Joe Rogan Experience", logo:"JR" }
+};
+var BRANDS = {
+  draftkings: { name:"DraftKings", logo:"DK", cat:"Sportsbook",
+    cta:'"Download the DraftKings app, use code ACME, bet five dollars, get two hundred."', ctaVerbatim:true, code:"ACME", url:"draftkings.com/acme",
+    position:"Mid-roll", length:60, fresh:true,
+    disclaimer:"Full legal disclaimer must be read word-for-word (eligibility, 21+, gambling helpline). A flubbed disclaimer voids the read.",
+    points:["Name the sportsbook","Read promo code ACME","$5 bet / $200 bonus offer","Legal disclaimer verbatim"],
+    donts:["No ad-libbing on the offer","Don't abbreviate the disclaimer","Don't name competing books"] },
+  kalshi:     { name:"Kalshi", logo:"KA", cat:"Prediction market",
+    cta:'"Head to Kalshi dot com slash acme to trade on the news."', ctaVerbatim:true, code:"KALSHI", url:"kalshi.com/acme",
+    position:"Mid-roll", length:60, fresh:true, disclaimer:"",
+    points:["Name the brand","Read promo code KALSHI","Free-trial CTA","CTA URL verbatim"],
+    donts:["CTA must be verbatim","Don't imply guaranteed returns"] },
+  ag1:        { name:"AG1", logo:"AG", cat:"Supplements",
+    cta:'"Go to drink A-G-1 dot com slash acme for a free welcome kit."', ctaVerbatim:true, code:"", url:"drinkag1.com/acme",
+    position:"Mid-roll", length:60, fresh:true, disclaimer:"",
+    points:["Name the brand","Personal why / routine mention","Free welcome-kit offer","CTA URL verbatim"],
+    donts:["Fresh read every week — no recycled audio","Don't make health claims"] },
+  betterhelp: { name:"BetterHelp", logo:"BH", cat:"Mental health",
+    cta:'"Visit betterhelp dot com slash acme to get ten percent off your first month."', ctaVerbatim:true, code:"", url:"betterhelp.com/acme",
+    position:"Mid-roll", length:60, fresh:true,
+    disclaimer:"Mental-health disclaimer required: 'not a crisis line' language must be present.",
+    points:["Name the brand","Mental-health disclaimer","10% off first month","CTA URL verbatim"],
+    donts:["Don't claim it treats conditions","Disclaimer is mandatory"] },
+  ramp:       { name:"Ramp", logo:"RP", cat:"Fintech",
+    cta:'"Get started at ramp dot com slash acme."', ctaVerbatim:false, code:"", url:"ramp.com/acme",
+    position:"Mid-roll", length:60, fresh:false, disclaimer:"",
+    points:["Name the brand","Value prop (save time / money)","CTA URL"],
+    donts:["Don't quote specific savings figures"] },
+  ritual:     { name:"Ritual", logo:"RT", cat:"Wellness",
+    cta:'"Visit ritual dot com slash acme for forty percent off."', ctaVerbatim:false, code:"", url:"ritual.com/acme",
+    position:"Mid-roll", length:60, fresh:false,
+    disclaimer:"Wellness disclaimer required (not a substitute for medical advice).",
+    points:["Name the brand","Wellness disclaimer","40% off offer","CTA URL"],
+    donts:["Don't make efficacy claims"] }
+};
+
+/* curated reads with full grading */
+var CURATED = [
+  { id:"r1", showId:"rubin", brandId:"kalshi", ep:"Ep. 412 — The week in prediction markets", date:"Oct 14", platform:"both",
+    position:"mid", posAt:"06:52", epLen:"48:20", length:61, confidence:94, status:"clean",
+    checks:{ cta:{s:"ok", detected:"kalshi.com/acme"}, points:{need:4, hit:["Named the brand","Read code KALSHI","Free-trial CTA","CTA URL verbatim"], miss:[]},
+      position:{s:"ok"}, length:{s:"ok"}, fresh:{s:"ok", note:"New read, distinct from last week."}, url:{s:"ok", yt:true, audio:true}, week:{s:"ok"}, social:null },
+    flags:[] },
+  { id:"r2", showId:"rubin", brandId:"betterhelp", ep:"Ep. 413 — pulling air check…", date:"Oct 15", platform:"none",
+    position:null, posAt:"", epLen:"", length:0, confidence:0, status:"await", checks:null, flags:["Air check not pulled yet"] },
+  { id:"r3", showId:"huberman", brandId:"ramp", ep:"Protocols for focus & deep work", date:"Oct 14", platform:"youtube",
+    position:"pre", posAt:"00:38", epLen:"1:52:40", length:58, confidence:71, status:"ear",
+    checks:{ cta:{s:"ok", detected:"ramp.com/acme"}, points:{need:3, hit:["Named the brand","Value prop","CTA URL"], miss:[]},
+      position:{s:"bad", note:"Detected at 0:38 of a 1:52:40 episode — reads as pre-roll, brief calls for mid-roll."}, length:{s:"ok"}, fresh:{s:"ok"}, url:{s:"ok", yt:true, audio:false}, week:{s:"ok"}, social:null },
+    flags:["Pre-roll, not mid-roll","No audio air check"] },
+  { id:"r4", showId:"huberman", brandId:"ag1", ep:"The science of supplementation", date:"Oct 15", platform:"both",
+    position:"mid", posAt:"41:10", epLen:"1:38:02", length:63, confidence:58, status:"ear",
+    checks:{ cta:{s:"ok", detected:"drinkag1.com/acme"}, points:{need:4, hit:["Named the brand","Personal why","Free welcome-kit","CTA URL verbatim"], miss:[]},
+      position:{s:"ok"}, length:{s:"ok"}, fresh:{s:"bad", note:"Audio fingerprint is a 97% match to last week's read on this show — looks recycled, not a fresh take."}, url:{s:"ok", yt:true, audio:true}, week:{s:"ok"}, social:null },
+    flags:["Recycled read (97% match to last week)"] },
+  { id:"r5", showId:"chd", brandId:"draftkings", ep:"The one about the group chat", date:"Oct 13", platform:"both",
+    position:"mid", posAt:"18:24", epLen:"58:11", length:66, confidence:96, status:"clean",
+    checks:{ cta:{s:"ok", detected:"code ACME · draftkings.com/acme"}, points:{need:4, hit:["Named the sportsbook","Read code ACME","$5/$200 offer","Disclaimer verbatim"], miss:[]},
+      position:{s:"ok"}, length:{s:"ok"}, fresh:{s:"ok"}, url:{s:"ok", yt:true, audio:true}, week:{s:"ok"}, social:{s:"ok"} },
+    flags:[] },
+  { id:"r6", showId:"chd", brandId:"ritual", ep:"Wellness era, who dis", date:"Oct 16", platform:"both",
+    position:"mid", posAt:"24:50", epLen:"51:30", length:41, confidence:69, status:"flag",
+    checks:{ cta:{s:"ok", detected:"ritual.com/acme"}, points:{need:4, hit:["Named the brand","40% off offer","CTA URL"], miss:["Wellness disclaimer"]},
+      position:{s:"ok"}, length:{s:"bad", note:"Read is 41s against a 60s guarantee — 19s short."}, fresh:{s:"ok"}, url:{s:"ok", yt:true, audio:true}, week:{s:"ok"}, social:null },
+    flags:["Under length (41s / 60s)","Missing wellness disclaimer"] },
+  { id:"r7", showId:"armchair", brandId:"draftkings", ep:"Experts on: risk & reward", date:"Oct 14", platform:"both",
+    position:"mid", posAt:"33:02", epLen:"1:12:08", length:60, confidence:77, status:"flag",
+    checks:{ cta:{s:"ok", detected:"code ACME · draftkings.com/acme"}, points:{need:4, hit:["Named the sportsbook","Read code ACME","$5/$200 offer"], miss:["Disclaimer verbatim"]},
+      position:{s:"ok"}, length:{s:"ok"}, fresh:{s:"ok"}, url:{s:"ok", yt:true, audio:true}, week:{s:"ok"}, social:null },
+    flags:["Disclaimer shortened — 2 required lines missing"] },
+  { id:"r8", showId:"mel", brandId:"betterhelp", ep:"How to actually start therapy", date:"Oct 15", platform:"both",
+    position:"mid", posAt:"12:40", epLen:"38:22", length:62, confidence:92, status:"clean",
+    checks:{ cta:{s:"ok", detected:"betterhelp.com/acme"}, points:{need:4, hit:["Named the brand","Mental-health disclaimer","10% off","CTA URL verbatim"], miss:[]},
+      position:{s:"ok"}, length:{s:"ok"}, fresh:{s:"ok"}, url:{s:"ok", yt:true, audio:true}, week:{s:"ok"}, social:null },
+    flags:[] },
+  { id:"r9", showId:"smartless", brandId:"kalshi", ep:"With special guest…", date:"Oct 16", platform:"both",
+    position:"mid", posAt:"09:15", epLen:"54:00", length:59, confidence:66, status:"flag",
+    checks:{ cta:{s:"ok", detected:"kalshi.com/acme (spoken)"}, points:{need:4, hit:["Named the brand","Read code KALSHI","Free-trial CTA","CTA URL verbatim"], miss:[]},
+      position:{s:"ok"}, length:{s:"ok"}, fresh:{s:"ok"}, url:{s:"bad", yt:false, audio:true, note:"CTA link missing from the YouTube description — present in audio show notes only."}, week:{s:"ok"}, social:null },
+    flags:["CTA URL missing from YouTube description"] },
+  { id:"r10", showId:"mel", brandId:"ramp", ep:"Systems that run themselves", date:"Oct 14", platform:"both",
+    position:"mid", posAt:"21:08", epLen:"41:55", length:60, confidence:93, status:"clean",
+    checks:{ cta:{s:"ok", detected:"ramp.com/acme"}, points:{need:3, hit:["Named the brand","Value prop","CTA URL"], miss:[]},
+      position:{s:"ok"}, length:{s:"ok"}, fresh:{s:"ok"}, url:{s:"ok", yt:true, audio:true}, week:{s:"ok"}, social:null },
+    flags:[] },
+  { id:"r11", showId:"armchair", brandId:"ag1", ep:"Experts on: longevity", date:"Oct 16", platform:"both",
+    position:"mid", posAt:"47:30", epLen:"1:20:10", length:64, confidence:90, status:"clean",
+    checks:{ cta:{s:"ok", detected:"drinkag1.com/acme"}, points:{need:4, hit:["Named the brand","Personal why","Free welcome-kit","CTA URL verbatim"], miss:[]},
+      position:{s:"ok"}, length:{s:"ok"}, fresh:{s:"ok", note:"Fresh read, distinct fingerprint."}, url:{s:"ok", yt:true, audio:true}, week:{s:"ok"}, social:null },
+    flags:[] },
+  { id:"r12", showId:"rogan", brandId:"draftkings", ep:"pulling air check…", date:"Oct 17", platform:"none",
+    position:null, posAt:"", epLen:"", length:0, confidence:0, status:"await", checks:null, flags:["Air check not pulled yet"] }
+];
+
+/* deterministic filler of auto-cleared reads for realistic weekly volume */
+function buildFiller(){
+  var showIds=Object.keys(SHOWS), brandIds=Object.keys(BRANDS), out=[], n=0;
+  var eps=["Weekly recap","Mailbag episode","The deep dive","Guest spotlight","Hot takes","Season preview","Listener Q&A","Field notes"];
+  for(var i=0;i<38;i++){
+    var s=showIds[(i*3)%showIds.length], b=brandIds[(i*5+2)%brandIds.length];
+    var br=BRANDS[b];
+    var conf=88+((i*7)%10);
+    var mins=30+((i*11)%80), secs=(i*13)%60;
+    var len=59+((i*3)%4);
+    out.push({ id:"f"+(n++), showId:s, brandId:b,
+      ep:eps[i%eps.length]+" · #"+(100+i), date:["Oct 13","Oct 14","Oct 15","Oct 16","Oct 17","Oct 18"][i%6], platform:"both",
+      position:"mid", posAt:(mins<10?"0":"")+mins+":"+(secs<10?"0":"")+secs, epLen:(40+(i%30))+":00", length:len, confidence:conf, status:"clean",
+      checks:{ cta:{s:"ok", detected:br.url}, points:{need:br.points.length, hit:br.points.slice(), miss:[]},
+        position:{s:"ok"}, length:{s:"ok"}, fresh:{s:"ok"}, url:{s:"ok", yt:true, audio:true}, week:{s:"ok"}, social:null }, flags:[] });
+  }
+  return out;
+}
+var READS = CURATED.concat(buildFiller());
+
+/* ───────── air-check scorecard model (SpotsNow Ad Scorecard) ───────── */
+var BRAND_COLOR={ draftkings:"#111827", kalshi:"#10a37f", ag1:"#14532d", betterhelp:"#1d4ed8", ramp:"#b45309", ritual:"#be123c" };
+function brandColor(id){ return BRAND_COLOR[id]||"#334155"; }
+// bands: Great>=85, Good 70-84, Okay 50-69, Bad <50 (thresholds are a demo convention; real scores come from the server)
+function bandOf(s){ return s>=85?"Great": s>=70?"Good": s>=50?"Okay":"Bad"; }
+function bandColor(b){ return (b==="Great"||b==="Good")?"var(--green-text)": b==="Okay"?"var(--orange-text)":"var(--red-text)"; }
+function scoreRing(s){ return s>=70?"var(--green-text)":"var(--red-text)"; } // overall ring: product-faithful single cut at 70
+function ordinal(n){ if(!n||n<1) return "—"; var s=["th","st","nd","rd"], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
+function readShort(r){ return r.position==="mid"?"Mid": r.position==="pre"?"Pre": r.position==="post"?"Post":"—"; }
+function ring(score,color,size){ size=size||44; var r=18,c=2*Math.PI*r,off=c*(1-Math.max(0,Math.min(100,score))/100);
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 44 44" style="transform:rotate(-90deg)">'
+    +'<circle cx="22" cy="22" r="18" fill="none" stroke="var(--secondary-lite)" stroke-width="4"/>'
+    +'<circle cx="22" cy="22" r="18" fill="none" stroke="'+color+'" stroke-width="4" stroke-linecap="round" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'"/></svg>'; }
+function ringEl(score,color,size){ size=size||44; return '<span class="ringwrap" style="width:'+size+'px;height:'+size+'px">'+ring(score,color,size)+'<span class="ringwrap__v" style="color:'+color+';font-size:'+(size>=56?13:11)+'px">'+score+'%</span></span>'; }
+var MK=["#10b981","#22c55e","#f59e0b","#8b5cf6","#6366f1","#3b82f6","#14b8a6"]; // categorical ad markers (not score-colored)
+
+// per-read scorecard specifics; reads not listed get generated by ec()
+var EC={
+  r1:{ overall:86, adLoad:12, place:1, impr:{current:32000,goal:45000},
+    sub:{ adLength:{score:92,desc:"61s — right in the recommended window."}, personalization:{score:78,desc:"Host ties it to following the markets herself."}, positioning:{score:90,desc:"First ad in the opening break."}, sov:{score:70,desc:"One other ad shares the break."} },
+    summary:"Strong execution: clean verbatim read in the top slot, solid personalization though share of voice dips with a break-mate.",
+    others:["kalshi","ramp","betterhelp"], markers:[{a:14,b:18,id:"kalshi"},{a:49,b:54,id:"ramp"},{a:80,b:84,id:"betterhelp"}] },
+  r3:{ overall:68, adLoad:6, place:1, impr:{current:40000,goal:70000},
+    sub:{ adLength:{score:80,desc:"58s — just under the 60s target."}, personalization:{score:74,desc:"Clear value prop, light personal context."}, positioning:{score:38,desc:"Ran at 0:38 of a 1h52 episode — reads as pre-roll."}, sov:{score:82,desc:"Sole ad in the break."} },
+    summary:"Mixed execution: good length and share of voice are undercut by a pre-roll placement where the brief wanted mid-roll.",
+    others:["ramp","ag1"], markers:[{a:1,b:4,id:"ramp"},{a:55,b:60,id:"ag1"}] },
+  r4:{ overall:64, adLoad:14, place:2, impr:{current:52000,goal:80000},
+    sub:{ adLength:{score:88,desc:"63s — within range."}, personalization:{score:48,desc:"Reused last week's audio — no fresh take."}, positioning:{score:82,desc:"Mid-episode, second in the break."}, sov:{score:70,desc:"One other ad shares the break."} },
+    summary:"Mixed execution: on-length and well placed, but the read is recycled from last week, which drags personalization.",
+    others:["ag1","betterhelp","ramp"], markers:[{a:24,b:28,id:"betterhelp"},{a:41,b:46,id:"ag1"},{a:70,b:74,id:"ramp"}] },
+  r5:{ overall:91, adLoad:13, place:1, impr:{current:41000,goal:45000},
+    sub:{ adLength:{score:86,desc:"66s — slightly long, still on spec."}, personalization:{score:93,desc:"Host ties DraftKings to game-day ritual with friends."}, positioning:{score:92,desc:"First ad in the first break."}, sov:{score:74,desc:"One other ad shares the break."} },
+    summary:"Strong execution: top-slot verbatim read with the full disclaimer and standout personalization.",
+    others:["draftkings","ritual","kalshi"], markers:[{a:18,b:24,id:"draftkings"},{a:50,b:55,id:"ritual"},{a:80,b:84,id:"kalshi"}] },
+  r6:{ overall:58, adLoad:7, place:2, impr:{current:18000,goal:45000},
+    sub:{ adLength:{score:42,desc:"41s against a 60s guarantee — 19s short."}, personalization:{score:72,desc:"Warm, on-brand read."}, positioning:{score:80,desc:"Mid-episode placement."}, sov:{score:70,desc:"One other ad shares the break."} },
+    summary:"Weak execution: a warm read is undercut by a short 41s length and a missing wellness disclaimer.",
+    others:["ritual","draftkings"], markers:[{a:25,b:28,id:"ritual"},{a:60,b:65,id:"draftkings"}] },
+  r7:{ overall:74, adLoad:9, place:2, impr:{current:34000,goal:45000},
+    sub:{ adLength:{score:84,desc:"60s — on target."}, personalization:{score:86,desc:"Host frames the bet around the weekend slate."}, positioning:{score:80,desc:"Second in a mid-episode break."}, sov:{score:70,desc:"One other ad shares the break."} },
+    summary:"Mixed execution: strong length and personalization, but two required disclaimer lines were shortened.",
+    others:["draftkings","ag1"], markers:[{a:33,b:38,id:"draftkings"},{a:66,b:70,id:"ag1"}] },
+  r8:{ overall:90, adLoad:12, place:1, impr:{current:44000,goal:45000},
+    sub:{ adLength:{score:88,desc:"62s — within range."}, personalization:{score:90,desc:"Host shares her own therapy experience."}, positioning:{score:88,desc:"Top of the first mid-roll break."}, sov:{score:84,desc:"Nearly sole voice in the break."} },
+    summary:"Strong execution: personal, on-length read with the disclaimer intact and strong share of voice.",
+    others:["betterhelp","ramp"], markers:[{a:13,b:17,id:"betterhelp"},{a:52,b:56,id:"ramp"}] },
+  r9:{ overall:72, adLoad:10, place:2, impr:{current:30000,goal:45000},
+    sub:{ adLength:{score:84,desc:"59s — on target."}, personalization:{score:80,desc:"Light but genuine host mention."}, positioning:{score:78,desc:"Mid-episode, second in the break."}, sov:{score:72,desc:"One other ad shares the break."} },
+    summary:"Mixed execution: a clean read, but the CTA link is missing from the YouTube description.",
+    others:["kalshi","draftkings","ag1"], markers:[{a:9,b:13,id:"kalshi"},{a:40,b:44,id:"draftkings"},{a:72,b:76,id:"ag1"}] },
+  r10:{ overall:89, adLoad:11, place:1, impr:{current:7600,goal:8000},
+    sub:{ adLength:{score:86,desc:"60s — on target."}, personalization:{score:88,desc:"Host explains how she uses it to run ops."}, positioning:{score:90,desc:"First ad in the break."}, sov:{score:82,desc:"Nearly sole voice in the break."} },
+    summary:"Strong execution: top-slot, on-length read with a genuine personal workflow story.",
+    others:["ramp","betterhelp"], markers:[{a:21,b:25,id:"ramp"},{a:55,b:59,id:"betterhelp"}] },
+  r11:{ overall:87, adLoad:13, place:2, impr:{current:38000,goal:45000},
+    sub:{ adLength:{score:88,desc:"64s — within range."}, personalization:{score:88,desc:"Host connects it to her longevity routine."}, positioning:{score:82,desc:"Second in a mid-episode break."}, sov:{score:74,desc:"One other ad shares the break."} },
+    summary:"Strong execution: fresh, on-length read with strong personalization in a mid-roll slot.",
+    others:["ag1","draftkings","ritual"], markers:[{a:47,b:51,id:"ag1"},{a:68,b:72,id:"draftkings"},{a:88,b:92,id:"ritual"}] }
+};
+function ec(r){
+  if(EC[r.id]) return EC[r.id];
+  var seed=0,i; for(i=0;i<r.id.length;i++) seed+=r.id.charCodeAt(i)*(i+1);
+  var overall=84+(seed%12);
+  var g={ overall:overall, adLoad:9+(seed%7), place:(seed%2)+1, impr:{ current:1000*(18+(seed%30)), goal:1000*(18+(seed%30)+5+(seed%4)*5) },
+    sub:{ adLength:{score:82+(seed%14),desc:"Close to the recommended range."},
+          personalization:{score:74+((seed*3)%22),desc:"Host adds a brief personal note."},
+          positioning:{score:76+((seed*2)%20),desc:"Mid-episode placement in the break."},
+          sov:{score:72+((seed*4)%20),desc:"One other ad shares the break."} },
+    summary:"Strong execution: a clean, on-length read, well placed with solid personalization.",
+    others:[r.brandId].concat(Object.keys(BRANDS).filter(function(x){return x!==r.brandId;}).slice(0,2)),
+    markers:[{a:12+(seed%8),b:16+(seed%8),id:r.brandId},{a:48,b:53,id:Object.keys(BRANDS)[seed%6]},{a:78,b:82,id:Object.keys(BRANDS)[(seed+2)%6]}] };
+  EC[r.id]=g; return g;
+}
+
+/* ───────── helpers ───────── */
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function show(r){ return SHOWS[r.showId]; }
+function brand(r){ return BRANDS[r.brandId]; }
+var STATUS = {
+  clean:{ pill:"pill--ok",  label:"Cleared" },
+  flag: {  pill:"pill--bad", label:"Flagged" },
+  ear:  {  pill:"pill--warn", label:"Needs a listen" },
+  await:{  pill:"pill--mute", label:"Awaiting air check" }
+};
+function confColor(c){ return c>=85?"var(--green-text)": c>=70?"var(--orange-text)":"var(--red-text)"; }
+function counts(){
+  var c={total:READS.length, clean:0, flag:0, ear:0, await:0};
+  READS.forEach(function(r){ c[r.status]++; });
+  c.needYou = c.flag + c.ear;
+  return c;
+}
+function posLabel(r){ return r.position==="mid"?"Mid-roll": r.position==="pre"?"Pre-roll": r.position==="post"?"Post-roll":"—"; }
+function avgScore(){ var s=0,n=0; READS.forEach(function(r){ if(r.status!=="await"){ s+=ec(r).overall; n++; } }); return n?Math.round(s/n):0; }
+
+/* ───────── OVERVIEW ───────── */
+function renderOverview(){
+  var c=counts();
+  var flagged=READS.filter(function(r){ return r.status==="flag"||r.status==="ear"; });
+  var h='<div class="wrap">';
+  h+='<div class="eyebrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Broadcast week of <b>'+WEEK+'</b> · ends Sun 10:00 PM ET</div>';
+  h+='<h1 class="title">Air Checks</h1>';
+  h+='<p class="sub">Every aired read pulled from YouTube + audio and scored against the brand brief — ad length, load, read, placement, personalization, share of voice — plus a full compliance check. You only review what the agent isn\'t sure about.</p>';
+
+  var avg=avgScore();
+  h+='<div class="kpis">';
+  h+=kpi("Reads scored", c.total, "pulled from YouTube + audio");
+  h+='<div class="kpi"><div class="kpi__label">Avg air-check score</div><div class="kpi__num" style="color:'+scoreRing(avg)+'">'+avg+'%</div><div class="kpi__sub">across all scored reads</div></div>';
+  h+=kpi("Need your review", c.needYou, "flagged or low confidence", true);
+  h+=kpi("Awaiting air check", c.await, "not posted / not pulled yet");
+  h+='</div>';
+
+  h+='<div class="savings"><div class="savings__big">~2 days</div><div class="savings__txt">The agent scored all <b>'+c.total+'</b> reads this week. You review <b>'+c.needYou+'</b> — not every one. Hosts no longer submit timestamps; air checks are pulled automatically.</div></div>';
+
+  h+='<div class="card"><div class="card__head"><h2>Needs your review</h2><span class="muted">ranked by risk · click to open the read</span></div>';
+  if(!flagged.length){ h+='<div class="empty">Nothing flagged — the whole week auto-cleared.</div>'; }
+  flagged.sort(function(a,b){ return a.confidence-b.confidence; }).forEach(function(r){
+    var st=STATUS[r.status];
+    h+='<div class="flagrow" onclick="openDrawer(\''+r.id+'\')">'
+      +'<div class="flagrow__logo">'+esc(show(r).logo)+'</div>'
+      +'<div class="flagrow__main"><div class="flagrow__t">'+esc(brand(r).name)+' on '+esc(show(r).name)+'</div>'
+      +'<div class="flagrow__s">'+esc(r.flags.join(" · ")||"Low confidence read")+'</div></div>'
+      +'<span class="conf"><span style="color:'+confColor(r.confidence)+'">'+r.confidence+'%</span></span>'
+      +'<span class="pill '+st.pill+'">'+st.label+'</span></div>';
+  });
+  h+='</div>';
+  h+='<div class="foothint">Compliance rules sync from Salesforce brand briefs · grading runs every Monday 8:00 AM ET</div>';
+  h+='</div>';
+  $("view-overview").innerHTML=h;
+}
+function kpi(label,num,sub,flag){
+  return '<div class="kpi'+(flag?' kpi--flag':'')+'"><div class="kpi__label">'+esc(label)+'</div><div class="kpi__num">'+num+'</div><div class="kpi__sub">'+esc(sub)+'</div></div>';
+}
+
+/* ───────── AD SCORECARDS (list) ───────── */
+var fBrand="all", fStatus="all", fText="";
+function renderReview(){
+  var h='<div class="wrap">';
+  h+='<h1 class="title">Ad scorecards</h1>';
+  h+='<p class="sub">Every aired read, scored against the brand brief — ad length, load, read, placement, personalization and share of voice. Compliance flags surface on the card.</p>';
+
+  h+='<div class="toolbar">';
+  h+='<div class="sel"><select onchange="fStatus=this.value;paintRows()"><option value="all">All scorecards</option><option value="flag">Compliance flags</option><option value="ear">Low confidence</option><option value="clean">Cleared</option><option value="await">Awaiting air check</option></select></div>';
+  var bopts='<option value="all">All brands</option>';
+  Object.keys(BRANDS).forEach(function(b){ bopts+='<option value="'+b+'">'+esc(BRANDS[b].name)+'</option>'; });
+  h+='<div class="sel"><select onchange="fBrand=this.value;paintRows()">'+bopts+'</select></div>';
+  h+='<div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Search shows or brands…" oninput="fText=this.value.toLowerCase();paintRows()"/></div>';
+  h+='</div>';
+
+  h+='<div class="sc-grid" id="rows"></div>';
+  h+='</div>';
+  $("view-review").innerHTML=h;
+  paintRows();
+}
+function rankStatus(s){ return s==="flag"?0 : s==="ear"?1 : s==="await"?2 : 3; }
+function paintRows(){
+  var rows=READS.filter(function(r){
+    if(fStatus!=="all" && r.status!==fStatus) return false;
+    if(fBrand!=="all" && r.brandId!==fBrand) return false;
+    if(fText && (show(r).name.toLowerCase().indexOf(fText)<0 && brand(r).name.toLowerCase().indexOf(fText)<0)) return false;
+    return true;
+  });
+  rows.sort(function(a,b){ return rankStatus(a.status)-rankStatus(b.status) || a.confidence-b.confidence; });
+  var el=$("rows"); if(!el) return;
+  if(!rows.length){ el.innerHTML='<div class="empty" style="grid-column:1/-1">No scorecards match these filters.</div>'; return; }
+  var h="";
+  rows.forEach(function(r){
+    var br=brand(r), sh=show(r), aw=r.status==="await";
+    h+='<div class="sc-card" onclick="openDrawer(\''+r.id+'\')">';
+    h+='<div class="sc-top">';
+    h+='<div class="sc-thumb" style="background:'+brandColor(r.brandId)+'">'+esc(br.logo)+'<span class="sc-thumb__play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></div>';
+    h+='<div class="sc-main"><div class="sc-row1"><span class="sc-title">'+esc(r.ep)+'</span><span class="sc-date">'+esc(r.date)+'</span></div>';
+    h+='<div style="font-size:11px;color:var(--text-tertiary);font-weight:600;margin-top:1px">'+esc(br.name)+' on '+esc(sh.name)+'</div>';
+    h+='<div class="sc-desc">'+esc(aw?"Air check not pulled yet — the agent re-checks every few hours.":ec(r).summary)+'</div></div>';
+    if(aw){ h+='<span class="pill pill--mute" style="align-self:flex-start">Awaiting</span>'; }
+    else { var ov=ec(r).overall; h+=ringEl(ov, scoreRing(ov), 50); }
+    h+='</div>'; // sc-top
+
+    if(!aw){
+      var e=ec(r);
+      h+='<div class="sc-stats">';
+      h+='<span class="sc-stat">Ads: <b>'+e.adLoad+'%</b></span>';
+      h+='<span class="sc-stat">Read: <b>'+readShort(r)+'</b></span>';
+      h+='<span class="sc-stat">Place: <b>'+ordinal(e.place)+'</b></span>';
+      h+='<span class="sc-stat dur">'+r.length+'s</span>';
+      h+='</div>';
+      h+='<div class="sc-deliv"><div class="sc-deliv__row"><span>'+(r.flags.length?'<span class="sc-flagchip"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></svg>'+r.flags.length+' flag'+(r.flags.length>1?'s':'')+'</span>':'<span class="sc-flagchip ok">Compliant</span>')+'</span><span><b>'+e.impr.current.toLocaleString()+'</b> / '+e.impr.goal.toLocaleString()+'</span></div>';
+      h+='<div class="sc-deliv__bar"><div class="sc-deliv__fill" style="width:'+Math.min(100,Math.round(e.impr.current/e.impr.goal*100))+'%"></div></div></div>';
+    } else {
+      h+='<div class="sc-deliv"><div class="sc-deliv__row"><span class="sc-stat">Delivery</span><span>--- / '+(EC_GOAL(r))+'</span></div><div class="sc-deliv__bar"></div></div>';
+    }
+    h+='</div>';
+  });
+  el.innerHTML=h;
+}
+function EC_GOAL(r){ return (r.brandId==="draftkings"?"70,000":"45,000"); }
+
+/* ───────── DRAWER (scorecard + compliance) ───────── */
+function openDrawer(id){
+  var r=READS.filter(function(x){return x.id===id;})[0]; if(!r) return;
+  var br=brand(r), sh=show(r);
+  var h='<div class="cd-head"><div class="cd-head__logo" style="background:'+brandColor(r.brandId)+';color:#fff">'+esc(br.logo)+'</div>'
+    +'<div style="min-width:0"><h2>'+esc(br.name)+'</h2><p>'+esc(br.name)+' on '+esc(sh.name)+'</p>'
+    +'<div class="cd-linkbtns"><button class="cd-linkbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14 21 3"/></svg>View profile</button>'
+    +'<button class="cd-linkbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>Download audio</button></div></div>'
+    +'<button class="cd-x" onclick="closeDrawer()">&times;</button></div>';
+  h+='<div class="cd-body">';
+
+  if(r.status==="await"){
+    h+='<div class="empty" style="padding:40px 10px"><div style="font-size:30px;margin-bottom:10px">🕓</div><div style="font-size:14px;font-weight:700;color:var(--text-primary)">Air check not pulled yet</div><div style="margin-top:6px">The episode hasn\'t posted, or the YouTube / audio link isn\'t in Salesforce yet. The agent re-checks every few hours and scores it automatically once it lands.</div></div>';
+    h+='</div>'; mountDrawer(h); return;
+  }
+
+  var c=r.checks, e=ec(r), ovColor=scoreRing(e.overall);
+  // delivery
+  var pct=Math.min(100,Math.round(e.impr.current/e.impr.goal*100));
+  h+='<div class="sc-deliverypanel"><span class="lab">Delivery</span><span class="track"><i style="width:'+pct+'%"></i></span><span class="val">'+e.impr.current.toLocaleString()+' / '+e.impr.goal.toLocaleString()+'</span></div>';
+
+  // overall + top tiles
+  h+='<div class="ovrow">';
+  h+='<div class="overall"><div class="overall__main"><div class="overall__t">Overall <span class="ipill" title="Weighted rollup of the metrics on this card — how well the ad executed in this episode.">i</span></div><div class="overall__d">'+esc(e.summary)+'</div></div>'+ringEl(e.overall, ovColor, 58)+'</div>';
+  h+='<div class="tiles">';
+  h+='<div class="tile"><span class="tile__l">Ad Length</span><span class="tile__v">'+r.length+'s</span></div>';
+  h+='<div class="tile"><span class="tile__l">Ad Load</span><span class="tile__v">'+e.adLoad+'%</span></div>';
+  h+='<div class="tile"><span class="tile__l">Read</span><span class="tile__v">'+readShort(r)+'</span></div>';
+  h+='<div class="tile"><span class="tile__l">Place</span><span class="tile__v">'+ordinal(e.place)+'</span></div>';
+  h+='</div></div>';
+
+  // sub-scores
+  var subs=[["Ad Length",e.sub.adLength],["Ad Personalization",e.sub.personalization],["Positioning",e.sub.positioning],["Share of Voice",e.sub.sov]];
+  h+='<div class="subs">';
+  subs.forEach(function(p){ var s=p[1], b=bandOf(s.score);
+    h+='<div class="subcard"><div class="subcard__main"><div class="subcard__t">'+esc(p[0])+'</div><div class="subcard__d">'+esc(s.desc)+'</div><span class="subcard__badge">'+b+'</span></div>'+ringEl(s.score, bandColor(b), 44)+'</div>';
+  });
+  h+='</div>';
+
+  // episode + brand strip + audio player with ad markers
+  h+='<div class="epbar"><div class="epbar__img">'+esc(sh.logo)+'</div><div style="min-width:0"><div class="epbar__t">'+esc(r.ep)+'</div><div class="epbar__d">'+esc(sh.name)+' · aired '+esc(r.date)+'</div></div></div>';
+  h+='<div class="strip">';
+  (e.others||[r.brandId]).forEach(function(bid){ var bb=BRANDS[bid]; if(!bb) return; h+='<div class="strip__tile" title="'+esc(bb.name)+'" style="background:'+brandColor(bid)+'">'+esc(bb.logo)+'</div>'; });
+  h+='</div>';
+  h+='<div class="aud"><div class="aud__row"><button class="aud__play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button><div class="aud__track"><div class="aud__markers">';
+  (e.markers||[]).forEach(function(m,i){ h+='<i style="left:'+m.a+'%;width:'+Math.max(2,(m.b-m.a))+'%;background:'+MK[i%MK.length]+'" title="'+esc((BRANDS[m.id]||{}).name||"Ad")+'"></i>'; });
+  h+='</div><div class="aud__seek"><i style="width:22%"></i><b style="left:22%"></b></div></div><span class="aud__dur">'+esc(r.epLen)+'</span></div>'
+    +'<div style="font-size:11px;color:var(--text-tertiary);font-weight:500;margin-top:8px">Markers show every detected ad in the episode — '+esc(br.name)+'’s read is at '+esc(r.posAt)+'. Hosts don’t submit timestamps; the agent pulls them.</div></div>';
+
+  // ── compliance section (merged) ──
+  h+='<hr class="sec-rule"/>';
+  h+='<div class="sec-h"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Compliance — graded against the brand brief</div>';
+  // confidence
+  h+='<div class="conf-wrap"><div class="conf-wrap__top"><span class="conf-wrap__lab">Agent confidence</span><span class="conf-wrap__big" style="color:'+confColor(r.confidence)+'">'+r.confidence+'%</span></div>'
+    +'<div class="conf-track"><i style="width:'+r.confidence+'%;background:'+confColor(r.confidence)+'"></i></div>'
+    +'<div class="conf-note">'+(r.confidence>=85?"High confidence — auto-cleared, no listen needed.":r.confidence>=70?"Medium confidence — a quick spot-check is worth it.":"Low confidence — flagged for a human listen.")+'</div></div>';
+  // brief vs read
+  h+='<div class="twocol">';
+  h+='<div class="panel"><div class="panel__h"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Brand brief</div>'
+    +'<div class="brief-line"><span class="lab">Required CTA</span><span class="quote">'+esc(br.cta)+'</span></div>'
+    +'<div class="brief-line"><span class="lab">Position / length</span><b>'+esc(br.position)+'</b> · '+br.length+'s'+(br.fresh?' · fresh read weekly':'')+'</div>'
+    +(br.disclaimer?'<div class="brief-line"><span class="lab">Disclaimer</span>'+esc(br.disclaimer)+'</div>':'')
+    +'</div>';
+  h+='<div class="panel"><div class="panel__h"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>What aired</div>';
+  h+='<div class="brief-line"><span class="lab">Detected CTA</span>'+esc(c.cta.detected)+'</div>';
+  h+='<div class="brief-line"><span class="lab">Detected position</span>'+posLabel(r)+' @ '+esc(r.posAt)+' of '+esc(r.epLen)+'</div>';
+  h+='<div class="brief-line"><span class="lab">Measured length</span>'+r.length+'s</div></div>';
+  h+='</div>';
+
+  // checklist
+  h+='<div class="panel" style="margin-bottom:16px"><div class="panel__h">Compliance checks</div>';
+  h+=chk(c.cta.s, "CTA read verbatim", c.cta.s==="ok"?("Matched the required CTA — "+esc(c.cta.detected)):"CTA did not match the brief word-for-word.");
+  var pts=c.points, ptxt=(pts.hit.length)+" of "+pts.need+" talking points hit"+(pts.miss.length?" · missing: "+esc(pts.miss.join(", ")):"");
+  h+=chk(pts.miss.length?"bad":"ok", "Talking points", ptxt);
+  h+=chk(c.position.s, "Ad position", c.position.note?esc(c.position.note):(posLabel(r)+" — matches the brief ("+esc(br.position)+")."));
+  h+=chk(c.length.s, "Read length", c.length.note?esc(c.length.note):(r.length+"s against a "+br.length+"s guarantee — on spec."));
+  if(br.fresh) h+=chk(c.fresh.s, "Fresh read", c.fresh.note?esc(c.fresh.note):"Distinct from prior weeks — not recycled.");
+  h+=chk(c.url.s, "CTA link in description", c.url.note?esc(c.url.note):("Present in "+((c.url.yt&&c.url.audio)?"both YouTube and audio":c.url.yt?"YouTube":"audio")+" description."));
+  h+=chk(c.week.s, "Within broadcast week", "Posted inside the Mon–Sun window, before Sunday 10 PM ET.");
+  h+='</div>';
+
+  // drafted email (only when there is something to flag)
+  if(r.flags.length){
+    var em=flagEmail(r);
+    h+='<div class="draft"><div class="draft__head"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6"/></svg>Drafted flag email — ready to send</div>'
+      +'<div class="draft__body"><div class="draft__to">To: '+esc(em.to)+'   ·   Subject: '+esc(em.subject)+'</div>'+esc(em.body)+'</div></div>';
+  }
+  h+='</div>'; // cd-body
+
+  h+='<div class="cd-foot">';
+  if(r.flags.length){
+    h+='<button class="btn btn--primary btn--grow" onclick="resolveRead(\''+r.id+'\',\'flag\')">Send flag &amp; log</button>';
+    h+='<button class="btn btn--ghost" onclick="resolveRead(\''+r.id+'\',\'clean\')">Override · mark clean</button>';
+  } else {
+    h+='<button class="btn btn--primary btn--grow" onclick="resolveRead(\''+r.id+'\',\'clean\')">Approve &amp; clear</button>';
+    h+='<button class="btn btn--ghost" onclick="closeDrawer()">Close</button>';
+  }
+  h+='</div>';
+  mountDrawer(h);
+}
+function chk(s, title, desc){
+  var ic = s==="ok"?'<span class="chk__ic ic-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>'
+    : s==="warn"?'<span class="chk__ic ic-warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 9v4M12 17h.01"/></svg></span>'
+    : '<span class="chk__ic ic-bad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></span>';
+  return '<div class="chk__row">'+ic+'<div class="chk__main"><div class="chk__t">'+esc(title)+'</div><div class="chk__d">'+desc+'</div></div></div>';
+}
+function wave(){ var h="", hs=[8,14,20,11,17,22,9,15,19,12,21,10,16,13,18,8,20,14]; hs.forEach(function(v){ h+='<i style="height:'+v+'px"></i>'; }); return h; }
+function flagEmail(r){
+  var sh=show(r), br=brand(r);
+  return {
+    to:"Host — "+sh.name,
+    subject:"Compliance flag · "+br.name+" on "+sh.name+" ("+r.date+")",
+    body:"Hi team,\n\nQuick compliance note on this week's "+br.name+" read on "+sh.name+" ("+r.ep+"):\n\n• "+r.flags.join("\n• ")+"\n\nEverything else on the read checked out. Please refresh and re-submit before Sunday 10 PM ET so it counts toward this week's delivery. Reply here if you want the exact timestamp.\n\nThanks,\nAcme Network — Compliance"
+  };
+}
+function mountDrawer(h){ $("cdrawer").innerHTML=h; $("cdrawer").classList.add("on"); $("overlay").classList.add("on"); }
+function closeDrawer(){ $("cdrawer").classList.remove("on"); $("overlay").classList.remove("on"); }
+function resolveRead(id, to){
+  var r=READS.filter(function(x){return x.id===id;})[0]; if(r){ r.status=to; if(to==="clean"){ r.flags=[]; } }
+  closeDrawer(); renderBriefs();
+}
+
+/* ───────── BRIEFS (templatable, add-a-brand builder) ───────── */
+// Requirement types the agent can check for. Each new brand starts from the
+// generic template, then you add/override requirements from this dropdown.
+var REQ_TYPES={
+  cta:       { label:"CTA read verbatim",        ph:"e.g. Visit brand.com/acme for 10% off",     strictable:true },
+  points:    { label:"Required talking point",   ph:"e.g. Name the brand",                        strictable:false },
+  position:  { label:"Ad position",              ph:"e.g. Mid-roll",                              strictable:false },
+  length:    { label:"Read length",              ph:"e.g. 60 seconds",                            strictable:false },
+  fresh:     { label:"Fresh read each week",     ph:"No recycled audio week to week",             strictable:false },
+  disclaimer:{ label:"Legal / brand disclaimer", ph:"e.g. 21+, gambling-helpline line verbatim",  strictable:true },
+  url:       { label:"CTA URL in description",   ph:"e.g. link in YouTube + audio show notes",    strictable:false },
+  social:    { label:"Social media mention",     ph:"e.g. 1 story post tagging the brand",        strictable:false },
+  custom:    { label:"Custom requirement",       ph:"Describe what the agent should check for…",   strictable:true }
+};
+// The generic baseline applied to every brand unless overridden.
+var DEFAULT_TEMPLATE=[
+  { type:"points", text:"Name the brand / product", strict:false },
+  { type:"cta",    text:"Read the call-to-action as written", strict:true },
+  { type:"position", text:"Mid-roll placement", strict:false },
+  { type:"length", text:"60 seconds", strict:false },
+  { type:"url",    text:"CTA link present in the episode description", strict:false }
+];
+// Derive display requirements from an existing structured brief.
+function brandReqs(b){
+  var r=[{type:"cta", text:b.cta, strict:!!b.ctaVerbatim}];
+  (b.points||[]).forEach(function(p){ r.push({type:"points", text:p, strict:false}); });
+  r.push({type:"position", text:b.position, strict:false});
+  r.push({type:"length", text:b.length+" seconds", strict:false});
+  if(b.fresh) r.push({type:"fresh", text:"Fresh read each week — no recycled audio", strict:true});
+  if(b.disclaimer) r.push({type:"disclaimer", text:b.disclaimer, strict:true});
+  return r;
+}
+function reqsFor(b){ return b.reqs ? b.reqs : brandReqs(b); }
+
+var SOLO_KEY=(function(){ try{ var p=new URLSearchParams(location.search).get('brand'); if(!p) return null;
+  return Object.keys(BRANDS).find(function(x){ return BRANDS[x].name.toLowerCase()===p.toLowerCase(); })||null; }catch(e){ return null; } })();
+var SOLO_UP=false, SOLO_MAPPED=false, SOLO_EDIT=false, SOLO_DRAFT=null;
+function startSoloEdit(){ var b=BRANDS[SOLO_KEY]; SOLO_DRAFT=JSON.parse(JSON.stringify(reqsFor(b))); SOLO_EDIT=true; SOLO_UP=false; renderSoloBrief(); }
+function cancelSoloEdit(){ SOLO_EDIT=false; SOLO_DRAFT=null; renderSoloBrief(); }
+function saveSoloEdit(){ var b=BRANDS[SOLO_KEY]; b.reqs=JSON.parse(JSON.stringify(SOLO_DRAFT)); SOLO_EDIT=false; SOLO_DRAFT=null; renderSoloBrief(); }
+function soloAddReq(){ var sel=$("soloAddType"); var tk=sel?sel.value:'points'; SOLO_DRAFT.push({type:tk,text:"",strict:false}); renderSoloBrief(); }
+function soloRemoveReq(i){ SOLO_DRAFT.splice(i,1); renderSoloBrief(); }
+function soloMap(){ var dz=$("solo-dz"); if(!dz) return;
+  dz.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--text-secondary)">Reading IO + talking points…</div><div class="conf-track" style="margin-top:12px"><i style="width:45%"></i></div>';
+  setTimeout(function(){ SOLO_UP=false; SOLO_MAPPED=true; renderSoloBrief(); }, 950); }
+function renderBriefs(){
+  if(SOLO_KEY) return renderSoloBrief();
+  var h='<div class="wrap">';
+  h+='<div style="display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:18px">';
+  h+='<div style="flex:1;min-width:240px"><h1 class="title">Brands</h1><p class="sub" style="margin-bottom:0">Set each brand up once. These compliance requirements are what every read is checked against in Delivery. Add a brand and set its rules — or upload the IO and talking points and let the agent map them.</p></div>';
+  h+='<div style="display:flex;gap:9px;flex-wrap:wrap"><button class="tb-btn" onclick="openUpload()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/></svg>Upload IO &amp; talking points</button>';
+  h+='<button class="btn btn--primary" onclick="openBuilder()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="width:15px;height:15px;vertical-align:-3px;margin-right:5px"><path d="M12 5v14M5 12h14"/></svg>Add brand</button></div>';
+  h+='</div>';
+
+  h+='<div class="brandlist">';
+  Object.keys(BRANDS).forEach(function(k){ h+=brandRow(k); });
+  h+=genericRow();
+  h+='</div></div>';
+  $("view-briefs").innerHTML=h;
+}
+function renderSoloBrief(){
+  var k=SOLO_KEY, b=BRANDS[k], reqs=reqsFor(b);
+  var h='<div class="wrap">';
+  h+='<div style="display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:18px">';
+  h+='<div style="display:flex;align-items:center;gap:13px;flex:1;min-width:240px"><div class="brow__logo" style="width:48px;height:48px;border-radius:10px;font-size:16px;background:'+brandColor(k)+';color:#fff">'+esc(b.logo)+'</div><div><h1 class="title" style="margin:0">'+esc(b.name)+'</h1><p class="sub" style="margin:3px 0 0">Campaign requirements</p></div></div>';
+  if(SOLO_EDIT){
+    h+='<div style="display:flex;gap:9px;flex-wrap:wrap"><button class="btn btn--ghost" onclick="cancelSoloEdit()">Cancel</button>';
+    h+='<button class="btn btn--primary" onclick="saveSoloEdit()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px"><path d="M20 6 9 17l-5-5"/></svg>Save changes</button></div>';
+  } else {
+    h+='<div style="display:flex;gap:9px;flex-wrap:wrap"><button class="btn '+(SOLO_UP?'btn--primary':'tb-btn')+'" onclick="SOLO_UP=!SOLO_UP;renderSoloBrief()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;vertical-align:-3px;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/></svg>Upload IO &amp; talking points</button>';
+    h+='<button class="btn btn--primary" onclick="startSoloEdit()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:14px;height:14px;vertical-align:-2px;margin-right:5px"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Edit requirements</button></div>';
+  }
+  h+='</div>';
+  if(SOLO_UP){ h+='<div style="background:var(--white);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px">'
+    +'<div id="solo-dz" onclick="soloMap()" style="border:2px dashed var(--border-strong);border-radius:12px;padding:28px 20px;text-align:center;cursor:pointer">'
+    +'<div style="font-size:26px;margin-bottom:8px">📄</div>'
+    +'<div style="font-size:14px;font-weight:700">Drop the IO + talking points, or click to select</div>'
+    +'<div style="font-size:12.5px;color:var(--text-secondary);font-weight:500;margin-top:6px">PDF, DOCX or pasted copy. The agent reads the CTA, required points, position, length and disclaimers, then updates '+esc(b.name)+'’s requirements below.</div>'
+    +'<div style="margin-top:14px;display:inline-flex;gap:7px;flex-wrap:wrap"><span class="pill pill--mute">'+esc(b.name).replace(/\s+/g,'_')+'_IO_Q4.pdf</span><span class="pill pill--mute">talking_points.docx</span></div>'
+    +'</div></div>'; }
+  if(SOLO_MAPPED){ h+='<div style="display:flex;align-items:center;gap:8px;background:var(--green-bg);color:var(--green-text);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12.5px;font-weight:600"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:15px;height:15px"><path d="M20 6 9 17l-5-5"/></svg>Mapped from the uploaded IO &amp; talking points · review the rules below and edit any line.</div>'; }
+  if(SOLO_EDIT){
+    var typeOpts=function(sel){ var o=''; Object.keys(REQ_TYPES).forEach(function(tk){ o+='<option value="'+tk+'"'+(tk===sel?' selected':'')+'>'+esc(REQ_TYPES[tk].label)+'</option>'; }); return o; };
+    h+='<div style="background:var(--white);border:1px solid var(--border);border-radius:16px;padding:12px 16px 16px">';
+    h+=SOLO_DRAFT.map(function(q,i){ var t=REQ_TYPES[q.type]||REQ_TYPES.custom;
+      var row='<div style="display:flex;align-items:center;gap:9px;padding:9px 0;border-top:1px solid var(--border-light)'+(i===0?';border-top:none':'')+'">';
+      row+='<div class="sel" style="width:184px;flex-shrink:0"><select style="width:100%" onchange="SOLO_DRAFT['+i+'].type=this.value;renderSoloBrief()">'+typeOpts(q.type)+'</select></div>';
+      row+='<input value="'+esc(q.text)+'" oninput="SOLO_DRAFT['+i+'].text=this.value" placeholder="'+esc(t.ph)+'" style="flex:1;min-width:0;font:inherit;font-size:12.5px;border:1px solid var(--border);border-radius:8px;padding:7px 10px;background:var(--white);color:var(--text-primary)"/>';
+      if(t.strictable) row+='<label style="font-size:11px;font-weight:600;color:var(--text-secondary);display:flex;align-items:center;gap:4px;white-space:nowrap"><input type="checkbox" '+(q.strict?"checked":"")+' onchange="SOLO_DRAFT['+i+'].strict=this.checked"/>verbatim</label>';
+      row+='<button class="cd-x" style="font-size:18px;padding:0 4px" onclick="soloRemoveReq('+i+')">&times;</button>';
+      row+='</div>'; return row;
+    }).join('');
+    var opts=""; Object.keys(REQ_TYPES).forEach(function(t){ opts+='<option value="'+t+'">'+esc(REQ_TYPES[t].label)+'</option>'; });
+    h+='<div style="display:flex;gap:8px;margin-top:14px"><div class="sel" style="flex:1"><select id="soloAddType" style="width:100%">'+opts+'</select></div>'
+      +'<button class="btn btn--primary" onclick="soloAddReq()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px"><path d="M12 5v14M5 12h14"/></svg>Add requirement</button></div>';
+    h+='</div>';
+  } else {
+    h+='<div style="background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden"><ul class="brief__rules" style="margin:0;padding:14px 18px;list-style:none">'+reqs.map(function(q){ var t=REQ_TYPES[q.type]||REQ_TYPES.custom;
+      return '<li><span class="k">'+esc(t.label)+'</span><span class="v">'+esc(q.text)+(q.strict&&t.strictable?' <span class="pill pill--bad" style="margin-left:4px">verbatim</span>':'')+'</span><button class="req-edit" onclick="startSoloEdit()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:12px;height:12px"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Edit</button></li>';
+    }).join('')+'</ul></div>';
+  }
+  h+='</div>';
+  $("view-briefs").innerHTML=h;
+}
+function briefSummary(b){
+  var reqs=reqsFor(b);
+  var cta=reqs.filter(function(r){return r.type==='cta';})[0];
+  var pts=reqs.filter(function(r){return r.type==='points';}).length;
+  var pos=reqs.filter(function(r){return r.type==='position';})[0];
+  var len=reqs.filter(function(r){return r.type==='length';})[0];
+  var parts=[];
+  if(cta) parts.push(cta.strict?'CTA verbatim':'CTA');
+  if(pts) parts.push(pts+' talking point'+(pts>1?'s':''));
+  if(pos) parts.push(pos.text);
+  if(len) parts.push(len.text);
+  if(reqs.some(function(r){return r.type==='disclaimer';})) parts.push('disclaimer');
+  return parts.join(' · ');
+}
+function toggleBrow(k){ var el=document.getElementById('brow-'+k); if(el) el.classList.toggle('open'); }
+function brandRow(k){
+  var b=BRANDS[k], reqs=reqsFor(b);
+  return '<div class="brow" id="brow-'+k+'"><div class="brow__head" onclick="toggleBrow(\''+k+'\')">'
+    +'<div class="brow__logo">'+esc(b.logo)+'</div>'
+    +'<div class="brow__main"><div class="brow__name">'+esc(b.name)+'</div><div class="brow__cat">'+esc(b.cat)+'</div></div>'
+    +'<div class="brow__sum">'+esc(briefSummary(b))+'</div>'
+    +'<button class="tb-btn brow__edit" onclick="event.stopPropagation();openBuilder(\''+k+'\')">Edit</button>'
+    +'<svg class="brow__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m6 9 6 6 6-6"/></svg>'
+    +'</div><div class="brow__body"><ul class="brief__rules">'+reqs.map(reqLine).join('')+'</ul></div></div>';
+}
+function genericRow(){
+  return '<div class="brow brow--generic" id="brow-__generic"><div class="brow__head" onclick="toggleBrow(\'__generic\')">'
+    +'<div class="brow__logo" style="background:var(--white);color:var(--text-tertiary)">◆</div>'
+    +'<div class="brow__main"><div class="brow__name">Generic template</div><div class="brow__cat">Baseline for every brand</div></div>'
+    +'<div class="brow__sum"><span class="pill pill--mute">Default</span> applied unless a brand overrides it</div>'
+    +'<svg class="brow__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m6 9 6 6 6-6"/></svg>'
+    +'</div><div class="brow__body"><ul class="brief__rules">'+DEFAULT_TEMPLATE.map(reqLine).join('')+'</ul></div></div>';
+}
+function reqLine(q){
+  var t=REQ_TYPES[q.type]||REQ_TYPES.custom;
+  return '<li><span class="k">'+esc(t.label)+'</span><span class="v">'+esc(q.text)+(q.strict&&t.strictable?' <span class="pill pill--bad" style="margin-left:4px">verbatim</span>':'')+'</span></li>';
+}
+
+/* ── builder drawer: add / edit a brand, requirement by requirement ── */
+var draft={ key:null, name:"", logo:"", cat:"", reqs:[], source:"" };
+function openBuilder(key){
+  if(key && BRANDS[key]){
+    var b=BRANDS[key];
+    draft={ key:key, name:b.name, logo:b.logo, cat:b.cat, reqs:JSON.parse(JSON.stringify(reqsFor(b))), source:b.source||"Synced from Salesforce · Oct 14" };
+  } else {
+    draft={ key:null, name:"", logo:"", cat:"", reqs:JSON.parse(JSON.stringify(DEFAULT_TEMPLATE)), source:"Added manually · "+WEEK };
+  }
+  paintBuilder();
+}
+function openUpload(){
+  draft={ key:null, name:"", logo:"", cat:"", reqs:[], source:"" };
+  var h='<div class="cd-head"><div class="cd-head__logo">⬆</div><div><h2>Upload IO &amp; talking points</h2><p>Drop the insertion order and the copy points — the agent maps them to compliance rules.</p></div><button class="cd-x" onclick="closeDrawer()">&times;</button></div>';
+  h+='<div class="cd-body"><div id="dropzone" onclick="simulateMap()" style="border:2px dashed var(--border-strong);border-radius:14px;padding:38px 20px;text-align:center;cursor:pointer;background:var(--white)">'
+    +'<div style="font-size:30px;margin-bottom:10px">📄</div>'
+    +'<div style="font-size:14px;font-weight:700">Drop IO + talking points, or click to select</div>'
+    +'<div style="font-size:12.5px;color:var(--text-secondary);font-weight:500;margin-top:6px">PDF, DOCX or pasted copy. The agent reads the CTA, required points, position, length and disclaimers, then proposes a brief you can edit.</div>'
+    +'<div style="margin-top:16px;display:inline-flex;gap:7px"><span class="pill pill--mute">PrizePix_IO_Q4.pdf</span><span class="pill pill--mute">talking_points.docx</span></div>'
+    +'</div><div class="foothint">Demo: clicking simulates the mapping step.</div></div>';
+  mountDrawer(h);
+}
+function simulateMap(){
+  var dz=$("dropzone"); if(dz){ dz.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--text-secondary)">Reading IO + talking points…</div><div class="conf-track" style="margin-top:12px"><i style="width:40%;background:var(--primary);animation:none"></i></div>'; }
+  setTimeout(function(){
+    // mapped suggestion from a typical sportsbook-style IO
+    draft={ key:null, name:"PrizePix", logo:"PP", cat:"Daily fantasy", source:"Mapped from IO + talking points · "+WEEK,
+      reqs:[
+        { type:"cta", text:"Go to PrizePix dot com, code ACME, get fifty dollars instantly", strict:true },
+        { type:"points", text:"Name the brand", strict:false },
+        { type:"points", text:"Read promo code ACME", strict:false },
+        { type:"points", text:"$50 instant offer on first $5", strict:false },
+        { type:"position", text:"Mid-roll", strict:false },
+        { type:"length", text:"60 seconds", strict:false },
+        { type:"fresh", text:"Fresh read each week — no recycled audio", strict:true },
+        { type:"disclaimer", text:"Responsible-gaming line read verbatim; no league names", strict:true },
+        { type:"url", text:"prizepix.com/acme in YouTube + audio description", strict:false }
+      ] };
+    paintBuilder(true);
+  }, 850);
+}
+function paintBuilder(mapped){
+  var editing=!!draft.key;
+  var h='<div class="cd-head"><div class="cd-head__logo">'+esc(draft.logo||"＋")+'</div><div style="min-width:0"><h2>'+(editing?"Edit brand":"New brand")+'</h2><p>'+(mapped?"Mapped from your IO — review and tweak each rule.":"Set the compliance requirements the agent grades against.")+'</p></div><button class="cd-x" onclick="closeDrawer()">&times;</button></div>';
+  h+='<div class="cd-body">';
+  if(mapped) h+='<div class="savings" style="margin-bottom:16px"><div class="savings__big" style="font-size:18px">'+draft.reqs.length+' rules</div><div class="savings__txt">mapped from the IO + talking points. Review below before saving.</div></div>';
+  h+='<div class="twocol" style="margin-bottom:14px">';
+  h+='<div class="panel"><div class="panel__h">Brand name</div><input id="bName" value="'+esc(draft.name)+'" oninput="draft.name=this.value" placeholder="e.g. DraftKings" style="width:100%;font:inherit;font-size:13px;border:1px solid var(--border);border-radius:9px;padding:9px 11px;background:var(--white);color:var(--text-primary)"/></div>';
+  h+='<div class="panel"><div class="panel__h">Category</div><input id="bCat" value="'+esc(draft.cat)+'" oninput="draft.cat=this.value" placeholder="e.g. Sportsbook" style="width:100%;font:inherit;font-size:13px;border:1px solid var(--border);border-radius:9px;padding:9px 11px;background:var(--white);color:var(--text-primary)"/></div>';
+  h+='</div>';
+  h+='<div class="panel"><div class="panel__h" style="display:flex;align-items:center"><span>Compliance requirements</span><span style="margin-left:auto;font-size:11px;color:var(--text-tertiary)">'+draft.reqs.length+'</span></div><div id="reqList"></div>';
+  // add-requirement control
+  var opts=""; Object.keys(REQ_TYPES).forEach(function(t){ opts+='<option value="'+t+'">'+esc(REQ_TYPES[t].label)+'</option>'; });
+  h+='<div style="display:flex;gap:8px;margin-top:12px"><div class="sel" style="flex:1"><select id="addType" style="width:100%">'+opts+'</select></div>'
+    +'<button class="btn btn--primary" onclick="addReq()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px"><path d="M12 5v14M5 12h14"/></svg>Add requirement</button></div>';
+  h+='</div></div>';
+  h+='<div class="cd-foot"><button class="btn btn--primary btn--grow" onclick="saveBrand()">'+(editing?"Save changes":"Add brand")+'</button><button class="btn btn--ghost" onclick="closeDrawer()">Cancel</button></div>';
+  mountDrawer(h);
+  paintReqRows();
+}
+function paintReqRows(){
+  var el=$("reqList"); if(!el) return;
+  if(!draft.reqs.length){ el.innerHTML='<div style="font-size:12.5px;color:var(--text-tertiary);padding:12px 0">No requirements yet — add one below, or start from the generic template.</div>'; return; }
+  var h="";
+  var typeOpts=function(sel){ var o=''; Object.keys(REQ_TYPES).forEach(function(tk){ o+='<option value="'+tk+'"'+(tk===sel?' selected':'')+'>'+esc(REQ_TYPES[tk].label)+'</option>'; }); return o; };
+  draft.reqs.forEach(function(q,i){
+    var t=REQ_TYPES[q.type]||REQ_TYPES.custom;
+    h+='<div class="chk__row" style="align-items:center;gap:9px">';
+    h+='<div class="sel" style="width:190px;flex-shrink:0"><select style="width:100%" onchange="draft.reqs['+i+'].type=this.value;paintReqRows()">'+typeOpts(q.type)+'</select></div>';
+    h+='<input value="'+esc(q.text)+'" oninput="draft.reqs['+i+'].text=this.value" placeholder="'+esc(t.ph)+'" style="flex:1;min-width:0;font:inherit;font-size:12.5px;border:1px solid var(--border);border-radius:8px;padding:7px 10px;background:var(--white);color:var(--text-primary)"/>';
+    if(t.strictable) h+='<label style="font-size:11px;font-weight:600;color:var(--text-secondary);display:flex;align-items:center;gap:4px;white-space:nowrap"><input type="checkbox" '+(q.strict?"checked":"")+' onchange="draft.reqs['+i+'].strict=this.checked"/>verbatim</label>';
+    h+='<button class="cd-x" style="font-size:18px;padding:0 4px" onclick="removeReq('+i+')">&times;</button>';
+    h+='</div>';
+  });
+  el.innerHTML=h;
+}
+function addReq(){
+  var t=$("addType")?$("addType").value:"points";
+  draft.reqs.push({ type:t, text:"", strict:false });
+  paintReqRows();
+  var hdr=document.querySelector("#view-briefs"); // keep count in header fresh on save
+  var el=$("reqList"); if(el){ var inputs=el.querySelectorAll("input[type=text],input:not([type])"); if(inputs.length){ inputs[inputs.length-1].focus(); } }
+}
+function removeReq(i){ draft.reqs.splice(i,1); paintReqRows(); }
+function saveBrand(){
+  var name=(draft.name||"").trim(); if(!name){ var n=$("bName"); if(n){ n.focus(); n.style.borderColor="var(--red-text)"; } return; }
+  var key=draft.key || ("b"+Date.now());
+  var logo=draft.logo || name.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase() || "BR";
+  BRANDS[key]={ name:name, logo:logo, cat:draft.cat||"Brand", reqs:draft.reqs.slice(), source:draft.source||("Added · "+WEEK),
+    // keep structured fallbacks so the grader/drawer stay happy if reads reference them
+    cta:(draft.reqs.filter(function(r){return r.type==="cta";})[0]||{}).text||"", ctaVerbatim:true,
+    position:(draft.reqs.filter(function(r){return r.type==="position";})[0]||{}).text||"Mid-roll",
+    length:parseInt((draft.reqs.filter(function(r){return r.type==="length";})[0]||{}).text,10)||60,
+    fresh:draft.reqs.some(function(r){return r.type==="fresh";}),
+    disclaimer:(draft.reqs.filter(function(r){return r.type==="disclaimer";})[0]||{}).text||"",
+    points:draft.reqs.filter(function(r){return r.type==="points";}).map(function(r){return r.text;}),
+    donts:[] };
+  closeDrawer(); renderBriefs(); renderReview();
+}
+
+/* ───────── OUTBOX ───────── */
+function renderOutbox(){
+  var flagged=READS.filter(function(r){ return r.status==="flag"; });
+  var h='<div class="wrap"><h1 class="title">Outbox</h1><p class="sub">Emails the agent drafted from this week\'s flags. Review, then send — nothing goes out on its own.</p>';
+
+  // host flag emails
+  h+='<div class="ob"><div class="ob__head"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6"/></svg><h3>Host flags</h3><span class="muted">'+flagged.length+' drafted · one per flagged read</span></div>';
+  if(!flagged.length){ h+='<div class="empty">No host flags this week.</div>'; }
+  flagged.forEach(function(r){
+    var em=flagEmail(r);
+    h+='<div class="ob__item" onclick="openDrawer(\''+r.id+'\')"><div class="ob__ic">'+esc(show(r).logo)+'</div><div class="ob__main"><div class="ob__t">'+esc(em.subject)+'</div><div class="ob__s">'+esc(r.flags.join(" · "))+'</div></div><span class="pill pill--warn">Ready</span></div>';
+  });
+  h+='</div>';
+
+  // weekly recaps (static drafts)
+  h+='<div class="ob"><div class="ob__head"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><h3>Weekly recaps</h3><span class="muted">brand + ops summaries</span></div>';
+  var recaps=[
+    { t:"Weekly compliance recap — DraftKings", s:"3 reads · 2 cleared, 1 disclaimer flag · delivery on pace", ic:"DK" },
+    { t:"Weekly compliance recap — AG1", s:"2 reads · 1 cleared, 1 recycled-read flag", ic:"AG" },
+    { t:"Ops summary — week of "+WEEK, s:"All shows · "+counts().needYou+" flags raised, "+counts().clean+" auto-cleared", ic:"★" }
+  ];
+  recaps.forEach(function(x){
+    h+='<div class="ob__item"><div class="ob__ic">'+esc(x.ic)+'</div><div class="ob__main"><div class="ob__t">'+esc(x.t)+'</div><div class="ob__s">'+esc(x.s)+'</div></div><span class="pill pill--blue">Draft</span></div>';
+  });
+  h+='</div>';
+  h+='<div class="foothint">Drafts mirror your weekly process — host flags, brand recaps, and an ops summary. Review before sending.</div>';
+  h+='</div>';
+  $("view-outbox").innerHTML=h;
+}
+
+/* ───────── nav / chrome ───────── */
+var RENDER={ overview:renderOverview, review:renderReview, briefs:renderBriefs, outbox:renderOutbox };
+function go(v){
+  renderBriefs();
+  var el=$("view-briefs"); if(el) el.classList.add("active");
+  document.querySelectorAll(".nav-item").forEach(function(n){ n.classList.toggle("active", n.dataset.view==="briefs"); });
+  var vw=document.querySelector(".views"); if(vw) vw.scrollTop=0;
+}
+function setBadges(){
+  var c=counts();
+  var rb=$("nav-rev-badge"); if(rb){ rb.textContent=c.needYou||""; rb.style.display=c.needYou?"":"none"; }
+  var tb=$("tab-rev-badge"); if(tb){ tb.textContent=c.needYou||""; tb.style.display=c.needYou?"":"none"; }
+  var ob=$("nav-ob-badge"); var fl=READS.filter(function(r){return r.status==="flag";}).length;
+  if(ob){ ob.textContent=fl||""; ob.style.display=fl?"":"none"; }
+}
+function toggleDark(){
+  document.body.classList.toggle("dark");
+  var b=$("dmBtn"); if(b){ b.lastChild.textContent=document.body.classList.contains("dark")?"Light":"Dark"; }
+}
+
+/* embedded in the Acme OS shell */
+if (window.self !== window.top) document.body.classList.add("embedded");
+window.addEventListener("message", function(e){ var d=e.data; if(d && d.type==="compnav" && typeof go==="function") go(d.view); });
+
+renderBriefs();
+</script>
+</body>
+</html>
