@@ -2459,7 +2459,7 @@ function renderFundsTable(){
   $('tableFoot').innerHTML = `Showing ${shown.length} of ${rows.length} funds` +
     (rows.length > shown.length ? ` — <button class="read-more" data-showmore>Show 300 more</button> <button class="read-more" data-showall>Show all ${rows.length}</button>` : '') +
     `. Click a fund to expand its people. Grades: hand-graded where curated, rubric first-pass otherwise.`;
-  wireCheckAll(shown.map(f => f.id));
+  wireCheckAll(rows.map(f => f.id));   // select-all = the whole filtered set, not just the rendered page
 }
 
 function renderPeopleTable(){
@@ -2499,7 +2499,7 @@ function renderPeopleTable(){
   $('tableFoot').innerHTML = `Showing ${shown.length} of ${rows.length} people` +
     (rows.length > shown.length ? ` — <button class="read-more" data-showmore>Show 300 more</button> <button class="read-more" data-showall>Show all ${rows.length}</button>` : '') +
     (fundArchiveView ? '. Archived people - restore with the arrow icon.' : '. Archived people are hidden and skipped by connector asks.');
-  wireCheckAll(shown.map(p => p.id));
+  wireCheckAll(rows.map(p => p.id));   // select-all = the whole filtered set, not just the rendered page
 }
 
 function renderFollowupsTable(){
