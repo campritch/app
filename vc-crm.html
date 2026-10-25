@@ -317,6 +317,7 @@
     .pill--lead        { background: #16a34a; color: #fff; font-weight: 700; }
     .pill--lead-maybe  { background: #f59e0b; color: #fff; font-weight: 700; }
     .pill--lead-follow { background: var(--secondary); color: var(--muted-foreground); font-weight: 600; }
+    .pill--lead-mini { font-size: 9px; padding: 1px 5px; height: auto; line-height: 1.35; letter-spacing: .01em; }
     .pill--sector   { background: transparent; border-color: var(--border); color: var(--text-secondary); font-weight: 500; }
     .pill--due, .pill--overdue { background: none; border: none; padding: 0; height: auto; border-radius: 0; font-size: 11px; font-weight: 400; color: var(--muted-foreground); }
     .pill--overdue  { color: var(--foreground); font-weight: 600; }
@@ -1153,12 +1154,12 @@ function gradePillHtml(f){
 }
 /* Lead-vs-follow tag. Set by the lead-check engine (api/vc-fit lead task). */
 const LEAD_LABELS = { lead: ['Lead', 'lead'], sometimes: ['Leads some', 'lead-maybe'], follow: ['Follows', 'lead-follow'] };
-function leadBadge(f){
+function leadBadge(f, mini){
   const l = FS(f.id).lead;
   const m = LEAD_LABELS[l];
   if (!m) return '';
   const note = FS(f.id).leadNote || '';
-  return ` <span class="pill pill--${m[1]}" title="${esc(note || 'Lead check')}">${m[0]}</span>`;
+  return `<span class="pill pill--${m[1]}${mini ? ' pill--lead-mini' : ''}" title="${esc(note || 'Lead check')}">${m[0]}</span>`;
 }
 // Ask the web-search engine whether THIS fund leads rounds; tag the result.
 async function leadFetch(f){
@@ -1655,12 +1656,16 @@ function introAvatarsHtml(f){
 
 function sourceCellHtml(f){
   const v = FS(f.id).source || 'list';
-  return `<div class="dd dd--row" data-ddctx="fsource:${f.id}" data-ddval="${v}">
-    <button type="button" class="dd-btn src-pill ${v==='openvc'?'src-pill--open':''}" title="Source">${v==='openvc'?'Open VC':'List'}</button>
-    <div class="dd-menu"><div class="dd-head">Source</div>
-      <button type="button" class="dd-item ${v==='list'?'on':''}" data-ddv="list">List</button>
-      <button type="button" class="dd-item ${v==='openvc'?'on':''}" data-ddv="openvc">Open VC</button>
+  const lead = leadBadge(f, true);
+  return `<div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start">
+    <div class="dd dd--row" data-ddctx="fsource:${f.id}" data-ddval="${v}">
+      <button type="button" class="dd-btn src-pill ${v==='openvc'?'src-pill--open':''}" title="Source">${v==='openvc'?'Open VC':'List'}</button>
+      <div class="dd-menu"><div class="dd-head">Source</div>
+        <button type="button" class="dd-item ${v==='list'?'on':''}" data-ddv="list">List</button>
+        <button type="button" class="dd-item ${v==='openvc'?'on':''}" data-ddv="openvc">Open VC</button>
+      </div>
     </div>
+    ${lead}
   </div>`;
 }
 
@@ -2394,7 +2399,7 @@ function renderFundsTable(){
     return `<tr data-fundrow="${f.id}" class="${selected.has(f.id)?'selected':''} ${open?'expanded':''} ${(fundArchiveView || FS(f.id).notInvestor || ['closed','disqualified'].includes(fStage(f)))?'arch-dim':''} ${isCompetitor(f)?'competitor-dim':''}">
       <td><input type="checkbox" class="row-check" data-check="${f.id}" ${selected.has(f.id)?'checked':''}></td>
       <td class="fund-td"><div class="fund-cell">
-        <span class="fund-name">${esc(f.name)}${deepBadge(f)}${leadBadge(f)}${competitorBadge(f)}</span>
+        <span class="fund-name">${esc(f.name)}${deepBadge(f)}${competitorBadge(f)}</span>
         <div class="fund-subrow">
           ${f.site ? `<a class="fund-site" href="https://${esc(f.site)}" target="_blank" rel="noopener" data-noopen title="Open website">${esc(f.site)}</a>` : ''}
           <button type="button" class="fund-info" title="Quick look - the full fund read" onclick="event.stopPropagation();togglePeek('${f.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></button>
@@ -3697,6 +3702,8 @@ async function aiFitFetch(f, opts){
   else if (data.dims) {
     delete st.notInvestor;
     f.dims = data.dims; st.aiDims = data.dims; st.aiGraded = true; if (opts && opts.deep) st.deepGraded = true; delete st.aiUnidentified;
+    // Deep grades classify lead vs follow in the same pass - tag it by default.
+    if (data.lead) { st.lead = data.lead; if (data.lead_note) st.leadNote = data.lead_note; else delete st.leadNote; }
     // strong fit -> auto-queue for intros, but ONLY on a deep (web-verified) grade.
     // Only promote from an untargeted stage (don't downgrade contacted/messaged/etc.
     // or resurrect passed/disqualified).

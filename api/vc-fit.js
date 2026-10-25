@@ -232,7 +232,9 @@ export default async function handler(req, res) {
             '- Typical check size, and whether they lead or follow.\n' +
             '- Whether they are ACTIVELY investing right now (a current/open fund or recent deals) vs fully deployed / between funds / winding down.\n' +
             '- Portfolio companies adjacent to SpotsNow (marketplaces, creator/media, adtech/measurement, AI-native/agentic, commerce) - name them.\n' +
-            'Base every dim on what you actually found. In the brief, cite concrete portfolio companies and recent facts (with the year). If after searching you still cannot verify a fund, say so plainly and return dims:null rather than guessing. Return STRICT JSON only, in the exact schema specified - no citations markup, no markdown.' })
+            'Base every dim on what you actually found. In the brief, cite concrete portfolio companies and recent facts (with the year). If after searching you still cannot verify a fund, say so plainly and return dims:null rather than guessing.\n' +
+            'ALSO add two fields: "lead" set to lead|sometimes|follow|unknown (does this fund LEAD rounds - anchor check, sets terms, board seat, named "led by" - or only follow/participate?), and "lead_note" (under 15 words, the evidence: a named deal they led, or that they follow).\n' +
+            'Return STRICT JSON only, in the exact schema specified plus the two lead fields - no citations markup, no markdown.' })
       : await callLLM({ system: SYSTEM, maxTokens: 1000,
           user: 'Fund data:\n' + JSON.stringify(payload) });
     const jm = text.match(/\{[\s\S]*\}/);
@@ -258,11 +260,15 @@ export default async function handler(req, res) {
     const dims = (!notInvestor && out.dims && typeof out.dims === 'object'
       && ['thesis','stage','check','portfolio','geo'].every(k => Number.isFinite(out.dims[k])))
       ? out.dims : null;
+    // Deep grades also classify lead vs follow in the same web search.
+    const lead = ['lead', 'sometimes', 'follow', 'unknown'].includes(out.lead) ? out.lead : null;
     return res.status(200).json({
       brief: String(out.brief || '').slice(0, 1200),
       one_liner: String(out.one_liner || '').slice(0, 120),
       dims: dims,
       not_investor: notInvestor,
+      lead: lead,
+      lead_note: lead ? String(out.lead_note || '').slice(0, 120) : undefined,
       provider: LAST_PROVIDER
     });
   } catch (err) {
