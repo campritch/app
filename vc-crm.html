@@ -5430,7 +5430,10 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(
 /* Export */
 $('exportBtn').addEventListener('click', () => {
   let lines;
-  if (currentTab === 'funds') {
+  // Export what's in front of you: on ANY stage tab (All funds, Need intros,
+  // Targets, ...) export that tab's visible funds; only the People tab exports
+  // people. visibleFunds() is already filtered to the current tab + filters.
+  if (STAGE_TABS.includes(currentTab)) {
     const rows = visibleFunds();
     lines = [['fund','type','region','check_min_k','check_max_k','grade','fit','people','why_it_fits'].join(',')]
       .concat(rows.map(f => [f.name, f.type||'', f.region||'', f.check?f.check[0]:'', f.check?f.check[1]:'', grade(f), f.dims?Math.round(score(f)):'', PEOPLE.filter(p=>p.fundId===f.id).length, f.why||''].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')));
@@ -5451,7 +5454,7 @@ $('exportBtn').addEventListener('click', () => {
   const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = currentTab === 'funds' ? 'spotsnow-vc-funds.csv' : 'spotsnow-vc-people.csv';
+  a.download = STAGE_TABS.includes(currentTab) ? `spotsnow-vc-${currentTab === 'funds' ? 'all-funds' : currentTab}.csv` : 'spotsnow-vc-people.csv';
   a.click();
   URL.revokeObjectURL(a.href);
 });
