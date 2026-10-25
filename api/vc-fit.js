@@ -107,6 +107,20 @@ Return STRICT JSON only, no markdown fences:
 {"not_investor": false, "dims": {"thesis":n,"stage":n,"check":n,"portfolio":n,"geo":n}, "one_liner": "under 12 words, the specific verdict", "brief": "2-4 tight sentences that concretely answer the four questions above (check range, category, actively investing, similar portfolio) grounded in THIS fund's real data, plus any provided history"}
 Set not_investor:true (and dims:null) when the entity is not a venture investor at all. Otherwise return dims unless the fund is genuinely unidentifiable (then dims: null). Do NOT use double quotes or line breaks inside any string value (use single quotes if you must quote).`;
 
+// Lead-vs-follow classifier. Reads the fund's own site copy plus a live web
+// search of recent funding announcements to decide if they LEAD rounds.
+const LEAD_SYSTEM = `You determine whether a venture investor LEADS rounds or only follows/participates, for a founder deciding who to prioritize. A LEAD writes the largest/anchor check, sets or negotiates the terms and price, usually takes a board seat, and is the investor named "led by" in funding announcements. A FOLLOW only participates in rounds someone else leads.
+
+Use the fund's own website copy (provided below) PLUS a web search of their recent deals and portfolio. Look for explicit signals: "we lead", "lead investor", "we write the first check", "we take board seats", or being named as the lead in recent round announcements - versus "we participate", "we follow", "we co-invest", small participation checks, or always appearing alongside a named lead.
+
+Pick ONE label:
+- "lead": clearly leads rounds (at least at their core stage)
+- "sometimes": leads some and follows others, or leads only at one stage and participates elsewhere
+- "follow": only participates / follows, or explicitly does not lead
+- "unknown": genuinely not enough signal to tell
+
+Return STRICT JSON only, no markdown: {"lead":"lead|sometimes|follow|unknown","lead_note":"under 15 words - the concrete evidence (a quote or a named deal they led)"}. Do not use double quotes inside the note.`;
+
 async function fetchSiteText(site) {
   if (!site) return '';
   const url = /^https?:\/\//i.test(site) ? site : 'https://' + site;
@@ -168,6 +182,31 @@ export default async function handler(req, res) {
       if (jm3) { try { a = JSON.parse(jm3[0]).angle || ''; } catch { const mm = t3.match(/"angle"\s*:\s*"((?:[^"\\]|\\.)*)"/); a = mm ? mm[1] : ''; } }
       if (!a) a = t3.trim();
       return res.status(200).json({ angle: String(a || '').replace(/^["']|["']$/g, '').slice(0, 240), provider: LAST_PROVIDER });
+    } catch (err) {
+      return res.status(500).json({ error: String(err?.message || err) });
+    }
+  }
+
+  // Lead check: classify lead vs follow from their site + a web search. A
+  // separate, cheaper call than a full grade - just the one question.
+  if (req.body.lead) {
+    const leadPayload = {
+      name: fund.name, site: fund.site, type: fund.type, region: fund.region,
+      stage_focus: fund.tier || null, about: (fund.looking || '').slice(0, 600),
+      website_text: websiteText || null
+    };
+    try {
+      const txt = process.env.OPENAI_API_KEY
+        ? await callLLMSearch({ system: LEAD_SYSTEM, maxTokens: 600,
+            user: 'Investor:\n' + JSON.stringify(leadPayload) +
+              '\n\nSearch the web for how ' + fund.name + ' actually invests - do they LEAD seed/early rounds or only follow? Base it on their site plus recent funding announcements. Return STRICT JSON only in the exact schema.' })
+        : await callLLM({ system: LEAD_SYSTEM, maxTokens: 300,
+            user: 'Investor:\n' + JSON.stringify(leadPayload) });
+      let out = {};
+      const jm = txt.match(/\{[\s\S]*\}/);
+      if (jm) { try { out = JSON.parse(jm[0]); } catch { const lm = txt.match(/"lead"\s*:\s*"(\w+)"/); if (lm) out.lead = lm[1]; const nm = txt.match(/"lead_note"\s*:\s*"((?:[^"\\]|\\.)*)"/); if (nm) out.lead_note = nm[1]; } }
+      const lead = ['lead', 'sometimes', 'follow', 'unknown'].includes(out.lead) ? out.lead : 'unknown';
+      return res.status(200).json({ lead, lead_note: String(out.lead_note || '').slice(0, 120), provider: LAST_PROVIDER });
     } catch (err) {
       return res.status(500).json({ error: String(err?.message || err) });
     }
