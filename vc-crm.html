@@ -772,6 +772,7 @@
         <button type="button" class="dd-item" data-fundact="single">Add one investor</button>
         <button type="button" class="dd-item" data-fundact="upload">Upload CSV file</button>
         <button type="button" class="dd-item" data-fundact="paste">Paste rows</button>
+        <button type="button" class="dd-item" data-fundact="emails">Import emails (xlsx/csv)</button>
       </div>
     </div>
     <button class="login-btn" id="tbPeople">People</button>
@@ -816,6 +817,7 @@
     <!-- Fund list import (funds tab; actions live in the top-bar Add funds menu) -->
     <div class="section-pad" id="fundsImportView" style="display:none;padding-top:0;padding-bottom:0">
       <input type="file" id="fundCsvInput" accept=".csv,.txt" style="display:none" />
+      <input type="file" id="emailsFile" accept=".xlsx,.xls,.csv,.txt" style="display:none" />
       <div class="sync-card__result" id="fundImportResult" style="margin:0"></div>
       <div id="fundSingleWrap" style="display:none">
         <div class="tpl-card" style="gap:12px">
@@ -3261,6 +3263,13 @@ function openFund(id){
       </dl></div>
     </div>` : ''}
     <div class="d-section">
+      <span class="d-label">Outbound email${FS(id).emailContact ? ` · ${esc(FS(id).emailContact)}` : ''}</span>
+      <div class="d-row" style="gap:8px">
+        <input class="li-input" id="dFundEmail" placeholder="name@fund.vc" value="${esc(FS(id).email || '')}" style="flex:1">
+        ${FS(id).email ? `<a class="mini-btn" href="mailto:${esc(FS(id).email)}" style="text-decoration:none;display:inline-flex;align-items:center">Email</a>` : ''}
+      </div>
+    </div>
+    <div class="d-section">
       <span class="d-label">Notes</span>
       <textarea class="notes-area" id="dFundNotes" placeholder="Your working notes on this fund...">${esc(FS(id).notes || '')}</textarea>
     </div>
@@ -3302,6 +3311,7 @@ function openFund(id){
   };
   $('dAddPerson').onclick = () => addPersonTo(id, () => openFund(id));
   $('dFundNotes').oninput = e => { FS(id).notes = e.target.value; save(); };
+  if ($('dFundEmail')) $('dFundEmail').onchange = e => { const v = e.target.value.trim(); if (v) FS(id).email = v; else delete FS(id).email; save(); };
   $('dSyncMeetings').onclick = async () => {
     const btn = $('dSyncMeetings');
     btn.textContent = 'Syncing...'; btn.disabled = true;
@@ -4669,6 +4679,7 @@ document.addEventListener('click', async e => {
     document.querySelectorAll('.dd.open').forEach(d => d.classList.remove('open'));
     const act = fact.dataset.fundact;
     if (act === 'upload') $('fundCsvInput').click();
+    if (act === 'emails') $('emailsFile').click();
     if (act === 'paste') {
       if (!STAGE_TABS.includes(currentTab)) switchTab('funds');
       $('fundSingleWrap').style.display = 'none';
@@ -5209,6 +5220,60 @@ function importInvestorScan(text){
   }, 50);
 }
 
+/* Per-fund email import. Takes the "VC Outbound List" style sheet (xlsx or csv):
+   firm name in the first cell, the email is whichever cell looks like an email.
+   Matches conservatively (exact normalized firm name, unique hit only) so an
+   email never lands on the wrong fund. */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function loadXLSX(){
+  return new Promise((res, rej) => {
+    if (window.XLSX) return res(window.XLSX);
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = () => res(window.XLSX); s.onerror = () => rej(new Error('could not load the spreadsheet reader (offline?)'));
+    document.head.appendChild(s);
+  });
+}
+async function handleEmailsFile(file){
+  try {
+    let rows;
+    const nm = (file.name || '').toLowerCase();
+    if (nm.endsWith('.xlsx') || nm.endsWith('.xls')) {
+      const XLSX = await loadXLSX();
+      const wb = XLSX.read(new Uint8Array(await file.arrayBuffer()), { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+    } else {
+      rows = (await file.text()).split(/\r?\n/).filter(l => l.trim()).map(l => csvLine(l));
+    }
+    importFundEmails(rows);
+  } catch (e) { toast('Could not read that file: ' + (e.message || e)); }
+}
+function importFundEmails(rows){
+  let matched = 0, noEmail = 0; const unmatched = [];
+  (rows || []).forEach(r => {
+    if (!r || !r.length) return;
+    const cells = r.map(c => String(c == null ? '' : c).trim());
+    const firm = cells[0];
+    if (!firm || /^(fund|firm|company|name|organization|investor)$/i.test(firm)) return;
+    const email = cells.find(c => EMAIL_RE.test(c));
+    if (!email) { noEmail++; return; }
+    const norm = normOrg(firm);
+    const hits = FUND_NORMS.filter(x => x.norm === norm);
+    if (hits.length !== 1) { unmatched.push(firm); return; }   // exact + unique only
+    const fs = FS(hits[0].f.id);
+    fs.email = email.toLowerCase();
+    const person = cells[1];
+    if (person && !EMAIL_RE.test(person) && !/^https?:|\.(com|vc|io|net|org|ai|co)$/i.test(person)) fs.emailContact = person;
+    matched++;
+  });
+  if (matched) { save(); render(); }
+  toast(`Assigned ${matched} email${matched===1?'':'s'} to funds.` +
+    (unmatched.length ? ` ${unmatched.length} not in your list (e.g. ${unmatched.slice(0,3).join(', ')}).` : '') +
+    (noEmail ? ` ${noEmail} row${noEmail===1?'':'s'} had no email.` : ''));
+}
+$('emailsFile').addEventListener('change', e => { const f = e.target.files[0]; if (f) handleEmailsFile(f); e.target.value = ''; });
+
 /* Fund import */
 $('fundCsvInput').addEventListener('change', e => {
   const file = e.target.files[0];
@@ -5538,8 +5603,8 @@ $('exportBtn').addEventListener('click', () => {
   if (STAGE_TABS.includes(currentTab)) {
     const rows = visibleFunds();
     const leadTxt = f => ({ lead:'Lead', sometimes:'Leads some', follow:'Follows', unknown:'Unknown' }[FS(f.id).lead] || '');
-    lines = [['fund','type','region','check_min_k','check_max_k','grade','fit','stage','lead','lead_evidence','deep_graded','people','why_it_fits'].join(',')]
-      .concat(rows.map(f => [f.name, f.type||'', f.region||'', f.check?f.check[0]:'', f.check?f.check[1]:'', grade(f), f.dims?Math.round(score(f)):'', F_STAGES[fStage(f)]||'', leadTxt(f), FS(f.id).leadNote||'', FS(f.id).deepGraded?'yes':'', PEOPLE.filter(p=>p.fundId===f.id).length, f.why||''].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')));
+    lines = [['fund','email','email_contact','type','region','check_min_k','check_max_k','grade','fit','stage','lead','lead_evidence','deep_graded','people','why_it_fits'].join(',')]
+      .concat(rows.map(f => [f.name, FS(f.id).email||'', FS(f.id).emailContact||'', f.type||'', f.region||'', f.check?f.check[0]:'', f.check?f.check[1]:'', grade(f), f.dims?Math.round(score(f)):'', F_STAGES[fStage(f)]||'', leadTxt(f), FS(f.id).leadNote||'', FS(f.id).deepGraded?'yes':'', PEOPLE.filter(p=>p.fundId===f.id).length, f.why||''].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')));
   } else {
     const rows = visiblePeople();
     lines = [['person','title','fund','grade','fit','linkedin','path','connectors','status','archived','follow_up_due','notes'].join(',')]
