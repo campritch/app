@@ -531,6 +531,8 @@
     .token-hint code { background: var(--muted); border-radius: 4px; padding: 2px 6px; font-size: 11.5px; }
 
     /* ── Bulk bar ── */
+    .select-all-bar { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 12px; margin: 0 0 4px; background: #fef9c3; border: 1px solid #fde68a; border-radius: 8px; font-size: 12.5px; color: var(--foreground); }
+    .select-all-bar .link { background: none; border: none; color: var(--primary); font-weight: 700; cursor: pointer; text-decoration: underline; font-size: 12.5px; padding: 0; }
     .bulk-bar {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
       z-index: 400; display: flex; align-items: center; justify-content: center;
@@ -861,6 +863,7 @@ Acme Ventures, Jane Doe, Partner, https://linkedin.com/in/janedoe, Seed, $250k-$
     </div>
 
     <!-- Table (funds / people / follow-ups) -->
+    <div class="select-all-bar" id="selectAllBar" style="display:none"></div>
     <div class="table-wrap" id="tableView">
       <table>
         <thead id="tableHead"></thead>
@@ -2272,6 +2275,7 @@ function render(){
   $('fundsImportView').style.display = STAGE_TABS.includes(currentTab) ? 'flex' : 'none';
   $('connectorsView').style.display = currentTab === 'connectors' ? 'flex' : 'none';
   $('templatesView').style.display = currentTab === 'templates' ? 'flex' : 'none';
+  { const sab = $('selectAllBar'); if (sab && !(isStageTab || currentTab === 'people')) sab.style.display = 'none'; }
 
   if (isStageTab) renderFundsTable();
   else if (currentTab === 'people') renderPeopleTable();
@@ -2459,7 +2463,7 @@ function renderFundsTable(){
   $('tableFoot').innerHTML = `Showing ${shown.length} of ${rows.length} funds` +
     (rows.length > shown.length ? ` — <button class="read-more" data-showmore>Show 300 more</button> <button class="read-more" data-showall>Show all ${rows.length}</button>` : '') +
     `. Click a fund to expand its people. Grades: hand-graded where curated, rubric first-pass otherwise.`;
-  wireCheckAll(rows.map(f => f.id));   // select-all = the whole filtered set, not just the rendered page
+  wireCheckAll(shown.map(f => f.id), rows.map(f => f.id));
 }
 
 function renderPeopleTable(){
@@ -2499,7 +2503,7 @@ function renderPeopleTable(){
   $('tableFoot').innerHTML = `Showing ${shown.length} of ${rows.length} people` +
     (rows.length > shown.length ? ` — <button class="read-more" data-showmore>Show 300 more</button> <button class="read-more" data-showall>Show all ${rows.length}</button>` : '') +
     (fundArchiveView ? '. Archived people - restore with the arrow icon.' : '. Archived people are hidden and skipped by connector asks.');
-  wireCheckAll(rows.map(p => p.id));   // select-all = the whole filtered set, not just the rendered page
+  wireCheckAll(shown.map(p => p.id), rows.map(p => p.id));
 }
 
 function renderFollowupsTable(){
@@ -2537,14 +2541,36 @@ function emptyState(n, msg){
   el.style.display = n ? 'none' : 'block';
   el.textContent = msg;
 }
-function wireCheckAll(visIds){
+function wireCheckAll(pageIds, allIds){
+  allIds = allIds || pageIds;
   const ca = $('checkAll');
-  if (!ca) return;
-  ca.checked = visIds.length > 0 && visIds.every(id => selected.has(id));
-  ca.onchange = e => {
-    if (e.target.checked) visIds.forEach(id => selected.add(id));
-    else visIds.forEach(id => selected.delete(id));
-    render();
+  if (ca) {
+    ca.checked = pageIds.length > 0 && pageIds.every(id => selected.has(id));
+    ca.onchange = e => {
+      if (e.target.checked) pageIds.forEach(id => selected.add(id));
+      else allIds.forEach(id => selected.delete(id));   // unchecking clears the lot, incl. a prior select-all
+      render();
+    };
+  }
+  // Gmail-style option to extend the selection to the whole filtered set, shown
+  // right under the header so you never scroll to the bottom to select all.
+  const bar = $('selectAllBar');
+  if (!bar) return;
+  const pageSel = pageIds.length > 0 && pageIds.every(id => selected.has(id));
+  const allSel  = allIds.length  > 0 && allIds.every(id => selected.has(id));
+  const more = allIds.length > pageIds.length;
+  if (more && allSel) {
+    bar.innerHTML = `All <b>${allIds.length}</b> selected. <button type="button" class="link" data-selclear>Clear selection</button>`;
+    bar.style.display = 'flex';
+  } else if (more && pageSel) {
+    bar.innerHTML = `All <b>${pageIds.length}</b> on this page selected. <button type="button" class="link" data-selall>Select all ${allIds.length}</button>`;
+    bar.style.display = 'flex';
+  } else {
+    bar.style.display = 'none';
+  }
+  bar.onclick = ev => {
+    if (ev.target.closest('[data-selall]')) { allIds.forEach(id => selected.add(id)); render(); }
+    else if (ev.target.closest('[data-selclear]')) { allIds.forEach(id => selected.delete(id)); render(); }
   };
 }
 
