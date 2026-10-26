@@ -95,6 +95,13 @@ export default async function handler(req, res) {
       if (!state || typeof state !== 'object' || !state.people) {
         return res.status(400).json({ error: 'state object required' });
       }
+      // Stale-write guard: never let a client whose copy is BEHIND the cloud
+      // overwrite it. This stops an out-of-date / corrupted tab from clobbering
+      // newer (or freshly restored) data. A client that gets 409 should refetch.
+      const cur = await readBlob(BLOB_KEY);
+      if (cur && Number(state._rev || 0) < Number(cur._rev || 0)) {
+        return res.status(409).json({ error: 'stale', rev: cur._rev });
+      }
       state._rev = (Number(state._rev) || 0) + 1;
       state._savedAt = new Date().toISOString();
       await writeBlob(BLOB_KEY, state);
