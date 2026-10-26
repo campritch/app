@@ -42,7 +42,50 @@ export default async function handler(req, res) {
   if (!(await authed(req))) return res.status(401).json({ error: 'locked' });
   if (!process.env.BLOB_READ_WRITE_TOKEN) return res.status(500).json({ error: 'BLOB_READ_WRITE_TOKEN not configured' });
 
+  // Quick stage histogram so we can eyeball whether a copy is healthy (a spread
+  // across stages) or corrupted (everything in one stage).
+  const stageSummary = (s) => {
+    if (!s) return null;
+    const funds = s.funds || {};
+    const counts = {}; let withStage = 0, competitors = 0;
+    for (const k in funds) {
+      const fs = funds[k] || {};
+      if (fs.stage) { counts[fs.stage] = (counts[fs.stage] || 0) + 1; withStage++; }
+      if (fs.competitor) competitors++;
+    }
+    return { savedAt: s._savedAt || null, rev: s._rev || 0, restoredFrom: s._restoredFrom || undefined,
+             fundsWithStage: withStage, competitors, extraFunds: (s.extraFunds || []).length, stageCounts: counts };
+  };
+
   try {
+    const q = req.query || {};
+
+    // --- Recovery: list available backups ---
+    if (req.method === 'GET' && q.backups) {
+      const { list } = await import('@vercel/blob');
+      const r = await list({ prefix: 'vc-crm/backup-' });
+      return res.status(200).json({ backups: (r.blobs || []).map(b => ({ key: b.pathname, size: b.size, uploadedAt: b.uploadedAt })).sort((a, b) => a.key < b.key ? 1 : -1) });
+    }
+    // --- Recovery: stage summary of current cloud (?summary=1) or a backup (?summary=2026-10-24) ---
+    if (req.method === 'GET' && q.summary) {
+      const key = q.summary === '1' ? BLOB_KEY : ('vc-crm/backup-' + String(q.summary).replace(/^backup-/, '').replace(/\.json$/, '') + '.json');
+      const s = await readBlob(key);
+      return res.status(200).json({ key, found: !!s, summary: stageSummary(s) });
+    }
+    // --- Recovery: restore state.json from a dated backup, winning over any
+    // client's local copy by jumping the revision far ahead (?restore=2026-10-24) ---
+    if (req.method === 'GET' && q.restore) {
+      const src = 'vc-crm/backup-' + String(q.restore).replace(/^backup-/, '').replace(/\.json$/, '') + '.json';
+      const good = await readBlob(src);
+      if (!good || !good.people) return res.status(400).json({ error: 'backup not found or invalid: ' + src });
+      const cur = await readBlob(BLOB_KEY);
+      good._rev = (Number(cur && cur._rev) || 0) + 1000000;   // out-rank any browser's dirty local copy
+      good._savedAt = new Date().toISOString();
+      good._restoredFrom = src;
+      await writeBlob(BLOB_KEY, good);
+      return res.status(200).json({ ok: true, restoredFrom: src, rev: good._rev, summary: stageSummary(good) });
+    }
+
     if (req.method === 'GET') {
       const state = await readBlob(BLOB_KEY);
       return res.status(200).json({ state: state || null });
