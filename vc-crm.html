@@ -5250,7 +5250,9 @@ async function handleEmailsFile(file){
   } catch (e) { toast('Could not read that file: ' + (e.message || e)); }
 }
 function importFundEmails(rows){
-  let matched = 0, noEmail = 0; const unmatched = [];
+  let matched = 0, added = 0, noEmail = 0; const ambiguous = [];
+  const createdByNorm = {};   // avoid duplicate creates within one import
+  const isUrl = c => /^(www\.|https?:\/\/)/i.test(c) || /\.(com|vc|io|net|org|ai|co)(\/|$)/i.test(c);
   (rows || []).forEach(r => {
     if (!r || !r.length) return;
     const cells = r.map(c => String(c == null ? '' : c).trim());
@@ -5260,17 +5262,29 @@ function importFundEmails(rows){
     if (!email) { noEmail++; return; }
     const norm = normOrg(firm);
     const hits = FUND_NORMS.filter(x => x.norm === norm);
-    if (hits.length !== 1) { unmatched.push(firm); return; }   // exact + unique only
-    const fs = FS(hits[0].f.id);
+    let fundId;
+    if (hits.length === 1) { fundId = hits[0].f.id; matched++; }
+    else if (hits.length === 0) {
+      // Not in the CRM yet - add it to the backlog so it shows under All funds.
+      if (createdByNorm[norm]) fundId = createdByNorm[norm];
+      else {
+        const site = (cells.find(c => c && !EMAIL_RE.test(c) && isUrl(c)) || '').replace(/^https?:\/\//i, '').replace(/\/$/, '');
+        const desc = cells.filter(c => c && !EMAIL_RE.test(c) && !isUrl(c) && c.includes(' ') && c.length > 45).sort((a, b) => b.length - a.length)[0] || '';
+        const id = 'cf-' + (slug(firm) || 'fund') + '-' + Math.random().toString(36).slice(2, 5);
+        state.extraFunds.push({ id, name: firm, site, type: '', region: '', check: null, sectors: [], looking: desc, people: [], paths: [], source: 'emails-import' });
+        fundId = id; createdByNorm[norm] = id; added++;
+      }
+    } else { ambiguous.push(firm); return; }   // multiple same-name funds - don't guess
+    const fs = FS(fundId);
     fs.email = email.toLowerCase();
     const person = cells[1];
-    if (person && !EMAIL_RE.test(person) && !/^https?:|\.(com|vc|io|net|org|ai|co)$/i.test(person)) fs.emailContact = person;
-    matched++;
+    if (person && !EMAIL_RE.test(person) && !isUrl(person)) fs.emailContact = person;
   });
-  if (matched) { save(); render(); }
-  toast(`Assigned ${matched} email${matched===1?'':'s'} to funds.` +
-    (unmatched.length ? ` ${unmatched.length} not in your list (e.g. ${unmatched.slice(0,3).join(', ')}).` : '') +
-    (noEmail ? ` ${noEmail} row${noEmail===1?'':'s'} had no email.` : ''));
+  if (added) rebuild();
+  save(); render();
+  toast(`${matched} email${matched===1?'':'s'} matched · ${added} new fund${added===1?'':'s'} added to All` +
+    (ambiguous.length ? ` · ${ambiguous.length} ambiguous skipped` : '') +
+    (noEmail ? ` · ${noEmail} no-email row${noEmail===1?'':'s'}` : '') + '.');
 }
 $('emailsFile').addEventListener('change', e => { const f = e.target.files[0]; if (f) handleEmailsFile(f); e.target.value = ''; });
 
