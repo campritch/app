@@ -5537,8 +5537,9 @@ $('exportBtn').addEventListener('click', () => {
   // people. visibleFunds() is already filtered to the current tab + filters.
   if (STAGE_TABS.includes(currentTab)) {
     const rows = visibleFunds();
-    lines = [['fund','type','region','check_min_k','check_max_k','grade','fit','people','why_it_fits'].join(',')]
-      .concat(rows.map(f => [f.name, f.type||'', f.region||'', f.check?f.check[0]:'', f.check?f.check[1]:'', grade(f), f.dims?Math.round(score(f)):'', PEOPLE.filter(p=>p.fundId===f.id).length, f.why||''].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')));
+    const leadTxt = f => ({ lead:'Lead', sometimes:'Leads some', follow:'Follows', unknown:'Unknown' }[FS(f.id).lead] || '');
+    lines = [['fund','type','region','check_min_k','check_max_k','grade','fit','stage','lead','lead_evidence','deep_graded','people','why_it_fits'].join(',')]
+      .concat(rows.map(f => [f.name, f.type||'', f.region||'', f.check?f.check[0]:'', f.check?f.check[1]:'', grade(f), f.dims?Math.round(score(f)):'', F_STAGES[fStage(f)]||'', leadTxt(f), FS(f.id).leadNote||'', FS(f.id).deepGraded?'yes':'', PEOPLE.filter(p=>p.fundId===f.id).length, f.why||''].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')));
   } else {
     const rows = visiblePeople();
     lines = [['person','title','fund','grade','fit','linkedin','path','connectors','status','archived','follow_up_due','notes'].join(',')]
