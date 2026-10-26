@@ -1164,6 +1164,7 @@ function leadBadge(f, mini){
   const note = FS(f.id).leadNote || '';
   return `<span class="pill pill--${m[1]}${mini ? ' pill--lead-mini' : ''}" title="${esc(note || 'Lead check')}">${m[0]}</span>`;
 }
+function leadRank(f){ return { lead: 3, sometimes: 2, follow: 1 }[FS(f.id).lead] || 0; }
 // Ask the web-search engine whether THIS fund leads rounds; tag the result.
 async function leadFetch(f){
   const r = await fetch('/api/vc-fit', { method:'POST', headers:{'Content-Type':'application/json'},
@@ -1657,19 +1658,10 @@ function introAvatarsHtml(f){
   return `<span class="intro-avas" title="Intro in motion">${avs}${extra}</span>`;
 }
 
+// The old List / Open-VC source pill wasn't pulling its weight - this column now
+// carries the lead/follow read, which is the signal Cam actually sorts on.
 function sourceCellHtml(f){
-  const v = FS(f.id).source || 'list';
-  const lead = leadBadge(f, true);
-  return `<div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start">
-    <div class="dd dd--row" data-ddctx="fsource:${f.id}" data-ddval="${v}">
-      <button type="button" class="dd-btn src-pill ${v==='openvc'?'src-pill--open':''}" title="Source">${v==='openvc'?'Open VC':'List'}</button>
-      <div class="dd-menu"><div class="dd-head">Source</div>
-        <button type="button" class="dd-item ${v==='list'?'on':''}" data-ddv="list">List</button>
-        <button type="button" class="dd-item ${v==='openvc'?'on':''}" data-ddv="openvc">Open VC</button>
-      </div>
-    </div>
-    ${lead}
-  </div>`;
+  return leadBadge(f) || '<span class="fund-sub" style="color:var(--grey-1)">—</span>';
 }
 
 function warmthCellHtml(f){
@@ -1998,6 +1990,7 @@ function visibleFunds(){
       if (k === 'check') return (((a.check && a.check[1]) || 0) - ((b.check && b.check[1]) || 0)) * d;
       if (k === 'stage') return (STAGE_ORDER[fStage(a)] - STAGE_ORDER[fStage(b)]) * d || score(b) - score(a);
       if (k === 'wayin') return (fundPathRank(a) - fundPathRank(b)) * d || score(b) - score(a);
+      if (k === 'lead') return (leadRank(a) - leadRank(b)) * d || score(b) - score(a);
       if (k === 'people') return (peopleCount(a) - peopleCount(b)) * d;
       return 0;
     });
@@ -2388,7 +2381,7 @@ function renderFundsTable(){
     <th class="sortable" data-hsort="wayin" style="width:104px">Way in${hArrow('wayin')}</th>
     <th class="sortable hide-md" data-hsort="profile" style="width:118px">Profile${hArrow('profile')}</th>
     <th class="hide-md">Why it fits</th>
-    <th class="hide-md" style="width:74px">Source</th>
+    <th class="sortable hide-md" data-hsort="lead" style="width:84px">Lead${hArrow('lead')}</th>
     <th class="sortable" data-hsort="stage" style="width:96px">Stage${hArrow('stage')}</th>
     <th class="sortable" data-hsort="people" style="width:74px">People${hArrow('people')}</th>
     <th style="width:34px"></th>
