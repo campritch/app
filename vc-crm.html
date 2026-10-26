@@ -5493,7 +5493,7 @@ $('bulkLeadCheck').addEventListener('click', async () => {
   toast(`Lead-checked ${done - failed} of ${targets.length}${leads ? ` - ${leads} lead` : ''}${failed ? ` (${failed} failed)` : ''}.`);
 });
 $('bulkClear').addEventListener('click', () => { selected.clear(); connSelected.clear(); render(); });
-$('bulkBar').addEventListener('click', e => {
+$('bulkBar').addEventListener('click', async e => {
   const b = e.target.closest('[data-bulkstage]');
   if (!b || !STAGE_TABS.includes(currentTab)) return;
   const stage = b.dataset.bulkstage;
@@ -5507,8 +5507,14 @@ $('bulkBar').addEventListener('click', e => {
     askPassReason(ids, () => { selected.clear(); render(); });
     return;
   }
+  const ids = [...selected].filter(id => FUND_BY_ID[id]);
+  // Guard a big reclassification - a stray click with "select all" active used to
+  // silently move every fund. Anything 10+ now asks first.
+  if (ids.length >= 10 && !(await appConfirm(
+      `Move ${ids.length} fund${ids.length===1?'':'s'} to ${F_STAGES[stage]}? This overwrites their current stage.`,
+      { okLabel: `Move ${ids.length}` }))) return;
   let n = 0;
-  selected.forEach(id => { if (FUND_BY_ID[id]) { const fs = FS(id); fs.stage = stage; fs.archived = false; n++; } });
+  ids.forEach(id => { const fs = FS(id); fs.stage = stage; fs.archived = false; n++; });
   selected.clear();
   save(); render();
   toast(`${n} fund${n===1?'':'s'} moved to ${F_STAGES[stage]}`);

@@ -104,11 +104,14 @@ export default async function handler(req, res) {
       }
       state._rev = (Number(state._rev) || 0) + 1;
       state._savedAt = new Date().toISOString();
-      await writeBlob(BLOB_KEY, state);
-      // One backup snapshot per day (idempotent overwrite of today's key).
+      // Daily backup = the FIRST good save of each day, left untouched after that,
+      // so a bad write later in the same day can never poison the day's snapshot.
       const day = state._savedAt.slice(0, 10);
-      await writeBlob(`vc-crm/backup-${day}.json`, state).catch(() => {});
-      return res.status(200).json({ ok: true, rev: state._rev, saved_at: state._savedAt });
+      const firstToday = !cur || cur._backupDay !== day;
+      state._backupDay = day;
+      await writeBlob(BLOB_KEY, state);
+      if (firstToday) await writeBlob(`vc-crm/backup-${day}.json`, state).catch(() => {});
+      return res.status(200).json({ ok: true, rev: state._rev, saved_at: state._savedAt, backedUp: firstToday });
     }
     res.setHeader('Allow', 'GET, POST');
     return res.status(405).json({ error: 'GET or POST only' });
