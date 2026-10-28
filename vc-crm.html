@@ -828,19 +828,23 @@
           </div>
           <div class="var-grid">
             <div class="var-field"><label id="afNameLabel">Fund name</label><input id="afName" placeholder="Acme Ventures" /></div>
-            <div class="var-field" id="afPersonField"><label>Person (optional)</label><input id="afPerson" placeholder="Jane Doe" /></div>
+            <div class="var-field"><label>Website (so it grades well)</label><input id="afSite" placeholder="acme.vc" /></div>
           </div>
           <div class="var-grid">
+            <div class="var-field" id="afPersonField"><label>Person (optional)</label><input id="afPerson" placeholder="Jane Doe" /></div>
             <div class="var-field" id="afTitleField"><label>Title (optional)</label><input id="afTitle" placeholder="Partner" /></div>
-            <div class="var-field"><label>LinkedIn URL (optional)</label><input id="afLi" placeholder="https://linkedin.com/in/janedoe" /></div>
           </div>
           <div class="var-grid">
             <div class="var-field"><label>Email (optional)</label><input id="afEmail" placeholder="jane@acme.vc" /></div>
-            <div class="var-field"><label>Check size (optional)</label><input id="afCheck" placeholder="$100k - $500k" /></div>
+            <div class="var-field"><label>LinkedIn URL (optional)</label><input id="afLi" placeholder="https://linkedin.com/in/janedoe" /></div>
           </div>
           <div class="var-grid">
+            <div class="var-field"><label>Check size (optional)</label><input id="afCheck" placeholder="$100k - $500k" /></div>
             <div class="var-field"><label>Location (optional)</label><input id="afRegion" placeholder="New York" /></div>
+          </div>
+          <div class="var-grid">
             <div class="var-field"><label>Thesis / notes (optional)</label><input id="afNotes" placeholder="Consumer marketplaces, invests in media" /></div>
+            <div class="var-field"></div>
           </div>
           <div class="d-row" style="align-items:center;gap:10px">
             <span class="d-label" style="margin:0">Starts in</span>
@@ -5360,21 +5364,25 @@ $('afCreate').addEventListener('click', () => {
   }
   let id = 'cf-' + slug(name);
   while (FUND_BY_ID[id]) id += '-x';
+  const siteVal = $('afSite') ? $('afSite').value.trim().replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') : '';
+  const emailVal = $('afEmail').value.trim();
   const f = { id, name, custom: true,
     type: isAngel ? 'Angel' : 'Seed',
     region: $('afRegion').value.trim() || '—',
     check: parseCheckRange($('afCheck').value.trim()),
-    sectors: [], site: '',
+    sectors: [], site: siteVal,
     looking: $('afNotes').value.trim(),
     people: [] };
   const person = isAngel ? name : $('afPerson').value.trim();
   if (person) {
     const p = { n: person, t: isAngel ? 'Angel investor' : ($('afTitle').value.trim() || 'Partner') };
     if ($('afLi').value.trim()) p.li = $('afLi').value.trim();
-    if ($('afEmail').value.trim()) p.email = $('afEmail').value.trim();
+    if (emailVal) p.email = emailVal;
     f.people.push(p);
   } else f.people.push({ n: '', t: 'Partner', tbd: true });
   state.extraFunds.push(f);
+  if (siteVal) FS(id).site = siteVal;
+  if (emailVal) { FS(id).email = emailVal.toLowerCase(); if (person) FS(id).emailContact = person; }
   if (afStage !== 'none') FS(id).stage = afStage;
   save(); rebuild();
   // match synced LinkedIn connections against ONLY the new fund - a full
