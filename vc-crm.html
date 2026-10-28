@@ -2949,9 +2949,10 @@ async function runAiFit(fid, btn, opts){
   try {
     const data = await aiFitFetch(f, { deep });
     save(); render();
-    // Refresh the open connector drawer so the row's %, blue check and any
-    // >=78% deep-grade auto-promote show up without closing/reopening.
+    // Refresh the open drawer so the grade, lead tag and any >=78% deep-grade
+    // auto-promote show up without closing/reopening.
     if (drawerRef && drawerRef.kind === 'connector') openConnector(drawerRef.id);
+    else if (drawerRef && drawerRef.kind === 'fund' && drawerRef.id === f.id) openFund(drawerRef.id);
     toast((deep ? 'Deep grade done' : 'AI fit read done') + (data.one_liner ? ': ' + data.one_liner : '.'));
   } catch (err) {
     if (btn) { btn.textContent = deep ? 'Deep grade \u{1F50E}' : 'Run AI fit read'; btn.disabled = false; }
@@ -3231,8 +3232,12 @@ function openFund(id){
         </div>`).join('')}
       <div class="grade-card__note" style="font-size:10.5px;color:var(--grey-1)">Thesis fit scores the deck's five surfaces: marketplaces, creator media, adtech / measurement, AI + data moat, and media SaaS. A fund hitting two or more scores 90+.</div>
     </div>` : `
-    <div class="info-card"><b>Not graded yet.</b> This fund came from your upload - it gets scored against the deck rubric (marketplaces, creator media, adtech, AI + data moat, media SaaS) on the next grading pass.</div>
+    <div class="info-card"><b>Not graded yet.</b> This fund came from your upload - grade it now${f.site ? '' : ' (add a website above first so it has something to read)'}.</div>
     ${f.looking ? `<div class="d-section"><span class="d-label">About the fund</span><div class="info-card">${esc(f.looking)}</div></div>` : ''}`}
+    <div class="d-row" style="gap:8px;margin-top:-6px">
+      <button class="mini-btn" id="dFundGrade" style="font-weight:600">${f.dims ? 'Re-grade' : 'Grade now'}</button>
+      <button class="mini-btn" id="dFundDeepGrade" style="font-weight:600" title="Deep grade: web-searches the fund + recent deals, grades on real data, and tags lead vs follow">\u{1F50E} ${FS(id).deepGraded ? 'Re-run deep grade' : 'Deep grade'}</button>
+    </div>
     ${(() => {
       const pids = ppl.map(x => x.id);
       const allc = allConnectors().filter(c => !CS(c.id).archived && (c.matches||[]).some(m => pids.includes(m)));
@@ -3316,6 +3321,8 @@ function openFund(id){
   $('dAddPerson').onclick = () => addPersonTo(id, () => openFund(id));
   $('dFundNotes').oninput = e => { FS(id).notes = e.target.value; save(); };
   if ($('dFundEmail')) $('dFundEmail').onchange = e => { const v = e.target.value.trim(); if (v) FS(id).email = v; else delete FS(id).email; save(); };
+  if ($('dFundGrade')) $('dFundGrade').onclick = e => runAiFit(id, e.target);
+  if ($('dFundDeepGrade')) $('dFundDeepGrade').onclick = e => runAiFit(id, e.target, { deep: true });
   $('dSyncMeetings').onclick = async () => {
     const btn = $('dSyncMeetings');
     btn.textContent = 'Syncing...'; btn.disabled = true;
