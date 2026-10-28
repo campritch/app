@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SpotsNow SuperAgent | 30 days of unlimited access, free</title>
+<meta name="description" content="SuperAgent is an AI agent built for podcast advertising. Ask anything across 59,000+ shows, or have it build the whole campaign plan. Get 30 days of unlimited early access with just your email.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Tokens pulled from spotsnow.io (community-web / apps/marketplace tailwind) */
+:root{
+  --accent:#FF6267;--accent-hover:#ff8185;--accent-soft:#FFF1F1;
+  --primary:#17212B;
+  --text-primary:#0E1323;--text-body:#1D2027;--text-secondary:#707481;
+  --border:#DEE0E4;--border-strong:#C5CBD5;
+  --secondary-3:#F9FAFB;--secondary-lite:#F3F4F6;
+  --white:#fff;
+  --shadow-card:0 1px 2px rgba(14,19,35,.04),0 8px 24px rgba(14,19,35,.05);
+  --shadow-btn:0 1px 3px 0 rgba(166,175,195,.20);
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;background:var(--white);color:var(--text-primary)}
+body{font-family:'Inter',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3,h4,p,ul{margin:0}
+ul{padding:0;list-style:none}
+a{color:inherit;text-decoration:none}
+.accent{color:var(--accent)}
+.container{max-width:1172px;margin:0 auto;width:100%;padding:0 16px}
+@media (min-width:1024px){.container{padding:0 24px}}
+
+/* Typography (marketplace landing scale) */
+.eyebrow{font-size:18px;font-weight:700;color:var(--accent)}
+.h1{font-size:30px;line-height:1.1;font-weight:700;letter-spacing:-.05em;text-wrap:balance}
+.h2{font-size:30px;line-height:1.15;font-weight:700;letter-spacing:-.05em;text-wrap:balance}
+.head{display:flex;flex-direction:column;gap:10px}
+.body-copy{color:var(--text-primary);max-width:462px}
+@media (min-width:1024px){
+  .eyebrow{font-size:20px}
+  .h1{font-size:48px}
+  .h2{font-size:36px}
+}
+
+/* Buttons + inputs */
+.btn{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;border-radius:6px;font:inherit;font-size:14px;font-weight:500;height:40px;padding:8px 28px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;transition:background-color .2s,border-color .2s}
+.btn:hover,.btn:focus-visible{background:var(--accent-hover);border-color:var(--accent-hover);outline:none}
+.btn--sm{height:36px;padding:6px 16px}
+.input{flex:1;min-width:0;font:inherit;font-size:14px;height:44px;padding:0 14px;border:0;border-radius:8px;background:#fff;color:var(--text-primary);box-shadow:inset 0 0 0 1px var(--border),var(--shadow-btn)}
+.input::placeholder{color:var(--text-secondary)}
+.input:focus{outline:none;box-shadow:inset 0 0 0 1.5px var(--text-primary),var(--shadow-btn)}
+
+/* Nav */
+.nav{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--border)}
+.nav__in{height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 24px;max-width:2560px;margin:0 auto}
+.nav__logo svg{display:block;height:28px;width:auto;color:var(--accent)}
+.nav__links{display:flex;align-items:center;gap:24px;font-size:14px;font-weight:500}
+.nav__links a.link{color:var(--text-secondary)}
+.nav__links a.link:hover{color:var(--text-primary)}
+@media (min-width:1024px){.nav__in{height:73px;padding:0 32px}.nav__logo svg{height:32px}}
+@media (max-width:640px){.nav__links a.link{display:none}}
+
+/* Hero */
+.hero .container{padding-top:48px;padding-bottom:80px}
+.hero__grid{display:flex;flex-direction:column;gap:40px;align-items:flex-start;justify-content:space-between}
+.hero__copy{display:flex;flex-direction:column;gap:24px;width:100%}
+@media (min-width:1024px){
+  .hero .container{padding-top:56px;padding-bottom:112px}
+  .hero__grid{flex-direction:row;gap:48px;align-items:center}
+  .hero__copy{max-width:540px;gap:28px}
+  .hero__visual{width:500px;flex:none}
+}
+
+/* Offer card (email gate) */
+.card{background:#fff;border:1px solid var(--border);border-radius:16px}
+.offer{padding:24px;box-shadow:var(--shadow-card);max-width:540px}
+.offer__head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.offer__big{font-size:32px;line-height:1;font-weight:700;letter-spacing:-.05em;color:var(--accent)}
+.offer__what{font-size:14px;font-weight:600}
+.offer__sub{margin-top:6px;font-size:14px;color:var(--text-secondary)}
+.gate{margin-top:18px}
+.gate label{display:block;font-size:14px;font-weight:600;margin-bottom:8px}
+.gate-row{display:flex;gap:8px}
+.gate .btn{height:44px}
+.gate .fine{margin-top:10px;font-size:13px;color:var(--text-secondary)}
+.gate .err{margin-top:8px;font-size:13px;font-weight:600;color:#EF4444;display:none}
+.gate.invalid .err{display:block}
+.gate.invalid .input{box-shadow:inset 0 0 0 1.5px #EF4444,var(--shadow-btn)}
+.gate .done{display:none;align-items:flex-start;gap:10px;padding:14px 16px;border-radius:12px;background:#D6F1E0;color:#0E6832;font-size:14px;font-weight:600}
+.gate.sent .gate-row,.gate.sent label,.gate.sent .fine,.gate.sent .err{display:none}
+.gate.sent .done{display:flex}
+
+/* SuperAgent chat mock (marketplace panel styling) */
+.chat{border-radius:16px;border:1px solid var(--border);background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.04),0 12px 32px rgba(0,0,0,.08);overflow:hidden;width:100%}
+.chat__top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border)}
+.chat__brand{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600}
+.chat__icon{width:28px;height:28px;border-radius:8px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;color:var(--accent)}
+.chat__icon svg{width:16px;height:16px}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600}
+.pill--green{background:#D6F1E0;color:#0E6832}
+.pill--green i{width:6px;height:6px;border-radius:50%;background:#10B981;display:block}
+.msgs{display:flex;flex-direction:column;gap:12px;padding:18px;background:var(--secondary-3)}
+.me{align-self:flex-end;background:var(--primary);color:#fff;padding:10px 14px;border-radius:12px 12px 4px 12px;font-size:14px;font-weight:500;max-width:85%}
+.agent{align-self:flex-start;background:#fff;border:1px solid var(--border);border-radius:12px 12px 12px 4px;padding:14px;width:100%;max-width:94%}
+.agent__lbl{font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:10px}
+.plan{display:flex;flex-direction:column;gap:8px}
+.plan__row{display:flex;gap:10px;align-items:center;padding:8px;border-radius:10px;border:1px solid var(--border)}
+.plan__logo{width:28px;height:28px;flex:none;border-radius:8px;background:var(--secondary-lite);border:1px solid var(--border);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.plan__bars{flex:1;display:flex;flex-direction:column;gap:5px}
+.plan__bars span{display:block;height:7px;border-radius:999px;background:var(--secondary-lite)}
+.plan__bars span:first-child{background:#E4E6ED;width:70%}
+.plan__bars span:last-child{width:45%}
+.plan__row:nth-child(2) .plan__bars span:first-child{width:58%}
+.plan__row:nth-child(3) .plan__bars span:first-child{width:50%}
+.plan__score{font-size:12px;font-weight:700;color:var(--accent)}
+.tags{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px}
+.tags em{font-style:normal;font-size:12px;font-weight:500;border-radius:999px;padding:4px 10px;background:var(--secondary-lite);color:var(--text-primary)}
+.chat__input{display:flex;align-items:center;gap:8px;padding:12px 14px;border-top:1px solid var(--border)}
+.chat__input div{flex:1;height:36px;border-radius:999px;background:var(--secondary-lite);font-size:13px;color:var(--text-secondary);display:flex;align-items:center;padding:0 14px}
+.chat__send{width:36px;height:36px;border-radius:999px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+
+/* Stat strip */
+.stats .container{border-top:1px solid var(--border)}
+.stats ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px;padding:48px 0}
+.stats li{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.stats .n{font-size:30px;font-weight:700;letter-spacing:-.05em;line-height:1.1;font-variant-numeric:tabular-nums}
+.stats .l{font-size:12px;max-width:220px}
+@media (min-width:1024px){
+  .stats ul{grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;padding:96px 0}
+  .stats .n{font-size:48px}
+  .stats .l{font-size:16px}
+}
+
+/* Generic section */
+.section .container{padding-top:64px;padding-bottom:64px}
+.section--alt{background:var(--secondary-3)}
+.section--rule .container{border-top:1px solid var(--border)}
+@media (min-width:1024px){.section .container{padding-top:96px;padding-bottom:96px}}
+
+/* Numbered steps (for-publishers "How it works") */
+.steps{display:flex;flex-direction:column;gap:36px;max-width:950px;margin-top:48px}
+.step{display:flex;gap:24px}
+.step__n{font-size:24px;line-height:1.2;color:var(--accent);width:16px;flex:none}
+.step__t{font-size:18px;font-weight:700;letter-spacing:-.05em}
+.step__d{margin-top:8px;font-size:14px;color:var(--text-body)}
+@media (min-width:1024px){
+  .steps{margin-top:64px}
+  .step{gap:56px;align-items:center}
+  .step__n{font-size:48px;width:32px}
+  .step__t{font-size:20px}
+  .step__d{font-size:16px;margin-top:12px}
+}
+
+/* Flow cards (pricing-card style) */
+.flow{display:flex;flex-direction:column;gap:40px}
+.flow__cards{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.fcard{display:flex;flex-direction:column;gap:16px;padding:36px 24px}
+.fcard__k{font-size:14px;font-weight:700;letter-spacing:.025em;text-transform:uppercase}
+.fcard__k span{color:var(--text-secondary)}
+.fcard h3{font-size:24px;line-height:1.2;font-weight:700;letter-spacing:-.025em}
+.fcard p{font-size:14px;color:var(--text-secondary)}
+.fcard--out{background:var(--primary);border-color:var(--primary);color:#fff}
+.fcard--out .fcard__k span,.fcard--out p{color:#C5CBD5}
+@media (min-width:768px){.flow__cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:1024px){.flow{gap:56px}.flow__head{max-width:640px}}
+
+/* Two sides (control-grid style) */
+.center-head{display:flex;flex-direction:column;gap:12px;max-width:768px}
+@media (min-width:1024px){.center-head{margin:0 auto;text-align:center;align-items:center}}
+.sides{margin-top:40px;display:grid;grid-template-columns:minmax(0,1fr);gap:40px;max-width:768px}
+@media (min-width:768px){.sides{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:64px;margin-left:auto;margin-right:auto}}
+.side{display:flex;flex-direction:column;gap:12px}
+.side h3{font-size:16px;font-weight:700;letter-spacing:-.025em}
+.side > p{font-size:14px;color:var(--text-primary)}
+.checks{display:flex;flex-direction:column;gap:8px}
+.checks li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text-primary)}
+.check{margin-top:2px;flex:none;width:16px;height:16px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center}
+.check svg{width:10px;height:10px}
+.asks{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.ask{display:flex;align-items:flex-start;gap:10px;background:var(--secondary-lite);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:500}
+.ask svg{flex:none;width:16px;height:16px;margin-top:2px;color:var(--accent)}
+
+/* Final CTA */
+.final .container{padding-top:64px;padding-bottom:64px}
+.final__in{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:32px}
+.final__head{display:flex;flex-direction:column;gap:16px}
+@media (min-width:1024px){
+  .final .container{padding-top:96px;padding-bottom:96px}
+  .final__head{text-align:center;align-items:center}
+}
+.final .gate{margin-top:0}
+.final .gate-row{flex-direction:column}
+.final .gate .btn{width:100%}
+.nosetup{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 20px;font-size:14px;color:var(--text-primary)}
+.nosetup span{display:flex;align-items:center;gap:8px}
+
+/* Footer */
+footer{background:var(--secondary-lite)}
+.foot{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:48px;justify-content:space-between;padding:32px 16px}
+.foot__brand{display:flex;flex-direction:column;gap:8px;max-width:520px}
+.foot__brand svg{height:39px;width:auto;color:var(--text-primary)}
+.foot__brand p{font-size:14px}
+.foot__about{margin-top:6px;font-size:13px;line-height:1.55;color:var(--text-secondary)}
+.foot__cols{display:flex;flex-direction:column;gap:24px;font-size:14px}
+.foot__col h4{font-size:14px;font-weight:600;margin-bottom:16px}
+.foot__col a{display:block;margin-bottom:4px}
+.foot__col a:hover{color:var(--accent)}
+.copy{text-align:center;font-size:14px;color:var(--text-secondary);padding:16px}
+@media (min-width:768px){.foot{flex-direction:row;padding:44px 16px}.foot__cols{flex-direction:row;gap:48px}}
+
+@media (max-width:560px){
+  .gate-row{flex-direction:column}
+  .gate .btn{width:100%}
+  .offer{padding:20px}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="snlogo" viewBox="0 0 331 74"><g fill="currentColor"><path d="M78.1 1.8L75.4 22.1C75.3 22.7 74.9 23.2 74.3 23.3C74.2 23.4 74 23.5 73.8 23.5C73.4 23.5 73 23.3 72.7 23L66.7 17.3L39.1 47.2C38.4 48 37.3 48.5 36.2 48.5C35.6 48.5 34.9 48.3 34.4 48L18.7 39.7C16.7 38.7 16 36.3 17 34.3C18 32.4 20.4 31.6 22.3 32.7L35.4 39.6L60.9 11.9L55.3 6.6C54.9 6.1 54.7 5.5 54.9 5C55.1 4.4 55.5 4 56.1 3.8L76.2 0C76.7 -0.1 77.2 0.1 77.6 0.4C78 0.8 78.1 1.3 78.1 1.8ZM0 38.4C0 57.6 15.6 73.1 34.7 73.1C53.9 73.1 69.4 57.6 69.4 38.4C69.4 33.8 68.5 29.4 66.8 25.4L59.1 33.7C59.4 35.3 59.5 36.8 59.5 38.4C59.5 52.1 48.4 63.3 34.7 63.3C21 63.3 9.8 52.1 9.8 38.4C9.8 24.7 21 13.6 34.7 13.6C39.6 13.6 44.2 15 48 17.5L54.8 10.2C49.1 6.1 42.2 3.7 34.7 3.7C15.5 3.7 0 19.2 0 38.4L0 38.4Z"></path><path d="M105.6 56.3C103.2 56.3 101 55.9 99.1 55C97.2 54.1 95.6 52.9 94.4 51.4C93.2 49.8 92.4 48 92.1 45.9L99.3 44.4C99.7 46.3 100.4 47.7 101.5 48.8C102.6 49.8 103.9 50.4 105.4 50.4C107.2 50.4 108.5 50 109.5 49.3C110.4 48.5 110.9 47.4 110.9 46.2C110.9 45.1 110.6 44.3 109.9 43.6C109.2 43 108.4 42.5 107.3 42C106.2 41.6 105 41.2 103.7 40.9C102.4 40.5 101.1 40.1 99.8 39.6C98.5 39.2 97.4 38.6 96.3 37.8C95.2 37.1 94.3 36.1 93.7 35C93 33.9 92.7 32.4 92.7 30.6C92.7 28.4 93.2 26.6 94.3 25.1C95.3 23.5 96.8 22.4 98.6 21.6C100.5 20.8 102.7 20.3 105.1 20.3C107.3 20.3 109.2 20.7 111 21.5C112.8 22.3 114.2 23.3 115.4 24.7C116.5 26.1 117.2 27.6 117.5 29.4L110.3 31.2C110 29.6 109.4 28.4 108.4 27.5C107.5 26.6 106.3 26.2 104.9 26.2C104 26.2 103.1 26.3 102.3 26.6C101.6 27 101 27.4 100.6 28C100.1 28.6 99.9 29.4 99.9 30.3C99.9 31.3 100.2 32.1 100.9 32.7C101.6 33.4 102.5 33.9 103.5 34.3C104.6 34.7 105.8 35.1 107.1 35.5C108.4 35.8 109.7 36.2 111 36.7C112.3 37.2 113.5 37.8 114.6 38.5C115.7 39.2 116.5 40.2 117.2 41.4C117.8 42.5 118.2 44 118.2 45.7C118.2 47.6 117.7 49.3 116.6 50.9C115.6 52.5 114.1 53.8 112.3 54.8C110.4 55.8 108.2 56.3 105.6 56.3L105.6 56.3ZM138.4 56.3C136.2 56.3 134.3 55.8 132.6 54.6C130.9 53.5 129.8 51.9 129.1 49.8V69.3H121.9V28H129.1V34.1C129.8 32.1 130.9 30.5 132.6 29.4C134.3 28.2 136.2 27.6 138.4 27.6C140.9 27.6 143 28.3 144.9 29.5C146.8 30.7 148.3 32.4 149.4 34.6C150.5 36.7 151 39.2 151 42C151 44.8 150.5 47.2 149.4 49.4C148.3 51.6 146.8 53.3 144.9 54.5C143 55.7 140.8 56.3 138.4 56.3ZM136.4 50.1C137.7 50.1 138.8 49.8 140 49.2C141.1 48.5 142 47.6 142.6 46.4C143.3 45.2 143.7 43.7 143.7 42C143.7 40.3 143.4 38.8 142.6 37.5C142 36.3 141.1 35.4 140 34.8C138.8 34.2 137.6 33.9 136.4 33.9C135.1 33.9 133.9 34.2 132.8 34.8C131.7 35.4 130.8 36.3 130.1 37.5C129.4 38.8 129.1 40.2 129.1 42C129.1 43.8 129.4 45.2 130.1 46.4C130.8 47.6 131.7 48.5 132.8 49.2C133.9 49.8 135.1 50.1 136.4 50.1ZM166.6 56.3C164 56.3 161.5 55.7 159.4 54.6C157.2 53.4 155.5 51.7 154.3 49.6C153 47.4 152.4 44.9 152.4 41.9C152.4 39 153 36.5 154.3 34.4C155.6 32.2 157.3 30.6 159.5 29.4C161.7 28.2 164.1 27.6 166.8 27.6C169.5 27.6 171.9 28.2 174.1 29.4C176.3 30.5 178 32.2 179.3 34.4C180.6 36.5 181.2 39 181.2 41.9C181.2 44.9 180.6 47.4 179.2 49.6C178 51.7 176.2 53.4 174 54.6C171.8 55.7 169.3 56.3 166.6 56.3H166.6ZM166.6 50.1C167.9 50.1 169.1 49.8 170.2 49.3C171.3 48.7 172.2 47.8 172.9 46.5C173.6 45.3 174 43.8 174 41.9C174 40.1 173.6 38.6 172.9 37.4C172.2 36.2 171.3 35.3 170.2 34.7C169.2 34.1 168 33.8 166.7 33.8C165.5 33.8 164.3 34.1 163.2 34.7C162.2 35.3 161.3 36.2 160.7 37.4C160 38.6 159.7 40.1 159.7 41.9C159.7 43.7 160 45.3 160.6 46.5C161.2 47.8 162.1 48.7 163.1 49.3C164.2 49.8 165.4 50.1 166.6 50.1ZM194.6 56.3C192 56.3 189.9 55.6 188.3 54C186.8 52.4 186.1 50.2 186.1 47.3V33.8H181.7V28H199.4V33.8H193.3V47.5C193.3 48.4 193.5 49.1 194 49.5C194.6 49.9 195.1 50.1 195.8 50.1C196.2 50.1 196.5 50.1 196.9 50C197.3 49.8 197.6 49.6 198 49.3L200.5 54.2C199.6 54.9 198.7 55.5 197.8 55.8C196.8 56.2 195.8 56.3 194.6 56.3L194.6 56.3ZM183.8 30.2V28C184.6 28 185.1 27.8 185.6 27.3C186 26.9 186.2 26.3 186.2 25.6V21.1H193.3V24.4C193.3 24.9 193.2 25.4 192.9 25.9C192.6 26.4 192.3 26.8 191.9 27.2C191.4 27.6 190.9 27.8 190.3 28L183.8 30.2ZM213.3 56.3C211.3 56.3 209.4 56 207.8 55.4C206.2 54.7 204.9 53.8 203.8 52.6C202.7 51.4 202 50.1 201.5 48.7L208.2 47.2C208.5 48.3 209.1 49.2 210 49.8C210.9 50.5 212 50.8 213.2 50.8C214.6 50.8 215.6 50.5 216.4 50C217.1 49.4 217.5 48.8 217.5 48C217.5 47.2 217.1 46.5 216.3 46C215.6 45.6 214.6 45.2 213.4 44.9C212.2 44.6 211 44.3 209.6 44C208.2 43.6 207 43.1 205.8 42.5C204.5 41.9 203.5 41.1 202.8 40.1C202 39.1 201.7 37.7 201.7 36C201.7 34.5 202.1 33.1 203 31.8C203.9 30.5 205.2 29.5 206.8 28.7C208.5 28 210.4 27.6 212.7 27.6C214.7 27.6 216.5 27.9 218 28.5C219.5 29.2 220.8 30 221.7 31.2C222.7 32.3 223.4 33.6 223.8 35.1L217.3 36.8C217 35.6 216.5 34.7 215.7 34.1C214.9 33.5 213.9 33.2 212.6 33.2C211.2 33.2 210.3 33.4 209.6 33.9C209 34.4 208.6 35.1 208.6 35.9C208.6 36.7 209 37.4 209.8 37.8C210.5 38.3 211.5 38.7 212.7 39C213.9 39.3 215.2 39.6 216.5 40C217.9 40.3 219.1 40.8 220.3 41.4C221.5 42 222.5 42.9 223.2 43.9C224 44.9 224.4 46.3 224.4 48C224.4 49.5 223.9 50.9 223 52.2C222.1 53.5 220.8 54.5 219.2 55.2C217.5 55.9 215.6 56.3 213.3 56.3L213.3 56.3ZM257.7 20.7V56H250.6L234.6 31.9V56H227.5V20.7H234.6L250.6 44.9V20.7H257.7ZM274.7 56.3C272 56.3 269.5 55.7 267.4 54.6C265.3 53.4 263.6 51.7 262.3 49.6C261 47.4 260.4 44.9 260.4 41.9C260.4 39 261 36.5 262.3 34.4C263.6 32.2 265.3 30.6 267.5 29.4C269.7 28.2 272.1 27.6 274.8 27.6C277.5 27.6 279.9 28.2 282.1 29.4C284.3 30.5 286 32.2 287.3 34.4C288.6 36.5 289.2 39 289.2 41.9C289.2 44.9 288.6 47.4 287.3 49.6C286 51.7 284.2 53.4 282 54.6C279.8 55.7 277.3 56.3 274.6 56.3H274.7ZM274.7 50.1C275.9 50.1 277.1 49.8 278.2 49.3C279.3 48.7 280.2 47.8 280.9 46.5C281.6 45.3 282 43.8 282 41.9C282 40.1 281.6 38.6 280.9 37.4C280.3 36.2 279.4 35.3 278.2 34.7C277.2 34.1 276 33.8 274.7 33.8C273.5 33.8 272.3 34.1 271.3 34.7C270.2 35.3 269.4 36.2 268.7 37.4C268 38.6 267.7 40.1 267.7 41.9C267.7 43.7 268 45.3 268.6 46.5C269.3 47.8 270.1 48.7 271.2 49.3C272.2 49.8 273.4 50.1 274.7 50.1ZM288.8 28H296L302 53.7H299.8L306.3 28H313.8L320.2 53.7H318.1L324 28H330.8L322.7 56H314.9L308.8 32.3H311L304.8 56H297L288.8 28H288.8Z"></path></g></symbol>
+<symbol id="ic-check" viewBox="0 0 12 12"><path d="M2.5 6.2l2.2 2.2 4.8-4.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-spark" viewBox="0 0 16 16"><path d="M8 1.5l1.5 4 4 1.5-4 1.5L8 12.5l-1.5-4-4-1.5 4-1.5z" fill="currentColor"/></symbol>
+<symbol id="ic-chat" viewBox="0 0 16 16"><path d="M3 3.5h10a1 1 0 011 1v6a1 1 0 01-1 1H7l-3 2.5v-2.5H3a1 1 0 01-1-1v-6a1 1 0 011-1z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></symbol>
+<symbol id="ic-send" viewBox="0 0 16 16"><path d="M8 13V3M3.5 7.5L8 3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<nav class="nav">
+  <div class="nav__in">
+    <a class="nav__logo" href="https://spotsnow.io" aria-label="SpotsNow"><svg viewBox="0 0 331 74" role="img" aria-label="SpotsNow"><use href="#snlogo"></use></svg></a>
+    <div class="nav__links">
+      <a class="link" href="https://spotsnow.io/for-advertisers">For advertisers</a>
+      <a class="link" href="https://spotsnow.io/for-publishers">For publishers</a>
+      <a class="btn btn--sm" href="#get-access">Get early access</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div class="hero__grid">
+      <div class="hero__copy">
+        <div class="head">
+          <p class="eyebrow">New &middot; SpotsNow SuperAgent</p>
+          <h1 class="h1">Build a podcast campaign from <span class="accent">one conversation.</span></h1>
+        </div>
+        <p>SuperAgent is an AI agent built for podcast advertising. Ask it anything across 59,000+ actively running shows, or ask it to build the whole campaign plan, on real data.</p>
+
+        <div class="card offer" id="get-access">
+          <div class="offer__head"><span class="offer__big">30 days</span><span class="offer__what">of unlimited access, free.</span></div>
+          <p class="offer__sub">Early access for brands, agencies, shows and networks.</p>
+          <form class="gate" novalidate data-gate>
+            <label for="email-top">Your work email</label>
+            <div class="gate-row">
+              <input class="input" id="email-top" type="email" name="email" autocomplete="email" placeholder="you@company.com" required>
+              <button class="btn" type="submit">Start my 30 days</button>
+            </div>
+            <p class="err" role="alert">Please enter a valid email address.</p>
+            <p class="fine">Just your email. No setup, no seat license, nothing to install.</p>
+            <div class="done" role="status"><span class="check" style="background:#0E6832"><svg><use href="#ic-check"></use></svg></span>You're in. Check your inbox for your 30 days of unlimited SuperAgent access.</div>
+          </form>
+        </div>
+      </div>
+
+      <div class="hero__visual" aria-hidden="true">
+        <div class="chat">
+          <div class="chat__top">
+            <div class="chat__brand"><span class="chat__icon"><svg><use href="#ic-spark"></use></svg></span>SpotsNow SuperAgent</div>
+            <span class="pill pill--green"><i></i>Live data</span>
+          </div>
+          <div class="msgs">
+            <div class="me">Build me a campaign plan for a skincare brand.</div>
+            <div class="agent">
+              <div class="agent__lbl">Campaign plan &middot; Skincare</div>
+              <div class="plan">
+                <div class="plan__row"><span class="plan__logo">1</span><span class="plan__bars"><span></span><span></span></span><span class="plan__score">Top match</span></div>
+                <div class="plan__row"><span class="plan__logo">2</span><span class="plan__bars"><span></span><span></span></span></div>
+                <div class="plan__row"><span class="plan__logo">3</span><span class="plan__bars"><span></span><span></span></span></div>
+              </div>
+              <div class="tags"><em>Best-performing matched shows</em><em>Who already advertises</em><em>Benchmark pricing</em><em>Estimated ROAS ranges</em></div>
+            </div>
+            <div class="me">Which wellness brands advertise on comedy podcasts?</div>
+          </div>
+          <div class="chat__input"><div>Ask SuperAgent anything...</div><span class="chat__send"><svg width="16" height="16"><use href="#ic-send"></use></svg></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="stats">
+  <div class="container">
+    <ul>
+      <li><p class="n">59,000+</p><p class="l">Actively running shows in SpotsNow's intelligence</p></li>
+      <li><p class="n">100+</p><p class="l">Data points per show, including ad-spend history</p></li>
+      <li><p class="n">1 chat</p><p class="l">From a brand brief to a full campaign plan</p></li>
+      <li><p class="n">FREE</p><p class="l">Unlimited access for 30 days</p></li>
+    </ul>
+  </div>
+</section>
+
+<main>
+  <section class="section section--rule">
+    <div class="container">
+      <div class="head">
+        <p class="eyebrow">One agent, four jobs</p>
+        <h2 class="h2" style="max-width:22ch">Ask anything about podcast advertising.</h2>
+      </div>
+      <p class="body-copy" style="margin-top:24px">Who advertises where, what they spend, which reads work, and which inventory is open. The answers used to live in spreadsheets, sales decks and word of mouth. Now you just ask.</p>
+      <div class="steps">
+        <div class="step"><span class="step__n">1</span><div><p class="step__t">Discover shows</p><p class="step__d">Find the shows whose audiences fit a brand, and see who already advertises on them.</p></div></div>
+        <div class="step"><span class="step__n">2</span><div><p class="step__t">Analyze spend</p><p class="step__d">See which brands are buying podcast ads, where, and roughly how much, based on tracked advertiser activity.</p></div></div>
+        <div class="step"><span class="step__n">3</span><div><p class="step__t">Optimize creative</p><p class="step__d">Learn from the reads already running in a category, and what to change in your own.</p></div></div>
+        <div class="step"><span class="step__n">4</span><div><p class="step__t">Uncover opportunities</p><p class="step__d">Surface open inventory for buyers and likely advertisers for sellers.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt">
+    <div class="container">
+      <div class="flow">
+        <div class="flow__head head">
+          <p class="eyebrow">From one chat to a full campaign plan</p>
+          <h2 class="h2">Days of research, <span class="accent">started in one conversation.</span></h2>
+        </div>
+        <div class="flow__cards">
+          <div class="card fcard"><p class="fcard__k"><span class="accent">01</span> <span>You</span></p><h3>Tell it about your brand.</h3><p>Who you sell to, what you're launching, what you want to test.</p></div>
+          <div class="card fcard"><p class="fcard__k"><span class="accent">02</span> <span>SuperAgent</span></p><h3>It does the planning work.</h3><p>Finds the best-performing shows that match your audience and checks who already advertises on them.</p></div>
+          <div class="card fcard fcard--out"><p class="fcard__k"><span class="accent">03</span> <span>You get</span></p><h3>A full campaign plan.</h3><p>Ranked shows with benchmark pricing and estimated ROAS ranges.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="center-head">
+        <p class="eyebrow">Built for both sides of the market</p>
+        <h2 class="h2">For the people buying and the people selling.</h2>
+      </div>
+      <div class="sides">
+        <div class="side">
+          <h3>Brands and agencies</h3>
+          <p>Plan and pressure-test a buy. Get to a shortlist and a plan without weeks of back-and-forth.</p>
+          <ul class="checks">
+            <li><span class="check"><svg><use href="#ic-check"></use></svg></span>Shortlist shows that match your audience</li>
+            <li><span class="check"><svg><use href="#ic-check"></use></svg></span>See who already advertises before you buy</li>
+          </ul>
+          <div class="asks">
+            <div class="ask"><svg><use href="#ic-chat"></use></svg>"Which wellness brands advertise on comedy podcasts?"</div>
+            <div class="ask"><svg><use href="#ic-chat"></use></svg>"Build me a campaign plan for a skincare brand."</div>
+          </div>
+        </div>
+        <div class="side">
+          <h3>Shows and networks</h3>
+          <p>Find your next advertiser. Understand your own market and see which brands are a fit before you pitch.</p>
+          <ul class="checks">
+            <li><span class="check"><svg><use href="#ic-check"></use></svg></span>Understand your own market</li>
+            <li><span class="check"><svg><use href="#ic-check"></use></svg></span>See which brands are a fit before you pitch</li>
+          </ul>
+          <div class="asks">
+            <div class="ask"><svg><use href="#ic-chat"></use></svg>"Which brands like my current advertisers haven't tried podcasts yet?"</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="final section--alt">
+    <div class="container">
+      <div class="final__in">
+        <div class="final__head">
+          <h2 class="h2">Get 30 days of <span class="accent">unlimited SuperAgent.</span></h2>
+          <p>Early access is open to any brand, agency, show or network. Enter your email and start asking.</p>
+        </div>
+        <form class="gate" novalidate data-gate>
+          <label for="email-bottom">Your work email</label>
+          <div class="gate-row">
+            <input class="input" id="email-bottom" type="email" name="email" autocomplete="email" placeholder="you@company.com" required>
+            <button class="btn" type="submit">Start my 30 days</button>
+          </div>
+          <p class="err" role="alert">Please enter a valid email address.</p>
+          <div class="done" role="status"><span class="check" style="background:#0E6832"><svg><use href="#ic-check"></use></svg></span>You're in. Check your inbox for your 30 days of unlimited SuperAgent access.</div>
+        </form>
+        <div class="nosetup">
+          <span><span class="check"><svg><use href="#ic-check"></use></svg></span>No setup</span>
+          <span><span class="check"><svg><use href="#ic-check"></use></svg></span>No seat license</span>
+          <span><span class="check"><svg><use href="#ic-check"></use></svg></span>Nothing to install</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="foot">
+    <div class="foot__brand">
+      <a href="https://spotsnow.io" aria-label="SpotsNow"><svg viewBox="0 0 331 74" role="img" aria-label="SpotsNow"><use href="#snlogo"></use></svg></a>
+      <p>The OS for Podcast Advertising</p>
+      <p class="foot__about"><strong style="color:var(--text-primary)">About SpotsNow.</strong> SpotsNow is the AI operating system and ad buying platform for podcast advertising, built on intelligence across 59,000+ actively running shows and billions in tracked ad spend. It helps buyers and sellers plan, price, and close podcast campaigns faster.</p>
+    </div>
+    <div class="foot__cols">
+      <div class="foot__col">
+        <h4>Resources</h4>
+        <a href="https://spotsnow.io/browse">Shop discounted spots</a>
+        <a href="https://spotsnow.io/chat">SpotsNow SuperAgent</a>
+        <a href="https://spotsnow.io/intelligence">Intelligence</a>
+        <a href="https://spotsnow.io/for-advertisers">How it works</a>
+        <a href="https://spotsnow.io/for-publishers">For publishers</a>
+      </div>
+      <div class="foot__col">
+        <h4>Support</h4>
+        <a href="https://spotsnow.io/tos">Terms of Service</a>
+        <a href="https://spotsnow.io/privacy">Privacy Policy</a>
+      </div>
+    </div>
+  </div>
+  <p class="copy">Copyright &copy; 2026 SpotsNow. All rights reserved.</p>
+</footer>
+
+<script>
+(function(){
+  var re=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  document.querySelectorAll('[data-gate]').forEach(function(form){
+    form.addEventListener('submit',function(e){
+      e.preventDefault();
+      var input=form.querySelector('input[type=email]');
+      if(!re.test((input.value||'').trim())){form.classList.add('invalid');input.focus();return;}
+      form.classList.remove('invalid');
+      /* TODO: send email to signup/ESP to provision 30-day unlimited access. */
+      form.classList.add('sent');
+    });
+  });
+})();
+</script>
+</body>
+</html>
