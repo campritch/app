@@ -346,8 +346,10 @@
     .dq-reason-line { font-size: 10.5px; font-weight: 600; color: var(--destructive, #dc2626); margin-top: 2px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .dq-reason-line:hover { text-decoration: underline; }
     /* "Why they passed" — Past-fund reason badge + free-text detail, shown in the Why column */
-    .why-passed { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .pass-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; letter-spacing: .01em; padding: 5px 11px; border-radius: 8px; border: 1px solid var(--border, #e4e4e7); background: var(--secondary); color: var(--foreground); cursor: pointer; white-space: nowrap; line-height: 1.2; }
+    .why-passed { display: flex; align-items: center; gap: 6px; max-width: 100%; min-width: 0; }
+    .pass-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; letter-spacing: .01em; padding: 5px 11px; border-radius: 8px; border: 1px solid var(--border, #e4e4e7); background: var(--secondary); color: var(--foreground); cursor: pointer; white-space: nowrap; line-height: 1.2; min-width: 0; max-width: 100%; }
+    .pass-badge__emoji { flex-shrink: 0; }
+    .pass-badge__txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
     .pass-badge:hover { filter: brightness(0.97); border-color: var(--grey-1, #a1a1aa); }
     .pass-why { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; flex-shrink: 0; border-radius: 8px; border: 1px solid var(--border, #e4e4e7); background: #fff; color: var(--muted-foreground); cursor: pointer; }
     .pass-why:hover { background: #f4f4f5; color: var(--foreground); }
@@ -4496,7 +4498,8 @@ function askPassReason(fids, done){
 function passReasonHtml(f){
   const fs = FS(f.id);
   const hasNote = !!(fs.passNote && fs.passNote.trim());
-  const badge = `<button type="button" class="pass-badge" data-passedit="${f.id}" title="Click to change the pass reason">\u{1F44B} ${esc(fs.passReason || 'Add reason')}</button>`;
+  const reason = fs.passReason || 'Add reason';
+  const badge = `<button type="button" class="pass-badge" data-passedit="${f.id}" title="${esc(reason)}"><span class="pass-badge__emoji">\u{1F44B}</span><span class="pass-badge__txt">${esc(reason)}</span></button>`;
   const chat = `<button type="button" class="pass-why${hasNote ? ' pass-why--has' : ''}" data-passwhy="${f.id}" title="${hasNote ? 'See why they said no' : 'Add why they said no'}">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
   </button>`;
