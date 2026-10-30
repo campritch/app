@@ -707,6 +707,10 @@
       box-shadow: var(--shadow-sm);
     }
     .notes-area:focus { border-color: var(--ring); box-shadow: 0 0 0 3px rgb(24 24 27 / 0.08); }
+    .fit-brief__notes { margin-top: 10px; max-width: 760px; }
+    .fit-brief__notes-hd { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); margin-bottom: 5px; }
+    .notes-area--inline { min-height: 54px; font-size: 12.5px; background: #fff; box-shadow: none; }
+    .granola-tag { font-size: 10.5px; font-weight: 600; color: #6d28d9; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 6px; padding: 1px 7px; }
 
     /* ── Toast (shadcn) ── */
     .toast {
@@ -2356,6 +2360,13 @@ function personSubRows(f){
         ${f.why ? `<br><b>Our angle:</b> ${esc(f.why)}` : ''}
         ${st.aiBrief ? `<div class="fit-brief__ai"><b>AI read${st.aiOneLiner ? ' - ' + esc(st.aiOneLiner) : ''}:</b> ${esc(st.aiBrief)}</div>` : ''}
         ${introLinksHtml(f)}
+        <div class="fit-brief__notes" data-noopen>
+          <div class="fit-brief__notes-hd">
+            <b>Notes</b>
+            ${st.notesSyncedAt ? `<span class="granola-tag" title="Summary pulled from your Granola meetings - edit freely, it won't be overwritten unless you re-sync">Granola · ${new Date(st.notesSyncedAt).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</span>` : ''}
+          </div>
+          <textarea class="notes-area notes-area--inline" data-fundnote="${f.id}" placeholder="Where things landed with ${esc(f.name)}... (pulls a short summary from your recent Granola meetings on sync)">${esc(st.notes || '')}</textarea>
+        </div>
       </div>
       <button class="mini-btn" data-aifit="${f.id}" style="flex-shrink:0">${st.aiBrief ? 'Re-run AI fit read' : 'Run AI fit read'}</button>
       <button class="mini-btn" data-deepfit="${f.id}" style="flex-shrink:0" title="Deep grade: googles the fund and grades on its recent deals, stage, check size and portfolio (slower, higher cost, more accurate)">${st.deepGraded ? 'Re-run deep grade \u{1F50E}' : 'Deep grade \u{1F50E}'}</button>
@@ -4923,6 +4934,11 @@ $('tableBody').addEventListener('click', e => {
   if (pr) { openPerson(pr.dataset.person); return; }
   const cr = e.target.closest('tr[data-conn]');
   if (cr) { openConnector(cr.dataset.conn); return; }
+});
+// Inline fund-notes autosave (shared with the fund drawer's Notes field).
+$('tableBody').addEventListener('input', e => {
+  const na = e.target.closest('[data-fundnote]');
+  if (na) { FS(na.dataset.fundnote).notes = e.target.value; save(); }
 });
 
 /* Connectors view */
