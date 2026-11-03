@@ -166,6 +166,18 @@
     .btn--sm { padding: 6px 12px; font-size: 12.5px; font-weight: 600; }
     .btn--green { background: var(--green-text); color: #fff; border-color: var(--green-text); }
     .btn--green:hover { filter: brightness(1.08); }
+    .btn--danger { background: var(--white); color: var(--red-text); border-color: color-mix(in srgb, var(--red-text) 45%, transparent); }
+    .btn--danger:hover { background: var(--red-bg); border-color: var(--red-text); }
+    /* reschedule avails - what's open vs already sold on the show */
+    .resch-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+    @media (max-width:520px){ .resch-grid { grid-template-columns:1fr; } }
+    .resch-slot { display:flex; flex-direction:column; align-items:flex-start; gap:2px; text-align:left; font-family:inherit; border:1px solid var(--border); border-radius:12px; padding:12px 14px; background:var(--white); cursor:pointer; transition:border-color .12s, box-shadow .12s; }
+    .resch-slot:hover:not(:disabled) { border-color:var(--primary); box-shadow:inset 0 0 0 1px var(--primary); }
+    .resch-slot.full { background:var(--secondary-lite); cursor:not-allowed; opacity:.75; }
+    .resch-slot__day { font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-tertiary); }
+    .resch-slot__date { font-size:14px; font-weight:700; color:var(--text-primary); }
+    .resch-slot__cap { font-size:11.5px; font-weight:600; color:var(--green-text); margin-top:2px; }
+    .resch-slot__cap.full { color:var(--text-tertiary); }
 
     /* cards + grid */
     .grid { display: grid; gap: 16px; }
@@ -1794,6 +1806,55 @@
         else if(f==='end'&&s.ts!=null&&secs>s.ts) s.length=(secs-s.ts)+'s'; } }
     rerender(); openSpot(id); }
 
+  /* A missed episode: nothing posted on the booked date. Reschedule into the next open
+     slot (most cases) or, failing that, cancel. Avails come from the ad server —
+     exactly what's open versus already sold, so nothing gets double-booked. */
+  function rescheduleSpot(id){
+    const s=spot(id), sh=show(s.showId), av=nextEpisodes(s.showId,8);
+    openDrawer(`<div class="drawer__head"><div>
+        <span class="tag tag--orange"><i></i>Missed ${fmtDate(s.published)}</span>
+        <h2 style="font-size:18px;font-weight:700;margin-top:8px">Reschedule · ${esc(s.brand)} on ${esc(sh.name)}</h2>
+        <div class="muted" style="font-size:12px">Nothing posted on ${dayName(s.published)} ${fmtDate(s.published)}. Move it to the next open slot, or cancel if nothing works.</div>
+      </div><button class="x" onclick="closeOverlays()" style="margin-left:auto">✕</button></div>
+    <div class="drawer__body">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:9px">Open slots on ${esc(sh.name)} · ${esc(sh.publishDays.join('/'))}</div>
+      <div class="resch-grid">${av.map(e=>`<button class="resch-slot${e.open?'':' full'}" ${e.open?`onclick="confirmReschedule('${id}','${e.date}')"`:'disabled'}>
+          <span class="resch-slot__day">${dayName(e.date)}</span>
+          <span class="resch-slot__date">${fmtDate(e.date)}</span>
+          <span class="resch-slot__cap ${e.open?'':'full'}">${e.open?`${e.open} of ${e.cap} open`:`Full — ${e.cap} sold`}</span>
+        </button>`).join('')}</div>
+      <div class="muted" style="font-size:11.5px;margin-top:13px">Slots marked full are already sold, so they can't be booked. Pick an open date and the slot is flagged in the ad server so it can't be double-sold.</div>
+    </div>
+    <div class="drawer__foot" style="justify-content:space-between">
+      <button class="btn btn--danger btn--sm" onclick="cancelReadStep('${id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:-2px;margin-right:5px"><path d="M18 6 6 18M6 6l12 12"/></svg>Cancel this read</button>
+      <button class="btn btn--ghost" onclick="closeOverlays()">Close</button>
+    </div>`);
+  }
+  function confirmReschedule(id,date){ const s=spot(id), sh=show(s.showId);
+    s.published=date; s.missed=false; s.status='scheduled'; s.views=null; s.downloads=null; s.yt=''; s.ts=null;
+    closeOverlays(); rerender(); refreshBadges();
+    toast(`Rescheduled to ${dayName(date)} ${fmtDate(date)} on ${sh.name}. Slot flagged in the ad server so it can't be sold twice.`); }
+  function cancelReadStep(id){ const s=spot(id), sh=show(s.showId);
+    openDrawer(`<div class="drawer__head"><div>
+        <span class="tag tag--red"><i></i>Cancel read</span>
+        <h2 style="font-size:18px;font-weight:700;margin-top:8px">Cancel ${esc(s.brand)} on ${esc(sh.name)}?</h2>
+        <div class="muted" style="font-size:12px">Only when no open slot works. This releases the booking and the agent lets ${esc(s.brand)} know the read won't run.</div>
+      </div><button class="x" onclick="closeOverlays()" style="margin-left:auto">✕</button></div>
+    <div class="drawer__body">
+      <div class="kv"><span>Was booked for</span><b>${dayName(s.published)} ${fmtDate(s.published)}</b></div>
+      <div class="kv"><span>Guarantee released</span><b>${K(s.guarantee)}</b></div>
+      <div class="kv"><span>Slot returns to avails</span><b>${esc(sh.name)}</b></div>
+    </div>
+    <div class="drawer__foot" style="justify-content:space-between">
+      <button class="btn btn--ghost" onclick="rescheduleSpot('${id}')">← Back to reschedule</button>
+      <button class="btn btn--danger" onclick="cancelRead('${id}')">Cancel read</button>
+    </div>`);
+  }
+  function cancelRead(id){ const s=spot(id), sh=show(s.showId);
+    s.cancelled=true; s.missed=false; ARCHIVED['w:'+id]=true;
+    closeOverlays(); rerender(); refreshBadges();
+    toast(`Read cancelled — booking released on ${sh.name}, slot back in avails, ${s.brand} notified.`); }
+
   function openSpot(id,full){
     const s=spot(id), sh=show(s.showId), pr=projection(s), v=verdict(s), m=mgForSpot(s.id), cr=creative(s.brand);
     if(full!==undefined) DRAWER_FULL=!!full; else if(DRAWER_SPOT!==id) DRAWER_FULL=false;
@@ -1804,7 +1865,7 @@
     const frAll=flightRows(s).filter(x=>projection(x));
     const gotT=frAll.reduce((a,x)=>a+(delivered(x)||0),0), gT=frAll.reduce((a,x)=>a+x.guarantee,0)||s.guarantee;
     const ratioT=gotT/Math.max(gT,1);
-    const actBtns=`${s.missed?`<button class="btn btn--primary" onclick="closeOverlays();nudgeEpisode('${s.id}')">Nudge show</button>`
+    const actBtns=`${s.missed?`<button class="btn btn--ghost" onclick="closeOverlays();nudgeEpisode('${s.id}')">Nudge show</button><button class="btn btn--primary" onclick="rescheduleSpot('${s.id}')">Reschedule</button>`
         :v.k==='short'&&!m?`<button class="btn btn--primary" onclick="closeOverlays();createMakegood('${s.id}')">Set up make good</button>`
         :m?`<button class="btn btn--primary" onclick="closeOverlays();openMg('${m.id}')">Open ${m.kind==='bonus'?'bonus spot':'make good'}</button>`
         :closedOut(s)&&!s.reportSent?`<button class="btn btn--primary" onclick="closeOverlays();sendDeliveryReport('${s.id}')">Send delivery report</button>`
