@@ -743,6 +743,35 @@
   .mg-opt.on { border-color:var(--primary); box-shadow:inset 0 0 0 1px var(--primary); }
   .mg-opt__t { font-size:13px; font-weight:700; display:flex; align-items:center; gap:7px; }
   .mg-opt__d { font-size:11.5px; color:var(--text-secondary); font-weight:500; margin-top:3px; line-height:1.4; }
+  /* YouTube engaged-views integration */
+  .mshowwrap { display:flex; align-items:center; gap:9px; }
+  .yt-pill { display:inline-flex; align-items:center; gap:4px; font-family:inherit; font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:999px; border:1px solid var(--border); background:var(--white); cursor:pointer; flex-shrink:0; white-space:nowrap; }
+  .yt-pill--none { color:var(--text-secondary); }
+  .yt-pill--none svg { color:#FF0000; }
+  .yt-pill--none:hover { border-color:#FF0000; color:#FF0000; }
+  .yt-pill--pending { color:var(--orange-text); background:var(--orange-bg); border-color:transparent; }
+  .yt-pill--on { color:var(--green-text); background:var(--green-bg); border-color:transparent; }
+  .yt-status { display:flex; gap:11px; align-items:flex-start; padding:13px 15px; border-radius:12px; margin-bottom:18px; }
+  .yt-status svg { width:18px; height:18px; flex-shrink:0; margin-top:1px; }
+  .yt-status b { font-size:13px; display:block; } .yt-status small { font-size:11.5px; color:var(--text-secondary); display:block; margin-top:2px; line-height:1.4; }
+  .yt-status--on { background:var(--green-bg); color:var(--green-text); }
+  .yt-status--pending { background:var(--orange-bg); color:var(--orange-text); }
+  .yt-status--none { background:var(--secondary-lite); color:var(--text-primary); }
+  .yt-scopes__t { font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:8px; }
+  .yt-scope--read { display:flex; gap:10px; align-items:flex-start; padding:9px 0; border-top:1px solid var(--border-light); }
+  .yt-scope--read b { font-size:12.5px; display:block; } .yt-scope--read small { font-size:11px; color:var(--text-tertiary); display:block; margin-top:1px; line-height:1.4; }
+  .yt-dot { width:8px; height:8px; border-radius:50%; background:var(--border-strong); margin-top:5px; flex-shrink:0; }
+  .yt-dot.on { background:var(--green-text); }
+  .yt-consent__head { display:flex; gap:12px; align-items:center; padding:20px 22px 16px; border-bottom:1px solid var(--border-light); }
+  .yt-g { width:36px; height:36px; border-radius:50%; background:#fff; border:1px solid var(--border); display:grid; place-items:center; font-weight:700; font-size:17px; color:#4285F4; flex-shrink:0; }
+  .yt-consent__t { font-size:15px; font-weight:700; line-height:1.3; } .yt-consent__s { font-size:12px; color:var(--text-secondary); margin-top:3px; }
+  .yt-consent__body { padding:16px 22px; }
+  .yt-consent__lead { font-size:13px; font-weight:600; margin-bottom:8px; }
+  .yt-scope { display:flex; gap:10px; align-items:flex-start; padding:8px 0; cursor:pointer; }
+  .yt-scope input { margin-top:3px; accent-color:#4285F4; flex-shrink:0; }
+  .yt-scope b { font-size:12.5px; display:block; } .yt-scope small { font-size:11px; color:var(--text-secondary); display:block; margin-top:1px; line-height:1.4; }
+  .yt-consent__note { font-size:11px; color:var(--text-tertiary); margin-top:12px; line-height:1.5; }
+  .yt-consent__foot { display:flex; justify-content:flex-end; gap:9px; padding:14px 22px; border-top:1px solid var(--border-light); }
   .showbar { margin-bottom:14px; }
   .showbar:last-child { margin-bottom:0; }
   .showbar__top { display:flex; justify-content:space-between; align-items:baseline; font-size:12.5px; margin-bottom:6px; gap:12px; }
@@ -2817,6 +2846,69 @@
       onchange="gridCommit('${sh.id}','${col.key}',this.value)">${suf}</span>`;
   }
 
+  /* YouTube integration — creators authorize Acme to pull engaged views (how YouTube
+     inventory is bought now), not just impressions. Sent from the show list; the creator
+     approves on a Google-style consent screen. */
+  const YT_AUTH = { rubin:'connected', sage:'connected', warren:'pending' };
+  const YT_SENT = { warren:addDays(TODAY,-2) };
+  const YT_SCOPES = [
+    ['Engaged views',"Views past YouTube's engaged-view threshold — the metric campaigns are bought on"],
+    ['Average view duration','How long viewers stay on the episode, for watch-time reporting'],
+    ['Impressions & click-through','Thumbnail impressions and CTR from YouTube Analytics'],
+    ['Traffic sources','Where the views came from — browse, search, suggested']
+  ];
+  const YT_ICON = `<svg viewBox="0 0 24 24" fill="currentColor" style="width:13px;height:13px"><path d="M23 12s0-3.9-.5-5.8a3 3 0 0 0-2.1-2.1C18.5 3.5 12 3.5 12 3.5s-6.5 0-8.4.6A3 3 0 0 0 1.5 6.2C1 8.1 1 12 1 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 8.4.6 8.4.6s6.5 0 8.4-.6a3 3 0 0 0 2.1-2.1C23 15.9 23 12 23 12zM10 15.5v-7l6 3.5-6 3.5z"/></svg>`;
+  function ytStatus(id){ return YT_AUTH[id]||'none'; }
+  function ytConnectedCount(){ return SHOWS.filter(s=>ytStatus(s.id)==='connected').length; }
+  function ytPill(id){ var st=ytStatus(id), m={none:['Connect','none'],pending:['Pending','pending'],connected:['Engaged views','on']}[st];
+    return `<button class="yt-pill yt-pill--${m[1]}" title="YouTube engaged-views integration" onclick="event.stopPropagation();ytAuthModal('${id}')">${YT_ICON}${m[0]}</button>`; }
+  function closeYt(){ var ov=document.getElementById('ytOverlay'); if(ov) ov.classList.remove('open'); }
+  function ytSend(id){ YT_AUTH[id]='pending'; YT_SENT[id]=TODAY; ytAuthModal(id); if(CURRENT==='shows') RENDER.shows();
+    toast(`Authorization request sent to ${show(id).host} (${show(id).channel}). Once they approve, engaged views flow in.`); }
+  function ytResend(id){ YT_SENT[id]=TODAY; toast(`Reminder sent to ${show(id).host}.`); }
+  function ytAuthorize(id){ YT_AUTH[id]='connected'; ytAuthModal(id); if(CURRENT==='shows') RENDER.shows();
+    toast(`${show(id).name} connected — engaged views and watch time now flow into delivery.`); }
+  function ytDisconnect(id){ YT_AUTH[id]='none'; delete YT_SENT[id]; ytAuthModal(id); if(CURRENT==='shows') RENDER.shows();
+    toast(`${show(id).name} disconnected from YouTube.`); }
+  function ytAuthModal(id, mode){
+    var sh=show(id), st=ytStatus(id);
+    var ov=document.getElementById('ytOverlay');
+    if(!ov){ ov=document.createElement('div'); ov.id='ytOverlay'; ov.className='pmov'; document.body.appendChild(ov); ov.addEventListener('click',function(e){ if(e.target===ov) closeYt(); }); }
+    if(mode==='consent'){
+      ov.innerHTML=`<div class="pmcard" style="max-width:480px">
+        <div class="yt-consent__head"><div class="yt-g">G</div><div><div class="yt-consent__t">Acme Network wants to access your YouTube data</div><div class="yt-consent__s">Signed in as ${esc(sh.host)} · ${esc(sh.channel)}</div></div></div>
+        <div class="yt-consent__body"><div class="yt-consent__lead">This will let Acme Network view:</div>
+          ${YT_SCOPES.map(sc=>`<label class="yt-scope"><input type="checkbox" checked><span><b>${sc[0]}</b><small>${sc[1]}</small></span></label>`).join('')}
+          <div class="yt-consent__note">Acme can only read these metrics — it can't post, edit or delete anything on your channel. You can revoke access any time from your Google account.</div>
+        </div>
+        <div class="yt-consent__foot"><button class="btn btn--ghost" onclick="ytAuthModal('${id}')">Deny</button><button class="btn btn--primary" onclick="ytAuthorize('${id}')">Allow</button></div>
+      </div>`; ov.classList.add('open'); return;
+    }
+    var statusBlock = st==='connected'
+      ? `<div class="yt-status yt-status--on">${CHK_SVG}<div><b>Connected</b><small>Engaged views, watch time and CTR are flowing from ${esc(sh.channel)}.</small></div></div>`
+      : st==='pending'
+      ? `<div class="yt-status yt-status--pending"><div><b>Waiting on ${esc(sh.host)}</b><small>Request sent ${YT_SENT[id]?fmtDate(YT_SENT[id]):'recently'} to ${esc(sh.channel)}. They approve on a Google consent screen.</small></div></div>`
+      : `<div class="yt-status yt-status--none"><div><b>Not connected</b><small>Acme is reading impressions only. Connect to pull engaged views — how YouTube inventory is bought now.</small></div></div>`;
+    ov.innerHTML=`<div class="pmcard">
+      <div class="pm-head"><div><div class="pm-eyebrow" style="color:#FF0000">YouTube integration</div><h2>${esc(sh.name)}</h2><p>${esc(sh.host)} · ${esc(sh.channel)}</p></div><button class="pm-x" onclick="closeYt()">✕</button></div>
+      <div class="pm-body">
+        ${statusBlock}
+        <div class="yt-scopes__t">What Acme receives once ${esc(sh.host)} approves</div>
+        ${YT_SCOPES.map(sc=>`<div class="yt-scope--read"><span class="yt-dot ${st==='connected'?'on':''}"></span><span><b>${sc[0]}</b><small>${sc[1]}</small></span></div>`).join('')}
+      </div>
+      <div class="pm-foot">
+        <button class="btn btn--ghost btn--sm" onclick="ytAuthModal('${id}','consent')">Preview the creator's screen</button>
+        <div style="display:flex;gap:9px">
+          ${st==='connected'
+            ? `<button class="btn btn--ghost" onclick="closeYt()">Close</button><button class="btn btn--danger" onclick="ytDisconnect('${id}')">Disconnect</button>`
+            : st==='pending'
+            ? `<button class="btn btn--ghost" onclick="ytResend('${id}')">Resend</button><button class="btn btn--primary" onclick="ytAuthModal('${id}','consent')">Open authorize screen</button>`
+            : `<button class="btn btn--ghost" onclick="closeYt()">Cancel</button><button class="btn btn--primary" onclick="ytSend('${id}')">Send to creator</button>`}
+        </div>
+      </div>
+    </div>`; ov.classList.add('open');
+  }
+
   function renderGrid(){
     const host=document.getElementById('gridHost'); if(!host) return;
     const rows=gridRows();
@@ -2838,10 +2930,10 @@
             ${SHEET_COLS.map(c=>`<th class="mh" style="width:${c.w}px;min-width:${c.w}px">${c.label}</th>`).join('')}
             <th class="mh" style="width:46px"></th></tr></thead>
           <tbody>${rows.map((sh,ri)=>`<tr class="mrow" onmouseenter="fillEnter('${sh.id}')">
-            <td class="mtd mtd--show"><button class="mshowcell mshowcell--btn" onclick="openShow('${sh.id}')" title="Open the full show record">
+            <td class="mtd mtd--show"><div class="mshowwrap"><button class="mshowcell mshowcell--btn" onclick="openShow('${sh.id}')" title="Open the full show record">
               <div class="mthumb">${esc(sh.name.split(' ').map(w=>w[0]).slice(0,2).join(''))}</div>
               <div style="min-width:0"><div class="mshowname">${esc(sh.name)}</div>
-              <div class="mshowdetail">Details<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></div></div></button></td>
+              <div class="mshowdetail">Details<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></div></div></button>${ytPill(sh.id)}</div></td>
             ${SHEET_COLS.map(c=>{
               const sel = gridSel && gridSel.id===sh.id && gridSel.key===c.key;
               const inR = gridDrag && gridDrag.key===c.key && ri>gridDrag.from && ri<=gridDrag.to;
@@ -2954,7 +3046,7 @@
     <div class="inner" style="max-width:1180px">
       <div class="pagebar">
         <div class="head"><h1>Shows</h1></div>
-        <div class="pagebar__right"><span class="tag tag--purple">${SHOWS.filter(x=>x.src==='adserver').length} of ${SHOWS.length} synced from the ad server</span></div>
+        <div class="pagebar__right" style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag tag--grey" style="display:inline-flex;align-items:center;gap:5px">${YT_ICON}${ytConnectedCount()} of ${SHOWS.length} on YouTube engaged views</span><span class="tag tag--purple">${SHOWS.filter(x=>x.src==='adserver').length} of ${SHOWS.length} synced from the ad server</span></div>
       </div>
       <div id="gridHost"></div>
       <div class="footnote">Positions and the guarantee come from the ad server; everything else maps 1:1 to the show page you keep in the system, so this pulls straight from there. Paid fill rate is ${f.rate}% — ${f.paid} spots sold, ${f.free} given as make goods or bonus.</div>
