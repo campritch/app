@@ -555,11 +555,12 @@
 
       <div class="panel">
         <div class="panel__head"><span class="panel__title" id="msgFormTitle">Add a template</span><button class="panel__regen" id="msgFormReset" style="display:none" onclick="resetMsgForm()">Cancel edit</button></div>
-        <div class="fld"><span class="fld__label">Name</span><input class="fld__in" id="msgName" placeholder="Open-window pitch" /></div>
-        <div class="fld" style="margin-top:10px"><span class="fld__label">When to use it</span><input class="fld__in" id="msgWhen" placeholder="A show has an open slot and the brand already buys the category" /></div>
-        <div class="fld" style="margin-top:10px"><span class="fld__label">Email subject</span><input class="fld__in" id="msgSubject" placeholder="{{show}} slot open for {{brand}}" /></div>
-        <div class="fld" style="margin-top:10px"><span class="fld__label">Email body</span><textarea class="fld__in" id="msgBody" rows="6" placeholder="Hey {{first_name}}, ..."></textarea></div>
-        <div class="fld" style="margin-top:10px"><span class="fld__label">LinkedIn note <span style="color:var(--text-tertiary);font-weight:500">· 300 char max</span></span><textarea class="fld__in" id="msgLi" rows="3" maxlength="300"></textarea></div>
+        <div class="fld__note" style="margin:0 0 12px">Fields marked <span style="color:var(--accent);font-weight:700">*</span> are required. Everything else is optional.</div>
+        <div class="fld"><span class="fld__label">Name <span style="color:var(--accent)">*</span></span><input class="fld__in" id="msgName" placeholder="Open-window pitch" /></div>
+        <div class="fld" style="margin-top:10px"><span class="fld__label">When to use it <span style="text-transform:none;letter-spacing:0;font-size:10px;font-weight:500;color:var(--text-tertiary)">· optional</span></span><input class="fld__in" id="msgWhen" placeholder="A show has an open slot and the brand already buys the category" /></div>
+        <div class="fld" style="margin-top:10px"><span class="fld__label">Email subject <span style="color:var(--accent)">*</span></span><input class="fld__in" id="msgSubject" placeholder="{{show}} slot open for {{brand}}" /></div>
+        <div class="fld" style="margin-top:10px"><span class="fld__label">Email body <span style="color:var(--accent)">*</span></span><textarea class="fld__in" id="msgBody" rows="6" placeholder="Hey {{first_name}}, ..."></textarea></div>
+        <div class="fld" style="margin-top:10px"><span class="fld__label">LinkedIn note <span style="text-transform:none;letter-spacing:0;font-size:10px;font-weight:500;color:var(--text-tertiary)">· optional · 300 char max</span></span><textarea class="fld__in" id="msgLi" rows="3" maxlength="300"></textarea></div>
         <div class="varbar" id="msgVars"></div>
         <button class="abtn abtn--dark" style="margin-top:12px;width:100%" id="msgAddBtn" onclick="saveMsgTemplate()">Add template</button>
       </div>
@@ -610,9 +611,10 @@
       <button class="drawer__close" onclick="closeRunDrawer()" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="drawer__body">
+      <div class="fld__note" style="margin:0">Fields marked <span style="color:var(--accent);font-weight:700">*</span> are required. Everything else is optional.</div>
       <div class="panel">
         <label class="fld">
-          <span class="fld__label">Campaign name</span>
+          <span class="fld__label">Campaign name <span style="color:var(--accent)">*</span></span>
           <input id="in-campaign" class="fld__in" value="Cam Newton HBCU Tour" placeholder="e.g. Cam Newton HBCU Tour" />
         </label>
         <div class="fld__note">What this run is for. Every brand it finds is grouped under this campaign.</div>
@@ -620,7 +622,7 @@
 
       <div class="panel">
         <div class="fld">
-          <span class="fld__label">Brands</span>
+          <span class="fld__label">Brands <span style="color:var(--accent)">*</span></span>
           <div class="chipin" onclick="document.getElementById('brand-input').focus()">
             <span id="brand-chips"></span>
             <input class="chipin__in" id="brand-input" placeholder="e.g. Kroger" onkeydown="brandKey(event)" />
@@ -637,19 +639,19 @@
         <div class="panel__head"><span class="panel__title">The pitch</span></div>
         <div class="fld__note" style="margin:0 0 12px">These feed the hook. The agent combines them with signals about each brand (recent campaigns, LinkedIn, Magellan) to write a message tied to the content, not our company stats.</div>
         <label class="fld">
-          <span class="fld__label">Talent / shows / content we're leading with</span>
+          <span class="fld__label">Talent / shows / content we're leading with <span style="color:var(--accent)">*</span></span>
           <input id="in-talent" class="fld__in" value="Cam Newton, 4th & 1" placeholder="e.g. Cam Newton, or our top NBA shows" />
         </label>
         <label class="fld" style="margin-top:12px">
-          <span class="fld__label">Moment, event or theme</span>
+          <span class="fld__label">Moment, event or theme <span style="text-transform:none;letter-spacing:0;font-size:10px;font-weight:500;color:var(--text-tertiary)">· optional</span></span>
           <input id="in-moment" class="fld__in" value="HBCU Tour, 8 campus stops this fall" placeholder="e.g. HBCU tour, NBA All-Star, season kickoff" />
         </label>
         <label class="fld" style="margin-top:12px">
-          <span class="fld__label">Integration, what's in it for the brand</span>
+          <span class="fld__label">Integration, what's in it for the brand <span style="text-transform:none;letter-spacing:0;font-size:10px;font-weight:500;color:var(--text-tertiary)">· optional</span></span>
           <textarea id="in-integration" class="fld__in" rows="3" placeholder="How the brand shows up in the content">Official [category] partner of the tour: branded activations at each stop and custom host-read segments with Cam.</textarea>
         </label>
         <label class="fld" style="margin-top:12px">
-          <span class="fld__label">Acme Network's objective <span style="color:var(--text-tertiary);font-weight:500">· optional</span></span>
+          <span class="fld__label">Acme Network's objective <span style="text-transform:none;letter-spacing:0;font-size:10px;font-weight:500;color:var(--text-tertiary)">· optional</span></span>
           <input id="in-objective" class="fld__in" value="Land tentpole sponsors for the tour" placeholder="Why Acme Network wants this" />
         </label>
       </div>

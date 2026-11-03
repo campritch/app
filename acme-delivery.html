@@ -656,6 +656,81 @@
   @media (max-width:820px){ .rpt-grid2{ grid-template-columns:1fr; } }
   .rpt-card { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:18px 20px; }
   .rpt-card__h { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:14px; }
+  /* operator-only report controls - shape what the brand sees on the share link */
+  .rpt-ctrls { margin-top:18px; border:1px dashed var(--border-strong); border-radius:14px; background:var(--page-bg); padding:14px 16px; }
+  .rpt-ctrls__t { font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+  .rpt-ctrls__t span { text-transform:none; letter-spacing:0; font-weight:500; color:var(--text-tertiary); font-size:11px; }
+  .rpt-ctrls__row { display:flex; gap:10px; flex-wrap:wrap; }
+  .rpt-switch { display:flex; align-items:center; gap:11px; padding:10px 13px; border:1px solid var(--border); border-radius:11px; background:var(--white); flex:1; min-width:240px; cursor:pointer; }
+  .rpt-switch b { font-size:12.5px; display:block; }
+  .rpt-switch small { font-size:11px; color:var(--text-tertiary); font-weight:500; display:block; margin-top:1px; line-height:1.35; }
+  .rpt-deliv--nochart { grid-template-columns:1fr; }
+  /* campaign note - a sentence or two at the top of the brand's report */
+  .rpt-note { margin-top:14px; }
+  .rpt-note--show { background:var(--secondary-lite); border:1px solid var(--border-light); border-radius:14px; padding:15px 18px; }
+  .rpt-note--show p { margin:0; font-size:14px; line-height:1.55; color:var(--text-primary); font-weight:500; }
+  .rpt-note__lbl { font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:7px; display:flex; align-items:center; gap:8px; }
+  .rpt-note__lbl span { text-transform:none; letter-spacing:0; font-weight:500; font-size:11px; }
+  .rpt-note__in { width:100%; font:inherit; font-size:13.5px; line-height:1.5; border:1px solid var(--border); border-radius:10px; padding:10px 12px; background:var(--white); color:var(--text-primary); resize:vertical; }
+  .rpt-note__in:focus { outline:none; border-color:var(--text-primary); }
+  /* per-episode note - shows on the read row without expanding */
+  .rpt-read__note { font-size:12px; color:var(--text-secondary); font-weight:500; margin-top:5px; line-height:1.4; }
+  .rpt-read__note--edit { display:block; width:100%; max-width:420px; font:inherit; font-size:12px; color:var(--text-primary); border:1px solid transparent; border-radius:7px; padding:3px 7px; margin:4px 0 0 -7px; background:transparent; }
+  .rpt-read__note--edit:hover { border-color:var(--border); }
+  .rpt-read__note--edit:focus { outline:none; border-color:var(--text-primary); background:var(--white); }
+  .rpt-read__note--edit::placeholder { color:var(--text-tertiary); font-weight:500; }
+  /* full-screen share preview - what the brand sees at the read-only link */
+  .shareov { position:fixed; inset:0; z-index:60; background:var(--page-bg); display:none; flex-direction:column; }
+  .shareov.open { display:flex; }
+  .shareov__bar { display:flex; align-items:center; gap:12px; padding:10px 16px; background:var(--primary); color:#fff; flex-shrink:0; }
+  .shareov__bar .lk { font-size:12.5px; font-weight:600; color:rgba(255,255,255,.85); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
+  .shareov__tag { font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; background:rgba(255,255,255,.16); padding:3px 9px; border-radius:999px; }
+  .shareov__x { margin-left:auto; border:1px solid rgba(255,255,255,.3); background:rgba(255,255,255,.08); color:#fff; font:inherit; font-size:12.5px; font-weight:600; padding:7px 14px; border-radius:9px; cursor:pointer; }
+  .shareov__x:hover { background:rgba(255,255,255,.18); }
+  .shareov__frame { flex:1; min-height:0; overflow:hidden; position:relative; }
+  .shareov__frame .rpt-scroll { height:100%; overflow-y:auto; }
+  /* paid-media request form - the alternative to a free make-good read */
+  .pmov { position:fixed; inset:0; z-index:70; background:rgba(14,19,35,.5); display:none; align-items:flex-start; justify-content:center; padding:40px 20px; overflow-y:auto; }
+  .pmov.open { display:flex; }
+  .pmcard { background:var(--white); border-radius:18px; width:min(620px,100%); box-shadow:0 24px 70px rgba(14,19,35,.3); display:flex; flex-direction:column; max-height:calc(100vh - 80px); }
+  .pm-head { display:flex; gap:14px; padding:22px 24px 16px; border-bottom:1px solid var(--border-light); }
+  .pm-eyebrow { font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); }
+  .pm-head h2 { font-size:19px; font-weight:700; margin:5px 0 4px; letter-spacing:-.02em; }
+  .pm-head p { font-size:12.5px; color:var(--text-secondary); margin:0; line-height:1.5; }
+  .pm-x { margin-left:auto; border:none; background:var(--secondary-lite); width:32px; height:32px; border-radius:8px; cursor:pointer; color:var(--text-secondary); font-size:15px; flex-shrink:0; }
+  .pm-x:hover { background:var(--secondary); }
+  .pm-body { padding:18px 24px; overflow-y:auto; }
+  .pm-f { margin-bottom:16px; }
+  .pm-f__l { font-size:12.5px; font-weight:700; color:var(--text-primary); display:block; margin-bottom:2px; }
+  .pm-f__h { font-size:11.5px; color:var(--text-tertiary); font-weight:500; margin-bottom:7px; line-height:1.4; }
+  .pm-req { color:var(--accent); font-weight:700; }
+  .pm-opt { color:var(--text-tertiary); font-weight:500; font-size:10.5px; }
+  .pm-in { width:100%; font:inherit; font-size:13px; border:1px solid var(--border); border-radius:9px; padding:9px 11px; background:var(--white); color:var(--text-primary); }
+  .pm-in:focus { outline:none; border-color:var(--text-primary); }
+  textarea.pm-in { resize:vertical; line-height:1.5; }
+  .pm-money { display:flex; align-items:center; border:1px solid var(--border); border-radius:9px; padding-left:11px; }
+  .pm-money:focus-within { border-color:var(--text-primary); }
+  .pm-money span { color:var(--text-secondary); font-weight:600; font-size:13px; }
+  .pm-money .pm-in { border:none; padding-left:5px; }
+  .pm-money .pm-in:focus { outline:none; }
+  .pm-seg, .pm-auds { display:flex; gap:7px; flex-wrap:wrap; }
+  .pm-chip { font:inherit; font-size:12px; font-weight:600; padding:7px 13px; border-radius:999px; border:1px solid var(--border); background:var(--white); color:var(--text-secondary); cursor:pointer; }
+  .pm-chip:hover { border-color:var(--border-strong); }
+  .pm-chip.on { background:var(--primary); color:#fff; border-color:var(--primary); }
+  .pm-upload { font:inherit; font-size:12.5px; font-weight:600; color:var(--text-secondary); display:flex; align-items:center; gap:8px; width:100%; justify-content:center; border:1.5px dashed var(--border-strong); background:var(--page-bg); border-radius:10px; padding:14px; cursor:pointer; }
+  .pm-upload:hover { border-color:var(--text-secondary); }
+  .pm-file { display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; background:var(--secondary-lite); border-radius:9px; padding:9px 12px; }
+  .pm-file button { margin-left:auto; border:none; background:none; cursor:pointer; color:var(--text-secondary); font-size:13px; }
+  .pm-2col { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:540px){ .pm-2col { grid-template-columns:1fr; } }
+  .pm-foot { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 24px; border-top:1px solid var(--border-light); background:var(--page-bg); border-radius:0 0 18px 18px; flex-wrap:wrap; }
+  .pm-note { font-size:11.5px; color:var(--text-tertiary); font-weight:500; }
+  .mg-choice { display:flex; gap:10px; margin-bottom:16px; }
+  .mg-opt { flex:1; border:1px solid var(--border); border-radius:12px; padding:13px 15px; cursor:pointer; background:var(--white); transition:border-color .12s, box-shadow .12s; }
+  .mg-opt:hover { border-color:var(--border-strong); }
+  .mg-opt.on { border-color:var(--primary); box-shadow:inset 0 0 0 1px var(--primary); }
+  .mg-opt__t { font-size:13px; font-weight:700; display:flex; align-items:center; gap:7px; }
+  .mg-opt__d { font-size:11.5px; color:var(--text-secondary); font-weight:500; margin-top:3px; line-height:1.4; }
   .showbar { margin-bottom:14px; }
   .showbar:last-child { margin-bottom:0; }
   .showbar__top { display:flex; justify-content:space-between; align-items:baseline; font-size:12.5px; margin-bottom:6px; gap:12px; }
@@ -1030,7 +1105,7 @@
     const imps = m.kind==='bonus' ? sp.guarantee : shortfall(sp);
     return Math.round(imps/1000*show(sp.showId).cpm); };
   function mgStats(){
-    const sched=MAKEGOODS.filter(m=>m.status==='scheduled'), open=MAKEGOODS.filter(m=>m.status!=='scheduled');
+    const sched=MAKEGOODS.filter(m=>m.status==='scheduled'), open=MAKEGOODS.filter(m=>m.status!=='scheduled'&&m.status!=='paidmedia');
     const imps=sched.reduce((a,m)=>a+shortfall(spot(m.spotId)),0);
     const val=sched.reduce((a,m)=>a+mgValue(m),0);
     const f=fillStats();
@@ -1474,7 +1549,7 @@
     const wants=new Set();
     SPOTS.filter(s=>s.status==='aired'&&s.missed).forEach(s=>wants.add(s.id));
     needsMakegood().forEach(s=>wants.add(s.id));
-    MAKEGOODS.filter(m=>m.status!=='scheduled').forEach(m=>wants.add(m.spotId));
+    MAKEGOODS.filter(m=>m.status!=='scheduled'&&m.status!=='paidmedia').forEach(m=>wants.add(m.spotId));
     SPOTS.filter(s=>s.dlState==='requested').forEach(s=>wants.add(s.id));
     SPOTS.filter(s=>['needs_copy','needs_cta','sent'].includes(s.copyStatus)).forEach(s=>wants.add(s.id));
     SPOTS.filter(s=>closedOut(s)&&!s.completed).forEach(s=>wants.add(s.id));
@@ -1677,13 +1752,15 @@
      one button. Everything else lives in the drawer. */
   function makeGoodsPanel(){
     const st=mgStats();
-    const row=m=>{ const sp=spot(m.spotId), sh=show(sp.showId), done=m.status==='scheduled';
+    const row=m=>{ const sp=spot(m.spotId), sh=show(sp.showId), done=m.status==='scheduled', paid=m.status==='paidmedia';
       const next=!m.date?'Pick a date':!m.position?'Pick position':'Book it';
       return `<div class="wrow wrow--click" onclick="openMg('${m.id}')">
         <div class="wrow__main"><b>${esc(sp.brand)} on ${esc(sh.name)}${m.kind==='bonus'?' <span class="tag tag--purple">Bonus</span>':''}</b></div>
         <span class="muted" style="font-size:12.5px;flex-shrink:0">${m.kind==='bonus'?`$0 bonus · worth ${money(mgValue(m))}`:`${K(shortfall(sp))} short · worth ${money(mgValue(m))}`}</span>
         <span onclick="event.stopPropagation()" style="flex-shrink:0">${done
           ?`<span class="tag tag--green"><i></i>Booked ${fmtDate(m.date)}</span>`
+          :paid
+          ?`<span class="tag tag--blue"><i></i>Paid media · ${money(m.paidBudget||mgValue(m))}</span>`
           :cta(next,`openMg('${m.id}')`,true)}</span>
       </div>`; };
     return `
@@ -1910,14 +1987,56 @@
       </div>
       <div class="muted" style="font-size:11.5px;margin-top:10px">These track who's been told — they're guidance, not a gate. Every situation is different.</div>
     </div>
-    <div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Close</button>
-      <button class="btn btn--green" ${ready?'':'disabled style="opacity:.45"'} onclick="commitMg('${id}')">✓ Write to the system</button></div>`);
+    <div class="drawer__foot" style="justify-content:space-between">
+      <button class="btn btn--ghost btn--sm" onclick="paidMediaForm('${id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:-2px;margin-right:5px"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Paid media instead</button>
+      <div style="display:flex;gap:9px"><button class="btn btn--ghost" onclick="closeOverlays()">Close</button>
+      <button class="btn btn--green" ${ready?'':'disabled style="opacity:.45"'} onclick="commitMg('${id}')">✓ Confirm make good</button></div></div>`);
   }
 
   function sendMg(id,who){ const m=mg(id), s=spot(m.spotId);
     if(who==='show') toast(`Sent to ${show(s.showId).host} from adops@. The agent reads the reply and flips the toggle.`);
     else { m.sentBrand=TODAY; toast(`Sent to ${s.brand} in the existing thread.`); }
     m.status='awaiting'; openMg(id); rerender(); refreshBadges(); }
+
+  /* Paid-media alternative to a make good. Instead of a free read, route the shortfall
+     into a paid campaign via the GROWTH-style intake form. */
+  const PM_AUD=['Sports','Finance & business','News & politics','Tech','Health & wellness','Comedy','True crime','Lifestyle'];
+  let PMF={};
+  function paidMediaForm(mgId){ const m=mg(mgId), s=spot(m.spotId), sh=show(s.showId);
+    PMF={ mgId, title:`${s.brand} / ${sh.name}`, brand:s.brand, budget:mgValue(m)||spotCost(s),
+      scope:'Single Episode', notes:'', asset:s.yt?`https://youtu.be/${s.yt}`:'', start:TODAY, end:addDays(TODAY,30), aud:['Finance & business'], file:'' };
+    renderPmForm(); }
+  function pmSet(k,v){ PMF[k]=v; }
+  function pmToggleAud(a){ const i=PMF.aud.indexOf(a); if(i<0) PMF.aud.push(a); else PMF.aud.splice(i,1); renderPmForm(); }
+  function pmUpload(){ PMF.file=(PMF.brand||'asset').toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-paid.mp4'; renderPmForm(); }
+  function closePmForm(){ const ov=document.getElementById('pmOverlay'); if(ov) ov.classList.remove('open'); PMF={}; }
+  function submitPmForm(){ const m=mg(PMF.mgId), s=spot(m.spotId);
+    m.status='paidmedia'; m.paidBudget=PMF.budget; const b=s.brand, bud=money(PMF.budget), sc=PMF.scope.toLowerCase();
+    closePmForm(); closeOverlays(); rerender(); refreshBadges();
+    toast(`Paid media request submitted for ${b} — ${bud}, ${sc}. Routed to GROWTH instead of a make good.`); }
+  function renderPmForm(){
+    let ov=document.getElementById('pmOverlay');
+    if(!ov){ ov=document.createElement('div'); ov.id='pmOverlay'; ov.className='pmov'; document.body.appendChild(ov); ov.addEventListener('click',e=>{ if(e.target===ov) closePmForm(); }); }
+    const row=(label,hint,field,req)=>`<div class="pm-f"><label class="pm-f__l">${label}${req?' <span class="pm-req">*</span>':' <span class="pm-opt">optional</span>'}</label>${hint?`<div class="pm-f__h">${hint}</div>`:''}${field}</div>`;
+    ov.innerHTML=`<div class="pmcard">
+      <div class="pm-head"><div><div class="pm-eyebrow">Paid media request</div><h2>GROWTH project request</h2><p>Route this flight into a paid campaign instead of a free make-good read. Pre-filled from the shortfall — adjust and submit.</p></div><button class="pm-x" onclick="closePmForm()">✕</button></div>
+      <div class="pm-body">
+        ${row('Client / Project Title','Who will this campaign support? Add episode or video detail to keep it easy to manage.',`<input class="pm-in" value="${esc(PMF.title)}" oninput="pmSet('title',this.value)" placeholder="Killer Mike / Episode 7">`,true)}
+        ${row('Brand for Campaign','Which brand or company will this campaign support?',`<input class="pm-in" value="${esc(PMF.brand)}" oninput="pmSet('brand',this.value)">`,true)}
+        ${row('Total Budget','Initial budget for this project. Add more later with the Add Budget field.',`<div class="pm-money"><span>$</span><input class="pm-in" type="number" value="${PMF.budget}" oninput="pmSet('budget',+this.value)"></div>`,true)}
+        ${row('Campaign Scope','Single episode, or spaced over multiple episodes?',`<div class="pm-seg">${['Single Episode','Multiple Episodes'].map(o=>`<button class="pm-chip ${PMF.scope===o?'on':''}" onclick="pmSet('scope','${o}');renderPmForm()">${o}</button>`).join('')}</div>`,true)}
+        ${row('Notes on Flight / Schedule','Episode release days, flight duration, client preferences, anything else.',`<textarea class="pm-in" rows="3" oninput="pmSet('notes',this.value)" placeholder="Typical release days, flight length, preferences…">${esc(PMF.notes)}</textarea>`,false)}
+        ${row('YouTube Video / Social Post','Link to the asset to promote. Multi-episode? Link the first live asset.',`<input class="pm-in" value="${esc(PMF.asset)}" oninput="pmSet('asset',this.value)" placeholder="https://youtu.be/…">`,true)}
+        ${row('Video Files','A different asset to use in the campaign.',PMF.file?`<div class="pm-file"><span>📎 ${esc(PMF.file)}</span><button onclick="pmSet('file','');renderPmForm()">✕</button></div>`:`<button class="pm-upload" onclick="pmUpload()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/></svg>Upload — 100 MB limit, up to 20 files</button>`,false)}
+        <div class="pm-2col">
+          ${row('Campaign Start Date','Roughly when should this start?',`<input class="pm-in" type="date" value="${PMF.start}" oninput="pmSet('start',this.value)">`,true)}
+          ${row('Campaign End Date','How long should it last?',`<input class="pm-in" type="date" value="${PMF.end}" oninput="pmSet('end',this.value)">`,false)}
+        </div>
+        ${row('Target Audiences','Select as many as you like.',`<div class="pm-auds">${PM_AUD.map(a=>`<button class="pm-chip ${PMF.aud.includes(a)?'on':''}" onclick="pmToggleAud('${a}')">${a}</button>`).join('')}</div>`,false)}
+      </div>
+      <div class="pm-foot"><span class="pm-note">Fields marked <span class="pm-req">*</span> are required.</span><div style="display:flex;gap:9px"><button class="btn btn--ghost" onclick="closePmForm()">Cancel</button><button class="btn btn--primary" onclick="submitPmForm()">Submit request</button></div></div>
+    </div>`;
+    ov.classList.add('open'); }
 
   /* "Yes - Good" on the flowchart: the flight cleared the line, so the report
      goes to the brand with adops@ copied, then the spot is marked complete —
@@ -2084,7 +2203,41 @@
     return playerCard(s,d,'top-'+s.id,'Latest read'+(vr?' · verified':''),false);
   }
 
+  /* Per-deal report settings + the notes the brand sees. The operator sets these on
+     the internal report; the share link (full screen) honors them, read-only. */
+  const REPORT_MSG_SEED = {
+    d1:"Strong start. YouTube is carrying the flight and both reads cleared air-check on the first pass. We're pacing ahead of goal and expect to finish over.",
+    d6:"Honest update: the Warren Smith read is pacing a little under. We've queued an extra read at no charge to bring the flight back over goal, so nothing is needed on your end."
+  };
+  const READ_MSG_SEED = {
+    s1:"Landed in the top third of the episode. The host ad-libbed the trade-credit line, which tends to lift completion.",
+    s6:"Strong placement, but the read came in a touch short on the disclaimer. Covered by the make-good read we've queued."
+  };
+  const REPORT_CFG = {};
+  function rcfg(id){ return REPORT_CFG[id] || (REPORT_CFG[id] = { audioMax:true, graph:true, msg:(REPORT_MSG_SEED[id]||'') }); }
+  const READ_MSG = Object.assign({}, READ_MSG_SEED);
+  let SHARE_MODE = false;
+  function setReadMsg(id,v){ READ_MSG[id]=v; }
+  function setCampaignMsg(id,v){ rcfg(id).msg=v; }
+  function toggleRcfg(id,k){ var cfg=rcfg(id); cfg[k]=!cfg[k]; redrawReport(id); refreshShare(id); }
+  function redrawReport(id){ const dr=document.getElementById('drawer');
+    if(dr&&dr.classList.contains('drawer--report')){ const sc=dr.querySelector('.rpt-scroll'), top=sc?sc.scrollTop:0;
+      dr.innerHTML=dealReportHTML(DEALS.find(x=>x.id===id)); const sc2=dr.querySelector('.rpt-scroll'); if(sc2) sc2.scrollTop=top; } }
+  function reportSwitch(id,k,label,note){ var on=rcfg(id)[k];
+    return `<label class="rpt-switch"><button class="tog__sw ${on?'on':''}" onclick="toggleRcfg('${id}','${k}')"><i></i></button><span><b>${label}</b><small>${note}</small></span></label>`; }
+  /* open the full-screen, read-only version the brand gets at the share link */
+  function openShareView(id){ SHARE_MODE=true; const html=dealReportHTML(DEALS.find(x=>x.id===id)); SHARE_MODE=false;
+    let ov=document.getElementById('shareOverlay');
+    if(!ov){ ov=document.createElement('div'); ov.id='shareOverlay'; ov.className='shareov'; document.body.appendChild(ov); }
+    const d=DEALS.find(x=>x.id===id);
+    ov.innerHTML=`<div class="shareov__bar"><span class="shareov__tag">Share preview</span><span class="lk">acme.live/${d.brand.toLowerCase()}-${d.id}</span><button class="shareov__x" onclick="closeShare()">Close preview</button></div><div class="shareov__frame">${html}</div>`;
+    ov.querySelectorAll('.rpt-close').forEach(b=>b.remove());
+    ov.classList.add('open'); }
+  function closeShare(){ const ov=document.getElementById('shareOverlay'); if(ov) ov.classList.remove('open'); }
+  function refreshShare(id){ const ov=document.getElementById('shareOverlay'); if(ov&&ov.classList.contains('open')) openShareView(id); }
+
   function dealReportHTML(d){
+    const OP=!SHARE_MODE, cfg=rcfg(d.id);
     const c=dealSummary(d);
     const {spots,liveSpots,mgs,g,got,proj,paid,yt,aud,shows,flight,done}=c;
     const verified=spots.filter(s=>s.status==='verified'&&s.yt).length;
@@ -2104,6 +2257,13 @@
       mgs.map(s=>({s,kind:s.kind==='bonus'?'Bonus':'Make good'}))
     ).sort((a,b)=>a.s.published<b.s.published?-1:1);
 
+    // audio-max toggle: ON folds audio downloads into the headline reach; OFF shows YouTube/impressions only
+    const audioMax=cfg.audioMax, graphOn=cfg.graph;
+    const headline = audioMax ? got : yt;
+    const pctShown = booked ? Math.round(headline/booked*100) : 0;
+    const cpmShown = headline ? (paid/(headline/1000)) : 0;
+    const ccShown = audioMax ? cc : Object.assign({}, cc, { got: yt, proj: Math.round((cc.proj||0)*(yt/Math.max(got,1))) });
+
     return `
     <button class="rpt-close" onclick="closeDeal()">✕</button>
     <div class="rpt-scroll">
@@ -2114,11 +2274,11 @@
         <div class="rpt-hero__content">
           <div class="rpt-hero__head">
             <div class="rpt-hero__eyebrow">Campaign delivery report</div>
-            <div class="rpt-hero__actions">
+            ${OP?`<div class="rpt-hero__actions">
               <button class="rpt-btn rpt-btn--solid" onclick="sendDealReport('${d.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg>Send to ${esc(d.brand)}</button>
-              <button class="rpt-btn" onclick="toast('Copied acme.live/${d.brand.toLowerCase()}-${d.id} — read-only link, internal notes stay out.')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>Share link</button>
+              <button class="rpt-btn" onclick="openShareView('${d.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>Share link</button>
               <button class="rpt-btn" onclick="toast('Report exported as PDF for ${esc(d.brand)}.')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>Download</button>
-            </div>
+            </div>`:''}
           </div>
           <div class="rpt-hero__row">
             <div class="rpt-logo" style="background:${brandCol(d.brand)}">${initials(d.brand)}</div>
@@ -2132,22 +2292,35 @@
       </div>
 
       <div class="rpt-pad">
+        ${OP?`<!-- REPORT CONTROLS (operator only) -->
+        <div class="rpt-ctrls">
+          <div class="rpt-ctrls__row">
+            ${reportSwitch(d.id,'audioMax','Impressions + audio max','Fold audio downloads into the headline reach, not just YouTube')}
+            ${reportSwitch(d.id,'graph','Show delivery graph','Include the pacing chart in the shared report')}
+          </div>
+        </div>`:''}
+
+        <!-- CAMPAIGN NOTE -->
+        ${OP
+          ? `<div class="rpt-note"><div class="rpt-note__lbl">Campaign note<span>a sentence or two at the top of ${esc(d.brand)}'s report</span></div><textarea class="rpt-note__in" rows="2" placeholder="Add a short note for ${esc(d.brand)} — context on how the campaign is tracking." oninput="setCampaignMsg('${d.id}',this.value)">${esc(cfg.msg)}</textarea></div>`
+          : (cfg.msg?`<div class="rpt-note rpt-note--show" style="margin-top:20px"><p>${esc(cfg.msg)}</p></div>`:'')}
+
         <!-- TRACKING -->
-        <div class="rpt-deliv" style="margin-top:20px">
+        <div class="rpt-deliv${graphOn?'':' rpt-deliv--nochart'}" style="margin-top:14px">
           <div>
-            <div class="rpt-deliv__big">${K(got)}</div>
-            <div class="rpt-deliv__of">of ${K(booked)} booked impressions</div>
-            <div class="rpt-deliv__pct green">${c.done?pctOf(got,booked)+'% delivered':c.pct+'% pacing'}</div>
+            <div class="rpt-deliv__big">${K(headline)}</div>
+            <div class="rpt-deliv__of">of ${K(booked)} booked impressions${audioMax?'':' · YouTube only'}</div>
+            <div class="rpt-deliv__pct green">${c.done?pctOf(headline,booked)+'% delivered':pctShown+'% pacing'}</div>
             <div class="rpt-chips">
-              <div><div class="rpt-chip__l">Delivered CPM</div><div class="rpt-chip__v">$${(got?(paid/(got/1000)):0).toFixed(2)}</div></div>
+              <div><div class="rpt-chip__l">Delivered CPM</div><div class="rpt-chip__v">$${cpmShown.toFixed(2)}</div></div>
               <div><div class="rpt-chip__l">YouTube reach</div><div class="rpt-chip__v">${K(yt)}</div></div>
-              <div><div class="rpt-chip__l">Audio reach</div><div class="rpt-chip__v">${K(aud)}</div></div>
+              ${audioMax?`<div><div class="rpt-chip__l">Audio reach</div><div class="rpt-chip__v">${K(aud)}</div></div>`:''}
               <div><div class="rpt-chip__l">Verified reads</div><div class="rpt-chip__v">${verified}/${paidCount}</div></div>
             </div>
           </div>
-          <div class="rpt-chart">${brandDealChart(cc)}
+          ${graphOn?`<div class="rpt-chart">${brandDealChart(ccShown)}
             <div class="rpt-chart__legend"><span><i style="background:var(--green-text)"></i>Delivered</span><span><i style="background:var(--green-text);opacity:.5"></i>Where it lands</span><span><i style="background:var(--border-strong)"></i>Goal</span></div>
-          </div>
+          </div>`:''}
         </div>
 
         <!-- WHAT'S NEXT -->
@@ -2240,6 +2413,9 @@
         <div class="rpt-read__main">
           <div class="rpt-read__show">${esc(show(s.showId).name)}</div>
           <div class="rpt-read__ep">${esc(ep)} · ${adSecs(s)}s ${isVideo?'video':'audio'} read</div>
+          ${!SHARE_MODE
+            ? `<input class="rpt-read__note--edit" value="${esc(READ_MSG[s.id]||'')}" placeholder="+ note for this episode (${esc(d.brand)} sees it)" oninput="setReadMsg('${s.id}',this.value)" onclick="event.stopPropagation()">`
+            : (READ_MSG[s.id]?`<div class="rpt-read__note">${esc(READ_MSG[s.id])}</div>`:'')}
         </div>
         <button class="rpt-viewad" onclick="var c=this.closest('.rpt-read');var o=c.classList.toggle('open');this.querySelector('span').textContent=o?'Hide ad':'View ad'"><span>View ad</span><svg class="rpt-viewad__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>
         <div class="rpt-read__dates">
