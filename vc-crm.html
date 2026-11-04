@@ -817,6 +817,7 @@
         <button class="btn-ghost" style="height:32px;font-size:12px" id="viewArchiveBtn">View Archive</button>
         <span id="sortDD"></span>
         <button class="btn-ghost" style="height:32px;font-size:12px" id="exportBtn">Export CSV</button>
+        <button class="btn-ghost" style="height:32px;font-size:12px" id="exportPeopleBtn" title="One row per person, with their LinkedIn where we have it (blank where we don't), for the funds currently in view">Export people</button>
       </div>
     </div>
 
@@ -5661,7 +5662,7 @@ $('exportBtn').addEventListener('click', () => {
         const f = FUND_BY_ID[p.fundId];
         const st = PS(p.id);
         const pi = pathInfo(p);
-        return [p.tbd?('['+p.title+']'):p.name, p.title, f.name, grade(f), f.dims?Math.round(score(f)):'', personLi(p),
+        return [p.tbd?('['+p.title+']'):p.name, p.title, f.name, grade(f), f.dims?Math.round(score(f)):'', personProfileUrl(p)||'',
           pi.kind, pi.connectors.map(c=>c.name).concat(pi.existing.map(e=>pathShort(e.via)+' (existing)')).join('; '),
           P_STATUS[pStatus(p)], isExcluded(p)?'yes':'no',
           st.followUp?new Date(st.followUp).toISOString().slice(0,10):'', st.notes||''
@@ -5674,6 +5675,40 @@ $('exportBtn').addEventListener('click', () => {
   a.download = STAGE_TABS.includes(currentTab) ? `spotsnow-vc-${currentTab === 'funds' ? 'all-funds' : currentTab}.csv` : 'spotsnow-vc-people.csv';
   a.click();
   URL.revokeObjectURL(a.href);
+});
+
+// Export people: one row per person for the funds currently in view. On a stage
+// tab (Need intros, Targets, ...) that's visibleFunds(); on the People tab it's
+// the funds behind the visible people. The `linkedin` column holds the real
+// profile URL where we have it and is blank where we don't, so the gaps show.
+$('exportPeopleBtn').addEventListener('click', () => {
+  const funds = STAGE_TABS.includes(currentTab)
+    ? visibleFunds()
+    : [...new Set(visiblePeople().map(p => p.fundId))].map(id => FUND_BY_ID[id]).filter(Boolean);
+  const lines = [['person','title','fund','linkedin','path','connectors','stage'].join(',')];
+  funds.forEach(f => {
+    PEOPLE.filter(p => p.fundId === f.id).forEach(p => {
+      const pi = pathInfo(p);
+      const row = [
+        p.tbd ? ('[' + p.title + ']') : p.name,
+        p.title || '',
+        f.name,
+        personProfileUrl(p) || '',
+        pi.kind,
+        pi.connectors.map(c => c.name).concat(pi.existing.map(e => pathShort(e.via) + ' (existing)')).join('; '),
+        F_STAGES[fStage(f)] || ''
+      ];
+      lines.push(row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','));
+    });
+  });
+  if (lines.length === 1) { toast('No people in view to export.'); return; }
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `spotsnow-vc-people-${STAGE_TABS.includes(currentTab) ? currentTab : 'all'}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast(`Exported ${lines.length - 1} people.`);
 });
 
 rebuild();
