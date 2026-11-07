@@ -774,6 +774,8 @@
   .yt-scope--read b { font-size:12.5px; display:block; } .yt-scope--read small { font-size:11px; color:var(--text-tertiary); display:block; margin-top:1px; line-height:1.4; }
   .yt-dot { width:8px; height:8px; border-radius:50%; background:var(--border-strong); margin-top:5px; flex-shrink:0; }
   .yt-dot.on { background:var(--green-text); }
+  .yt-copy { display:flex; align-items:center; gap:8px; }
+  .yt-copy__url { flex:1; min-width:0; font-family:ui-monospace,SFMono-Regular,monospace; font-size:12px; color:var(--text-primary); background:var(--secondary-lite); border-radius:8px; padding:9px 11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .yt-consent__head { display:flex; gap:12px; align-items:center; padding:20px 22px 16px; border-bottom:1px solid var(--border-light); }
   .yt-g { width:36px; height:36px; border-radius:50%; background:#fff; border:1px solid var(--border); display:grid; place-items:center; font-weight:700; font-size:17px; color:#4285F4; flex-shrink:0; }
   .yt-consent__t { font-size:15px; font-weight:700; line-height:1.3; } .yt-consent__s { font-size:12px; color:var(--text-secondary); margin-top:3px; }
@@ -850,6 +852,7 @@
   .cplist__score { font-size:12px; font-weight:700; padding:3px 10px; border-radius:999px; }
   .cplist__score.ok { background:var(--green-bg); color:var(--green-text); }
   .cplist__score.warn { background:var(--orange-bg); color:var(--orange-text); }
+  .cplist__score.check { background:var(--secondary); color:var(--text-secondary); }
   .cprow { display:flex; align-items:center; gap:11px; padding:10px 15px; border-top:1px solid var(--border-light); cursor:pointer; }
   .cprow:first-child { border-top:none; }
   .cprow:hover { background:var(--page-bg); }
@@ -905,6 +908,21 @@
   .cpth--bad > .cpth__sm:hover { background:var(--red-bg); }
   .cpth--bad .cpth__ic { background:var(--red-text); color:#fff; }
   .cpth--bad .cpth__n { color:var(--red-text); }
+  /* a theme with on-screen placements still to verify: neutral gray — these often can't be
+     confirmed from the transcript, so they shouldn't read as a warning. opens by default. */
+  .cpth--check > .cpth__sm { background:var(--secondary-lite); }
+  .cpth--check > .cpth__sm:hover { background:var(--secondary); }
+  .cpth--check .cpth__ic { background:var(--secondary); color:var(--text-secondary); }
+  .cpth--check .cpth__n { color:var(--text-secondary); }
+  /* manual-verify rows + controls — neutral gray */
+  .cprow__ic.check { background:var(--secondary); color:var(--text-secondary); font-size:13px; }
+  .cprow--check { background:transparent; }
+  .cprow__t em.cprow__sub { display:block; font-style:normal; font-size:11.5px; font-weight:500; color:var(--text-tertiary); margin-top:3px; line-height:1.35; }
+  .cprow__hint.ok2 { color:var(--green-text); }
+  .cpverify { font:inherit; font-size:11.5px; font-weight:700; color:var(--text-primary); background:var(--white); border:1px solid var(--border-strong); border-radius:8px; padding:6px 13px; cursor:pointer; flex-shrink:0; }
+  .cpverify:hover { border-color:var(--text-primary); background:var(--page-bg); }
+  .cpverify-all { display:flex; align-items:center; gap:12px; padding:11px 15px; background:var(--secondary-lite); border-bottom:1px solid var(--border-light); }
+  .cpverify-all span { flex:1; font-size:12px; font-weight:600; color:var(--text-secondary); }
 
   /* ad scorecard (operator) — matched to the real marketplace scorecard: big, airy */
   .scard { background:var(--page-bg); border:1px solid var(--border); border-radius:14px; padding:15px 16px; margin-top:9px; }
@@ -2342,7 +2360,7 @@
     s6:"Strong placement, but the read came in a touch short on the disclaimer. Covered by the make-good read we've queued."
   };
   const REPORT_CFG = {};
-  function rcfg(id){ return REPORT_CFG[id] || (REPORT_CFG[id] = { metric:'impr', graph:true, msg:(REPORT_MSG_SEED[id]||'') }); }
+  function rcfg(id){ return REPORT_CFG[id] || (REPORT_CFG[id] = { metric:'impr', graph:true, next:true, reads:true, msg:(REPORT_MSG_SEED[id]||'') }); }
   // Campaign-level: is this campaign judged on total impressions (+ audio) or on YouTube
   // engaged views? Operators pick it per campaign; the brand's share view shows it as a label.
   function setMetric(id,m){ rcfg(id).metric=m; redrawReport(id); refreshShare(id); }
@@ -2442,6 +2460,16 @@
         <!-- DELIVERY METRIC (campaign-level) -->
         ${metricSel(d.id,OP)}
 
+        <!-- REPORT CONTROLS (operator only) — switch on what the brand sees -->
+        ${OP?`<div class="rpt-ctrls">
+          <div class="rpt-ctrls__t">What ${esc(d.brand)} sees <span>toggle sections on or off before you send</span></div>
+          <div class="rpt-ctrls__row">
+            ${reportSwitch(d.id,'graph','Delivery chart','The pacing curve toward the goal')}
+            ${reportSwitch(d.id,'next',"What's next",'Scheduled reads, make goods and bonuses')}
+            ${reportSwitch(d.id,'reads','Per-read breakdown','Every aired read with its scorecard')}
+          </div>
+        </div>`:''}
+
         <!-- TRACKING -->
         <div class="rpt-deliv${graphOn?'':' rpt-deliv--nochart'}" style="margin-top:14px">
           <div>
@@ -2461,13 +2489,13 @@
         </div>
 
         <!-- WHAT'S NEXT -->
-        ${nextUp.length?`<div class="rpt-card" style="margin-top:14px"><div class="rpt-card__h">What's next · ${nextUp.length} coming up</div>
+        ${cfg.next!==false&&nextUp.length?`<div class="rpt-card" style="margin-top:14px"><div class="rpt-card__h">What's next · ${nextUp.length} coming up</div>
           <div class="nextstack">${nextUp.slice(0,6).map(function(x,i){ return `<div class="nextrow"><div class="nextrow__when ${i===0?'soon':''}">${i===0?'Next up':dayName(x.s.published)}</div><div><div class="nextrow__show">${esc(show(x.s.showId).name)}</div><div class="nextrow__meta">${fmtDate(x.s.published)} · ${adSecs(x.s)}s · ${x.kind}${x.kind!=='Scheduled'?' · no charge':''}</div></div></div>`; }).join('')}</div>
         </div>`:''}
 
         <!-- EVERY READ -->
-        <div class="rpt-sec"><h2>Every read</h2><span class="muted">${verified}/${paidCount} air-checked · tap a read for its scorecard</span></div>
-        ${aired.map(s=>readCard(s,d)).join('')}
+        ${cfg.reads!==false?`<div class="rpt-sec"><h2>Every read</h2><span class="muted">${verified}/${paidCount} air-checked · tap a read for its scorecard</span></div>
+        ${aired.map(s=>readCard(s,d)).join('')}`:''}
 
         <div class="footnote">This is ${esc(d.brand)}'s live view — read-only, and it updates as reads land. Internal notes never appear here.</div>
       </div>
@@ -2705,7 +2733,7 @@
   }
   const CK_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>';
   const CX_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg>';
-  let COMPLIANCE_STATE={};
+  let COMPLIANCE_STATE={}, COMPLIANCE_VERIFIED={};
   function complianceItems(s){
     const cr=creative(s.brand), q=qualityScore(s), items=[];
     (cr.points||[]).forEach(function(p){ items.push({k:'pt:'+p, label:p}); });
@@ -2714,39 +2742,62 @@
     items.push({k:'place', label:cr.placement+' placement', auto:q.factors[2].v>=70});
     items.push({k:'len', label:'On-length ('+cr.len+')'});
     items.push({k:'fresh', label:'Fresh read this week — not recycled'});
-    if(cr.url) items.push({k:'url', label:'Landing URL in the episode description'});
-    const st=COMPLIANCE_STATE[s.id]||{}, seed=s.compMiss||[], note=s.compNote||{};
+    // On-screen / show placements — visuals the transcript can't confirm, so a human verifies them.
+    items.push({k:'logo', label:'Brand logo on screen', manual:true});
+    items.push({k:'lower', label:'Lower-third / on-screen name', manual:true});
+    if(cr.url) items.push({k:'url', label:'Landing link in the show notes', manual:true});
+    const st=COMPLIANCE_STATE[s.id]||{}, ver=COMPLIANCE_VERIFIED[s.id]||{}, seed=s.compMiss||[], note=s.compNote||{};
     items.forEach(function(it){
+      if(it.manual){ it.verified=!!ver[it.k]; it.met=it.verified; it.status=it.verified?'met':'check'; return; }
       var base=(it.auto!==undefined)?it.auto:(seed.indexOf(it.k)<0);
       it.met=(st[it.k]!==undefined)?st[it.k]:base;
+      it.status=it.met?'met':'fail';
       if(note[it.k]) it.why=note[it.k];
     });
     return items;
   }
-  function compMissed(s){ return complianceItems(s).filter(function(x){return !x.met;}).length; }
-  function toggleCompliance(id,i){ const items=complianceItems(spot(id)), it=items[i]; if(!it) return;
+  function compMissed(s){ return complianceItems(s).filter(function(x){return x.status==='fail';}).length; }
+  function compToCheck(s){ return complianceItems(s).filter(function(x){return x.status==='check';}).length; }
+  function toggleCompliance(id,i){ const items=complianceItems(spot(id)), it=items[i]; if(!it||it.manual) return;
     COMPLIANCE_STATE[id]=COMPLIANCE_STATE[id]||{}; COMPLIANCE_STATE[id][it.k]=!it.met;
-    if(typeof DRAWER_SPOT!=='undefined' && DRAWER_SPOT) openSpot(DRAWER_SPOT); else openRead(id); }
-  // Networks told us the 50-line checklist is overwhelming — they want to see what's WRONG,
-  // not scroll past everything that's right. So checks roll up into a few buckets; only the
-  // failures show by default, with the full list tucked behind "show all".
+    reRenderCompliance(id); }
+  function ocVerify(id,k){ COMPLIANCE_VERIFIED[id]=COMPLIANCE_VERIFIED[id]||{}; COMPLIANCE_VERIFIED[id][k]=true; reRenderCompliance(id); }
+  function ocVerifyAll(id,keys){ COMPLIANCE_VERIFIED[id]=COMPLIANCE_VERIFIED[id]||{}; (keys||[]).forEach(function(k){COMPLIANCE_VERIFIED[id][k]=true;}); reRenderCompliance(id); toast('On-screen placements verified.'); }
+  function reRenderCompliance(id){ if(typeof DRAWER_SPOT!=='undefined' && DRAWER_SPOT) openSpot(DRAWER_SPOT); else openRead(id); }
+  function manualHint(k){ return k==='logo'?"Not in the transcript — open the episode to confirm it appeared."
+    : k==='lower'?"On-screen graphic — confirm it ran." : "Confirm the link is in the show notes."; }
+  // Checks roll into a few expandable themes. Script/CTA/timing are auto-verified from the
+  // transcript; on-screen placements can't be, so they sit in their own theme to verify by hand.
   function compGroup(k){
+    if(k==='logo'||k==='lower'||k==='url') return 'On-screen placements';
     if(k.indexOf('pt:')===0) return 'Script & claims';
-    if(k==='cta'||k==='code'||k==='url') return 'CTA & links';
+    if(k==='cta'||k==='code') return 'CTA & links';
     return 'Timing & placement';
   }
-  function compRow(s,o,alert){ var it=o.it;
-    return `<div class="cprow${it.met?'':' cprow--no'}" onclick="event.stopPropagation();toggleCompliance('${s.id}',${o.i})"><span class="cprow__ic ${it.met?'met':'no'}">${it.met?CK_SVG:CX_SVG}</span><span class="cprow__t">${esc(it.label)}${it.met||!it.why?'':`<em>${esc(it.why)}</em>`}</span><span class="cprow__hint${it.met?'':' no'}">${it.met?'met':'not met'}</span></div>`;
+  function compRow(s,o){ var it=o.it, pend=it.manual&&!it.verified;
+    var ic = pend?'<span class="cprow__ic check">?</span>'
+           : `<span class="cprow__ic ${it.met?'met':'no'}">${it.met?CK_SVG:CX_SVG}</span>`;
+    var right = pend
+      ? `<button class="cpverify" onclick="event.stopPropagation();ocVerify('${s.id}','${it.k}')">Verify</button>`
+      : it.manual ? `<span class="cprow__hint ok2">verified</span>`
+      : `<span class="cprow__hint${it.met?'':' no'}">${it.met?'met':'not met'}</span>`;
+    var sub = (!it.met&&it.why)?`<em>${esc(it.why)}</em>`
+            : pend?`<em class="cprow__sub">${manualHint(it.k)}</em>` : '';
+    var cls = pend?' cprow--check':(it.status==='fail'?' cprow--no':'');
+    var click = it.manual?'':`onclick="event.stopPropagation();toggleCompliance('${s.id}',${o.i})"`;
+    return `<div class="cprow${cls}"${it.manual?' style="cursor:default"':''} ${click}>${ic}<span class="cprow__t">${esc(it.label)}${sub}</span>${right}</div>`;
   }
   function complianceBlock(s){
-    const items=complianceItems(s), met=items.filter(function(x){return x.met;}).length, tot=items.length, missed=tot-met;
-    const q=qualityScore(s);
+    const items=complianceItems(s);
+    const fails=items.filter(function(x){return x.status==='fail';}).length;
+    const checks=items.filter(function(x){return x.status==='check';}).length;
+    const q=qualityScore(s), open=fails||checks;
     const idx=items.map(function(it,i){return {it:it,i:i};});
-    const GROUPS=['Script & claims','CTA & links','Timing & placement'];
+    const GROUPS=['Script & claims','CTA & links','Timing & placement','On-screen placements'];
     const grouped=GROUPS.map(function(g){ return {name:g, rows:idx.filter(function(o){return compGroup(o.it.k)===g;})}; }).filter(function(g){return g.rows.length;});
 
-    // Escalation path — only shown when a requirement failed.
-    const esc1=missed?`<div class="cpesc">
+    // Escalation path — only shown when a requirement actually failed.
+    const esc1=fails?`<div class="cpesc">
         <div class="cpesc__steps">
           <div class="cpesc__step done"><span class="cpesc__dot">${CK_SVG}</span>Flagged</div>
           <span class="cpesc__arr"></span>
@@ -2756,30 +2807,42 @@
           <span class="cpesc__arr"></span>
           <div class="cpesc__step"><span class="cpesc__dot">4</span>On brand report</div>
         </div>
-        <button class="btn btn--primary btn--sm" style="flex-shrink:0" onclick="event.stopPropagation();toast('Flag email drafted to the host for ${missed} missed requirement'+(${missed}>1?'s':'')+'.')">Draft host flag</button>
+        <button class="btn btn--primary btn--sm" style="flex-shrink:0" onclick="event.stopPropagation();toast('Flag email drafted to the host for ${fails} missed requirement'+(${fails}>1?'s':'')+'.')">Draft host flag</button>
       </div>`:'';
-    // Each theme is its own expandable chunk. A clean theme stays contracted to one
-    // line; a theme with a flag opens by default to its itemized checks, so the host
-    // only drills into what's off instead of scrolling past everything that's right.
+    // Each theme is its own expandable chunk. A clean theme stays contracted to one line;
+    // a flagged theme (red) or one with on-screen placements to verify (amber) opens by default.
     const themesHTML=grouped.map(function(g){
-      const gm=g.rows.filter(function(o){return o.it.met;}).length, gt=g.rows.length, gbad=gt-gm;
-      const body=g.rows.map(function(o){return compRow(s,o,false);}).join('');
-      return `<details class="cpth${gbad?' cpth--bad':''}" ${gbad?'open':''}>
+      const gfail=g.rows.filter(function(o){return o.it.status==='fail';}).length;
+      const gcheck=g.rows.filter(function(o){return o.it.status==='check';}).length;
+      const gmet=g.rows.filter(function(o){return o.it.status==='met';}).length, gt=g.rows.length;
+      const state=gfail?'bad':(gcheck?'check':'ok');
+      const nlabel=gfail?`${gfail} flag${gfail>1?'s':''}`:(gcheck?`${gcheck} to check`:`${gmet}/${gt}`);
+      const icon=gfail?'!':(gcheck?'?':CK_SVG);
+      const mk=g.rows.filter(function(o){return o.it.manual&&!o.it.verified;}).map(function(o){return "'"+o.it.k+"'";}).join(',');
+      const verifyAll=gcheck>0?`<div class="cpverify-all"><span>${gcheck} on-screen placement${gcheck>1?'s':''} to confirm</span><button class="btn btn--primary btn--sm" onclick="event.stopPropagation();ocVerifyAll('${s.id}',[${mk}])">Verify all</button></div>`:'';
+      const body=verifyAll + g.rows.map(function(o){return compRow(s,o);}).join('');
+      return `<details class="cpth cpth--${state}" ${(gfail||gcheck)?'open':''}>
         <summary class="cpth__sm">
-          <span class="cpth__ic">${gbad?'!':CK_SVG}</span>
+          <span class="cpth__ic">${icon}</span>
           <span class="cpth__t">${g.name}</span>
-          <span class="cpth__n">${gbad?`${gbad} flag${gbad>1?'s':''}`:`${gm}/${gt}`}</span>
+          <span class="cpth__n">${nlabel}</span>
           <svg class="cpth__chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
         </summary>
         <div class="cpth__body">${body}</div>
       </details>`;
     }).join('');
 
-    return `<details class="cplist${missed?' cplist--alert':''}" ${missed?'open':''} style="margin-top:13px">
-      <summary class="cplist__hd"><b>Compliance — ${esc(s.brand)}</b><span style="margin-left:auto;display:flex;align-items:center;gap:8px"><span class="cpq cpq--${q.tone}">${q.score} quality</span><span class="cplist__score ${missed?'bad':'ok'}">${missed?`${missed} flag${missed>1?'s':''}`:'All clear'}</span><svg class="cplist__chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></span></summary>
+    const pill=fails?`<span class="cplist__score bad">${fails} flag${fails>1?'s':''}</span>`
+             :checks?`<span class="cplist__score check">${checks} to check</span>`
+             :`<span class="cplist__score ok">All clear</span>`;
+    const foot=fails?'Resolve by flagging the host or scheduling a make-good read.'
+             :checks?'Confirm the on-screen placements to finish the check.'
+             :'All requirements met — nothing to flag.';
+    return `<details class="cplist${fails?' cplist--alert':''}" ${open?'open':''} style="margin-top:13px">
+      <summary class="cplist__hd"><b>Compliance — ${esc(s.brand)}</b><span style="margin-left:auto;display:flex;align-items:center;gap:8px"><span class="cpq cpq--${q.tone}">${q.score} quality</span>${pill}<svg class="cplist__chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></span></summary>
       ${esc1}
       ${themesHTML}
-      <div class="cplist__foot"><button class="btn btn--ghost btn--sm" onclick="event.stopPropagation();toast('Air-check MP3 + transcript downloaded.')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>Download air check</button>${missed?`<span class="muted" style="font-size:12px;margin-left:auto">Resolve by flagging the host or scheduling a make-good read.</span>`:'<span class="muted" style="font-size:12px;margin-left:auto">All requirements met — nothing to flag.</span>'}</div>
+      <div class="cplist__foot"><button class="btn btn--ghost btn--sm" onclick="event.stopPropagation();toast('Air-check MP3 + transcript downloaded.')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>Download air check</button><span class="muted" style="font-size:12px;margin-left:auto">${foot}</span></div>
     </details>`;
   }
   function openRead(id){
@@ -2937,9 +3000,10 @@
   function ytPill(id){ var st=ytStatus(id), m={none:['Connect','none'],pending:['Pending','pending'],connected:['Engaged views','on']}[st];
     return `<button class="yt-pill yt-pill--${m[1]}" title="YouTube engaged-views integration" onclick="event.stopPropagation();ytAuthModal('${id}')">${YT_ICON}${m[0]}</button>`; }
   function closeYt(){ var ov=document.getElementById('ytOverlay'); if(ov) ov.classList.remove('open'); }
-  function ytSend(id){ YT_AUTH[id]='pending'; YT_SENT[id]=TODAY; ytAuthModal(id); if(CURRENT==='shows') RENDER.shows();
-    toast(`Authorization request sent to ${show(id).host} (${show(id).channel}). Once they approve, engaged views flow in.`); }
+  function ytSend(id){ var em=(document.getElementById('ytEmail')||{}).value||''; YT_AUTH[id]='pending'; YT_SENT[id]=TODAY; ytAuthModal(id); if(CURRENT==='shows') RENDER.shows();
+    toast(`Authorization request sent${em?' to '+em:' to '+show(id).host}. Once they approve, engaged views flow in.`); }
   function ytResend(id){ YT_SENT[id]=TODAY; toast(`Reminder sent to ${show(id).host}.`); }
+  function ytCopyLink(t){ try{ if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t); }catch(e){} toast('Authorization link copied.'); }
   function ytAuthorize(id){ YT_AUTH[id]='connected'; ytAuthModal(id); if(CURRENT==='shows') RENDER.shows();
     toast(`${show(id).name} connected — engaged views and watch time now flow into delivery.`); }
   function ytDisconnect(id){ YT_AUTH[id]='none'; delete YT_SENT[id]; ytAuthModal(id); if(CURRENT==='shows') RENDER.shows();
@@ -2958,27 +3022,37 @@
         <div class="yt-consent__foot"><button class="btn btn--ghost" onclick="ytAuthModal('${id}')">Deny</button><button class="btn btn--primary" onclick="ytAuthorize('${id}')">Allow</button></div>
       </div>`; ov.classList.add('open'); return;
     }
-    var statusBlock = st==='connected'
-      ? `<div class="yt-status yt-status--on">${CHK_SVG}<div><b>Connected</b><small>Engaged views, watch time and CTR are flowing from ${esc(sh.channel)}.</small></div></div>`
-      : st==='pending'
-      ? `<div class="yt-status yt-status--pending"><div><b>Waiting on ${esc(sh.host)}</b><small>Request sent ${YT_SENT[id]?fmtDate(YT_SENT[id]):'recently'} to ${esc(sh.channel)}. They approve on a Google consent screen.</small></div></div>`
-      : `<div class="yt-status yt-status--none"><div><b>Not connected</b><small>Acme is reading impressions only. Connect to pull engaged views — how YouTube inventory is bought now.</small></div></div>`;
+    // The operator just sends a short, editable request — the detail of what's being
+    // authorized lives on the creator's own consent screen (Preview the creator's screen).
+    var firstName=(sh.host||'').split(' ')[0];
+    if(/^(the|a|an)$/i.test(firstName)) firstName=(sh.name||sh.host).replace(/^The\s+/i,''); // crew/collective host -> use show name
+    var handle=((sh.channel||'').replace(/^@/,'').toLowerCase().replace(/[^a-z0-9]/g,''))||firstName.toLowerCase().replace(/[^a-z0-9]/g,'');
+    var link='acme.network/yt/'+handle;
+    var prefillEmail=handle+'@gmail.com';
+    var prefillMsg='Hi '+firstName+',\n\nTo report your YouTube numbers the way advertisers now ask for them - engaged views, not just impressions - can you authorize Acme to read them? It is read-only, takes about 30 seconds, and you approve on a Google screen:\n\n'+link+'\n\nThanks!';
+    var mkLink=function(hint){ return `<div class="pm-f" style="margin-bottom:0"><label class="pm-f__l">Authorization link</label><div class="yt-copy"><span class="yt-copy__url">${esc(link)}</span><button class="btn btn--ghost btn--sm" onclick="ytCopyLink('${esc(link)}')">Copy</button></div><div class="pm-f__h" style="margin-top:6px">${hint}</div></div>`; };
+
+    var body, foot;
+    if(st==='connected'){
+      body=`<div class="yt-status yt-status--on" style="margin-bottom:0">${CHK_SVG}<div><b>Connected</b><small>Engaged views, watch time and CTR are flowing from ${esc(sh.channel)}.</small></div></div>`;
+      foot=`<button class="btn btn--ghost" onclick="closeYt()">Close</button><button class="btn btn--danger" onclick="ytDisconnect('${id}')">Disconnect</button>`;
+    } else if(st==='pending'){
+      body=`<div class="yt-status yt-status--pending"><div><b>Waiting on ${esc(firstName)}</b><small>Request sent ${YT_SENT[id]?fmtDate(YT_SENT[id]):'recently'} to ${esc(sh.channel)}. They approve on a Google consent screen.</small></div></div>`
+        + mkLink(`Resend the email, or share this link with ${esc(firstName)} directly.`);
+      foot=`<button class="btn btn--ghost" onclick="ytResend('${id}')">Resend</button><button class="btn btn--primary" onclick="ytAuthModal('${id}','consent')">Open authorize screen</button>`;
+    } else {
+      body=`<div class="yt-status yt-status--none"><div><b>Not connected</b><small>Acme reads impressions only. Send ${esc(firstName)} a one-click request to authorize engaged views - read-only, approved on a Google screen.</small></div></div>`
+        + `<div class="pm-f"><label class="pm-f__l" for="ytEmail">Creator's email</label><input class="pm-in" id="ytEmail" type="email" value="${esc(prefillEmail)}"></div>`
+        + `<div class="pm-f"><label class="pm-f__l" for="ytMsg">Message <span class="pm-opt">editable</span></label><textarea class="pm-in" id="ytMsg" rows="6">${esc(prefillMsg)}</textarea></div>`
+        + mkLink('The link is included in the message. You can also copy it and send it yourself.');
+      foot=`<button class="btn btn--ghost" onclick="closeYt()">Cancel</button><button class="btn btn--primary" onclick="ytSend('${id}')">Send to creator</button>`;
+    }
     ov.innerHTML=`<div class="pmcard">
       <div class="pm-head"><div><div class="pm-eyebrow" style="color:#FF0000">YouTube integration</div><h2>${esc(sh.name)}</h2><p>${esc(sh.host)} · ${esc(sh.channel)}</p></div><button class="pm-x" onclick="closeYt()">✕</button></div>
-      <div class="pm-body">
-        ${statusBlock}
-        <div class="yt-scopes__t">What Acme receives once ${esc(sh.host)} approves</div>
-        ${YT_SCOPES.map(sc=>`<div class="yt-scope--read"><span class="yt-dot ${st==='connected'?'on':''}"></span><span><b>${sc[0]}</b><small>${sc[1]}</small></span></div>`).join('')}
-      </div>
+      <div class="pm-body">${body}</div>
       <div class="pm-foot">
         <button class="btn btn--ghost btn--sm" onclick="ytAuthModal('${id}','consent')">Preview the creator's screen</button>
-        <div style="display:flex;gap:9px">
-          ${st==='connected'
-            ? `<button class="btn btn--ghost" onclick="closeYt()">Close</button><button class="btn btn--danger" onclick="ytDisconnect('${id}')">Disconnect</button>`
-            : st==='pending'
-            ? `<button class="btn btn--ghost" onclick="ytResend('${id}')">Resend</button><button class="btn btn--primary" onclick="ytAuthModal('${id}','consent')">Open authorize screen</button>`
-            : `<button class="btn btn--ghost" onclick="closeYt()">Cancel</button><button class="btn btn--primary" onclick="ytSend('${id}')">Send to creator</button>`}
-        </div>
+        <div style="display:flex;gap:9px">${foot}</div>
       </div>
     </div>`; ov.classList.add('open');
   }
