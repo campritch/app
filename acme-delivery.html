@@ -886,27 +886,24 @@
   .cpq--blue { background:var(--blue-bg,#E0ECFF); color:var(--blue-text,#1D4ED8); }
   .cpq--orange { background:var(--orange-bg); color:var(--orange-text); }
   .cpq--red { background:var(--red-bg); color:var(--red-text); }
-  /* "needs attention" section — only the failing checks, up top */
-  .cpsec__h { display:flex; align-items:center; gap:8px; padding:11px 15px 9px; font-size:11px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--red-text); border-top:1px solid var(--border-light); }
-  .cpsec__h-ic { width:16px; height:16px; border-radius:50%; background:var(--red-text); color:#fff; display:grid; place-items:center; font-size:11px; font-weight:800; flex-shrink:0; }
-  /* passed-checks rollup — a few summary lines instead of 50 */
-  .cproll { border-top:1px solid var(--border-light); }
-  .cproll__row { display:flex; align-items:center; gap:11px; padding:9px 15px; border-top:1px solid var(--border-light); }
-  .cproll__row:first-child { border-top:none; }
-  .cproll__ic { width:20px; height:20px; border-radius:50%; display:grid; place-items:center; flex-shrink:0; background:var(--green-bg); color:var(--green-text); font-weight:800; font-size:12px; }
-  .cproll__ic svg { width:12px; height:12px; }
-  .cproll__ic.warn { background:var(--orange-bg); color:var(--orange-text); }
-  .cproll__t { flex:1; font-size:13px; font-weight:600; }
-  .cproll__n { font-size:12px; font-weight:700; color:var(--green-text); font-variant-numeric:tabular-nums; }
-  .cproll__n.warn { color:var(--orange-text); }
-  /* show-all full list */
-  .cpall { border-top:1px solid var(--border-light); }
-  .cpall__sm { list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; padding:10px 15px; font-size:12px; font-weight:600; color:var(--text-secondary); user-select:none; }
-  .cpall__sm::-webkit-details-marker { display:none; }
-  .cpall__sm:hover { background:var(--page-bg); color:var(--text-primary); }
-  .cpall__sm svg { transition:transform .18s ease; }
-  .cpall[open] .cpall__sm svg { transform:rotate(180deg); }
-  .cpall__g { padding:9px 15px 5px; font-size:10.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--text-tertiary); background:var(--page-bg); border-top:1px solid var(--border-light); }
+  /* compliance themes — the 10 checks roll into a few expandable chunks.
+     a clean theme stays contracted; a theme with a flag opens to its itemized checks. */
+  .cpth { border-top:1px solid var(--border-light); }
+  .cpth__sm { list-style:none; cursor:pointer; display:flex; align-items:center; gap:11px; padding:12px 15px; user-select:none; }
+  .cpth__sm::-webkit-details-marker { display:none; }
+  .cpth__sm:hover { background:var(--page-bg); }
+  .cpth__ic { width:22px; height:22px; border-radius:50%; display:grid; place-items:center; flex-shrink:0; background:var(--green-bg); color:var(--green-text); font-weight:800; font-size:12px; }
+  .cpth__ic svg { width:13px; height:13px; }
+  .cpth__t { flex:1; font-size:13px; font-weight:700; }
+  .cpth__n { font-size:11px; font-weight:700; color:var(--green-text); font-variant-numeric:tabular-nums; text-transform:uppercase; letter-spacing:.03em; }
+  .cpth__chev { color:var(--text-tertiary); transition:transform .18s ease; flex-shrink:0; }
+  .cpth[open] .cpth__chev { transform:rotate(180deg); }
+  .cpth__body { border-top:1px solid var(--border-light); }
+  /* a flagged theme: red accent, opens by default so the problem is visible */
+  .cpth--bad > .cpth__sm { background:color-mix(in srgb, var(--red-bg) 45%, transparent); }
+  .cpth--bad > .cpth__sm:hover { background:var(--red-bg); }
+  .cpth--bad .cpth__ic { background:var(--red-text); color:#fff; }
+  .cpth--bad .cpth__n { color:var(--red-text); }
 
   /* ad scorecard (operator) — matched to the real marketplace scorecard: big, airy */
   .scard { background:var(--page-bg); border:1px solid var(--border); border-radius:14px; padding:15px 16px; margin-top:9px; }
@@ -2746,9 +2743,8 @@
     const idx=items.map(function(it,i){return {it:it,i:i};});
     const GROUPS=['Script & claims','CTA & links','Timing & placement'];
     const grouped=GROUPS.map(function(g){ return {name:g, rows:idx.filter(function(o){return compGroup(o.it.k)===g;})}; }).filter(function(g){return g.rows.length;});
-    const fails=idx.filter(function(o){return !o.it.met;});
 
-    // 1. What's wrong — failing checks only, up top, with the escalation path.
+    // Escalation path — only shown when a requirement failed.
     const esc1=missed?`<div class="cpesc">
         <div class="cpesc__steps">
           <div class="cpesc__step done"><span class="cpesc__dot">${CK_SVG}</span>Flagged</div>
@@ -2761,25 +2757,27 @@
         </div>
         <button class="btn btn--primary btn--sm" style="flex-shrink:0" onclick="event.stopPropagation();toast('Flag email drafted to the host for ${missed} missed requirement'+(${missed}>1?'s':'')+'.')">Draft host flag</button>
       </div>`:'';
-    const failHTML=fails.length?`<div class="cpsec__h"><span class="cpsec__h-ic">!</span>Needs attention · ${fails.length}</div>${fails.map(function(o){return compRow(s,o,true);}).join('')}`:'';
-
-    // 2. What's right — one rollup line per bucket instead of the full list.
-    const rollup=`<div class="cproll">`+grouped.map(function(g){
+    // Each theme is its own expandable chunk. A clean theme stays contracted to one
+    // line; a theme with a flag opens by default to its itemized checks, so the host
+    // only drills into what's off instead of scrolling past everything that's right.
+    const themesHTML=grouped.map(function(g){
       const gm=g.rows.filter(function(o){return o.it.met;}).length, gt=g.rows.length, gbad=gt-gm;
-      return `<div class="cproll__row"><span class="cproll__ic ${gbad?'warn':'ok'}">${gbad?'!':CK_SVG}</span><span class="cproll__t">${g.name}</span><span class="cproll__n ${gbad?'warn':''}">${gm}/${gt}</span></div>`;
-    }).join('')+`</div>`;
-
-    // 3. Full granular list, for the detail-minded, behind a toggle.
-    const allHTML=`<details class="cpall"><summary class="cpall__sm">Show all ${tot} checks<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></summary>`+
-      grouped.map(function(g){ return `<div class="cpall__g">${g.name}</div>`+g.rows.map(function(o){return compRow(s,o,false);}).join(''); }).join('')+
-      `</details>`;
+      const body=g.rows.map(function(o){return compRow(s,o,false);}).join('');
+      return `<details class="cpth${gbad?' cpth--bad':''}" ${gbad?'open':''}>
+        <summary class="cpth__sm">
+          <span class="cpth__ic">${gbad?'!':CK_SVG}</span>
+          <span class="cpth__t">${g.name}</span>
+          <span class="cpth__n">${gbad?`${gbad} flag${gbad>1?'s':''}`:`${gm}/${gt}`}</span>
+          <svg class="cpth__chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+        </summary>
+        <div class="cpth__body">${body}</div>
+      </details>`;
+    }).join('');
 
     return `<details class="cplist${missed?' cplist--alert':''}" ${missed?'open':''} style="margin-top:13px">
       <summary class="cplist__hd"><b>Compliance — ${esc(s.brand)}</b><span style="margin-left:auto;display:flex;align-items:center;gap:8px"><span class="cpq cpq--${q.tone}">${q.score} quality</span><span class="cplist__score ${missed?'bad':'ok'}">${missed?`${missed} flag${missed>1?'s':''}`:'All clear'}</span><svg class="cplist__chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></span></summary>
       ${esc1}
-      ${failHTML}
-      ${rollup}
-      ${allHTML}
+      ${themesHTML}
       <div class="cplist__foot"><button class="btn btn--ghost btn--sm" onclick="event.stopPropagation();toast('Air-check MP3 + transcript downloaded.')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>Download air check</button>${missed?`<span class="muted" style="font-size:12px;margin-left:auto">Resolve by flagging the host or scheduling a make-good read.</span>`:'<span class="muted" style="font-size:12px;margin-left:auto">All requirements met — nothing to flag.</span>'}</div>
     </details>`;
   }
