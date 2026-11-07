@@ -676,6 +676,18 @@
   .rpt-switch { display:flex; align-items:center; gap:11px; padding:10px 13px; border:1px solid var(--border); border-radius:11px; background:var(--white); flex:1; min-width:240px; cursor:pointer; }
   .rpt-switch b { font-size:12.5px; display:block; }
   .rpt-switch small { font-size:11px; color:var(--text-tertiary); font-weight:500; display:block; margin-top:1px; line-height:1.35; }
+  /* campaign-level delivery-metric selector — networks set whether a campaign is judged on
+     total impressions or YouTube engaged views (how YouTube inventory is bought now) */
+  .rpt-metric { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:16px; }
+  .rpt-metric__lbl { font-size:10.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--text-tertiary); }
+  .rpt-metric__val { font-size:12.5px; font-weight:700; color:var(--text-primary); }
+  .rpt-metric__hint { font-size:11px; color:var(--text-tertiary); font-weight:500; flex-basis:100%; }
+  .rpt-seg { display:inline-flex; border:1px solid var(--border); border-radius:9px; overflow:hidden; background:var(--white); }
+  .rpt-seg__b { padding:7px 14px; font-size:12.5px; font-weight:600; color:var(--text-secondary); background:transparent; border:none; border-left:1px solid var(--border); cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+  .rpt-seg__b:first-child { border-left:none; }
+  .rpt-seg__b.on { background:var(--primary); color:#fff; }
+  .rpt-seg__b:not(.on):hover { background:var(--page-bg); color:var(--text-primary); }
+  .rpt-seg__b svg { width:13px; height:13px; }
   .rpt-deliv--nochart { grid-template-columns:1fr; }
   /* campaign note - a sentence or two at the top of the brand's report */
   .rpt-note { margin-top:14px; }
@@ -867,6 +879,34 @@
   .cpesc__step.on .cpesc__dot { background:var(--red-text); color:#fff; }
   .cpesc__step.done .cpesc__dot { background:var(--green-text); color:#fff; }
   .cpesc__arr { width:16px; height:1.5px; background:var(--border-strong); margin:0 8px; flex-shrink:0; }
+
+  /* grade chip in the compliance header */
+  .cpq { font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; background:var(--secondary-lite); color:var(--text-secondary); font-variant-numeric:tabular-nums; }
+  .cpq--green { background:var(--green-bg); color:var(--green-text); }
+  .cpq--blue { background:var(--blue-bg,#E0ECFF); color:var(--blue-text,#1D4ED8); }
+  .cpq--orange { background:var(--orange-bg); color:var(--orange-text); }
+  .cpq--red { background:var(--red-bg); color:var(--red-text); }
+  /* "needs attention" section — only the failing checks, up top */
+  .cpsec__h { display:flex; align-items:center; gap:8px; padding:11px 15px 9px; font-size:11px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--red-text); border-top:1px solid var(--border-light); }
+  .cpsec__h-ic { width:16px; height:16px; border-radius:50%; background:var(--red-text); color:#fff; display:grid; place-items:center; font-size:11px; font-weight:800; flex-shrink:0; }
+  /* passed-checks rollup — a few summary lines instead of 50 */
+  .cproll { border-top:1px solid var(--border-light); }
+  .cproll__row { display:flex; align-items:center; gap:11px; padding:9px 15px; border-top:1px solid var(--border-light); }
+  .cproll__row:first-child { border-top:none; }
+  .cproll__ic { width:20px; height:20px; border-radius:50%; display:grid; place-items:center; flex-shrink:0; background:var(--green-bg); color:var(--green-text); font-weight:800; font-size:12px; }
+  .cproll__ic svg { width:12px; height:12px; }
+  .cproll__ic.warn { background:var(--orange-bg); color:var(--orange-text); }
+  .cproll__t { flex:1; font-size:13px; font-weight:600; }
+  .cproll__n { font-size:12px; font-weight:700; color:var(--green-text); font-variant-numeric:tabular-nums; }
+  .cproll__n.warn { color:var(--orange-text); }
+  /* show-all full list */
+  .cpall { border-top:1px solid var(--border-light); }
+  .cpall__sm { list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; padding:10px 15px; font-size:12px; font-weight:600; color:var(--text-secondary); user-select:none; }
+  .cpall__sm::-webkit-details-marker { display:none; }
+  .cpall__sm:hover { background:var(--page-bg); color:var(--text-primary); }
+  .cpall__sm svg { transition:transform .18s ease; }
+  .cpall[open] .cpall__sm svg { transform:rotate(180deg); }
+  .cpall__g { padding:9px 15px 5px; font-size:10.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--text-tertiary); background:var(--page-bg); border-top:1px solid var(--border-light); }
 
   /* ad scorecard (operator) — matched to the real marketplace scorecard: big, airy */
   .scard { background:var(--page-bg); border:1px solid var(--border); border-radius:14px; padding:15px 16px; margin-top:9px; }
@@ -2304,7 +2344,20 @@
     s6:"Strong placement, but the read came in a touch short on the disclaimer. Covered by the make-good read we've queued."
   };
   const REPORT_CFG = {};
-  function rcfg(id){ return REPORT_CFG[id] || (REPORT_CFG[id] = { audioMax:true, graph:true, msg:(REPORT_MSG_SEED[id]||'') }); }
+  function rcfg(id){ return REPORT_CFG[id] || (REPORT_CFG[id] = { metric:'impr', graph:true, msg:(REPORT_MSG_SEED[id]||'') }); }
+  // Campaign-level: is this campaign judged on total impressions (+ audio) or on YouTube
+  // engaged views? Operators pick it per campaign; the brand's share view shows it as a label.
+  function setMetric(id,m){ rcfg(id).metric=m; redrawReport(id); refreshShare(id); }
+  function metricSel(id,OP){ var m=rcfg(id).metric||'impr', eng=m==='engaged';
+    var yt='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12s-3-7-10-7-10 7-10 7 3 7 10 7 10-7 10-7Z"/><path d="M10 9l5 3-5 3Z" fill="currentColor"/></svg>';
+    if(!OP) return `<div class="rpt-metric"><span class="rpt-metric__lbl">Measured by</span><span class="rpt-metric__val">${eng?'YouTube engaged views':'Impressions + audio'}</span></div>`;
+    return `<div class="rpt-metric"><span class="rpt-metric__lbl">Measure delivery by</span>
+      <div class="rpt-seg">
+        <button class="rpt-seg__b ${eng?'':'on'}" onclick="setMetric('${id}','impr')">Impressions + audio</button>
+        <button class="rpt-seg__b ${eng?'on':''}" onclick="setMetric('${id}','engaged')">${yt}Engaged views</button>
+      </div>
+      <span class="rpt-metric__hint">${eng?'This campaign is graded on YouTube engaged views — how YouTube inventory is bought now.':'This campaign is graded on total impressions, with audio downloads folded in.'}</span>
+    </div>`; }
   const READ_MSG = Object.assign({}, READ_MSG_SEED);
   let SHARE_MODE = false;
   function setReadMsg(id,v){ READ_MSG[id]=v; }
@@ -2347,8 +2400,9 @@
       mgs.map(s=>({s,kind:s.kind==='bonus'?'Bonus':'Make good'}))
     ).sort((a,b)=>a.s.published<b.s.published?-1:1);
 
-    // audio-max toggle: ON folds audio downloads into the headline reach; OFF shows YouTube/impressions only
-    const audioMax=cfg.audioMax, graphOn=cfg.graph;
+    // Delivery metric is set per campaign: 'impr' folds audio downloads into the headline reach;
+    // 'engaged' grades the campaign on YouTube engaged views only.
+    const audioMax=cfg.metric!=='engaged', graphOn=cfg.graph;
     const headline = audioMax ? got : yt;
     const pctShown = booked ? Math.round(headline/booked*100) : 0;
     const cpmShown = headline ? (paid/(headline/1000)) : 0;
@@ -2387,11 +2441,14 @@
           ? `<div class="rpt-note"><div class="rpt-note__lbl">Campaign note</div><textarea class="rpt-note__in" rows="2" placeholder="Add a short note for ${esc(d.brand)} — context on how the campaign is tracking." oninput="setCampaignMsg('${d.id}',this.value)">${esc(cfg.msg)}</textarea></div>`
           : (cfg.msg?`<div class="rpt-note rpt-note--show" style="margin-top:20px"><p>${esc(cfg.msg)}</p></div>`:'')}
 
+        <!-- DELIVERY METRIC (campaign-level) -->
+        ${metricSel(d.id,OP)}
+
         <!-- TRACKING -->
         <div class="rpt-deliv${graphOn?'':' rpt-deliv--nochart'}" style="margin-top:14px">
           <div>
             <div class="rpt-deliv__big">${K(headline)}</div>
-            <div class="rpt-deliv__of">of ${K(booked)} booked impressions${audioMax?'':' · YouTube only'}</div>
+            <div class="rpt-deliv__of">of ${K(booked)} booked ${audioMax?'impressions':'engaged views'}</div>
             <div class="rpt-deliv__pct green">${c.done?pctOf(headline,booked)+'% delivered':pctShown+'% pacing'}</div>
             <div class="rpt-chips">
               <div><div class="rpt-chip__l">Delivered CPM</div><div class="rpt-chip__v">$${cpmShown.toFixed(2)}</div></div>
@@ -2672,15 +2729,26 @@
   function toggleCompliance(id,i){ const items=complianceItems(spot(id)), it=items[i]; if(!it) return;
     COMPLIANCE_STATE[id]=COMPLIANCE_STATE[id]||{}; COMPLIANCE_STATE[id][it.k]=!it.met;
     if(typeof DRAWER_SPOT!=='undefined' && DRAWER_SPOT) openSpot(DRAWER_SPOT); else openRead(id); }
+  // Networks told us the 50-line checklist is overwhelming — they want to see what's WRONG,
+  // not scroll past everything that's right. So checks roll up into a few buckets; only the
+  // failures show by default, with the full list tucked behind "show all".
+  function compGroup(k){
+    if(k.indexOf('pt:')===0) return 'Script & claims';
+    if(k==='cta'||k==='code'||k==='url') return 'CTA & links';
+    return 'Timing & placement';
+  }
+  function compRow(s,o,alert){ var it=o.it;
+    return `<div class="cprow${it.met?'':' cprow--no'}" onclick="event.stopPropagation();toggleCompliance('${s.id}',${o.i})"><span class="cprow__ic ${it.met?'met':'no'}">${it.met?CK_SVG:CX_SVG}</span><span class="cprow__t">${esc(it.label)}${it.met||!it.why?'':`<em>${esc(it.why)}</em>`}</span><span class="cprow__hint${it.met?'':' no'}">${it.met?'met':'not met'}</span></div>`;
+  }
   function complianceBlock(s){
     const items=complianceItems(s), met=items.filter(function(x){return x.met;}).length, tot=items.length, missed=tot-met;
-    // Failed requirements float to the top so the problem reads first, then the rest in order.
-    const order=items.map(function(it,i){return {it:it,i:i};}).sort(function(a,b){return (a.it.met?1:0)-(b.it.met?1:0);});
-    const rows=order.map(function(o){ var it=o.it;
-      return `<div class="cprow${it.met?'':' cprow--no'}" onclick="event.stopPropagation();toggleCompliance('${s.id}',${o.i})"><span class="cprow__ic ${it.met?'met':'no'}">${it.met?CK_SVG:CX_SVG}</span><span class="cprow__t">${esc(it.label)}${it.met||!it.why?'':`<em>${esc(it.why)}</em>`}</span><span class="cprow__hint${it.met?'':' no'}">${it.met?'met':'not met'}</span></div>`;
-    }).join('');
-    // Escalation path, shown only when a requirement failed. Step 1 is already done
-    // (the air-check caught it); the remaining steps are what happens next.
+    const q=qualityScore(s);
+    const idx=items.map(function(it,i){return {it:it,i:i};});
+    const GROUPS=['Script & claims','CTA & links','Timing & placement'];
+    const grouped=GROUPS.map(function(g){ return {name:g, rows:idx.filter(function(o){return compGroup(o.it.k)===g;})}; }).filter(function(g){return g.rows.length;});
+    const fails=idx.filter(function(o){return !o.it.met;});
+
+    // 1. What's wrong — failing checks only, up top, with the escalation path.
     const esc1=missed?`<div class="cpesc">
         <div class="cpesc__steps">
           <div class="cpesc__step done"><span class="cpesc__dot">${CK_SVG}</span>Flagged</div>
@@ -2693,10 +2761,25 @@
         </div>
         <button class="btn btn--primary btn--sm" style="flex-shrink:0" onclick="event.stopPropagation();toast('Flag email drafted to the host for ${missed} missed requirement'+(${missed}>1?'s':'')+'.')">Draft host flag</button>
       </div>`:'';
+    const failHTML=fails.length?`<div class="cpsec__h"><span class="cpsec__h-ic">!</span>Needs attention · ${fails.length}</div>${fails.map(function(o){return compRow(s,o,true);}).join('')}`:'';
+
+    // 2. What's right — one rollup line per bucket instead of the full list.
+    const rollup=`<div class="cproll">`+grouped.map(function(g){
+      const gm=g.rows.filter(function(o){return o.it.met;}).length, gt=g.rows.length, gbad=gt-gm;
+      return `<div class="cproll__row"><span class="cproll__ic ${gbad?'warn':'ok'}">${gbad?'!':CK_SVG}</span><span class="cproll__t">${g.name}</span><span class="cproll__n ${gbad?'warn':''}">${gm}/${gt}</span></div>`;
+    }).join('')+`</div>`;
+
+    // 3. Full granular list, for the detail-minded, behind a toggle.
+    const allHTML=`<details class="cpall"><summary class="cpall__sm">Show all ${tot} checks<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></summary>`+
+      grouped.map(function(g){ return `<div class="cpall__g">${g.name}</div>`+g.rows.map(function(o){return compRow(s,o,false);}).join(''); }).join('')+
+      `</details>`;
+
     return `<details class="cplist${missed?' cplist--alert':''}" ${missed?'open':''} style="margin-top:13px">
-      <summary class="cplist__hd"><b>Compliance — scored against ${esc(s.brand)}'s brief</b><span style="margin-left:auto;display:flex;align-items:center;gap:8px"><span class="cplist__score ${missed?'bad':'ok'}">${missed?`${missed} not met`:`${met}/${tot} met`}</span><svg class="cplist__chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></span></summary>
+      <summary class="cplist__hd"><b>Compliance — ${esc(s.brand)}</b><span style="margin-left:auto;display:flex;align-items:center;gap:8px"><span class="cpq cpq--${q.tone}">${q.score} quality</span><span class="cplist__score ${missed?'bad':'ok'}">${missed?`${missed} flag${missed>1?'s':''}`:'All clear'}</span><svg class="cplist__chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></span></summary>
       ${esc1}
-      ${rows}
+      ${failHTML}
+      ${rollup}
+      ${allHTML}
       <div class="cplist__foot"><button class="btn btn--ghost btn--sm" onclick="event.stopPropagation();toast('Air-check MP3 + transcript downloaded.')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>Download air check</button>${missed?`<span class="muted" style="font-size:12px;margin-left:auto">Resolve by flagging the host or scheduling a make-good read.</span>`:'<span class="muted" style="font-size:12px;margin-left:auto">All requirements met — nothing to flag.</span>'}</div>
     </details>`;
   }
