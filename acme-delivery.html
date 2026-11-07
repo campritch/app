@@ -921,6 +921,8 @@
   .cprow__hint.ok2 { color:var(--green-text); }
   .cpverify { font:inherit; font-size:11.5px; font-weight:700; color:var(--text-primary); background:var(--white); border:1px solid var(--border-strong); border-radius:8px; padding:6px 13px; cursor:pointer; flex-shrink:0; }
   .cpverify:hover { border-color:var(--text-primary); background:var(--page-bg); }
+  .cpverify--all { background:var(--secondary); padding:7px 15px; }
+  .cpverify--all:hover { background:var(--border-strong); border-color:var(--border-strong); }
   .cpverify-all { display:flex; align-items:center; gap:12px; padding:11px 15px; background:var(--secondary-lite); border-bottom:1px solid var(--border-light); }
   .cpverify-all span { flex:1; font-size:12px; font-weight:600; color:var(--text-secondary); }
 
@@ -2819,7 +2821,7 @@
       const nlabel=gfail?`${gfail} flag${gfail>1?'s':''}`:(gcheck?`${gcheck} to check`:`${gmet}/${gt}`);
       const icon=gfail?'!':(gcheck?'?':CK_SVG);
       const mk=g.rows.filter(function(o){return o.it.manual&&!o.it.verified;}).map(function(o){return "'"+o.it.k+"'";}).join(',');
-      const verifyAll=gcheck>0?`<div class="cpverify-all"><span>${gcheck} on-screen placement${gcheck>1?'s':''} to confirm</span><button class="btn btn--primary btn--sm" onclick="event.stopPropagation();ocVerifyAll('${s.id}',[${mk}])">Verify all</button></div>`:'';
+      const verifyAll=gcheck>0?`<div class="cpverify-all"><span>${gcheck} on-screen placement${gcheck>1?'s':''} to confirm</span><button class="cpverify cpverify--all" onclick="event.stopPropagation();ocVerifyAll('${s.id}',[${mk}])">Verify all</button></div>`:'';
       const body=verifyAll + g.rows.map(function(o){return compRow(s,o);}).join('');
       return `<details class="cpth cpth--${state}" ${(gfail||gcheck)?'open':''}>
         <summary class="cpth__sm">
