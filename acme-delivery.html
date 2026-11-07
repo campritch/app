@@ -669,13 +669,10 @@
   .rpt-card { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:18px 20px; }
   .rpt-card__h { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:14px; }
   /* operator-only report controls - shape what the brand sees on the share link */
-  .rpt-ctrls { margin-top:18px; border:1px dashed var(--border-strong); border-radius:14px; background:var(--page-bg); padding:14px 16px; }
-  .rpt-ctrls__t { font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
-  .rpt-ctrls__t span { text-transform:none; letter-spacing:0; font-weight:500; color:var(--text-tertiary); font-size:11px; }
-  .rpt-ctrls__row { display:flex; gap:10px; flex-wrap:wrap; }
-  .rpt-switch { display:flex; align-items:center; gap:11px; padding:10px 13px; border:1px solid var(--border); border-radius:11px; background:var(--white); flex:1; min-width:240px; cursor:pointer; }
-  .rpt-switch b { font-size:12.5px; display:block; }
-  .rpt-switch small { font-size:11px; color:var(--text-tertiary); font-weight:500; display:block; margin-top:1px; line-height:1.35; }
+  /* bare, functional toggles — no box, no labels-paragraph, just switch + name */
+  .rpt-ctrls { display:flex; align-items:center; gap:22px; flex-wrap:wrap; margin-top:16px; }
+  .rpt-switch { display:inline-flex; align-items:center; gap:10px; cursor:pointer; }
+  .rpt-switch b { font-size:13px; font-weight:600; }
   /* campaign-level delivery-metric selector — networks set whether a campaign is judged on
      total impressions or YouTube engaged views (how YouTube inventory is bought now) */
   .rpt-metric { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:16px; }
@@ -2384,8 +2381,8 @@
   function redrawReport(id){ const dr=document.getElementById('drawer');
     if(dr&&dr.classList.contains('drawer--report')){ const sc=dr.querySelector('.rpt-scroll'), top=sc?sc.scrollTop:0;
       dr.innerHTML=dealReportHTML(DEALS.find(x=>x.id===id)); const sc2=dr.querySelector('.rpt-scroll'); if(sc2) sc2.scrollTop=top; } }
-  function reportSwitch(id,k,label,note){ var on=rcfg(id)[k];
-    return `<label class="rpt-switch"><button class="tog__sw ${on?'on':''}" onclick="toggleRcfg('${id}','${k}')"><i></i></button><span><b>${label}</b><small>${note}</small></span></label>`; }
+  function reportSwitch(id,k,label){ var on=rcfg(id)[k];
+    return `<label class="rpt-switch"><button class="tog__sw ${on?'on':''}" onclick="toggleRcfg('${id}','${k}')"><i></i></button><b>${label}</b></label>`; }
   /* open the full-screen, read-only version the brand gets at the share link */
   function openShareView(id){ SHARE_MODE=true; const html=dealReportHTML(DEALS.find(x=>x.id===id)); SHARE_MODE=false;
     let ov=document.getElementById('shareOverlay');
@@ -2459,18 +2456,14 @@
           ? `<div class="rpt-note"><div class="rpt-note__lbl">Campaign note</div><textarea class="rpt-note__in" rows="2" placeholder="Add a short note for ${esc(d.brand)} — context on how the campaign is tracking." oninput="setCampaignMsg('${d.id}',this.value)">${esc(cfg.msg)}</textarea></div>`
           : (cfg.msg?`<div class="rpt-note rpt-note--show" style="margin-top:20px"><p>${esc(cfg.msg)}</p></div>`:'')}
 
+        <!-- REPORT CONTROLS (operator only) — bare toggles for what shows on the report -->
+        ${OP?`<div class="rpt-ctrls">
+          ${reportSwitch(d.id,'graph','Delivery chart')}
+          ${reportSwitch(d.id,'next',"What's next")}
+        </div>`:''}
+
         <!-- DELIVERY METRIC (campaign-level) -->
         ${metricSel(d.id,OP)}
-
-        <!-- REPORT CONTROLS (operator only) — switch on what the brand sees -->
-        ${OP?`<div class="rpt-ctrls">
-          <div class="rpt-ctrls__t">What ${esc(d.brand)} sees <span>toggle sections on or off before you send</span></div>
-          <div class="rpt-ctrls__row">
-            ${reportSwitch(d.id,'graph','Delivery chart','The pacing curve toward the goal')}
-            ${reportSwitch(d.id,'next',"What's next",'Scheduled reads, make goods and bonuses')}
-            ${reportSwitch(d.id,'reads','Per-read breakdown','Every aired read with its scorecard')}
-          </div>
-        </div>`:''}
 
         <!-- TRACKING -->
         <div class="rpt-deliv${graphOn?'':' rpt-deliv--nochart'}" style="margin-top:14px">
