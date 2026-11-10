@@ -1357,6 +1357,34 @@
     #subnav-delivery { margin:3px 0 6px 23px; padding-left:13px; gap:2px; }
     #subnav-delivery .subnav-item { padding:8px 12px; font-size:13px; }
     .sub-badge { margin-left:auto; font-size:10px; font-weight:700; background:var(--accent); color:#fff; padding:1px 7px; border-radius:999px; }
+    /* My show */
+    .ms-sec { background:var(--white); border:1px solid var(--border); border-radius:16px; margin-bottom:14px; }
+    .ms-sec__h { padding:18px 22px 0; } .ms-sec__h h2 { font-size:16px; font-weight:700; letter-spacing:-.02em; } .ms-sec__h p { font-size:13px; color:var(--text-secondary); margin-top:3px; line-height:1.5; }
+    .ms-sec__h p a { color:var(--text-primary); font-weight:600; }
+    .ms-sec__b { padding:14px 22px 20px; }
+    .ms-id { display:flex; align-items:center; gap:16px; }
+    .ms-conn { margin-top:16px; border:1px solid var(--border-light); border-radius:12px; }
+    .ms-conn__r { display:flex; align-items:center; gap:10px; padding:11px 14px; font-size:13px; } .ms-conn__r + .ms-conn__r { border-top:1px solid var(--border-light); }
+    .ms-conn__r b { font-weight:600; width:120px; flex-shrink:0; } .ms-conn__r .muted { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12.5px; }
+    .ms-conn__s { font-size:12px; font-weight:600; color:var(--green-text); }
+    .ms-dot { width:8px; height:8px; border-radius:50%; background:var(--border-strong); flex-shrink:0; } .ms-dot.on { background:var(--green-text); } .ms-dot.half { background:#EAB308; }
+    .ms--days button { min-width:58px; padding:9px 0; font-size:13px; border-radius:10px; }
+    .ms-spot { display:flex; align-items:center; gap:14px; padding:12px 0; } .ms-spot + .ms-spot { border-top:1px solid var(--border-light); }
+    .ms-spot.off .ms-spot__t b { color:var(--text-secondary); }
+    .ms-spot__t { flex:1; min-width:0; } .ms-spot__t b { display:block; font-size:14px; font-weight:600; } .ms-spot__t span { font-size:12px; color:var(--text-secondary); }
+    .ms-name { border:none; font:inherit; font-size:14px; font-weight:600; padding:0; width:100%; color:var(--text-primary); background:none; } .ms-name:focus { outline:none; text-decoration:underline; }
+    .ms-price { display:flex; align-items:center; gap:4px; border:1px solid var(--border); border-radius:9px; padding:0 10px; height:38px; font-size:14px; font-weight:600; background:var(--white); }
+    .ms-price input { width:76px; border:none; font:inherit; font-weight:600; text-align:right; background:none; color:var(--text-primary); } .ms-price input:focus { outline:none; }
+    .ms-price span { font-size:11.5px; font-weight:500; color:var(--text-tertiary); margin-left:4px; }
+    .ms-add { border:1px dashed var(--border-strong); background:none; border-radius:10px; width:100%; padding:10px; margin-top:8px; font-family:inherit; font-size:13px; font-weight:600; color:var(--text-secondary); cursor:pointer; } .ms-add:hover { color:var(--text-primary); border-color:var(--text-tertiary); }
+    .ms-promise { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .ms-big { display:flex; align-items:baseline; gap:8px; border:1px solid var(--border); border-radius:10px; padding:8px 12px; } .ms-big input { width:100%; border:none; font:inherit; font-size:22px; font-weight:700; letter-spacing:-.02em; background:none; color:var(--text-primary); } .ms-big input:focus { outline:none; } .ms-big span { font-size:12px; color:var(--text-tertiary); }
+    .ms-inline { margin-top:14px; font-size:13.5px; color:var(--text-primary); } .ms-inline input { width:56px; margin:0 4px; padding:5px 8px; border:1px solid var(--border); border-radius:8px; font:inherit; text-align:center; }
+    .ms-row { display:flex; align-items:center; gap:12px; padding:10px 0; } .ms-row + .ms-row { border-top:1px solid var(--border-light); } .ms-row b { display:block; font-size:13.5px; font-weight:600; } .ms-row span { font-size:12px; color:var(--text-secondary); }
+    .ms-bar { position:sticky; bottom:16px; display:flex; align-items:center; gap:10px; background:var(--primary); color:#fff; border-radius:12px; padding:10px 12px 10px 18px; box-shadow:var(--shadow-hover); transform:translateY(140%); opacity:0; transition:.2s; pointer-events:none; }
+    .ms-bar.on { transform:none; opacity:1; pointer-events:auto; } .ms-bar span { flex:1; font-size:13.5px; font-weight:600; }
+    .ms-bar .btn--ghost { background:transparent; color:#fff; border-color:rgba(255,255,255,.3); } .ms-bar .btn--dark { background:#fff; color:var(--primary); border-color:#fff; }
+    @media (max-width:760px){ .ms-promise, .ms-id > div { grid-template-columns:1fr !important; } }
     /* mobile */
     .mtabs { display:none; }
     .mhead { display:none; }
@@ -2789,69 +2817,71 @@ function reportPDFkit(){ toast('Second-Wind-media-kit.pdf downloaded.'); closeOv
 /* ════════ MY CHANNEL (5.2): single-show form + rate card + storefront controls ════════ */
 let CH=null, CH_DIRTY=false;
 function chStart(){ CH=JSON.parse(JSON.stringify(S.show)); CH_DIRTY=false; }
-function chSet(path,val){ const ks=path.split('.'); let o=CH; for(let i=0;i<ks.length-1;i++) o=o[ks[i]]; o[ks[ks.length-1]]=val; CH_DIRTY=true; const b=$('chSave'); if(b){ b.style.display=''; } }
+function chSet(path,val){ const ks=path.split('.'); let o=CH; for(let i=0;i<ks.length-1;i++) o=o[ks[i]]; o[ks[ks.length-1]]=val; if(!CH_DIRTY){ CH_DIRTY=true; chSaveBar(); } }
+function chSaveBar(){ const b=$('chBar'); if(b) b.classList.toggle('on', CH_DIRTY); }
+function chDiscard(){ CH=null; CH_DIRTY=false; RENDER.channel(); toast('Changes discarded.'); }
+/* My show: one column of plain questions. Each section is one decision. */
 RENDER.channel = function(){
   if(!CH || CH.id!==S.show.id) chStart();
-  const c=CH, sf=c.storefront;
-  const tgl=(path,on,label,sub)=>`<div class="swrow"><button class="sw ${on?'on':''}" onclick="chSet('${path}',${!on});RENDER.channel()"><i></i></button><div><b>${label}</b>${sub?`<small>${sub}</small>`:''}</div></div>`;
+  const c=CH, sf=c.storefront, pls=placements(c), cpm=c.priceModel==='CPM';
   const src=t=>c.sources.find(s=>s.type===t);
-  $('view-channel').innerHTML=`<div class="inner">${pageHead('My show', 'Your show, your prices and your booking page.', `<button class="btn btn--ghost btn--sm" onclick="openStorefront()">View storefront</button><button id="chSave" class="btn btn--dark btn--sm" style="${CH_DIRTY?'':'display:none'}" onclick="saveChannel()">Save changes</button>`)}
-  <div class="grid" style="grid-template-columns:1fr 1fr;align-items:start">
-    <div class="card"><div class="card__head"><div class="card__title">${art(c,26,10)} Show and sources</div></div><div class="card__pad">
-      <div class="fgrid"><div class="fld2"><label class="lbl">Show name</label><input class="inp" value="${esc(c.name)}" oninput="chSet('name',this.value)"></div><div class="fld2"><label class="lbl">Host</label><input class="inp" value="${esc(c.host)}" oninput="chSet('host',this.value)"></div></div>
-      <div class="fld2"><label class="lbl">Apple Podcasts</label><input class="inp" value="${esc(c.links.apple)}" oninput="chSet('links.apple',this.value)"></div>
-      <div class="fgrid"><div class="fld2"><label class="lbl">YouTube</label><input class="inp" value="${esc(c.links.youtube)}" oninput="chSet('links.youtube',this.value)"></div><div class="fld2"><label class="lbl">RSS</label><input class="inp" value="${esc(c.links.rss)}" oninput="chSet('links.rss',this.value)"></div></div>
-      <div class="dhead">Delivery sources</div>
-      ${[['RSS','Podcast feed','Episodes and audio air checks'],['YOUTUBE','YouTube channel','Air checks and views'],['NEWSLETTER','Newsletter','Stored. No delivery tracking in v1.']].map(([t,l,s])=>{ const x=src(t); return `<div class="swrow"><span class="tag ${x?(x.oauthStatus==='connected'||t==='RSS'?'tag--green':'tag--grey'):'tag--grey'}">${x?(t==='YOUTUBE'?(x.oauthStatus==='connected'?'Engaged views':'Public views'):t==='RSS'?'Synced':'Stored'):'Not added'}</span><div style="flex:1"><b>${l}</b><small>${s}${x&&x.lastSyncedAt!=null?' · synced '+rel(x.lastSyncedAt):''}</small></div>${t==='YOUTUBE'&&(!x||x.oauthStatus!=='connected')?`<button class="btn btn--ghost btn--sm" onclick="openYtConnect()">Connect</button>`:''}</div>`; }).join('')}
-      <div class="swrow"><span class="tag tag--grey">Soon</span><div style="flex:1"><b>Hosting connect</b><small>Spotify for Creators and Megaphone next. Until then audio is creator-reported.</small></div></div>
-      <div class="dhead">Release schedule</div>
-      <div class="ms">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<button class="${c.releaseDays.includes(d)?'on':''}" onclick="chDay('${d}')">${d}</button>`).join('')}</div>
-      <div class="fgrid" style="margin-top:12px"><div class="fld2"><label class="lbl">Releases per week</label><input class="inp" type="number" value="${c.releasesPerWeek}" oninput="chSet('releasesPerWeek',+this.value);chValidate()"></div>
-        <div class="fld2"><label class="lbl">Delivery type</label><select class="inp" onchange="chSet('deliveryType',this.value);RENDER.channel()">${['Audio','Simulcast','Video'].map(x=>`<option ${c.deliveryType===x?'selected':''}>${x}</option>`).join('')}</select></div></div>
-      ${c.deliveryType==='Simulcast'?`<div class="fgrid"><div class="fld2"><label class="lbl">Video %</label><input class="inp" type="number" value="${c.split.video}" oninput="chSet('split.video',+this.value);chValidate()"></div><div class="fld2"><label class="lbl">Audio %</label><input class="inp" type="number" value="${c.split.audio}" oninput="chSet('split.audio',+this.value);chValidate()"></div></div>`:''}
-      <div id="chErr"></div>
-      <div class="dhead">Ad positions</div>
-      ${tgl('pre',c.pre,'Pre-roll')}
-      <div class="swrow"><span style="width:38px;text-align:center;font-weight:700">${c.midSlots}</span><div style="flex:1"><b>Mid-roll slots</b><small>1 to 4</small></div><button class="btn btn--ghost btn--sm" onclick="chSet('midSlots',Math.max(1,CH.midSlots-1));RENDER.channel()">−</button><button class="btn btn--ghost btn--sm" onclick="chSet('midSlots',Math.min(4,CH.midSlots+1));RENDER.channel()">+</button></div>
-      ${tgl('post',c.post,'Post-roll')}
-      ${tgl('ytIntegration',c.ytIntegration,'YouTube integrated placement','Only when a YouTube source exists')}
-      <div class="fgrid" style="margin-top:12px"><div class="fld2"><label class="lbl">Impressions per episode</label><input class="inp" type="number" value="${c.imprPerEp}" oninput="chSet('imprPerEp',+this.value)"></div><div class="fld2"><label class="lbl">Guarantee per read</label><input class="inp" type="number" value="${c.guarantee}" oninput="chSet('guarantee',+this.value)"><div class="help">Used when an IO doesn't set one. Default 90% of average.</div></div></div>
-    </div></div>
-
-    <div>
-    <div class="card"><div class="card__head"><div class="card__title">Rate card and packages</div><div class="seg2"><button class="${c.priceModel==='FLAT'?'on':''}" onclick="chSet('priceModel','FLAT');RENDER.channel()">Flat per episode</button><button class="${c.priceModel==='CPM'?'on':''}" onclick="chSet('priceModel','CPM');RENDER.channel()">CPM</button></div></div><div class="card__pad">
-      ${placements(c).map(p=>`<div class="kv"><span>${PL[p]}</span><b style="display:flex;align-items:center;gap:6px">${c.priceModel==='CPM'?`$<input class="inp" style="width:80px;min-height:32px" type="number" value="${c.cpm[p]}" oninput="chSet('cpm.${p}',+this.value)"> CPM`:`$<input class="inp" style="width:96px;min-height:32px" type="number" value="${c.flat[p]}" oninput="chSet('flat.${p}',+this.value)">`}</b></div>`).join('')}
-      <div class="help">${c.priceModel==='CPM'?'Flat fees are off.':'CPM is off.'} One model per placement, never both. Sold slots keep the price they sold at.</div>
-      <div class="dhead">Packages</div>
-      <table><thead><tr><th style="padding:8px 10px">Name</th><th style="padding:8px 10px">Includes</th><th class="right" style="padding:8px 10px">Price</th><th style="padding:8px 10px">Active</th></tr></thead><tbody>
-      ${c.packages.map((k,i)=>`<tr><td style="padding:8px 10px"><input class="inp" style="min-height:30px" value="${esc(k.name)}" oninput="chSet('packages.${i}.name',this.value)"></td><td style="padding:8px 10px;font-size:12px">${k.count} × ${PL_SHORT[k.placement]}${(k.extra||[]).map(x=>` + ${x.count} × ${PL_SHORT[x.placement]}`).join('')}</td><td class="right" style="padding:8px 10px">$<input class="inp" style="width:80px;min-height:30px" type="number" value="${k.priceCents/100}" oninput="chSet('packages.${i}.priceCents',this.value*100)"></td><td style="padding:8px 10px"><button class="sw ${k.active?'on':''}" onclick="chSet('packages.${i}.active',${!k.active});RENDER.channel()"><i></i></button></td></tr>`).join('')}
-      </tbody></table>
-      <button class="btn btn--ghost btn--sm" style="margin-top:10px" onclick="CH.packages.push({id:uid('PKG'),name:'New package',placement:'MID1',count:2,priceCents:900000,active:false});CH_DIRTY=true;RENDER.channel()">+ Package</button>
-      <div class="dhead">Categories I won't read for</div>
+  const sw=(on,fn)=>`<button class="sw ${on?'on':''}" onclick="${fn}"><i></i></button>`;
+  const sec=(title,sub,body,id)=>`<section class="ms-sec"${id?` id="${id}"`:''}><div class="ms-sec__h"><h2>${title}</h2>${sub?`<p>${sub}</p>`:''}</div><div class="ms-sec__b">${body}</div></section>`;
+  const price=p=>`<div class="ms-price">$<input type="number" value="${cpm?c.cpm[p]:c.flat[p]}" oninput="chSet('${cpm?'cpm':'flat'}.${p}',+this.value)"><span>${cpm?'CPM':'per episode'}</span></div>`;
+  const spot=(p,label,desc,on,toggle,extra)=>`<div class="ms-spot ${on?'':'off'}">${toggle?sw(on,toggle):'<span style="width:38px"></span>'}<div class="ms-spot__t"><b>${label}</b><span>${desc}</span></div>${on?price(p):'<span class="muted" style="font-size:12.5px">Off</span>'}${extra||''}</div>`;
+  const ytOn=!!src('YOUTUBE');
+  const avg=c.imprPerEp, gp=avg?Math.round(c.guarantee/avg*100):0;
+  const body = [
+    sec('Your show', 'How sponsors and the agent find your episodes.', `
+      <div class="ms-id">${art(c,64,22)}<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label class="lbl">Show name</label><input class="inp" value="${esc(c.name)}" oninput="chSet('name',this.value)"></div>
+        <div><label class="lbl">Host</label><input class="inp" value="${esc(c.host)}" oninput="chSet('host',this.value)"></div></div></div>
+      <div class="ms-conn">
+        <div class="ms-conn__r"><span class="ms-dot on"></span><b>Podcast feed</b><span class="muted">${esc(c.links.rss||'Not added')}</span><span class="ms-conn__s">Synced ${src('RSS')&&src('RSS').lastSyncedAt!=null?rel(src('RSS').lastSyncedAt):''}</span></div>
+        <div class="ms-conn__r"><span class="ms-dot ${ytOn&&src('YOUTUBE').oauthStatus==='connected'?'on':ytOn?'half':''}"></span><b>YouTube</b><span class="muted">${esc(c.links.youtube||'Not added')}</span>${ytOn&&src('YOUTUBE').oauthStatus==='connected'?'<span class="ms-conn__s">Engaged views</span>':`<button class="btn btn--ghost btn--sm" onclick="openYtConnect()">Connect</button>`}</div>
+        <div class="ms-conn__r"><span class="ms-dot"></span><b>Audio downloads</b><span class="muted">From your monthly number until hosting connects</span><span class="ms-conn__s" style="color:var(--text-tertiary)">Creator-reported</span></div>
+      </div>`),
+    sec('When do you publish?', 'Tap the days new episodes come out. Your calendar fills in from this.', `
+      <div class="ms ms--days">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<button class="${c.releaseDays.includes(d)?'on':''}" onclick="chDay('${d}')">${d}</button>`).join('')}</div>
+      <div class="help" style="margin-top:8px">${c.releaseDays.length?`${c.releaseDays.length} episode${c.releaseDays.length>1?'s':''} a week, about ${c.releaseDays.length*4} a month.`:'Pick at least one day.'}</div>`),
+    sec('Ad spots and prices', `Which spots you sell in each episode, and what each costs. <a href="#" onclick="chSet('priceModel','${cpm?'FLAT':'CPM'}');RENDER.channel();return false">${cpm?'Price per episode instead':'Price by CPM instead'}</a>`, `
+      ${spot('PRE','Pre-roll','30s, before the episode starts',c.pre,`chSet('pre',${!c.pre});RENDER.channel()`)}
+      ${Array.from({length:c.midSlots},(_,i)=>spot('MID'+(i+1),c.midSlots>1?`Mid-roll ${i+1}`:'Mid-roll','60s, in the middle of the episode',true,null, i===c.midSlots-1&&c.midSlots>1?`<button class="att-x" title="Remove" onclick="chSet('midSlots',${c.midSlots-1});RENDER.channel()">✕</button>`:'<span style="width:26px"></span>')).join('')}
+      ${c.midSlots<4?`<button class="ms-add" onclick="chSet('midSlots',${c.midSlots+1});RENDER.channel()">+ Add another mid-roll</button>`:''}
+      ${spot('POST','Post-roll','30s, after the episode ends',c.post,`chSet('post',${!c.post});RENDER.channel()`)}
+      ${spot('YT','YouTube integration','90s, built into the video with a pinned link',c.ytIntegration&&ytOn,ytOn?`chSet('ytIntegration',${!c.ytIntegration});RENDER.channel()`:`toast('Connect YouTube first.')`)}
+      <div class="help" style="margin-top:10px">Changing a price never changes spots you've already sold.</div>`),
+    sec('Bundles', 'Spots sold together at one price. They show on your booking page.', `
+      ${c.packages.map((k,i)=>`<div class="ms-spot ${k.active?'':'off'}">${sw(k.active,`chSet('packages.${i}.active',${!k.active});RENDER.channel()`)}<div class="ms-spot__t"><input class="ms-name" value="${esc(k.name)}" oninput="chSet('packages.${i}.name',this.value)"><span>${k.count} × ${PL[k.placement].toLowerCase()}${(k.extra||[]).map(x=>` + ${x.count} × ${PL[x.placement].toLowerCase()}`).join('')}</span></div><div class="ms-price">$<input type="number" value="${k.priceCents/100}" oninput="chSet('packages.${i}.priceCents',this.value*100)"><span>total</span></div></div>`).join('')}
+      <button class="ms-add" onclick="CH.packages.push({id:uid('PKG'),name:'New bundle',placement:'MID1',count:2,priceCents:900000,active:true});chSet('packages',CH.packages);RENDER.channel()">+ Add a bundle</button>`),
+    sec('What do you promise sponsors?', 'Sponsors are guaranteed this many impressions per read. Hit 90% and the read counts as fully delivered.', `
+      <div class="ms-promise">
+        <div><label class="lbl">Your episodes average</label><div class="ms-big"><input type="number" value="${avg}" oninput="chSet('imprPerEp',+this.value)"><span>impressions</span></div></div>
+        <div><label class="lbl">You promise per read</label><div class="ms-big"><input type="number" value="${c.guarantee}" oninput="chSet('guarantee',+this.value)"><span>impressions</span></div></div>
+      </div>
+      <div class="help" style="margin-top:8px">That's ${gp}% of your average. Most creators promise about 90%, so a slow week doesn't put you under.</div>`),
+    sec("Brands you won't read for", 'These categories can never book you, and they are greyed out on your booking page.', `
       <div class="ms">${CATEGORIES.map(x=>`<button class="${c.excludedCategories.includes(x)?'on':''}" onclick="chCat('${x}')">${x}</button>`).join('')}</div>
-      <div class="fld2" style="margin-top:12px"><label class="lbl">Exclusivity window (days a sponsor's category stays locked after their last read)</label><input class="inp" type="number" value="${c.exclusivityWindowDays}" oninput="chSet('exclusivityWindowDays',+this.value)"></div>
-    </div></div>
-
-    <div class="card" style="margin-top:16px"><div class="card__head"><div class="card__title">Storefront</div><a href="#" class="mono" style="font-size:12px" onclick="openStorefront();return false">spotsnow.io/book/${c.slug}</a></div><div class="card__pad">
-      ${tgl('storefront.enabled',sf.enabled,'Public','Anyone with the link can see open slots and request')}
-      ${tgl('storefront.showPrices',sf.showPrices,'Show prices','Off shows "Ask for budget"')}
-      ${tgl('storefront.publicSponsors',sf.publicSponsors,'Past sponsors rail','Only sponsors you opt in on the deal')}
-      <div class="dhead">Instant booking ("Book now")</div>
-      <div class="ms">${products().map(p=>`<button class="${sf.instant.includes(p.id)?'on':''}" onclick="chInstant('${p.id}')">${esc(p.name)}</button>`).join('')}</div>
-      <div class="help">Off by default: requests are approve-then-capture.</div>
-      <div class="fgrid" style="margin-top:12px"><div class="fld2"><label class="lbl">Lead time (days)</label><input class="inp" type="number" value="${sf.leadTimeDays}" oninput="chSet('storefront.leadTimeDays',+this.value)"></div><div class="fld2"><label class="lbl">Minimum booking (units)</label><input class="inp" type="number" value="${sf.minUnits}" oninput="chSet('storefront.minUnits',+this.value)"></div></div>
-      <div class="fld2"><label class="lbl">Intro</label><textarea class="inp" rows="2" oninput="chSet('storefront.intro',this.value)">${esc(sf.intro)}</textarea></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn--ghost btn--sm" onclick="copyText('https://spotsnow.io/book/${c.slug}')">${ICO_LINK} Copy bio link</button><button class="btn btn--ghost btn--sm" onclick="copyText('<iframe src=&quot;https://spotsnow.io/book/${c.slug}?embed=1&quot; width=&quot;100%&quot; height=&quot;720&quot; style=&quot;border:0&quot;></iframe>')">&lt;/&gt; Copy embed</button></div>
-    </div></div>
-    </div>
-  </div></div>`;
+      <div class="ms-inline">After a sponsor's last read, keep competitors off for <input type="number" value="${c.exclusivityWindowDays}" oninput="chSet('exclusivityWindowDays',+this.value)"> days.</div>`),
+    sec('Your booking page', `Where brands see your open spots and request them. <a href="#" onclick="openStorefront();return false">View it</a>`, `
+      <div class="ms-row">${sw(sf.enabled,`chSet('storefront.enabled',${!sf.enabled});RENDER.channel()`)}<div><b>Booking page is ${sf.enabled?'on':'off'}</b><span>spotsnow.io/book/${c.slug}</span></div><button class="btn btn--ghost btn--sm" style="margin-left:auto" onclick="copyText('https://spotsnow.io/book/${c.slug}')">${ICO_LINK} Copy link</button></div>
+      <div class="ms-row">${sw(sf.showPrices,`chSet('storefront.showPrices',${!sf.showPrices});RENDER.channel()`)}<div><b>Show prices</b><span>Off shows "Ask for budget"</span></div></div>
+      <div class="ms-row">${sw(sf.publicSponsors,`chSet('storefront.publicSponsors',${!sf.publicSponsors});RENDER.channel()`)}<div><b>Show past sponsors</b><span>Only the ones you pick on each campaign</span></div></div>
+      <div class="ms-inline">Brands must book at least <input type="number" value="${sf.leadTimeDays}" oninput="chSet('storefront.leadTimeDays',+this.value)"> days ahead.</div>
+      <div style="margin-top:12px"><label class="lbl">A line about you</label><textarea class="inp" rows="2" oninput="chSet('storefront.intro',this.value)">${esc(sf.intro)}</textarea></div>
+      <div class="help" style="margin-top:8px">Brands request, you accept, then they pay. <a href="#" onclick="copyText('<iframe src=&quot;https://spotsnow.io/book/${c.slug}?embed=1&quot; width=&quot;100%&quot; height=&quot;720&quot; style=&quot;border:0&quot;></iframe>');return false">Copy embed code</a></div>`),
+  ].join('');
+  $('view-channel').innerHTML=`<div class="inner" style="max-width:780px">${pageHead('My show', 'Your show, your spots and prices, and your booking page.')}
+    <div id="chErr"></div>${body}
+    <div class="ms-bar ${CH_DIRTY?'on':''}" id="chBar"><span>You have unsaved changes</span><button class="btn btn--ghost btn--sm" onclick="chDiscard()">Discard</button><button class="btn btn--dark btn--sm" onclick="saveChannel()">Save changes</button></div>
+  </div>`;
   chValidate();
 };
-function chDay(d){ const a=CH.releaseDays; const i=a.indexOf(d); if(i>=0) a.splice(i,1); else a.push(d); CH_DIRTY=true; RENDER.channel(); }
+function chDay(d){ const a=CH.releaseDays; const i=a.indexOf(d); if(i>=0) a.splice(i,1); else a.push(d); a.sort((x,y)=>['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].indexOf(x)-['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].indexOf(y)); CH.releasesPerWeek=a.length; chSet('releaseDays',a); RENDER.channel(); }
 function chCat(x){ const a=CH.excludedCategories; const i=a.indexOf(x); if(i>=0) a.splice(i,1); else a.push(x); CH_DIRTY=true; RENDER.channel(); }
 function chInstant(id){ const a=CH.storefront.instant; const i=a.indexOf(id); if(i>=0) a.splice(i,1); else a.push(id); CH_DIRTY=true; RENDER.channel(); }
-function chErrors(){ const e=[]; if(CH.releaseDays.length!==Math.round(CH.releasesPerWeek)) e.push(`Schedule must match selected days: ${CH.releaseDays.length} day${CH.releaseDays.length===1?'':'s'} picked, ${CH.releasesPerWeek} releases per week.`);
-  if(CH.deliveryType==='Simulcast' && CH.split.video+CH.split.audio!==100) e.push('Simulcast split must sum to 100.'); if(CH.midSlots<1) e.push('An enabled roll must have slots.'); return e; }
+function chErrors(){ const e=[]; if(!CH.releaseDays.length) e.push('Pick at least one day you publish.');
+  if(!CH.pre&&!CH.post&&CH.midSlots<1&&!CH.ytIntegration) e.push('Turn on at least one ad spot.'); return e; }
 function chValidate(){ const el=$('chErr'); if(!el) return; const e=chErrors(); el.innerHTML=e.length?`<div class="notice notice--orange" style="margin-bottom:10px">${e.map(esc).join('<br>')}</div>`:''; }
 function saveChannel(force){
   const e=chErrors(); if(e.length){ toast(e[0]); return; }
@@ -2863,7 +2893,7 @@ function saveChannel(force){
   const daysChanged = CH.releaseDays.join()!==S.show.releaseDays.join();
   Object.assign(S.show, JSON.parse(JSON.stringify(CH)));
   if(daysChanged){ const keepEps=S.episodes.filter(e=>e.date<=TODAY); const fut=makeEpisodes(S.show, addDays(TODAY,1), '2027-02-05'); S.episodes=keepEps.concat(fut); }
-  rebuildSlots(); CH_DIRTY=false; refreshChrome(); RENDER.channel(); toast('Saved. Ad Calendar and storefront updated.');
+  rebuildSlots(); CH_DIRTY=false; refreshChrome(); RENDER.channel(); toast('Saved. Your calendar and booking page are updated.');
 }
 
 /* ════════ SETTINGS ════════ */
