@@ -33,7 +33,8 @@ const TEAM_PATHS = new Set([
   // reachable ungated.
   '/acme', '/acme-os.html',
   '/acme-inventory.html', '/acme-vetting.html',
-  '/acme-outbound-bw.html', '/acme-delivery.html'
+  '/acme-outbound-bw.html', '/acme-delivery.html',
+  '/acme/creators', '/acme-creators.html'
 ]);
 
 // Shared-password demo area. Includes the clean rewrite paths AND the real
@@ -75,6 +76,7 @@ export const config = {
     '/acme', '/acme-os.html',
     '/acme-inventory.html', '/acme-vetting.html',
     '/acme-outbound-bw.html', '/acme-delivery.html',
+    '/acme/creators', '/acme-creators.html',
     '/outbound', '/acme-outbound.html',
     '/financialdashboard', '/financial-dashboard-preview.html'
   ]
