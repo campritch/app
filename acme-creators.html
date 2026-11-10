@@ -3050,12 +3050,21 @@ function openCampaign(id){ const d=deal(id); if(!d) return; if(d.status!=='BOOKE
 function campPace(d){ const c=dealSummary(d); if(!c.aired.length) return {txt:c.sched.length?'Not started':'—', pct:null};
   if(c.tooEarly) return {txt:'Too early', pct:null}; return {txt:c.airedPct+'%', pct:c.airedPct}; }
 function paceBar(p){ if(p==null) return ''; const col=p>=90?'var(--green-text)':p>=80?'#EAB308':'var(--orange-text)'; return `<div class="pace" style="height:6px;flex:1"><div class="pace__fill" style="width:${Math.min(100,p)}%;background:${col}"></div></div>`; }
-function renderDvSub(){ const el=$('dvSub'); if(!el) return; const list=liveCampaigns();
-  el.innerHTML=list.map(d=>{ const p=campPace(d); return `<button class="subnav-item ${CURRENT==='campaign'&&CAMP_ID===d.id?'active':''}" onclick="openCampaign('${d.id}')">${blogo(d.domain,d.brand,'sm')}<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(d.brand)}</span><span class="subnav-pct" style="color:${p.pct==null?'var(--text-tertiary)':p.pct>=90?'var(--green-text)':'var(--orange-text)'}">${p.pct==null?'':p.pct+'%'}</span></button>`; }).join(''); }
-function campaignStrip(){ const list=liveCampaigns(); if(!list.length) return '';
-  return `<div class="dhead" style="margin:4px 2px 8px">By campaign</div><div class="listcard" style="margin-bottom:18px">${list.map(d=>{ const c=dealSummary(d), p=campPace(d), b=brandBadge(c);
+// Campaigns don't go in the sidebar: it has to work at 40 sponsors, not 4.
+function renderDvSub(){ const el=$('dvSub'); if(el) el.innerHTML=''; }
+let DV_ALLC=false, DV_CQ='';
+function campRank(d){ const c=dealSummary(d); if(d.reads.some(r=>r.status==='missed')||c.under) return 0; if(c.aired.some(r=>compMissed(r)>0&&!hasMakegoodFor(r))) return 1; if(c.tooEarly) return 3; if(c.state==='upcoming') return 4; return 2; }
+function campaignStrip(){ let list=liveCampaigns(); if(!list.length) return ''; const total=list.length;
+  list=list.slice().sort((a,b)=>campRank(a)-campRank(b) || (campPace(a).pct??999)-(campPace(b).pct??999));
+  if(DV_CQ) list=list.filter(d=>d.brand.toLowerCase().includes(DV_CQ.toLowerCase()));
+  const attn=list.filter(d=>campRank(d)<=1).length, LIMIT=5, shown=DV_ALLC||DV_CQ?list:list.slice(0,LIMIT);
+  return `<div style="display:flex;align-items:center;gap:10px;margin:4px 2px 8px"><div class="dhead" style="margin:0">By campaign</div><span class="muted" style="font-size:12px">${total} live${attn?` · ${attn} need${attn>1?'':'s'} attention`:''} · problems first</span>
+    ${total>LIMIT?`<div class="tbar__search tbar--bare" style="margin-left:auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Find a campaign" value="${esc(DV_CQ)}" onchange="DV_CQ=this.value;RENDER.delivery()"></div>`:''}</div>
+  <div class="listcard" style="margin-bottom:18px">${shown.map(d=>{ const c=dealSummary(d), p=campPace(d), b=brandBadge(c);
     return `<div class="att wrow--click" style="cursor:pointer" onclick="openCampaign('${d.id}')">${blogo(d.domain,d.brand)}<div class="att__main"><b>${esc(d.brand)}</b><span>${fmtDate(c.start)} – ${fmtDate(c.end)} · ${c.aired.length}/${c.paid.length+c.extra.length} aired · ${K(c.got)} of ${K(c.g)}</span></div>
-      <div style="display:flex;align-items:center;gap:8px;width:190px">${paceBar(p.pct)}<b style="font-size:12px;min-width:62px;text-align:right">${p.txt}</b></div><span style="width:120px;text-align:right"><span class="tag tag--${b.tone==='grey'?'grey':b.tone}">${b.t}</span></span></div>`; }).join('')}</div>`; }
+      <div style="display:flex;align-items:center;gap:8px;width:190px">${paceBar(p.pct)}<b style="font-size:12px;min-width:62px;text-align:right">${p.txt}</b></div><span style="width:120px;text-align:right"><span class="tag tag--${b.tone==='grey'?'grey':b.tone}">${b.t}</span></span></div>`; }).join('')}
+    ${!DV_CQ&&total>LIMIT?`<button class="archdiv" style="margin:0;padding:12px 16px" onclick="DV_ALLC=!DV_ALLC;RENDER.delivery()">${DV_ALLC?'Show fewer':`Show all ${total} campaigns`}</button>`:''}
+    ${DV_CQ&&!list.length?'<div class="empty">No campaign matches.</div>':''}</div>`; }
 RENDER.campaign = function(){
   const d=deal(CAMP_ID); if(!d){ go('delivery'); return; }
   const c=dealSummary(d), b=brandBadge(c), p=campPace(d), inv=d.invoice, ist=invStatus(inv);
