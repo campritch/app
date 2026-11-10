@@ -1437,6 +1437,14 @@
     .cs-shield { width:42px; height:42px; border-radius:50%; background:var(--secondary-lite); display:grid; place-items:center; color:var(--text-secondary); }
     .cs-ft__prog { width:200px; margin-left:94px; } .cs-ft__prog b { font-size:18px; } .cs-bar { height:14px; border-radius:999px; background:var(--secondary); margin-top:8px; overflow:hidden; } .cs-bar i { display:block; height:100%; background:var(--accent); border-radius:999px; transition:width .3s; }
     @media (max-width:1000px){ .cs-grid { grid-template-columns:1fr; } .cs-sum { position:static; } .cs-task { margin-left:0; flex-wrap:wrap; } .cs-task .cs-btn { min-width:0; width:100%; } .cs-h1 { font-size:32px; } .cs-btn--o, .cs-btn--a { min-width:0; } .cs-ft__note, .cs-ft__prog { display:none; } .cs-wrap { padding:24px 16px 140px; } .cs-pref__b { grid-template-columns:auto 1fr; } .cs-pref__b p { grid-column:1/-1; } }
+    .sidebar { width:246px; padding:18px 14px 14px; }
+    .sidebar .sb-group { margin-top:12px; } .sidebar .sb-group:first-child { margin-top:2px; }
+    .sidebar .sb-group__label { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text-tertiary); padding:8px 10px 6px; }
+    .sidebar .nav-item { padding:9px 11px; border-radius:9px; gap:11px; font-size:13.5px; font-weight:600; }
+    .sidebar .nav-item + .nav-item { margin-top:0; }
+    .sidebar .nav-item.active { background:var(--nav-current); }
+    .wnote .blogo.sm { width:22px; height:22px; border-radius:5px; flex-shrink:0; }
+    .wnote__body > b { flex-shrink:0; }
     /* mobile */
     .mtabs { display:none; }
     .mhead { display:none; }
@@ -1486,17 +1494,22 @@
       <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"/></svg>
     </button>
     <div class="sb-scroll">
-      <button class="nav-item" data-view="home" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home<span class="nbadge" id="needsBadge">0</span></button>
+      <div class="sb-group"><div class="sb-group__label">Platform</div>
+      <button class="nav-item" data-view="home" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Command Center<span class="nbadge" id="needsBadge">0</span></button>
       <button class="nav-item" data-view="calendar" onclick="go('calendar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Calendar</button>
+      </div>
+      <div class="sb-group"><div class="sb-group__label">Add-ons</div>
       <button class="nav-item" data-view="delivery" data-group="delivery" onclick="go('delivery')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Delivery<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
       <div class="subnav" id="subnav-delivery" hidden>
         <button class="subnav-item" data-sub="delivery" onclick="go('delivery')">Delivery <span class="sub-badge" id="delBadge"></span></button>
         <button class="subnav-item" data-sub="deals" onclick="go('deals')">Campaign Portal</button>
       </div><div id="dvSub" hidden></div>
-      <div class="sb-div"></div>
+      <button class="nav-item" onclick="openStorefront()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9 4.5 4h15L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6"/></svg>Booking page<svg style="margin-left:auto;width:12px;height:12px;opacity:.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 17 17 7M8 7h9v9"/></svg></button>
+      </div>
+      <div class="sb-group"><div class="sb-group__label">Workspace</div>
       <button class="nav-item" data-view="channel" onclick="go('channel')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="m8 3 4 4 4-4"/></svg>My show</button>
       <button class="nav-item" data-view="settings" onclick="go('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.2 4.2l2.8 2.8M17 17l2.8 2.8M1 12h4M19 12h4M4.2 19.8 7 17M17 7l2.8-2.8"/></svg>Settings</button>
-      <button class="nav-item" onclick="openStorefront()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9 4.5 4h15L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6"/></svg>Booking page<svg style="margin-left:auto;width:12px;height:12px;opacity:.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 17 17 7M8 7h9v9"/></svg></button>
+      </div>
       <span id="lockDelivery" hidden></span><span id="lockBrands" hidden></span>
     </div>
     <div id="sbPlan"></div>
@@ -3058,32 +3071,41 @@ function obFinish(){
   toast(`Welcome, ${c.host.split(' ')[0]}. Your calendar has ${overview().tot.open} open slots. Switch back to Second Wind from the show menu.`);
 }
 
+/* Home = Acme Command Center: hero + pills + ask, work rows, three tiles, conversation */
 RENDER.home = function(){
   const rows=needsYou(), sh=S.show;
   const unpaid=S.deals.filter(d=>d.invoice && ['SENT','DUE','OVERDUE'].includes(invStatus(d.invoice)));
   const owed=unpaid.reduce((a,d)=>a+d.invoice.amountCents,0);
-  const open4=S.episodes.filter(e=>e.date>TODAY&&e.date<=addDays(TODAY,28)).reduce((a,e)=>a+placements().filter(p=>!slot(e.date,p)).length,0);
-  const live=S.deals.filter(d=>d.status==='BOOKED'&&['live','upcoming'].includes(dealSummary(d).state)).length;
+  const under=S.deals.filter(d=>d.status==='BOOKED'&&dealSummary(d).under).length;
   const empty=!S.deals.length;
-  const stat=(v,l,fn)=>`<button class="cc-tile" onclick="${fn}"><div class="cc-tile__v" style="margin-top:0">${v}</div><div class="cc-tile__l" style="margin-top:4px">${l}</div></button>`;
-  $('view-home').innerHTML = `<div class="inner" style="max-width:880px">
-    <div class="head" style="margin:10px 0 22px"><h1 style="font-size:26px">Hi ${esc(S.owner.name.split(' ')[0])}</h1><p style="font-size:14px">${rows.length?`${rows.length} thing${rows.length>1?'s':''} need${rows.length>1?'':'s'} you.`:"You're all caught up."}</p></div>
-    ${empty?`<div class="firstrun" style="margin-top:0;margin-bottom:22px"><h3>Add your first sponsor</h3><p>Forward any IO or sponsor email to <b class="mono">deals+${S.dealIngestToken}@spotsnow.io</b>, or add one yourself.</p><div style="margin-top:14px"><button class="btn btn--dark btn--sm" onclick="openIngest()">Add sponsor</button></div></div>`:''}
-    <div class="cc-tiles" style="margin-top:0">
-      ${stat($$(owed),'Owed to you',"go('deals')")}
-      ${stat(open4,'Open slots, next 4 weeks',"go('calendar')")}
-      ${stat(live,'Live campaigns',"go('delivery')")}
+  const live=S.deals.find(d=>d.status==='BOOKED'&&dealSummary(d).state==='live');
+  const starters=[`Is ${live?live.brand:'my sponsor'} on track?`,"What's open next month?","Who hasn't paid?",'Which read scored lowest?'];
+  const t=(label,v,sub,click,dim)=>`<div class="tile" style="cursor:pointer" onclick="${click}"><div class="tile__label">${label}</div><div class="tile__val" style="color:${dim?'var(--text-tertiary)':'var(--text-primary)'}">${v}</div><div class="tile__delta"><span class="muted">${sub}</span></div></div>`;
+  const wrow=r=>{ const a=r.acts.find(x=>x[1]==='btn--dark')||r.acts[0];
+    return `<div class="wnote" onclick="${a[2]}"><span class="wnote__body"><b>${r.label}</b><span class="wnote__txt" title="${esc(r.title)}">${esc(r.title)}</span></span>${r.d?blogo(r.d.domain,r.d.brand,'sm'):''}<button class="btn btn--ghost btn--sm" style="flex-shrink:0" onclick="event.stopPropagation();${a[2]}">${a[0]}</button><button class="wnote__x" title="Dismiss" onclick="event.stopPropagation();DISMISSED.add('${r.id}');rerender();refreshChrome()">✕</button></div>`; };
+  $('view-home').innerHTML=`<div class="inner" style="max-width:940px;padding-top:8px">
+    <div class="hero">
+      <h1>Command Center</h1>
+      <p>Ask anything about your sponsors: who's on track, what's open, who hasn't paid. Answered off your calendar, your reads and your invoices.</p>
+      <div class="hero__pills"><span class="pill"><i style="background:var(--green-text)"></i>Agent checked ${rel(S.agentCheckedMins)}</span><button class="pill pill--solid" onclick="document.getElementById('ccWork').scrollIntoView({behavior:'smooth'})">${rows.length} need${rows.length===1?'s':''} you</button></div>
+      <div class="askwrap"><input id="ask" placeholder="Ask anything…" onkeydown="if(event.key==='Enter')ask(this.value)"><button class="askwrap__go" onclick="ask($('ask').value)" aria-label="Ask"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h13M12 5l7 7-7 7"/></svg></button></div>
+      <div class="starters">${starters.map(q=>`<button class="starter" onclick="ask(this.textContent)">${esc(q)}</button>`).join('')}</div>
     </div>
-    ${rows.length?`<div class="section-title" style="font-size:15px;font-weight:700;margin:26px 0 10px">To do</div><div class="listcard">${rows.map(attRow).join('')}</div>`:''}
-    <div class="section-title" style="font-size:15px;font-weight:700;margin:26px 0 10px;display:flex;align-items:center">Coming up<button class="btn btn--ghost btn--sm" style="margin-left:auto" onclick="go('calendar')">Calendar</button></div>
-    <div class="listcard">${nextOnAir()}</div>
-    <div class="card card__pad" style="margin-top:22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-      <div style="flex:1;min-width:220px"><b style="font-size:13.5px">Fill your open slots</b><div class="help" style="margin-top:2px">Share your booking page, or pitch brands already buying shows like yours.</div></div>
-      <button class="btn btn--ghost btn--sm" onclick="copyText('https://spotsnow.io/book/${sh.slug}')">${ICO_LINK} Copy booking link</button>
-      <button class="btn btn--ghost btn--sm" onclick="go('brands')">Brands to pitch</button>
+    ${empty?`<div class="firstrun" style="max-width:720px;margin:22px auto 0"><h3>Add your first sponsor</h3><p>Forward any IO or sponsor email to <b class="mono">deals+${S.dealIngestToken}@spotsnow.io</b>, or add one yourself.</p><div style="margin-top:14px"><button class="btn btn--dark btn--sm" onclick="openIngest()">Add deal</button></div></div>`:''}
+    <div id="ccWork" style="max-width:720px;margin:18px auto 0;text-align:left">
+      ${rows.map(wrow).join('<div style="height:8px"></div>')}
+      ${S.reminders.map(rm=>`<div class="wnote" style="margin-top:8px"><span class="wnote__body"><b>Reminder</b><span class="wnote__txt">${esc(rm.text)}</span><span class="tag ${rm.due<TODAY?'tag--orange':'tag--grey'}" style="margin-left:8px;flex-shrink:0">${rm.due<TODAY?'Overdue':fmtDate(rm.due)}</span></span><button class="wnote__x" title="Done" onclick="event.stopPropagation();doneReminder('${rm.id}')">✕</button></div>`).join('')}
+      <button class="fcta--quiet" style="margin-top:10px" onclick="addReminder()">+ Add reminder</button>
     </div>
+    <div class="tiles" style="grid-template-columns:repeat(3,1fr);margin-top:18px">
+      ${t('Needs you',rows.length,'things waiting on you',"document.getElementById('ccWork').scrollIntoView({behavior:'smooth'})",!rows.length)}
+      ${t('Owed to you',$$(owed),unpaid.length+' unpaid invoice'+(unpaid.length===1?'':'s'),"portalFilter='all';go('deals')",!owed)}
+      ${t('Campaigns under',under,'projecting below the 90% line',"delTab='work';go('delivery')",!under)}
+    </div>
+    ${CHAT.length?`<div class="thread"><div class="thread__hd"><span>Conversation</span><button onclick="CHAT=[];RENDER.home()">Clear</button></div>${CHAT.map(c=>`<div class="turn"><div class="turn__q">${esc(c.q)}</div><div class="turn__a">${c.a}</div></div>`).join('')}</div>`:''}
   </div>`;
 };
+
 RENDER.calendar = function(){
   const pls=placements(), ov=overview();
   const eps=S.episodes.filter(e=>e.date>addDays(TODAY,-4) && e.date<=WINDOW_END());
