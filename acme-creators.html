@@ -1345,6 +1345,11 @@
     @media (max-width:860px){ .cr-grid, .cr-row.open .cr-row__body { grid-template-columns:1fr; } .cr-kv, .cr-pill { display:none; } .cr-facts { grid-template-columns:1fr 1fr; } }
     .dv-head button { border:none; background:none; padding:0; font:inherit; font-size:11px; font-weight:600; color:var(--text-secondary); text-align:left; cursor:pointer; white-space:nowrap; }
     .dv-head button:hover { color:var(--text-primary); }
+    .sidebar .nav-chevron { margin-left:auto; width:15px; height:15px; opacity:.45; transition:transform .16s; }
+    .sidebar .nav-item.active .nav-chevron { transform:rotate(180deg); opacity:.7; }
+    #subnav-delivery { margin:3px 0 6px 23px; padding-left:13px; gap:2px; }
+    #subnav-delivery .subnav-item { padding:8px 12px; font-size:13px; }
+    .sub-badge { margin-left:auto; font-size:10px; font-weight:700; background:var(--accent); color:#fff; padding:1px 7px; border-radius:999px; }
     /* mobile */
     .mtabs { display:none; }
     .mhead { display:none; }
@@ -1396,9 +1401,11 @@
     <div class="sb-scroll">
       <button class="nav-item" data-view="home" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home<span class="nbadge" id="needsBadge">0</span></button>
       <button class="nav-item" data-view="calendar" onclick="go('calendar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Calendar</button>
-      <button class="nav-item" data-view="deals" onclick="go('deals')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1Z"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Campaign Portal</button>
-      <button class="nav-item" data-view="delivery" onclick="go('delivery')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Delivery</button>
-      <div class="subnav" id="dvSub"></div>
+      <button class="nav-item" data-view="delivery" data-group="delivery" onclick="go('delivery')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Delivery<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+      <div class="subnav" id="subnav-delivery" hidden>
+        <button class="subnav-item" data-sub="delivery" onclick="go('delivery')">Delivery <span class="sub-badge" id="delBadge"></span></button>
+        <button class="subnav-item" data-sub="deals" onclick="go('deals')">Campaign Portal</button>
+      </div><div id="dvSub" hidden></div>
       <div class="sb-div"></div>
       <button class="nav-item" data-view="channel" onclick="go('channel')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="m8 3 4 4 4-4"/></svg>My show</button>
       <button class="nav-item" data-view="settings" onclick="go('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.2 4.2l2.8 2.8M17 17l2.8 2.8M1 12h4M19 12h4M4.2 19.8 7 17M17 7l2.8-2.8"/></svg>Settings</button>
@@ -1777,7 +1784,9 @@ let CURRENT='home';
 const RENDER = {};
 function go(v){ if(v==='needs') v='home'; /* Needs you lives on Home: one list, not two */ CURRENT=v; document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active', x.id==='view-'+v));
   document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active', b.dataset.view===v)); document.querySelectorAll('.mtabs button').forEach(b=>b.classList.toggle('on', b.dataset.view===v));
-  RENDER[v] && RENDER[v](); if(v==='campaign'){ document.querySelectorAll('[data-view="delivery"]').forEach(b=>b.classList.add('active','on')); } renderDvSub(); $('views').scrollTop=0; try{ history.replaceState(null,'','#'+v); }catch(e){} }
+  RENDER[v] && RENDER[v](); { const inDel=v==='delivery'||v==='deals'||v==='campaign'; const sn=$('subnav-delivery'); if(sn) sn.hidden=!inDel;
+    document.querySelectorAll('.nav-item[data-group="delivery"]').forEach(b=>b.classList.toggle('active',inDel));
+    document.querySelectorAll('#subnav-delivery .subnav-item').forEach(b=>b.classList.toggle('active', b.dataset.sub===(v==='campaign'?'delivery':v))); } renderDvSub(); $('views').scrollTop=0; try{ history.replaceState(null,'','#'+v); }catch(e){} }
 function rerender(){ RENDER[CURRENT] && RENDER[CURRENT](); }
 function refreshChrome(){
   const sh=S.show;
@@ -1788,6 +1797,7 @@ function refreshChrome(){
   const gmv=S.gmvMonthCents, waived=gmv>=100000;
   $('sbPlan').innerHTML='';const _unused=`<div class="sb-plan"><b>${PLANS[S.plan].name} plan</b>${S.plan==='CREATOR_PRO'?` · ${waived?'<span style="color:var(--green-text);font-weight:700">waived this month</span>':'$50/mo'}<div>${$$(gmv)} booked through SpotsNow this month${waived?'':' · $1,000 waives it'}</div><div class="bar"><i style="width:${Math.min(100,gmv/1000)}%"></i></div>`:S.plan==='CREATOR_STORE'?`<div>Delivery, reports and invoicing are Pro.</div><button class="btn btn--sm btn--dark" style="margin-top:8px;width:100%" onclick="upgradePlan()">Upgrade</button>`:'<div>Multi-show, seats, API and MCP.</div>'}</div>`;
   document.title = sh.name+' · SpotsNow for Creators'; renderDvSub();
+  { const n=allReads().filter(x=>x._d.status==='BOOKED' && (x.status==='missed' || (x.status==='aired' && compMissed(x)>0 && !hasMakegoodFor(x)) || (x.status==='aired' && pastCheckIn(x) && dealSummary(x._d).under && !x._d.reads.some(y=>y.kind==='makegood')))).length; const b=$('delBadge'); if(b){ b.textContent=n; b.style.display=n?'':'none'; } }
 }
 function openWsMenu(ev){ ev.stopPropagation(); closeWsMenu(); const m=document.createElement('div'); m.className='wsmenu'; m.id='wsmenu';
   m.innerHTML = Object.values(WORKSPACES).map(w=>`<button onclick="switchWs('${w.id}')">${art(w.show,28,10)}<span style="flex:1"><b style="font-weight:700">${esc(w.show.name)}</b><small>${PLANS[w.plan].name} · ${w.deals.length} deals</small></span>${w===S?CK:''}</button>`).join('')+
