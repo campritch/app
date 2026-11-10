@@ -1385,6 +1385,58 @@
     .ms-bar.on { transform:none; opacity:1; pointer-events:auto; } .ms-bar span { flex:1; font-size:13.5px; font-weight:600; }
     .ms-bar .btn--ghost { background:transparent; color:#fff; border-color:rgba(255,255,255,.3); } .ms-bar .btn--dark { background:#fff; color:var(--primary); border-color:#fff; }
     @media (max-width:760px){ .ms-promise, .ms-id > div { grid-template-columns:1fr !important; } }
+    /* /confirm-spot (marketplace checkout) */
+    .cs-wrap { max-width:1340px; margin:0 auto; padding:44px 40px 140px; }
+    .cs-grid { display:grid; grid-template-columns:minmax(0,1fr) 420px; gap:48px; align-items:start; }
+    .cs-one { max-width:1040px; margin:0 auto; }
+    .cs-h1 { font-size:46px; font-weight:800; letter-spacing:-.035em; line-height:1.05; }
+    .cs-sub { font-size:17px; color:var(--text-primary); margin:12px 0 30px; }
+    .cs-h3 { font-size:18px; font-weight:700; margin:34px 0 16px; }
+    .cs-box { border:1px solid var(--border); border-radius:18px; padding:22px 26px 26px; background:var(--white); }
+    .cs-box__h { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; } .cs-box__h b { font-size:17px; } .cs-box__h a { font-size:15px; color:var(--text-primary); text-decoration:underline; }
+    .cs-item { display:flex; gap:18px; align-items:center; border:1px solid var(--border); border-radius:16px; padding:20px 22px; }
+    .cs-item .art { border-radius:8px; }
+    .cs-item__m { flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; } .cs-item__m b { font-size:19px; font-weight:700; } .cs-item__m span { font-size:13.5px; color:var(--text-secondary); display:inline-flex; gap:6px; align-items:center; } .cs-item__m a { font-size:13.5px; font-weight:600; color:var(--text-primary); text-decoration:underline; }
+    .cs-dates { font-size:12.5px !important; }
+    .cs-item__r { display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+    .cs-price { font-size:24px; font-weight:800; letter-spacing:-.02em; } .cs-cpm { font-size:13px; font-weight:600; }
+    .cs-ic { border:none; background:none; color:var(--text-primary); cursor:pointer; padding:2px; }
+    .cs-qty { display:flex; align-items:center; gap:14px; border:1px solid var(--border); border-radius:9px; padding:5px 10px; } .cs-qty button { border:none; background:none; font-size:18px; cursor:pointer; display:grid; place-items:center; color:var(--text-primary); } .cs-qty b { font-size:15px; min-width:12px; text-align:center; }
+    .cs-pref { background:var(--page-bg); border-radius:18px; padding:22px 26px; margin-bottom:22px; }
+    .cs-pref--w { background:var(--white); border:1px solid var(--border); } .cs-pref p { font-size:15px; line-height:1.55; color:var(--text-primary); margin-top:10px; }
+    .cs-pref__h { display:flex; align-items:center; gap:12px; } .cs-pref__h b { font-size:21px; font-weight:700; letter-spacing:-.02em; flex:1; }
+    .cs-pref__h input { width:22px; height:22px; accent-color:var(--primary); }
+    .cs-rec { font-size:13px; font-weight:600; background:var(--green-bg); color:var(--green-text); padding:5px 12px; border-radius:7px; }
+    .cs-pref__b { display:grid; grid-template-columns:auto 1fr 1.2fr; gap:16px; align-items:center; margin-top:18px; } .cs-pref__b b { display:block; font-size:15px; } .cs-pref__b span { font-size:15px; } .cs-pref__b p { margin:0; }
+    .cs-av { width:56px; height:56px; border-radius:50%; background:var(--primary); color:#fff; display:grid; place-items:center; font-weight:700; }
+    .cs-pref__f { font-size:15px; font-weight:700; margin-top:20px; }
+    .cs-sum { background:var(--page-bg); border-radius:22px; padding:28px 34px 32px; position:sticky; top:84px; }
+    .cs-sum h2 { font-size:25px; font-weight:800; letter-spacing:-.02em; } .cs-sum > .muted { font-size:15px; }
+    .cs-sum__t { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:26px 0; padding-bottom:24px; border-bottom:1px solid var(--border); }
+    .cs-sum__t div { background:var(--white); border-radius:14px; padding:12px; text-align:center; } .cs-sum__t span { display:block; font-size:12.5px; color:var(--text-secondary); } .cs-sum__t b { font-size:22px; font-weight:700; }
+    .cs-sum__l { display:flex; justify-content:space-between; font-size:18px; } .cs-sum__l b:last-child { font-size:16px; }
+    .cs-chip { display:inline-block; border:1px solid var(--border); background:var(--white); border-radius:7px; padding:6px 22px; font-size:14px; font-weight:500; margin-top:12px; }
+    .cs-sum p { font-size:16px; line-height:1.45; margin-top:22px; }
+    .cs-head { display:flex; gap:28px; align-items:flex-start; margin-bottom:6px; } .cs-head .cs-sub { margin-bottom:44px; }
+    .cs-back { width:62px; height:62px; flex-shrink:0; border-radius:50%; border:none; background:var(--secondary-lite); display:grid; place-items:center; cursor:pointer; color:var(--text-primary); margin-top:-4px; }
+    .cs-task { display:flex; align-items:flex-start; gap:16px; border:1px solid var(--border); border-radius:18px; padding:26px 30px; margin:0 0 22px 90px; background:var(--white); }
+    .cs-task b { display:block; font-size:19px; font-weight:700; } .cs-task span { display:block; font-size:16px; margin-top:6px; color:var(--text-primary); }
+    .cs-task .cs-btn { align-self:center; min-width:240px; }
+    .sf:has(.cs-wrap) { background:var(--white); }
+    .cs-task span.cs-num { display:grid; margin-top:-3px; color:var(--text-primary); font-size:16px; }
+    .cs-num { width:32px; height:32px; border-radius:50%; background:var(--secondary-lite); display:grid; place-items:center; font-weight:700; font-size:16px; flex-shrink:0; }
+    .cs-task.done .cs-num { background:var(--green-bg); color:var(--green-text); }
+    .cs-btn { height:56px; padding:0 34px; border-radius:12px; font-family:inherit; font-size:18px; font-weight:600; cursor:pointer; border:1px solid transparent; }
+    .cs-btn--o { background:var(--white); border-color:var(--border-strong); color:var(--text-primary); min-width:290px; }
+    .cs-btn--a { background:var(--accent); color:#fff; min-width:280px; } .cs-btn--a:hover { background:var(--accent-hover); } .cs-btn--a:disabled { opacity:.5; cursor:not-allowed; }
+    .cs-btn--d { background:var(--primary); color:#fff; height:46px; font-size:16px; padding:0 22px; border-radius:8px; }
+    .cs-ft { position:fixed; left:0; right:0; bottom:0; z-index:7; background:var(--page-bg); border-top:1px solid var(--border); }
+    .cs-ft__in { max-width:1340px; margin:0 auto; padding:14px 40px; display:flex; align-items:center; gap:16px; }
+    .cs-ft__tot span { display:block; font-size:18px; } .cs-ft__tot b { font-size:24px; font-weight:800; }
+    .cs-ft__note { display:flex; align-items:center; gap:10px; font-size:15px; color:var(--text-secondary); line-height:1.3; margin-left:20px; }
+    .cs-shield { width:42px; height:42px; border-radius:50%; background:var(--secondary-lite); display:grid; place-items:center; color:var(--text-secondary); }
+    .cs-ft__prog { width:200px; margin-left:94px; } .cs-ft__prog b { font-size:18px; } .cs-bar { height:14px; border-radius:999px; background:var(--secondary); margin-top:8px; overflow:hidden; } .cs-bar i { display:block; height:100%; background:var(--accent); border-radius:999px; transition:width .3s; }
+    @media (max-width:1000px){ .cs-grid { grid-template-columns:1fr; } .cs-sum { position:static; } .cs-task { margin-left:0; flex-wrap:wrap; } .cs-task .cs-btn { min-width:0; width:100%; } .cs-h1 { font-size:32px; } .cs-btn--o, .cs-btn--a { min-width:0; } .cs-ft__note, .cs-ft__prog { display:none; } .cs-wrap { padding:24px 16px 140px; } .cs-pref__b { grid-template-columns:auto 1fr; } .cs-pref__b p { grid-column:1/-1; } }
     /* mobile */
     .mtabs { display:none; }
     .mhead { display:none; }
@@ -2665,7 +2717,7 @@ function renderStorefront(){
   if(!sf.enabled){ $('storefront').innerHTML=`<div class="prevbar">Storefront is off · only you can see this<button onclick="closeStorefront()">Back to workspace</button></div><div class="sf-in"><div class="empty">This storefront is private. Turn it on in My channel → Storefront.</div></div>`; return; }
   if(SF.done){ const d=deal(SF.done); $('storefront').innerHTML=`<div class="prevbar">Public preview of spotsnow.io/book/${sh.slug}<button onclick="closeStorefront()">Back to workspace</button></div>
     <div class="sf-in" style="max-width:640px"><div class="ob-card" style="text-align:center;padding:34px"><div style="width:52px;height:52px;border-radius:50%;background:var(--green-bg);color:var(--green-text);display:grid;place-items:center;margin:0 auto 12px">${CK.replace(/11/g,'22')}</div>
-      <h2>${d.status==='BOOKED'?'You\'re booked':'Request sent'}</h2><p style="color:var(--text-secondary);font-size:14px;margin-top:6px">${d.status==='BOOKED'?`${$$(dealSummary(d).totalCents)} charged. ${esc(sh.host)} has your talking points.`:`${esc(sh.host)} replies within 24 hours. Nothing is charged until you're accepted, then you'll get a link to pay.`}</p>
+      <h2>${d.status==='BOOKED'?'You\'re booked':'Message sent'}</h2><p style="color:var(--text-secondary);font-size:14px;margin-top:6px">${d.status==='BOOKED'?`${$$(dealSummary(d).totalCents)} charged. ${esc(sh.host)} has your talking points.`:`${esc(sh.host)} replies within 24 hours. Nothing is charged until you're accepted, then you'll get a link to pay.`}</p>
       <div class="mail" style="text-align:left;margin-top:20px"><div class="mail__h"><b>To:</b> ${esc(d.contact.email)}<br><b>Subject:</b> ${esc(d.brand)} x ${esc(sh.name)}: ${d.status==='BOOKED'?'booking confirmed':'request received'}<br>📎 IO_${esc(d.brand.replace(/\W+/g,''))}_${sh.slug}.pdf</div><div class="mail__b">Your ${d.reads.length} read${d.reads.length>1?'s':''} on ${esc(sh.name)}: ${d.reads.map(r=>fmtDate(r.date)).join(', ')}.<br>Follow delivery live, no login: <a href="#" onclick="closeStorefront();openReport('${d.id}',true);return false">spotsnow.io/r/${d.id}</a> (shows "Scheduled" until reads air)</div></div>
       <button class="btn btn--ghost" style="margin-top:18px" onclick="SF.done=null;SF.sel=[];renderStorefront()">Back to ${esc(sh.name)}</button></div></div>`; return; }
   const [y,m]=SF.month.split('-').map(Number); const first=new Date(Date.UTC(y,m-1,1)); const startDow=first.getUTCDay(); const dim=new Date(Date.UTC(y,m,0)).getUTCDate();
@@ -3239,6 +3291,100 @@ RENDER.deals = function(){
   </div>`;
   refocusQ();
 };
+
+/* ════════ /confirm-spot: SpotsNow checkout (community-web develop, request-spot-process) ════════
+   Confirm Campaign → Set up your Ad → Send Request → Message sent. Paid on approval. */
+function openRequest(){ const pf=SF.prefill||{};
+  RQ={ brand:pf.brand||'', site:pf.domain||'', email:pf.email||'', name:pf.name||'', promo:pf.promo||'', landing:'', tps:'', host:'', terms:false, category:SF.category||pf.category||'',
+       kickoff:false, managed:false, tpDone:false, trDone:false, hostDone:false, message:'' };
+  SF.checkout='CONFIRM'; renderStorefront(); $('storefront').scrollTop=0; }
+function csTotals(){ const p=products().find(x=>x.id===SF.product); const unit=p.pkg?0:rateCents(p.placement); const sub=p.pkg?p.priceCents:SF.sel.length*unit;
+  const impr=(p.placement==='YT'?S.show.ytAvg:S.show.imprPerEp)*(p.pkg?p.count:SF.sel.length); return {p,unit,sub,impr}; }
+function csQty(n){ const t=csTotals(); if(n<0){ SF.sel.pop(); if(!SF.sel.length){ SF.checkout=null; } }
+  else { const next=S.episodes.find(e=>e.date>(SF.sel[SF.sel.length-1]||TODAY) && bookable(e.date,t.p.placement,SF.category).ok); if(next) SF.sel.push(next.date); else toast('No more open dates for this spot.'); }
+  RQ.message=''; renderStorefront(); }
+function renderConfirmSpot(){
+  const sh=S.show, st=SF.checkout, {p,unit,sub,impr}=csTotals();
+  const money=c=>'$'+(c/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const TRASH='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>';
+  const SHIELD='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>';
+  let main='', foot='';
+  if(st==='CONFIRM'){
+    main=`<div class="cs-grid"><div>
+      <h1 class="cs-h1">Confirm Campaign</h1><p class="cs-sub">Please review the details below and click Confirm &amp; Review to continue.</p>
+      <div class="cs-box"><div class="cs-box__h"><b>Custom booking (1)</b><a href="#" onclick="SF.sel=[];SF.checkout=null;renderStorefront();return false">Clear all</a></div>
+        <div class="cs-item">${art(sh,90,30)}<div class="cs-item__m"><b>${esc(sh.name)}</b><span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 4 6"/></svg>${(p.placement==='YT'?sh.ytAvg:sh.imprPerEp).toLocaleString('en-US')} per episode</span>
+            <span class="cs-dates">${esc(p.name)} · ${SF.sel.map(fmtDate).join(', ')}</span><a href="#" onclick="SF.checkout=null;renderStorefront();return false">View details</a></div>
+          <div class="cs-item__r"><div style="display:flex;align-items:center;gap:10px"><b class="cs-price">${money(sub)}</b><button class="cs-ic" onclick="SF.sel=[];SF.checkout=null;renderStorefront()">${TRASH}</button></div>
+            <span class="cs-cpm">${p.pkg?'bundle':money(unit)+' per episode'}</span>
+            ${p.pkg?'':`<div class="cs-qty"><button onclick="csQty(-1)">${SF.sel.length>1?'−':TRASH.replace(/17/g,'14')}</button><b>${SF.sel.length}</b><button onclick="csQty(1)">+</button></div>`}</div></div></div>
+      <h3 class="cs-h3">Booking Preferences</h3>
+      <div class="cs-pref"><div class="cs-pref__h"><b>Free expert kick off call</b><span class="cs-rec">Recommended</span><input type="checkbox" ${RQ.kickoff?'checked':''} onchange="RQ.kickoff=this.checked"></div>
+        <div class="cs-pref__b"><div class="cs-av">SN</div><div><b>Account Expert</b><span>SpotsNow team</span></div><p>Your order qualifies for a free 30 minute kick off call.</p></div>
+        <div class="cs-pref__f">Optimize success, audience fit, &amp; ensure competitive pricing</div></div>
+      <div class="cs-pref cs-pref--w"><div class="cs-pref__h"><b>Get SpotsNow to run this campaign for you</b><input type="checkbox" ${RQ.managed?'checked':''} onchange="RQ.managed=this.checked"></div>
+        <p>We'll take the campaign goals, the creative, and the time periods, and set up your campaign for you so you can measure results and report to your clients.</p></div>
+    </div>
+    <aside class="cs-sum"><h2>Order Summary</h2><span class="muted">1 show selected</span>
+      <div class="cs-sum__t"><div><span>Budget</span><b>${money(sub)}</b></div><div><span>Impressions</span><b>${impr.toLocaleString('en-US')}</b></div></div>
+      <div class="cs-sum__l"><b>Custom booking (1)</b><b>${money(sub)}</b></div>
+      <span class="cs-chip">Paid on Approval</span>
+      <p>This is the final price and you will be charged only if the show approves.</p></aside></div>`;
+    foot=`<div class="cs-ft__tot"><span>Total Price</span><b>${money(sub)}</b></div><div class="cs-ft__note"><span class="cs-shield">${SHIELD}</span>You won't be<br>charged yet.</div>
+      <span style="flex:1"></span><button class="cs-btn cs-btn--o" onclick="SF.checkout=null;renderStorefront()">Continue Browsing</button><button class="cs-btn cs-btn--a" onclick="SF.checkout='ONBOARDING';renderStorefront();$('storefront').scrollTop=0">Add talking points</button>`;
+  }
+  if(st==='ONBOARDING'){
+    const req=[RQ.tpDone,RQ.trDone].filter(Boolean).length, pct=Math.round(((RQ.tpDone?1:0)+(RQ.trDone?1:0)+(RQ.hostDone?1:0))/3*100);
+    const card=(n,t,s,done,btn,fn,opt)=>`<div class="cs-task ${done?'done':''}"><span class="cs-num">${done?CK:n}</span><div style="flex:1"><b>${t}${opt?' (optional)':''}</b><span>${s}</span></div><button class="cs-btn cs-btn--d" onclick="${fn}">${done?'Edit':btn}</button></div>`;
+    main=`<div class="cs-one"><div class="cs-head"><button class="cs-back" onclick="SF.checkout='CONFIRM';renderStorefront()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></button>
+      <div><h1 class="cs-h1">Set up your Ad</h1><p class="cs-sub">Add your talking points and tracking before you send the request to the show.</p></div></div>
+      ${card(1,'Submit your talking points','Add your talking points so the show can approve the ad.',RQ.tpDone,'Add talking points','csTask(\'tp\')')}
+      ${card(2,'Add your tracking','Please add tracking details for your campaign.',RQ.trDone,'Add tracking','csTask(\'tr\')')}
+      ${card(3,'Set the host up for success','Help the show better persuade your brand to their audience',RQ.hostDone,'Prepare the host','csTask(\'host\')',true)}</div>`;
+    foot=`<div class="cs-ft__prog"><b>Ad set up</b><div class="cs-bar"><i style="width:${Math.max(8,pct)}%"></i></div></div><span style="flex:1"></span>
+      <button class="cs-btn cs-btn--o" onclick="SF.checkout='SEND';RQ.message='';renderStorefront();$('storefront').scrollTop=0">Do it Later</button>
+      <button class="cs-btn cs-btn--a" ${req===2?'':'disabled'} onclick="SF.checkout='SEND';RQ.message='';renderStorefront();$('storefront').scrollTop=0">Continue</button>`;
+  }
+  if(st==='SEND'){
+    if(!RQ.message) RQ.message=`Hi ${sh.firstName}, we'd love to book ${SF.sel.length>1?SF.sel.length+' spots':'a spot'} on ${sh.name}: ${p.name} on ${SF.sel.map(fmtDate).join(', ')}.${RQ.tpDone?' Talking points are attached.':' We will send talking points shortly.'} Thanks!`;
+    main=`<div class="cs-one"><div class="cs-head"><button class="cs-back" onclick="SF.checkout='ONBOARDING';renderStorefront()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></button>
+      <div><h1 class="cs-h1">Send Request</h1><p class="cs-sub">Review your message and send the request once onboarding is complete.</p></div></div>
+      <div class="cs-box" style="padding:24px">
+        <div class="fgrid"><div class="fld2"><label class="lbl">Brand name</label><input class="inp" value="${esc(RQ.brand)}" oninput="RQ.brand=this.value"></div><div class="fld2"><label class="lbl">Brand website</label><input class="inp" placeholder="brand.com" value="${esc(RQ.site)}" oninput="RQ.site=this.value"></div></div>
+        <div class="fgrid"><div class="fld2"><label class="lbl">Your name</label><input class="inp" value="${esc(RQ.name)}" oninput="RQ.name=this.value"></div><div class="fld2"><label class="lbl">Email</label><input class="inp" type="email" value="${esc(RQ.email)}" oninput="RQ.email=this.value"></div></div>
+        <div class="fld2"><label class="lbl">Message to ${esc(sh.name)}</label><textarea class="inp" rows="5" oninput="RQ.message=this.value">${esc(RQ.message)}</textarea></div>
+        <label class="swrow" style="cursor:pointer"><input type="checkbox" ${RQ.terms?'checked':''} onchange="RQ.terms=this.checked"><div><b>I agree to the terms</b><small>Standard SpotsNow IO. You're charged only if the show approves.</small></div></label></div></div>`;
+    foot=`<div class="cs-ft__tot"><span>Total Price</span><b>${money(sub)}</b></div><div class="cs-ft__note"><span class="cs-shield">${SHIELD}</span>You won't be<br>charged yet.</div><span style="flex:1"></span>
+      <button class="cs-btn cs-btn--o" onclick="SF.checkout='ONBOARDING';renderStorefront()">Back</button><button class="cs-btn cs-btn--a" onclick="csSend()">Send Request</button>`;
+  }
+  $('storefront').innerHTML=`<div class="prevbar">Preview of spotsnow.io/confirm-spot<button onclick="SF.checkout=null;closeStorefront()">Back to workspace</button></div>
+    <div class="sf-top"><div class="sf-top__in"><div class="sf-wm"><i>S</i>SpotsNow</div><span class="muted" style="font-size:12.5px;margin-left:auto">Browse Spots · Bookings · Inbox</span></div></div>
+    <div class="cs-wrap">${main}</div><div class="cs-ft"><div class="cs-ft__in">${foot}</div></div>`;
+}
+function csTask(k){ const sh=S.show;
+  const body = k==='tp' ? `<div class="fld2"><label class="lbl">Talking points</label><textarea class="inp" id="csIn" rows="8" placeholder="What should ${esc(sh.firstName)} say? Key points, in your words.">${esc(RQ.tps)}</textarea><div class="help">The show approves these before the read.</div></div>`
+    : k==='tr' ? `<div class="fld2"><label class="lbl">Promo code</label><input class="inp" id="csCode" value="${esc(RQ.promo)}"></div><div class="fld2"><label class="lbl">Tracking URL</label><input class="inp" id="csIn" placeholder="brand.com/${sh.slug}" value="${esc(RQ.landing)}"></div>`
+    : `<div class="fld2"><label class="lbl">What should ${esc(sh.firstName)} know?</label><textarea class="inp" id="csIn" rows="6" placeholder="Why people love the product, a story the host can tell, what to avoid.">${esc(RQ.host)}</textarea></div><div class="fld2"><label class="lbl">Send ${esc(sh.firstName)} a sample (optional)</label><div class="help">We'll ask for a shipping address after the show accepts.</div></div>`;
+  const title={tp:'Submit your talking points',tr:'Add your tracking',host:'Prepare the host'}[k];
+  openDrawer(dHead(title)+`<div class="drawer__body">${body}</div><div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Cancel</button><button class="btn btn--dark" onclick="csSave('${k}')">Save</button></div>`); }
+function csSave(k){ const v=($('csIn')||{}).value||'';
+  if(k==='tp'){ if(!v.trim()){ toast('Add at least one talking point.'); return; } RQ.tps=v; RQ.tpDone=true; }
+  if(k==='tr'){ RQ.landing=v; RQ.promo=($('csCode')||{}).value||''; if(!v.trim()&&!RQ.promo.trim()){ toast('Add a promo code or tracking URL.'); return; } RQ.trDone=true; }
+  if(k==='host'){ RQ.host=v; RQ.hostDone=!!v.trim(); }
+  closeOverlays(); renderStorefront(); }
+function csSend(){
+  if(!RQ.brand.trim()){ toast('Brand name is required'); return; }
+  const site=(RQ.site||'').toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/.*$/,'');
+  if(site && !/^[\da-z.-]+\.[a-z.]{2,6}$/.test(site)){ toast('Please enter a valid website URL'); return; }
+  if(!RQ.email.includes('@')){ toast('Add an email so the show can reply.'); return; }
+  if(!RQ.message.trim()){ toast('Message is required'); return; }
+  if(!RQ.terms){ toast('You must accept the terms'); return; }
+  RQ.site=site||RQ.brand.toLowerCase().replace(/[^a-z0-9]/g,'')+'.com'; RQ.goal=RQ.message;
+  SF.checkout=null; submitRequest();
+  const d=S.deals[S.deals.length-1]; if(d && d.brand===RQ.brand.trim()){ d.goal=RQ.message; d.landingUrl=RQ.landing; d.hostNotes=RQ.host; d.kickoff=RQ.kickoff; d.managed=RQ.managed; }
+}
+const _sfRender = renderStorefront;
+renderStorefront = function(){ if(SF && SF.checkout) return renderConfirmSpot(); return _sfRender(); };
 
 /* ════════ BOOT ════════ */
 (function init(){
