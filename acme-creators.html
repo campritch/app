@@ -1343,6 +1343,8 @@
     .cr-facts span { display:block; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-secondary); } .cr-facts b { font-size:15px; font-weight:600; margin-top:4px; display:block; }
     .cr-land { font-size:13.5px; color:var(--text-secondary); margin-top:14px; } .cr-land a { color:var(--text-primary); text-decoration:underline; }
     @media (max-width:860px){ .cr-grid, .cr-row.open .cr-row__body { grid-template-columns:1fr; } .cr-kv, .cr-pill { display:none; } .cr-facts { grid-template-columns:1fr 1fr; } }
+    .dv-head button { border:none; background:none; padding:0; font:inherit; font-size:11px; font-weight:600; color:var(--text-secondary); text-align:left; cursor:pointer; white-space:nowrap; }
+    .dv-head button:hover { color:var(--text-primary); }
     /* mobile */
     .mtabs { display:none; }
     .mhead { display:none; }
@@ -1394,7 +1396,7 @@
     <div class="sb-scroll">
       <button class="nav-item" data-view="home" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home<span class="nbadge" id="needsBadge">0</span></button>
       <button class="nav-item" data-view="calendar" onclick="go('calendar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Calendar</button>
-      <button class="nav-item" data-view="deals" onclick="go('deals')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1Z"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Campaigns</button>
+      <button class="nav-item" data-view="deals" onclick="go('deals')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1Z"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Campaign Portal</button>
       <button class="nav-item" data-view="delivery" onclick="go('delivery')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Delivery</button>
       <div class="subnav" id="dvSub"></div>
       <div class="sb-div"></div>
@@ -1968,29 +1970,6 @@ function paceCell(d,c){
   const p=c.airedPct, cls=p>=90?'pace--good':p>=80?'pace--warn':'pace--bad';
   return `<div class="pbar"><div class="pace ${cls}" style="${p<80?'':''}"><div class="pace__fill" style="width:${Math.min(100,p)}%;${p<80?'background:var(--orange-text)':p<90?'background:#EAB308':''}"></div></div><b>${p}%</b></div>`;
 }
-RENDER.deals = function(){
-  let list=S.deals.slice();
-  const fl={ all:x=>!['DECLINED','RELEASED'].includes(x.status), active:x=>x.status==='BOOKED'&&dealSummary(x).state!=='done', req:x=>['PROPOSED','HOLD','COUNTERED','DRAFT'].includes(x.status), unpaid:x=>x.invoice&&['SENT','DUE','OVERDUE'].includes(invStatus(x.invoice)), done:x=>dealSummary(x).state==='done'||['DECLINED','RELEASED'].includes(x.status) };
-  list=list.filter(fl[DL_F]); if(DL_Q) list=list.filter(x=>(x.brand+x.domain+(x.agency||'')).toLowerCase().includes(DL_Q.toLowerCase()));
-  list.sort((a,b)=>{ const ca=dealSummary(a), cb=dealSummary(b); const rk=x=>({proposed:0,draft:1,live:2,upcoming:3,done:5})[x.state]??4; return rk(ca)-rk(cb) || (cb.start||'').localeCompare(ca.start||''); });
-  const cnt=k=>S.deals.filter(fl[k]).length;
-  $('view-deals').innerHTML=`<div class="inner">${pageHead('Campaigns', 'Every campaign has a live page to share with the advertiser: what aired, how it is delivering, what is next. Open one to edit or share it.', `<button class="btn btn--ghost btn--sm" onclick="exportDeals()">${ICO_DL} CSV</button><button class="btn btn--dark btn--sm" onclick="openIngest()">+ Add deal</button>`)}
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
-      <div class="seg">${[['all','All'],['active','Active'],['req','Requests & holds'],['unpaid','Unpaid'],['done','Done']].map(([k,l])=>`<button class="${DL_F===k?'active':''}" onclick="DL_F='${k}';RENDER.deals()">${l} <span class="muted">${cnt(k)}</span></button>`).join('')}</div>
-      <div class="tbar__search tbar--bare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Search sponsors" value="${esc(DL_Q)}" oninput="DL_Q=this.value;clearTimeout(window._dq);window._dq=setTimeout(()=>{RENDER.deals();const i=document.querySelector('#view-deals input');i.focus();i.setSelectionRange(i.value.length,i.value.length)},250)"></div>
-      <span class="muted" style="margin-left:auto;font-size:12px">Forward IOs to <b class="mono">deals+${S.dealIngestToken}@spotsnow.io</b></span>
-    </div>
-    <div class="listcard"><div class="dl-head"><span>Sponsor</span><span>Source</span><span>Flight</span><span>Reads</span><span>Value</span><span>Delivery</span><span>Invoice</span><span>Status</span></div>
-    ${list.length?list.map(d=>{ const c=dealSummary(d); return `<div class="dl-row" onclick="${d.status==='BOOKED'?`openReport('${d.id}')`:`openDeal('${d.id}')`}"><div class="who">${blogo(d.domain,d.brand)}<div style="min-width:0"><b>${esc(d.brand)}</b><span>${esc(d.category)}${d.agency?' · via '+esc(d.agency):''}</span></div></div>
-      <span class="tag tag--grey" style="justify-self:start">${srcLabel(d.source)}</span>
-      <span style="font-size:12.5px">${c.start?fmtDate(c.start)+' – '+fmtDate(c.end):'—'}</span>
-      <span class="num" style="font-size:12.5px">${c.paid.length}${c.extra.length?` <span class="muted">+${c.extra.length}</span>`:''}</span>
-      <b class="num" style="font-size:13px">${$$(c.totalCents)}</b>
-      ${paceCell(d,c)}
-      ${invBadge(d.invoice,d)}
-      <span style="display:flex;align-items:center;gap:6px">${dealStatusTag(d,c)}${d.status==='BOOKED'?`<button class="wdots" title="Copy the advertiser's link" onclick="event.stopPropagation();copyText('https://spotsnow.io/r/${d.id}')">${ICO_LINK}</button>`:''}</span></div>`; }).join(''):`<div class="empty">No deals here yet. <a href="#" onclick="openIngest();return false">Add a deal</a> or forward an IO.</div>`}</div>
-  </div>`;
-};
 function exportDeals(){ const rows=[['Sponsor','Domain','Source','Start','End','Reads','Value','Delivered','Guarantee','Invoice']].concat(S.deals.map(d=>{const c=dealSummary(d);return [d.brand,d.domain,d.source,c.start,c.end,c.paid.length,(c.totalCents/100).toFixed(2),c.got,c.g,d.invoice?invStatus(d.invoice):''];}));
   dlFile('second-wind-deals.csv', rows.map(r=>r.map(x=>`"${String(x??'').replace(/"/g,'""')}"`).join(',')).join('\n'), 'text/csv'); }
 function dlFile(name, text, type){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type})); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.parentNode.removeChild(a); },100); }
@@ -2310,33 +2289,6 @@ function guaranteeAdvice(){
   const avg=Math.round(called.reduce((a,r)=>a+projected(r),0)/called.length); const g=S.show.guarantee; if(avg>=g) return null;
   return { g, avg, sug: Math.round(avg*0.95/1000)*1000, n:called.length, short:short.length };
 }
-RENDER.delivery = function(){
-  const reads=allReads().filter(r=>['aired','missed','scheduled'].includes(r.status) && ['BOOKED'].includes(r._d.status));
-  const needs=r=> r.status==='missed' || compMissed(r)>0&&!hasMakegoodFor(r) || (r.status==='aired' && pastCheckIn(r) && dealSummary(r._d).under && !r._d.reads.some(x=>x.kind==='makegood'));
-  const Q={ needs, all:()=>true, aired:r=>r.status==='aired', scheduled:r=>r.status==='scheduled' };
-  let list=reads.filter(Q[DV_Q]);
-  if(DV_SRC!=='all') list=list.filter(r=> DV_SRC==='yt' ? (r.placement==='YT'||r.ytShare>0) : r.placement!=='YT');
-  if(DV_SEARCH) list=list.filter(r=>r._d.brand.toLowerCase().includes(DV_SEARCH.toLowerCase()));
-  list.sort((a,b)=> DV_Q==='scheduled' ? (a.date<b.date?-1:1) : (a.date<b.date?1:-1));
-  const ga=guaranteeAdvice(), mkey=TODAY.slice(0,7);
-  const banner = ga && !GA_DISMISSED[mkey] ? `<div class="banner"><div style="flex:1">You're guaranteeing <b>${K(ga.g)}</b> per read but averaging <b>${K(ga.avg)}</b> across ${ga.n} called reads (${ga.short} short). Drop the guarantee to <b>${K(ga.sug)}</b>?</div><button class="btn btn--dark btn--sm" onclick="S.show.guarantee=${ga.sug};GA_DISMISSED['${mkey}']=1;rerender();toast('Guarantee updated to ${K(ga.sug)} in My channel. Existing deals keep the guarantee they were sold with.')">Update guarantee</button><button class="att-x" onclick="GA_DISMISSED['${mkey}']=1;rerender()">✕</button></div>` : '';
-  const yt=S.show.sources.find(s=>s.type==='YOUTUBE');
-  const cnt=k=>reads.filter(Q[k]).length;
-  const html=`<div class="inner">${pageHead('Delivery', `Every booked read: did it air, how it's pacing on your own curve (${curveKey()==='fitted'?'fitted from your verified reads':'category default until 5 verified reads'}, check-in day ${checkInDay()}), and what needs you.`,
-    `<span class="live-dot"><i></i>Air check every 24h</span><button class="btn btn--ghost btn--sm" onclick="syncEpisodes()">Sync episodes</button>${yt&&yt.oauthStatus!=='connected'?`<button class="btn btn--dark btn--sm" onclick="openYtConnect()">Connect YouTube</button>`:''}`)}
-    ${banner}
-    ${campaignStrip()}<div class="dhead" style="margin:4px 2px 8px">Reads</div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
-      <div class="seg">${[['needs','Needs you'],['all','All'],['aired','Aired'],['scheduled','Scheduled']].map(([k,l])=>`<button class="${DV_Q===k?'active':''}" onclick="DV_Q='${k}';RENDER.delivery()">${l} <span class="muted">${cnt(k)}</span></button>`).join('')}</div>
-      <div class="tbar__search tbar--bare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Search sponsors" value="${esc(DV_SEARCH)}" onchange="DV_SEARCH=this.value;RENDER.delivery()"></div>
-      <select class="inp" style="width:auto;min-height:34px;padding:5px 9px;font-size:12.5px" onchange="DV_SRC=this.value;RENDER.delivery()"><option value="all">All sources</option><option value="yt" ${DV_SRC==='yt'?'selected':''}>YouTube</option><option value="aud" ${DV_SRC==='aud'?'selected':''}>Audio</option></select>
-    </div>
-    <div class="listcard"><div class="dv-head"><span>Ad</span><span>Day</span><span>Ran</span><span>Delivered</span><span>Pacing</span><span></span><span>Status</span><span></span></div>
-    ${list.length?list.map(dvRow).join(''):`<div class="empty">${DV_Q==='needs'?'Nothing needs you in Delivery.':'No reads here.'}</div>`}</div>
-    <div class="footnote">Audio is ${S.show.sources.some(s=>s.type.startsWith('HOSTING'))?'from your hosting connect':'creator-reported from your monthly baseline'} · YouTube is ${yt&&yt.oauthStatus==='connected'?'engaged views via your connected channel':'public views'} · 90% of guarantee is full delivery, called at the deal level</div>
-  </div>`;
-  $('view-delivery').innerHTML=gate('delivery', html);
-};
 function dvRow(r){
   const d=r._d, sp=deliveredSplit(r), g=guaranteeOf(r), miss=compMissed(r);
   let status, cta;
@@ -3093,6 +3045,139 @@ RENDER.campaign = function(){
     <div class="listcard"><div class="dv-head"><span>Ad</span><span>Day</span><span>Ran</span><span>Delivered</span><span>Pacing</span><span></span><span>Status</span><span></span></div>${reads.map(dvRow).join('')}</div>
   </div>`;
   $('view-campaign').innerHTML=gate('delivery', html);
+};
+
+/* ════════ DELIVERY + CAMPAIGN PORTAL: ported 1:1 from acme-delivery.html ════════ */
+let delTab='work', delMode='campaigns', delTime='All time', delStatus='All statuses', delQ2='', DEL_OPEN={}, FOCUS_Q=null;
+let portalFilter='all', dealQ='', dealSort={k:'date',dir:-1}, delSort={k:'day',dir:-1}, BRAND_OPEN={};
+const CHEV='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>';
+function refocusQ(){ if(!FOCUS_Q) return; const el=$(FOCUS_Q); if(el){ el.focus(); el.setSelectionRange(el.value.length,el.value.length); } FOCUS_Q=null; }
+function setDelSort(k){ delSort = delSort.k===k?{k,dir:-delSort.dir}:{k,dir:-1}; RENDER.delivery(); }
+function setDealSort(k){ dealSort = dealSort.k===k?{k,dir:-dealSort.dir}:{k,dir:-1}; RENDER.deals(); }
+function toggleDelDeal(id){ DEL_OPEN[id]=!DEL_OPEN[id]; RENDER.delivery(); }
+function openPick(ev,kind){ ev.stopPropagation(); closeRowMenu();
+  const opts = kind==='time' ? ['All time','This week','This month','September','October','November','December'] : ['All statuses','In progress','Complete','Tracking under','Tracking over','On track','Not started'];
+  const m=document.createElement('div'); m.className='wpop'; m.id='rowmenu';
+  m.innerHTML=opts.map(o=>`<button onclick="closeRowMenu();${kind==='time'?'delTime':'delStatus'}='${o}';RENDER.delivery()">${o}</button>`).join('');
+  document.body.appendChild(m); const r=ev.currentTarget.getBoundingClientRect(); m.style.top=(r.bottom+4)+'px'; m.style.left=r.left+'px'; setTimeout(()=>document.addEventListener('click',closeRowMenu,{once:true}),0); }
+function bookedDeals(){ return S.deals.filter(d=>d.status==='BOOKED'); }
+function readVerdict(r){ if(r.status!=='aired') return null; const p=Math.round(projected(r)/guaranteeOf(r)*100); return { final: ageOf(r)>=30, k: !pastCheckIn(r)?'early': p>=100?'bonus': p<FULL_AT*100?'short':'on' }; }
+function openCampaign(id){ const d=deal(id); if(!d) return; if(d.status!=='BOOKED'){ openDeal(id); return; } closeOverlays(); delTab='all'; delMode='campaigns'; DEL_OPEN[id]=true; go('delivery'); }
+
+RENDER.delivery = function(){
+  const all=allReads().filter(r=>r._d.status==='BOOKED' && ['aired','missed','scheduled'].includes(r.status));
+  const needs=r=> r.status==='missed' || compMissed(r)>0&&!hasMakegoodFor(r) || (r.status==='aired' && pastCheckIn(r) && dealSummary(r._d).under && !r._d.reads.some(x=>x.kind==='makegood'));
+  const work=all.filter(needs).sort((a,b)=>a.date<b.date?1:-1);
+  const MG=allReads().filter(r=>r.kind!=='paid' && r.status!=='cancelled');
+  const MON3={September:'09',October:'10',November:'11',December:'12'};
+  let live = delStatus==='Not started' ? all.filter(r=>r.status!=='aired') : all.filter(r=>r.status==='aired');
+  if(delTime!=='All time') live=live.filter(r=>{ if(delTime==='This week'){ const x=diffDays(r.date,TODAY); return x>=-7&&x<=7; } if(delTime==='This month') return r.date.slice(5,7)===TODAY.slice(5,7); return r.date.slice(5,7)===MON3[delTime]; });
+  if(delStatus!=='All statuses'&&delStatus!=='Not started') live=live.filter(r=>{ const v=readVerdict(r); if(!v) return false;
+    if(delStatus==='In progress') return !v.final; if(delStatus==='Complete') return v.final;
+    if(delStatus==='Tracking over') return !v.final&&v.k==='bonus'; if(delStatus==='Tracking under') return !v.final&&v.k==='short'; return !v.final&&v.k==='on'; });
+  if(delQ2.trim()){ const q=delQ2.trim().toLowerCase(); live=live.filter(r=>r._d.brand.toLowerCase().includes(q)); }
+  const sv={ ad:r=>r._d.brand.toLowerCase(), day:r=>r.date, delivered:r=>delivered(r), pacing:r=>r.status==='aired'?projected(r)/guaranteeOf(r):-1 };
+  live.sort((a,b)=>{ const x=sv[delSort.k](a), y=sv[delSort.k](b); return (x>y?1:x<y?-1:0)*delSort.dir; });
+  const ga=guaranteeAdvice(), mkey=TODAY.slice(0,7);
+  const banner = ga && !GA_DISMISSED[mkey] ? `<div class="banner"><div style="flex:1">You're guaranteeing <b>${K(ga.g)}</b> per read but averaging <b>${K(ga.avg)}</b> across ${ga.n} called reads. Drop the guarantee to <b>${K(ga.sug)}</b>?</div><button class="btn btn--dark btn--sm" onclick="S.show.guarantee=${ga.sug};GA_DISMISSED['${mkey}']=1;rerender();toast('Guarantee updated to ${K(ga.sug)}. Existing deals keep what they were sold with.')">Update guarantee</button><button class="att-x" onclick="GA_DISMISSED['${mkey}']=1;rerender()">✕</button></div>` : '';
+  const delBar=`<div class="tbar tbar--bare">
+      <div class="tbar__search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="delQInp" placeholder="Search flights…" value="${esc(delQ2)}" oninput="delQ2=this.value;FOCUS_Q='delQInp';RENDER.delivery()"></div>
+      <button class="tsel" style="display:inline-flex;align-items:center;gap:6px" onclick="openPick(event,'time')">${esc(delTime)} ${CHEV}</button>
+      <button class="tsel" style="display:inline-flex;align-items:center;gap:6px" onclick="openPick(event,'status')">${esc(delStatus)} ${CHEV}</button>
+    </div>`;
+  const head=`<div class="dv-head">${[['ad','Ad'],['day','Day'],[null,'Ran'],['delivered','Delivered'],['pacing','Pacing']].map(([k,l])=>k?`<button class="shbtn" onclick="setDelSort('${k}')">${l}${delSort.k===k?(delSort.dir>0?' ↑':' ↓'):''}</button>`:`<span>${l}</span>`).join('')}<span></span><span>Status</span><span></span></div>`;
+  let body;
+  if(delTab==='mg') body = makeGoodsPanel(MG);
+  else if(delTab==='work') body = work.length?`<div class="listcard">${head}${work.map(dvRow).join('')}</div>`:`<div class="card"><div class="empty">✨ Nothing needs you. Every flight projects over the 90% line.</div></div>`;
+  else body = `<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><div class="seg">
+        <button class="${delMode==='campaigns'?'active':''}" onclick="delMode='campaigns';RENDER.delivery()">By campaign</button>
+        <button class="${delMode==='episodes'?'active':''}" onclick="delMode='episodes';RENDER.delivery()">By episode</button></div></div>
+      ${delMode==='campaigns'
+        ? (()=>{ const cs=bookedDeals().filter(d=>dealSummary(d).state==='live').filter(d=>!delQ2.trim()||d.brand.toLowerCase().includes(delQ2.trim().toLowerCase()))
+            .sort((a,b)=>(dealSummary(b).start||'').localeCompare(dealSummary(a).start||''));
+            return `<div class="listcard">${cs.length?cs.map((d,i)=>dealIndexRow(d,i,`toggleDelDeal('${d.id}')`,!!DEL_OPEN[d.id])
+              +(DEL_OPEN[d.id]?`<div style="background:var(--page-bg);box-shadow:inset 0 1px 0 var(--border-light)">${d.reads.filter(r=>r.status!=='cancelled').map(r=>Object.assign(r,{_d:d})).sort((a,b)=>a.date<b.date?1:-1).map(dvRow).join('')}</div>`:'')).join(''):'<div class="empty">No live campaigns.</div>'}</div>`; })()
+        : `<div class="listcard">${head}${live.length?live.map(dvRow).join(''):'<div class="empty">No flights match.</div>'}</div>`}`;
+  const html=`<div class="inner" style="max-width:1080px">
+    <div class="pagebar"><div class="head"><h1>Delivery</h1></div>
+      <div class="pagebar__right">${delTab!=='mg'?delBar:''}<div class="seg">
+        <button class="${delTab==='work'?'active':''}" onclick="delTab='work';RENDER.delivery()">Needs you${work.length?' · '+work.length:''}</button>
+        <button class="${delTab==='all'?'active':''}" onclick="delTab='all';RENDER.delivery()">All flights</button>
+        <button class="${delTab==='mg'?'active':''}" onclick="delTab='mg';RENDER.delivery()">Make goods${MG.length?' · '+MG.length:''}</button></div></div>
+    </div>
+    ${banner}${body}
+    <div class="footnote">Projections come from your show's own curve, refit every time a read is verified. Audio is ${S.show.sources.some(s=>s.type.startsWith('HOSTING'))?'from your host':'creator-reported'}.</div>
+  </div>`;
+  $('view-delivery').innerHTML=gate('delivery', html);
+  refocusQ();
+};
+function makeGoodsPanel(MG){
+  const given=MG.reduce((a,r)=>a+(r.status==='aired'?delivered(r):guaranteeOf(r)),0), value=MG.reduce((a,r)=>a+rateCents(r.placement),0);
+  return `<div class="tiles" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px">
+      <div class="tile"><div class="tile__label">Make goods + bonus</div><div class="tile__val" style="font-size:28px">${MG.length}</div></div>
+      <div class="tile"><div class="tile__label">Given at no charge</div><div class="tile__val" style="font-size:28px">${$$(value)}</div><div class="help">at your rate card</div></div>
+      <div class="tile"><div class="tile__label">Impressions given</div><div class="tile__val" style="font-size:28px">${K(given)}</div></div></div>
+    <div class="listcard">${MG.length?MG.sort((a,b)=>a.date<b.date?1:-1).map(r=>`<div class="att wrow--click" style="cursor:pointer" onclick="${r.status==='aired'?`openRead('${r.id}')`:`openCampaign('${r._d.id}')`}">${blogo(r._d.domain,r._d.brand)}<div class="att__main"><b>${esc(r._d.brand)} <span class="tag ${r.kind==='bonus'?'tag--green':'tag--purple'}" style="margin-left:4px">${r.kind==='bonus'?'Bonus':'Make good'}</span></b><span>${PL[r.placement]} · ${dayName(r.date)} ${fmtDate(r.date)}${r.forRead?' · for the '+fmtDate(readById(r.forRead)?.date||r.date)+' read':''}</span></div><b style="font-size:13px">${r.status==='aired'?K(delivered(r)):'Scheduled'}</b></div>`).join(''):'<div class="empty">No make goods yet. That means every read landed.</div>'}</div>
+    <div style="margin-top:12px"><button class="btn btn--ghost btn--sm" onclick="(()=>{const d=bookedDeals().find(x=>dealSummary(x).state==='live'); if(d) openMakegood(null,d.id,'bonus');})()">+ Bonus spot</button></div>`;
+}
+function plSummary(d){ const m={}; d.reads.filter(r=>r.kind==='paid'&&r.status!=='cancelled').forEach(r=>m[r.placement]=(m[r.placement]||0)+1); return Object.entries(m).map(([p,n])=>`${PL[p]} ×${n}`).join(', ')||'—'; }
+function dealIndexRow(d,i,click,open){
+  const c=dealSummary(d), b=brandBadge(c);
+  const proj=c.proj+c.sched.reduce((a,r)=>a+(r.kind==='paid'?guaranteeOf(Object.assign(r,{_d:d})):0),0);
+  const tone = !c.aired.length||c.tooEarly ? 'var(--text-tertiary)' : c.pct>=90 ? 'var(--green-text)' : c.pct>=80 ? '#CA8A04' : 'var(--orange-text)';
+  const max=Math.max(c.g,proj)*1.06||1, w=x=>Math.min(100,x/max*100);
+  const missed=d.reads.some(r=>r.status==='missed'), flag=c.aired.some(r=>compMissed(r)>0&&!hasMakegoodFor(r)), mg=d.reads.some(r=>r.kind==='makegood'&&r.status==='scheduled');
+  const st = c.under?['warn','Tracking under'] : missed?['clock','Missed read'] : flag?['warn','Read flagged'] : mg?['mg','Make good scheduled'] : null;
+  const ICO={warn:'<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',mg:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>'};
+  return `<div class="wrow--click" style="display:grid;grid-template-columns:minmax(0,0.9fr) minmax(0,1fr) 108px 150px 168px 118px 26px;align-items:center;gap:0 13px;padding:13px 16px;${i===0?'':'border-top:1px solid var(--border-light)'}" onclick="${click||`openReport('${d.id}')`}">
+    <div style="min-width:0;display:flex;align-items:center;gap:10px">${blogo(d.domain,d.brand,'sm')}<b style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(d.brand)}${d.agency?` <span style="font-weight:400;color:var(--text-secondary)">· ${esc(d.agency)}</span>`:''}</b></div>
+    <div class="muted" style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">${plSummary(d)}</div>
+    <div class="muted" style="font-size:11.5px;white-space:nowrap">${c.start?fmtDate(c.start)+' – '+fmtDate(c.end):'—'}</div>
+    <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-start;min-width:0">${st?`<b style="font-size:12.5px;display:inline-flex;align-items:center;gap:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${ICO[st[0]]}</svg>${st[1]}</b>`
+        :`<span class="muted" style="font-size:11.5px">${c.state==='upcoming'?'Starts '+fmtDate(c.start):c.state==='done'?'Complete':c.tooEarly?'Too early to call':'On track'}</span>`}
+      <button class="rpt-reqlink" onclick="event.stopPropagation();openBrief('${d.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg>Requirements</button></div>
+    <div class="wrow__num" style="width:auto;justify-content:flex-end;display:flex;align-items:center;gap:9px">${c.aired.length?`
+      <div style="position:relative;flex:1;height:8px;border-radius:4px;background:var(--secondary-lite)">
+        <div style="position:absolute;inset:0 auto 0 0;width:${w(proj)}%;border-radius:4px;background:${tone};opacity:.28"></div>
+        <div style="position:absolute;inset:0 auto 0 0;width:${w(c.got)}%;border-radius:4px;background:${tone}"></div>
+        <div style="position:absolute;top:-2px;bottom:-2px;left:${w(c.g*FULL_AT)}%;width:2px;background:var(--green-text)"></div>
+      </div><b style="font-size:12px;color:${tone};min-width:36px;text-align:right">${c.tooEarly?'—':c.pct+'%'}</b>`
+      :'<span style="flex:1;text-align:left;font-size:12px;color:var(--text-tertiary)">Not started</span>'}</div>
+    <div style="text-align:right"><span class="muted" style="font-size:11.5px">${c.aired.length?K(c.got)+' of '+K(c.g):K(c.g)+' booked'}</span></div>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.4" style="justify-self:center;transition:transform .15s;transform:rotate(${open?90:0}deg)"><path d="M9 6l6 6-6 6"/></svg>
+  </div>`;
+}
+RENDER.deals = function(){
+  const allD=bookedDeals(); const stOf=d=>{ const s=dealSummary(d).state; return s==='done'?'complete':s; };
+  const live=allD.filter(d=>stOf(d)==='live');
+  const totG=live.reduce((a,d)=>a+dealSummary(d).g,0), totP=live.reduce((a,d)=>{ const c=dealSummary(d); return a+c.proj+c.sched.reduce((x,r)=>x+(r.kind==='paid'?guaranteeOf(Object.assign(r,{_d:d})):0),0); },0);
+  const brands=[...new Set(allD.map(d=>d.brand))].sort();
+  const FILTERS=[['all','All'],['live','Live'],['upcoming','Upcoming'],['complete','Complete'],['brands','Brands']];
+  let body;
+  if(portalFilter==='brands'){
+    body=`<div style="display:flex;flex-direction:column;gap:10px">${brands.map(b=>{ const bd=allD.filter(d=>d.brand===b), open=!!BRAND_OPEN[b], deliv=bd.reduce((a,d)=>a+dealSummary(d).got,0);
+      return `<div class="card"><button style="width:100%;border:none;background:none;font-family:inherit;color:var(--text-primary);text-align:left;padding:11px 14px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="BRAND_OPEN['${esc(b)}']=!BRAND_OPEN['${esc(b)}'];RENDER.deals()">
+        ${blogo(bd[0].domain,b,'sm')}<b style="font-size:14.5px;letter-spacing:-.02em;flex:1">${esc(b)}</b><span class="muted" style="font-size:11.5px">${K(deliv)} delivered to date · ${bd.length} deal${bd.length!==1?'s':''}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2.4" style="transform:rotate(${open?90:0}deg);transition:.15s"><path d="M9 6l6 6-6 6"/></svg></button>
+        ${open?`<div style="border-top:1px solid var(--border-light)">${bd.map((d,i)=>dealIndexRow(d,i+1)).join('')}</div>`:''}</div>`; }).join('')}</div>`;
+  } else {
+    let cs=allD.filter(d=>portalFilter==='all'||stOf(d)===portalFilter);
+    if(dealQ.trim()){ const q=dealQ.trim().toLowerCase(); cs=cs.filter(d=>(d.brand+' '+(d.agency||'')+' '+plSummary(d)).toLowerCase().includes(q)); }
+    const dv={ deal:d=>d.brand.toLowerCase(), date:d=>dealSummary(d).start||'', status:d=>{ const c=dealSummary(d); return c.under?0:d.reads.some(r=>r.status==='missed')?1:2; }, pacing:d=>dealSummary(d).pct||0, delivered:d=>dealSummary(d).got||0 };
+    const sf=dv[dealSort.k]||dv.date; cs=cs.slice().sort((a,b)=>{ const x=sf(a), y=sf(b); return (x>y?1:x<y?-1:0)*dealSort.dir; });
+    const head=`<div class="shead" style="grid-template-columns:minmax(0,0.9fr) minmax(0,1fr) 108px 150px 168px 118px 26px">${[['deal','Deal'],['pl','Placement'],['date','Dates'],['status','Status'],['pacing','Pacing'],['delivered','Delivered']].map(([k,l])=>k==='pl'?`<span>${l}</span>`:`<button onclick="setDealSort('${k}')">${l}${dealSort.k===k?(dealSort.dir>0?' ↑':' ↓'):''}</button>`).join('')}<span></span></div>`;
+    body=`<div class="card" style="overflow:hidden">${head}${cs.length?cs.map((d,i)=>dealIndexRow(d,i+1)).join(''):'<div class="empty">No deals match.</div>'}</div>`;
+  }
+  $('view-deals').innerHTML=`<div class="inner" style="max-width:1080px">
+    <div class="pagebar"><div class="head"><h1>Campaign Portal</h1></div>
+      <div class="pagebar__right">${portalFilter!=='brands'?`<div class="tbar tbar--bare"><div class="tbar__search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="dealQInp" placeholder="Search deals…" value="${esc(dealQ)}" oninput="dealQ=this.value;FOCUS_Q='dealQInp';RENDER.deals()"></div></div>`:''}
+        <div class="seg">${FILTERS.map(([k,l])=>{ const n=k==='brands'?brands.length:allD.filter(d=>k==='all'||stOf(d)===k).length; return `<button class="${portalFilter===k?'active':''}" onclick="portalFilter='${k}';RENDER.deals()">${l}${k==='all'?'':' · '+n}</button>`; }).join('')}</div>
+        <button class="btn btn--dark btn--sm" onclick="openIngest()">+ Add deal</button></div>
+    </div>
+    ${body}
+    <div class="footnote">Every deal opens its own read-only report. Live deals projecting ${totG?Math.round(totP/totG*100):0}%.</div>
+  </div>`;
+  refocusQ();
 };
 
 /* ════════ BOOT ════════ */
