@@ -1133,8 +1133,15 @@
     .gated__card p { font-size:13px; color:var(--text-secondary); margin:6px 0 16px; line-height:1.5; }
 
     /* report additions */
-    .rpt-fullov { position:fixed; inset:0; z-index:70; background:var(--page-bg); display:none; flex-direction:column; }
-    .rpt-fullov.open { display:flex; }
+    /* report = Acme side drawer: slides in from the right over a dimmed page */
+    .rpt-fullov { position:fixed; top:0; right:0; bottom:0; width:min(1140px,97vw); z-index:70; background:var(--page-bg); display:flex; flex-direction:column;
+                  transform:translateX(103%); visibility:hidden; transition:transform .3s cubic-bezier(.4,0,.2,1), width .3s cubic-bezier(.4,0,.2,1), visibility 0s linear .3s;
+                  box-shadow:-18px 0 50px rgba(14,19,35,.20); border-radius:14px 0 0 14px; overflow:hidden; }
+    .rpt-fullov.open { transform:translateX(0); visibility:visible; transition:transform .3s cubic-bezier(.4,0,.2,1), width .3s cubic-bezier(.4,0,.2,1); }
+    .rpt-fullov.full { width:100vw; border-radius:0; }
+    .rpt-scrim { position:fixed; inset:0; z-index:69; background:rgba(20,25,35,.44); backdrop-filter:blur(2px); opacity:0; pointer-events:none; transition:opacity .25s; }
+    .rpt-scrim.open { opacity:1; pointer-events:auto; }
+    @media (max-width:760px){ .rpt-fullov { width:100vw; border-radius:0; } }
     .rpt-bar { display:flex; align-items:center; gap:10px; padding:10px 18px; background:var(--white); border-bottom:1px solid var(--border); font-size:12.5px; flex-shrink:0; }
     .rpt-bar .url { font-family:ui-monospace,Menlo,monospace; font-size:12px; color:var(--text-secondary); background:var(--secondary-lite); padding:5px 10px; border-radius:7px; flex:1; max-width:560px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .rpt-fullov .rpt-scroll { flex:1; overflow-y:auto; }
@@ -1446,6 +1453,7 @@
   <div class="scrim" id="scrim" onclick="closeOverlays()"></div>
   <aside class="drawer" id="drawer"></aside>
   <div class="modal" id="modal"></div>
+  <div class="rpt-scrim" id="rptScrim" onclick="closeReport()"></div>
   <div class="rpt-fullov" id="report"></div>
   <div class="sf" id="storefront"></div>
   <div class="ob" id="onboarding"></div>
@@ -1782,7 +1790,10 @@ function srcLabel(s){ return ({IO_UPLOAD:'IO upload',STOREFRONT:'Storefront',MAR
 /* ════════ NAV ════════ */
 let CURRENT='home';
 const RENDER = {};
-function go(v){ if(v==='needs') v='home'; /* Needs you lives on Home: one list, not two */ CURRENT=v; document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active', x.id==='view-'+v));
+function go(v){ if(v==='needs') v='home';
+  // navigating always clears whatever is on top: report drawer, side drawers, booking page
+  if($('report').classList.contains('open')){ $('report').classList.remove('open','full'); $('rptScrim').classList.remove('open'); RPT.id=null; }
+  closeOverlays(); $('storefront').classList.remove('open'); closeRowMenu&&closeRowMenu(); /* Needs you lives on Home: one list, not two */ CURRENT=v; document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active', x.id==='view-'+v));
   document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active', b.dataset.view===v)); document.querySelectorAll('.mtabs button').forEach(b=>b.classList.toggle('on', b.dataset.view===v));
   RENDER[v] && RENDER[v](); { const inDel=v==='delivery'||v==='deals'||v==='campaign'; const sn=$('subnav-delivery'); if(sn) sn.hidden=!inDel;
     document.querySelectorAll('.nav-item[data-group="delivery"]').forEach(b=>b.classList.toggle('active',inDel));
@@ -2425,8 +2436,16 @@ function ytConnect(){ let yt=S.show.sources.find(s=>s.type==='YOUTUBE'); if(!yt)
    Same full-screen report as the network Campaign Portal, creator-branded.
    Rules: no grades, no compliance, no red. "Building" before check-in day. */
 let RPT={ id:null, share:false, metric:'impr' };
-function openReport(id, share){ RPT={ id, share:!!share, metric:(deal(id).reportMetric||'impr') }; renderReport(); $('report').classList.add('open'); }
-function closeReport(){ $('report').classList.remove('open'); RPT.id=null; rerender(); }
+function openReport(id, share){ const was=$('report').classList.contains('open');
+  RPT={ id, share:!!share, metric:(deal(id).reportMetric||'impr') }; renderReport();
+  $('report').scrollTop=0; const sc=$('report').querySelector('.rpt-scroll'); if(sc) sc.scrollTop=0;
+  requestAnimationFrame(()=>{ $('report').classList.add('open'); $('rptScrim').classList.add('open'); });
+  if(!was){ try{ history.pushState({rpt:id},'','#report-'+id.replace(/^d_/,'')); }catch(e){} } }
+function closeReport(fromHistory){ if(!$('report').classList.contains('open')) return;
+  $('report').classList.remove('open','full'); $('rptScrim').classList.remove('open'); RPT.id=null;
+  if(!fromHistory && /^#report-/.test(location.hash)){ try{ history.replaceState(null,'','#'+CURRENT); }catch(e){} }
+  rerender(); }
+window.addEventListener('popstate',()=>{ if($('report').classList.contains('open') && !/^#report-/.test(location.hash)) closeReport(true); });
 function reportChart(d){
   const c=dealSummary(d); const pts=[]; const dates=d.reads.filter(r=>r.status!=='cancelled').map(r=>r.date).sort(); if(!dates.length) return '';
   const start=dates[0], end=addDays(dates[dates.length-1],30), days=Math.max(1,diffDays(start,end));
@@ -2445,6 +2464,7 @@ function reportChart(d){
 }
 const READ_OPEN={};
 function renderReport(){
+  $('report').classList.toggle('full', !!RPT.share);   // "Open full report" = the advertiser's full-width view
   const d=deal(RPT.id), c=dealSummary(d), sh=S.show, OP=!RPT.share;
   const eng=RPT.metric==='engaged', headline=eng?c.yt:c.got, booked=c.g||1;
   const togo=Math.max(0,booked-headline), cpm=headline?(c.totalCents/100)/(headline/1000):0;
