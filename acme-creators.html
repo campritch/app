@@ -1275,6 +1275,72 @@
     .subnav-item .blogo.sm { width:18px; height:18px; border-radius:4px; }
     .subnav-pct { font-size:11px; font-weight:700; }
     .camplink { cursor:pointer; } .camplink:hover { text-decoration:underline; text-underline-offset:2px; }
+    /* campaign report (community-web campaign-report-view) */
+    .rpt-fullov .rpt-scroll { flex:1; overflow-y:auto; }
+    .cr { max-width:1180px; margin:0 auto; padding:22px 24px 60px; }
+    .cr-hero { border-radius:18px; padding:26px 30px 30px; min-height:250px; display:flex; flex-direction:column; justify-content:space-between; color:#fff; }
+    .cr-hero__top { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+    .cr-eyebrow { font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.8); padding-top:10px; }
+    .cr-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .cr-btn { display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 16px; border-radius:9px; border:1px solid rgba(255,255,255,.6); background:#fff; color:var(--primary); font-family:inherit; font-size:13.5px; font-weight:600; cursor:pointer; }
+    .cr-ib { width:40px; height:40px; border-radius:9px; border:1px solid rgba(255,255,255,.6); background:#fff; color:var(--primary); display:grid; place-items:center; cursor:pointer; }
+    .cr-btn:hover, .cr-ib:hover { background:#f2f3f5; }
+    .cr-live { font-size:12px; font-weight:600; color:rgba(255,255,255,.75); margin-right:4px; }
+    .cr-hero__id { display:flex; align-items:center; gap:18px; margin-top:40px; }
+    .blogo.cr { width:70px; height:70px; border-radius:14px; border:none; margin:0 !important; flex-shrink:0; }
+    .blogo.cr img { width:72%; height:72%; }
+    .blogo.cr .bl-l { font-size:24px; }
+    .cr-name { font-size:30px; font-weight:700; letter-spacing:-.03em; line-height:1.1; }
+    .cr-sub { font-size:15px; color:rgba(255,255,255,.82); margin-top:6px; }
+    .cr-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:20px; margin-top:22px; align-items:stretch; }
+    .cr-dark { background:var(--primary); color:#fff; border-radius:16px; padding:22px 22px 20px; }
+    .cr-dark__l { font-size:15px; font-weight:600; }
+    .cr-dark__v { font-size:44px; font-weight:800; letter-spacing:-.04em; margin-top:6px; line-height:1.05; }
+    .cr-dark__s { font-size:14px; color:rgba(255,255,255,.75); margin-top:8px; }
+    .cr-tiles { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
+    .cr-tile { border:1px solid var(--border); border-radius:14px; padding:18px 20px; background:var(--white); }
+    .cr-tile__l { font-size:14.5px; font-weight:600; display:flex; align-items:center; gap:6px; }
+    .cr-tile__v { font-size:34px; font-weight:800; letter-spacing:-.03em; margin-top:10px; }
+    .cr-metric { display:flex; align-items:center; gap:10px; margin-top:12px; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-tertiary); }
+    .cr-chart { border:1px solid var(--border); border-radius:16px; padding:28px 26px 18px; background:var(--white); }
+    .cr-chart__lbl { position:absolute; font-size:13px; color:var(--text-primary); white-space:nowrap; }
+    .cr-chart__lbl--v { color:var(--accent); font-weight:700; }
+    .cr-chart__dot { position:absolute; width:12px; height:12px; border-radius:50%; background:var(--accent); transform:translate(-50%,-50%); }
+    .cr-h { font-size:20px; font-weight:700; letter-spacing:-.02em; margin:30px 0 12px; }
+    .cr-list { border:1px solid var(--border); border-radius:16px; overflow:hidden; background:var(--white); }
+    .cr-row + .cr-row { border-top:1px solid var(--border-light); }
+    .cr-row__head { display:flex; align-items:center; gap:16px; padding:16px 22px; cursor:pointer; }
+    .cr-row.open .cr-row__head { box-shadow:inset 0 0 0 2px var(--blue-text); border-radius:4px; }
+    .cr-row__main { flex:1; min-width:0; }
+    .cr-row__main b { display:block; font-size:16px; font-weight:600; }
+    .cr-row__main span { font-size:13.5px; color:var(--text-secondary); display:inline-flex; align-items:center; gap:6px; }
+    .cr-kv { width:110px; } .cr-kv span { display:block; font-size:13px; color:var(--text-secondary); } .cr-kv b { font-size:15px; font-weight:600; }
+    .cr-pill { min-width:110px; text-align:center; padding:7px 12px; border-radius:8px; font-size:14px; font-weight:600; }
+    .cr-pill--green { background:var(--green-bg); color:var(--green-text); } .cr-pill--grey { background:var(--secondary-lite); color:var(--text-secondary); }
+    .cr-ring { width:54px; height:54px; border-radius:50%; display:grid; place-items:center; background:conic-gradient(var(--c) calc(var(--p)*1%), var(--secondary-lite) 0); flex-shrink:0; position:relative; }
+    .cr-ring::before { content:""; position:absolute; inset:5px; border-radius:50%; background:var(--white); }
+    .cr-ring span { position:relative; font-size:13px; font-weight:700; }
+    .cr-chev { color:var(--text-tertiary); transition:transform .15s; flex-shrink:0; }
+    .cr-row.open .cr-chev { transform:rotate(90deg); }
+    .cr-row__body { display:none; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:22px; padding:22px; border-top:1px solid var(--border-light); }
+    .cr-row.open .cr-row__body { display:grid; }
+    .cr-player { border:1px solid var(--border); border-radius:16px; padding:16px; align-self:start; }
+    .cr-player__top { display:flex; align-items:center; gap:14px; }
+    .cr-player__top .art { border-radius:10px; }
+    .cr-player__t { font-size:16px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .cr-player__time { font-size:13px; color:var(--text-secondary); margin-top:6px; font-variant-numeric:tabular-nums; }
+    .cr-play { width:48px; height:48px; border-radius:50%; border:none; background:var(--primary); color:#fff; display:grid; place-items:center; cursor:pointer; flex-shrink:0; }
+    .cr-tag { font-size:12.5px; font-weight:600; padding:7px 12px; border-radius:8px; background:var(--green-bg); color:var(--green-text); } .cr-tag--ic { background:var(--secondary-lite); color:var(--text-secondary); padding:7px 9px; }
+    .cr-prog { height:5px; border-radius:999px; background:var(--accent-soft); margin-top:12px; overflow:hidden; } .cr-prog i { display:block; height:100%; width:2%; background:var(--accent); border-radius:999px; }
+    .cr-detail__top { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    .cr-chip { font-size:13.5px; font-weight:600; padding:6px 12px; border-radius:8px; background:var(--secondary-lite); }
+    .cr-link { margin-left:auto; border:none; background:none; font-family:inherit; font-size:13px; font-weight:600; color:var(--text-secondary); display:inline-flex; gap:6px; align-items:center; cursor:pointer; }
+    .cr-tx { font-size:14px; line-height:1.6; color:var(--text-secondary); margin-top:14px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; } .cr-tx.full { -webkit-line-clamp:unset; }
+    .cr-more { border:none; background:none; padding:0; margin-top:6px; font-family:inherit; font-size:13px; font-weight:600; color:var(--text-secondary); cursor:pointer; }
+    .cr-facts { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; border-top:1px solid var(--border); margin-top:14px; padding-top:16px; }
+    .cr-facts span { display:block; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-secondary); } .cr-facts b { font-size:15px; font-weight:600; margin-top:4px; display:block; }
+    .cr-land { font-size:13.5px; color:var(--text-secondary); margin-top:14px; } .cr-land a { color:var(--text-primary); text-decoration:underline; }
+    @media (max-width:860px){ .cr-grid, .cr-row.open .cr-row__body { grid-template-columns:1fr; } .cr-kv, .cr-pill { display:none; } .cr-facts { grid-template-columns:1fr 1fr; } }
     /* mobile */
     .mtabs { display:none; }
     .mhead { display:none; }
@@ -2413,105 +2479,128 @@ function reportChart(d){
   return `<svg viewBox="0 0 ${W} ${H}" class="rchart" preserveAspectRatio="none"><line x1="0" x2="${W}" y1="${gy}" y2="${gy}" stroke="var(--border-strong)" stroke-dasharray="4 4"/><path d="${b}" fill="none" stroke="var(--green-text)" stroke-width="2" stroke-dasharray="5 4" opacity=".5"/><path d="${a}" fill="none" stroke="var(--green-text)" stroke-width="2.5"/></svg>
   <div class="rpt-chart__legend"><span><i style="background:var(--green-text)"></i>Delivered</span><span><i style="background:var(--green-text);opacity:.5"></i>Where it lands</span><span><i style="background:var(--border-strong)"></i>Goal ${K(g)}</span></div>`;
 }
+const READ_OPEN={};
 function renderReport(){
-  const d=deal(RPT.id), c=dealSummary(d), sh=S.show, OP=!RPT.share, b=brandBadge(c);
-  const watermark = !isPro();
-  const eng=RPT.metric==='engaged';
-  const headline = eng ? c.yt : c.got;
-  const paidAired=c.aired.filter(r=>r.kind==='paid');
-  const verified=c.aired.length;
-  const cpm = headline ? (c.totalCents/100)/(headline/1000) : 0;
-  const nextUp=d.reads.filter(r=>r.status==='scheduled').sort((a,b)=>a.date<b.date?-1:1);
+  const d=deal(RPT.id), c=dealSummary(d), sh=S.show, OP=!RPT.share;
+  const eng=RPT.metric==='engaged', headline=eng?c.yt:c.got, booked=c.g||1;
+  const togo=Math.max(0,booked-headline), cpm=headline?(c.totalCents/100)/(headline/1000):0;
+  const pacing = c.state==='upcoming'?'not started' : c.tooEarly?'building' : (c.done?Math.round(headline/booked*100)+'% delivered':c.airedPct+'% pacing');
   const inv=d.invoice, ist=invStatus(inv);
-  const lastProd = d.reads.filter(r=>r.kind==='paid').slice(-1)[0];
-  const openNext = lastProd ? openFutureSlots(lastProd.placement, addDays(TODAY, sh.storefront.leadTimeDays), 4).filter(dt=>!categoryLock(d.category,dt,d.id).filter(l=>l.kind==='excluded').length) : [];
-  const audLabel = sh.sources.some(s=>s.type.startsWith('HOSTING'))?'platform-verified':'creator-reported';
-  const pct = c.done ? Math.round(headline/(c.g||1)*100) : c.airedPct;
-  const pctPill = c.state==='upcoming'?'Scheduled' : c.tooEarly?'Building' : c.done? pct+'% delivered' : pct+'% pacing';
-  const pillTone = c.under&&!c.tooEarly ? 'orange' : 'green';
-  const url=`spotsnow.io/r/${d.id}`;
-  $('report').innerHTML=`
-    <div class="rpt-bar">
-      ${OP?`<button class="btn btn--ghost btn--sm" onclick="closeReport()">← Back</button><span class="url">${url}</span>
-        <div class="rpt-seg" style="margin-left:auto"><button class="rpt-seg__b ${!RPT.share?'on':''}" onclick="RPT.share=false;renderReport()">Edit</button><button class="rpt-seg__b ${RPT.share?'on':''}" onclick="RPT.share=true;renderReport()">View as ${esc(d.brand)}</button></div>`
-        :`<div class="sf-wm"><i>S</i>SpotsNow</div><span class="url">${url}</span><span class="muted" style="margin-left:auto;font-size:12px">Live view · no login</span><button class="btn btn--ghost btn--sm" onclick="RPT.share=false;renderReport()">Back to edit</button>`}
+  const lastProd=d.reads.filter(r=>r.kind==='paid').slice(-1)[0];
+  const openNext=lastProd?openFutureSlots(lastProd.placement, addDays(TODAY, sh.storefront.leadTimeDays), 4):[];
+  const nextUp=d.reads.filter(r=>r.status==='scheduled').sort((a,b)=>a.date<b.date?-1:1);
+  const ytLabel = sh.sources.find(s=>s.type==='YOUTUBE')?.oauthStatus==='connected' ? 'YouTube reach' : 'YouTube reach (public)';
+  const reads=d.reads.filter(r=>r.status!=='cancelled').sort((a,b)=>a.date<b.date?1:-1);
+  const icoBtn=(svg,fn,title)=>`<button class="cr-ib" title="${title}" onclick="${fn}">${svg}</button>`;
+  const SHARE='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>';
+  const DL='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>';
+  const X='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+  const ARR='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M8 7h9v9"/></svg>';
+  $('report').innerHTML=`${!isPro()?`<div class="watermark"><span>PREVIEW · Upgrade to Pro</span></div>`:''}
+  <div class="rpt-scroll"><div class="cr">
+    <div class="cr-hero" style="background:radial-gradient(70% 120% at 85% 20%, ${sh.colors[0]}cc, transparent 60%), linear-gradient(120deg, #202833 0%, #3a3f46 55%, ${sh.colors[1]} 100%)">
+      <div class="cr-hero__top"><div class="cr-eyebrow">Campaign delivery report</div>
+        <div class="cr-actions">
+          ${OP?`<button class="cr-btn" onclick="sendReport('${d.id}')">${ICO_SEND} Send to ${esc(d.brand)}</button><button class="cr-btn" onclick="RPT.share=true;renderReport()">Open full report ${ARR}</button>`
+              :`<span class="cr-live">Live view · no login</span>`}
+          ${icoBtn(SHARE,`copyText('https://spotsnow.io/r/${d.id}')`,'Copy share link')}
+          ${icoBtn(DL,`reportCSV('${d.id}')`,'Download CSV')}
+          ${icoBtn(X, OP?'closeReport()':'RPT.share=false;renderReport()', OP?'Close':'Back to edit')}
+        </div></div>
+      <div class="cr-hero__id">${blogo(d.domain,d.brand,'cr')}<div><div class="cr-name">${esc(d.brand)}</div><div class="cr-sub">${esc(sh.name)} · ${c.start?`Released between ${fmtDate(c.start)} - ${fmtDate(c.end)}`:''} · ${c.paid.length} read${c.paid.length===1?'':'s'}${c.extra.length?` + ${c.extra.length} bonus`:''}</div></div></div>
     </div>
-    ${watermark?`<div class="watermark"><span>PREVIEW · Upgrade to Pro</span></div>`:''}
-    <div class="rpt-scroll"><div class="rpt-wrap">
-      <div class="rpt-hero" style="min-height:220px">
-        <div class="rpt-hero__cover" data-mono="${esc(initials(sh.name))}" style="background:radial-gradient(82% 120% at 78% 4%, rgba(255,255,255,.16), transparent 56%), linear-gradient(150deg, ${sh.colors[0]} 0%, #0f141b 85%)"></div>
-        <div class="rpt-hero__scrim"></div>
-        <div class="rpt-hero__content">
-          <div class="rpt-hero__head"><div class="rpt-hero__eyebrow">Campaign delivery report</div>
-            ${OP?`<div class="rpt-hero__actions"><button class="rpt-btn rpt-btn--solid" onclick="sendReport('${d.id}')">${ICO_SEND}Send to ${esc(d.brand)}</button><button class="rpt-btn" onclick="copyText('https://${url}')">${ICO_LINK}Copy link</button><button class="rpt-btn" onclick="reportCSV('${d.id}')">${ICO_DL}CSV</button><button class="rpt-btn" onclick="reportPDF('${d.id}')">${ICO_DL}PDF</button></div>`
-              :`<div class="rpt-hero__actions"><button class="rpt-btn" onclick="reportCSV('${d.id}')">${ICO_DL}CSV</button><button class="rpt-btn" onclick="reportPDF('${d.id}')">${ICO_DL}PDF</button></div>`}
-          </div>
-          <div class="rpt-hero__row">
-            ${art(sh,58,20).replace('class="art"','class="art rpt-showart"')}
-            <div style="flex:1;min-width:0"><div class="rpt-hero__name2">${esc(sh.name)}</div><div class="rpt-hero__sub">${esc(sh.host)} · ${c.start?fmtDate(c.start)+' – '+fmtDateY(c.end):''} · ${c.paid.length} read${c.paid.length===1?'':'s'}</div></div>
-            <div class="rpt-brandlogo">${blogo(d.domain,d.brand,'lg')}<div><div style="font-size:15px;font-weight:700">${esc(d.brand)}</div><span class="rpt-status ${b.tone==='orange'?'orange':b.tone==='grey'?'':'green'}" style="${b.tone==='grey'?'background:rgba(255,255,255,.12);color:#fff':''};margin-top:4px">${b.t}</span></div></div>
-          </div>
+
+    ${OP?`<div class="rpt-note" style="margin-top:18px"><div class="rpt-note__lbl">Campaign note <span>shows as a callout for ${esc(d.brand)}</span></div><textarea class="rpt-note__in" rows="2" placeholder="A short note on how the campaign is going" oninput="deal('${d.id}').reportNote=this.value">${esc(d.reportNote)}</textarea></div>`
+      :(d.reportNote?`<div class="rpt-note rpt-note--show" style="margin-top:18px"><p>${esc(d.reportNote)}</p></div>`:'')}
+
+    <div class="cr-grid">
+      <div class="cr-left">
+        <div class="cr-dark"><div class="cr-dark__l">${eng?'Engaged views delivered':'Impressions delivered'}</div><div class="cr-dark__v">${c.state==='upcoming'?'0':K(headline)}</div><div class="cr-dark__s">of ${K(booked)} booked · ${pacing} · ${K(togo)} to go</div></div>
+        <div class="cr-tiles">
+          <div class="cr-tile"><div class="cr-tile__l">Delivered CPM</div><div class="cr-tile__v">${headline?'$'+cpm.toFixed(2):'N/A'}</div></div>
+          <div class="cr-tile"><div class="cr-tile__l">Verified Episodes</div><div class="cr-tile__v">${c.aired.length}/${c.paid.length+c.extra.length}</div></div>
+          <div class="cr-tile"><div class="cr-tile__l">${ytLabel}</div><div class="cr-tile__v">${c.yt?K(c.yt):'N/A'}</div></div>
+          <div class="cr-tile"><div class="cr-tile__l">Audio reach${c.aud?' <span class="srcpill">creator-reported</span>':''}</div><div class="cr-tile__v">${c.aud?K(c.aud):'N/A'}</div></div>
         </div>
+        <div class="cr-metric"><span>Count</span><div class="rpt-seg"><button class="rpt-seg__b ${!eng?'on':''}" onclick="setRptMetric('impr')">Impressions</button><button class="rpt-seg__b ${eng?'on':''}" onclick="setRptMetric('engaged')">YouTube engaged views</button></div></div>
       </div>
+      <div class="cr-chart">${crChart(d, eng)}</div>
+    </div>
 
-      ${OP?`<div class="rpt-note" style="margin-top:16px"><div class="rpt-note__lbl">Campaign note <span>shows as a callout for ${esc(d.brand)}</span></div><textarea class="rpt-note__in" rows="2" placeholder="A short note on how the campaign is going" oninput="deal('${d.id}').reportNote=this.value">${esc(d.reportNote)}</textarea></div>`
-        :(d.reportNote?`<div class="rpt-note rpt-note--show" style="margin-top:16px"><p>${esc(d.reportNote)}</p></div>`:'')}
+    ${inv && !inv.upfront ? `<div class="inv"><div class="inv__ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></div>
+      <div style="flex:1"><div class="inv__t">Invoice ${esc(inv.number)}: ${$$(inv.amountCents)}${ist==='PAID'?'':', due '+fmtDate(inv.dueAt)}</div><div class="inv__s">${ist==='PAID'?'Paid '+fmtDate(inv.paidAt)+'. Thank you.':inv.external?`Invoiced directly by ${esc(sh.host)}`:'Card or ACH'}</div></div>
+      ${ist==='PAID'?'<span class="tag tag--green">Paid</span>':inv.external?`<span class="tag tag--grey">Sent</span>`:`<span class="tag ${ist==='OVERDUE'?'tag--orange':'tag--blue'}">${ist==='OVERDUE'?'Past due':'Open'}</span><button class="btn btn--dark btn--sm" onclick="payInvoice('${d.id}')">Pay now</button>`}</div>`:''}
 
-      <div class="rpt-metric"><span class="rpt-metric__lbl">Delivery metric</span>
-        <div class="rpt-seg"><button class="rpt-seg__b ${!eng?'on':''}" onclick="setRptMetric('impr')">Impressions</button><button class="rpt-seg__b ${eng?'on':''}" onclick="setRptMetric('engaged')">YouTube engaged views</button></div>
-        <span class="rpt-metric__hint">${eng?'YouTube engaged views only, via the connected channel.':`YouTube ${sh.sources.find(s=>s.type==='YOUTUBE')?.oauthStatus==='connected'?'engaged views':'public views'} plus audio downloads (${audLabel}).`}</span></div>
+    <div class="cr-h">Shows read</div>
+    <div class="cr-list">${reads.length?reads.map(r=>crRow(r,d)).join(''):'<div class="empty">No reads yet.</div>'}</div>
 
-      <div class="rpt-deliv" style="margin-top:14px">
-        <div>
-          <div class="rpt-deliv__big">${c.state==='upcoming'?'—':K(headline)}</div>
-          <div class="rpt-deliv__of">of ${K(c.g)} guaranteed ${eng?'engaged views':'impressions'}</div>
-          <div class="rpt-deliv__pct ${c.state==='upcoming'||c.tooEarly?'':pillTone}" style="${c.state==='upcoming'||c.tooEarly?'background:var(--secondary-lite);color:var(--text-secondary)':''}">${pctPill}</div>
-          <div class="rpt-chips">
-            <div><div class="rpt-chip__l">Delivered CPM</div><div class="rpt-chip__v">${headline?'$'+cpm.toFixed(2):'—'}</div></div>
-            <div><div class="rpt-chip__l">YouTube ${sh.sources.find(s=>s.type==='YOUTUBE')?.oauthStatus==='connected'?'engaged':'views'}</div><div class="rpt-chip__v">${K(c.yt)}</div></div>
-            ${!eng?`<div><div class="rpt-chip__l">Audio <span class="srcpill">${audLabel}</span></div><div class="rpt-chip__v">${K(c.aud)}</div></div>`:''}
-            <div><div class="rpt-chip__l">Verified reads</div><div class="rpt-chip__v">${verified}/${c.paid.length+c.extra.length}</div></div>
-          </div>
-        </div>
-        <div class="rpt-chart"><div class="rpt-chart__plot">${reportChart(d)}</div></div>
+    ${nextUp.length?`<div class="cr-h">What's next</div><div class="rpt-card"><div class="nextstack">${nextUp.map((r,i)=>`<div class="nextrow"><div class="nextrow__when ${i===0?'soon':''}">${i===0?'Next up':dayName(r.date)}</div><div><div class="nextrow__show">${esc(sh.name)} · ${PL[r.placement]}</div><div class="nextrow__meta">${fmtDateY(r.date)}${r.kind==='bonus'?' · Bonus · no charge':r.kind==='makegood'?' · Make good · no charge':''}</div></div></div>`).join('')}</div></div>`:''}
+
+    ${c.state!=='proposed'&&c.state!=='draft'?`<div class="rebook">
+      <div style="flex:1"><div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-tertiary)">Book the next flight</div>
+        <h3>${openNext.length?`Open on ${esc(sh.name)}: next ${openNext.length} ${PL[lastProd.placement].toLowerCase()} slots from ${fmtDate(openNext[0])}`:`${esc(sh.name)} is booked up for now`}</h3>
+        <div class="slots">${openNext.map(dt=>`<span>${dayName(dt)} ${fmtDate(dt)}</span>`).join('')}</div></div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end"><button class="btn btn--accentcta" ${openNext.length?'':'disabled'} onclick="rebook('${d.id}')">Book the next flight</button><a href="#" style="font-size:12px;color:var(--text-secondary)" onclick="toast('Opens SpotsNow browse filtered to ${esc(d.category)} shows like ${esc(sh.name)}.');return false">Find similar shows on SpotsNow →</a></div></div>`:''}
+    <div class="footnote">This is ${esc(d.brand)}'s live view. It updates as reads land.<br><span class="sf-wm" style="display:inline-flex;font-size:12px;margin-top:8px"><i style="width:16px;height:16px;font-size:9px">S</i>SpotsNow</span></div>
+  </div></div>`;
+}
+function crChart(d, eng){
+  const c=dealSummary(d); const dates=d.reads.filter(r=>r.status!=='cancelled').map(r=>r.date).sort(); if(!dates.length) return '';
+  const start=dates[0], end=dates[dates.length-1], span=Math.max(1,diffDays(start,addDays(end,30)));
+  const share=r=>eng?(r.ytShare??.7):1;
+  const cum=t=>d.reads.filter(r=>r.status==='aired'&&r.date<=t).reduce((a,r)=>a+Math.round((r.final||0)*share(r)*curveAt(diffDays(r.date,t))),0);
+  const g=c.g||1, W=560, H=230, maxV=Math.max(g*1.08, cum(TODAY)*1.08);
+  const X=t=>diffDays(start,t)/span*W, Y=v=>H-v/maxV*H;
+  let path='', last=null; const stop=TODAY<addDays(end,30)?TODAY:addDays(end,30);
+  for(let i=0;i<=diffDays(start,stop);i+=Math.max(1,Math.round(span/60))){ const t=addDays(start,i); const v=cum(t); path+=(path?'L':'M')+X(t).toFixed(1)+','+Y(v).toFixed(1); last={x:X(t),y:Y(v),v}; }
+  const gy=Y(g);
+  return `<div style="position:relative;height:100%;min-height:260px">
+    <svg viewBox="0 0 ${W} ${H+40}" preserveAspectRatio="none" style="width:100%;height:100%;overflow:visible">
+      <line x1="0" x2="${W}" y1="${gy}" y2="${gy}" stroke="var(--text-tertiary)" stroke-dasharray="6 6" stroke-width="1"/>
+      <line x1="0" x2="${W}" y1="${H}" y2="${H}" stroke="var(--border)" stroke-width="1"/>
+      <path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+    </svg>
+    <div class="cr-chart__lbl" style="left:12px;top:calc(${gy/(H+40)*100}% + 6px)">Expected ${K(g)}</div>
+    ${last?`<div class="cr-chart__dot" style="left:${last.x/W*100}%;top:${last.y/(H+40)*100}%"></div><div class="cr-chart__lbl cr-chart__lbl--v" style="left:calc(${last.x/W*100}% - 6px);top:calc(${last.y/(H+40)*100}% - 26px)">${K(last.v)}</div>`:''}
+    <div class="cr-chart__lbl" style="right:10px;bottom:4px">${fmtDate(addDays(end,30))}</div>
+  </div>`;
+}
+function crRow(r,d){
+  const sp=deliveredSplit(r), g=guaranteeOf(Object.assign(r,{_d:d})), ep=episode(r.date);
+  const pct=r.status==='aired'?Math.round(sp.total/g*100):0;
+  const st = r.status==='aired' ? (pastCheckIn(r)?['Done','green']:['Building','grey']) : r.status==='missed' ? ['Rescheduling','grey'] : ['Scheduled','grey'];
+  const ringCol = r.status!=='aired'||!pastCheckIn(r) ? 'var(--text-tertiary)' : pct>=90 ? 'var(--green-text)' : 'var(--orange-text)';
+  const secs=PL_SECS[r.placement], epLen=2700+hashN(r.id)%1500, start=r.ts, endT=r.ts+secs;
+  const kind = r.placement==='YT' ? `${secs}s YouTube integration` : `${secs}s audio read`;
+  const open=READ_OPEN[r.id];
+  return `<div class="cr-row ${open?'open':''}" id="cr-${r.id}">
+    <div class="cr-row__head" onclick="READ_OPEN['${r.id}']=!READ_OPEN['${r.id}'];document.getElementById('cr-${r.id}').classList.toggle('open')">
+      ${art(S.show,46,15)}
+      <div class="cr-row__main"><b>${esc(S.show.name)}${r.kind!=='paid'?` <span class="rd-pill" style="background:var(--green-bg);color:var(--green-text)">${r.kind==='bonus'?'Bonus':'Make good'}</span>`:''}</b><span>${fmtDate(r.date)}${r.status==='aired'?` · ${kind} · <span style="color:var(--green-text)">${CK}</span>`:''}</span></div>
+      <div class="cr-kv"><span>Booked</span><b>${fmtDate(r.date)}</b></div>
+      <div class="cr-kv"><span>Aired</span><b>${r.status==='aired'?fmtDate(r.date):'N/A'}</b></div>
+      <span class="cr-pill cr-pill--${st[1]}">${st[0]}</span>
+      <div class="cr-ring" style="--p:${Math.min(100,pct)};--c:${ringCol}"><span style="color:${ringCol}">${pct}%</span></div>
+      <svg class="cr-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
+    </div>
+    <div class="cr-row__body">${r.status==='aired'?`
+      <div class="cr-player">
+        <div class="cr-player__top">${art(S.show,104,32)}<div style="flex:1;min-width:0"><div class="cr-player__t">${esc(ep?ep.title:S.show.name)}</div><div class="cr-player__time" id="pt-${r.id}">0:00 / ${mmss(secs)}</div></div>
+          <button class="cr-play" onclick="crPlay('${r.id}',${secs})">${ICO_PLAY.replace(/14/g,'20')}</button></div>
+        <div style="display:flex;gap:6px;margin-top:12px"><span class="cr-tag">Direct Response</span><span class="cr-tag cr-tag--ic">🎙</span></div>
+        <div class="cr-prog"><i id="pb-${r.id}"></i></div>
       </div>
-
-      ${inv && !inv.upfront ? `<div class="inv"><div class="inv__ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></div>
-        <div style="flex:1"><div class="inv__t">Invoice ${esc(inv.number)}: ${$$(inv.amountCents)}${ist==='PAID'?'':', due '+fmtDate(inv.dueAt)}</div><div class="inv__s">${ist==='PAID'?'Paid '+fmtDate(inv.paidAt)+'. Thank you.':inv.external?`${d.invoiceTerms.terms.replace('_',' ')} · invoiced directly by ${esc(sh.host)}`:`${d.invoiceTerms.terms.replace('_',' ')} · card or ACH${inv.feeCents&&inv.feeLabel&&inv.feeLabel.includes('pass-through')?' · '+esc(inv.feeLabel.toLowerCase())+' '+$$c(inv.feeCents)+' itemized':''}`}</div></div>
-        ${ist==='PAID'?'<span class="tag tag--green">Paid</span>':inv.external?`<span class="tag tag--grey">${ist==='OVERDUE'?'Open':'Sent'}</span>`:`<span class="tag ${ist==='OVERDUE'?'tag--orange':'tag--blue'}">${ist==='OVERDUE'?'Past due':'Open'}</span><button class="btn btn--dark btn--sm" onclick="payInvoice('${d.id}')">Pay now</button>`}
-      </div>`:''}
-
-      ${nextUp.length?`<div class="rpt-card" style="margin-top:14px"><div class="rpt-card__h">What's next · ${nextUp.length} coming up</div><div class="nextstack">${nextUp.map((r,i)=>`<div class="nextrow"><div class="nextrow__when ${i===0?'soon':''}">${i===0?'Next up':dayName(r.date)}</div><div><div class="nextrow__show">${esc(sh.name)} · ${PL[r.placement]}</div><div class="nextrow__meta">${fmtDateY(r.date)} · ${PL_SECS[r.placement]}s${r.kind==='bonus'?' · Bonus · no charge':r.kind==='makegood'?' · Make good · no charge':''}</div></div></div>`).join('')}</div></div>`:''}
-
-      <div class="rpt-sec"><h2>Every read</h2><span class="muted">${verified} air-checked · tap a read to watch it</span></div>
-      ${c.aired.length?c.aired.sort((a,b)=>a.date<b.date?1:-1).map(r=>reportRead(r,d)).join(''):`<div class="rpt-card"><div class="muted" style="font-size:13px">The first read airs ${c.start?fmtDate(c.start):'soon'}. This page updates on its own as reads land.</div></div>`}
-
-      ${!c.state.match(/proposed|draft/)?`<div class="rebook">
-        <div style="flex:1"><div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-tertiary)">Book the next flight</div>
-          <h3>${openNext.length?`Open on ${esc(sh.name)}: next ${openNext.length} ${PL[lastProd.placement].toLowerCase()} slots from ${fmtDate(openNext[0])}`:`${esc(sh.name)} is booked up for now`}</h3>
-          <p>${sh.storefront.showPrices&&lastProd?`${priceLabel(lastProd.placement)} per ${PL[lastProd.placement].toLowerCase()}, same as this flight.`:'Ask for current pricing.'} Prefilled with ${esc(d.brand)}'s details.</p>
-          <div class="slots">${openNext.map(dt=>`<span>${dayName(dt)} ${fmtDate(dt)}</span>`).join('')}</div></div>
-        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end"><button class="btn btn--accentcta" ${openNext.length?'':'disabled'} onclick="rebook('${d.id}')">Book the next flight</button><a href="#" style="font-size:12px;color:var(--text-secondary)" onclick="toast('Opens SpotsNow marketplace browse filtered to ${esc(d.category)} shows like ${esc(sh.name)}.');return false">Find similar shows on SpotsNow →</a></div>
-      </div>`:''}
-      <div class="footnote">This is ${esc(d.brand)}'s live view. It updates as reads land. Internal notes, scores and self-checks never appear here.<br><span style="display:inline-flex;align-items:center;gap:6px;margin-top:8px"><span class="sf-wm" style="font-size:12px"><i style="width:16px;height:16px;font-size:9px">S</i>SpotsNow</span></span></div>
+      <div class="cr-detail">
+        <div class="cr-detail__top"><span class="cr-chip">${PL[r.placement]} · ${secs}s</span><span class="muted" style="font-size:13px">Read at ${mmss(start)}–${mmss(endT)}</span><button class="cr-link" onclick="toast('MP3 of the read downloaded.')">${ICO_DL} Download MP3</button></div>
+        <div class="cr-tx" id="tx-${r.id}">${esc(crTranscript(r,d))}</div><button class="cr-more" onclick="document.getElementById('tx-${r.id}').classList.toggle('full');this.textContent=this.textContent==='Show more'?'Show less':'Show more'">Show more</button>
+        <div class="cr-facts"><div><span>Episode length</span><b>${mmss(epLen)}</b></div><div><span>Ad start</span><b>${mmss(start)}</b></div><div><span>Ad end</span><b>${mmss(endT)}</b></div><div><span>Read duration</span><b>${secs}s</b></div><div><span>Placement</span><b>${PL[r.placement]}</b></div><div><span>Delivered</span><b>${K(sp.total)} <em class="muted" style="font-style:normal;font-weight:500">${K(sp.yt)} YT · ${K(sp.aud)} audio</em></b></div></div>
+        ${d.landingUrl?`<div class="cr-land">Landing page: <a href="#" onclick="return false">${esc(d.landingUrl)}</a></div>`:''}
+      </div>`:`<div class="empty" style="padding:22px">${r.status==='missed'?'This read is being rescheduled to a new episode at no charge.':`Airs ${fmtDateY(r.date)}. The air check, timestamps and numbers appear here once it's live.`}</div>`}
     </div></div>`;
 }
-function reportRead(r,d){ const sp=deliveredSplit(r), ep=episode(r.date), early=!pastCheckIn(r);
-  return `<div class="rpt-read" id="rr-${r.id}"><div class="rpt-read__head" onclick="this.parentNode.classList.toggle('open')">
-    ${art(S.show,40,13)}
-    <div class="rpt-read__main"><div class="rpt-read__show">${esc(S.show.name)} · ${PL[r.placement]} ${r.kind==='bonus'?'<span class="rd-pill" style="background:var(--green-bg);color:var(--green-text)">Bonus</span>':r.kind==='makegood'?'<span class="rd-pill" style="background:var(--green-bg);color:var(--green-text)">Make good · no charge</span>':''}</div><div class="rpt-read__ep">${fmtDateY(r.date)} · #${ep?ep.n:''} ${ep?esc(ep.title):''} · at ${mmss(r.ts)}</div></div>
-    <span class="rpt-vbadge">${CK} Verified</span>
-    <div class="rpt-read__imp"><b>${K(sp.total)}</b><span>${early?'building':'impressions'}</span></div>
-    <svg class="rpt-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></div>
-    <div class="rpt-read__body"><div class="spotcols"><div>
-      <div class="reel-stage" style="background:linear-gradient(140deg,${S.show.colors[0]},${S.show.colors[1]});cursor:pointer" onclick="this.innerHTML='<div style=&quot;color:#fff;font-size:13px;font-weight:600&quot;>YouTube embed loads here, starting at ${mmss(r.ts)}</div>'"><div style="color:#fff;text-align:center"><b>▶ Watch the read at ${mmss(r.ts)}</b><div style="font-size:11.5px;opacity:.75;margin-top:3px">click to load the video</div></div></div>
-    </div><div>
-      <div class="kv"><span>Placement</span><b>${PL[r.placement]} · ${PL_SECS[r.placement]}s</b></div>
-      <div class="kv"><span>YouTube</span><b>${K(sp.yt)}</b></div><div class="kv"><span>Audio</span><b>${K(sp.aud)} <em>creator-reported</em></b></div>
-      ${d.landingUrl?`<div class="kv"><span>Landing page</span><b>${esc(d.landingUrl)}</b></div>`:''}
-      <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn--ghost btn--sm" onclick="toast('Opens the episode at ${mmss(r.ts)}.')">${ICO_PLAY} Watch</button><button class="btn btn--ghost btn--sm" onclick="toast('MP3 of the read downloaded.')">${ICO_DL} MP3</button></div>
-      ${d.brief?`<details class="copyread"><summary>Ad copy as read</summary><p>"${esc(d.brief.talkingPoints[0]||'')}. ${esc(d.brief.cta)}."</p></details>`:''}
-    </div></div></div></div>`; }
+function crTranscript(r,d){ const b=d.brief; const tp=b?b.talkingPoints:[]; return `...and that's the part people miss about base building. Okay, quick break, because I want to tell you about today's sponsor, ${d.brand}. ${tp[0]?tp[0]+'. ':''}I've been using it through this whole training block, and honestly it's become part of my routine. ${tp[1]?tp[1]+'. ':''}${b?b.cta+'.':'Check them out at '+d.domain+'.'} That's ${d.landingUrl||d.domain}. Alright, back to the show.`; }
+function crPlay(id,secs){ const bar=$('pb-'+id), t=$('pt-'+id); if(!bar) return; let p=0; clearInterval(window['_pl'+id]); window['_pl'+id]=setInterval(()=>{ p+=0.5; bar.style.width=(p/secs*100)+'%'; if(t) t.textContent=mmss(p)+' / '+mmss(secs); if(p>=secs) clearInterval(window['_pl'+id]); },500); }
+
 function setRptMetric(m){ RPT.metric=m; deal(RPT.id).reportMetric=m; renderReport(); }
 function sendReport(id){ const d=deal(id), c=dealSummary(d);
   if(!d.contact.email || !d.contact.email.includes('@')){ window.location.href=`mailto:?subject=${encodeURIComponent(d.brand+' x '+S.show.name)}&body=${encodeURIComponent('https://spotsnow.io/r/'+d.id)}`; return; }
@@ -2547,95 +2636,106 @@ function publicAvailability(from, to, productId, category){
   return { creator:S.show.slug, product:p.id, placement:p.placement, priceCents:p.pkg?p.priceCents:rateCents(p.placement), priceModel:S.show.priceModel, leadTimeDays:S.show.storefront.leadTimeDays, excludedCategories:S.show.excludedCategories,
     openEpisodes:S.episodes.filter(e=>e.date>=from&&e.date<=to).filter(e=>bookable(e.date,p.placement,category).ok).map(e=>({date:e.date, episode:e.n, title:e.title, priceCents:rateCents(p.placement)})) }; }
 
-/* Booking page: mirrors the marketplace BookingSection (week rows of
-   "Position Length · $price" cards) and the /confirm-spot steps
-   Set up your Ad → Send Request → Authorize Payment. */
 let SF=null;
-const POS_LABEL = { PRE:'Pre-Roll', MID1:'Mid-Roll', MID2:'Mid-Roll 2', MID3:'Mid-Roll 3', MID4:'Mid-Roll 4', POST:'Post-Roll', YT:'YouTube Integration' };
-function mondayOf(s){ const d=d2(s), dow=(d.getUTCDay()+6)%7; return addDays(s,-dow); }
-function sfWeeks(){ const sh=S.show, start=addDays(TODAY, sh.storefront.leadTimeDays), out=[]; let wk=mondayOf(start);
-  for(let i=0;i<10;i++){ const eps=S.episodes.filter(e=>e.date>=wk && e.date<addDays(wk,7) && e.date>=start); if(eps.length) out.push({week:wk, eps}); wk=addDays(wk,7); }
-  return out; }
-function weekOpenEpisode(w, pl, category){ return w.eps.find(e=>bookable(e.date,pl,category).ok); }
-function openStorefront(prefill){ SF={ sel:[], category:(prefill&&prefill.category)||'', prefill:prefill||{}, done:null, step:0 };
-  if(prefill&&prefill.product){ const w=sfWeeks().find(w=>weekOpenEpisode(w,prefill.product,SF.category)); if(w) SF.sel.push({week:w.week, pl:prefill.product}); }
-  renderStorefront(); $('storefront').classList.add('open'); $('storefront').scrollTop=0; }
+function openStorefront(prefill){
+  const prods=products(); const pf=prefill||{};
+  SF={ product: pf.product || prods[0].id, month: null, sel:[], category: pf.category||'', prefill:pf, done:null };
+  const first=publicAvailability(TODAY, WINDOW_END(), SF.product, SF.category).openEpisodes[0]; SF.month=(first?first.date:TODAY).slice(0,7);
+  renderStorefront(); $('storefront').classList.add('open'); $('storefront').scrollTop=0;
+}
 function closeStorefront(){ $('storefront').classList.remove('open'); rerender(); }
-function sfLine(x){ return { ...x, price:rateCents(x.pl) }; }
 function renderStorefront(){
-  const sh=S.show, sf=sh.storefront, pls=placements();
+  const sh=S.show, sf=sh.storefront, prods=products(), p=prods.find(x=>x.id===SF.product)||prods[0];
   const past=S.deals.filter(d=>d.publicSponsor && dealSummary(d).aired.length);
-  const sub=SF.sel.reduce((a,x)=>a+rateCents(x.pl),0), fee=Math.round(sub*.10);
-  const bar=`<div class="prevbar">Preview of spotsnow.io/book/${sh.slug}${SF.prefill.from?` · prefilled for ${esc(SF.prefill.brand)}`:''}<button onclick="closeStorefront()">Back to workspace</button></div>
-    <div class="sf-top"><div class="sf-top__in"><div class="sf-wm"><i>S</i>SpotsNow</div></div></div>`;
-  if(!sf.enabled){ $('storefront').innerHTML=bar+`<div class="sf-in"><div class="empty">This booking page is off. Turn it on in My show.</div></div>`; return; }
-  if(SF.done){ const d=deal(SF.done); $('storefront').innerHTML=bar+`<div class="sf-in" style="max-width:600px"><div class="ob-card" style="text-align:center;padding:34px">
-      <div style="width:52px;height:52px;border-radius:50%;background:var(--green-bg);color:var(--green-text);display:grid;place-items:center;margin:0 auto 12px">${CK.replace(/11/g,'22')}</div>
-      <h2>Request sent</h2><p style="color:var(--text-secondary);font-size:14px;margin-top:6px">${esc(sh.firstName)} replies within 24 hours. Nothing is charged until ${esc(sh.firstName)} accepts, then you'll get a link to pay.</p>
-      <p style="font-size:13px;margin-top:14px">Track it live, no login: <a href="#" onclick="closeStorefront();openReport('${d.id}',true);return false">spotsnow.io/r/${d.id}</a></p>
+  const excluded = SF.category && sh.excludedCategories.includes(SF.category);
+  const sumUnits=SF.sel.length, unit=p.pkg?0:rateCents(p.placement), sub=p.pkg?p.priceCents:sumUnits*unit, fee=Math.round(sub*.10);
+  const instant=false;
+  if(!sf.enabled){ $('storefront').innerHTML=`<div class="prevbar">Storefront is off · only you can see this<button onclick="closeStorefront()">Back to workspace</button></div><div class="sf-in"><div class="empty">This storefront is private. Turn it on in My channel → Storefront.</div></div>`; return; }
+  if(SF.done){ const d=deal(SF.done); $('storefront').innerHTML=`<div class="prevbar">Public preview of spotsnow.io/book/${sh.slug}<button onclick="closeStorefront()">Back to workspace</button></div>
+    <div class="sf-in" style="max-width:640px"><div class="ob-card" style="text-align:center;padding:34px"><div style="width:52px;height:52px;border-radius:50%;background:var(--green-bg);color:var(--green-text);display:grid;place-items:center;margin:0 auto 12px">${CK.replace(/11/g,'22')}</div>
+      <h2>${d.status==='BOOKED'?'You\'re booked':'Request sent'}</h2><p style="color:var(--text-secondary);font-size:14px;margin-top:6px">${d.status==='BOOKED'?`${$$(dealSummary(d).totalCents)} charged. ${esc(sh.host)} has your talking points.`:`${esc(sh.host)} replies within 24 hours. Nothing is charged until you're accepted, then you'll get a link to pay.`}</p>
+      <div class="mail" style="text-align:left;margin-top:20px"><div class="mail__h"><b>To:</b> ${esc(d.contact.email)}<br><b>Subject:</b> ${esc(d.brand)} x ${esc(sh.name)}: ${d.status==='BOOKED'?'booking confirmed':'request received'}<br>📎 IO_${esc(d.brand.replace(/\W+/g,''))}_${sh.slug}.pdf</div><div class="mail__b">Your ${d.reads.length} read${d.reads.length>1?'s':''} on ${esc(sh.name)}: ${d.reads.map(r=>fmtDate(r.date)).join(', ')}.<br>Follow delivery live, no login: <a href="#" onclick="closeStorefront();openReport('${d.id}',true);return false">spotsnow.io/r/${d.id}</a> (shows "Scheduled" until reads air)</div></div>
       <button class="btn btn--ghost" style="margin-top:18px" onclick="SF.done=null;SF.sel=[];renderStorefront()">Back to ${esc(sh.name)}</button></div></div>`; return; }
-  const weeks=sfWeeks();
-  $('storefront').innerHTML=bar+`<div class="sf-in" style="max-width:900px">
-    <div class="sf-hero">${art(sh,112,38)}<div><div class="sf-name">${esc(sh.name)}</div><div class="sf-host">with ${esc(sh.host)} · ${esc(sh.category)}</div><div class="sf-desc">${esc(sf.intro||sh.desc)}</div>
-      <div class="stat-pills"><span class="stat-pill"><b>${K(sh.imprPerEp)}</b> per episode</span><span class="stat-pill"><b>${sh.releasesPerWeek}</b> episodes a week</span></div></div></div>
-    <div class="sf-h" style="display:flex;align-items:center;gap:10px">Book a spot <span class="muted" style="font-size:13px;font-weight:500">Pick a week and a position. ${esc(sh.firstName)} places it in that week's episode.</span></div>
-    <div class="listcard">${weeks.map(w=>`<div class="att" style="align-items:center;flex-wrap:wrap"><div style="width:120px;flex-shrink:0"><b style="font-size:13px">Week of ${fmtDate(w.week)}</b><div class="muted" style="font-size:11px">${w.eps.map(e=>dayName(e.date)).join(' + ')} episode${w.eps.length>1?'s':''}</div></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;flex:1">${pls.map(p=>{ const ep=weekOpenEpisode(w,p,SF.category), on=SF.sel.some(x=>x.week===w.week&&x.pl===p);
-        return `<button class="sfcard ${on?'on':''}" ${ep?'':'disabled'} title="${ep?`${PL_SECS[p]}s, ${POS_LABEL[p].includes('Pre')?'at the start':POS_LABEL[p].includes('Post')?'at the end':POS_LABEL[p].includes('YouTube')?'on the YouTube upload':'in the middle'} of an episode that week`:SF.category&&categoryLock(SF.category,w.eps[0].date).length?'Category not available':'Booked'}" onclick="sfToggle('${w.week}','${p}')"><span>${POS_LABEL[p]} ${PL_SECS[p]}s</span><b>${ep?(sf.showPrices?'$'+(rateCents(p)/100).toLocaleString('en-US',{minimumFractionDigits:2}):'Ask'):'Booked'}</b></button>`; }).join('')}</div></div>`).join('')}</div>
-    ${past.length&&sf.publicSponsors?`<div class="sf-h">Past sponsors</div><div class="rail">${past.map(d=>`<span style="display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:8px 12px;font-size:13px;font-weight:600">${blogo(d.domain,d.brand,'sm')}${esc(d.brand)}</span>`).join('')}</div>`:''}
-    <div class="callout"><div style="flex:1"><b style="font-size:14px">Have your own IO?</b><div style="font-size:13px;color:var(--text-secondary);margin-top:2px">Email it to <b class="mono">deals+${S.dealIngestToken}@spotsnow.io</b> or upload it.</div></div><button class="btn btn--ghost btn--sm" onclick="openIngest(true)">Upload IO</button></div>
-    <div style="height:90px"></div>
-  </div>
-  ${SF.sel.length?`<div class="sfbar"><div class="sfbar__in"><div><b>${SF.sel.length} spot${SF.sel.length>1?'s':''}</b> · ${$$(sub)} <span class="muted">+ ${$$(fee)} SpotsNow fee</span></div><button class="btn btn--dark" onclick="openCheckout()">Continue</button></div></div>`:''}`;
-}
-function sfToggle(week,pl){ const i=SF.sel.findIndex(x=>x.week===week&&x.pl===pl); if(i>=0) SF.sel.splice(i,1); else SF.sel.push({week,pl}); renderStorefront(); }
+  const [y,m]=SF.month.split('-').map(Number); const first=new Date(Date.UTC(y,m-1,1)); const startDow=first.getUTCDay(); const dim=new Date(Date.UTC(y,m,0)).getUTCDate();
+  let cells=''; for(let i=0;i<startDow;i++) cells+='<div></div>';
+  for(let dd=1; dd<=dim; dd++){ const ds=y+'-'+pad(m)+'-'+pad(dd); const e=episode(ds);
+    if(!e){ cells+=`<div class="mday">${dd}</div>`; continue; }
+    const bk=bookable(ds,p.placement,SF.category), on=SF.sel.includes(ds);
+    cells+= bk.ok ? `<button class="mday ep ${on?'sel':''}" onclick="sfToggle('${ds}')">${dd}<small>${on?'selected':'open'}</small></button>`
+                  : `<div class="mday ep full" title="${bk.why}">${dd}<small>${bk.lock?'n/a':bk.why==='Inside lead time'?'—':'booked'}</small></div>`; }
+  $('storefront').innerHTML=`
+  <div class="prevbar">Public preview of spotsnow.io/book/${sh.slug}${SF.prefill.from?` · prefilled from the ${esc(SF.prefill.brand)} report`:''}<button onclick="closeStorefront()">Back to workspace</button></div>
+  <div class="sf-top"><div class="sf-top__in"><div class="sf-wm"><i>S</i>SpotsNow</div><span class="muted" style="font-size:12.5px">/ book / ${sh.slug}</span><a href="#" style="margin-left:auto;font-size:12.5px;font-weight:600" onclick="toast('Opens /show/${sh.slug}, the full public stats profile.');return false">See full stats</a></div></div>
+  <div class="sf-in">
+    <div class="sf-hero">${art(sh,132,44)}<div><div class="sf-name">${esc(sh.name)}</div><div class="sf-host">with ${esc(sh.host)} · ${esc(sh.category)}</div><div class="sf-desc">${esc(sf.intro||sh.desc)}</div>
+      <div class="stat-pills"><span class="stat-pill"><b>${K(sh.imprPerEp)}</b> per episode</span><span class="stat-pill"><b>${Math.round(sh.releasesPerWeek*4.3)}</b> episodes / month</span><span class="stat-pill"><b>68%</b> 25–44 · runners</span><span class="stat-pill"><b>${new Set(S.deals.filter(d=>d.status==='BOOKED').map(d=>d.domain)).size}</b> past sponsors</span></div></div></div>
 
-/* /confirm-spot: Set up your Ad → Send Request → Authorize Payment */
+    <div class="sf-h">Products</div>
+    <div class="prods">${prods.map(x=>`<button class="prod ${x.id===p.id?'on':''}" onclick="SF.product='${x.id}';SF.sel=[];renderStorefront()"><b>${esc(x.name)}</b><div class="inc">${esc(x.inc)}</div><div class="pr">${sf.showPrices?(x.cpm&&!x.pkg?`from $${x.cpm} <small>CPM</small>`:$$(x.priceCents)+(x.pkg?'':' <small>/ episode</small>')):'<small>Ask for budget</small>'}</div><span class="btn btn--sm ${x.id===p.id?'btn--dark':'btn--ghost'}" style="margin-top:12px">Request to book</span></button>`).join('')}</div>
+
+    <div class="sf-h" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">Availability <span class="muted" style="font-size:13px;font-weight:500">${esc(p.name)} · ${sf.leadTimeDays}-day lead time${sf.minUnits>1?` · min ${sf.minUnits}`:''}</span>
+      <select class="inp" style="width:auto;margin-left:auto;font-size:12.5px;min-height:34px;padding:5px 9px" onchange="SF.category=this.value;SF.sel=SF.sel.filter(d=>bookable(d,'${p.placement}',this.value).ok);renderStorefront()"><option value="">Your category (optional)</option>${CATEGORIES.map(c=>`<option ${SF.category===c?'selected':''}>${c}</option>`).join('')}</select></div>
+    ${excluded?`<div class="notice notice--grey" style="margin-bottom:12px">${esc(sh.host)} doesn't read for ${esc(SF.category)} brands, so nothing can be booked in that category.</div>`:''}
+    <div class="avail"><div class="mcal"><div class="mcal__hd"><b>${MONL[m-1]} ${y}</b><div class="mcal__nav"><button onclick="sfMonth(-1)">‹</button><button onclick="sfMonth(1)">›</button></div></div>
+      <div class="mgrid">${DOW.map(x=>`<div class="dow">${x}</div>`).join('')}${cells}</div>
+      <div class="help" style="margin-top:10px">Episodes drop ${sh.releaseDays.join(' and ')}. Grey dates are booked, inside lead time, or not available for your category.</div></div>
+      <div class="sumbox"><b style="font-size:14px">${esc(p.name)}</b>
+        <div class="sumrow"><span>${p.pkg?`${p.count} episodes from ${SF.sel[0]?fmtDate(SF.sel[0]):'your start date'}`:`${sumUnits} date${sumUnits===1?'':'s'} × ${$$(unit)}`}</span><b>${$$(sub)}</b></div>
+        <div class="sumrow"><span>SpotsNow platform fee</span><b>${$$(fee)}</b></div>
+        <div class="sumrow tot"><span>Total</span><span>${$$(sub+fee)}</span></div>
+        <div style="font-size:11.5px;color:var(--text-secondary);margin:8px 0 12px">${SF.sel.length?SF.sel.map(fmtDate).join(', '):'Pick dates on the calendar.'}</div>
+        <button class="btn ${instant?'btn--accentcta':'btn--dark'}" style="width:100%" ${SF.sel.length>=Math.max(1,sf.minUnits)&&!excluded?'':'disabled'} onclick="openRequest()">${instant?'Book now':'Request'}</button>
+        <div class="help" style="text-align:center">Nothing is charged until ${esc(sh.firstName)} accepts. Then you get a link to pay.</div></div></div>
+
+    <div class="sf-h">How it works</div>
+    <div class="how"><div><b><i>1</i>Request</b>Pick dates and send your talking points. No card needed.</div><div><b><i>2</i>${esc(sh.firstName)} accepts within 24h</b>Or suggests other dates. Nothing is charged until you're accepted.</div><div><b><i>3</i>Pay and track it live</b>You get a link to pay and a live report that fills in as reads air.</div></div>
+
+    ${sf.publicSponsors&&past.length?`<div class="sf-h">Past sponsors</div><div class="rail">${past.slice(0,12).map(d=>`<span title="${esc(d.brand)}" style="display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:8px 12px;font-size:13px;font-weight:600">${blogo(d.domain,d.brand,'sm')}${esc(d.brand)}</span>`).join('')}${past.length>12?`<span class="muted">and ${past.length-12} more</span>`:''}</div>`:''}
+
+    <div class="callout"><div style="font-size:26px">📄</div><div style="flex:1"><b style="font-size:14.5px">Have your own IO?</b><div style="font-size:13px;color:var(--text-secondary);margin-top:2px">Email it to <b class="mono">deals+${S.dealIngestToken}@spotsnow.io</b> or upload it here. It lands on ${esc(sh.firstName)}'s calendar as a proposed booking. No account needed.</div></div><button class="btn btn--ghost" onclick="openIngest(true)">Upload IO</button></div>
+  </div>
+  <div class="sf-foot"><div class="sf-wm" style="justify-content:center;font-size:13px;margin-bottom:6px"><i style="width:18px;height:18px;font-size:10px">S</i>Powered by SpotsNow</div>Privacy · Terms · spotsnow.io/book/${sh.slug}</div>`;
+}
+function sfMonth(n){ let [y,m]=SF.month.split('-').map(Number); m+=n; if(m<1){m=12;y--;} if(m>12){m=1;y++;} SF.month=y+'-'+pad(m); renderStorefront(); }
+function sfToggle(ds){ const p=products().find(x=>x.id===SF.product);
+  if(p.pkg){ const picks=[]; for(const e of S.episodes){ if(e.date<ds) continue; if(bookable(e.date,p.placement,SF.category).ok) picks.push(e.date); if(picks.length>=p.count) break; } SF.sel=picks; }
+  else { const i=SF.sel.indexOf(ds); if(i>=0) SF.sel.splice(i,1); else SF.sel.push(ds); SF.sel.sort(); }
+  renderStorefront(); }
 let RQ={};
-function openCheckout(){ const pf=SF.prefill||{}; RQ={ step:1, brand:pf.brand||'', site:pf.domain||'', email:pf.email||'', name:pf.name||'', promo:pf.promo||'', landing:'', tps:'', later:false, terms:false,
-  message:`Hi ${S.show.firstName}, we'd love to book ${SF.sel.length} spot${SF.sel.length>1?'s':''} on ${S.show.name}. Talking points are attached. Thanks!` }; renderCheckout(); }
-function renderCheckout(){
-  // custom booking: no Authorize Payment step. The show accepts first, the brand pays after.
-  const steps=['Set up your Ad','Send Request'], st=RQ.step;
-  const sub=SF.sel.reduce((a,x)=>a+rateCents(x.pl),0), fee=Math.round(sub*.10);
-  let body='';
-  if(st===1) body=`<p class="help" style="margin:0 0 14px">What ${esc(S.show.firstName)} should say. You can add this later.</p>
-    <div class="fld2"><label class="lbl">Talking points</label><textarea class="inp" rows="5" placeholder="Key points, in your words" oninput="RQ.tps=this.value">${esc(RQ.tps)}</textarea></div>
-    <div class="fgrid"><div class="fld2"><label class="lbl">Promo code</label><input class="inp" value="${esc(RQ.promo)}" oninput="RQ.promo=this.value"></div><div class="fld2"><label class="lbl">Tracking URL</label><input class="inp" placeholder="brand.com/show" value="${esc(RQ.landing)}" oninput="RQ.landing=this.value"></div></div>`;
-  if(st===2) body=`<div class="fgrid"><div class="fld2"><label class="lbl">Brand name</label><input class="inp" value="${esc(RQ.brand)}" oninput="RQ.brand=this.value"></div><div class="fld2"><label class="lbl">Brand website</label><input class="inp" placeholder="brand.com" value="${esc(RQ.site)}" oninput="RQ.site=this.value"></div></div>
-    <div class="fld2"><label class="lbl">Your email</label><input class="inp" type="email" value="${esc(RQ.email)}" oninput="RQ.email=this.value"></div>
-    <div class="fld2"><label class="lbl">Message to ${esc(S.show.firstName)}</label><textarea class="inp" rows="4" oninput="RQ.message=this.value">${esc(RQ.message)}</textarea></div>
-    <div class="card card__pad" style="background:var(--page-bg)">${SF.sel.map(x=>`<div class="kv"><span>Week of ${fmtDate(x.week)} · ${POS_LABEL[x.pl]} ${PL_SECS[x.pl]}s</span><b>${$$(rateCents(x.pl))}</b></div>`).join('')}
-      <div class="kv"><span>SpotsNow fee</span><b>${$$(fee)}</b></div><div class="kv"><span><b>Total</b></span><b>${$$(sub+fee)}</b></div>
-      <div class="help" style="margin-top:8px">Nothing is charged now. ${esc(S.show.firstName)} accepts first, then you get a link to pay.</div></div>
-    <label class="swrow" style="cursor:pointer;margin-top:6px"><input type="checkbox" ${RQ.terms?'checked':''} onchange="RQ.terms=this.checked"><div><b>I accept the terms</b></div></label>`;
-  openDrawer(`<div class="drawer__head"><div><div class="stepper" style="margin:0 0 10px">${steps.map((s,i)=>`<div class="st ${i+1===st?'on':i+1<st?'done':''}"><i>${i+1<st?'✓':i+1}</i>${s}</div>${i<steps.length-1?'<div class="ln"></div>':''}`).join('')}</div><h2 style="font-size:17px;font-weight:700">${steps[st-1]}</h2></div><button class="x" onclick="closeOverlays()">✕</button></div>
-    <div class="drawer__body">${body}</div>
-    <div class="drawer__foot drawer__foot--split">${st>1?`<button class="btn btn--ghost" onclick="RQ.step--;renderCheckout()">Back</button>`:`<button class="fcta--quiet" onclick="RQ.later=true;RQ.step=2;renderCheckout()">Do it later</button>`}
-      <button class="btn btn--dark" onclick="checkoutNext()">${st===2?'Send Request':'Continue'}</button></div>`, 'lg');
-}
-function checkoutNext(){
-  if(RQ.step===2){ const site=(RQ.site||'').toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/.*$/,'');
-    if(!RQ.brand.trim()){ toast('Brand name is required'); return; }
-    if(site && !/^[\da-z.-]+\.[a-z.]{2,6}$/.test(site)){ toast('Please enter a valid website URL'); return; }
-    if(!RQ.email.includes('@')){ toast('Add an email so the creator can reply.'); return; }
-    if(!RQ.message.trim()){ toast('Message is required'); return; } RQ.site=site; }
-  if(RQ.step<2){ RQ.step++; renderCheckout(); return; }
-  if(!RQ.terms){ toast('You must accept the terms'); return; }
-  submitRequest();
-}
+function openRequest(){ const pf=SF.prefill||{}; const p=products().find(x=>x.id===SF.product);
+  RQ={ brand:pf.brand||'', site:pf.domain||'', email:pf.email||'', name:pf.name||'', goal:'', promo:pf.promo||'', tps:'', terms:false, category:SF.category||pf.category||'' };
+  renderRequest(); }
+function renderRequest(){ const p=products().find(x=>x.id===SF.product), instant=false;
+  openDrawer(dHead(`${instant?'Book':'Request'} ${esc(p.name)} on ${esc(S.show.name)}`, `${SF.sel.map(fmtDate).join(', ')}`)+
+  `<div class="drawer__body">
+    <div class="fgrid"><div class="fld2"><label class="lbl">Brand name</label><input class="inp" value="${esc(RQ.brand)}" oninput="RQ.brand=this.value"></div><div class="fld2"><label class="lbl">Website</label><input class="inp" placeholder="brand.com" value="${esc(RQ.site)}" oninput="RQ.site=this.value"><div class="help">Your domain is how we recognize your brand.</div></div></div>
+    <div class="fgrid"><div class="fld2"><label class="lbl">Your name</label><input class="inp" value="${esc(RQ.name)}" oninput="RQ.name=this.value"></div><div class="fld2"><label class="lbl">Contact email</label><input class="inp" type="email" value="${esc(RQ.email)}" oninput="RQ.email=this.value"></div></div>
+    <div class="fgrid"><div class="fld2"><label class="lbl">Category</label><select class="inp" onchange="RQ.category=this.value;renderRequest()"><option value="">Choose</option>${CATEGORIES.filter(c=>!S.show.excludedCategories.includes(c)).map(c=>`<option ${RQ.category===c?'selected':''}>${c}</option>`).join('')}</select></div><div class="fld2"><label class="lbl">Promo code / URL (optional)</label><input class="inp" value="${esc(RQ.promo)}" oninput="RQ.promo=this.value"></div></div>
+    <div class="fld2"><label class="lbl">Campaign goal (one line)</label><input class="inp" value="${esc(RQ.goal)}" oninput="RQ.goal=this.value"></div>
+    <div class="fld2"><label class="lbl">Talking points</label><textarea class="inp" rows="4" placeholder="What should ${esc(S.show.firstName)} make sure to say?" oninput="RQ.tps=this.value">${esc(RQ.tps)}</textarea></div>
+    <div class="notice notice--grey" style="margin-bottom:12px">No card needed. ${esc(S.show.firstName)} accepts first, then you get a link to pay.</div>
+    <label class="swrow" style="cursor:pointer"><input type="checkbox" ${RQ.terms?'checked':''} onchange="RQ.terms=this.checked"><div><b>I agree to the insertion order terms</b><small>Standard SpotsNow IO: host-read, make-goods for under delivery, 30-day measurement window, cancel 14 days before air.</small></div></label>
+  </div>
+  <div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Cancel</button><button class="btn btn--dark" onclick="submitRequest()">${instant?'Book and pay':'Send request'}</button></div>`, 'lg'); }
 function submitRequest(){
-  const targets=SF.sel.map(x=>{ const w=sfWeeks().find(w=>w.week===x.week); const ep=w&&weekOpenEpisode(w,x.pl,SF.category); return ep?[ep.date,x.pl]:null; });
-  if(targets.some(t=>!t)){ toast('One of those weeks was just booked. Pick again.'); SF.sel=[]; closeOverlays(); renderStorefront(); return; }
-  const site=RQ.site||RQ.brand.toLowerCase().replace(/[^a-z0-9]/g,'')+'.com';
-  const tps=RQ.tps.split('\n').map(x=>x.trim()).filter(Boolean);
-  const d={ id:uid('d'), brand:RQ.brand.trim(), domain:site, category:SF.category||'Software', source:'STOREFRONT', agency:null, contact:{name:RQ.name,email:RQ.email}, promoCode:RQ.promo, landingUrl:RQ.landing, priceModel:S.show.priceModel,
-    status:'PROPOSED', goal:RQ.message, requestedAt:TODAY, fromDeal:SF.prefill.from||null,
+  const p=products().find(x=>x.id===SF.product), instant=false;
+  const site=(RQ.site||'').toLowerCase().replace(/^https?:\/\//,'').replace(/\/.*$/,'').replace(/^www\./,'');
+  if(!RQ.brand||!site||!RQ.email.includes('@')){ toast('Add the brand, website and a contact email.'); return; }
+  if(!RQ.terms){ toast('Agree to the IO terms to continue.'); return; }
+  // re-check availability against the calendar at submit time (no separate store)
+  const targets=[]; SF.sel.forEach(dt=>targets.push([dt,p.placement])); if(p.pkg&&p.extra) p.extra.forEach(x=>{ let n=0; for(const e of S.episodes){ if(e.date<SF.sel[0]) continue; if(!slot(e.date,x.placement)&&bookable(e.date,x.placement,RQ.category).ok){ targets.push([e.date,x.placement]); if(++n>=x.count) break; } } });
+  if(targets.some(t=>slot(t[0],t[1]))){ toast('One of those dates was just booked. Pick again.'); SF.sel=[]; closeOverlays(); renderStorefront(); return; }
+  const each = p.pkg ? Math.round(p.priceCents/targets.length) : rateCents(p.placement);
+  const d={ id:uid('d'), brand:RQ.brand, domain:site, category:RQ.category||'Software', source:'STOREFRONT', agency:null, contact:{name:RQ.name,email:RQ.email}, promoCode:RQ.promo, landingUrl:'', priceModel:S.show.priceModel,
+    status: instant?'BOOKED':'PROPOSED', product:p.id, goal:RQ.goal, requestedAt:TODAY, fromDeal:SF.prefill.from||null,
     invoiceTerms:{terms:'UPFRONT',invoiceOn:'BOOKING',collectVia:'SPOTSNOW'}, invoice:null,
-    brief: tps.length? { cta:`Go to ${RQ.landing||site}${RQ.promo?' and use code '+RQ.promo:''}`, talkingPoints:tps, banned:[], disclaimer:'', position:targets[0][1], lengthSec:PL_SECS[targets[0][1]], descLink:true, fresh:true } : null,
-    publicSponsor:false, reportNote:'', sendLog:[], copyIn:!!tps.length, createdAt:TODAY, conversationId:uid('conv'),
-    reads: targets.map(t=>({ id:uid('r'), date:t[0], placement:t[1], kind:'paid', status:'requested', final:0, ytShare:t[1]==='YT'?1:.7, ts:700, priceCents:rateCents(t[1]), comp:{} })) };
-  S.deals.push(d); rebuildSlots(); closeOverlays(); refreshChrome(); SF.done=d.id; SF.sel=[]; renderStorefront(); $('storefront').scrollTop=0;
+    brief: RQ.tps.trim()? { cta:`Go to ${site}${RQ.promo?' and use code '+RQ.promo:''}`, talkingPoints:RQ.tps.split('\n').map(x=>x.trim()).filter(Boolean), banned:[], disclaimer:'', position:p.placement, lengthSec:PL_SECS[p.placement], descLink:true, fresh:true } : null,
+    publicSponsor:false, reportNote:'', sendLog:[], copyIn:!!RQ.tps.trim(), createdAt:TODAY, conversationId:uid('conv'),
+    reads: targets.map(t=>({ id:uid('r'), date:t[0], placement:t[1], kind:'paid', status:instant?'scheduled':'requested', final:0, ytShare:t[1]==='YT'?1:.7, ts:700, priceCents:each, packageId:p.pkg?p.id:null, comp:{} })) };
+  S.deals.push(d);
+  if(instant){ const c=dealSummary(d), fee=Math.round(c.totalCents*.10); d.invoice={ number:'INV-'+(1048+S.deals.filter(x=>x.invoice).length), amountCents:c.totalCents, feeCents:fee, feeLabel:'SpotsNow marketplace fee (10%)', issuedAt:TODAY, dueAt:TODAY, status:'PAID', paidAt:TODAY, upfront:true, payout:{at:d.reads[0].date,amountCents:c.totalCents-fee,status:'SCHEDULED'} };
+    S.payouts.unshift({id:uid('po'),at:d.reads[0].date,amountCents:c.totalCents-fee,status:'SCHEDULED',ref:d.brand+' · '+d.invoice.number+' · on first verified air'}); S.gmvMonthCents+=c.totalCents; }
+  rebuildSlots(); closeOverlays(); refreshChrome(); SF.done=d.id; SF.sel=[]; renderStorefront(); $('storefront').scrollTop=0;
 }
 
 /* ════════ BRANDS TO PITCH (5.11) ════════
