@@ -1624,7 +1624,7 @@ function openFutureSlots(pl, from, n){ const out=[]; for(const e of S.episodes){
 /* Invoice status rolls forward with the calendar (OVERDUE is computed, not stored). */
 function invStatus(inv){ if(!inv) return null; if(inv.status==='PAID'||inv.status==='VOID'||inv.status==='DRAFT') return inv.status; if(inv.dueAt<TODAY) return 'OVERDUE'; if(diffDays(TODAY,inv.dueAt)<=3) return 'DUE'; return inv.status; }
 function invBadge(inv, d){
-  if(!inv) return d&&d.status==='PROPOSED'?'<span class="tag tag--grey">Authorized</span>':'<span class="tag tag--grey">None yet</span>';
+  if(!inv) return d&&d.status==='PROPOSED'?'<span class="tag tag--grey">Pays after accept</span>':'<span class="tag tag--grey">None yet</span>';
   const st=invStatus(inv);
   const m={DRAFT:['grey','Draft'],SENT:['blue','Sent'],DUE:['blue','Due'],OVERDUE:['orange','Overdue'],PAID:['green','Paid'],VOID:['grey','Void']}[st];
   return `<span class="tag tag--${m[0]}">${m[1]}${inv.external?' · ext':''}</span>`;
@@ -1652,7 +1652,7 @@ const DISMISSED = new Set();
 function needsYou(){
   const rows=[];
   S.deals.filter(d=>d.status==='PROPOSED').forEach(d=>{ const c=dealSummary(d);
-    rows.push({ id:'bk_'+d.id, kind:'booking', label:'New booking request', title:`${d.brand} requested ${d.reads.length} ${PL[d.reads[0].placement]} slot${d.reads.length>1?'s':''}`, sub:`${d.reads.map(r=>fmtDate(r.date)).join(', ')} · ${$$(c.totalCents)} authorized · via ${srcLabel(d.source)}${categoryLock(d.category,d.reads[0].date,d.id).length?' · <b style="color:var(--orange-text)">category conflict</b>':''}`, d,
+    rows.push({ id:'bk_'+d.id, kind:'booking', label:'New booking request', title:`${d.brand} requested ${d.reads.length} ${PL[d.reads[0].placement]} slot${d.reads.length>1?'s':''}`, sub:`${d.reads.map(r=>fmtDate(r.date)).join(', ')} · ${$$(c.totalCents)} · pays after you accept${categoryLock(d.category,d.reads[0].date,d.id).length?' · <b style="color:var(--orange-text)">category conflict</b>':''}`, d,
       acts:[['Review','btn--dark',`openBookingRequest('${d.id}')`],['Decline','btn--ghost',`declineBooking('${d.id}')`]] }); });
   S.deals.filter(d=>d.status==='HOLD' && d.holdExpiresAt && d.holdExpiresAt<TODAY).forEach(d=>{
     rows.push({ id:'hd_'+d.id, kind:'hold', label:'Hold expired', title:`${d.brand} hold on ${d.reads.length} ${PL[d.reads[0].placement]} slot${d.reads.length>1?'s':''} expired`, sub:`Hear back was due ${fmtDate(d.holdExpiresAt)} · ${d.reads.map(r=>fmtDate(r.date)).join(', ')}`, d,
@@ -2091,7 +2091,7 @@ function openBookingRequest(id){ const d=deal(id), c=dealSummary(d); const lk=ca
     ${lk.length?`<div class="notice notice--orange" style="margin-bottom:14px">⚠ <div><b>${lk.map(l=>esc(l.text)).join(' ')}</b><div>Conflicts flag, they don't block. You decide.</div></div></div>`:''}
     <div class="kv"><span>Slots</span><b>${d.reads.map(r=>`${PL[r.placement]} ${fmtDate(r.date)}`).join(', ')}</b></div>
     <div class="kv"><span>Total</span><b>${$$(c.totalCents)} <em>+ ${$$(Math.round(c.totalCents*.1))} marketplace fee paid by the brand</em></b></div>
-    <div class="kv"><span>Payment</span><b>Card authorized <em>captured only when you approve</em></b></div>
+    <div class="kv"><span>Payment</span><b>After you accept <em>${esc(d.brand)} gets a link to pay</em></b></div>
     <div class="kv"><span>Contact</span><b>${esc(d.contact.name)} <em>${esc(d.contact.email)}</em></b></div>
     ${d.goal?`<div class="kv"><span>Goal</span><b style="font-weight:500">${esc(d.goal)}</b></div>`:''}
     <div class="kv"><span>Promo / URL</span><b>${esc(d.promoCode||'—')} <em>${esc(d.landingUrl||'')}</em></b></div>
@@ -2099,18 +2099,20 @@ function openBookingRequest(id){ const d=deal(id), c=dealSummary(d); const lk=ca
     <div class="dhead">Propose other dates</div><div class="help">Pick alternatives and we'll send a counter in the marketplace thread.</div>
     <div class="pick" style="margin-top:8px">${openFutureSlots(d.reads[0].placement, addDays(TODAY,7), 8).map(dt=>`<button class="${(PROPOSE[id]||[]).includes(dt)?'on':''} ${categoryLock(d.category,dt,d.id).length?'conf':''}" onclick="togglePropose('${id}','${dt}')"><b>${dayName(dt)} ${fmtDate(dt)}</b><span>${categoryLock(d.category,dt,d.id).length?'Category conflict':'Open · '+PL[d.reads[0].placement]}</span></button>`).join('')}</div>
   </div>
-  <div class="drawer__foot drawer__foot--split"><button class="btn btn--ghost" onclick="declineBooking('${id}')">Decline</button><div class="drawer__foot-btns"><button class="btn btn--ghost" onclick="proposeDates('${id}')">Propose other dates</button><button class="btn btn--dark" onclick="approveBooking('${id}')">Approve and capture</button></div></div>`, 'lg'); }
+  <div class="drawer__foot drawer__foot--split"><button class="btn btn--ghost" onclick="declineBooking('${id}')">Decline</button><div class="drawer__foot-btns"><button class="btn btn--ghost" onclick="proposeDates('${id}')">Propose other dates</button><button class="btn btn--dark" onclick="approveBooking('${id}')">Accept</button></div></div>`, 'lg'); }
 const PROPOSE={};
 function togglePropose(id,dt){ const a=PROPOSE[id]=PROPOSE[id]||[]; const i=a.indexOf(dt); if(i>=0) a.splice(i,1); else a.push(dt); openBookingRequest(id); }
 function approveBooking(id){ const d=deal(id), c=dealSummary(d);
   d.status='BOOKED'; d.reads.forEach(r=>r.status='scheduled'); d.copyIn=!!d.brief;
   if(d.source==='IO_UPLOAD'){ rebuildSlots(); closeOverlays(); refreshChrome(); rerender(); toast(`Confirmed. No payment on an IO: the invoice issues on the IO's ${d.invoiceTerms.terms.replace('_',' ')} terms at first verified air.`); return; }
   const fee=Math.round(c.totalCents*.10);
-  d.invoice={ number:'INV-'+(1048+S.deals.filter(x=>x.invoice).length), amountCents:c.totalCents, feeCents:fee, feeLabel:'SpotsNow marketplace fee (10%)', issuedAt:TODAY, dueAt:TODAY, status:'PAID', paidAt:TODAY, upfront:true, payout:{at:d.reads[0].date, amountCents:c.totalCents-fee, status:'SCHEDULED'} };
-  S.payouts.unshift({id:uid('po'),at:d.reads[0].date,amountCents:c.totalCents-fee,status:'SCHEDULED',ref:d.brand+' · '+d.invoice.number+' · pays out on first verified air'});
-  S.gmvMonthCents+=c.totalCents; rebuildSlots(); closeOverlays(); refreshChrome(); rerender();
-  toast(`Approved. ${$$(c.totalCents)} captured, slots marked sold, IO emailed to ${d.contact.email}.`); }
-function declineBooking(id){ const d=deal(id); d.status='DECLINED'; d.reads.forEach(r=>r.status='cancelled'); rebuildSlots(); closeOverlays(); refreshChrome(); rerender(); toast(`Declined. The authorization on ${d.brand}'s card was released and the hold is freed.`); }
+  // accept first, pay later (marketplace custom booking): accepting sends the brand a pay link
+  const due = [addDays(TODAY,7), addDays(d.reads[0].date,-3)].sort()[0];
+  d.invoice={ number:'INV-'+(1048+S.deals.filter(x=>x.invoice).length), amountCents:c.totalCents, feeCents:fee, feeLabel:'SpotsNow marketplace fee (10%)', issuedAt:TODAY, dueAt:due<TODAY?TODAY:due, status:'SENT', paidAt:null, payLink:true };
+  S.reminders.push({ id:uid('rm'), text:`${d.brand} to pay ${d.invoice.number}`, due:d.invoice.dueAt, origin:'INVOICE', ref:d.id });
+  rebuildSlots(); closeOverlays(); refreshChrome(); rerender();
+  toast(`Accepted. ${d.brand} got a link to pay ${$$(c.totalCents)}. The slots are yours to hold until they pay.`); }
+function declineBooking(id){ const d=deal(id); d.status='DECLINED'; d.reads.forEach(r=>r.status='cancelled'); rebuildSlots(); closeOverlays(); refreshChrome(); rerender(); toast(`Declined. ${d.brand} was told, and those slots are open again.`); }
 function proposeDates(id){ const d=deal(id), dts=PROPOSE[id]||[]; if(!dts.length){ toast('Pick at least one alternative date.'); return; }
   d.status='COUNTERED'; d.reads.forEach(r=>r.status='cancelled'); d.counter=dts; rebuildSlots(); closeOverlays(); refreshChrome(); rerender();
   toast(`Counter sent in the marketplace thread: ${dts.map(fmtDate).join(', ')}. The authorization stays until ${d.brand} replies.`); }
@@ -2441,7 +2443,7 @@ function payInvoice(id){ const d=deal(id), inv=d.invoice;
     <div class="stripe-el">🏦 Bank account entered on Stripe's page<span class="tm">Test mode</span></div>
     <div class="help" style="margin-top:8px">Prototype: no real payment is taken. In production this is Stripe's hosted invoice page.</div>
     <button class="btn btn--dark" style="width:100%;margin-top:16px" onclick="simulatePaid('${id}')">Pay ${$$(inv.amountCents)}</button></div>`); }
-function simulatePaid(id){ const d=deal(id); d.invoice.status='PAID'; d.invoice.paidAt=TODAY; const net=d.invoice.amountCents; d.invoice.payout={at:addDays(TODAY,2),amountCents:net,status:'SCHEDULED'}; S.payouts.unshift({id:uid('po'),at:addDays(TODAY,2),amountCents:net,status:'SCHEDULED',ref:d.brand+' · '+d.invoice.number}); clearRemindersFor(id); closeOverlays(); refreshChrome(); renderReport(); toast(`Paid. Stripe webhook marked ${d.invoice.number} paid and scheduled the payout to Maya.`); }
+function simulatePaid(id){ const d=deal(id); d.invoice.status='PAID'; d.invoice.paidAt=TODAY; const mk=(d.invoice.feeLabel||'').includes('marketplace'); const net=d.invoice.amountCents-(mk?d.invoice.feeCents:0); const pAt=mk?(d.reads.find(r=>r.status==='scheduled')||{}).date||addDays(TODAY,2):addDays(TODAY,2); if(mk) S.gmvMonthCents+=d.invoice.amountCents; d.invoice.payout={at:pAt,amountCents:net,status:'SCHEDULED'}; S.payouts.unshift({id:uid('po'),at:pAt,amountCents:net,status:'SCHEDULED',ref:d.brand+' · '+d.invoice.number+(mk?' · on first verified air':'')}); clearRemindersFor(id); closeOverlays(); refreshChrome(); if(RPT.id&&$('report').classList.contains('open')) renderReport(); else rerender(); toast(`Paid. Stripe webhook marked ${d.invoice.number} paid and scheduled the payout to Maya.`); }
 function rebook(id){ const d=deal(id); const lastProd=d.reads.filter(r=>r.kind==='paid').slice(-1)[0]; closeReport(); openStorefront({ from:d.id, brand:d.brand, domain:d.domain, email:d.contact.email, name:d.contact.name, product:lastProd.placement, promo:d.promoCode, category:d.category }); }
 
 /* ════════ STOREFRONT /book/[slug] (5.4) + public availability API (5.12) ════════
@@ -2483,7 +2485,7 @@ function renderStorefront(){
   if(!sf.enabled){ $('storefront').innerHTML=bar+`<div class="sf-in"><div class="empty">This booking page is off. Turn it on in My show.</div></div>`; return; }
   if(SF.done){ const d=deal(SF.done); $('storefront').innerHTML=bar+`<div class="sf-in" style="max-width:600px"><div class="ob-card" style="text-align:center;padding:34px">
       <div style="width:52px;height:52px;border-radius:50%;background:var(--green-bg);color:var(--green-text);display:grid;place-items:center;margin:0 auto 12px">${CK.replace(/11/g,'22')}</div>
-      <h2>Request sent</h2><p style="color:var(--text-secondary);font-size:14px;margin-top:6px">${esc(sh.firstName)} confirms within 24 hours. Your card is authorized, not charged, until then.</p>
+      <h2>Request sent</h2><p style="color:var(--text-secondary);font-size:14px;margin-top:6px">${esc(sh.firstName)} replies within 24 hours. Nothing is charged until ${esc(sh.firstName)} accepts, then you'll get a link to pay.</p>
       <p style="font-size:13px;margin-top:14px">Track it live, no login: <a href="#" onclick="closeStorefront();openReport('${d.id}',true);return false">spotsnow.io/r/${d.id}</a></p>
       <button class="btn btn--ghost" style="margin-top:18px" onclick="SF.done=null;SF.sel=[];renderStorefront()">Back to ${esc(sh.name)}</button></div></div>`; return; }
   const weeks=sfWeeks();
@@ -2507,7 +2509,8 @@ let RQ={};
 function openCheckout(){ const pf=SF.prefill||{}; RQ={ step:1, brand:pf.brand||'', site:pf.domain||'', email:pf.email||'', name:pf.name||'', promo:pf.promo||'', landing:'', tps:'', later:false, terms:false,
   message:`Hi ${S.show.firstName}, we'd love to book ${SF.sel.length} spot${SF.sel.length>1?'s':''} on ${S.show.name}. Talking points are attached. Thanks!` }; renderCheckout(); }
 function renderCheckout(){
-  const steps=['Set up your Ad','Send Request','Authorize Payment'], st=RQ.step;
+  // custom booking: no Authorize Payment step. The show accepts first, the brand pays after.
+  const steps=['Set up your Ad','Send Request'], st=RQ.step;
   const sub=SF.sel.reduce((a,x)=>a+rateCents(x.pl),0), fee=Math.round(sub*.10);
   let body='';
   if(st===1) body=`<p class="help" style="margin:0 0 14px">What ${esc(S.show.firstName)} should say. You can add this later.</p>
@@ -2515,15 +2518,15 @@ function renderCheckout(){
     <div class="fgrid"><div class="fld2"><label class="lbl">Promo code</label><input class="inp" value="${esc(RQ.promo)}" oninput="RQ.promo=this.value"></div><div class="fld2"><label class="lbl">Tracking URL</label><input class="inp" placeholder="brand.com/show" value="${esc(RQ.landing)}" oninput="RQ.landing=this.value"></div></div>`;
   if(st===2) body=`<div class="fgrid"><div class="fld2"><label class="lbl">Brand name</label><input class="inp" value="${esc(RQ.brand)}" oninput="RQ.brand=this.value"></div><div class="fld2"><label class="lbl">Brand website</label><input class="inp" placeholder="brand.com" value="${esc(RQ.site)}" oninput="RQ.site=this.value"></div></div>
     <div class="fld2"><label class="lbl">Your email</label><input class="inp" type="email" value="${esc(RQ.email)}" oninput="RQ.email=this.value"></div>
-    <div class="fld2"><label class="lbl">Message to ${esc(S.show.firstName)}</label><textarea class="inp" rows="4" oninput="RQ.message=this.value">${esc(RQ.message)}</textarea></div>`;
-  if(st===3) body=`${SF.sel.map(x=>`<div class="kv"><span>Week of ${fmtDate(x.week)} · ${POS_LABEL[x.pl]} ${PL_SECS[x.pl]}s</span><b>${$$(rateCents(x.pl))}</b></div>`).join('')}
-    <div class="kv"><span>SpotsNow fee</span><b>${$$(fee)}</b></div><div class="kv"><span><b>Total</b></span><b>${$$(sub+fee)}</b></div>
-    <div class="fld2" style="margin-top:14px"><label class="lbl">Card</label><div class="stripe-el">💳 Entered in Stripe's secure field<span class="tm">Test mode</span></div><div class="help">Authorized now, charged only when ${esc(S.show.firstName)} accepts.</div></div>
-    <label class="swrow" style="cursor:pointer"><input type="checkbox" ${RQ.terms?'checked':''} onchange="RQ.terms=this.checked"><div><b>I accept the terms</b></div></label>`;
-  openDrawer(`<div class="drawer__head"><div><div class="stepper" style="margin:0 0 10px">${steps.map((s,i)=>`<div class="st ${i+1===st?'on':i+1<st?'done':''}"><i>${i+1<st?'✓':i+1}</i>${s}</div>${i<2?'<div class="ln"></div>':''}`).join('')}</div><h2 style="font-size:17px;font-weight:700">${steps[st-1]}</h2></div><button class="x" onclick="closeOverlays()">✕</button></div>
+    <div class="fld2"><label class="lbl">Message to ${esc(S.show.firstName)}</label><textarea class="inp" rows="4" oninput="RQ.message=this.value">${esc(RQ.message)}</textarea></div>
+    <div class="card card__pad" style="background:var(--page-bg)">${SF.sel.map(x=>`<div class="kv"><span>Week of ${fmtDate(x.week)} · ${POS_LABEL[x.pl]} ${PL_SECS[x.pl]}s</span><b>${$$(rateCents(x.pl))}</b></div>`).join('')}
+      <div class="kv"><span>SpotsNow fee</span><b>${$$(fee)}</b></div><div class="kv"><span><b>Total</b></span><b>${$$(sub+fee)}</b></div>
+      <div class="help" style="margin-top:8px">Nothing is charged now. ${esc(S.show.firstName)} accepts first, then you get a link to pay.</div></div>
+    <label class="swrow" style="cursor:pointer;margin-top:6px"><input type="checkbox" ${RQ.terms?'checked':''} onchange="RQ.terms=this.checked"><div><b>I accept the terms</b></div></label>`;
+  openDrawer(`<div class="drawer__head"><div><div class="stepper" style="margin:0 0 10px">${steps.map((s,i)=>`<div class="st ${i+1===st?'on':i+1<st?'done':''}"><i>${i+1<st?'✓':i+1}</i>${s}</div>${i<steps.length-1?'<div class="ln"></div>':''}`).join('')}</div><h2 style="font-size:17px;font-weight:700">${steps[st-1]}</h2></div><button class="x" onclick="closeOverlays()">✕</button></div>
     <div class="drawer__body">${body}</div>
     <div class="drawer__foot drawer__foot--split">${st>1?`<button class="btn btn--ghost" onclick="RQ.step--;renderCheckout()">Back</button>`:`<button class="fcta--quiet" onclick="RQ.later=true;RQ.step=2;renderCheckout()">Do it later</button>`}
-      <button class="btn btn--dark" onclick="checkoutNext()">${st===2?'Send Request':st===3?'Authorize payment':'Continue'}</button></div>`, 'lg');
+      <button class="btn btn--dark" onclick="checkoutNext()">${st===2?'Send Request':'Continue'}</button></div>`, 'lg');
 }
 function checkoutNext(){
   if(RQ.step===2){ const site=(RQ.site||'').toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/.*$/,'');
@@ -2531,7 +2534,7 @@ function checkoutNext(){
     if(site && !/^[\da-z.-]+\.[a-z.]{2,6}$/.test(site)){ toast('Please enter a valid website URL'); return; }
     if(!RQ.email.includes('@')){ toast('Add an email so the creator can reply.'); return; }
     if(!RQ.message.trim()){ toast('Message is required'); return; } RQ.site=site; }
-  if(RQ.step<3){ RQ.step++; renderCheckout(); return; }
+  if(RQ.step<2){ RQ.step++; renderCheckout(); return; }
   if(!RQ.terms){ toast('You must accept the terms'); return; }
   submitRequest();
 }
@@ -2847,6 +2850,7 @@ function simpleStatus(d){ const c=dealSummary(d), ist=invStatus(d.invoice);
   if(d.status==='HOLD') return ['On hold','grey'];
   if(d.status==='DRAFT') return ['Draft','grey'];
   if(ist==='OVERDUE') return ['Unpaid','orange'];
+  if(d.invoice && d.invoice.payLink && ist!=='PAID') return ['Waiting for payment','blue'];
   if(c.state==='done') return [ist==='PAID'||!d.invoice?'Done':'Awaiting payment', ist==='PAID'?'green':'grey'];
   if(c.state==='upcoming') return ['Upcoming','grey'];
   return ['Live','green'];
