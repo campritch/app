@@ -981,6 +981,7 @@
     /* Needs-you / attention rows */
     .att { display:flex; align-items:center; gap:13px; padding:12px 16px; }
     .att + .att { border-top:1px solid var(--border-light); }
+    .att__main .att__kind { display:block; width:auto; padding:0; margin-bottom:2px; text-align:left; background:none; color:var(--text-tertiary); font-size:10px; }
     .att__kind { font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:6px; white-space:nowrap; flex-shrink:0; width:150px; text-align:center; }
     .k-booking { background:var(--blue-bg); color:var(--blue-text); } .k-hold { background:var(--orange-bg); color:var(--orange-text); }
     .k-missed { background:var(--red-bg); color:var(--red-text); } .k-flag { background:var(--red-bg); color:var(--red-text); }
@@ -995,7 +996,7 @@
     .att-x:hover { background:var(--nav-hover); color:var(--text-primary); }
 
     /* Command center */
-    .cc-tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:26px; }
+    .cc-tiles { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:26px; }
     .cc-tile { background:var(--white); border:1px solid var(--border); border-radius:16px; padding:15px 17px; text-align:left; font-family:inherit; cursor:pointer; transition:border-color .12s; }
     .cc-tile:hover { border-color:var(--border-strong); }
     .cc-tile__l { font-size:12px; font-weight:600; color:var(--text-secondary); }
@@ -1306,8 +1307,7 @@
       <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"/></svg>
     </button>
     <div class="sb-scroll">
-      <button class="nav-item" data-view="home" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
-      <button class="nav-item" data-view="needs" onclick="go('needs')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Needs you<span class="nbadge" id="needsBadge">0</span></button>
+      <button class="nav-item" data-view="home" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home<span class="nbadge" id="needsBadge" title="Needs you">0</span></button>
       <button class="nav-item" data-view="calendar" onclick="go('calendar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Ad Calendar</button>
       <button class="nav-item" data-view="deals" onclick="go('deals')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1Z"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Deals</button>
       <button class="nav-item" data-view="delivery" onclick="go('delivery')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Delivery<span id="lockDelivery"></span></button>
@@ -1675,16 +1675,18 @@ function needsYou(){
 }
 const KIND_CLASS = {booking:'k-booking',hold:'k-hold',missed:'k-missed',flag:'k-flag',mg:'k-mg',inv:'k-inv',dl:'k-dl',copy:'k-copy',mail:'k-mail'};
 function attRow(r){
-  return `<div class="att"><span class="att__kind ${KIND_CLASS[r.kind]}">${r.label}</span>${r.d?blogo(r.d.domain,r.d.brand,'sm'):''}
-    <div class="att__main"><b>${esc(r.title)}</b><span>${r.sub}</span></div>
-    <div class="att__acts">${r.acts.map(a=>`<button class="btn btn--sm ${a[1]}" onclick="${a[2]}">${a[0]}</button>`).join('')}<button class="att-x" title="Dismiss for this session" onclick="DISMISSED.add('${r.id}');rerender();refreshChrome()">✕</button></div></div>`;
+  // one primary action per row (PRD 5.10); secondary actions live in the drawer it opens
+  const a=r.acts.find(x=>x[1]==='btn--dark')||r.acts[0];
+  return `<div class="att">${r.d?blogo(r.d.domain,r.d.brand,'sm'):'<span class="blogo sm" style="background:var(--secondary-lite)"></span>'}
+    <div class="att__main"><span class="att__kind">${r.label}</span><b>${esc(r.title)}</b><span>${r.sub}</span></div>
+    <div class="att__acts"><button class="btn btn--sm btn--dark" onclick="${a[2]}">${a[0]}</button><button class="att-x" title="Dismiss for this session" onclick="DISMISSED.add('${r.id}');rerender();refreshChrome()">✕</button></div></div>`;
 }
 function srcLabel(s){ return ({IO_UPLOAD:'IO upload',STOREFRONT:'Storefront',MARKETPLACE:'Marketplace',MANUAL:'Manual',API:'API'})[s]||s; }
 
 /* ════════ NAV ════════ */
 let CURRENT='home';
 const RENDER = {};
-function go(v){ CURRENT=v; document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active', x.id==='view-'+v));
+function go(v){ if(v==='needs') v='home'; /* Needs you lives on Home: one list, not two */ CURRENT=v; document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active', x.id==='view-'+v));
   document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active', b.dataset.view===v)); document.querySelectorAll('.mtabs button').forEach(b=>b.classList.toggle('on', b.dataset.view===v));
   RENDER[v] && RENDER[v](); $('views').scrollTop=0; try{ history.replaceState(null,'','#'+v); }catch(e){} }
 function rerender(){ RENDER[CURRENT] && RENDER[CURRENT](); }
@@ -1735,13 +1737,12 @@ RENDER.home = function(){
     ${empty?`<div class="firstrun"><div style="display:flex;justify-content:center;margin-bottom:12px">${art(sh,54)}</div><h3>Your calendar is live. Now add your first deal.</h3><p>Forward any IO or sponsor email to your deals address and we'll turn it into a booking you approve. Or add one by hand.</p>
       <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><span class="codechip">deals+${S.dealIngestToken}@spotsnow.io<button onclick="copyText('deals+${S.dealIngestToken}@spotsnow.io')">Copy</button></span><button class="btn btn--dark btn--sm" onclick="openIngest()">Add deal</button><button class="btn btn--ghost btn--sm" onclick="go('calendar')">See my calendar</button></div></div>`:''}
     <div class="cc-tiles">
-      <button class="cc-tile" onclick="go('needs')"><div class="cc-tile__l">Needs you</div><div class="cc-tile__v">${rows.length}</div><div class="cc-tile__s">one flat list, oldest risk first</div></button>
       <button class="cc-tile" onclick="DV_Q='needs';go('delivery')"><div class="cc-tile__l">Behind pace</div><div class="cc-tile__v">${behind}</div><div class="cc-tile__s">past check-in day, under 90%</div></button>
       <button class="cc-tile" onclick="DL_F='unpaid';go('deals')"><div class="cc-tile__l">Unpaid</div><div class="cc-tile__v">${unpaid.length}</div><div class="cc-tile__s">${$$(unpaid.reduce((a,d)=>a+d.invoice.amountCents,0))} outstanding</div></button>
       <button class="cc-tile" onclick="DV_Q='all';go('delivery')"><div class="cc-tile__l">Make goods</div><div class="cc-tile__v">${mgs}</div><div class="cc-tile__s">scheduled, no charge</div></button>
     </div>
     <div class="section-title" style="display:flex;align-items:center;gap:10px;font-size:15px;font-weight:700;margin:28px 0 12px">Needs you <span class="tag tag--grey">${rows.length}</span><button class="btn btn--ghost btn--sm" style="margin-left:auto" onclick="openIngest()">+ Add deal</button></div>
-    ${rows.length?`<div class="listcard">${rows.slice(0,6).map(attRow).join('')}${rows.length>6?`<button class="archdiv" style="margin:0;padding:12px 16px" onclick="go('needs')">See all ${rows.length}</button>`:''}</div>`:`<div class="listcard"><div class="empty">Nothing needs you. The agent checks again in 24 hours.</div></div>`}
+    ${rows.length?`<div class="listcard">${rows.map(attRow).join('')}</div>`:`<div class="listcard"><div class="empty">Nothing needs you. The agent checks again in 24 hours.</div></div>`}
     <div class="grid" style="grid-template-columns:1.2fr 1fr;margin-top:22px">
       <div class="card"><div class="card__head"><div class="card__title">Next on air</div><button class="btn btn--ghost btn--sm" onclick="go('calendar')">Calendar</button></div>
         ${nextOnAir()}</div>
