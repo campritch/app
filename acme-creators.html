@@ -990,7 +990,7 @@
     .k-mail { background:var(--secondary-lite); color:var(--text-secondary); }
     .att__main { flex:1; min-width:0; }
     .att__main b { display:block; font-size:13px; font-weight:700; }
-    .att__main span { font-size:12px; color:var(--text-secondary); }
+    .att__main span { font-size:12px; color:var(--text-secondary); display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .att__acts { display:flex; gap:7px; flex-shrink:0; align-items:center; }
     .att-x { width:26px; height:26px; border-radius:7px; border:none; background:none; color:var(--text-tertiary); cursor:pointer; font-size:12px; }
     .att-x:hover { background:var(--nav-hover); color:var(--text-primary); }
@@ -1258,6 +1258,15 @@
     .drawer--lg { width:min(760px,96vw); } .drawer--2xl { width:min(1080px,97vw); }
     .drawer .drawer__foot { margin-top:auto; }
 
+    /* booking page week cards (marketplace BookingCard pattern) */
+    .sfcard { display:flex; flex-direction:column; align-items:center; gap:2px; min-width:128px; padding:8px 10px; border-radius:8px; border:1px solid var(--border); background:var(--secondary-lite); font-family:inherit; cursor:pointer; color:var(--text-primary); }
+    .sfcard span { font-size:11.5px; font-weight:700; white-space:nowrap; } .sfcard b { font-size:12px; }
+    .sfcard:hover:not(:disabled) { border-color:var(--text-tertiary); }
+    .sfcard.on { background:var(--primary); border-color:var(--primary); color:#fff; }
+    .sfcard:disabled { opacity:.45; cursor:not-allowed; }
+    .sfbar { position:fixed; left:0; right:0; bottom:0; z-index:6; background:var(--white); border-top:1px solid var(--border); }
+    .sfbar__in { max-width:900px; margin:0 auto; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:14px; }
+    .sf .stepper .st { font-size:11.5px; }
     /* mobile */
     .mtabs { display:none; }
     .mhead { display:none; }
@@ -1307,15 +1316,14 @@
       <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"/></svg>
     </button>
     <div class="sb-scroll">
-      <button class="nav-item" data-view="home" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home<span class="nbadge" id="needsBadge" title="Needs you">0</span></button>
-      <button class="nav-item" data-view="calendar" onclick="go('calendar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Ad Calendar</button>
-      <button class="nav-item" data-view="deals" onclick="go('deals')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1Z"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Deals</button>
-      <button class="nav-item" data-view="delivery" onclick="go('delivery')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Delivery<span id="lockDelivery"></span></button>
-      <button class="nav-item" data-view="brands" onclick="go('brands')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg>Brands to pitch<span id="lockBrands"></span></button>
+      <button class="nav-item" data-view="home" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home<span class="nbadge" id="needsBadge">0</span></button>
+      <button class="nav-item" data-view="calendar" onclick="go('calendar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Calendar</button>
+      <button class="nav-item" data-view="deals" onclick="go('deals')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1Z"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Sponsors</button>
       <div class="sb-div"></div>
-      <button class="nav-item" data-view="channel" onclick="go('channel')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="m8 3 4 4 4-4"/></svg>My channel</button>
-      <button class="nav-item" data-view="settings" onclick="go('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>Settings</button>
-      <button class="nav-item" onclick="openStorefront()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9 4.5 4h15L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6"/></svg>Storefront<svg style="margin-left:auto;width:12px;height:12px;opacity:.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 17 17 7M8 7h9v9"/></svg></button>
+      <button class="nav-item" data-view="channel" onclick="go('channel')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="m8 3 4 4 4-4"/></svg>My show</button>
+      <button class="nav-item" data-view="settings" onclick="go('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.2 4.2l2.8 2.8M17 17l2.8 2.8M1 12h4M19 12h4M4.2 19.8 7 17M17 7l2.8-2.8"/></svg>Settings</button>
+      <button class="nav-item" onclick="openStorefront()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9 4.5 4h15L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6"/></svg>Booking page<svg style="margin-left:auto;width:12px;height:12px;opacity:.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 17 17 7M8 7h9v9"/></svg></button>
+      <span id="lockDelivery" hidden></span><span id="lockBrands" hidden></span>
     </div>
     <div id="sbPlan"></div>
     <div class="sb-foot">
@@ -1342,8 +1350,7 @@
     <div class="mtabs" id="mtabs">
       <button data-view="home" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
       <button data-view="calendar" onclick="go('calendar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Calendar</button>
-      <button data-view="deals" onclick="go('deals')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1Z"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Deals</button>
-      <button data-view="delivery" onclick="go('delivery')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Delivery</button>
+      <button data-view="deals" onclick="go('deals')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1Z"/></svg>Sponsors</button>
     </div>
   </main>
 
@@ -1697,7 +1704,7 @@ function refreshChrome(){
   const n=needsYou().length; $('needsBadge').textContent=n; $('needsBadge').style.display=n?'':'none';
   $('lockDelivery').innerHTML=isPro()?'':LOCK; $('lockBrands').innerHTML=isPro()?'':LOCK;
   const gmv=S.gmvMonthCents, waived=gmv>=100000;
-  $('sbPlan').innerHTML=`<div class="sb-plan"><b>${PLANS[S.plan].name} plan</b>${S.plan==='CREATOR_PRO'?` · ${waived?'<span style="color:var(--green-text);font-weight:700">waived this month</span>':'$50/mo'}<div>${$$(gmv)} booked through SpotsNow this month${waived?'':' · $1,000 waives it'}</div><div class="bar"><i style="width:${Math.min(100,gmv/1000)}%"></i></div>`:S.plan==='CREATOR_STORE'?`<div>Delivery, reports and invoicing are Pro.</div><button class="btn btn--sm btn--dark" style="margin-top:8px;width:100%" onclick="upgradePlan()">Upgrade</button>`:'<div>Multi-show, seats, API and MCP.</div>'}</div>`;
+  $('sbPlan').innerHTML='';const _unused=`<div class="sb-plan"><b>${PLANS[S.plan].name} plan</b>${S.plan==='CREATOR_PRO'?` · ${waived?'<span style="color:var(--green-text);font-weight:700">waived this month</span>':'$50/mo'}<div>${$$(gmv)} booked through SpotsNow this month${waived?'':' · $1,000 waives it'}</div><div class="bar"><i style="width:${Math.min(100,gmv/1000)}%"></i></div>`:S.plan==='CREATOR_STORE'?`<div>Delivery, reports and invoicing are Pro.</div><button class="btn btn--sm btn--dark" style="margin-top:8px;width:100%" onclick="upgradePlan()">Upgrade</button>`:'<div>Multi-show, seats, API and MCP.</div>'}</div>`;
   document.title = sh.name+' · SpotsNow for Creators';
 }
 function openWsMenu(ev){ ev.stopPropagation(); closeWsMenu(); const m=document.createElement('div'); m.className='wsmenu'; m.id='wsmenu';
@@ -1719,39 +1726,6 @@ function pageHead(title, sub, right){ return `<div class="pagebar"><div class="h
 
 /* ════════ HOME: Command Center (5.10) ════════ */
 let CHAT=[];
-RENDER.home = function(){
-  const rows=needsYou(), sh=S.show;
-  const behind=S.deals.filter(d=>dealSummary(d).under).length;
-  const unpaid=S.deals.filter(d=>d.invoice && ['SENT','DUE','OVERDUE'].includes(invStatus(d.invoice)));
-  const mgs=allReads().filter(r=>r.kind==='makegood'&&r.status==='scheduled').length;
-  const empty=!S.deals.length;
-  const starters=[ `Is ${(S.deals.find(d=>d.status==='BOOKED'&&dealSummary(d).state==='live')||{brand:'my sponsor'}).brand} on track?`, "What's open next month?", "Who hasn't paid?", 'Which read scored lowest?' ];
-  $('view-home').innerHTML = `<div class="inner">
-    <div class="hero" style="padding-top:26px">
-      <h1>Welcome back, ${esc(S.owner.name.split(' ')[0])}</h1>
-      <div class="hero__pills"><span class="pill"><i style="color:var(--green-text)"></i>Agent checked ${rel(S.agentCheckedMins)}</span><span class="pill ${rows.length?'pill--solid':''}" style="cursor:pointer" onclick="go('needs')">${rows.length} need you</span></div>
-      <div class="askwrap"><input id="ask" placeholder="Ask about my sponsors" onkeydown="if(event.key==='Enter')ask(this.value)"><button class="askwrap__go" onclick="ask($('ask').value)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
-      <div class="starters">${starters.map(q=>`<button class="starter" onclick="ask(this.textContent)">${esc(q)}</button>`).join('')}</div>
-    </div>
-    ${CHAT.length?`<div class="thread"><div class="thread__hd"><span>My sponsors</span><button onclick="CHAT=[];RENDER.home()">Clear</button></div>${CHAT.map(t=>`<div class="turn"><div class="turn__q">${esc(t.q)}</div><div class="turn__a">${t.a}</div></div>`).join('')}</div>`:''}
-    ${empty?`<div class="firstrun"><div style="display:flex;justify-content:center;margin-bottom:12px">${art(sh,54)}</div><h3>Your calendar is live. Now add your first deal.</h3><p>Forward any IO or sponsor email to your deals address and we'll turn it into a booking you approve. Or add one by hand.</p>
-      <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><span class="codechip">deals+${S.dealIngestToken}@spotsnow.io<button onclick="copyText('deals+${S.dealIngestToken}@spotsnow.io')">Copy</button></span><button class="btn btn--dark btn--sm" onclick="openIngest()">Add deal</button><button class="btn btn--ghost btn--sm" onclick="go('calendar')">See my calendar</button></div></div>`:''}
-    <div class="cc-tiles">
-      <button class="cc-tile" onclick="DV_Q='needs';go('delivery')"><div class="cc-tile__l">Behind pace</div><div class="cc-tile__v">${behind}</div><div class="cc-tile__s">past check-in day, under 90%</div></button>
-      <button class="cc-tile" onclick="DL_F='unpaid';go('deals')"><div class="cc-tile__l">Unpaid</div><div class="cc-tile__v">${unpaid.length}</div><div class="cc-tile__s">${$$(unpaid.reduce((a,d)=>a+d.invoice.amountCents,0))} outstanding</div></button>
-      <button class="cc-tile" onclick="DV_Q='all';go('delivery')"><div class="cc-tile__l">Make goods</div><div class="cc-tile__v">${mgs}</div><div class="cc-tile__s">scheduled, no charge</div></button>
-    </div>
-    <div class="section-title" style="display:flex;align-items:center;gap:10px;font-size:15px;font-weight:700;margin:28px 0 12px">Needs you <span class="tag tag--grey">${rows.length}</span><button class="btn btn--ghost btn--sm" style="margin-left:auto" onclick="openIngest()">+ Add deal</button></div>
-    ${rows.length?`<div class="listcard">${rows.map(attRow).join('')}</div>`:`<div class="listcard"><div class="empty">Nothing needs you. The agent checks again in 24 hours.</div></div>`}
-    <div class="grid" style="grid-template-columns:1.2fr 1fr;margin-top:22px">
-      <div class="card"><div class="card__head"><div class="card__title">Next on air</div><button class="btn btn--ghost btn--sm" onclick="go('calendar')">Calendar</button></div>
-        ${nextOnAir()}</div>
-      <div class="card"><div class="card__head"><div class="card__title">Reminders</div><button class="btn btn--ghost btn--sm" onclick="addReminder()">+ Add</button></div>
-        <div style="padding:4px 0">${S.reminders.length?S.reminders.slice().sort((a,b)=>a.due<b.due?-1:1).map(r=>`<div class="att" style="padding:10px 16px"><span class="tag ${r.due<TODAY?'tag--orange':'tag--grey'}">${r.due<TODAY?'Overdue':fmtDate(r.due)}</span><div class="att__main"><b style="font-weight:600">${esc(r.text)}</b><span>${r.origin==='MANUAL'?'Manual':r.origin==='HOLD'?'From a hold · clears when the hold resolves':'From an invoice · clears when paid'}</span></div><button class="att-x" onclick="doneReminder('${r.id}')" title="Done">${CK}</button></div>`).join(''):'<div class="empty">No reminders.</div>'}</div></div>
-    </div>
-    <div class="footnote">Human approves, agent executes. Nothing sends on its own.</div>
-  </div>`;
-};
 function nextOnAir(){
   const up=S.episodes.filter(e=>e.date>=TODAY).slice(0,4);
   return `<div>${up.map(e=>{ const pls=placements(); const sold=pls.map(p=>({p,s:slot(e.date,p)})).filter(x=>x.s);
@@ -1784,10 +1758,6 @@ function answer(q){
     return `Lowest: <b>${esc(w.r._d.brand)}</b> on ${fmtDate(w.r.date)} at <b>${w.sc.overall}</b>. ${w.sc.coach} <a href="#" onclick="openRead('${w.r.id}');return false">Open the read</a>. This score is private and never appears on a sponsor report.`; }
   return `I can answer about your sponsors, open inventory, invoices and read scores. Try "Is AG1 on track?" or "What's open next month?"`;
 }
-RENDER.needs = function(){ const rows=needsYou();
-  $('view-needs').innerHTML=`<div class="inner">${pageHead('Needs you',`${rows.length} item${rows.length===1?'':'s'} · one flat list in priority order. Every action resolves its row.`)}
-  ${rows.length?`<div class="listcard">${rows.map(attRow).join('')}</div>`:`<div class="listcard"><div class="empty">All clear. Nothing needs you.</div></div>`}</div>`; };
-
 /* ════════ AD CALENDAR (5.3): one show, every episode by position ════════ */
 let CAL_TAB='calendar', CAL_LOCKCAT='', CAL_SEL=new Set(), CAL_PAST=false;
 const WINDOW_END = () => addDays(TODAY, 84);   // 12 weeks of sellable slots
@@ -1799,41 +1769,6 @@ function overview(from){
   Object.values(out).forEach(o=>{ tot.open+=o.open; tot.held+=o.held; tot.sold+=o.sold; tot.openValue+=o.openValue; });
   return {per:out, tot};
 }
-RENDER.calendar = function(){
-  const sh=S.show, pls=placements(), ov=overview();
-  const tabs=`<div class="seg2"><button class="${CAL_TAB==='overview'?'on':''}" onclick="CAL_TAB='overview';RENDER.calendar()">Overview</button><button class="${CAL_TAB==='calendar'?'on':''}" onclick="CAL_TAB='calendar';RENDER.calendar()">Calendar</button></div>`;
-  const tiles=`<div class="ov-tiles">
-    <div class="ov-tile" style="background:var(--primary);border-color:var(--primary);color:#fff"><h4 style="opacity:.75">Open value, next 12 weeks</h4><div class="ovv">${$$(ov.tot.openValue)}</div><div class="ovs" style="color:#fff;opacity:.6">${ov.tot.open} open · ${ov.tot.held} held · ${ov.tot.sold} sold</div></div>
-    ${pls.map(p=>{ const o=ov.per[p], n=o.open+o.held+o.sold||1; return `<div class="ov-tile"><h4>${PL[p]}</h4><div class="ovv">${$$(o.openValue)}</div><div class="ovs">${o.open} open · ${o.held} held · ${o.sold} sold</div><div class="ov-bar"><i style="width:${o.sold/n*100}%;background:var(--primary)"></i><i style="width:${o.held/n*100}%;background:var(--border-strong)"></i></div></div>`; }).join('')}
-  </div>`;
-  const head=pageHead('Ad Calendar', `${esc(sh.name)} · ${sh.releaseDays.join(' + ')} · ${pls.map(p=>PL[p]).join(', ')} · forward-looking from today`,
-    `${tabs}<button class="btn btn--ghost btn--sm" onclick="openStorefront()">Storefront view</button><button class="btn btn--dark btn--sm" onclick="openIngest()">+ Add deal</button>`);
-  if(CAL_TAB==='overview'){
-    const months={}; S.episodes.filter(e=>e.date>TODAY&&e.date<=WINDOW_END()).forEach(e=>{ const m=e.date.slice(0,7); months[m]=months[m]||{open:0,sold:0,held:0,val:0,soldVal:0}; pls.forEach(p=>{ const s=slot(e.date,p); if(!s){months[m].open++;months[m].val+=rateCents(p);} else if(s.state==='sold'){months[m].sold++;months[m].soldVal+=s.priceCents||0;} else months[m].held++; }); });
-    $('view-calendar').innerHTML=`<div class="inner">${head}${tiles}
-      <div class="card"><div class="card__head"><div class="card__title">By month</div><div class="card__sub">Changing a rate card price never rewrites a sold slot's price.</div></div>
-      <table><thead><tr><th>Month</th><th class="right">Sold</th><th class="right">Booked value</th><th class="right">Held</th><th class="right">Open</th><th class="right">Open value</th></tr></thead><tbody>
-      ${Object.entries(months).map(([m,o])=>`<tr class="clickable" onclick="CAL_TAB='calendar';RENDER.calendar()"><td><b>${MONL[+m.slice(5)-1]} ${m.slice(0,4)}</b></td><td class="right num">${o.sold}</td><td class="right num">${$$(o.soldVal)}</td><td class="right num">${o.held}</td><td class="right num">${o.open}</td><td class="right num"><b>${$$(o.val)}</b></td></tr>`).join('')}
-      </tbody></table></div></div>`;
-    return;
-  }
-  const from = CAL_PAST ? '2026-10-01' : addDays(TODAY,-10);
-  const eps=S.episodes.filter(e=>e.date>=from && e.date<=WINDOW_END());
-  let lastM='', rowsH='';
-  eps.forEach((e,i)=>{ const m=e.date.slice(0,7); if(m!==lastM){ rowsH+=`<tr class="mon"><td colspan="${pls.length+1}">${MONL[+m.slice(5)-1]} ${m.slice(0,4)}</td></tr>`; lastM=m; }
-    const past=e.date<=TODAY;
-    rowsH+=`<tr class="${past?'past':''}"><td class="ep"><b>${dayName(e.date)} ${fmtDate(e.date)}</b><span>#${e.n} ${esc(e.title)}</span></td>${pls.map(p=>`<td>${calCell(e,p,eps[i-1],eps[i+1],past)}</td>`).join('')}</tr>`; });
-  $('view-calendar').innerHTML=`<div class="inner">${head}${tiles}
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
-      <label class="tsel" style="display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-secondary)">Show category locks for
-        <select class="inp" style="width:auto;min-height:32px;padding:4px 8px;font-size:12.5px" onchange="CAL_LOCKCAT=this.value;RENDER.calendar()"><option value="">None</option>${CATEGORIES.map(c=>`<option ${CAL_LOCKCAT===c?'selected':''}>${c}</option>`).join('')}</select></label>
-      <label style="display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-secondary);cursor:pointer"><input type="checkbox" ${CAL_PAST?'checked':''} onchange="CAL_PAST=this.checked;RENDER.calendar()"> Show aired episodes</label>
-      <span class="muted" style="margin-left:auto;font-size:12px">Click an open cell to quote and book in one step.</span>
-    </div>
-    <div class="cal"><table><thead><tr><th>Episode</th>${pls.map(p=>`<th>${PL[p]}<div style="font-weight:500;color:var(--text-tertiary);font-size:10.5px">${priceLabel(p)}</div></th>`).join('')}</tr></thead><tbody>${rowsH}</tbody></table></div>
-    <div class="cal-legend"><span><i style="background:var(--primary)"></i>Sold</span><span><i style="background:var(--secondary-lite);border:1px solid var(--border)"></i>Held (hear-back date)</span><span><i style="background:var(--blue-bg)"></i>Requested from storefront</span><span><i style="background:var(--purple-bg)"></i>Make-good</span><span><i style="border:1px dashed var(--border-strong)"></i>Open</span><span><i style="background:var(--secondary-lite)"></i>🔒 Category locked</span></div>
-  </div>`;
-};
 function calCell(e,p,prev,next,past){
   const s=slot(e.date,p), k=slotKey(e.date,p), ring=CAL_SEL.has(k)?' ring':'';
   if(!s){
@@ -1953,82 +1888,9 @@ function paceCell(d,c){
   const p=c.airedPct, cls=p>=90?'pace--good':p>=80?'pace--warn':'pace--bad';
   return `<div class="pbar"><div class="pace ${cls}" style="${p<80?'':''}"><div class="pace__fill" style="width:${Math.min(100,p)}%;${p<80?'background:var(--orange-text)':p<90?'background:#EAB308':''}"></div></div><b>${p}%</b></div>`;
 }
-RENDER.deals = function(){
-  let list=S.deals.slice();
-  const fl={ all:x=>!['DECLINED','RELEASED'].includes(x.status), active:x=>x.status==='BOOKED'&&dealSummary(x).state!=='done', req:x=>['PROPOSED','HOLD','COUNTERED','DRAFT'].includes(x.status), unpaid:x=>x.invoice&&['SENT','DUE','OVERDUE'].includes(invStatus(x.invoice)), done:x=>dealSummary(x).state==='done'||['DECLINED','RELEASED'].includes(x.status) };
-  list=list.filter(fl[DL_F]); if(DL_Q) list=list.filter(x=>(x.brand+x.domain+(x.agency||'')).toLowerCase().includes(DL_Q.toLowerCase()));
-  list.sort((a,b)=>{ const ca=dealSummary(a), cb=dealSummary(b); const rk=x=>({proposed:0,draft:1,live:2,upcoming:3,done:5})[x.state]??4; return rk(ca)-rk(cb) || (cb.start||'').localeCompare(ca.start||''); });
-  const cnt=k=>S.deals.filter(fl[k]).length;
-  $('view-deals').innerHTML=`<div class="inner">${pageHead('Deals', 'Every sponsor, flight, read and invoice lives on one Deal record. Free to create, Pro to track.', `<button class="btn btn--ghost btn--sm" onclick="exportDeals()">${ICO_DL} CSV</button><button class="btn btn--dark btn--sm" onclick="openIngest()">+ Add deal</button>`)}
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
-      <div class="seg">${[['all','All'],['active','Active'],['req','Requests & holds'],['unpaid','Unpaid'],['done','Done']].map(([k,l])=>`<button class="${DL_F===k?'active':''}" onclick="DL_F='${k}';RENDER.deals()">${l} <span class="muted">${cnt(k)}</span></button>`).join('')}</div>
-      <div class="tbar__search tbar--bare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Search sponsors" value="${esc(DL_Q)}" oninput="DL_Q=this.value;clearTimeout(window._dq);window._dq=setTimeout(()=>{RENDER.deals();const i=document.querySelector('#view-deals input');i.focus();i.setSelectionRange(i.value.length,i.value.length)},250)"></div>
-      <span class="muted" style="margin-left:auto;font-size:12px">Forward IOs to <b class="mono">deals+${S.dealIngestToken}@spotsnow.io</b></span>
-    </div>
-    <div class="listcard"><div class="dl-head"><span>Sponsor</span><span>Source</span><span>Flight</span><span>Reads</span><span>Value</span><span>Delivery</span><span>Invoice</span><span>Status</span></div>
-    ${list.length?list.map(d=>{ const c=dealSummary(d); return `<div class="dl-row" onclick="openDeal('${d.id}')"><div class="who">${blogo(d.domain,d.brand)}<div style="min-width:0"><b>${esc(d.brand)}</b><span>${esc(d.category)}${d.agency?' · via '+esc(d.agency):''}</span></div></div>
-      <span class="tag tag--grey" style="justify-self:start">${srcLabel(d.source)}</span>
-      <span style="font-size:12.5px">${c.start?fmtDate(c.start)+' – '+fmtDate(c.end):'—'}</span>
-      <span class="num" style="font-size:12.5px">${c.paid.length}${c.extra.length?` <span class="muted">+${c.extra.length}</span>`:''}</span>
-      <b class="num" style="font-size:13px">${$$(c.totalCents)}</b>
-      ${paceCell(d,c)}
-      ${invBadge(d.invoice,d)}
-      ${dealStatusTag(d,c)}</div>`; }).join(''):`<div class="empty">No deals here yet. <a href="#" onclick="openIngest();return false">Add a deal</a> or forward an IO.</div>`}</div>
-  </div>`;
-};
 function exportDeals(){ const rows=[['Sponsor','Domain','Source','Start','End','Reads','Value','Delivered','Guarantee','Invoice']].concat(S.deals.map(d=>{const c=dealSummary(d);return [d.brand,d.domain,d.source,c.start,c.end,c.paid.length,(c.totalCents/100).toFixed(2),c.got,c.g,d.invoice?invStatus(d.invoice):''];}));
   dlFile('second-wind-deals.csv', rows.map(r=>r.map(x=>`"${String(x??'').replace(/"/g,'""')}"`).join(',')).join('\n'), 'text/csv'); }
 function dlFile(name, text, type){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type})); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.parentNode.removeChild(a); },100); }
-
-function openDeal(id){
-  const d=deal(id), c=dealSummary(d), b=brandBadge(c);
-  const st=r=> r.status==='aired'?`<span class="tag tag--green">Aired</span>`: r.status==='missed'?'<span class="tag tag--red">Missed</span>': r.status==='hold'?'<span class="tag tag--grey">Held</span>': r.status==='requested'?'<span class="tag tag--blue">Requested</span>': r.status==='cancelled'?'<span class="tag tag--grey">Cancelled</span>':'<span class="tag tag--grey">Scheduled</span>';
-  const inv=d.invoice, ist=invStatus(inv);
-  openDrawer(`<div class="drawer__head"><div style="display:flex;gap:13px;align-items:center">${blogo(d.domain,d.brand,'lg')}<div><h2 style="font-size:18px;font-weight:700;letter-spacing:-.02em">${esc(d.brand)}</h2><div class="card__sub">${esc(d.domain)} · ${esc(d.category)} · ${srcLabel(d.source)}${d.agency?' · '+esc(d.agency):''}</div></div></div>
-    <div style="display:flex;gap:8px;align-items:center">${d.status==='BOOKED'?`<button class="btn btn--ghost btn--sm" onclick="closeOverlays();openReport('${d.id}')">${ICO_LINK} Sponsor report</button>`:''}<button class="x" onclick="closeOverlays()">✕</button></div></div>
-  <div class="drawer__body"><div class="spotcols">
-    <div>
-      <div class="dhead">Deal</div>
-      <div class="kv"><span>Status</span><b>${dealStatusTag(d,c)} ${d.status==='BOOKED'?`<em>sponsor sees</em> <span class="tag tag--${b.tone}">${b.t}</span>`:''}</b></div>
-      <div class="kv"><span>Flight</span><b>${c.start?fmtDate(c.start)+' – '+fmtDateY(c.end):'—'}</b></div>
-      <div class="kv"><span>Value</span><b>${$$(c.totalCents)} <em>${d.priceModel==='CPM'?'CPM':'flat'}</em></b></div>
-      <div class="kv"><span>Guarantee</span><b>${K(c.g)} <em>${K(d.guaranteePerRead||S.show.guarantee)}/read</em></b></div>
-      ${c.aired.length?`<div class="kv"><span>Delivered</span><b>${K(c.got)} <em>${c.tooEarly?'too early to call':c.airedPct+'% of called reads'}</em></b></div>`:''}
-      <div class="kv"><span>Contact</span><b>${esc(d.contact.name||'—')} <em>${esc(d.contact.email||'')}</em></b></div>
-      <div class="kv"><span>Promo code</span><b>${esc(d.promoCode||'—')}</b></div>
-      <div class="kv"><span>Landing page</span><b>${esc(d.landingUrl||'—')}</b></div>
-      ${d.conversationId?`<div class="kv"><span>Messages</span><b><a href="#" onclick="toast('Opens the marketplace thread in /messages.');return false">Marketplace thread →</a></b></div>`:''}
-      <div class="dhead">Reads</div>
-      ${d.reads.map(r=>`<div class="kv" ${r.status==='aired'||r.status==='missed'?`style="cursor:pointer" onclick="openRead('${r.id}')"`:''}><span>${dayName(r.date)} ${fmtDate(r.date)} · ${PL[r.placement]}${r.kind!=='paid'?` <span class="tag tag--purple">${r.kind==='bonus'?'Bonus':'Make-good'}</span>`:''}</span><b>${r.status==='aired'?K(delivered(r))+' ':''}${st(r)}</b></div>`).join('')}
-      ${d.status==='BOOKED'?`<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn--ghost btn--sm" onclick="openMakegood(null,'${d.id}','bonus')">+ Bonus spot</button></div>`:''}
-    </div>
-    <div>
-      <div class="dhead">Requirements brief</div>
-      ${d.brief?`<div class="card card__pad" style="font-size:12.5px;line-height:1.6">
-        <div><b>CTA:</b> ${esc(d.brief.cta)}</div>
-        ${d.brief.talkingPoints.map(t=>`<div>• ${esc(t)}</div>`).join('')}
-        ${d.brief.banned.length?`<div><b>Don't say:</b> ${d.brief.banned.map(esc).join(', ')}</div>`:''}
-        ${d.brief.disclaimer?`<div><b>Disclaimer:</b> ${esc(d.brief.disclaimer)}</div>`:''}
-        <div class="muted" style="margin-top:6px">${PL[d.brief.position]||''} · ${d.brief.lengthSec}s · link in description${d.brief.file?' · 📎 '+esc(d.brief.file):''}</div>
-        <button class="btn btn--ghost btn--sm" style="margin-top:10px" onclick="openBrief('${d.id}')">Edit brief</button></div>`
-        :`<div class="notice notice--grey">No brief yet. Without one there's nothing to self-check reads against. <a href="#" style="margin-left:auto" onclick="openBrief('${d.id}');return false">Add brief</a></div>`}
-      <div class="dhead">Invoice</div>
-      <div class="card card__pad">
-        <div class="kv"><span>Terms</span><b>${d.invoiceTerms.terms.replace('_',' ')} <em>on ${d.invoiceTerms.invoiceOn.replace('_',' ').toLowerCase()} · ${d.invoiceTerms.collectVia==='SPOTSNOW'?'collected via SpotsNow':'invoiced externally'}</em></b></div>
-        ${inv?`<div class="kv"><span>${esc(inv.number)}</span><b>${$$(inv.amountCents)} ${invBadge(inv)}</b></div>
-          ${inv.feeCents?`<div class="kv"><span>${esc(inv.feeLabel||'Fee')}</span><b>−${$$c(inv.feeCents)}</b></div>`:''}
-          <div class="kv"><span>${ist==='PAID'?'Paid':'Due'}</span><b>${fmtDate(ist==='PAID'?inv.paidAt:inv.dueAt)}</b></div>
-          ${inv.payout?`<div class="kv"><span>Payout</span><b>${$$(inv.payout.amountCents)} <em>${inv.payout.status==='PAID'?'paid '+fmtDate(inv.payout.at):'scheduled '+fmtDate(inv.payout.at)}</em></b></div>`:''}
-          ${ist!=='PAID'?`<div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn--ghost btn--sm" onclick="invoiceReminder('${d.id}')">Send reminder</button><button class="btn btn--ghost btn--sm" onclick="markPaid('${d.id}')">Mark paid</button></div>`:''}`
-        : d.status==='BOOKED'?`<div style="display:flex;gap:8px;align-items:center;margin-top:6px"><span class="muted" style="font-size:12px;flex:1">Not issued yet.</span><button class="btn btn--dark btn--sm" onclick="createInvoice('${d.id}')">Create invoice</button></div>`:'<div class="muted" style="font-size:12px">Issued once the deal is booked.</div>'}
-      </div>
-      <div class="dhead">Storefront</div>
-      <div class="swrow"><button class="sw ${d.publicSponsor?'on':''}" onclick="deal('${d.id}').publicSponsor=!deal('${d.id}').publicSponsor;openDeal('${d.id}')"><i></i></button><div><b>Show ${esc(d.brand)} in "Past sponsors"</b><small>Opt-in per sponsor. Logo only.</small></div></div>
-      ${d.sendLog.length?`<div class="dhead">Report sends</div>${d.sendLog.map(s=>`<div class="kv"><span>${fmtDate(s.at)}</span><b>${esc(s.to)} <em>via ${s.via}</em></b></div>`).join('')}`:''}
-    </div>
-  </div></div>
-  <div class="drawer__foot" style="justify-content:space-between"><span class="muted" style="font-size:12px">Created ${fmtDate(d.createdAt)} · one Deal per sponsor per flight</span><div style="display:flex;gap:8px">${d.status==='PROPOSED'?`<button class="btn btn--dark" onclick="openBookingRequest('${d.id}')">Review request</button>`:''}${d.status==='HOLD'?`<button class="btn btn--ghost" onclick="releaseHold('${d.id}')">Release</button><button class="btn btn--dark" onclick="confirmHold('${d.id}')">Convert to booking</button>`:''}${d.status==='BOOKED'?`<button class="btn btn--dark" onclick="closeOverlays();openReport('${d.id}')">Open sponsor report</button>`:''}</div></div>`, 'wide');
-}
 
 /* ── Invoicing (5.9): drafted, approved, sent. Overdue is orange, never red. ── */
 function termDays(t){ return t==='UPFRONT'?0:+String(t).replace('NET_',''); }
@@ -2597,106 +2459,94 @@ function publicAvailability(from, to, productId, category){
   return { creator:S.show.slug, product:p.id, placement:p.placement, priceCents:p.pkg?p.priceCents:rateCents(p.placement), priceModel:S.show.priceModel, leadTimeDays:S.show.storefront.leadTimeDays, excludedCategories:S.show.excludedCategories,
     openEpisodes:S.episodes.filter(e=>e.date>=from&&e.date<=to).filter(e=>bookable(e.date,p.placement,category).ok).map(e=>({date:e.date, episode:e.n, title:e.title, priceCents:rateCents(p.placement)})) }; }
 
+/* Booking page: mirrors the marketplace BookingSection (week rows of
+   "Position Length · $price" cards) and the /confirm-spot steps
+   Set up your Ad → Send Request → Authorize Payment. */
 let SF=null;
-function openStorefront(prefill){
-  const prods=products(); const pf=prefill||{};
-  SF={ product: pf.product || prods[0].id, month: null, sel:[], category: pf.category||'', prefill:pf, done:null };
-  const first=publicAvailability(TODAY, WINDOW_END(), SF.product, SF.category).openEpisodes[0]; SF.month=(first?first.date:TODAY).slice(0,7);
-  renderStorefront(); $('storefront').classList.add('open'); $('storefront').scrollTop=0;
-}
+const POS_LABEL = { PRE:'Pre-Roll', MID1:'Mid-Roll', MID2:'Mid-Roll 2', MID3:'Mid-Roll 3', MID4:'Mid-Roll 4', POST:'Post-Roll', YT:'YouTube Integration' };
+function mondayOf(s){ const d=d2(s), dow=(d.getUTCDay()+6)%7; return addDays(s,-dow); }
+function sfWeeks(){ const sh=S.show, start=addDays(TODAY, sh.storefront.leadTimeDays), out=[]; let wk=mondayOf(start);
+  for(let i=0;i<10;i++){ const eps=S.episodes.filter(e=>e.date>=wk && e.date<addDays(wk,7) && e.date>=start); if(eps.length) out.push({week:wk, eps}); wk=addDays(wk,7); }
+  return out; }
+function weekOpenEpisode(w, pl, category){ return w.eps.find(e=>bookable(e.date,pl,category).ok); }
+function openStorefront(prefill){ SF={ sel:[], category:(prefill&&prefill.category)||'', prefill:prefill||{}, done:null, step:0 };
+  if(prefill&&prefill.product){ const w=sfWeeks().find(w=>weekOpenEpisode(w,prefill.product,SF.category)); if(w) SF.sel.push({week:w.week, pl:prefill.product}); }
+  renderStorefront(); $('storefront').classList.add('open'); $('storefront').scrollTop=0; }
 function closeStorefront(){ $('storefront').classList.remove('open'); rerender(); }
+function sfLine(x){ return { ...x, price:rateCents(x.pl) }; }
 function renderStorefront(){
-  const sh=S.show, sf=sh.storefront, prods=products(), p=prods.find(x=>x.id===SF.product)||prods[0];
+  const sh=S.show, sf=sh.storefront, pls=placements();
   const past=S.deals.filter(d=>d.publicSponsor && dealSummary(d).aired.length);
-  const excluded = SF.category && sh.excludedCategories.includes(SF.category);
-  const sumUnits=SF.sel.length, unit=p.pkg?0:rateCents(p.placement), sub=p.pkg?p.priceCents:sumUnits*unit, fee=Math.round(sub*.10);
-  const instant=sf.instant.includes(p.id);
-  if(!sf.enabled){ $('storefront').innerHTML=`<div class="prevbar">Storefront is off · only you can see this<button onclick="closeStorefront()">Back to workspace</button></div><div class="sf-in"><div class="empty">This storefront is private. Turn it on in My channel → Storefront.</div></div>`; return; }
-  if(SF.done){ const d=deal(SF.done); $('storefront').innerHTML=`<div class="prevbar">Public preview of spotsnow.io/book/${sh.slug}<button onclick="closeStorefront()">Back to workspace</button></div>
-    <div class="sf-in" style="max-width:640px"><div class="ob-card" style="text-align:center;padding:34px"><div style="width:52px;height:52px;border-radius:50%;background:var(--green-bg);color:var(--green-text);display:grid;place-items:center;margin:0 auto 12px">${CK.replace(/11/g,'22')}</div>
-      <h2>${d.status==='BOOKED'?'You\'re booked':'Request sent'}</h2><p style="color:var(--text-secondary);font-size:14px;margin-top:6px">${d.status==='BOOKED'?`${$$(dealSummary(d).totalCents)} charged. ${esc(sh.host)} has your talking points.`:`${esc(sh.host)} confirms within 24 hours. Your card is authorized, not charged, until then.`}</p>
-      <div class="mail" style="text-align:left;margin-top:20px"><div class="mail__h"><b>To:</b> ${esc(d.contact.email)}<br><b>Subject:</b> ${esc(d.brand)} x ${esc(sh.name)}: ${d.status==='BOOKED'?'booking confirmed':'request received'}<br>📎 IO_${esc(d.brand.replace(/\W+/g,''))}_${sh.slug}.pdf</div><div class="mail__b">Your ${d.reads.length} read${d.reads.length>1?'s':''} on ${esc(sh.name)}: ${d.reads.map(r=>fmtDate(r.date)).join(', ')}.<br>Follow delivery live, no login: <a href="#" onclick="closeStorefront();openReport('${d.id}',true);return false">spotsnow.io/r/${d.id}</a> (shows "Scheduled" until reads air)</div></div>
+  const sub=SF.sel.reduce((a,x)=>a+rateCents(x.pl),0), fee=Math.round(sub*.10);
+  const bar=`<div class="prevbar">Preview of spotsnow.io/book/${sh.slug}${SF.prefill.from?` · prefilled for ${esc(SF.prefill.brand)}`:''}<button onclick="closeStorefront()">Back to workspace</button></div>
+    <div class="sf-top"><div class="sf-top__in"><div class="sf-wm"><i>S</i>SpotsNow</div></div></div>`;
+  if(!sf.enabled){ $('storefront').innerHTML=bar+`<div class="sf-in"><div class="empty">This booking page is off. Turn it on in My show.</div></div>`; return; }
+  if(SF.done){ const d=deal(SF.done); $('storefront').innerHTML=bar+`<div class="sf-in" style="max-width:600px"><div class="ob-card" style="text-align:center;padding:34px">
+      <div style="width:52px;height:52px;border-radius:50%;background:var(--green-bg);color:var(--green-text);display:grid;place-items:center;margin:0 auto 12px">${CK.replace(/11/g,'22')}</div>
+      <h2>Request sent</h2><p style="color:var(--text-secondary);font-size:14px;margin-top:6px">${esc(sh.firstName)} confirms within 24 hours. Your card is authorized, not charged, until then.</p>
+      <p style="font-size:13px;margin-top:14px">Track it live, no login: <a href="#" onclick="closeStorefront();openReport('${d.id}',true);return false">spotsnow.io/r/${d.id}</a></p>
       <button class="btn btn--ghost" style="margin-top:18px" onclick="SF.done=null;SF.sel=[];renderStorefront()">Back to ${esc(sh.name)}</button></div></div>`; return; }
-  const [y,m]=SF.month.split('-').map(Number); const first=new Date(Date.UTC(y,m-1,1)); const startDow=first.getUTCDay(); const dim=new Date(Date.UTC(y,m,0)).getUTCDate();
-  let cells=''; for(let i=0;i<startDow;i++) cells+='<div></div>';
-  for(let dd=1; dd<=dim; dd++){ const ds=y+'-'+pad(m)+'-'+pad(dd); const e=episode(ds);
-    if(!e){ cells+=`<div class="mday">${dd}</div>`; continue; }
-    const bk=bookable(ds,p.placement,SF.category), on=SF.sel.includes(ds);
-    cells+= bk.ok ? `<button class="mday ep ${on?'sel':''}" onclick="sfToggle('${ds}')">${dd}<small>${on?'selected':'open'}</small></button>`
-                  : `<div class="mday ep full" title="${bk.why}">${dd}<small>${bk.lock?'n/a':bk.why==='Inside lead time'?'—':'booked'}</small></div>`; }
-  $('storefront').innerHTML=`
-  <div class="prevbar">Public preview of spotsnow.io/book/${sh.slug}${SF.prefill.from?` · prefilled from the ${esc(SF.prefill.brand)} report`:''}<button onclick="closeStorefront()">Back to workspace</button></div>
-  <div class="sf-top"><div class="sf-top__in"><div class="sf-wm"><i>S</i>SpotsNow</div><span class="muted" style="font-size:12.5px">/ book / ${sh.slug}</span><a href="#" style="margin-left:auto;font-size:12.5px;font-weight:600" onclick="toast('Opens /show/${sh.slug}, the full public stats profile.');return false">See full stats</a></div></div>
-  <div class="sf-in">
-    <div class="sf-hero">${art(sh,132,44)}<div><div class="sf-name">${esc(sh.name)}</div><div class="sf-host">with ${esc(sh.host)} · ${esc(sh.category)}</div><div class="sf-desc">${esc(sf.intro||sh.desc)}</div>
-      <div class="stat-pills"><span class="stat-pill"><b>${K(sh.imprPerEp)}</b> per episode</span><span class="stat-pill"><b>${Math.round(sh.releasesPerWeek*4.3)}</b> episodes / month</span><span class="stat-pill"><b>68%</b> 25–44 · runners</span><span class="stat-pill"><b>${new Set(S.deals.filter(d=>d.status==='BOOKED').map(d=>d.domain)).size}</b> past sponsors</span></div></div></div>
-
-    <div class="sf-h">Products</div>
-    <div class="prods">${prods.map(x=>`<button class="prod ${x.id===p.id?'on':''}" onclick="SF.product='${x.id}';SF.sel=[];renderStorefront()"><b>${esc(x.name)}</b><div class="inc">${esc(x.inc)}</div><div class="pr">${sf.showPrices?(x.cpm&&!x.pkg?`from $${x.cpm} <small>CPM</small>`:$$(x.priceCents)+(x.pkg?'':' <small>/ episode</small>')):'<small>Ask for budget</small>'}</div><span class="btn btn--sm ${x.id===p.id?'btn--dark':'btn--ghost'}" style="margin-top:12px">${sf.instant.includes(x.id)?'Book now':'Request to book'}</span></button>`).join('')}</div>
-
-    <div class="sf-h" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">Availability <span class="muted" style="font-size:13px;font-weight:500">${esc(p.name)} · ${sf.leadTimeDays}-day lead time${sf.minUnits>1?` · min ${sf.minUnits}`:''}</span>
-      <select class="inp" style="width:auto;margin-left:auto;font-size:12.5px;min-height:34px;padding:5px 9px" onchange="SF.category=this.value;SF.sel=SF.sel.filter(d=>bookable(d,'${p.placement}',this.value).ok);renderStorefront()"><option value="">Your category (optional)</option>${CATEGORIES.map(c=>`<option ${SF.category===c?'selected':''}>${c}</option>`).join('')}</select></div>
-    ${excluded?`<div class="notice notice--grey" style="margin-bottom:12px">${esc(sh.host)} doesn't read for ${esc(SF.category)} brands, so nothing can be booked in that category.</div>`:''}
-    <div class="avail"><div class="mcal"><div class="mcal__hd"><b>${MONL[m-1]} ${y}</b><div class="mcal__nav"><button onclick="sfMonth(-1)">‹</button><button onclick="sfMonth(1)">›</button></div></div>
-      <div class="mgrid">${DOW.map(x=>`<div class="dow">${x}</div>`).join('')}${cells}</div>
-      <div class="help" style="margin-top:10px">Episodes drop ${sh.releaseDays.join(' and ')}. Grey dates are booked, inside lead time, or not available for your category.</div></div>
-      <div class="sumbox"><b style="font-size:14px">${esc(p.name)}</b>
-        <div class="sumrow"><span>${p.pkg?`${p.count} episodes from ${SF.sel[0]?fmtDate(SF.sel[0]):'your start date'}`:`${sumUnits} date${sumUnits===1?'':'s'} × ${$$(unit)}`}</span><b>${$$(sub)}</b></div>
-        <div class="sumrow"><span>SpotsNow platform fee</span><b>${$$(fee)}</b></div>
-        <div class="sumrow tot"><span>Total</span><span>${$$(sub+fee)}</span></div>
-        <div style="font-size:11.5px;color:var(--text-secondary);margin:8px 0 12px">${SF.sel.length?SF.sel.map(fmtDate).join(', '):'Pick dates on the calendar.'}</div>
-        <button class="btn ${instant?'btn--accentcta':'btn--dark'}" style="width:100%" ${SF.sel.length>=Math.max(1,sf.minUnits)&&!excluded?'':'disabled'} onclick="openRequest()">${instant?'Book now':'Request'}</button>
-        <div class="help" style="text-align:center">${instant?'Charged now. Instant booking is on for this product.':'Card authorized now, charged when the creator confirms.'}</div></div></div>
-
-    <div class="sf-h">How it works</div>
-    <div class="how"><div><b><i>1</i>Request</b>Pick dates and send your talking points. Your card is authorized, not charged.</div><div><b><i>2</i>${esc(sh.firstName)} confirms within 24h</b>Approve captures the payment. Decline releases it right away.</div><div><b><i>3</i>Pay and send assets</b>You get the IO and a live report link that fills in as reads air.</div></div>
-
-    ${sf.publicSponsors&&past.length?`<div class="sf-h">Past sponsors</div><div class="rail">${past.slice(0,12).map(d=>`<span title="${esc(d.brand)}" style="display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:8px 12px;font-size:13px;font-weight:600">${blogo(d.domain,d.brand,'sm')}${esc(d.brand)}</span>`).join('')}${past.length>12?`<span class="muted">and ${past.length-12} more</span>`:''}</div>`:''}
-
-    <div class="callout"><div style="font-size:26px">📄</div><div style="flex:1"><b style="font-size:14.5px">Have your own IO?</b><div style="font-size:13px;color:var(--text-secondary);margin-top:2px">Email it to <b class="mono">deals+${S.dealIngestToken}@spotsnow.io</b> or upload it here. It lands on ${esc(sh.firstName)}'s calendar as a proposed booking. No account needed.</div></div><button class="btn btn--ghost" onclick="openIngest(true)">Upload IO</button></div>
+  const weeks=sfWeeks();
+  $('storefront').innerHTML=bar+`<div class="sf-in" style="max-width:900px">
+    <div class="sf-hero">${art(sh,112,38)}<div><div class="sf-name">${esc(sh.name)}</div><div class="sf-host">with ${esc(sh.host)} · ${esc(sh.category)}</div><div class="sf-desc">${esc(sf.intro||sh.desc)}</div>
+      <div class="stat-pills"><span class="stat-pill"><b>${K(sh.imprPerEp)}</b> per episode</span><span class="stat-pill"><b>${sh.releasesPerWeek}</b> episodes a week</span></div></div></div>
+    <div class="sf-h" style="display:flex;align-items:center;gap:10px">Book a spot <span class="muted" style="font-size:13px;font-weight:500">Pick a week and a position. ${esc(sh.firstName)} places it in that week's episode.</span></div>
+    <div class="listcard">${weeks.map(w=>`<div class="att" style="align-items:center;flex-wrap:wrap"><div style="width:120px;flex-shrink:0"><b style="font-size:13px">Week of ${fmtDate(w.week)}</b><div class="muted" style="font-size:11px">${w.eps.map(e=>dayName(e.date)).join(' + ')} episode${w.eps.length>1?'s':''}</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;flex:1">${pls.map(p=>{ const ep=weekOpenEpisode(w,p,SF.category), on=SF.sel.some(x=>x.week===w.week&&x.pl===p);
+        return `<button class="sfcard ${on?'on':''}" ${ep?'':'disabled'} title="${ep?`${PL_SECS[p]}s, ${POS_LABEL[p].includes('Pre')?'at the start':POS_LABEL[p].includes('Post')?'at the end':POS_LABEL[p].includes('YouTube')?'on the YouTube upload':'in the middle'} of an episode that week`:SF.category&&categoryLock(SF.category,w.eps[0].date).length?'Category not available':'Booked'}" onclick="sfToggle('${w.week}','${p}')"><span>${POS_LABEL[p]} ${PL_SECS[p]}s</span><b>${ep?(sf.showPrices?'$'+(rateCents(p)/100).toLocaleString('en-US',{minimumFractionDigits:2}):'Ask'):'Booked'}</b></button>`; }).join('')}</div></div>`).join('')}</div>
+    ${past.length&&sf.publicSponsors?`<div class="sf-h">Past sponsors</div><div class="rail">${past.map(d=>`<span style="display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:8px 12px;font-size:13px;font-weight:600">${blogo(d.domain,d.brand,'sm')}${esc(d.brand)}</span>`).join('')}</div>`:''}
+    <div class="callout"><div style="flex:1"><b style="font-size:14px">Have your own IO?</b><div style="font-size:13px;color:var(--text-secondary);margin-top:2px">Email it to <b class="mono">deals+${S.dealIngestToken}@spotsnow.io</b> or upload it.</div></div><button class="btn btn--ghost btn--sm" onclick="openIngest(true)">Upload IO</button></div>
+    <div style="height:90px"></div>
   </div>
-  <div class="sf-foot"><div class="sf-wm" style="justify-content:center;font-size:13px;margin-bottom:6px"><i style="width:18px;height:18px;font-size:10px">S</i>Powered by SpotsNow</div>Privacy · Terms · spotsnow.io/book/${sh.slug}</div>`;
+  ${SF.sel.length?`<div class="sfbar"><div class="sfbar__in"><div><b>${SF.sel.length} spot${SF.sel.length>1?'s':''}</b> · ${$$(sub)} <span class="muted">+ ${$$(fee)} SpotsNow fee</span></div><button class="btn btn--dark" onclick="openCheckout()">Continue</button></div></div>`:''}`;
 }
-function sfMonth(n){ let [y,m]=SF.month.split('-').map(Number); m+=n; if(m<1){m=12;y--;} if(m>12){m=1;y++;} SF.month=y+'-'+pad(m); renderStorefront(); }
-function sfToggle(ds){ const p=products().find(x=>x.id===SF.product);
-  if(p.pkg){ const picks=[]; for(const e of S.episodes){ if(e.date<ds) continue; if(bookable(e.date,p.placement,SF.category).ok) picks.push(e.date); if(picks.length>=p.count) break; } SF.sel=picks; }
-  else { const i=SF.sel.indexOf(ds); if(i>=0) SF.sel.splice(i,1); else SF.sel.push(ds); SF.sel.sort(); }
-  renderStorefront(); }
+function sfToggle(week,pl){ const i=SF.sel.findIndex(x=>x.week===week&&x.pl===pl); if(i>=0) SF.sel.splice(i,1); else SF.sel.push({week,pl}); renderStorefront(); }
+
+/* /confirm-spot: Set up your Ad → Send Request → Authorize Payment */
 let RQ={};
-function openRequest(){ const pf=SF.prefill||{}; const p=products().find(x=>x.id===SF.product);
-  RQ={ brand:pf.brand||'', site:pf.domain||'', email:pf.email||'', name:pf.name||'', goal:'', promo:pf.promo||'', tps:'', terms:false, category:SF.category||pf.category||'' };
-  renderRequest(); }
-function renderRequest(){ const p=products().find(x=>x.id===SF.product), instant=S.show.storefront.instant.includes(p.id);
-  openDrawer(dHead(`${instant?'Book':'Request'} ${esc(p.name)} on ${esc(S.show.name)}`, `${SF.sel.map(fmtDate).join(', ')}`)+
-  `<div class="drawer__body">
-    <div class="fgrid"><div class="fld2"><label class="lbl">Brand name</label><input class="inp" value="${esc(RQ.brand)}" oninput="RQ.brand=this.value"></div><div class="fld2"><label class="lbl">Website</label><input class="inp" placeholder="brand.com" value="${esc(RQ.site)}" oninput="RQ.site=this.value"><div class="help">Your domain is how we recognize your brand.</div></div></div>
-    <div class="fgrid"><div class="fld2"><label class="lbl">Your name</label><input class="inp" value="${esc(RQ.name)}" oninput="RQ.name=this.value"></div><div class="fld2"><label class="lbl">Contact email</label><input class="inp" type="email" value="${esc(RQ.email)}" oninput="RQ.email=this.value"></div></div>
-    <div class="fgrid"><div class="fld2"><label class="lbl">Category</label><select class="inp" onchange="RQ.category=this.value;renderRequest()"><option value="">Choose</option>${CATEGORIES.filter(c=>!S.show.excludedCategories.includes(c)).map(c=>`<option ${RQ.category===c?'selected':''}>${c}</option>`).join('')}</select></div><div class="fld2"><label class="lbl">Promo code / URL (optional)</label><input class="inp" value="${esc(RQ.promo)}" oninput="RQ.promo=this.value"></div></div>
-    <div class="fld2"><label class="lbl">Campaign goal (one line)</label><input class="inp" value="${esc(RQ.goal)}" oninput="RQ.goal=this.value"></div>
-    <div class="fld2"><label class="lbl">Talking points</label><textarea class="inp" rows="4" placeholder="What should ${esc(S.show.firstName)} make sure to say?" oninput="RQ.tps=this.value">${esc(RQ.tps)}</textarea></div>
-    <div class="fld2"><label class="lbl">Payment</label><div class="stripe-el">💳 Card details go in Stripe's secure field<span class="tm">Test mode</span></div><div class="help">${instant?'Charged now.':'Authorized now, captured only if the creator approves. Released instantly on decline.'}</div></div>
-    <label class="swrow" style="cursor:pointer"><input type="checkbox" ${RQ.terms?'checked':''} onchange="RQ.terms=this.checked"><div><b>I agree to the insertion order terms</b><small>Standard SpotsNow IO: host-read, make-goods for under delivery, 30-day measurement window, cancel 14 days before air.</small></div></label>
-  </div>
-  <div class="drawer__foot"><button class="btn btn--ghost" onclick="closeOverlays()">Cancel</button><button class="btn btn--dark" onclick="submitRequest()">${instant?'Book and pay':'Send request'}</button></div>`, 'lg'); }
+function openCheckout(){ const pf=SF.prefill||{}; RQ={ step:1, brand:pf.brand||'', site:pf.domain||'', email:pf.email||'', name:pf.name||'', promo:pf.promo||'', landing:'', tps:'', later:false, terms:false,
+  message:`Hi ${S.show.firstName}, we'd love to book ${SF.sel.length} spot${SF.sel.length>1?'s':''} on ${S.show.name}. Talking points are attached. Thanks!` }; renderCheckout(); }
+function renderCheckout(){
+  const steps=['Set up your Ad','Send Request','Authorize Payment'], st=RQ.step;
+  const sub=SF.sel.reduce((a,x)=>a+rateCents(x.pl),0), fee=Math.round(sub*.10);
+  let body='';
+  if(st===1) body=`<p class="help" style="margin:0 0 14px">What ${esc(S.show.firstName)} should say. You can add this later.</p>
+    <div class="fld2"><label class="lbl">Talking points</label><textarea class="inp" rows="5" placeholder="Key points, in your words" oninput="RQ.tps=this.value">${esc(RQ.tps)}</textarea></div>
+    <div class="fgrid"><div class="fld2"><label class="lbl">Promo code</label><input class="inp" value="${esc(RQ.promo)}" oninput="RQ.promo=this.value"></div><div class="fld2"><label class="lbl">Tracking URL</label><input class="inp" placeholder="brand.com/show" value="${esc(RQ.landing)}" oninput="RQ.landing=this.value"></div></div>`;
+  if(st===2) body=`<div class="fgrid"><div class="fld2"><label class="lbl">Brand name</label><input class="inp" value="${esc(RQ.brand)}" oninput="RQ.brand=this.value"></div><div class="fld2"><label class="lbl">Brand website</label><input class="inp" placeholder="brand.com" value="${esc(RQ.site)}" oninput="RQ.site=this.value"></div></div>
+    <div class="fld2"><label class="lbl">Your email</label><input class="inp" type="email" value="${esc(RQ.email)}" oninput="RQ.email=this.value"></div>
+    <div class="fld2"><label class="lbl">Message to ${esc(S.show.firstName)}</label><textarea class="inp" rows="4" oninput="RQ.message=this.value">${esc(RQ.message)}</textarea></div>`;
+  if(st===3) body=`${SF.sel.map(x=>`<div class="kv"><span>Week of ${fmtDate(x.week)} · ${POS_LABEL[x.pl]} ${PL_SECS[x.pl]}s</span><b>${$$(rateCents(x.pl))}</b></div>`).join('')}
+    <div class="kv"><span>SpotsNow fee</span><b>${$$(fee)}</b></div><div class="kv"><span><b>Total</b></span><b>${$$(sub+fee)}</b></div>
+    <div class="fld2" style="margin-top:14px"><label class="lbl">Card</label><div class="stripe-el">💳 Entered in Stripe's secure field<span class="tm">Test mode</span></div><div class="help">Authorized now, charged only when ${esc(S.show.firstName)} accepts.</div></div>
+    <label class="swrow" style="cursor:pointer"><input type="checkbox" ${RQ.terms?'checked':''} onchange="RQ.terms=this.checked"><div><b>I accept the terms</b></div></label>`;
+  openDrawer(`<div class="drawer__head"><div><div class="stepper" style="margin:0 0 10px">${steps.map((s,i)=>`<div class="st ${i+1===st?'on':i+1<st?'done':''}"><i>${i+1<st?'✓':i+1}</i>${s}</div>${i<2?'<div class="ln"></div>':''}`).join('')}</div><h2 style="font-size:17px;font-weight:700">${steps[st-1]}</h2></div><button class="x" onclick="closeOverlays()">✕</button></div>
+    <div class="drawer__body">${body}</div>
+    <div class="drawer__foot drawer__foot--split">${st>1?`<button class="btn btn--ghost" onclick="RQ.step--;renderCheckout()">Back</button>`:`<button class="fcta--quiet" onclick="RQ.later=true;RQ.step=2;renderCheckout()">Do it later</button>`}
+      <button class="btn btn--dark" onclick="checkoutNext()">${st===2?'Send Request':st===3?'Authorize payment':'Continue'}</button></div>`, 'lg');
+}
+function checkoutNext(){
+  if(RQ.step===2){ const site=(RQ.site||'').toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/.*$/,'');
+    if(!RQ.brand.trim()){ toast('Brand name is required'); return; }
+    if(site && !/^[\da-z.-]+\.[a-z.]{2,6}$/.test(site)){ toast('Please enter a valid website URL'); return; }
+    if(!RQ.email.includes('@')){ toast('Add an email so the creator can reply.'); return; }
+    if(!RQ.message.trim()){ toast('Message is required'); return; } RQ.site=site; }
+  if(RQ.step<3){ RQ.step++; renderCheckout(); return; }
+  if(!RQ.terms){ toast('You must accept the terms'); return; }
+  submitRequest();
+}
 function submitRequest(){
-  const p=products().find(x=>x.id===SF.product), instant=S.show.storefront.instant.includes(p.id);
-  const site=(RQ.site||'').toLowerCase().replace(/^https?:\/\//,'').replace(/\/.*$/,'').replace(/^www\./,'');
-  if(!RQ.brand||!site||!RQ.email.includes('@')){ toast('Add the brand, website and a contact email.'); return; }
-  if(!RQ.terms){ toast('Agree to the IO terms to continue.'); return; }
-  // re-check availability against the calendar at submit time (no separate store)
-  const targets=[]; SF.sel.forEach(dt=>targets.push([dt,p.placement])); if(p.pkg&&p.extra) p.extra.forEach(x=>{ let n=0; for(const e of S.episodes){ if(e.date<SF.sel[0]) continue; if(!slot(e.date,x.placement)&&bookable(e.date,x.placement,RQ.category).ok){ targets.push([e.date,x.placement]); if(++n>=x.count) break; } } });
-  if(targets.some(t=>slot(t[0],t[1]))){ toast('One of those dates was just booked. Pick again.'); SF.sel=[]; closeOverlays(); renderStorefront(); return; }
-  const each = p.pkg ? Math.round(p.priceCents/targets.length) : rateCents(p.placement);
-  const d={ id:uid('d'), brand:RQ.brand, domain:site, category:RQ.category||'Software', source:'STOREFRONT', agency:null, contact:{name:RQ.name,email:RQ.email}, promoCode:RQ.promo, landingUrl:'', priceModel:S.show.priceModel,
-    status: instant?'BOOKED':'PROPOSED', product:p.id, goal:RQ.goal, requestedAt:TODAY, fromDeal:SF.prefill.from||null,
+  const targets=SF.sel.map(x=>{ const w=sfWeeks().find(w=>w.week===x.week); const ep=w&&weekOpenEpisode(w,x.pl,SF.category); return ep?[ep.date,x.pl]:null; });
+  if(targets.some(t=>!t)){ toast('One of those weeks was just booked. Pick again.'); SF.sel=[]; closeOverlays(); renderStorefront(); return; }
+  const site=RQ.site||RQ.brand.toLowerCase().replace(/[^a-z0-9]/g,'')+'.com';
+  const tps=RQ.tps.split('\n').map(x=>x.trim()).filter(Boolean);
+  const d={ id:uid('d'), brand:RQ.brand.trim(), domain:site, category:SF.category||'Software', source:'STOREFRONT', agency:null, contact:{name:RQ.name,email:RQ.email}, promoCode:RQ.promo, landingUrl:RQ.landing, priceModel:S.show.priceModel,
+    status:'PROPOSED', goal:RQ.message, requestedAt:TODAY, fromDeal:SF.prefill.from||null,
     invoiceTerms:{terms:'UPFRONT',invoiceOn:'BOOKING',collectVia:'SPOTSNOW'}, invoice:null,
-    brief: RQ.tps.trim()? { cta:`Go to ${site}${RQ.promo?' and use code '+RQ.promo:''}`, talkingPoints:RQ.tps.split('\n').map(x=>x.trim()).filter(Boolean), banned:[], disclaimer:'', position:p.placement, lengthSec:PL_SECS[p.placement], descLink:true, fresh:true } : null,
-    publicSponsor:false, reportNote:'', sendLog:[], copyIn:!!RQ.tps.trim(), createdAt:TODAY, conversationId:uid('conv'),
-    reads: targets.map(t=>({ id:uid('r'), date:t[0], placement:t[1], kind:'paid', status:instant?'scheduled':'requested', final:0, ytShare:t[1]==='YT'?1:.7, ts:700, priceCents:each, packageId:p.pkg?p.id:null, comp:{} })) };
-  S.deals.push(d);
-  if(instant){ const c=dealSummary(d), fee=Math.round(c.totalCents*.10); d.invoice={ number:'INV-'+(1048+S.deals.filter(x=>x.invoice).length), amountCents:c.totalCents, feeCents:fee, feeLabel:'SpotsNow marketplace fee (10%)', issuedAt:TODAY, dueAt:TODAY, status:'PAID', paidAt:TODAY, upfront:true, payout:{at:d.reads[0].date,amountCents:c.totalCents-fee,status:'SCHEDULED'} };
-    S.payouts.unshift({id:uid('po'),at:d.reads[0].date,amountCents:c.totalCents-fee,status:'SCHEDULED',ref:d.brand+' · '+d.invoice.number+' · on first verified air'}); S.gmvMonthCents+=c.totalCents; }
-  rebuildSlots(); closeOverlays(); refreshChrome(); SF.done=d.id; SF.sel=[]; renderStorefront(); $('storefront').scrollTop=0;
+    brief: tps.length? { cta:`Go to ${RQ.landing||site}${RQ.promo?' and use code '+RQ.promo:''}`, talkingPoints:tps, banned:[], disclaimer:'', position:targets[0][1], lengthSec:PL_SECS[targets[0][1]], descLink:true, fresh:true } : null,
+    publicSponsor:false, reportNote:'', sendLog:[], copyIn:!!tps.length, createdAt:TODAY, conversationId:uid('conv'),
+    reads: targets.map(t=>({ id:uid('r'), date:t[0], placement:t[1], kind:'paid', status:'requested', final:0, ytShare:t[1]==='YT'?1:.7, ts:700, priceCents:rateCents(t[1]), comp:{} })) };
+  S.deals.push(d); rebuildSlots(); closeOverlays(); refreshChrome(); SF.done=d.id; SF.sel=[]; renderStorefront(); $('storefront').scrollTop=0;
 }
 
 /* ════════ BRANDS TO PITCH (5.11) ════════
@@ -2772,7 +2622,7 @@ RENDER.channel = function(){
   const c=CH, sf=c.storefront;
   const tgl=(path,on,label,sub)=>`<div class="swrow"><button class="sw ${on?'on':''}" onclick="chSet('${path}',${!on});RENDER.channel()"><i></i></button><div><b>${label}</b>${sub?`<small>${sub}</small>`:''}</div></div>`;
   const src=t=>c.sources.find(s=>s.type===t);
-  $('view-channel').innerHTML=`<div class="inner">${pageHead('My channel', 'One form for your show, rate card and storefront. Changes apply to the calendar and storefront at once.', `<button class="btn btn--ghost btn--sm" onclick="openStorefront()">View storefront</button><button id="chSave" class="btn btn--dark btn--sm" style="${CH_DIRTY?'':'display:none'}" onclick="saveChannel()">Save changes</button>`)}
+  $('view-channel').innerHTML=`<div class="inner">${pageHead('My show', 'Your show, your prices and your booking page.', `<button class="btn btn--ghost btn--sm" onclick="openStorefront()">View storefront</button><button id="chSave" class="btn btn--dark btn--sm" style="${CH_DIRTY?'':'display:none'}" onclick="saveChannel()">Save changes</button>`)}
   <div class="grid" style="grid-template-columns:1fr 1fr;align-items:start">
     <div class="card"><div class="card__head"><div class="card__title">${art(c,26,10)} Show and sources</div></div><div class="card__pad">
       <div class="fgrid"><div class="fld2"><label class="lbl">Show name</label><input class="inp" value="${esc(c.name)}" oninput="chSet('name',this.value)"></div><div class="fld2"><label class="lbl">Host</label><input class="inp" value="${esc(c.host)}" oninput="chSet('host',this.value)"></div></div>
@@ -2844,9 +2694,9 @@ function saveChannel(force){
 }
 
 /* ════════ SETTINGS ════════ */
-let SET_TAB='general', API_OUT='';
+let SET_TAB='payouts', API_OUT='';
 RENDER.settings = function(){
-  const tabs=[['general','General'],['team','Team'],['inbox','Deal inbox'],['payouts','Payouts'],['plan','Plan'],['voice','Voice'],['notify','Weekly digest'],['api','API & agents']];
+  const tabs=[['payouts','Getting paid'],['inbox','Deal inbox'],['team','Team'],['plan','Plan'],['notify','Weekly email']];
   let body='';
   if(SET_TAB==='general') body=`<div class="card card__pad" style="max-width:640px"><div class="fld2"><label class="lbl">Workspace name</label><input class="inp" value="${esc(S.show.name)}"></div><div class="fld2"><label class="lbl">Logo</label><div style="display:flex;align-items:center;gap:12px">${art(S.show,44)}<span class="help">Uses your show art. Creators are SpotsNow-branded; no white-label.</span></div></div><div class="fld2"><label class="lbl">Timezone</label><input class="inp" value="${S.timezone}"><div class="help">Set from your browser at onboarding.</div></div><div class="help">Salesforce sync and backfill are network features and are hidden in creator mode.</div></div>`;
   if(SET_TAB==='team') body=`<div class="card" style="max-width:640px">${S.team.map(m=>`<div class="att"><div class="sb-user__av">${initials(m.name)}</div><div class="att__main"><b>${esc(m.name)}${m.title?` <span class="muted" style="font-weight:500">· ${m.title}</span>`:''}</b><span>${esc(m.email)}</span></div><span class="tag tag--grey">${m.role==='OWNER'?'Owner':'Editor'}</span></div>`).join('')}<div class="att"><input class="inp" id="invEmail" placeholder="producer@yourshow.com"><button class="btn btn--dark btn--sm" onclick="const v=$('invEmail').value;if(v.includes('@')){S.team.push({name:v.split('@')[0],email:v,role:'EDITOR'});RENDER.settings();toast('Invite sent. Editors can book, ingest and send reports.')}">Invite</button></div></div>`;
@@ -2951,6 +2801,91 @@ function obFinish(){
   ws.episodes=makeEpisodes(show, TODAY, addDays(TODAY,90)).map((e,i)=>Object.assign(e,{title:'Upcoming episode'}));
   WORKSPACES[ws.id]=ws; S=ws; rebuildSlots(); CH=null; closeOb(); refreshChrome(); go('home');
   toast(`Welcome, ${c.host.split(' ')[0]}. Your calendar has ${overview().tot.open} open slots. Switch back to Second Wind from the show menu.`);
+}
+
+RENDER.home = function(){
+  const rows=needsYou(), sh=S.show;
+  const unpaid=S.deals.filter(d=>d.invoice && ['SENT','DUE','OVERDUE'].includes(invStatus(d.invoice)));
+  const owed=unpaid.reduce((a,d)=>a+d.invoice.amountCents,0);
+  const open4=S.episodes.filter(e=>e.date>TODAY&&e.date<=addDays(TODAY,28)).reduce((a,e)=>a+placements().filter(p=>!slot(e.date,p)).length,0);
+  const live=S.deals.filter(d=>d.status==='BOOKED'&&['live','upcoming'].includes(dealSummary(d).state)).length;
+  const empty=!S.deals.length;
+  const stat=(v,l,fn)=>`<button class="cc-tile" onclick="${fn}"><div class="cc-tile__v" style="margin-top:0">${v}</div><div class="cc-tile__l" style="margin-top:4px">${l}</div></button>`;
+  $('view-home').innerHTML = `<div class="inner" style="max-width:880px">
+    <div class="head" style="margin:10px 0 22px"><h1 style="font-size:26px">Hi ${esc(S.owner.name.split(' ')[0])}</h1><p style="font-size:14px">${rows.length?`${rows.length} thing${rows.length>1?'s':''} need${rows.length>1?'':'s'} you.`:"You're all caught up."}</p></div>
+    ${empty?`<div class="firstrun" style="margin-top:0;margin-bottom:22px"><h3>Add your first sponsor</h3><p>Forward any IO or sponsor email to <b class="mono">deals+${S.dealIngestToken}@spotsnow.io</b>, or add one yourself.</p><div style="margin-top:14px"><button class="btn btn--dark btn--sm" onclick="openIngest()">Add sponsor</button></div></div>`:''}
+    <div class="cc-tiles" style="margin-top:0">
+      ${stat($$(owed),'Owed to you',"go('deals')")}
+      ${stat(open4,'Open slots, next 4 weeks',"go('calendar')")}
+      ${stat(live,'Active sponsors',"go('deals')")}
+    </div>
+    ${rows.length?`<div class="section-title" style="font-size:15px;font-weight:700;margin:26px 0 10px">To do</div><div class="listcard">${rows.map(attRow).join('')}</div>`:''}
+    <div class="section-title" style="font-size:15px;font-weight:700;margin:26px 0 10px;display:flex;align-items:center">Coming up<button class="btn btn--ghost btn--sm" style="margin-left:auto" onclick="go('calendar')">Calendar</button></div>
+    <div class="listcard">${nextOnAir()}</div>
+    <div class="card card__pad" style="margin-top:22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div style="flex:1;min-width:220px"><b style="font-size:13.5px">Fill your open slots</b><div class="help" style="margin-top:2px">Share your booking page, or pitch brands already buying shows like yours.</div></div>
+      <button class="btn btn--ghost btn--sm" onclick="copyText('https://spotsnow.io/book/${sh.slug}')">${ICO_LINK} Copy booking link</button>
+      <button class="btn btn--ghost btn--sm" onclick="go('brands')">Brands to pitch</button>
+    </div>
+  </div>`;
+};
+RENDER.calendar = function(){
+  const pls=placements(), ov=overview();
+  const eps=S.episodes.filter(e=>e.date>addDays(TODAY,-4) && e.date<=WINDOW_END());
+  let lastM='', rowsH='';
+  eps.forEach((e,i)=>{ const m=e.date.slice(0,7); if(m!==lastM){ rowsH+=`<tr class="mon"><td colspan="${pls.length+1}">${MONL[+m.slice(5)-1]}</td></tr>`; lastM=m; }
+    const past=e.date<=TODAY;
+    rowsH+=`<tr class="${past?'past':''}"><td class="ep"><b>${dayName(e.date)} ${fmtDate(e.date)}</b><span>#${e.n} ${esc(e.title)}</span></td>${pls.map(p=>`<td>${calCell(e,p,eps[i-1],eps[i+1],past)}</td>`).join('')}</tr>`; });
+  $('view-calendar').innerHTML=`<div class="inner">${pageHead('Calendar', `${ov.tot.open} open slots worth ${$$(ov.tot.openValue)} over the next 12 weeks. Tap an open slot to book it.`, `<button class="btn btn--dark btn--sm" onclick="openIngest()">+ Add sponsor</button>`)}
+    <div class="cal"><table><thead><tr><th>Episode</th>${pls.map(p=>`<th>${PL[p]}<div style="font-weight:500;color:var(--text-tertiary);font-size:10.5px">${priceLabel(p)}</div></th>`).join('')}</tr></thead><tbody>${rowsH}</tbody></table></div>
+    <div class="cal-legend"><span><i style="background:var(--primary)"></i>Booked</span><span><i style="background:var(--secondary-lite);border:1px solid var(--border)"></i>On hold</span><span><i style="background:var(--blue-bg)"></i>Requested</span><span><i style="border:1px dashed var(--border-strong)"></i>Open</span></div>
+  </div>`;
+};
+function simpleStatus(d){ const c=dealSummary(d), ist=invStatus(d.invoice);
+  if(d.status==='PROPOSED') return ['Request','blue'];
+  if(d.status==='COUNTERED') return ['Waiting on them','grey'];
+  if(d.status==='HOLD') return ['On hold','grey'];
+  if(d.status==='DRAFT') return ['Draft','grey'];
+  if(ist==='OVERDUE') return ['Unpaid','orange'];
+  if(c.state==='done') return [ist==='PAID'||!d.invoice?'Done':'Awaiting payment', ist==='PAID'?'green':'grey'];
+  if(c.state==='upcoming') return ['Upcoming','grey'];
+  return ['Live','green'];
+}
+RENDER.deals = function(){
+  const vis=S.deals.filter(d=>!['DECLINED','RELEASED'].includes(d.status));
+  const past=vis.filter(d=>simpleStatus(d)[0]==='Done'), active=vis.filter(d=>!past.includes(d));
+  const row=d=>{ const c=dealSummary(d), st=simpleStatus(d); return `<div class="att wrow--click" style="cursor:pointer" onclick="openDeal('${d.id}')">${blogo(d.domain,d.brand)}<div class="att__main"><b>${esc(d.brand)}</b><span>${c.start?fmtDate(c.start)+' – '+fmtDate(c.end):''} · ${c.paid.length} read${c.paid.length===1?'':'s'}</span></div><b class="num" style="font-size:13.5px;width:90px;text-align:right">${$$(c.totalCents)}</b><span style="width:140px;text-align:right"><span class="tag tag--${st[1]}">${st[0]}</span></span></div>`; };
+  $('view-deals').innerHTML=`<div class="inner" style="max-width:880px">${pageHead('Sponsors', `Forward any IO to <b class="mono">deals+${S.dealIngestToken}@spotsnow.io</b> and it shows up here.`, `<button class="btn btn--dark btn--sm" onclick="openIngest()">+ Add sponsor</button>`)}
+    <div class="listcard">${active.length?active.map(row).join(''):'<div class="empty">No active sponsors yet.</div>'}</div>
+    ${past.length?`<div class="section-title" style="font-size:13px;font-weight:700;color:var(--text-secondary);margin:24px 0 10px">Past</div><div class="listcard">${past.map(row).join('')}</div>`:''}
+  </div>`;
+};
+function openDeal(id){
+  const d=deal(id), c=dealSummary(d), inv=d.invoice, ist=invStatus(inv), st=simpleStatus(d);
+  const line = d.status==='PROPOSED' ? `Requested ${d.reads.length} slot${d.reads.length>1?'s':''} for ${$$(c.totalCents)}`
+    : d.status==='HOLD' ? `Holding ${d.reads.length} slot${d.reads.length>1?'s':''} until ${fmtDate(d.holdExpiresAt)}`
+    : !c.aired.length ? `${c.paid.length} read${c.paid.length>1?'s':''} booked, first one ${fmtDate(c.start)}`
+    : c.tooEarly ? `${c.aired.length} of ${c.paid.length} aired · too early to call`
+    : `${c.aired.length} of ${c.paid.length} aired · ${c.airedPct}% of what you promised`;
+  const rs=r=> r.status==='aired'?`${K(delivered(r))} views`: r.status==='missed'?'<span style="color:var(--orange-text)">Not found</span>': r.status==='scheduled'?'Upcoming': r.status==='requested'?'Requested': r.status==='hold'?'On hold':'Cancelled';
+  openDrawer(`<div class="drawer__head"><div style="display:flex;gap:12px;align-items:center">${blogo(d.domain,d.brand,'lg')}<div><h2 style="font-size:18px;font-weight:700">${esc(d.brand)}</h2><div class="card__sub">${line}</div></div></div><button class="x" onclick="closeOverlays()">✕</button></div>
+  <div class="drawer__body">
+    ${d.status==='BOOKED'?`<div style="display:flex;gap:8px;margin-bottom:18px"><button class="btn btn--dark btn--sm" onclick="closeOverlays();openReport('${d.id}')">${ICO_LINK} Sponsor report</button>${d.contact.email&&d.contact.email.includes('@')?`<button class="btn btn--ghost btn--sm" onclick="sendReport('${d.id}')">${ICO_SEND} Send to ${esc(d.brand)}</button>`:''}</div>`:''}
+    <div class="dhead" style="margin-top:0">Reads</div>
+    ${d.reads.filter(r=>r.status!=='cancelled').map(r=>`<div class="kv" ${r.status==='aired'||r.status==='missed'?`style="cursor:pointer" onclick="openRead('${r.id}')"`:''}><span>${dayName(r.date)} ${fmtDate(r.date)} · ${PL[r.placement]}${r.kind!=='paid'?' · free':''}</span><b style="font-weight:600">${rs(r)}</b></div>`).join('')}
+    <div class="dhead">Money</div>
+    <div class="kv"><span>${$$(c.totalCents)}${inv?' · '+esc(inv.number):''}</span><b>${inv?`<span class="tag tag--${ist==='PAID'?'green':ist==='OVERDUE'?'orange':'grey'}">${ist==='PAID'?'Paid '+fmtDate(inv.paidAt):ist==='OVERDUE'?'Overdue':'Due '+fmtDate(inv.dueAt)}</span>`:'<span class="muted">Not invoiced</span>'}</b></div>
+    ${inv&&ist!=='PAID'?`<div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn--ghost btn--sm" onclick="invoiceReminder('${d.id}')">Send reminder</button><button class="btn btn--ghost btn--sm" onclick="markPaid('${d.id}')">Mark paid</button></div>`:''}
+    ${!inv&&d.status==='BOOKED'?`<button class="btn btn--ghost btn--sm" style="margin-top:10px" onclick="createInvoice('${d.id}')">Send invoice</button>`:''}
+    <details style="margin-top:20px"><summary style="font-size:12.5px;font-weight:600;color:var(--text-secondary);cursor:pointer">More</summary>
+      <div class="kv"><span>Contact</span><b>${esc(d.contact.name||'—')} <em>${esc(d.contact.email||'')}</em></b></div>
+      <div class="kv"><span>Promo code</span><b>${esc(d.promoCode||'—')}</b></div>
+      <div class="kv"><span>Talking points</span><b><a href="#" onclick="openBrief('${d.id}');return false">${d.brief?'Edit':'Add'}</a></b></div>
+      <div class="swrow"><button class="sw ${d.publicSponsor?'on':''}" onclick="deal('${d.id}').publicSponsor=!deal('${d.id}').publicSponsor;openDeal('${d.id}')"><i></i></button><div><b>Show logo on my booking page</b></div></div>
+    </details>
+  </div>
+  ${d.status==='PROPOSED'?`<div class="drawer__foot"><button class="btn btn--dark" onclick="openBookingRequest('${d.id}')">Review request</button></div>`:''}
+  ${d.status==='HOLD'?`<div class="drawer__foot"><button class="btn btn--ghost" onclick="releaseHold('${d.id}')">Release</button><button class="btn btn--dark" onclick="confirmHold('${d.id}')">Confirm booking</button></div>`:''}`);
 }
 
 /* ════════ BOOT ════════ */
