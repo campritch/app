@@ -1267,6 +1267,14 @@
     .sfbar { position:fixed; left:0; right:0; bottom:0; z-index:6; background:var(--white); border-top:1px solid var(--border); }
     .sfbar__in { max-width:900px; margin:0 auto; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:14px; }
     .sf .stepper .st { font-size:11.5px; }
+    .subnav { margin:2px 0 6px 22px; padding-left:10px; border-left:1px solid var(--border); display:flex; flex-direction:column; gap:1px; }
+    .subnav:empty { display:none; }
+    .subnav-item { display:flex; align-items:center; gap:8px; width:100%; padding:6px 8px; border:none; background:none; border-radius:8px; font-family:inherit; font-size:12.5px; font-weight:600; color:var(--text-secondary); text-align:left; cursor:pointer; }
+    .subnav-item:hover { background:var(--nav-hover); color:var(--text-primary); }
+    .subnav-item.active { background:var(--nav-current); color:var(--text-primary); }
+    .subnav-item .blogo.sm { width:18px; height:18px; border-radius:4px; }
+    .subnav-pct { font-size:11px; font-weight:700; }
+    .camplink { cursor:pointer; } .camplink:hover { text-decoration:underline; text-underline-offset:2px; }
     /* mobile */
     .mtabs { display:none; }
     .mhead { display:none; }
@@ -1320,6 +1328,7 @@
       <button class="nav-item" data-view="calendar" onclick="go('calendar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Calendar</button>
       <button class="nav-item" data-view="deals" onclick="go('deals')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1Z"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Campaigns</button>
       <button class="nav-item" data-view="delivery" onclick="go('delivery')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Delivery</button>
+      <div class="subnav" id="dvSub"></div>
       <div class="sb-div"></div>
       <button class="nav-item" data-view="channel" onclick="go('channel')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="m8 3 4 4 4-4"/></svg>My show</button>
       <button class="nav-item" data-view="settings" onclick="go('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.2 4.2l2.8 2.8M17 17l2.8 2.8M1 12h4M19 12h4M4.2 19.8 7 17M17 7l2.8-2.8"/></svg>Settings</button>
@@ -1344,6 +1353,7 @@
       <section class="view" id="view-calendar"></section>
       <section class="view" id="view-deals"></section>
       <section class="view" id="view-delivery"></section>
+      <section class="view" id="view-campaign"></section>
       <section class="view" id="view-brands"></section>
       <section class="view" id="view-channel"></section>
       <section class="view" id="view-settings"></section>
@@ -1697,7 +1707,7 @@ let CURRENT='home';
 const RENDER = {};
 function go(v){ if(v==='needs') v='home'; /* Needs you lives on Home: one list, not two */ CURRENT=v; document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active', x.id==='view-'+v));
   document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active', b.dataset.view===v)); document.querySelectorAll('.mtabs button').forEach(b=>b.classList.toggle('on', b.dataset.view===v));
-  RENDER[v] && RENDER[v](); $('views').scrollTop=0; try{ history.replaceState(null,'','#'+v); }catch(e){} }
+  RENDER[v] && RENDER[v](); if(v==='campaign'){ document.querySelectorAll('[data-view="delivery"]').forEach(b=>b.classList.add('active','on')); } renderDvSub(); $('views').scrollTop=0; try{ history.replaceState(null,'','#'+v); }catch(e){} }
 function rerender(){ RENDER[CURRENT] && RENDER[CURRENT](); }
 function refreshChrome(){
   const sh=S.show;
@@ -1707,7 +1717,7 @@ function refreshChrome(){
   $('lockDelivery').innerHTML=isPro()?'':LOCK; $('lockBrands').innerHTML=isPro()?'':LOCK;
   const gmv=S.gmvMonthCents, waived=gmv>=100000;
   $('sbPlan').innerHTML='';const _unused=`<div class="sb-plan"><b>${PLANS[S.plan].name} plan</b>${S.plan==='CREATOR_PRO'?` · ${waived?'<span style="color:var(--green-text);font-weight:700">waived this month</span>':'$50/mo'}<div>${$$(gmv)} booked through SpotsNow this month${waived?'':' · $1,000 waives it'}</div><div class="bar"><i style="width:${Math.min(100,gmv/1000)}%"></i></div>`:S.plan==='CREATOR_STORE'?`<div>Delivery, reports and invoicing are Pro.</div><button class="btn btn--sm btn--dark" style="margin-top:8px;width:100%" onclick="upgradePlan()">Upgrade</button>`:'<div>Multi-show, seats, API and MCP.</div>'}</div>`;
-  document.title = sh.name+' · SpotsNow for Creators';
+  document.title = sh.name+' · SpotsNow for Creators'; renderDvSub();
 }
 function openWsMenu(ev){ ev.stopPropagation(); closeWsMenu(); const m=document.createElement('div'); m.className='wsmenu'; m.id='wsmenu';
   m.innerHTML = Object.values(WORKSPACES).map(w=>`<button onclick="switchWs('${w.id}')">${art(w.show,28,10)}<span style="flex:1"><b style="font-weight:700">${esc(w.show.name)}</b><small>${PLANS[w.plan].name} · ${w.deals.length} deals</small></span>${w===S?CK:''}</button>`).join('')+
@@ -1896,21 +1906,21 @@ RENDER.deals = function(){
   list=list.filter(fl[DL_F]); if(DL_Q) list=list.filter(x=>(x.brand+x.domain+(x.agency||'')).toLowerCase().includes(DL_Q.toLowerCase()));
   list.sort((a,b)=>{ const ca=dealSummary(a), cb=dealSummary(b); const rk=x=>({proposed:0,draft:1,live:2,upcoming:3,done:5})[x.state]??4; return rk(ca)-rk(cb) || (cb.start||'').localeCompare(ca.start||''); });
   const cnt=k=>S.deals.filter(fl[k]).length;
-  $('view-deals').innerHTML=`<div class="inner">${pageHead('Campaigns', 'Every sponsor, flight, read and invoice lives on one Deal record. Free to create, Pro to track.', `<button class="btn btn--ghost btn--sm" onclick="exportDeals()">${ICO_DL} CSV</button><button class="btn btn--dark btn--sm" onclick="openIngest()">+ Add deal</button>`)}
+  $('view-deals').innerHTML=`<div class="inner">${pageHead('Campaigns', 'Every campaign has a live page to share with the advertiser: what aired, how it is delivering, what is next. Open one to edit or share it.', `<button class="btn btn--ghost btn--sm" onclick="exportDeals()">${ICO_DL} CSV</button><button class="btn btn--dark btn--sm" onclick="openIngest()">+ Add deal</button>`)}
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
       <div class="seg">${[['all','All'],['active','Active'],['req','Requests & holds'],['unpaid','Unpaid'],['done','Done']].map(([k,l])=>`<button class="${DL_F===k?'active':''}" onclick="DL_F='${k}';RENDER.deals()">${l} <span class="muted">${cnt(k)}</span></button>`).join('')}</div>
       <div class="tbar__search tbar--bare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Search sponsors" value="${esc(DL_Q)}" oninput="DL_Q=this.value;clearTimeout(window._dq);window._dq=setTimeout(()=>{RENDER.deals();const i=document.querySelector('#view-deals input');i.focus();i.setSelectionRange(i.value.length,i.value.length)},250)"></div>
       <span class="muted" style="margin-left:auto;font-size:12px">Forward IOs to <b class="mono">deals+${S.dealIngestToken}@spotsnow.io</b></span>
     </div>
     <div class="listcard"><div class="dl-head"><span>Sponsor</span><span>Source</span><span>Flight</span><span>Reads</span><span>Value</span><span>Delivery</span><span>Invoice</span><span>Status</span></div>
-    ${list.length?list.map(d=>{ const c=dealSummary(d); return `<div class="dl-row" onclick="openDeal('${d.id}')"><div class="who">${blogo(d.domain,d.brand)}<div style="min-width:0"><b>${esc(d.brand)}</b><span>${esc(d.category)}${d.agency?' · via '+esc(d.agency):''}</span></div></div>
+    ${list.length?list.map(d=>{ const c=dealSummary(d); return `<div class="dl-row" onclick="${d.status==='BOOKED'?`openReport('${d.id}')`:`openDeal('${d.id}')`}"><div class="who">${blogo(d.domain,d.brand)}<div style="min-width:0"><b>${esc(d.brand)}</b><span>${esc(d.category)}${d.agency?' · via '+esc(d.agency):''}</span></div></div>
       <span class="tag tag--grey" style="justify-self:start">${srcLabel(d.source)}</span>
       <span style="font-size:12.5px">${c.start?fmtDate(c.start)+' – '+fmtDate(c.end):'—'}</span>
       <span class="num" style="font-size:12.5px">${c.paid.length}${c.extra.length?` <span class="muted">+${c.extra.length}</span>`:''}</span>
       <b class="num" style="font-size:13px">${$$(c.totalCents)}</b>
       ${paceCell(d,c)}
       ${invBadge(d.invoice,d)}
-      ${dealStatusTag(d,c)}</div>`; }).join(''):`<div class="empty">No deals here yet. <a href="#" onclick="openIngest();return false">Add a deal</a> or forward an IO.</div>`}</div>
+      <span style="display:flex;align-items:center;gap:6px">${dealStatusTag(d,c)}${d.status==='BOOKED'?`<button class="wdots" title="Copy the advertiser's link" onclick="event.stopPropagation();copyText('https://spotsnow.io/r/${d.id}')">${ICO_LINK}</button>`:''}</span></div>`; }).join(''):`<div class="empty">No deals here yet. <a href="#" onclick="openIngest();return false">Add a deal</a> or forward an IO.</div>`}</div>
   </div>`;
 };
 function exportDeals(){ const rows=[['Sponsor','Domain','Source','Start','End','Reads','Value','Delivered','Guarantee','Invoice']].concat(S.deals.map(d=>{const c=dealSummary(d);return [d.brand,d.domain,d.source,c.start,c.end,c.paid.length,(c.totalCents/100).toFixed(2),c.got,c.g,d.invoice?invStatus(d.invoice):''];}));
@@ -2247,6 +2257,7 @@ RENDER.delivery = function(){
   const html=`<div class="inner">${pageHead('Delivery', `Every booked read: did it air, how it's pacing on your own curve (${curveKey()==='fitted'?'fitted from your verified reads':'category default until 5 verified reads'}, check-in day ${checkInDay()}), and what needs you.`,
     `<span class="live-dot"><i></i>Air check every 24h</span><button class="btn btn--ghost btn--sm" onclick="syncEpisodes()">Sync episodes</button>${yt&&yt.oauthStatus!=='connected'?`<button class="btn btn--dark btn--sm" onclick="openYtConnect()">Connect YouTube</button>`:''}`)}
     ${banner}
+    ${campaignStrip()}<div class="dhead" style="margin:4px 2px 8px">Reads</div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
       <div class="seg">${[['needs','Needs you'],['all','All'],['aired','Aired'],['scheduled','Scheduled']].map(([k,l])=>`<button class="${DV_Q===k?'active':''}" onclick="DV_Q='${k}';RENDER.delivery()">${l} <span class="muted">${cnt(k)}</span></button>`).join('')}</div>
       <div class="tbar__search tbar--bare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Search sponsors" value="${esc(DV_SEARCH)}" onchange="DV_SEARCH=this.value;RENDER.delivery()"></div>
@@ -2269,7 +2280,7 @@ function dvRow(r){
   const p=r.status==='aired'?Math.round(delivered(r)/g*100):0, pp=r.status==='aired'?Math.round(projected(r)/g*100):0;
   const cls=pp>=90?'pace--good':pp>=80?'pace--warn':'pace--bad';
   return `<div class="dv-row wrow--click" onclick="openRead('${r.id}')">
-    <div class="who">${blogo(d.domain,d.brand,'sm')}<div style="min-width:0"><b>${esc(d.brand)}</b><span>${PL[r.placement]}${r.kind!=='paid'?' · '+(r.kind==='bonus'?'bonus':'make-good'):''}</span></div></div>
+    <div class="who">${blogo(d.domain,d.brand,'sm')}<div style="min-width:0"><b class="camplink" onclick="event.stopPropagation();openCampaign('${d.id}')">${esc(d.brand)}</b><span>${PL[r.placement]}${r.kind!=='paid'?' · '+(r.kind==='bonus'?'bonus':'make-good'):''}</span></div></div>
     <div class="dv-day"><b>${dayName(r.date)} ${fmtDate(r.date)}</b><span>${r.status==='aired'?'day '+ageOf(r):r.status==='scheduled'?'in '+diffDays(TODAY,r.date)+'d':''}</span></div>
     <div>${r.status==='aired'?`<span class="fran" onclick="event.stopPropagation();openRead('${r.id}')">${ICO_PLAY} ${mmss(r.ts)}</span>`:`<span class="fran fran--no">${r.status==='missed'?'Not found':'Not aired'}</span>`}</div>
     <div class="fnum">${r.status==='aired'?K(sp.total):'—'}${r.status==='aired'?`<small>${K(sp.yt)} vid · ${K(sp.aud)} aud</small>`:''}</div>
@@ -2930,6 +2941,49 @@ function simpleStatus(d){ const c=dealSummary(d), ist=invStatus(d.invoice);
   if(c.state==='upcoming') return ['Upcoming','grey'];
   return ['Live','green'];
 }
+/* ════════ CAMPAIGN PAGE (Delivery → one campaign) ════════ */
+let CAMP_ID=null;
+function liveCampaigns(){ return S.deals.filter(d=>d.status==='BOOKED' && ['live','upcoming'].includes(dealSummary(d).state)).sort((a,b)=>(dealSummary(a).start||'').localeCompare(dealSummary(b).start||'')); }
+function openCampaign(id){ const d=deal(id); if(!d) return; if(d.status!=='BOOKED'){ openDeal(id); return; } closeOverlays(); CAMP_ID=id; go('campaign'); }
+function campPace(d){ const c=dealSummary(d); if(!c.aired.length) return {txt:c.sched.length?'Not started':'—', pct:null};
+  if(c.tooEarly) return {txt:'Too early', pct:null}; return {txt:c.airedPct+'%', pct:c.airedPct}; }
+function paceBar(p){ if(p==null) return ''; const col=p>=90?'var(--green-text)':p>=80?'#EAB308':'var(--orange-text)'; return `<div class="pace" style="height:6px;flex:1"><div class="pace__fill" style="width:${Math.min(100,p)}%;background:${col}"></div></div>`; }
+function renderDvSub(){ const el=$('dvSub'); if(!el) return; const list=liveCampaigns();
+  el.innerHTML=list.map(d=>{ const p=campPace(d); return `<button class="subnav-item ${CURRENT==='campaign'&&CAMP_ID===d.id?'active':''}" onclick="openCampaign('${d.id}')">${blogo(d.domain,d.brand,'sm')}<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(d.brand)}</span><span class="subnav-pct" style="color:${p.pct==null?'var(--text-tertiary)':p.pct>=90?'var(--green-text)':'var(--orange-text)'}">${p.pct==null?'':p.pct+'%'}</span></button>`; }).join(''); }
+function campaignStrip(){ const list=liveCampaigns(); if(!list.length) return '';
+  return `<div class="dhead" style="margin:4px 2px 8px">By campaign</div><div class="listcard" style="margin-bottom:18px">${list.map(d=>{ const c=dealSummary(d), p=campPace(d), b=brandBadge(c);
+    return `<div class="att wrow--click" style="cursor:pointer" onclick="openCampaign('${d.id}')">${blogo(d.domain,d.brand)}<div class="att__main"><b>${esc(d.brand)}</b><span>${fmtDate(c.start)} – ${fmtDate(c.end)} · ${c.aired.length}/${c.paid.length+c.extra.length} aired · ${K(c.got)} of ${K(c.g)}</span></div>
+      <div style="display:flex;align-items:center;gap:8px;width:190px">${paceBar(p.pct)}<b style="font-size:12px;min-width:62px;text-align:right">${p.txt}</b></div><span style="width:120px;text-align:right"><span class="tag tag--${b.tone==='grey'?'grey':b.tone}">${b.t}</span></span></div>`; }).join('')}</div>`; }
+RENDER.campaign = function(){
+  const d=deal(CAMP_ID); if(!d){ go('delivery'); return; }
+  const c=dealSummary(d), b=brandBadge(c), p=campPace(d), inv=d.invoice, ist=invStatus(inv);
+  const reads=d.reads.filter(r=>r.status!=='cancelled').map(r=>Object.assign(r,{_d:d})).sort((a,b)=>a.date<b.date?-1:1);
+  const flags=reads.filter(r=>compMissed(r)>0&&!hasMakegoodFor(r)).length, missed=reads.filter(r=>r.status==='missed').length;
+  const tile=(l,v,s)=>`<div class="tile"><div class="tile__label">${l}</div><div class="tile__val" style="font-size:26px">${v}</div>${s?`<div class="help" style="margin-top:2px">${s}</div>`:''}</div>`;
+  const html=`<div class="inner">
+    <button class="fcta--quiet" style="margin-bottom:12px" onclick="go('delivery')">← Delivery</button>
+    <div class="pagebar"><div style="display:flex;align-items:center;gap:14px">${blogo(d.domain,d.brand,'lg')}<div class="head"><h1>${esc(d.brand)} <span class="tag tag--${b.tone==='grey'?'grey':b.tone}">${b.t}</span></h1><p>${fmtDate(c.start)} – ${fmtDateY(c.end)} · ${c.paid.length} paid read${c.paid.length===1?'':'s'}${c.extra.length?' + '+c.extra.length+' free':''} · ${srcLabel(d.source)}${d.agency?' via '+esc(d.agency):''}</p></div></div>
+      <div class="pagebar__right"><button class="btn btn--ghost btn--sm" onclick="openDeal('${d.id}')">Details</button><button class="btn btn--ghost btn--sm" onclick="openMakegood(null,'${d.id}','bonus')">+ Bonus spot</button>${c.under?`<button class="btn btn--ghost btn--sm" onclick="openMakegood('${c.aired.slice(-1)[0].id}')">Offer make-good</button>`:''}<button class="btn btn--dark btn--sm" onclick="openReport('${d.id}')">${ICO_LINK} Sponsor report</button></div></div>
+    ${missed||flags||c.under?`<div class="banner" style="background:var(--orange-bg);border-color:transparent;color:var(--orange-text)"><b>Needs you:</b>&nbsp;${[missed?`${missed} missed read${missed>1?'s':''}`:'',flags?`${flags} read${flags>1?'s':''} missing a must-say`:'',c.under?`tracking at ${c.airedPct}% of what you promised`:''].filter(Boolean).join(' · ')}</div>`:''}
+    <div class="tiles" style="grid-template-columns:repeat(4,1fr)">
+      ${tile('Delivered', K(c.got), `${K(c.yt)} YouTube · ${K(c.aud)} audio`)}
+      ${tile('Guarantee', K(c.g), `${K(d.guaranteePerRead||S.show.guarantee)} per read`)}
+      ${tile('Pacing', p.txt, c.tooEarly?`called on day ${checkInDay()}`:'90% is full delivery')}
+      ${tile('Value', $$(c.totalCents), inv?`${esc(inv.number)} · ${ist==='PAID'?'paid':ist==='OVERDUE'?'overdue':'due '+fmtDate(inv.dueAt)}`:'not invoiced yet')}
+    </div>
+    <div class="grid" style="grid-template-columns:1.4fr 1fr;margin-top:16px;align-items:start">
+      <div class="card card__pad"><div class="card__title" style="margin-bottom:10px">Delivery</div><div class="rpt-chart" style="border:none;padding:0">${reportChart(d)}</div></div>
+      <div class="card card__pad"><div class="card__title" style="margin-bottom:6px">Talking points</div>
+        ${d.brief?`<div style="font-size:12.5px;line-height:1.6">${d.brief.talkingPoints.map(t=>'• '+esc(t)).join('<br>')}<div class="muted" style="margin-top:6px">CTA: ${esc(d.brief.cta)}${d.promoCode?' · code '+esc(d.promoCode):''}</div></div><button class="btn btn--ghost btn--sm" style="margin-top:10px" onclick="openBrief('${d.id}')">Edit</button>`
+          :`<div class="help">No talking points yet, so reads can't be self-checked.</div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn--dark btn--sm" onclick="requestCopy('${d.id}')">Ask for copy</button><button class="btn btn--ghost btn--sm" onclick="openBrief('${d.id}')">Add</button></div>`}
+        ${d.reportNote?`<div class="dhead">Note on the report</div><div style="font-size:12.5px">${esc(d.reportNote)}</div>`:''}</div>
+    </div>
+    <div class="dhead" style="margin:22px 2px 8px">Reads</div>
+    <div class="listcard"><div class="dv-head"><span>Ad</span><span>Day</span><span>Ran</span><span>Delivered</span><span>Pacing</span><span></span><span>Status</span><span></span></div>${reads.map(dvRow).join('')}</div>
+  </div>`;
+  $('view-campaign').innerHTML=gate('delivery', html);
+};
+
 /* ════════ BOOT ════════ */
 (function init(){
   const ws=seedDemo(); WORKSPACES[ws.id]=ws; S=ws;
@@ -2941,6 +2995,7 @@ function simpleStatus(d){ const c=dealSummary(d), ist=invStatus(d.invoice);
   if(h==='onboarding') openOnboarding();
   if(h==='storefront') openStorefront();
   if(h.startsWith('report-')) openReport('d_'+h.slice(7), false);
+  if(h.startsWith('campaign-')) openCampaign('d_'+h.slice(9));
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if($('drawer').classList.contains('open')||$('modal').classList.contains('open')) closeOverlays(); else if($('report').classList.contains('open')) closeReport(); else if($('storefront').classList.contains('open')) closeStorefront(); } });
 })();
 </script>
