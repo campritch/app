@@ -960,6 +960,12 @@
   .scard__more-sum::-webkit-details-marker { display:none; }
   .scard__more-sum:hover { background:var(--secondary); border-color:var(--secondary); }
   .scard__more[open] .scard__more-sum { margin-bottom:10px; }
+  .scard__fold { border-top:1px solid var(--border-light); margin-top:10px; }
+  .scard__fold-sum { list-style:none; cursor:pointer; display:flex; align-items:center; gap:10px; padding:12px 2px 2px; font-size:13px; font-weight:700; color:var(--text-primary); user-select:none; }
+  .scard__fold-sum::-webkit-details-marker { display:none; }
+  .scard__fold-n { font-size:11.5px; font-weight:600; color:var(--text-tertiary); }
+  .scard__fold-chev { margin-left:auto; color:var(--text-tertiary); transition:transform .18s ease; }
+  .scard__fold[open] .scard__fold-chev { transform:rotate(180deg); }
   .scard__subs { display:flex; flex-direction:column; gap:8px; margin-top:12px; }
   .scard__sub { background:var(--white); display:flex; align-items:center; gap:12px; border:1px solid var(--border); border-radius:10px; padding:10px 13px; }
   .scard__sub-main { flex:1; min-width:0; }
@@ -1321,12 +1327,15 @@
         <div class="scard__tile"><span class="l">Read</span><span class="v">${sc.read}</span></div>
         <div class="scard__tile"><span class="l">Place</span><span class="v">${ordinal(sc.place)}</span></div>
       </div>
-      <div class="scard__subs">
-        ${scSub('Ad Length', sc.subs.adLength)}
-        ${scSub('Ad Personalization', sc.subs.personalization)}
-        ${scSub('Positioning', sc.subs.positioning)}
-        ${scSub('Share of voice', sc.subs.sov)}
-      </div>
+      <details class="scard__fold">
+        <summary class="scard__fold-sum"><span>Scorecard breakdown</span><span class="scard__fold-n">4 dimensions</span><svg class="scard__fold-chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>
+        <div class="scard__subs">
+          ${scSub('Ad Length', sc.subs.adLength)}
+          ${scSub('Ad Personalization', sc.subs.personalization)}
+          ${scSub('Positioning', sc.subs.positioning)}
+          ${scSub('Share of voice', sc.subs.sov)}
+        </div>
+      </details>
     </div>`;
   }
 
