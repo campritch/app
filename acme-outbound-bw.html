@@ -160,7 +160,7 @@
     .bulkbar__all input, .bl-cb { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
     .bulkbar__count { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; min-width: 74px; }
     .bulkbar__grow { display: flex; align-items: center; gap: 8px; margin: 0 auto; flex-wrap: wrap; }
-    .dbtools__sel { font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text-primary); background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor: pointer; box-shadow: var(--shadow-btn); }
+    .dbtools__sel { font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text-primary); background-color: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 8px 34px 8px 12px; cursor: pointer; box-shadow: var(--shadow-btn); appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23707481' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>"); background-repeat: no-repeat; background-position: right 11px center; }
     .dbtools__in { font-family: inherit; font-size: 14px; color: var(--text-primary); background: var(--white); border: 0; border-radius: 8px; padding: 7px 11px; width: 190px; max-width: 40vw; box-shadow: inset 0 0 0 1px var(--border), var(--shadow-btn); }
     .dbtools__in:focus { outline: none; box-shadow: inset 0 0 0 1.5px var(--text-primary), var(--shadow-btn); }
     .dbtools__btn { border: 1px solid var(--border); background: var(--white); color: var(--text-primary); border-radius: 8px; padding: 7px 13px; font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; }
@@ -628,7 +628,7 @@
             <input class="chipin__in" id="brand-input" placeholder="e.g. Kroger" onkeydown="brandKey(event)" />
           </div>
         </div>
-        <div class="fld__note">Type a brand name and press Enter. We match the website automatically. <button type="button" class="linklike" onclick="toggleBulkImport()">Paste a list</button>, or import from CSV, HubSpot or Magellan.</div>
+        <div class="fld__note">Type a brand name and press Enter. We match the website automatically. <button type="button" class="linklike" onclick="toggleBulkImport()">Paste a list</button>, or import from CSV or HubSpot.</div>
         <div class="bulk" id="bulkImport" hidden>
           <textarea id="bulk-in" class="fld__in" rows="3" placeholder="Paste brand names, one per line or comma-separated"></textarea>
           <button type="button" class="abtn abtn--dark" style="margin-top:8px" onclick="bulkAddBrands()">Add all</button>
@@ -637,7 +637,7 @@
 
       <div class="panel">
         <div class="panel__head"><span class="panel__title">The pitch</span></div>
-        <div class="fld__note" style="margin:0 0 12px">These feed the hook. The agent combines them with signals about each brand (recent campaigns, LinkedIn, Magellan) to write a message tied to the content, not our company stats.</div>
+        <div class="fld__note" style="margin:0 0 12px">These feed the hook. The agent combines them with signals about each brand (recent campaigns and LinkedIn) to write a message tied to the content, not our company stats.</div>
         <label class="fld">
           <span class="fld__label">Talent / shows / content we're leading with <span style="color:var(--accent)">*</span></span>
           <input id="in-talent" class="fld__in" value="Cam Newton, 4th & 1" placeholder="e.g. Cam Newton, or our top NBA shows" />
@@ -901,7 +901,7 @@ Would love to walk you through it. Worth a quick chat?</textarea>
 
     /* ─── message templates: the voice + the frames the agent writes to ─── */
     const MSG_VARS = ["{{first_name}}","{{brand}}","{{talent}}","{{moment}}","{{integration}}","{{signal}}"];
-    let MSG_PROMPT = "Write like a Acme Network seller: warm, specific, short. American spelling, no em-dashes. Open with a signal about the brand (a recent campaign, LinkedIn post or Magellan spend). Then tie to the specific content, talent and moment we're pitching from the campaign (for example Cam Newton's HBCU tour), and the integration, what's in it for the brand (official partner, branded activation, custom host-read). Do NOT lead with company metrics like show count or downloads. Keep LinkedIn notes under 300 characters. No unsubscribe footer. End on a light ask like 'Worth a quick chat?'";
+    let MSG_PROMPT = "Write like a Acme Network seller: warm, specific, short. American spelling, no em-dashes. Open with a signal about the brand (a recent campaign or LinkedIn post). Then tie to the specific content, talent and moment we're pitching from the campaign (for example Cam Newton's HBCU tour), and the integration, what's in it for the brand (official partner, branded activation, custom host-read). Do NOT lead with company metrics like show count or downloads. Keep LinkedIn notes under 300 characters. No unsubscribe footer. End on a light ask like 'Worth a quick chat?'";
     let MSG_TEMPLATES = [
       { id:"m1", name:"Signal + integration", when:"The default. Open on a brand signal, tie to the talent, moment and integration.",
         subject:"{{moment}}: {{brand}} as official partner",
@@ -990,15 +990,15 @@ Would love to walk you through it. Worth a quick chat?</textarea>
     /* ─── Brand database: every brand we know about. Sourced leads land here un-worked,
        waiting to be pulled into the pipeline (worked=false). ─── */
     const SOURCED_SEED = [
-      { brand:"Buffalo Wild Wings", cat:"QSR", domain:"buffalowildwings.com", source:"Magellan" },
-      { brand:"Dr Pepper", cat:"Beverage", domain:"drpepper.com", source:"Magellan" },
+      { brand:"Buffalo Wild Wings", cat:"QSR", domain:"buffalowildwings.com", source:"HubSpot" },
+      { brand:"Dr Pepper", cat:"Beverage", domain:"drpepper.com", source:"LinkedIn" },
       { brand:"Progressive", cat:"Insurance", domain:"progressive.com", source:"HubSpot" },
       { brand:"Bose", cat:"Consumer Tech", domain:"bose.com", source:"LinkedIn" },
-      { brand:"Chipotle", cat:"QSR", domain:"chipotle.com", source:"Magellan" },
+      { brand:"Chipotle", cat:"QSR", domain:"chipotle.com", source:"ChatGPT" },
       { brand:"Rocket Mortgage", cat:"Fintech", domain:"rocketmortgage.com", source:"SellerCrowd" },
       { brand:"Prime Hydration", cat:"Sports Drink", domain:"drinkprime.com", source:"ChatGPT" },
       { brand:"Dollar Shave Club", cat:"Grooming", domain:"dollarshaveclub.com", source:"HubSpot" },
-      { brand:"Bud Light", cat:"Beverage", domain:"budlight.com", source:"Magellan" },
+      { brand:"Bud Light", cat:"Beverage", domain:"budlight.com", source:"SellerCrowd" },
       { brand:"Fanatics", cat:"Apparel", domain:"fanatics.com", source:"LinkedIn" },
     ];
     let leadIdSeq = 0;
