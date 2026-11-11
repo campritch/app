@@ -775,12 +775,13 @@
   .mg-opt__d { font-size:11.5px; color:var(--text-secondary); font-weight:500; margin-top:3px; line-height:1.4; }
   /* YouTube engaged-views integration */
   .mshowwrap { display:flex; align-items:center; gap:9px; }
-  .yt-pill { display:inline-flex; align-items:center; gap:4px; font-family:inherit; font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:999px; border:1px solid var(--border); background:var(--white); cursor:pointer; flex-shrink:0; white-space:nowrap; }
-  .yt-pill--none { color:var(--text-secondary); }
+  .yt-pill { display:inline-flex; align-items:center; gap:5px; font-family:inherit; font-size:11px; font-weight:600; padding:4px 9px; border-radius:7px; border:none; box-shadow:inset 0 0 0 1px var(--border); background:var(--white); color:var(--text-secondary); cursor:pointer; flex-shrink:0; white-space:nowrap; transition:box-shadow .12s, color .12s; }
+  .yt-pill svg { width:12px; height:12px; }
   .yt-pill--none svg { color:#FF0000; }
-  .yt-pill--none:hover { border-color:#FF0000; color:#FF0000; }
-  .yt-pill--pending { color:var(--orange-text); background:var(--orange-bg); border-color:transparent; }
-  .yt-pill--on { color:var(--green-text); background:var(--green-bg); border-color:transparent; }
+  .yt-pill--none:hover { box-shadow:inset 0 0 0 1px #FF0000; color:#FF0000; }
+  .yt-pill--pending { color:var(--orange-text); background:var(--orange-bg); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--orange-text) 24%, transparent); }
+  .yt-pill--on { color:var(--green-text); background:var(--green-bg); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--green-text) 24%, transparent); }
+  .yt-pill--on svg { color:var(--green-text); }
   .yt-status { display:flex; gap:11px; align-items:flex-start; padding:13px 15px; border-radius:12px; margin-bottom:18px; }
   .yt-status svg { width:18px; height:18px; flex-shrink:0; margin-top:1px; }
   .yt-status b { font-size:13px; display:block; } .yt-status small { font-size:11.5px; color:var(--text-secondary); display:block; margin-top:2px; line-height:1.4; }
