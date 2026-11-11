@@ -95,7 +95,7 @@
     .nav-item .dot { display: none; }
     @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(63,184,124,.5);} 70%{box-shadow:0 0 0 5px rgba(63,184,124,0);} 100%{box-shadow:0 0 0 0 rgba(63,184,124,0);} }
 
-    .sb-foot { margin-top: auto; padding-top: 12px; }
+    .sb-foot { margin-top: auto; padding-top: 12px; position: relative; }
     .sb-powered { display: flex; align-items: center; gap: 8px; padding: 8px 10px; margin-bottom: 4px; font-size: 11px; font-weight: 600; color: var(--text-tertiary); width: 100%; border: none; background: none; font-family: inherit; text-align: left; border-radius: 9px; cursor: pointer; transition: background .12s; }
     .sb-powered:hover { background: var(--nav-hover); color: var(--text-secondary); }
     .sb-powered.active { background: var(--nav-current); color: var(--text-secondary); }
@@ -107,6 +107,15 @@
     .sb-user__av { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 12px; flex-shrink: 0; }
     .sb-user__name { color: var(--text-primary); font-size: 12.5px; font-weight: 700; line-height: 1.2; }
     .sb-user__sub { color: var(--text-tertiary); font-size: 11px; font-weight: 500; }
+    .sb-user { cursor: pointer; transition: background .12s; }
+    .sb-user:hover { background: var(--nav-hover); }
+    .sb-user__chev { color: var(--text-tertiary); margin-left: auto; flex-shrink: 0; transition: transform .18s ease; }
+    .sb-user.open .sb-user__chev { transform: rotate(180deg); }
+    .addons-menu { position: absolute; left: 8px; right: 8px; bottom: 62px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 32px rgba(14,19,35,.16); padding: 7px; z-index: 50; }
+    .addons-menu__t { font-size: 10.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--text-tertiary); padding: 6px 8px 5px; }
+    .addons-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .addons-row:hover { background: var(--secondary-lite); }
+    .addons-row input { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
 
     /* ─── MAIN ─── */
     .main { flex: 1; height: 100vh; position: relative; overflow: hidden; }
@@ -384,12 +393,19 @@
 
     <div class="sb-foot">
       <button class="sb-powered" data-view="spotsnow" onclick="switchView('spotsnow')"><span class="smark">S</span>Powered by <b>SpotsNow</b></button>
-      <div class="sb-user">
+      <div class="addons-menu" id="addonsMenu" hidden>
+        <div class="addons-menu__t">Add-ons · show in nav</div>
+        <label class="addons-row" onclick="event.stopPropagation()"><span>Inventory Agent</span><input type="checkbox" checked onchange="toggleAddon('inventory',this.checked)"></label>
+        <label class="addons-row" onclick="event.stopPropagation()"><span>Vetting Agent</span><input type="checkbox" checked onchange="toggleAddon('vetting',this.checked)"></label>
+        <label class="addons-row" onclick="event.stopPropagation()"><span>Outbound</span><input type="checkbox" checked onchange="toggleAddon('outbound',this.checked)"></label>
+      </div>
+      <div class="sb-user" id="sbUser" onclick="toggleAddonsMenu(event)" title="Manage add-ons">
         <div class="sb-user__av">CP</div>
-        <div>
+        <div style="min-width:0">
           <div class="sb-user__name">Cam Pritchard</div>
           <div class="sb-user__sub">Acme Network</div>
         </div>
+        <svg class="sb-user__chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg>
       </div>
     </div>
   </nav>
@@ -724,6 +740,16 @@ Slots like this tend to move fast once the category opens up. Want me to put tog
 
   <script>
     /* ─── view switching ─── */
+    function toggleAddonsMenu(e){ if(e) e.stopPropagation();
+      var m=document.getElementById('addonsMenu'), u=document.getElementById('sbUser');
+      var open=m.hasAttribute('hidden'); if(open){ m.removeAttribute('hidden'); u.classList.add('open'); } else { m.setAttribute('hidden',''); u.classList.remove('open'); } }
+    function closeAddonsMenu(){ var m=document.getElementById('addonsMenu'), u=document.getElementById('sbUser'); if(m){ m.setAttribute('hidden',''); } if(u){ u.classList.remove('open'); } }
+    function toggleAddon(view,on){
+      // show/hide the add-on's nav item (and its subnav); if hiding the active view, fall back to Network HQ
+      document.querySelectorAll('[data-view="'+view+'"]').forEach(function(n){ n.style.display = on ? '' : 'none'; });
+      var sub=document.getElementById('subnav-'+view); if(sub && !on) sub.hidden=true;
+      if(!on){ var el=document.getElementById('view-'+view); if(el && el.classList.contains('active')) switchView('home'); } }
+    document.addEventListener('click', function(e){ var m=document.getElementById('addonsMenu'); if(m && !m.hasAttribute('hidden') && !e.target.closest('#addonsMenu') && !e.target.closest('#sbUser')) closeAddonsMenu(); });
     function switchView(name){
       document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
       const view = document.getElementById('view-'+name);
