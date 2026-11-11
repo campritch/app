@@ -339,6 +339,8 @@
     .acsug { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:14px; }
     .acsug__chip { font:inherit; font-size:12.5px; font-weight:600; color:var(--text-secondary); background:var(--white); border:1px solid var(--border); border-radius:999px; padding:7px 14px; cursor:pointer; transition:transform .14s, box-shadow .14s, color .14s, border-color .14s; box-shadow:var(--shadow-btn); }
     .acsug__chip:hover { color:var(--text-primary); border-color:var(--border-strong); box-shadow:var(--shadow-card); transform:translateY(-1px); }
+    /* while a conversation is active, the chat takes over - hide the reminder/tile dashboard */
+    .inner--chatting .cc-rem, .inner--chatting .tiles { display:none; }
     .askwrap__go { position:absolute; right:9px; top:50%; transform:translateY(-50%); width:36px; height:36px; border-radius:9px; border:none; background:var(--primary); color:#fff; display:grid; place-items:center; }
 
     /* ─── MANAGE SHOWS GRID (ported from inventory-demo3) ─── */
@@ -1772,7 +1774,7 @@
   RENDER.overview = () => {
     const work=workList();
     document.getElementById('view-overview').innerHTML=`
-    <div class="inner" style="max-width:940px;padding-top:8px">
+    <div class="inner${CHATS.length?' inner--chatting':''}" style="max-width:940px;padding-top:8px">
       <div class="hero">
         <h1>Command Center</h1>
         <p>Ask anything about the network — delivery pacing, what needs a make good, which guarantees are running hot. Answered off the system and the ad server.</p>
@@ -1796,7 +1798,7 @@
         <div class="thread__hd"><span>Conversation</span><button onclick="newChat()">Clear</button></div>
         ${CHATS.map(c=>`<div class="turn"><div class="turn__q">${esc(c.q)}</div><div class="turn__a">${c.a}</div></div>`).join('')}
       </div>`:''}
-      <div style="max-width:720px;margin:18px auto 0;text-align:left">
+      <div class="cc-rem" style="max-width:720px;margin:18px auto 0;text-align:left">
         ${work.checks||''}
         ${REMINDERS.map(rm=>`<div class="wnote" ${rm.link?`onclick="go('${rm.link}')"`:''} style="${REMINDERS.length||work.checks?'margin-top:8px':''}">
           <span class="wnote__body"><b>Reminder</b><span class="wnote__txt" title="${esc(rm.text)}">${esc(rm.text)}</span>${rm.link?`<span class="tag tag--grey" style="margin-left:8px;flex-shrink:0">${({delivery:'Delivery',portal:'Campaign Portal',shows:'Shows'})[rm.link]}</span>`:''}</span>
@@ -2486,7 +2488,7 @@
               <div class="rpt-hero__name2">${esc(d.brand)}</div>
               <div class="rpt-hero__sub">${esc(c.title)} · ${flight} · ${shows.length} show${shows.length>1?'s':''} on Acme Network</div>
             </div>
-            <span class="rpt-status ${heroTone(c)}">${heroLabel(c,mgsBonus)}</span>
+            ${heroTone(c)==='green'?`<span class="rpt-status green">${heroLabel(c,mgsBonus)}</span>`:''}
           </div>
         </div>
       </div>
