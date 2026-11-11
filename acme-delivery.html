@@ -701,6 +701,12 @@
   .rpt-note--show p { margin:0; font-size:14px; line-height:1.55; color:var(--text-primary); font-weight:500; }
   .rpt-note__lbl { font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:7px; display:flex; align-items:center; gap:8px; }
   .rpt-note__lbl span { text-transform:none; letter-spacing:0; font-weight:500; font-size:11px; }
+  .rpt-note--fold { margin-top:16px; }
+  .rpt-note__sum { list-style:none; cursor:pointer; display:flex; align-items:center; gap:8px; user-select:none; padding:2px 0; }
+  .rpt-note__sum::-webkit-details-marker { display:none; }
+  .rpt-note__chev { margin-left:auto; color:var(--text-tertiary); transition:transform .18s ease; }
+  .rpt-note--fold[open] .rpt-note__chev { transform:rotate(180deg); }
+  .rpt-note--fold .rpt-note__in { margin-top:7px; }
   .rpt-note__in { width:100%; font:inherit; font-size:13.5px; line-height:1.5; border:1px solid var(--border); border-radius:10px; padding:10px 12px; background:var(--white); color:var(--text-primary); resize:vertical; }
   .rpt-note__in:focus { outline:none; border-color:var(--text-primary); }
   /* per-episode note - shows on the read row without expanding */
@@ -2368,7 +2374,7 @@
     s6:"Strong placement, but the read came in a touch short on the disclaimer. Covered by the make-good read we've queued."
   };
   const REPORT_CFG = {};
-  function rcfg(id){ return REPORT_CFG[id] || (REPORT_CFG[id] = { metric:'impr', graph:true, next:true, reads:true, msg:(REPORT_MSG_SEED[id]||'') }); }
+  function rcfg(id){ return REPORT_CFG[id] || (REPORT_CFG[id] = { metric:'impr', graph:true, next:true, reads:true, audio:true, msg:(REPORT_MSG_SEED[id]||'') }); }
   // Campaign-level: is this campaign judged on total impressions (+ audio) or on YouTube
   // engaged views? Operators pick it per campaign; the brand's share view shows it as a label.
   function setMetric(id,m){ rcfg(id).metric=m; redrawReport(id); refreshShare(id); }
@@ -2380,7 +2386,6 @@
         <button class="rpt-seg__b ${eng?'':'on'}" onclick="setMetric('${id}','impr')">Impressions + audio</button>
         <button class="rpt-seg__b ${eng?'on':''}" onclick="setMetric('${id}','engaged')">${yt}Engaged views</button>
       </div>
-      <span class="rpt-metric__hint">${eng?'This campaign is graded on YouTube engaged views — how YouTube inventory is bought now.':'This campaign is graded on total impressions, with audio downloads folded in.'}</span>
     </div>`; }
   const READ_MSG = Object.assign({}, READ_MSG_SEED);
   let SHARE_MODE = false;
@@ -2462,13 +2467,13 @@
       <div class="rpt-pad">
         <!-- CAMPAIGN NOTE -->
         ${OP
-          ? `<div class="rpt-note"><div class="rpt-note__lbl">Campaign note</div><textarea class="rpt-note__in" rows="2" placeholder="Add a short note for ${esc(d.brand)} — context on how the campaign is tracking." oninput="setCampaignMsg('${d.id}',this.value)">${esc(cfg.msg)}</textarea></div>`
+          ? `<details class="rpt-note--fold" ${cfg.msg?'open':''}><summary class="rpt-note__sum"><span class="rpt-note__lbl" style="margin:0">Campaign note</span><svg class="rpt-note__chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></summary><textarea class="rpt-note__in" rows="2" placeholder="Add a short note for ${esc(d.brand)}" oninput="setCampaignMsg('${d.id}',this.value)">${esc(cfg.msg)}</textarea></details>`
           : (cfg.msg?`<div class="rpt-note rpt-note--show" style="margin-top:20px"><p>${esc(cfg.msg)}</p></div>`:'')}
 
         <!-- REPORT CONTROLS (operator only) — bare toggles for what shows on the report -->
         ${OP?`<div class="rpt-ctrls">
           ${reportSwitch(d.id,'graph','Delivery chart')}
-          ${reportSwitch(d.id,'next',"What's next")}
+          ${reportSwitch(d.id,'audio','Audio reach')}
         </div>`:''}
 
         <!-- DELIVERY METRIC (campaign-level) -->
@@ -2486,7 +2491,7 @@
               <div class="rpt-tile"><div class="rpt-tile__l">Delivered CPM</div><div class="rpt-tile__v">${headline?'$'+cpmShown.toFixed(2):'N/A'}</div></div>
               <div class="rpt-tile"><div class="rpt-tile__l">Verified reads</div><div class="rpt-tile__v">${verified}/${paidCount}</div></div>
               <div class="rpt-tile"><div class="rpt-tile__l">YouTube reach</div><div class="rpt-tile__v">${yt?K(yt):'N/A'}</div></div>
-              <div class="rpt-tile"><div class="rpt-tile__l">Audio reach</div><div class="rpt-tile__v">${audioMax&&aud?K(aud):'N/A'}</div></div>
+              ${cfg.audio!==false?`<div class="rpt-tile"><div class="rpt-tile__l">Audio reach</div><div class="rpt-tile__v">${audioMax&&aud?K(aud):'N/A'}</div></div>`:''}
             </div>
           </div>
           ${graphOn?`<div class="rpt-chart">${brandDealChart(ccShown)}
