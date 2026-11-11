@@ -1792,6 +1792,10 @@
           <button class="acsug__chip" onclick="askSug('What is behind on pacing?')">What's behind on pacing?</button>
         </div>`}
       </div>
+      ${CHATS.length?`<div class="thread" style="margin-top:20px">
+        <div class="thread__hd"><span>Conversation</span><button onclick="newChat()">Clear</button></div>
+        ${CHATS.map(c=>`<div class="turn"><div class="turn__q">${esc(c.q)}</div><div class="turn__a">${c.a}</div></div>`).join('')}
+      </div>`:''}
       <div style="max-width:720px;margin:18px auto 0;text-align:left">
         ${work.checks||''}
         ${REMINDERS.map(rm=>`<div class="wnote" ${rm.link?`onclick="go('${rm.link}')"`:''} style="${REMINDERS.length||work.checks?'margin-top:8px':''}">
@@ -1819,10 +1823,6 @@
           ${t('Make goods open',mgOpen,'waiting on a date or position',"delTab='mg';go('delivery')")}
           ${t('Campaigns under',under,'projecting below the 90% line',"go('portal')")}
         </div>`; })()}
-      ${CHATS.length?`<div class="thread">
-        <div class="thread__hd"><span>Conversation</span><button onclick="newChat()">Clear</button></div>
-        ${CHATS.map(c=>`<div class="turn"><div class="turn__q">${esc(c.q)}</div><div class="turn__a">${c.a}</div></div>`).join('')}
-      </div>`:''}
     </div>`;
     const el=document.querySelector('.view.active #acAsk'); if(el&&CHATS.length) el.focus();
   };
