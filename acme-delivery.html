@@ -552,6 +552,12 @@
   .rpt-read__logo { width:40px; height:40px; border-radius:2px; display:grid; place-items:center; color:#fff; font-weight:700; font-size:13px; flex-shrink:0; }
   .rpt-read__main { flex:1; min-width:0; }
   .rpt-read__show { font-size:13.5px; font-weight:700; }
+  .rpt-read__show--link { cursor:pointer; display:inline-block; }
+  .rpt-read__show--link:hover { text-decoration:underline; }
+  .rpt-read__expand { border:none; background:none; cursor:pointer; color:var(--text-tertiary); padding:5px; border-radius:8px; display:grid; place-items:center; flex-shrink:0; }
+  .rpt-read__expand svg { width:17px; height:17px; transition:transform .18s ease; }
+  .rpt-read__expand:hover { background:var(--page-bg); color:var(--text-primary); }
+  .rpt-read__expand.open svg { transform:rotate(180deg); }
   .rpt-read__ep { font-size:11.5px; color:var(--text-secondary); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .rpt-read__imp { text-align:right; flex-shrink:0; }
   .rpt-read__imp b { font-size:14px; font-weight:700; }
@@ -2380,10 +2386,10 @@
   function setMetric(id,m){ rcfg(id).metric=m; redrawReport(id); refreshShare(id); }
   function metricSel(id,OP){ var m=rcfg(id).metric||'impr', eng=m==='engaged';
     var yt='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12s-3-7-10-7-10 7-10 7 3 7 10 7 10-7 10-7Z"/><path d="M10 9l5 3-5 3Z" fill="currentColor"/></svg>';
-    if(!OP) return `<div class="rpt-metric"><span class="rpt-metric__lbl">Measured by</span><span class="rpt-metric__val">${eng?'YouTube engaged views':'Impressions + audio'}</span></div>`;
+    if(!OP) return `<div class="rpt-metric"><span class="rpt-metric__lbl">Measured by</span><span class="rpt-metric__val">${eng?'YouTube engaged views':'Total views'}</span></div>`;
     return `<div class="rpt-metric"><span class="rpt-metric__lbl">Measure delivery by</span>
       <div class="rpt-seg">
-        <button class="rpt-seg__b ${eng?'':'on'}" onclick="setMetric('${id}','impr')">Impressions + audio</button>
+        <button class="rpt-seg__b ${eng?'':'on'}" onclick="setMetric('${id}','impr')">Total views</button>
         <button class="rpt-seg__b ${eng?'on':''}" onclick="setMetric('${id}','engaged')">${yt}Engaged views</button>
       </div>
     </div>`; }
@@ -2483,7 +2489,7 @@
         <div class="rpt-deliv${graphOn?'':' rpt-deliv--nochart'}" style="margin-top:14px">
           <div class="rpt-dcol">
             <div class="rpt-dark">
-              <div class="rpt-dark__l">${audioMax?'Impressions delivered':'Engaged views delivered'}</div>
+              <div class="rpt-dark__l">${audioMax?'Total views delivered':'Engaged views delivered'}</div>
               <div class="rpt-dark__v">${K(headline)}</div>
               <div class="rpt-dark__s">of ${K(booked)} booked · ${c.done?pctOf(headline,booked)+'% delivered':pctShown+'% pacing'} · ${K(Math.max(0,booked-headline))} to go</div>
             </div>
@@ -2569,6 +2575,9 @@
   function savePixel(id){ var f=document.getElementById('pxin-'+id); var v=(f&&f.value.trim())||`<img src="https://px.acme.net/p?rid=${id}" width="1" height="1"/>`;
     PIXEL[id]=v; var el=document.getElementById('px-'+id); if(el){ el.innerHTML=pixelCtrl(spot(id)); var card=el.closest('.rpt-read'); var hp=card&&card.querySelector('.rpt-read__px'); if(hp){ hp.classList.add('on'); hp.firstChild&&(hp.lastChild.textContent='Pixel'); } }
     toast('Pixel added — now firing on every verified read.'); }
+  function toggleReadOpen(c){ if(!c) return; var o=c.classList.toggle('open');
+    var va=c.querySelector('.rpt-viewad span'); if(va) va.textContent=o?'Hide ad':'View ad';
+    var ch=c.querySelector('.rpt-read__expand'); if(ch) ch.classList.toggle('open',o); }
   function readCard(s,d){
     const pr=projection(s), vr=(s.status==='verified'&&s.yt);
     const dpct=Math.round(pr.got/Math.max(s.guarantee,1)*100);
@@ -2587,13 +2596,13 @@
       <div class="rpt-read__head rpt-read__head--static">
         <div class="rpt-read__logo" style="background:${brandCol(d.brand)}">${initials(show(s.showId).name)}</div>
         <div class="rpt-read__main">
-          <div class="rpt-read__show">${esc(show(s.showId).name)}</div>
+          <div class="rpt-read__show rpt-read__show--link" onclick="event.stopPropagation();window.open('https://www.youtube.com/${show(s.showId).channel}','_blank')" title="Open ${esc(show(s.showId).name)} on YouTube">${esc(show(s.showId).name)}</div>
           <div class="rpt-read__ep">${esc(ep)} · ${adSecs(s)}s ${isVideo?'video':'audio'} read</div>
           ${!SHARE_MODE
             ? `<input class="rpt-read__note--edit" value="${esc(READ_MSG[s.id]||'')}" placeholder="+ note for this episode (${esc(d.brand)} sees it)" oninput="setReadMsg('${s.id}',this.value)" onclick="event.stopPropagation()">`
             : (READ_MSG[s.id]?`<div class="rpt-read__note"><b>Note:</b> ${esc(READ_MSG[s.id])}</div>`:'')}
         </div>
-        <button class="rpt-viewad" onclick="var c=this.closest('.rpt-read');var o=c.classList.toggle('open');this.querySelector('span').textContent=o?'Hide ad':'View ad'"><span>View ad</span><svg class="rpt-viewad__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <button class="rpt-viewad" onclick="event.stopPropagation();toggleReadOpen(this.closest('.rpt-read'))"><span>View ad</span></button>
         <div class="rpt-read__dates">
           <div class="rpt-read__dt"><span>Booked</span>${fmtDate(booked)}</div>
           <div class="rpt-read__dt"><span>Aired</span>${fmtDate(s.published)}</div>
@@ -2603,6 +2612,7 @@
           ${vr?`<span class="rpt-vbadge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Verified</span>`:`<span class="rpt-vbadge" style="background:var(--orange-bg);color:var(--orange-text)">On air</span>`}
         </div>
         <div class="rpt-read__ring" title="${dpct}% delivered">${ring(dpct,{size:40,thick:5,color:rcol})}</div>
+        <button class="rpt-read__expand" onclick="event.stopPropagation();toggleReadOpen(this.closest('.rpt-read'))" title="Expand read"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
       </div>
       <div class="rpt-ad">
         <div class="rpt-ad__media">${media}</div>
