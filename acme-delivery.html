@@ -502,7 +502,16 @@
   .rpt-btn--solid:hover { background:#f0f0f0; }
   .rpt-btn svg { width:14px; height:14px; }
 
-  .rpt-deliv { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:20px; margin-top:16px; background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:20px 22px; align-items:stretch; }
+  .rpt-deliv { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.1fr); gap:16px; margin-top:16px; align-items:stretch; }
+  .rpt-dcol { display:flex; flex-direction:column; gap:12px; }
+  .rpt-dark { background:var(--primary); color:#fff; border-radius:16px; padding:20px 22px; }
+  .rpt-dark__l { font-size:14px; font-weight:600; }
+  .rpt-dark__v { font-size:42px; font-weight:800; letter-spacing:-.04em; margin-top:6px; line-height:1.03; }
+  .rpt-dark__s { font-size:13px; color:rgba(255,255,255,.72); font-weight:500; margin-top:8px; }
+  .rpt-tiles { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .rpt-tile { border:1px solid var(--border); border-radius:14px; padding:15px 17px; background:var(--white); }
+  .rpt-tile__l { font-size:12.5px; font-weight:600; color:var(--text-secondary); }
+  .rpt-tile__v { font-size:28px; font-weight:800; letter-spacing:-.03em; margin-top:7px; font-variant-numeric:tabular-nums; }
   @media (max-width:760px){ .rpt-deliv { grid-template-columns:1fr; } }
   @media (max-width:760px){ .rpt-deliv{ grid-template-columns:1fr; } }
   .rpt-deliv__big { font-size:40px; font-weight:700; letter-spacing:-.04em; line-height:1; }
@@ -1058,7 +1067,7 @@
      where the audio downloads come from, and whether a make-good needs the
      show's sign-off or can just be scheduled. */
   const SHOWS = [
-    { id:'rubin',  name:'The Rubin Report', host:'Dave Rubin',    publishDays:['Mon','Tue','Wed','Thu','Fri'], epsPerWeek:5, positionsPerEp:4, curve:'medium', samples:46, simulcast:true,  audioSrc:'hosting', scanEvery:24, revShare:0.65, mgPolicy:'auto', guarantee:95000,  cpm:26, category:'Politics / Culture', channel:'@rubinreport',   src:'adserver' },
+    { id:'rubin',  name:'Huberman Labs', host:'Andrew Huberman',    publishDays:['Mon','Tue','Wed','Thu','Fri'], epsPerWeek:5, positionsPerEp:4, curve:'medium', samples:46, simulcast:true,  audioSrc:'hosting', scanEvery:24, revShare:0.65, mgPolicy:'auto', guarantee:95000,  cpm:26, category:'Health / Science', channel:'@hubermanlab',   src:'adserver' },
     { id:'sage',   name:'Sage Steele',      host:'Sage Steele',   publishDays:['Wed'],                         epsPerWeek:1, positionsPerEp:4, curve:'slow',   samples:19, simulcast:true,  audioSrc:'hosting', scanEvery:24, revShare:0.70, mgPolicy:'auto', guarantee:120000, cpm:28, category:'Sports / Culture',   channel:'@sagesteele',    src:'adserver' },
     { id:'warren', name:'Warren Smith',     host:'Warren Smith',  publishDays:['Tue','Thu'],                   epsPerWeek:2.5, positionsPerEp:3, curve:'fast', samples:23, simulcast:false, audioSrc:'none',    scanEvery:12, revShare:0.60, mgPolicy:'ask',  guarantee:85000,  cpm:24, category:'Interview',          channel:'@warrensmith',   src:'adserver' },
     { id:'action', name:'Action Friends',   host:'The Action crew',publishDays:['Fri'],                        epsPerWeek:1, positionsPerEp:3, curve:'quick',  samples:15, simulcast:false, audioSrc:'none',    scanEvery:24, revShare:0.60, mgPolicy:'ask',  guarantee:70000,  cpm:22, category:'Comedy',             channel:'@actionfriends', src:'adserver' },
@@ -2232,7 +2241,7 @@
       <div class="scanbar"><div class="scanbar__fill" id="scanFill"></div></div></div></div>`;
     const finds={ s11:{yt:'dQw4w9WgXcQ',ts:455,epLen:5380,views:9200,downloads:1400,copy:['Named the brand','Read promo code KALSHI','Free-trial CTA']},
                   s12:{yt:'ScMzIvxBSi4',ts:612,epLen:6100,views:31000,downloads:0,copy:['Named the brand','URL CTA']}, s13:{miss:true} };
-    const steps=['Scanning channels…','The Rubin Report posted 3h ago — pulling transcript…','Matching the read to the Kalshi copy…','Warren Smith posted 6h ago — reading views…','Nate has no episode yet — flagging…','Writing links + timestamps to the system…'];
+    const steps=['Scanning channels…','Huberman Labs posted 3h ago — pulling transcript…','Matching the read to the Kalshi copy…','Warren Smith posted 6h ago — reading views…','Nate has no episode yet — flagging…','Writing links + timestamps to the system…'];
     for(let i=0;i<steps.length;i++){ const l=q('#scanLabel'); if(l) l.textContent=steps[i];
       const p=Math.round((i+1)/steps.length*100); const f=q('#scanFill'); if(f) f.style.width=p+'%';
       const pc=q('#scanPct'); if(pc) pc.textContent=p+'%'; await sleep(560); }
@@ -2467,15 +2476,17 @@
 
         <!-- TRACKING -->
         <div class="rpt-deliv${graphOn?'':' rpt-deliv--nochart'}" style="margin-top:14px">
-          <div>
-            <div class="rpt-deliv__big">${K(headline)}</div>
-            <div class="rpt-deliv__of">of ${K(booked)} booked ${audioMax?'impressions':'engaged views'}</div>
-            <div class="rpt-deliv__pct green">${c.done?pctOf(headline,booked)+'% delivered':pctShown+'% pacing'}</div>
-            <div class="rpt-chips">
-              <div><div class="rpt-chip__l">Delivered CPM</div><div class="rpt-chip__v">$${cpmShown.toFixed(2)}</div></div>
-              <div><div class="rpt-chip__l">YouTube reach</div><div class="rpt-chip__v">${K(yt)}</div></div>
-              ${audioMax?`<div><div class="rpt-chip__l">Audio reach</div><div class="rpt-chip__v">${K(aud)}</div></div>`:''}
-              <div><div class="rpt-chip__l">Verified reads</div><div class="rpt-chip__v">${verified}/${paidCount}</div></div>
+          <div class="rpt-dcol">
+            <div class="rpt-dark">
+              <div class="rpt-dark__l">${audioMax?'Impressions delivered':'Engaged views delivered'}</div>
+              <div class="rpt-dark__v">${K(headline)}</div>
+              <div class="rpt-dark__s">of ${K(booked)} booked · ${c.done?pctOf(headline,booked)+'% delivered':pctShown+'% pacing'} · ${K(Math.max(0,booked-headline))} to go</div>
+            </div>
+            <div class="rpt-tiles">
+              <div class="rpt-tile"><div class="rpt-tile__l">Delivered CPM</div><div class="rpt-tile__v">${headline?'$'+cpmShown.toFixed(2):'N/A'}</div></div>
+              <div class="rpt-tile"><div class="rpt-tile__l">Verified reads</div><div class="rpt-tile__v">${verified}/${paidCount}</div></div>
+              <div class="rpt-tile"><div class="rpt-tile__l">YouTube reach</div><div class="rpt-tile__v">${yt?K(yt):'N/A'}</div></div>
+              <div class="rpt-tile"><div class="rpt-tile__l">Audio reach</div><div class="rpt-tile__v">${audioMax&&aud?K(aud):'N/A'}</div></div>
             </div>
           </div>
           ${graphOn?`<div class="rpt-chart">${brandDealChart(ccShown)}
