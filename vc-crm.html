@@ -793,7 +793,7 @@
         <button class="tab active" data-tab="funds">All funds <span class="count" id="cntFunds">0</span></button>
         <button class="tab" data-tab="targets">Targets <span class="count" id="cntTargets">0</span></button>
         <button class="tab" data-tab="needintros">Need intros <span class="count" id="cntNeedintros">0</span></button>
-        <button class="tab" data-tab="contacted">Contacted <span class="count" id="cntContacted">0</span></button>
+        <button class="tab" data-tab="contacted">Connected <span class="count" id="cntContacted">0</span></button>
         <button class="tab" data-tab="booked">Booked <span class="count" id="cntBooked">0</span></button>
         <button class="tab" data-tab="pitching">Pitching <span class="count" id="cntPitching">0</span></button>
         <button class="tab" data-tab="diligence">Diligence <span class="count" id="cntDiligence">0</span></button>
@@ -996,7 +996,7 @@ Dana Whitfield, Overline, worked together at Techstars,"></textarea>
     <span class="bulk-bar__count" id="bulkCount">0 selected</span>
     <button class="bulk-btn bulk-btn--coral bulk-fund" data-bulkstage="target">→ Targets</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="needintros">→ Need intros</button>
-    <button class="bulk-btn bulk-fund" data-bulkstage="contacted">→ Contacted</button>
+    <button class="bulk-btn bulk-fund" data-bulkstage="contacted">→ Connected</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="booked">→ Booked</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="pitching">→ Pitching</button>
     <button class="bulk-btn bulk-fund" data-bulkstage="diligence">→ Diligence</button>
@@ -1634,7 +1634,7 @@ const P_STATUS = {
 };
 const C_STATUS = { none:'Not asked', draft:'Ask drafted', asked:'Asked', agreed:'Agreed', declined:'Declined' };
 /* Fund pipeline stages — the core CRM flow. */
-const F_STAGES = { none:'Backlog', target:'\ud83c\udfaf Target', needintros:'\ud83e\udd1d Need intros', contacted:'\ud83d\udce8 Contacted', booked:'\u2705 Booked', pitching:'\ud83c\udfa4 Pitching', diligence:'\ud83d\udd2c Diligence', closed:'\u{1F44B} Passed', disqualified:'\ud83d\udeab Disqualified', future:'\u23f3 Future', won:'\u{1F91D} Closed', updates:'\ud83d\udcc8 Updates' };
+const F_STAGES = { none:'Backlog', target:'\ud83c\udfaf Target', needintros:'\ud83e\udd1d Need intros', contacted:'\ud83d\udcac Connected', booked:'\u2705 Booked', pitching:'\ud83c\udfa4 Pitching', diligence:'\ud83d\udd2c Diligence', closed:'\u{1F44B} Passed', disqualified:'\ud83d\udeab Disqualified', future:'\u23f3 Future', won:'\u{1F91D} Closed', updates:'\ud83d\udcc8 Updates' };
 // Backlog (stage 'none') has no dedicated tab - those funds live under All funds.
 // NOTE: internal key 'closed' is the "Passed" stage (they passed on us); 'won'
 // is the "Closed" stage (committed/invested). Kept this way to avoid migrating
