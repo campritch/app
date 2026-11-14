@@ -2177,6 +2177,7 @@ async function onDdChange(ctx, v){
     if (v === '__restore') {
       if (PARKED_STAGES.has(fs.stage)) delete fs.stage;   // back to active backlog
       delete fs.archiveReason;
+      delete fs.competitor; delete fs.competitorNote;      // competitors read as "past"; restoring clears the flag so the row un-grays
       (PEOPLE_BY_FUND[arg] || []).forEach(p => { if (PS(p.id).excluded) delete PS(p.id).excluded; });
       save();
       if (drawerRef && drawerRef.kind === 'connector') openConnector(drawerRef.id); else render();
@@ -4011,7 +4012,7 @@ function openConnector(id, preselect){
   // A door row is "archived" (gray, sunk to the bottom) when it's excluded, or
   // its fund is parked in a terminal/future stage - so a disqualified or
   // future-round fund never resurfaces as an active row on any connector.
-  const isDoorArch = p => isExcluded(p) || isParkedFund(FUND_BY_ID[p.fundId]);
+  const isDoorArch = p => { const f = FUND_BY_ID[p.fundId]; return isExcluded(p) || isParkedFund(f) || (f && isCompetitor(f)); };
   // Pull the sheet funds into the door matches (one representative person per
   // fund) so they render, grade, filter and export alongside everything else.
   const hidden = new Set(state.hiddenMatches[id] || []);   // bad-data rows deleted from this connector
@@ -4168,7 +4169,7 @@ function openConnector(id, preselect){
             <span class="cr-why" style="flex:1;min-width:0;margin:0 10px">${esc(fundWhyLine(f))}</span>
             <b style="flex-shrink:0;font-size:12.5px;width:42px;text-align:right" title="Fit against the deck">${pct}</b>
             ${prefDd}
-            <span class="cr-sub" style="flex-shrink:0;text-align:right">${grade(f)}${arch ? ' · Archived' + (reason ? ' (' + esc(reason) + ')' : '') : ' · ' + P_STATUS[pStatus(p)]}${(stg!=='none') ? ` · <span class="pill pill--type">${F_STAGES[stg]}</span>` : ''}</span>
+            <span class="cr-sub" style="flex-shrink:0;text-align:right">${grade(f)}${arch ? ' · ' + (reason ? 'Archived (' + esc(reason) + ')' : ((f && isCompetitor(f)) ? 'Competitor' : 'Archived')) : ' · ' + P_STATUS[pStatus(p)]}${(stg!=='none') ? ` · <span class="pill pill--type">${F_STAGES[stg]}</span>` : ''}</span>
             <button type="button" class="cr-deep${FS(f.id).deepGraded?' cr-deep--done':''}" data-rowdeep="${f.id}" title="${FS(f.id).deepGraded ? 'Re-run deep grade - web-verified fit read' : 'Deep grade: googles the fund and grades on its real recent deals, stage, check and portfolio'}">🔎</button>
             ${ddHtml({ ctx:'fstage:'+f.id, value: stg, kebab:true, quiet:true, trigger:'⋯', menuRight:true, title:'Move this fund to a stage', options: Object.entries(F_STAGES).map(([k,v]) => ({v:k,l:v})).concat([{v:'__site', l: f.site ? '🔗 Edit website' : '🔗 Add website'}, {v:'__delete', l:'🗑 Delete (bad data)'}]) })}
           </label>`;
