@@ -818,6 +818,7 @@
         <span id="sortDD"></span>
         <button class="btn-ghost" style="height:32px;font-size:12px" id="exportBtn">Export CSV</button>
         <button class="btn-ghost" style="height:32px;font-size:12px" id="exportPeopleBtn" title="One row per person, with their LinkedIn where we have it (blank where we don't), for the funds currently in view">Export people</button>
+        <button class="btn-ghost" style="height:32px;font-size:12px" id="exportWarmBtn" title="Warm funds (Connected, Booked, Pitching, Diligence by default) to a Google Sheet - pick your columns">Export warm funds</button>
       </div>
     </div>
 
@@ -5710,6 +5711,168 @@ $('exportPeopleBtn').addEventListener('click', () => {
   URL.revokeObjectURL(a.href);
   toast(`Exported ${lines.length - 1} people.`);
 });
+
+/* Export warm funds -> Google Sheets, with a column picker.
+   "Warm" = funds you're actively in it with (responded / pitching / in diligence).
+   No Google backend here, so we copy the rows as TSV and open a blank Google
+   Sheet - a single paste (Cmd/Ctrl+V) drops them in. CSV download is a fallback.
+   Filtering uses internal stage keys; labels come from F_STAGES. Spans ALL funds
+   regardless of the current tab, so it's a full warm-pipeline snapshot. */
+(function(){
+  const css = `
+.vcx-ov{position:fixed;inset:0;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}
+.vcx-card{background:#fff;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.25);width:100%;max-width:560px;max-height:88vh;overflow:auto;padding:20px}
+.vcx-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px}
+.vcx-title{font-size:16px;font-weight:700;color:#0f172a}
+.vcx-sub{font-size:12.5px;color:#64748b;margin-top:3px}
+.vcx-x{border:none;background:none;font-size:16px;color:#94a3b8;cursor:pointer;line-height:1}
+.vcx-lbl{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#94a3b8;margin:16px 0 8px}
+.vcx-chips{display:flex;flex-wrap:wrap;gap:7px}
+.vcx-chip{border:1px solid #e2e8f0;background:#fff;color:#334155;border-radius:999px;padding:5px 11px;font-size:12.5px;cursor:pointer;transition:all .12s}
+.vcx-chip:hover{border-color:#cbd5e1}
+.vcx-chip.on{background:#0f172a;border-color:#0f172a;color:#fff}
+.vcx-cols{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px}
+.vcx-col{display:flex;align-items:center;gap:8px;font-size:13px;color:#334155;cursor:pointer;padding:3px 0}
+.vcx-col input{width:15px;height:15px;cursor:pointer;accent-color:#0f172a}
+.vcx-foot{display:flex;align-items:center;gap:8px;margin-top:20px}
+.vcx-foot .btn-primary:disabled,.vcx-foot .btn-ghost:disabled{opacity:.45;cursor:not-allowed}
+.vcx-hint{font-size:11.5px;color:#94a3b8;margin-top:10px;line-height:1.45}
+@media(max-width:520px){.vcx-cols{grid-template-columns:1fr}}`;
+  const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+
+  const WARM_STAGE_OPTS = ['target','needintros','contacted','booked','pitching','diligence','won'];
+  const WARM_DEFAULT_STAGES = ['contacted','booked','pitching','diligence'];
+  const peopleOf = f => (PEOPLE_BY_FUND[f.id] || PEOPLE.filter(p => p.fundId === f.id));
+  const siteOf = f => (FS(f.id).site || f.site || '').replace(/^https?:\/\/(www\.)?/i,'').replace(/\/$/,'');
+  function ctxOf(f){
+    const ppl = peopleOf(f);
+    const liP = ppl.find(p => personProfileUrl(p));
+    const fups = ppl.map(p => PS(p.id).followUp).filter(Boolean);
+    const paths = new Set();
+    ppl.forEach(p => { const pi = pathInfo(p); if (pi.direct) paths.add('Direct'); pi.connectors.forEach(c => paths.add(c.name)); (pi.existing||[]).forEach(e => paths.add(pathShort(e.via) + ' (existing)')); });
+    return {
+      partners: ppl.map(p => p.tbd ? ('[' + p.title + ']') : p.name).join('; '),
+      linkedin: liP ? (personProfileUrl(liP) || '') : '',
+      nextFup: fups.length ? new Date(Math.min.apply(null, fups)).toISOString().slice(0,10) : '',
+      paths: [...paths].join('; ')
+    };
+  }
+  const COLS = [
+    {k:'fund',         label:'Fund',           on:true,  val:f=>f.name},
+    {k:'stage',        label:'Stage',          on:true,  val:f=>F_STAGES[fStage(f)]||''},
+    {k:'partners',     label:'Partners',       on:true,  val:(f,c)=>c.partners},
+    {k:'next_followup',label:'Next follow-up', on:true,  val:(f,c)=>c.nextFup},
+    {k:'notes',        label:'Notes',          on:true,  val:f=>FS(f.id).notes||''},
+    {k:'linkedin',     label:'LinkedIn (lead)',on:true,  val:(f,c)=>c.linkedin},
+    {k:'intro_path',   label:'Intro path',     on:false, val:(f,c)=>c.paths},
+    {k:'grade',        label:'Grade',          on:false, val:f=>grade(f)||''},
+    {k:'fit',          label:'Fit score',      on:false, val:f=>f.dims?Math.round(score(f)):''},
+    {k:'type',         label:'Type',           on:false, val:f=>f.type||''},
+    {k:'region',       label:'Region',         on:false, val:f=>f.region||''},
+    {k:'check_min_k',  label:'Check min (k)',  on:false, val:f=>f.check?f.check[0]:''},
+    {k:'check_max_k',  label:'Check max (k)',  on:false, val:f=>f.check?f.check[1]:''},
+    {k:'website',      label:'Website',        on:false, val:f=>siteOf(f)},
+    {k:'email',        label:'Email',          on:false, val:f=>FS(f.id).email||''},
+    {k:'why',          label:'Why it fits',    on:false, val:f=>f.why||''},
+  ];
+  const LS_COLS = 'vcWarmCols', LS_STAGES = 'vcWarmStages';
+  const loadSel = (key, fb) => { try { const v = JSON.parse(localStorage.getItem(key)); return Array.isArray(v) && v.length ? v : fb.slice(); } catch { return fb.slice(); } };
+  let selCols = loadSel(LS_COLS, COLS.filter(c => c.on).map(c => c.k));
+  let selStages = loadSel(LS_STAGES, WARM_DEFAULT_STAGES);
+  const saveSel = () => { try { localStorage.setItem(LS_COLS, JSON.stringify(selCols)); localStorage.setItem(LS_STAGES, JSON.stringify(selStages)); } catch {} };
+
+  function warmFunds(){
+    return FUNDS.filter(f => !isFundArchived(f) && selStages.includes(fStage(f)))
+                .sort((a,b) => ((STAGE_ORDER[fStage(b)]||0) - (STAGE_ORDER[fStage(a)]||0)) || a.name.localeCompare(b.name));
+  }
+  function build(){
+    const cols = COLS.filter(c => selCols.includes(c.k));
+    const header = cols.map(c => c.label);
+    const rows = warmFunds().map(f => { const c = ctxOf(f); return cols.map(col => String(col.val(f,c) ?? '')); });
+    return { header, rows };
+  }
+  const clean = v => String(v).replace(/[\t\r\n]+/g,' ').trim();
+  function legacyCopy(text){ const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch {} document.body.removeChild(ta); }
+
+  let overlay = null;
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  function close(){ if (overlay) { overlay.remove(); overlay = null; document.removeEventListener('keydown', onKey); } }
+  function updateCount(){
+    if (!overlay) return;
+    const n = warmFunds().length;
+    overlay.querySelector('#vcxCount').textContent = n + (n === 1 ? ' fund selected.' : ' funds selected.');
+    const disabled = !n || !selCols.length;
+    overlay.querySelector('#vcxGo').disabled = disabled;
+    overlay.querySelector('#vcxCsv').disabled = disabled;
+  }
+  function open(){
+    close();
+    overlay = document.createElement('div');
+    overlay.className = 'vcx-ov';
+    const chips = WARM_STAGE_OPTS.map(s => `<button type="button" class="vcx-chip${selStages.includes(s) ? ' on' : ''}" data-stage="${s}">${F_STAGES[s] || s}</button>`).join('');
+    const boxes = COLS.map(c => `<label class="vcx-col"><input type="checkbox" data-col="${c.k}"${selCols.includes(c.k) ? ' checked' : ''}> <span>${c.label}</span></label>`).join('');
+    overlay.innerHTML =
+      `<div class="vcx-card" role="dialog" aria-modal="true">
+        <div class="vcx-head">
+          <div>
+            <div class="vcx-title">Export warm funds to Google Sheets</div>
+            <div class="vcx-sub">Funds you're actively in it with. <span id="vcxCount"></span></div>
+          </div>
+          <button class="vcx-x" id="vcxClose" aria-label="Close">&#10005;</button>
+        </div>
+        <div class="vcx-lbl">Stages counted as warm</div>
+        <div class="vcx-chips">${chips}</div>
+        <div class="vcx-lbl">Columns to export</div>
+        <div class="vcx-cols">${boxes}</div>
+        <div class="vcx-foot">
+          <button class="btn-ghost" id="vcxCsv">Download CSV</button>
+          <span style="flex:1"></span>
+          <button class="btn-ghost" id="vcxCancel">Cancel</button>
+          <button class="btn-primary" id="vcxGo">Copy + open Google Sheet</button>
+        </div>
+        <div class="vcx-hint">Copies the rows to your clipboard and opens a blank Google Sheet - press Cmd+V / Ctrl+V to drop them in.</div>
+      </div>`;
+    document.body.appendChild(overlay);
+    document.addEventListener('keydown', onKey);
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    overlay.querySelector('#vcxClose').onclick = close;
+    overlay.querySelector('#vcxCancel').onclick = close;
+    overlay.querySelectorAll('[data-stage]').forEach(b => b.onclick = () => {
+      const s = b.dataset.stage, i = selStages.indexOf(s);
+      if (i >= 0) selStages.splice(i,1); else selStages.push(s);
+      b.classList.toggle('on'); saveSel(); updateCount();
+    });
+    overlay.querySelectorAll('[data-col]').forEach(cb => cb.onchange = () => {
+      const k = cb.dataset.col, i = selCols.indexOf(k);
+      if (cb.checked && i < 0) selCols.push(k); else if (!cb.checked && i >= 0) selCols.splice(i,1);
+      saveSel(); updateCount();
+    });
+    overlay.querySelector('#vcxGo').onclick = () => {
+      const { header, rows } = build();
+      if (!rows.length) { toast('No warm funds for those stages.'); return; }
+      const tsv = [header].concat(rows).map(r => r.map(clean).join('\t')).join('\n');
+      const w = window.open('https://sheets.new', '_blank');
+      const finish = () => toast(`Copied ${rows.length} warm funds - press Cmd+V in the new Google Sheet.`);
+      if (navigator.clipboard && navigator.clipboard.writeText)
+        navigator.clipboard.writeText(tsv).then(finish).catch(() => { legacyCopy(tsv); finish(); });
+      else { legacyCopy(tsv); finish(); }
+      if (!w) toast('Allow pop-ups for sheets.new, or use Download CSV.');
+      close();
+    };
+    overlay.querySelector('#vcxCsv').onclick = () => {
+      const { header, rows } = build();
+      if (!rows.length) { toast('No warm funds for those stages.'); return; }
+      const csv = [header].concat(rows).map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv' }));
+      a.download = 'spotsnow-warm-funds.csv'; a.click(); URL.revokeObjectURL(a.href);
+      toast(`Downloaded ${rows.length} warm funds.`); close();
+    };
+    updateCount();
+  }
+  const trigger = document.getElementById('exportWarmBtn');
+  if (trigger) trigger.addEventListener('click', open);
+})();
 
 rebuild();
 mergeDuplicateConnectors();
