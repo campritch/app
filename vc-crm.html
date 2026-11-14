@@ -1505,11 +1505,23 @@ function connectorsFor(personId){ return allConnectors().filter(c => !CS(c.id).a
 function isSuper(c){ const st = CS(c.id); return st.superc !== undefined ? !!st.superc : !!c.superc; }
 /* Display name for a connector - a saved rename wins over the imported name. */
 function connName(c){ return CS(c.id).customName || c.name; }
-/* Competitor blacklist: funds backing direct competitors (e.g. Agentio's cap
-   table). Data can preset it; the drawer toggle (state) always wins. */
-function isCompetitor(f){ const fs = FS(f.id); return fs.competitor !== undefined ? !!fs.competitor : !!f.competitor; }
-/* The named competitor a fund backs (persisted on fs, falls back to seed). */
-function competitorName(f){ return (FS(f.id).competitorNote || f.competitorNote || '').trim(); }
+/* Competitor blacklist: funds backing direct competitors. Flagged funds gray out,
+   sink, and are skipped in grading/intros. Priority: the per-fund state toggle
+   (fs.competitor true/false - an explicit choice always wins), then the seed flag
+   (f.competitor), then COMPETITOR_BACKERS below (funds we know sit on a direct
+   competitor's cap table). To clear an auto-backer, use the fund's un-flag toggle,
+   which writes fs.competitor=false and overrides the list. */
+const COMPETITOR_BACKER_OF = '';   // name the competitor these funds back, once known (shows as "Backs <x>")
+const COMPETITOR_BACKERS = new Set([
+  // From a direct competitor's announced raise / cap table. Exact roster names.
+  // Scout-fund checks (e.g. Sequoia/Accel scouts) are deliberately left out - a
+  // scout check is not a partnership backing, so we don't blacklist the main fund.
+  'Creandum', 'Supernode Global', 'Insight Partners',
+].map(s => s.trim().toLowerCase()));
+function isBackerListed(f){ return !!f && !!f.name && COMPETITOR_BACKERS.has(f.name.trim().toLowerCase()); }
+function isCompetitor(f){ const fs = FS(f.id); return fs.competitor !== undefined ? !!fs.competitor : (!!f.competitor || isBackerListed(f)); }
+/* The named competitor a fund backs (state, then seed, then the backer list). */
+function competitorName(f){ return (FS(f.id).competitorNote || f.competitorNote || (isBackerListed(f) ? COMPETITOR_BACKER_OF : '') || '').trim(); }
 /* Competitor badge - always shows WHO they back (or prompts to name them), and
    is clickable to set/change it. A competitor claim must be substantiated. */
 function competitorBadge(f){
