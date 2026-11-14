@@ -818,7 +818,7 @@
         <span id="sortDD"></span>
         <button class="btn-ghost" style="height:32px;font-size:12px" id="exportBtn">Export CSV</button>
         <button class="btn-ghost" style="height:32px;font-size:12px" id="exportPeopleBtn" title="One row per person, with their LinkedIn where we have it (blank where we don't), for the funds currently in view">Export people</button>
-        <button class="btn-ghost" style="height:32px;font-size:12px" id="exportWarmBtn" title="Warm funds (Connected, Booked, Pitching, Diligence by default) to a Google Sheet - pick your columns">Export warm funds</button>
+        <button class="btn-ghost" style="height:32px;font-size:12px" id="exportWarmBtn" title="Copy funds by stage (pick columns) to paste into your Google Sheet">Export warm funds</button>
       </div>
     </div>
 
@@ -5740,7 +5740,7 @@ $('exportPeopleBtn').addEventListener('click', () => {
 @media(max-width:520px){.vcx-cols{grid-template-columns:1fr}}`;
   const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
 
-  const WARM_STAGE_OPTS = ['target','needintros','contacted','booked','pitching','diligence','won'];
+  const WARM_STAGE_OPTS = ['target','needintros','contacted','booked','pitching','diligence','won','closed'];
   const WARM_DEFAULT_STAGES = ['contacted','booked','pitching','diligence'];
   const peopleOf = f => (PEOPLE_BY_FUND[f.id] || PEOPLE.filter(p => p.fundId === f.id));
   const siteOf = f => (FS(f.id).site || f.site || '').replace(/^https?:\/\/(www\.)?/i,'').replace(/\/$/,'');
@@ -5764,22 +5764,25 @@ $('exportPeopleBtn').addEventListener('click', () => {
     {k:'next_followup',label:'Next follow-up', on:true,  val:(f,c)=>c.nextFup},
     {k:'notes',        label:'Notes',          on:true,  val:f=>FS(f.id).notes||''},
     {k:'linkedin',     label:'LinkedIn (lead)',on:true,  val:(f,c)=>c.linkedin},
+    {k:'grade',        label:'Grade',          on:true,  val:f=>grade(f)||''},
+    {k:'fit',          label:'Fit score',      on:true,  val:f=>f.dims?Math.round(score(f)):''},
+    {k:'check_min_k',  label:'Check min (k)',  on:true,  val:f=>f.check?f.check[0]:''},
+    {k:'check_max_k',  label:'Check max (k)',  on:true,  val:f=>f.check?f.check[1]:''},
+    {k:'website',      label:'Website',        on:true,  val:f=>siteOf(f)},
+    {k:'email',        label:'Email',          on:true,  val:f=>FS(f.id).email||''},
+    {k:'why',          label:'Why it fits',    on:true,  val:f=>f.why||''},
+    // Extras kept OFF by default and placed last, so checking one spills into an
+    // empty column to the right of your sheet instead of shifting your columns.
     {k:'intro_path',   label:'Intro path',     on:false, val:(f,c)=>c.paths},
-    {k:'grade',        label:'Grade',          on:false, val:f=>grade(f)||''},
-    {k:'fit',          label:'Fit score',      on:false, val:f=>f.dims?Math.round(score(f)):''},
     {k:'type',         label:'Type',           on:false, val:f=>f.type||''},
     {k:'region',       label:'Region',         on:false, val:f=>f.region||''},
-    {k:'check_min_k',  label:'Check min (k)',  on:false, val:f=>f.check?f.check[0]:''},
-    {k:'check_max_k',  label:'Check max (k)',  on:false, val:f=>f.check?f.check[1]:''},
-    {k:'website',      label:'Website',        on:false, val:f=>siteOf(f)},
-    {k:'email',        label:'Email',          on:false, val:f=>FS(f.id).email||''},
-    {k:'why',          label:'Why it fits',    on:false, val:f=>f.why||''},
   ];
   const LS_COLS = 'vcWarmCols', LS_STAGES = 'vcWarmStages';
   const loadSel = (key, fb) => { try { const v = JSON.parse(localStorage.getItem(key)); return Array.isArray(v) && v.length ? v : fb.slice(); } catch { return fb.slice(); } };
   let selCols = loadSel(LS_COLS, COLS.filter(c => c.on).map(c => c.k));
   let selStages = loadSel(LS_STAGES, WARM_DEFAULT_STAGES);
-  const saveSel = () => { try { localStorage.setItem(LS_COLS, JSON.stringify(selCols)); localStorage.setItem(LS_STAGES, JSON.stringify(selStages)); } catch {} };
+  let inclHeader = false; try { inclHeader = localStorage.getItem('vcWarmHeader') === '1'; } catch {}
+  const saveSel = () => { try { localStorage.setItem(LS_COLS, JSON.stringify(selCols)); localStorage.setItem(LS_STAGES, JSON.stringify(selStages)); localStorage.setItem('vcWarmHeader', inclHeader ? '1' : '0'); } catch {} };
 
   function warmFunds(){
     return FUNDS.filter(f => !isFundArchived(f) && selStages.includes(fStage(f)))
@@ -5815,22 +5818,23 @@ $('exportPeopleBtn').addEventListener('click', () => {
       `<div class="vcx-card" role="dialog" aria-modal="true">
         <div class="vcx-head">
           <div>
-            <div class="vcx-title">Export warm funds to Google Sheets</div>
-            <div class="vcx-sub">Funds you're actively in it with. <span id="vcxCount"></span></div>
+            <div class="vcx-title">Copy funds into your Google Sheet</div>
+            <div class="vcx-sub">Pick stages and columns, then paste into your tracker. <span id="vcxCount"></span></div>
           </div>
           <button class="vcx-x" id="vcxClose" aria-label="Close">&#10005;</button>
         </div>
-        <div class="vcx-lbl">Stages counted as warm</div>
+        <div class="vcx-lbl">Stages to include</div>
         <div class="vcx-chips">${chips}</div>
         <div class="vcx-lbl">Columns to export</div>
         <div class="vcx-cols">${boxes}</div>
+        <label class="vcx-col" style="margin-top:14px"><input type="checkbox" id="vcxHdr"> <span>Include header row (leave off when appending to an existing sheet)</span></label>
         <div class="vcx-foot">
           <button class="btn-ghost" id="vcxCsv">Download CSV</button>
           <span style="flex:1"></span>
           <button class="btn-ghost" id="vcxCancel">Cancel</button>
-          <button class="btn-primary" id="vcxGo">Copy + open Google Sheet</button>
+          <button class="btn-primary" id="vcxGo">Copy rows</button>
         </div>
-        <div class="vcx-hint">Copies the rows to your clipboard and opens a blank Google Sheet - press Cmd+V / Ctrl+V to drop them in.</div>
+        <div class="vcx-hint">Copies the rows to your clipboard - paste into your tracker with Cmd+V / Ctrl+V. Column order matches your sheet, so it drops straight in.</div>
       </div>`;
     document.body.appendChild(overlay);
     document.addEventListener('keydown', onKey);
@@ -5847,16 +5851,18 @@ $('exportPeopleBtn').addEventListener('click', () => {
       if (cb.checked && i < 0) selCols.push(k); else if (!cb.checked && i >= 0) selCols.splice(i,1);
       saveSel(); updateCount();
     });
+    const hdr = overlay.querySelector('#vcxHdr');
+    hdr.checked = inclHeader;
+    hdr.onchange = e => { inclHeader = e.target.checked; saveSel(); };
     overlay.querySelector('#vcxGo').onclick = () => {
       const { header, rows } = build();
-      if (!rows.length) { toast('No warm funds for those stages.'); return; }
-      const tsv = [header].concat(rows).map(r => r.map(clean).join('\t')).join('\n');
-      const w = window.open('https://sheets.new', '_blank');
-      const finish = () => toast(`Copied ${rows.length} warm funds - press Cmd+V in the new Google Sheet.`);
+      if (!rows.length) { toast('No funds for those stages.'); return; }
+      const body = inclHeader ? [header].concat(rows) : rows;
+      const tsv = body.map(r => r.map(clean).join('\t')).join('\n');
+      const finish = () => toast(`Copied ${rows.length} ${rows.length === 1 ? 'row' : 'rows'}${inclHeader ? ' (with header)' : ''} - paste into your sheet with Cmd+V.`);
       if (navigator.clipboard && navigator.clipboard.writeText)
         navigator.clipboard.writeText(tsv).then(finish).catch(() => { legacyCopy(tsv); finish(); });
       else { legacyCopy(tsv); finish(); }
-      if (!w) toast('Allow pop-ups for sheets.new, or use Download CSV.');
       close();
     };
     overlay.querySelector('#vcxCsv').onclick = () => {
