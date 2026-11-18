@@ -793,7 +793,9 @@
         <button class="tab active" data-tab="funds">All funds <span class="count" id="cntFunds">0</span></button>
         <button class="tab" data-tab="targets">Targets <span class="count" id="cntTargets">0</span></button>
         <button class="tab" data-tab="needintros">Need intros <span class="count" id="cntNeedintros">0</span></button>
+        <button class="tab" data-tab="reachedout">Reached out <span class="count" id="cntReachedout">0</span></button>
         <button class="tab" data-tab="contacted">Connected <span class="count" id="cntContacted">0</span></button>
+        <button class="tab" data-tab="responded">Responded <span class="count" id="cntResponded">0</span></button>
         <button class="tab" data-tab="booked">Booked <span class="count" id="cntBooked">0</span></button>
         <button class="tab" data-tab="pitching">Pitching <span class="count" id="cntPitching">0</span></button>
         <button class="tab" data-tab="diligence">Diligence <span class="count" id="cntDiligence">0</span></button>
@@ -1647,12 +1649,12 @@ const P_STATUS = {
 };
 const C_STATUS = { none:'Not asked', draft:'Ask drafted', asked:'Asked', agreed:'Agreed', declined:'Declined' };
 /* Fund pipeline stages — the core CRM flow. */
-const F_STAGES = { none:'Backlog', target:'\ud83c\udfaf Target', needintros:'\ud83e\udd1d Need intros', contacted:'\ud83d\udcac Connected', booked:'\u2705 Booked', pitching:'\ud83c\udfa4 Pitching', diligence:'\ud83d\udd2c Diligence', closed:'\u{1F44B} Passed', disqualified:'\ud83d\udeab Disqualified', future:'\u23f3 Future', won:'\u{1F91D} Closed', updates:'\ud83d\udcc8 Updates' };
+const F_STAGES = { none:'Backlog', target:'\ud83c\udfaf Target', needintros:'\ud83e\udd1d Need intros', reachedout:'\ud83d\udce8 Reached out', contacted:'\ud83d\udcac Connected', responded:'\u21a9\ufe0f Responded', booked:'\u2705 Booked', pitching:'\ud83c\udfa4 Pitching', diligence:'\ud83d\udd2c Diligence', closed:'\u{1F44B} Passed', disqualified:'\ud83d\udeab Disqualified', future:'\u23f3 Future', won:'\u{1F91D} Closed', updates:'\ud83d\udcc8 Updates' };
 // Backlog (stage 'none') has no dedicated tab - those funds live under All funds.
 // NOTE: internal key 'closed' is the "Passed" stage (they passed on us); 'won'
 // is the "Closed" stage (committed/invested). Kept this way to avoid migrating
 // existing stored data that already uses 'closed' for passed.
-const STAGE_TABS = ['funds','targets','needintros','contacted','booked','pitching','diligence','closed','disqualified','future','won','updates'];
+const STAGE_TABS = ['funds','targets','needintros','reachedout','contacted','responded','booked','pitching','diligence','closed','disqualified','future','won','updates'];
 // Tab names match stage keys one-to-one except 'targets' <-> stage 'target'.
 function tabForStage(stage){ return stage === 'target' ? 'targets' : (STAGE_TABS.includes(stage) && stage !== 'funds' ? stage : 'funds'); }
 function stageForTab(tab){ return tab === 'targets' ? 'target' : (STAGE_TABS.includes(tab) && tab !== 'funds' ? tab : 'target'); }
@@ -1912,7 +1914,7 @@ let fundArchiveView = false;
 let headSort = { key: null, dir: 1 };
 let renderCap = 150;
 const HSORT_DEFAULT_DIR = { name:1, profile:1, fit:-1, check:-1, stage:1, people:-1, path:1, status:1, wayin:1 };
-const STAGE_ORDER = { none:0, target:1, needintros:2, contacted:3, messaged:3, booked:4, pitching:5, diligence:6, closed:7, disqualified:8, future:9, won:10, updates:11 };
+const STAGE_ORDER = { none:0, target:1, needintros:2, reachedout:3, contacted:4, messaged:4, responded:5, booked:6, pitching:7, diligence:8, closed:9, disqualified:10, future:11, won:12, updates:13 };
 const hArrow = k => headSort.key === k ? (headSort.dir === 1 ? ' \u2191' : ' \u2193') : '';
 let currentTab = 'funds';
 let searchQ = '';
@@ -2322,7 +2324,9 @@ function render(){
   const setCnt = (id, v) => { const el = $(id); if (el) el.textContent = v; };
   setCnt('cntTargets', stageCount('target'));
   setCnt('cntNeedintros', stageCount('needintros'));
+  setCnt('cntReachedout', stageCount('reachedout'));
   setCnt('cntContacted', stageCount('contacted'));
+  setCnt('cntResponded', stageCount('responded'));
   setCnt('cntBooked', stageCount('booked'));
   setCnt('cntPitching', stageCount('pitching'));
   setCnt('cntDiligence', stageCount('diligence'));
@@ -5753,7 +5757,7 @@ $('exportPeopleBtn').addEventListener('click', () => {
 @media(max-width:520px){.vcx-cols{grid-template-columns:1fr}}`;
   const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
 
-  const WARM_STAGE_OPTS = ['target','needintros','contacted','booked','pitching','diligence','won','closed'];
+  const WARM_STAGE_OPTS = ['target','needintros','reachedout','contacted','responded','booked','pitching','diligence','won','closed'];
   const WARM_DEFAULT_STAGES = ['contacted','booked','pitching','diligence'];
   const peopleOf = f => (PEOPLE_BY_FUND[f.id] || PEOPLE.filter(p => p.fundId === f.id));
   const siteOf = f => (FS(f.id).site || f.site || '').replace(/^https?:\/\/(www\.)?/i,'').replace(/\/$/,'');
@@ -5892,6 +5896,45 @@ $('exportPeopleBtn').addEventListener('click', () => {
   const trigger = document.getElementById('exportWarmBtn');
   if (trigger) trigger.addEventListener('click', open);
 })();
+
+/* One-time seed for the "Reached out" stage. Funds Cam marked "Reached out" in
+   the Nov need-intros CSV (resolved to roster IDs below), plus any fund where a
+   connector has been asked to open a door (requestedFrom). Only promotes funds
+   still at or before "Need intros" and not flagged competitor - never demotes a
+   fund already further down the funnel (Connected/Responded/Pitching/etc.).
+   Runs once per stored state; clear state._reachedOutSeed to re-run. */
+const REACHED_OUT_SEED = new Set([
+  "gl-fly-bridge", "gl-foundation-cap", "gl-torch-captial", "p-accomplice", "p-altos-ventures",
+  "p-baroda-ventures", "p-base-ventures", "p-bessemer-venture-partners", "p-bloomberg-beta", "p-bloomberg-lp",
+  "p-boxgroup", "p-breyer-capital", "p-chapter-one-ventures", "p-charge", "p-charles-river-ventures",
+  "p-cleo-capital", "p-commerce-vc", "p-company-ventures", "p-dn-capital", "p-epic-ventures",
+  "p-fernbrook-capital-management", "p-floodgate", "p-florida-funders", "p-freestyle",
+  "p-fuel-capital-task-rabbit", "p-g20-ventures", "p-ggv-capital", "p-gv", "p-haystack",
+  "p-headline-formerly-e-ventures", "p-hike-ventures", "p-hyde-park-venture-partners", "p-idea-fund-partners",
+  "p-index-ventures", "p-interlace-ventures", "p-jackson-square-ventures", "p-kickstart-fund",
+  "p-kortschak-investments", "p-left-lane-capital", "p-lightbank-vc", "p-link-ventures", "p-lri",
+  "p-ludlow-ventures", "p-madrona-ventures", "p-marker", "p-maveron", "p-mayfield-fund", "p-menlo-ventures",
+  "p-mighty-capital", "p-next-frontier-capital", "p-one-way-vc", "p-origin-ventures", "p-overline",
+  "p-palm-drive-capital", "p-pjc", "p-powerhouse-capital", "p-quiet-capital", "p-rainfall-ventures",
+  "p-rally-ventures", "p-redpoint", "p-rtp-global", "p-savyon-ventures", "p-seven-seven-six",
+  "p-seven-seven-six-7-7-6", "p-signalfire", "p-signia-venture-partners", "p-streamlined-ventures",
+  "p-structure-capital", "p-sugar-capital", "p-susa-ventures", "p-tcg-the-chernin-group", "p-the-battery",
+  "p-third-kind-ventures", "p-trac", "p-tribe-capital", "p-union-square-ventures-opportunity", "p-upfront",
+  "p-uphonest", "p-wasabi-ventures", "p-wing-venture-partners"
+]);
+if (!state._reachedOutSeed) {
+  const cutoff = STAGE_ORDER.reachedout;
+  let seeded = 0;
+  SEED_FUNDS.forEach(f => {   // FUNDS isn't built until rebuild() below; seed off the raw roster
+    const fs = FS(f.id);
+    if ((STAGE_ORDER[fStage(f)] ?? 0) >= cutoff) return;   // already at/past Reached out - leave it
+    if (isCompetitor(f)) return;                            // competitors stay parked
+    const marked = REACHED_OUT_SEED.has(f.id) || ((fs.requestedFrom || []).length > 0);
+    if (marked) { fs.stage = 'reachedout'; seeded++; }
+  });
+  state._reachedOutSeed = 1;
+  if (seeded) save();
+}
 
 rebuild();
 mergeDuplicateConnectors();
