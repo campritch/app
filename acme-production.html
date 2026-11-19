@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acme Network - Spots</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2318181B'/%3E%3Ctext x='16' y='22' font-family='Helvetica,Arial,sans-serif' font-size='15' font-weight='700' fill='%23ffffff' text-anchor='middle'%3EAN%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #17212B; --text-primary: #0E1323; --text-secondary: #707481;
+      --border: #DEE0E4; --border-light: #EDEEF1; --white: #ffffff;
+      --accent: #FF6267; --accent-hover: #ff4d52;
+      --secondary: #E4E6ED; --secondary-lite: #F3F4F6; --page-bg: #F9FAFB;
+      --green-text: #0E6832; --green-bg: #D6F1E0; --amber-text: #C2410C; --amber-bg: #FFEDD5;
+      --blue-text: #1435C0; --blue-bg: #C7E0FF; --red-text: #B91C1C; --red-bg: #FEE2E2;
+      --shadow-card: 0 1px 2px rgba(14,19,35,.04), 0 8px 24px rgba(14,19,35,.05);
+      --shadow-btn: 0 1px 3px 0 rgba(166,175,195,.20);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; background: var(--page-bg); color: var(--text-primary); -webkit-font-smoothing: antialiased; line-height: 1.45; font-size: 14px; }
+    button { font-family: inherit; cursor: pointer; } input, textarea, select { font-family: inherit; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 28px 60px; }
+    .h1 { font-size: 20px; font-weight: 700; letter-spacing: -.03em; margin-bottom: 16px; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 600; border: 1px solid var(--border); background: var(--white); color: var(--text-primary); box-shadow: var(--shadow-btn); white-space: nowrap; }
+    .btn:hover { background: var(--secondary-lite); }
+    .btn--primary { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: none; }
+    .btn--primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .btn--sm { padding: 6px 11px; font-size: 12.5px; }
+    .btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .input { border: 1px solid var(--border); border-radius: 8px; background: var(--white); padding: 8px 12px; font-size: 13px; color: var(--text-primary); min-height: 36px; outline: none; }
+    .input:focus { border-color: var(--text-primary); } .input::placeholder { color: var(--text-secondary); }
+    textarea.input { width: 100%; resize: vertical; min-height: 64px; line-height: 1.5; }
+    .dd { display: inline-flex; align-items: center; justify-content: space-between; gap: 10px; font-family: inherit; font-weight: 600; cursor: pointer; text-align: left; }
+    .dd svg { color: var(--text-secondary); flex: none; } .dd:focus-visible, .dd[aria-expanded="true"] { border-color: var(--text-primary); }
+    .ddmenu { position: fixed; z-index: 90; background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 32px rgba(23,33,43,.14); padding: 4px; overflow-y: auto; display: flex; flex-direction: column; }
+    .ddopt { display: flex; align-items: center; gap: 8px; border: 0; background: none; font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text-primary); padding: 8px 12px 8px 8px; border-radius: 7px; cursor: pointer; text-align: left; white-space: nowrap; outline: none; }
+    .ddopt svg { flex: none; visibility: hidden; } .ddopt.on { font-weight: 600; } .ddopt.on svg { visibility: visible; }
+    .ddopt:hover, .ddopt:focus-visible { background: var(--page-bg); }
+    .search { width: 220px; }
+    input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--primary); cursor: pointer; }
+
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow-card); overflow: hidden; }
+    .bar { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border-light); flex-wrap: wrap; }
+    .sp { margin-left: auto; }
+    .tblwrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #F7F8FA; font-size: 12px; font-weight: 600; color: var(--text-secondary); text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border-light); white-space: nowrap; }
+    td { padding: 11px 10px; border-bottom: 1px solid var(--border-light); font-weight: 500; vertical-align: middle; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    tr:last-child td { border-bottom: 0; }
+    th:first-child, td:first-child { padding-left: 16px; }
+    tr.rowlink { cursor: pointer; } tr.rowlink:hover { background: #FAFBFC; }
+    .cell { display: flex; align-items: center; gap: 10px; }
+    .cell__t { font-weight: 600; } .cell__s { font-size: 12px; color: var(--text-secondary); }
+    .late { color: var(--red-text); font-weight: 600; } .muted { color: var(--text-secondary); }
+    .empty { padding: 44px 20px; text-align: center; color: var(--text-secondary); font-weight: 500; }
+    .logo { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; font-weight: 700; font-size: 11px; color: #fff; flex-shrink: 0; }
+    .logo--sm { width: 20px; height: 20px; border-radius: 5px; font-size: 8px; }
+    .pill { display: inline-flex; align-items: center; border-radius: 999px; padding: 3px 9px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+    .pill--green { background: var(--green-bg); color: var(--green-text); } .pill--amber { background: var(--amber-bg); color: var(--amber-text); }
+    .pill--blue { background: var(--blue-bg); color: var(--blue-text); } .pill--gray { background: var(--secondary-lite); color: var(--text-secondary); }
+    .pill--red { background: var(--red-bg); color: var(--red-text); } .pill--line { background: var(--white); border: 1px solid var(--border); color: var(--text-primary); }
+
+    /* one request */
+    .dw-back { position: fixed; inset: 0; background: rgba(16,19,35,.26); z-index: 60; }
+    .dw { position: fixed; top: 0; right: 0; bottom: 0; width: min(560px, 100%); background: var(--white); border-left: 1px solid var(--border); box-shadow: -14px 0 40px rgba(16,19,35,.14); z-index: 61; display: flex; flex-direction: column; }
+    .dw.in { animation: dwin .2s ease-out; } .dw-back.in { animation: dwfade .2s ease-out; }
+    @keyframes dwin { from { transform: translateX(28px); opacity: 0; } } @keyframes dwfade { from { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) { .dw.in, .dw-back.in { animation: none; } }
+    .dw__head { padding: 16px 20px 14px; border-bottom: 1px solid var(--border-light); }
+    .dw__top { display: flex; align-items: flex-start; gap: 10px; }
+    .dw__x { margin-left: auto; flex: none; width: 30px; height: 30px; border-radius: 8px; border: 0; background: none; color: var(--text-secondary); display: grid; place-items: center; } .dw__x:hover { background: var(--secondary-lite); color: var(--text-primary); }
+    .dtitle { font-size: 16px; font-weight: 700; letter-spacing: -.02em; line-height: 1.3; padding-top: 1px; }
+    .dstat { margin-top: 8px; font-size: 12.5px; color: var(--text-secondary); font-weight: 500; } .dstat b { font-weight: 700; margin-right: 6px; }
+    .dw__body { flex: 1; overflow-y: auto; padding: 18px 20px 24px; display: flex; flex-direction: column; gap: 22px; }
+    .dw__h { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+    .dw__foot { padding: 12px 20px; border-top: 1px solid var(--border-light); display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; background: var(--white); }
+    .mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; }
+    .m__l { font-size: 11px; font-weight: 600; color: var(--text-secondary); } .m__v { font-size: 13px; font-weight: 600; margin-top: 2px; display: flex; align-items: center; gap: 6px; min-height: 22px; }
+    .m__v input { border: 0; font: inherit; background: none; color: inherit; padding: 0; outline: none; }
+    .creative { background: #F7F8FA; border: 1px solid var(--border-light); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .creative__t { font-size: 12.5px; font-weight: 700; padding: 0 2px 2px; }
+    .frow { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 11px 12px; display: flex; gap: 12px; align-items: flex-start; }
+    .frow.ok { background: #F3FBF6; border-color: #BFE6CD; }
+    .frow--click { cursor: pointer; } .frow--click:hover { border-color: #B9BEC9; }
+    .frow--col { flex-direction: column; gap: 10px; } .frow__acts { display: flex; gap: 8px; margin-left: auto; }
+    .frow__ic { width: 30px; height: 30px; border-radius: 8px; background: var(--secondary-lite); color: var(--text-secondary); display: grid; place-items: center; flex-shrink: 0; } .frow__ic svg { width: 15px; height: 15px; }
+    .frow__m { flex: 1; min-width: 0; } .frow__n { font-size: 13px; font-weight: 600; } .frow__s { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+    .frow .input { flex: 1; }
+    details.frow { display: block; } details.frow summary { display: flex; gap: 12px; align-items: flex-start; cursor: pointer; list-style: none; } details.frow summary::-webkit-details-marker { display: none; }
+    details.frow[open] .tog:after { content: "Hide"; } .tog:after { content: "View"; } .tog { font-size: 12px; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+    .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+    .points { font-size: 13px; line-height: 1.55; padding: 12px 4px 2px 42px; } .points li { margin-bottom: 3px; } .points b { font-weight: 600; }
+    .play { width: 30px; height: 30px; border-radius: 50%; border: 0; background: var(--primary); color: #fff; display: grid; place-items: center; flex-shrink: 0; }
+    .seek { height: 3px; border-radius: 3px; background: var(--secondary); margin-top: 8px; overflow: hidden; } .seek i { display: block; height: 100%; width: 0; background: var(--accent); }
+    .seek.on i { width: 100%; transition: width 9s linear; }
+    .cmt { display: flex; gap: 8px; margin-bottom: 16px; } .cmt .input { flex: 1; }
+    .ev { position: relative; padding: 0 0 14px 20px; font-size: 13px; }
+    .ev:before { content: ""; position: absolute; left: 0; top: 5px; width: 8px; height: 8px; border-radius: 50%; background: #fff; border: 2px solid #C5CBD5; }
+    .ev:after { content: ""; position: absolute; left: 5.5px; top: 19px; bottom: 1px; width: 1px; background: var(--border-light); }
+    .ev:last-child { padding-bottom: 0; } .ev:last-child:after { display: none; }
+    .ev--agent:before { border-color: var(--accent); }
+    .ev__h b { font-weight: 600; } .ev__h span { color: var(--text-secondary); font-size: 12px; margin-left: 8px; }
+    .ev__t { color: #3C4150; margin-top: 1px; }
+    .ev--cmt:before { background: var(--navy, #17212B); border-color: var(--navy, #17212B); }
+    .ev--cmt .ev__t { display: inline-block; margin-top: 5px; padding: 8px 12px; background: #F4F5F7; border-radius: 10px; max-width: 640px; white-space: pre-wrap; }
+    .dl { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; font-size: 13px; margin: 0; }
+    .dl dt { font-size: 11px; font-weight: 600; color: var(--text-secondary); } .dl dd { font-weight: 600; margin-top: 1px; }
+    .sw { width: 34px; height: 20px; border-radius: 20px; border: 0; background: var(--secondary); position: relative; vertical-align: middle; }
+    .sw:after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .15s; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+    .sw.on { background: var(--green-text); } .sw.on:after { left: 16px; }
+    .link { border: 0; background: none; color: var(--text-primary); font-weight: 600; font-size: 12.5px; text-decoration: underline; text-underline-offset: 2px; padding: 0; }
+
+    /* what a show sees */
+    .todo { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border-light); flex-wrap: wrap; }
+    .todo__r { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+    .days { display: flex; gap: 4px; } .days button { border: 1px solid var(--border); background: #fff; border-radius: 7px; padding: 5px 9px; font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+    .days button.on { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--primary); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; opacity: 0; transition: all .25s; z-index: 80; pointer-events: none; }
+    #toast.on { opacity: 1; transform: translateX(-50%); }
+    @media (max-width: 900px) { .wrap { padding: 18px 16px 50px; } }
+    body.nested { background: transparent; }
+    body.drawer-only .wrap { display: none; }
+    html:has(body.drawer-only) { background: transparent; }
+    body.nested .wrap { padding: 0 0 40px; max-width: none; }
+    body.nested .h1 { display: none !important; }
+    body.campaign .wrap { padding: 14px 16px 24px; }
+    body.campaign .card { box-shadow: none; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="h1" id="h1">Spots</div>
+  <div id="main"></div>
+</div>
+<div id="drawer"></div>
+<div id="toast"></div>
+
+<script>
+/* ───────── helpers ───────── */
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const D = iso => new Date(iso + 'T12:00:00');
+const isoOf = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const addDays = (iso, n) => { const d = D(iso); d.setDate(d.getDate() + n); return isoOf(d); };
+const fmt = iso => D(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+const dow = iso => D(iso).toLocaleDateString('en-US', { weekday: 'short' });
+const mdy = iso => D(iso).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+const daysBetween = (a, b) => Math.round((D(b) - D(a)) / 864e5);
+const initials = s => { const c = s.replace(/[^A-Z0-9]/g, ''); return (c.length >= 2 ? c.slice(0, 2) : s.replace(/[^A-Za-z0-9]/g, '').slice(0, 2)).toUpperCase(); };
+const kfmt = n => Math.round(n / 1000) + 'K';
+const usd = n => '$' + Math.round(n).toLocaleString('en-US');
+const I = {
+  send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>',
+  bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>',
+  up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/></svg>',
+  down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>',
+  play: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
+  link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>'
+};
+
+/* ───────── reference data ───────── */
+const TODAY = '2026-06-16';            // demo clock: a Tuesday, the day next week's requests go out
+const MON0 = '2026-06-15';
+const wk = (n, day) => addDays(MON0, n * 7 + (day || 0));
+const NETS = { ltc: 'Laugh Track Collective', orig: 'Acme Originals' };
+const SHOWS = {
+  smartless: { name: 'SmartLess', short: 'SmartLess', net: 'ltc', contact: 'Dana (producer)', pub: 'Mon', host: 'Megaphone', ontime: 96 },
+  armchair:  { name: 'Armchair Expert', short: 'Armchair', net: 'ltc', contact: 'Rob (producer)', pub: 'Mon / Thu', host: 'Megaphone', ontime: 91 },
+  chd:       { name: 'Call Her Daddy', short: 'CHD', net: 'ltc', contact: 'Maya (producer)', pub: 'Wed', host: 'Art19', ontime: 88 },
+  rogan:     { name: 'The Joe Rogan Experience', short: 'JRE', net: 'orig', contact: 'Jamie (producer)', pub: 'Tue to Sat', host: 'Megaphone', ontime: 62 },
+  huberman:  { name: 'Huberman Lab', short: 'Huberman', net: 'orig', contact: 'Ian (producer)', pub: 'Mon', host: 'Megaphone', ontime: 98 },
+  mel:       { name: 'The Mel Robbins Podcast', short: 'Mel Robbins', net: 'orig', contact: 'Tracey (producer)', pub: 'Mon / Thu', host: 'Art19', ontime: 93 },
+  oprah:     { name: 'The Oprah Podcast', short: 'Oprah', net: 'orig', contact: 'Sam (producer)', pub: 'Tue', host: 'Megaphone', ontime: 95 }
+};
+const BR = {
+  'Quince':       { col: '#3F3A36', agency: 'Oxford Road', pts: ['Luxury essentials at 50 to 80% less than similar brands', 'Mention a specific piece you own (Mongolian cashmere from $50)', 'Free shipping and 365-day returns'], cta: 'quince.com/{show}', personal: true },
+  'Monarch':      { col: '#F26A3D', agency: 'Direct', pts: ['All your accounts in one clean dashboard', 'Named best budgeting app by The Wall Street Journal', '50% off your first year'], cta: 'monarchmoney.com, code {SHOW}', personal: true },
+  'Rocket Money': { col: '#D4352B', agency: 'Ad Results Media', pts: ['Finds and cancels subscriptions you forgot about', 'Over 5 million members, $500M saved in canceled subscriptions', 'Lowers your bills for you'], cta: 'rocketmoney.com/{show}', personal: true },
+  'Mint Mobile':  { col: '#3FA66B', agency: 'Ad Results Media', pts: ['Premium wireless for $15 a month', 'Keep your phone and your number', 'New customer offer, 3-month plan'], cta: 'mintmobile.com/{show}', verbatim: true },
+  'Squarespace':  { col: '#111111', agency: 'Direct', pts: ['All-in-one website platform', 'Blueprint AI builds a custom site in minutes', '10% off first website or domain'], cta: 'squarespace.com/{show}, code {SHOW}' },
+  'Toyota':       { col: '#C8102E', agency: 'Saatchi', pre: true, pts: ['All-new Camry, now hybrid standard', 'Up to 51 MPG combined (must be read exactly)', 'Lease offer ends December 1'], cta: 'toyota.com/camry', verbatim: true },
+  'AG1':          { col: '#1F4D3A', agency: 'Direct', pts: ['One scoop replaces multiple supplements', 'How long you have been taking it', 'Free year of vitamin D3 and 5 travel packs'], cta: 'drinkag1.com/{show}', personal: true },
+  'BetterHelp':   { col: '#3E8E5A', agency: 'Direct', pre: true, pts: ['Therapy that fits your schedule, fully online', 'Matched with a licensed therapist, switch any time', '10% off your first month'], cta: 'betterhelp.com/{show}' },
+  'Ramp':         { col: '#1F1F1F', agency: 'Direct', pts: ['Corporate card and spend management in one', 'Saves companies an average of 5%', '$250 when you join'], cta: 'ramp.com/{show}' },
+  'Ritual':       { col: '#F2C230', agency: 'Veritone One', pts: ['Traceable ingredients, third-party tested', 'Essential for Women 18+ multivitamin', '25% off your first month'], cta: 'ritual.com/{show}', personal: true },
+  'Kalshi':       { col: '#00B386', agency: 'Direct', pre: true, pts: ['First legal US exchange for trading on events', 'Regulated by the CFTC (must be read exactly)', '$10 bonus when you trade $100'], cta: 'kalshi.com/{show}', verbatim: true },
+  'DraftKings':   { col: '#53A548', agency: 'Direct', pts: ['Official sports betting partner', 'New customers bet $5, get $200 in bonus bets', 'Responsible gaming disclaimer read in full'], cta: 'DraftKings Sportsbook app, code {SHOW}', verbatim: true }
+};
+const ST = { draft: ['Scheduled', 'gray'], requested: ['Requested', 'amber'], production: ['In production', 'blue'], qa: ['Ready for QA', 'amber'], buyer: ['Buyer approval', 'blue'], revision: ['Revision requested', 'red'], approved: ['Approved', 'green'], live: ['Live', 'green'], complete: ['Complete', 'gray'] };
+const AC = { pending: ['Pending', 'gray'], verified: ['Verified', 'green'], flagged: ['Flagged', 'amber'], missed: ['Missed', 'red'] };
+const STEPS = { dai: ['Requested', 'In production', 'Proof', 'Execution', 'Air check'], baked: ['Requested', 'In production', 'Aired', 'Air check'] };
+
+/* ───────── state ───────── */
+let RID = 0, REQS = [], COMMS = [];
+const AUTO = { entries: 31, reminders: 14, renamed: 6, handoffs: 5, airchecks: 9 };
+const S = { tab: 'production', role: 'ops', net: 'all', sendBack: false, editInstr: false, hostShow: 'smartless', status: new URLSearchParams(location.search).get('brand') ? 'all' : 'open', show: 'all', delivery: 'all', q: '', sel: new Set(), open: null };
+function scriptOf(r) { const b = BR[r.brand], sh = SHOWS[r.show].short.replace(/\s/g, ''); return { pts: b.pts, cta: b.cta.replace('{show}', sh.toLowerCase()).replace('{SHOW}', sh.toUpperCase()), verbatim: r.verbatim != null ? r.verbatim : !!b.verbatim, personal: r.personal != null ? r.personal : !!b.personal }; }
+function fileName(r) { return SHOWS[r.show].short + ' - ' + r.brand + ' - ' + D(r.date).toLocaleDateString('en-US', { month: 'short' }) + '.mp3'; }
+function title(r) { return r.brand + ' | ' + mdy(r.date) + ' - Host-Read :' + r.len + ' - ' + (r.delivery === 'dai' ? 'Ad-inserted' : 'Baked-in') + (r.makeGood ? ' - Make-good' : ''); }
+function checks(r, miss) { const s = scriptOf(r), m = miss || []; const rows = s.pts.map((p, i) => ({ label: p, ok: !m.includes(i), ts: '0:' + String(8 + i * 14).padStart(2, '0') })); rows.push({ label: 'Call to action read: ' + s.cta, ok: !m.includes(3), ts: '0:51' }); rows.push({ label: m.includes(4) ? 'Length: ran 0:38 of :' + r.len : 'Length: ran 0:' + (r.len - 2) + ' of :' + r.len, ok: !m.includes(4), ts: '' }); return rows; }
+function isLate(r) { return ['requested', 'production', 'revision'].includes(r.status) && r.due < TODAY; }
+function log(r, who, text, auto, at) { r.tl.unshift({ at: at || stamp(), who, text, auto: !!auto }); }
+function stamp() { return fmt(TODAY) + ', ' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).toLowerCase().replace(' ', ''); }
+function comm(to, subject, body, rid, auto, at) { COMMS.unshift({ at: at || stamp(), to, subject, body, rid, auto: auto !== false }); }
+
+function R(brand, show, delivery, w, day, status, x) {
+  x = x || {};
+  const date = wk(w, day), b = BR[brand];
+  const r = Object.assign({ id: 'r' + (++RID), brand, show, delivery, date, due: delivery === 'dai' ? addDays(date, -3) : date, status, len: 60, pos: 'Mid-roll', pre: !!b.pre, imps: 350000, cpm: 28, pixel: delivery === 'dai', reminders: 0, instr: '', tl: [], ac: { state: 'pending' }, traffic: null, file: null, noScript: false, ackDay: null }, x);
+  const sh = SHOWS[show], c = addDays(r.due, -9);
+  if (!x.fresh) {
+    log(r, 'Agent', 'Created from the Inventory booking. Brand, dates, spec, impressions and CPM carried over', true, fmt(c) + ', 9:02am');
+    if (r.noScript) log(r, 'Agent', 'No copy link on the booking. Held back from sending', true, fmt(c) + ', 9:02am');
+    if (status !== 'draft') { log(r, 'Priya (Ad Ops)', 'Sent to ' + sh.contact + ' at ' + sh.name, false, fmt(addDays(c, 1)) + ', 10:15am'); }
+    for (let i = 0; i < r.reminders; i++) log(r, 'Agent', 'Automatic reminder sent to ' + sh.contact, true, fmt(addDays(r.due, -3 + i)) + ', 8:00am');
+    if (!['draft', 'requested'].includes(status)) { r.ackDay = r.ackDay || dow(r.date); log(r, sh.contact, 'Acknowledged. Publishing ' + r.ackDay, false, fmt(addDays(c, 2)) + ', 2:40pm'); }
+    if (r.file) { log(r, sh.contact, 'Uploaded ' + r.file.orig, false, r.file.at); log(r, 'Agent', 'Scored the read against the script: ' + r.file.score + '% match', true, r.file.at); }
+    if (status === 'revision') log(r, 'Priya (Ad Ops)', 'Requested a revision: ' + r.revNote, false, fmt(addDays(TODAY, -1)) + ', 4:05pm');
+    if (status === 'buyer') log(r, 'Agent', 'Listen link sent to the buyer at ' + b.agency + ' for pre-approval', true, fmt(addDays(TODAY, -1)) + ', 11:20am');
+    if (['approved', 'live', 'complete'].includes(status) && r.file) { log(r, 'Priya (Ad Ops)', 'Approved the file', false, fmt(addDays(r.due, 0)) + ', 11:00am'); log(r, 'Agent', 'Renamed to ' + fileName(r) + ' and placed on the Execution desk with pixel and flight dates', true, fmt(r.due) + ', 11:00am'); }
+    if (r.traffic === 'done') log(r, 'Execution team', 'Set live in ' + sh.host, false, fmt(addDays(r.due, 1)) + ', 9:30am');
+    if (r.ac.state !== 'pending') log(r, 'Agent', r.ac.state === 'missed' ? 'Air check: ' + r.ac.note : 'Air check pulled from ' + r.ac.ep + ': ' + r.ac.score + '% match' + (r.ac.note ? '. ' + r.ac.note : ''), true, fmt(addDays(r.date, 1)) + ', 6:10am');
+  }
+  REQS.push(r); return r;
+}
+const F = (show, brand, score, miss, at) => ({ orig: show + '_' + brand.toLowerCase().replace(/\s/g, '') + '_final_v2.mp3', at, size: '2.02 MB', review: 'pending', score, miss: miss || [] });
+
+function seed() {
+  RID = 0; REQS = []; COMMS = [];
+  // next week: drafts created from IOs, ready to go out today
+  R('Rocket Money', 'smartless', 'baked', 1, 0, 'draft');
+  R('Mint Mobile', 'armchair', 'baked', 1, 3, 'draft');
+  R('Squarespace', 'chd', 'baked', 1, 2, 'draft');
+  R('AG1', 'huberman', 'baked', 1, 0, 'draft');
+  R('Ramp', 'rogan', 'dai', 1, 3, 'draft', { noScript: true });
+  // this week
+  R('Quince', 'smartless', 'dai', 0, 3, 'qa', { reminders: 1, file: F('smartless', 'Quince', 96, [], fmt(TODAY) + ', 7:48am') });
+  R('Toyota', 'armchair', 'dai', 0, 3, 'qa', { reminders: 2, file: F('armchair', 'Toyota', 74, [2], fmt(TODAY) + ', 8:21am') });
+  R('BetterHelp', 'chd', 'dai', 0, 2, 'buyer', { reminders: 1, file: Object.assign(F('chd', 'BetterHelp', 92, [], fmt(addDays(TODAY, -1)) + ', 10:02am'), { review: 'approved' }) });
+  R('Monarch', 'rogan', 'baked', 0, 2, 'requested', { reminders: 2, instr: 'Last Monarch read skipped the promo code. Please read it twice.' });
+  R('Ritual', 'mel', 'dai', 0, 4, 'production', { reminders: 1 });
+  R('Kalshi', 'chd', 'dai', 0, 4, 'requested');
+  R('Kalshi', 'rogan', 'dai', 0, 2, 'requested', { reminders: 3, due: wk(0, 0) });
+  R('DraftKings', 'smartless', 'baked', 0, 3, 'production', { ackDay: 'Thu' });
+  R('AG1', 'armchair', 'baked', 0, 0, 'live', { ac: { state: 'verified', score: 94, ep: 'Ep. 612 (Mon)', miss: [] } });
+  R('Squarespace', 'huberman', 'dai', 0, 4, 'approved', { traffic: 'new', file: Object.assign(F('huberman', 'Squarespace', 95, [], fmt(addDays(TODAY, -1)) + ', 3:12pm'), { review: 'approved' }) });
+  R('Mint Mobile', 'oprah', 'dai', 0, 3, 'revision', { reminders: 1, revNote: 'Offer read as $25 a month. Script says $15', file: Object.assign(F('oprah', 'Mint Mobile', 68, [0], fmt(addDays(TODAY, -1)) + ', 1:30pm'), { review: 'declined' }) });
+  // last week: aired, air checks in
+  R('Rocket Money', 'chd', 'baked', -1, 2, 'live', { ac: { state: 'flagged', score: 71, ep: 'Ep. 418 (Wed)', note: 'Call to action was not read', miss: [3] } });
+  R('Ramp', 'mel', 'baked', -1, 3, 'live', { ac: { state: 'missed', note: 'No episode published Thursday. Nothing aired', miss: [] } });
+  R('Quince', 'huberman', 'dai', -1, 0, 'complete', { traffic: 'done', file: Object.assign(F('huberman', 'Quince', 97, [], fmt(wk(-2, 3)) + ', 9:40am'), { review: 'approved' }), ac: { state: 'verified', score: 97, ep: 'Ep. 301 (Mon)', miss: [], sent: true } });
+  R('BetterHelp', 'rogan', 'baked', -1, 1, 'complete', { ac: { state: 'verified', score: 91, ep: '#2412 (Tue)', miss: [], sent: true } });
+  R('DraftKings', 'armchair', 'dai', -1, 3, 'live', { traffic: 'done', file: Object.assign(F('armchair', 'DraftKings', 89, [], fmt(wk(-2, 4)) + ', 4:15pm'), { review: 'approved' }), ac: { state: 'verified', score: 89, ep: 'Ep. 611 (Thu)', miss: [] } });
+  // SmartLess: one new request, plus earlier reads so the show login has history
+  R('Monarch', 'smartless', 'dai', 0, 4, 'requested');
+  R('Ritual', 'smartless', 'dai', -1, 3, 'live', { traffic: 'done', file: Object.assign(F('smartless', 'Ritual', 93, [], fmt(wk(-2, 4)) + ', 2:05pm'), { review: 'approved' }), ac: { state: 'verified', score: 93, ep: 'Ep. 254 (Thu)', miss: [] } });
+  R('Squarespace', 'smartless', 'baked', -1, 0, 'complete', { ac: { state: 'verified', score: 95, ep: 'Ep. 253 (Mon)', miss: [], sent: true } });
+  R('Kalshi', 'smartless', 'baked', -2, 0, 'complete', { ac: { state: 'verified', score: 90, ep: 'Ep. 251 (Mon)', miss: [], sent: true } });
+  R('Toyota', 'oprah', 'baked', -1, 1, 'complete', { ac: { state: 'verified', score: 93, ep: 'Ep. 88 (Tue)', miss: [], sent: true } });
+
+  REQS.filter(r => r.status !== 'draft').slice(0, 9).forEach(r => {
+    const sh = SHOWS[r.show];
+    if (r.reminders) comm(sh.contact + ', ' + sh.name, 'Reminder: ' + r.brand + ' ' + (r.delivery === 'dai' ? 'file due ' + fmt(r.due) : 'read publishing ' + fmt(r.date)), reminderBody(r), r.id, true, fmt(addDays(TODAY, -1)) + ', 8:00am');
+  });
+}
+function reminderBody(r) { const sh = SHOWS[r.show]; return 'Hey ' + sh.contact.split(' ')[0] + ',\n\nQuick reminder on ' + r.brand + ' for ' + sh.name + '.\n\n' + (r.delivery === 'dai' ? 'The :' + r.len + ' file is due ' + dow(r.due) + ' ' + fmt(r.due) + '. MP3 only, please.' : 'The :' + r.len + ' ' + r.pos.toLowerCase() + ' read publishes ' + dow(r.date) + ' ' + fmt(r.date) + '.') + '\n\nScript and talking points are one click away:\n[ Open request ]\n\nThanks,\nAcme Network Ad Ops'; }
+function requestBody(r) { const sh = SHOWS[r.show], s = scriptOf(r); return 'Hey ' + sh.contact.split(' ')[0] + ',\n\nNew spot for ' + sh.name + ', week of ' + fmt(wk(Math.floor(daysBetween(MON0, r.date) / 7))) + '.\n\nBrand: ' + r.brand + '\nSpec: :' + r.len + ' host-read, ' + r.pos.toLowerCase() + ', ' + (r.delivery === 'dai' ? 'ad-inserted (upload an MP3 by ' + dow(r.due) + ' ' + fmt(r.due) + ')' : 'baked-in (nothing to upload)') + '\n' + (s.verbatim ? 'Read verbatim.\n' : '') + (s.personal ? 'Personal experience required.\n' : '') + (r.instr ? 'Note from ad ops: ' + r.instr + '\n' : '') + '\n[ Acknowledge and pick publish day ]   [ View script ]\n\nThanks,\nAcme Network Ad Ops'; }
+
+/* ───────── scoping ───────── */
+function netOf() { return S.role === 'producer' ? (S.pnet || 'ltc') : S.net; }
+const DRAWER = new URLSearchParams(location.search).get('drawer');   // set when this page is only the request panel, laid over the whole parent screen
+const ONLY = new URLSearchParams(location.search).get('brand');   // set when shown inside one campaign in the Operator inbox
+function scoped() { const n = netOf(); return REQS.filter(r => (n === 'all' || SHOWS[r.show].net === n) && (!ONLY || r.brand === ONLY)); }
+
+/* One copy of the spot data, shared by every Production view open in this browser (the Production tab and each campaign in the Operator inbox). */
+const STATE_KEY = 'acme_prod_state'; let EXTRA = { brands: {}, shows: {} };
+function save() { try { localStorage.setItem(STATE_KEY, JSON.stringify({ REQS, RID, EXTRA, applied })); } catch (e) {} }
+function load() {
+  let st = null; try { st = JSON.parse(localStorage.getItem(STATE_KEY) || 'null'); } catch (e) {}
+  if (!st || !st.REQS) return false;
+  REQS = st.REQS; RID = st.RID; EXTRA = st.EXTRA || EXTRA; Object.assign(BR, EXTRA.brands); Object.assign(SHOWS, EXTRA.shows); applied = Math.max(applied, st.applied || 0);
+  return true;
+}
+window.addEventListener('storage', e => { if (e.key === STATE_KEY && e.newValue && load()) render(); });
+const req = id => REQS.find(r => r.id === id);
+
+/* ───────── actions ───────── */
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('on'), 2400); }
+function refresh() { render(); }
+function sendDrafts(ids) {
+  let n = 0, held = 0;
+  ids.forEach(id => { const r = req(id); if (!r || r.status !== 'draft') return; if (r.noScript) { held++; return; }
+    const sh = SHOWS[r.show]; r.status = 'requested'; log(r, 'You (Ad Ops)', 'Sent to ' + sh.contact + ' at ' + sh.name); comm(sh.contact + ', ' + sh.name, 'New spot: ' + r.brand + ', ' + dow(r.date) + ' ' + fmt(r.date), requestBody(r), r.id, false); n++; });
+  S.sel.clear(); toast(n + ' request' + (n === 1 ? '' : 's') + ' sent to shows' + (held ? '. ' + held + ' held back, copy missing' : '')); refresh();
+}
+function remind(id) { const r = req(id), sh = SHOWS[r.show]; r.reminders++; AUTO.reminders++; log(r, 'You (Ad Ops)', 'Reminder sent to ' + sh.contact); comm(sh.contact + ', ' + sh.name, 'Reminder: ' + r.brand + (r.delivery === 'dai' ? ' file due ' + fmt(r.due) : ' read publishing ' + fmt(r.date)), reminderBody(r), r.id, false); toast('Reminder sent to ' + sh.contact); emit({ ev: 'remind', key: keyOf(r) }); refresh(); }
+function attachCopy(id) { const r = req(id); r.noScript = false; log(r, 'You (Ad Ops)', 'Copy link attached'); toast('Copy attached. Ready to send'); refresh(); }
+function saveInstr(id) { const r = req(id), v = $('#instr').value.trim(); r.instr = v; log(r, 'You (Ad Ops)', v ? 'Special instructions updated: "' + v + '"' : 'Special instructions cleared'); toast('Instructions saved'); refresh(); }
+function shiftDate(id, v) { const r = req(id); if (!v || v === r.date) return; const old = r.date, gap = daysBetween(r.date, r.due); r.date = v; r.due = addDays(v, gap); log(r, 'You (Ad Ops)', 'Flight shifted from ' + mdy(old) + ' to ' + mdy(v) + '. Host, execution team and Inventory updated'); comm(SHOWS[r.show].contact + ', ' + SHOWS[r.show].name, 'Date change: ' + r.brand + ' moves to ' + fmt(v), 'The ' + r.brand + ' spot has moved from ' + fmt(old) + ' to ' + fmt(v) + '. Nothing else changed.', r.id); toast('Flight shifted. Everyone notified'); emit({ ev: 'shift', key: keyOf(r), label: fmt(v) }); refresh(); }
+function togglePre(id) { const r = req(id); r.pre = !r.pre; log(r, 'You (Ad Ops)', 'Buyer pre-approval turned ' + (r.pre ? 'on' : 'off')); refresh(); }
+function hostAck(id, day) { const r = req(id), sh = SHOWS[r.show]; r.status = 'production'; r.ackDay = day; log(r, sh.contact, 'Acknowledged. Publishing ' + day); toast('Acknowledged. Ad ops can see your publish day'); render(); }
+function hostUpload(id) { const r = req(id), sh = SHOWS[r.show]; r.file = F(r.show, r.brand, 93, [], stamp()); r.status = 'qa'; log(r, sh.contact, 'Uploaded ' + r.file.orig); log(r, 'Agent', 'Scored the read against the script: 93% match', true); comm('Ad Ops', 'File in: ' + r.brand + ' on ' + sh.name + ' (93% script match)', 'The file is uploaded and scored. Every talking point and the call to action were read.\n\n[ Review and approve ]', r.id); toast('Uploaded. Ad ops has been notified'); render(); }
+function approveFile(id) {
+  const r = req(id), sh = SHOWS[r.show]; r.file.review = 'approved'; log(r, 'You (Ad Ops)', 'Accepted the file'); emit({ ev: 'accept', key: keyOf(r) });
+  if (r.pre && !r.buyerOk) { r.status = 'buyer'; log(r, 'Agent', 'Listen link sent to the buyer at ' + BR[r.brand].agency + ' for pre-approval', true); comm('Buyer, ' + BR[r.brand].agency, 'For approval: ' + r.brand + ' read on ' + sh.name, 'The ' + r.brand + ' read for ' + sh.name + ' is ready for your approval ahead of the ' + fmt(r.date) + ' flight.\n\n[ Listen and approve ]', r.id); toast('Accepted. Listen link sent to the buyer'); }
+  else finishApproval(r);
+  refresh();
+}
+function finishApproval(r) { const sh = SHOWS[r.show]; r.status = 'approved'; r.traffic = 'new'; AUTO.renamed++; AUTO.handoffs++; log(r, 'Agent', 'Renamed to ' + fileName(r) + ' and placed on the Execution desk with pixel and flight dates', true); comm('Execution team', 'Ready to run: ' + fileName(r), 'Approved file, pixel and flight dates are on your desk.\n\nShow: ' + sh.name + ' (' + sh.host + ')\nFlight: ' + fmt(r.date) + '\n\n[ Open Execution desk ]', r.id); comm(sh.contact + ', ' + sh.name, 'Approved: ' + r.brand + '. Thank you', 'Your ' + r.brand + ' read is approved. Nothing else needed.', r.id); toast('Accepted, renamed and placed on the Execution desk'); }
+function buyerApprove(id) { const r = req(id); r.buyerOk = true; log(r, 'Buyer, ' + BR[r.brand].agency, 'Approved the read'); finishApproval(r); refresh(); }
+function askRevision(id) {
+  const r = req(id), sh = SHOWS[r.show], v = ($('#revnote') && $('#revnote').value.trim()) || 'Please re-record';
+  r.file.review = 'declined'; r.status = 'revision'; r.revNote = v; log(r, 'You (Ad Ops)', 'Requested a revision: ' + v);
+  comm(sh.contact + ', ' + sh.name, 'Revision needed: ' + r.brand, 'Hey ' + sh.contact.split(' ')[0] + ',\n\nOne fix needed on the ' + r.brand + ' read:\n\n' + v + '\n\n[ Upload a new file ]', r.id, false); toast('Revision request sent to ' + sh.contact); emit({ ev: 'sendback', key: keyOf(r), note: v }); refresh();
+}
+function markTrafficked(id) { const r = req(id); r.traffic = 'done'; r.status = 'live'; log(r, 'Execution team', 'Set live in ' + SHOWS[r.show].host); toast('Marked live. Ad ops can see it'); emit({ ev: 'live', key: keyOf(r) }); refresh(); }
+function pickUp(id) { const r = req(id); r.traffic = 'picked'; log(r, 'Execution team', 'Downloaded ' + fileName(r)); toast('Downloaded ' + fileName(r)); refresh(); }
+function completeReq(id) { const r = req(id); r.status = 'complete'; log(r, 'You (Ad Ops)', 'Marked complete'); toast('Complete'); refresh(); if (S.open === id) back(); }   // done with this request: close the panel, back to the list
+function acOk(id) { const r = req(id); r.ac.state = 'verified'; r.ac.note = ''; log(r, 'You (Ad Ops)', 'Listened and cleared the air check'); toast('Air check cleared'); refresh(); }
+function acSend(id) { const r = req(id); r.ac.sent = true; log(r, 'You (Ad Ops)', 'Air check sent to the buyer at ' + BR[r.brand].agency); comm('Buyer, ' + BR[r.brand].agency, 'Air check: ' + r.brand + ' on ' + SHOWS[r.show].name, 'Your ' + r.brand + ' spot aired in ' + r.ac.ep + '.\n\n[ Listen at the timestamp ]', r.id, false); toast('Air check sent to the buyer'); refresh(); }
+function reopen(id) { const r = req(id), sh = SHOWS[r.show]; r.makeGood = true; r.status = 'requested'; r.date = wk(1, daysBetween(wk(Math.floor(daysBetween(MON0, r.date) / 7)), r.date)); r.due = r.delivery === 'dai' ? addDays(r.date, -3) : r.date; r.ac = { state: 'pending' }; r.file = null; r.traffic = null; r.reminders = 0; log(r, 'You (Ad Ops)', 'Reopened as a make-good for ' + fmt(r.date) + '. Same request, full history kept'); comm(sh.contact + ', ' + sh.name, 'Make-good: ' + r.brand + ', ' + dow(r.date) + ' ' + fmt(r.date), requestBody(r), r.id, false); toast('Reopened as a make-good for ' + fmt(r.date)); refresh(); }
+function me() { return S.role === 'host' ? 'Show' : { ops: 'You (Ad Ops)', producer: 'You (Network producer)', traffic: 'You (Execution team)' }[S.role]; }
+function addComment(id) { const r = req(id), v = $('#cmt').value.trim(); if (!v) return; const who = S.role === 'host' ? SHOWS[r.show].contact : me(); r.tl.unshift({ at: stamp(), who, text: v, auto: false, c: true }); toast('Comment added'); refresh(); }
+/* ───────── render ───────── */
+const pill = (label, tone) => '<span class="pill pill--' + tone + '">' + esc(label) + '</span>';
+const logo = (b, sm) => '<div class="logo' + (sm ? ' logo--sm' : '') + '" style="background:' + BR[b].col + '">' + initials(b) + '</div>';
+const scoreCol = s => s >= 85 ? 'var(--green-text)' : s >= 70 ? 'var(--amber-text)' : 'var(--red-text)';
+const TONE = { gray: 'var(--text-secondary)', amber: 'var(--amber-text)', blue: 'var(--blue-text)', red: 'var(--red-text)', green: 'var(--green-text)' };
+const statusOf = r => r.status === 'draft' && r.noScript ? ['Held back', 'red'] : ST[r.status];
+const sendDay = r => fmt(addDays(wk(Math.floor(daysBetween(MON0, r.date) / 7)), -6));
+const needsYou = r => r.status === 'qa' || (r.status === 'draft' && r.noScript) || isLate(r) || (r.status === 'live' && (r.ac.state === 'flagged' || r.ac.state === 'missed'));
+function why(r) {
+  return ({
+    draft: r.noScript ? 'The booking has no copy link, so it will not go to the show.' : 'Goes to the show on ' + sendDay(r) + '.',
+    requested: 'Awaiting acknowledgement from the show.',
+    production: r.delivery === 'dai' ? 'Acknowledged. Waiting on the file.' : 'Acknowledged. Publishing ' + (r.ackDay || dow(r.date)) + '.',
+    revision: 'Sent back. Waiting on a new file.',
+    qa: 'The file needs your review.',
+    buyer: 'Waiting on the buyer at ' + BR[r.brand].agency + '.',
+    approved: 'With the execution team.',
+    live: r.ac.state === 'pending' ? 'Air check runs when the episode publishes.' : r.ac.state === 'missed' ? 'Did not air. ' + r.ac.note + '.' : 'Aired in ' + r.ac.ep + '. Air check ' + r.ac.score + '% match.',
+    complete: 'Aired and closed out.'
+  })[r.status];
+}
+const EMBED = window.parent !== window;   // inside the Vetting Agent the login comes from its top-right account switch, not a picker here
+const roleSel = () => ONLY || EMBED ? '' : dd('role', 'Viewing as', S.role, [['ops', 'Ad ops'], ['producer', 'Network producer'], ['traffic', 'Execution team'], ['host', 'Show']].map(o => [o[0], 'Viewing as: ' + o[1]]), v => { S.role = v; S.sel.clear(); S.open = null; });
+/* Our own dropdown, never a native select. The menu is laid over the page so cards and tables cannot clip it. */
+const DDS = {}; let ddCur = null;
+function dd(id, aria, val, opts, pick) {
+  DDS[id] = { val, opts, pick }; const cur = opts.find(o => o[0] === val) || opts[0];
+  return '<button type="button" class="input dd" aria-haspopup="listbox" aria-label="' + aria + '" onclick="ddOpen(this,\'' + id + '\')"><span>' + esc(cur[1]) + '</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>';
+}
+function ddClose() { const m = document.getElementById('ddmenu'); if (m) m.remove(); ddCur = null; }
+function ddOpen(btn, id) {
+  const was = ddCur; ddClose(); if (was === id) return;
+  const d = DDS[id], r = btn.getBoundingClientRect(), m = document.createElement('div');
+  m.id = 'ddmenu'; m.className = 'ddmenu'; m.setAttribute('role', 'listbox'); m.setAttribute('aria-label', btn.getAttribute('aria-label'));
+  m.innerHTML = d.opts.map((o, i) => '<button type="button" role="option" aria-selected="' + (o[0] === d.val) + '" class="ddopt' + (o[0] === d.val ? ' on' : '') + '" onclick="ddPick(\'' + id + '\',' + i + ')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg><span>' + esc(o[1]) + '</span></button>').join('');
+  document.body.appendChild(m); ddCur = id;
+  m.style.minWidth = r.width + 'px'; m.style.top = (r.bottom + 4) + 'px'; m.style.maxHeight = Math.max(160, innerHeight - r.bottom - 16) + 'px';
+  m.style.left = Math.max(8, Math.min(r.left, innerWidth - m.offsetWidth - 8)) + 'px';
+  (m.querySelector('.on') || m.firstChild).focus();
+  m.onkeydown = e => { if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return; e.preventDefault(); const o = [...m.children], n = o.indexOf(document.activeElement) + (e.key === 'ArrowDown' ? 1 : -1); o[(n + o.length) % o.length].focus(); };
+}
+function ddPick(id, i) { const d = DDS[id]; ddClose(); d.pick(d.opts[i][0]); render(); const b = document.querySelector('.dd[onclick*="\'' + id + '\'"]'); if (b) b.focus(); }
+document.addEventListener('mousedown', e => { if (ddCur && !e.target.closest('#ddmenu, .dd')) ddClose(); });
+window.addEventListener('resize', ddClose); window.addEventListener('blur', ddClose);
+function render() {
+  S.tab = S.role === 'host' ? 'host' : S.role === 'traffic' ? 'traffic' : 'production';
+  if (S.open && !req(S.open)) S.open = null;
+  $('#h1').textContent = { production: 'Spots', traffic: 'Execution desk', host: 'My requests' }[S.tab];
+  $('#main').innerHTML = VIEW[S.tab]();
+  const dw = $('#drawer'), old = dw.querySelector('.dw__body'), top = old ? old.scrollTop : 0, fresh = S.anim; S.anim = false;
+  dw.innerHTML = S.open ? '<div class="dw-back' + (fresh ? ' in' : '') + '" onclick="back()"></div><aside class="dw' + (fresh ? ' in' : '') + '" role="dialog" aria-modal="true" aria-label="Spot">' + detail(req(S.open)) + '</aside>' : '';
+  const body = dw.querySelector('.dw__body'); if (body && !fresh) body.scrollTop = top;
+  if (fresh && body) dw.querySelector('.dw__x').focus();
+  save();
+}
+function openRequest(id) {
+  if (!DRAWER && window.parent !== window) {   // embedded: the panel opens over the whole parent screen, not inside this frame
+    const d = window.parent.document, old = d.getElementById('prod-drawer'); if (old) old.remove();
+    const f = d.createElement('iframe'); f.id = 'prod-drawer'; f.title = 'Spot'; f.setAttribute('allowtransparency', 'true');
+    f.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;border:0;z-index:200;background:transparent;color-scheme:normal';
+    f.src = 'acme-production.html?embed=1&drawer=' + encodeURIComponent(id) + '&role=' + S.role + '&host=' + S.hostShow; d.body.appendChild(f); return;
+  }
+  S.open = id; S.sendBack = false; S.editInstr = false; S.anim = true; render(); }
+function back() { if (DRAWER && window.frameElement) { window.frameElement.remove(); return; } S.open = null; render(); }
+function doSendBack(id) { S.sendBack = false; askRevision(id); }
+
+/* ───────── list ───────── */
+const VIEW = {};
+VIEW.production = () => {
+  const all = scoped(), ops = S.role === 'ops';
+  const test = { open: r => r.status !== 'complete', needs: needsYou, all: () => true }[S.status] || (r => r.status === S.status);
+  const rs = all.filter(r => test(r) && (S.show === 'all' || r.show === S.show) && (!S.q || (r.brand + ' ' + SHOWS[r.show].name).toLowerCase().includes(S.q.toLowerCase()))).sort((a, b) => a.due < b.due ? -1 : a.due > b.due ? 1 : 0);
+  const n = netOf(), shows = Object.keys(SHOWS).filter(k => n === 'all' || SHOWS[k].net === n);
+  const views = [['open', 'All open', all.filter(r => r.status !== 'complete').length], ['needs', 'Needs you', all.filter(needsYou).length]].concat(Object.keys(ST).map(k => [k, ST[k][0], all.filter(r => r.status === k).length]).filter(v => v[2] || S.status === v[0]), [['all', 'Everything', all.length]]);
+  const drafts = [...S.sel].filter(id => req(id) && req(id).status === 'draft'), waiting = [...S.sel].filter(id => req(id) && ['requested', 'production', 'revision'].includes(req(id).status));
+  const bulk = (drafts.length ? '<button class="btn btn--primary" onclick="sendDrafts([...S.sel])">' + I.send + 'Send ' + drafts.length + ' to shows</button>' : '') + (waiting.length ? '<button class="btn" onclick="[...S.sel].filter(i=>[\'requested\',\'production\',\'revision\'].includes(req(i).status)).forEach(remind);S.sel.clear();render()">' + I.bell + 'Remind ' + waiting.length + '</button>' : '');
+  const bar = ONLY ? (bulk ? '<div class="bar"><span class="sp"></span>' + bulk + '</div>' : '') :
+    '<div class="bar"><input class="input search" placeholder="Search" value="' + esc(S.q) + '" oninput="S.q=this.value;clearTimeout(window._q);window._q=setTimeout(()=>{render();const s=document.querySelector(\'.search\');s.focus();s.setSelectionRange(s.value.length,s.value.length)},250)">' +
+    dd('view', 'View', S.status, views.map(v => [v[0], v[1] + ' (' + v[2] + ')']), v => { S.status = v; }) +
+    dd('show', 'Show', S.show, [['all', 'All shows']].concat(shows.map(k => [k, SHOWS[k].name])), v => { S.show = v; }) +
+    '<span class="sp"></span>' + bulk + roleSel() + '</div>';
+  const row = r => { const late = isLate(r), sh = SHOWS[r.show], st = statusOf(r), dai = r.delivery === 'dai';
+    const sub = r.status === 'draft' && !r.noScript ? 'Sends ' + sendDay(r) : r.status === 'production' && r.ackDay ? 'Publishing ' + r.ackDay : r.manual ? 'Thread on manual' : '';
+    return '<tr class="rowlink" onclick="openRequest(\'' + r.id + '\')">' +
+      (ops ? '<td onclick="event.stopPropagation()"><input type="checkbox" aria-label="Select"' + (S.sel.has(r.id) ? ' checked' : '') + ' onchange="this.checked?S.sel.add(\'' + r.id + '\'):S.sel.delete(\'' + r.id + '\');render()"></td>' : '') +
+      (ONLY ? '' : '<td><div class="cell">' + logo(r.brand) + '<div><div class="cell__t">' + esc(r.brand) + ' | ' + mdy(r.date) + '</div><div class="cell__s">' + esc(BR[r.brand].agency) + (r.makeGood ? ' · Make-good' : '') + '</div></div></div></td>') +
+      '<td>' + pill(dai ? 'Ad-inserted' : 'Baked-in', 'line') + '</td>' +
+      '<td><div class="cell__t">' + esc(sh.name) + '</div>' + (ONLY ? '<div class="cell__s">' + esc(sh.contact) + (r.makeGood ? ' · Make-good' : '') + '</div>' : '') + '</td>' +
+      '<td>:' + r.len + ' ' + r.pos + '</td>' +
+      '<td>' + dow(r.date) + ' ' + fmt(r.date) + '</td>' +
+      '<td' + (late ? ' class="late"' : '') + '>' + (dai ? dow(r.due) + ' ' + fmt(r.due) : 'On air date') + (late ? '<div class="cell__s late">Past due</div>' : '') + '</td>' +
+      '<td>' + pill(st[0], st[1]) + (sub ? '<div class="cell__s" style="margin-top:3px">' + sub + '</div>' : '') + '</td>' +
+      '<td>' + (r.file ? '<b style="color:' + scoreCol(r.file.score) + '">' + r.file.score + '%</b>' : '<span class="muted">' + (dai ? 'No file yet' : '-') + '</span>') + '</td></tr>'; };
+  const allSel = rs.length && rs.every(r => S.sel.has(r.id));
+  return '<div class="card">' + bar + '<div class="tblwrap"><table><thead><tr>' +
+    (ops ? '<th><input type="checkbox" aria-label="Select all"' + (allSel ? ' checked' : '') + ' onchange="' + (allSel ? 'S.sel.clear()' : '[' + rs.map(r => "'" + r.id + "'").join(',') + '].forEach(i=>S.sel.add(i))') + ';render()"></th>' : '') +
+    (ONLY ? '' : '<th>Campaign</th>') + '<th>Delivery</th><th>Show</th><th>Ad specs</th><th>Air date</th><th>Due</th><th>Status</th><th>Script match</th></tr></thead><tbody>' +
+    (rs.map(row).join('') || '<tr><td colspan="9"><div class="empty">' + (ONLY ? 'No spots for this campaign yet.' : 'Nothing here.') + '</div></td></tr>') + '</tbody></table></div></div>';
+};
+
+VIEW.traffic = () => {
+  const rs = scoped().filter(r => r.traffic).sort((a, b) => (a.traffic === 'done') - (b.traffic === 'done') || (a.date < b.date ? -1 : 1));
+  const row = r => { const sh = SHOWS[r.show]; return '<tr class="rowlink" onclick="openRequest(\'' + r.id + '\')"><td><div class="cell">' + logo(r.brand) + '<div><div class="cell__t">' + esc(fileName(r)) + '</div><div class="cell__s">' + r.file.size + '</div></div></div></td><td>' + esc(sh.name) + '</td><td>' + sh.host + '</td><td>' + dow(r.date) + ' ' + fmt(r.date) + '</td><td>' + kfmt(r.imps) + '</td><td>' + (r.pixel ? 'Attached' : '<span class="muted">None</span>') + '</td><td>' + pill(r.traffic === 'new' ? 'New' : r.traffic === 'picked' ? 'Downloaded' : 'Live', r.traffic === 'done' ? 'green' : r.traffic === 'picked' ? 'blue' : 'amber') + '</td><td style="text-align:right" onclick="event.stopPropagation()">' + (r.traffic === 'done' ? '' : '<button class="btn btn--sm" onclick="pickUp(\'' + r.id + '\')">' + I.down + 'Download</button> <button class="btn btn--sm btn--primary" onclick="markTrafficked(\'' + r.id + '\')">Mark live</button>') + '</td></tr>'; };
+  return '<div class="card">' + (EMBED ? '' : '<div class="bar"><span class="sp"></span>' + roleSel() + '</div>') + '<div class="tblwrap"><table><thead><tr><th>File</th><th>Show</th><th>Hosting</th><th>Flight starts</th><th>Impressions</th><th>Pixel</th><th>Status</th><th></th></tr></thead><tbody>' + (rs.map(row).join('') || '<tr><td colspan="8"><div class="empty">Nothing waiting.</div></td></tr>') + '</tbody></table></div></div>';
+};
+
+VIEW.host = () => {
+  const k = S.hostShow, rs = REQS.filter(r => r.show === k && r.status !== 'draft'), todo = rs.filter(r => ['requested', 'revision'].includes(r.status) || (r.status === 'production' && r.delivery === 'dai')),
+    aired = rs.filter(r => ['live', 'complete'].includes(r.status)).sort((a, b) => b.date.localeCompare(a.date)), upcoming = rs.filter(r => !todo.includes(r) && !aired.includes(r)).sort((a, b) => a.date.localeCompare(b.date));
+  const hv = S.hostView || 'all', rest = hv === 'todo' ? [] : hv === 'upcoming' ? upcoming : hv === 'aired' ? aired : upcoming.concat(aired), showTodo = hv === 'all' || hv === 'todo';
+  const stat = r => r.status === 'production' ? pill('Acknowledged', 'green') : r.status === 'qa' || r.status === 'buyer' ? pill('In review', 'amber') : r.status === 'approved' ? pill('Approved', 'green') : pill('Aired', 'gray');
+  const check = r => r.ac && r.ac.state === 'verified' ? '<span style="font-weight:600">' + r.ac.score + '%</span> <span class="muted">' + esc(r.ac.ep) + '</span>' : r.ac && r.ac.state !== 'pending' ? '<span class="late">' + esc(r.ac.note || 'Flagged') + '</span>' : '<span class="muted">-</span>';
+  const days = r => '<div class="days">' + ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => '<button class="' + (d === dow(r.date) ? 'on' : '') + '" onclick="this.parentNode.querySelectorAll(\'button\').forEach(b=>b.classList.remove(\'on\'));this.classList.add(\'on\')">' + d + '</button>').join('') + '</div>';
+  const card = r => '<div class="todo">' + logo(r.brand) + '<div><div class="cell__t">' + esc(r.brand) + ' · :' + r.len + ' ' + r.pos.toLowerCase() + (r.makeGood ? ' · make-good' : '') + (r.status === 'requested' ? ' ' + pill('New', 'blue') : '') + '</div><div class="cell__s">' + (r.delivery === 'dai' ? 'Upload an MP3 by ' + dow(r.due) + ' ' + fmt(r.due) : 'Read it in the episode. Nothing to upload') + (r.status === 'revision' ? ' · <span class="late">Fix needed: ' + esc(r.revNote) + '</span>' : '') + '</div></div><div class="todo__r">' +
+    '<button class="btn btn--sm" onclick="openRequest(\'' + r.id + '\')">Script</button>' +
+    (r.status === 'requested' ? days(r) + '<button class="btn btn--sm btn--primary" onclick="hostAck(\'' + r.id + '\',this.parentNode.querySelector(\'.days .on\').textContent)">Acknowledge</button>' : '<button class="btn btn--sm btn--primary" onclick="hostUpload(\'' + r.id + '\')">' + I.up + 'Upload MP3</button>') + '</div></div>';
+  return '<div class="card"><div class="bar">' + (EMBED ? '' : dd('host', 'Show', k, Object.keys(SHOWS).map(x => [x, SHOWS[x].name]), v => { S.hostShow = v; })) +
+    dd('hostview', 'View', hv, [['all', 'All reads (' + rs.length + ')'], ['todo', 'New and to do (' + todo.length + ')'], ['upcoming', 'Upcoming (' + upcoming.length + ')'], ['aired', 'Aired (' + aired.length + ')']], v => { S.hostView = v; }) + '<span class="sp"></span>' + roleSel() + '</div>' +
+    (showTodo ? todo.map(card).join('') || (hv === 'todo' ? '<div class="empty">You are all caught up.</div>' : '') : '') +
+    (hv === 'todo' ? '' : '<div class="tblwrap"><table><thead><tr><th>Brand</th><th>Delivery</th><th>Airs</th><th>Status</th><th>Air check</th></tr></thead><tbody>' + (rest.map(r => '<tr class="rowlink" onclick="openRequest(\'' + r.id + '\')"><td><div class="cell">' + logo(r.brand) + '<span class="cell__t">' + esc(r.brand) + '</span></div></td><td>' + (r.delivery === 'dai' ? 'Ad-inserted' : 'Baked-in') + '</td><td>' + dow(r.date) + ' ' + fmt(r.date) + '</td><td>' + stat(r) + '</td><td>' + check(r) + '</td></tr>').join('') || '<tr><td colspan="5"><div class="empty">Nothing here.</div></td></tr>') + '</tbody></table></div>') + '</div>';
+};
+
+/* ───────── one request ───────── */
+function detail(r) {
+  const id = r.id, q = "'" + id + "'", sh = SHOWS[r.show], s = scriptOf(r), ops = S.role === 'ops', st = statusOf(r), late = isLate(r), dai = r.delivery === 'dai';
+  const B = (label, fn, cls, icon) => '<button class="btn' + (cls ? ' ' + cls : '') + '" onclick="' + fn + '">' + (icon || '') + label + '</button>';
+  const M = (l, v) => '<div class="m"><div class="m__l">' + l + '</div><div class="m__v">' + v + '</div></div>';
+  let acts = '';
+  if (ops) acts = ({
+    draft: r.noScript ? '' : B('Send now', 'sendDrafts([' + q + '])', 'btn--primary', I.send),
+    requested: B('Send reminder', 'remind(' + q + ')', 'btn--primary', I.bell),
+    production: B('Send reminder', 'remind(' + q + ')', '', I.bell),
+    revision: B('Send reminder', 'remind(' + q + ')', '', I.bell),
+    qa: B('Send back', 'S.sendBack=true;render()') + B(r.pre ? 'Accept and send to buyer' : 'Accept', 'approveFile(' + q + ')', 'btn--primary', I.check),
+    buyer: B('Buyer approved', 'buyerApprove(' + q + ')', 'btn--primary'),
+    live: r.ac.state === 'pending' ? '' : r.ac.state === 'verified' ? (r.ac.sent ? '' : B('Send air check to buyer', 'acSend(' + q + ')', '', I.send)) + B('Complete', 'completeReq(' + q + ')', 'btn--primary') : (r.ac.state === 'flagged' ? B('Clear it', 'acOk(' + q + ')') : '') + B('Reopen as make-good', 'reopen(' + q + ')', 'btn--primary'),
+    complete: B('Reopen as make-good', 'reopen(' + q + ')')
+  })[r.status] || '';
+  else if (S.role === 'traffic' && r.traffic && r.traffic !== 'done') acts = B('Download', 'pickUp(' + q + ')', '', I.down) + B('Mark live', 'markTrafficked(' + q + ')', 'btn--primary');
+  else if (S.role === 'host') acts = r.status === 'requested' ? B('Acknowledge', 'hostAck(' + q + ',\'' + dow(r.date) + '\')', 'btn--primary') : dai && ['production', 'revision'].includes(r.status) ? B('Upload MP3', 'hostUpload(' + q + ')', 'btn--primary', I.up) : '';
+
+  let file = '';
+  if (dai) {
+    if (r.file) {
+      const f = r.file, ok = f.review === 'approved', missed = checks(r, f.miss).filter(c => !c.ok).map(c => c.label);
+      file = '<div class="frow' + (ok ? ' ok' : '') + '"><button class="play" aria-label="Play" onclick="const s=this.parentNode.querySelector(\'.seek\');s.classList.remove(\'on\');void s.offsetWidth;s.classList.add(\'on\')">' + I.play + '</button><div class="frow__m"><div class="frow__n">' + esc(ok ? fileName(r) : f.orig) + '</div><div class="frow__s">Uploaded by ' + esc(sh.contact) + ' on ' + f.at + ' · ' + f.size + '</div><div class="seek"><i></i></div><div class="frow__s" style="margin-top:8px">Script match <b style="color:' + scoreCol(f.score) + '">' + f.score + '%</b> · ' + (missed.length ? '<span class="late">Not heard: ' + esc(missed.join('; ')) + '</span>' : 'every point and the call to action were read') + '</div></div>' + pill(ok ? 'Approved' : f.review === 'declined' ? 'Sent back' : 'Pending review', ok ? 'green' : f.review === 'declined' ? 'red' : 'amber') + '</div>' +
+        (ops && r.status === 'qa' && S.sendBack ? '<div class="frow frow--col"><textarea class="input" id="revnote" placeholder="What should they fix?">' + esc(missed.length ? 'Missed in the read: ' + missed.join('; ') + '. Please re-record with this included.' : '') + '</textarea><div class="frow__acts">' + B('Cancel', 'S.sendBack=false;render()') + B('Send to show', 'doSendBack(' + q + ')', 'btn--primary') + '</div></div>' : '');
+    } else file = '<div class="frow"><div class="frow__ic">' + I.up + '</div><div class="frow__m"><div class="frow__n">No file yet</div><div class="frow__s">' + (r.status === 'draft' ? 'The show uploads an MP3 here once the request goes out.' : 'Waiting on ' + esc(sh.contact) + '. Due ' + dow(r.due) + ' ' + fmt(r.due) + '. ' + r.reminders + ' reminder' + (r.reminders === 1 ? '' : 's') + ' sent.') + '</div></div></div>';
+  }
+  const air = r.ac.state === 'pending' ? '' : '<div class="frow"><div class="frow__ic">' + I.check + '</div><div class="frow__m"><div class="frow__n">Air check</div><div class="frow__s">' + (r.ac.state === 'missed' ? esc(r.ac.note) : 'Found in ' + r.ac.ep + ' · <b style="color:' + scoreCol(r.ac.score) + '">' + r.ac.score + '%</b> match' + (r.ac.note ? ' · ' + esc(r.ac.note) : '')) + '</div></div>' + pill(AC[r.ac.state][0], AC[r.ac.state][1]) + '</div>';
+  const script = r.noScript ? '<div class="frow"><div class="frow__ic">' + I.link + '</div><div class="frow__m"><div class="frow__n">No copy on the booking</div><div class="frow__s">Held back so a show never gets a request without a script.</div></div>' + (ops ? B('Attach copy', 'attachCopy(' + q + ')', 'btn--sm') : '') + '</div>'
+    : '<details class="frow"' + (S.role === 'host' ? ' open' : '') + '><summary><div class="frow__ic">' + I.link + '</div><div class="frow__m"><div class="frow__n">Script</div><div class="tags">' + (s.verbatim ? pill('Read verbatim', 'line') : '') + (s.personal ? pill('Personal experience required', 'blue') : '') + (!s.verbatim && !s.personal ? '<span class="frow__s">Talking points and call to action</span>' : '') + '</div></div><span class="tog"></span></summary><ul class="points">' + s.pts.map(p => '<li>' + esc(p) + '</li>').join('') + '<li><b>Call to action:</b> ' + esc(s.cta) + '</li></ul></details>';
+  const instr = ops && S.editInstr ? '<div class="frow"><input class="input" id="instr" value="' + esc(r.instr) + '" placeholder="Anything they missed last time?">' + B('Save', 'S.editInstr=false;saveInstr(' + q + ')') + '</div>'
+    : (ops || r.instr) ? '<div class="frow' + (ops ? ' frow--click' : '') + '"' + (ops ? ' onclick="S.editInstr=true;render();document.querySelector(\'#instr\').focus()"' : '') + '><div class="frow__ic">' + I.info + '</div><div class="frow__m"><div class="frow__n">Special instructions</div><div class="frow__s">' + (r.instr ? esc(r.instr) : '<i>Click to add instructions for the show</i>') + '</div></div></div>' : '';
+  const thread = window.top !== window && window.top.openInboxThread && THREADS.includes(keyOf(r));
+
+  return '<div class="dw__head"><div class="dw__top">' + logo(r.brand, true) + '<div class="dtitle">' + esc(title(r)) + '</div><button class="dw__x" aria-label="Close" onclick="back()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
+      '<div class="dstat"><b style="color:' + TONE[st[1]] + '">' + st[0] + '</b>' + esc(why(r)) + '</div></div>' +
+    '<div class="dw__body">' +
+      '<div class="mgrid">' + M('Show', esc(sh.name)) + M('Assigned to', esc(sh.contact)) + M('Delivery', dai ? 'Ad-inserted' : 'Baked-in') + M('Ad specs', ':' + r.len + ' host-read, ' + r.pos.toLowerCase()) +
+        M(dai ? 'File due' : 'Publishes', (dai ? dow(r.due) + ' ' + fmt(r.due) : (r.ackDay || sh.pub)) + (late ? ' ' + pill('Past due', 'red') : '')) +
+        M('Air date', ops && !['live', 'complete'].includes(r.status) ? '<input type="date" aria-label="Air date" value="' + r.date + '" onchange="shiftDate(' + q + ',this.value)">' : dow(r.date) + ' ' + fmt(r.date)) + '</div>' +
+      '<div><div class="dw__h">Files</div><div class="creative"><div class="creative__t">Creative 1</div>' + file + script + instr + air + '</div></div>' +
+      '<div><div class="dw__h">Timeline</div><div class="cmt"><input class="input" id="cmt" placeholder="Add a comment for the team or the show" onkeydown="if(event.key===\'Enter\')addComment(' + q + ')">' + B('Comment', 'addComment(' + q + ')') + '</div>' + r.tl.map(e => '<div class="ev' + (e.auto ? ' ev--agent' : '') + (e.c || /^Comment: /.test(e.text) ? ' ev--cmt' : '') + '"><div class="ev__h"><b>' + esc(e.who) + '</b><span>' + e.at + '</span></div><div class="ev__t">' + esc(e.text.replace(/^Comment: /, '')) + '</div></div>').join('') + '</div>' +
+      '<div><div class="dw__h">Details</div><dl class="dl">' +
+        '<div><dt>Campaign</dt><dd>' + esc(r.brand) + ' · ' + esc(BR[r.brand].agency) + '</dd></div>' +
+        '<div><dt>Network</dt><dd>' + (NETS[sh.net] || 'Unassigned') + '</dd></div>' +
+        '<div><dt>Booked</dt><dd>' + kfmt(r.imps) + ' impressions at $' + r.cpm + ' CPM</dd></div>' +
+        '<div><dt>Tracking pixel</dt><dd>' + (r.pixel ? 'Attached' : 'None') + '</dd></div>' +
+        '<div><dt>Requires buyer approval</dt><dd>' + (ops ? '<button class="sw' + (r.pre ? ' on' : '') + '" aria-label="Toggle buyer approval" onclick="togglePre(' + q + ')"></button>' : (r.pre ? 'Yes' : 'No')) + '</dd></div>' +
+        '<div><dt>Request created</dt><dd>' + (r.tl.length ? r.tl[r.tl.length - 1].at : '-') + '</dd></div>' +
+        (thread ? '<div><button class="link" onclick="window.top.openInboxThread(\'show\',\'' + r.brand + ' ' + sh.name + '\');if(DRAWER)back()">View email thread</button></div>' : '') +
+      '</dl></div>' +
+    '</div>' + (acts ? '<div class="dw__foot">' + acts + '</div>' : '');
+}
+
+/* ───────── link to the show agent's threads ───────── */
+const ME = 'production';
+const keyOf = r => r.brand + '|' + SHOWS[r.show].name;
+const THREADS = ['Quince|SmartLess', 'Monarch|The Joe Rogan Experience', 'Kalshi|The Joe Rogan Experience', 'Ritual|The Mel Robbins Podcast', 'Squarespace|Huberman Lab', 'Kalshi|Call Her Daddy'];
+function reseed() { seed(); syncInventory(false); S.open = null; }
+function handle(ev) {
+  const r = REQS.find(x => keyOf(x) === ev.key && x.status !== 'complete'); if (!r) return;
+  const sh = SHOWS[r.show], me = 'You (Ad Ops)';
+  if (ev.ev === 'choice') {
+    if (ev.kase === 'file') { if (r.status === 'qa') ev.opt === 'hold' ? approveFile(r.id) : askRevision(r.id); }
+    else if (ev.kase === 'move') ev.opt === 'hold' ? shiftDate(r.id, '2026-06-29') : log(r, me, 'Show asked to move outside the booked week. Kept the date, from the Inbox');
+    else if (ev.kase === 'silent') ev.opt === 'hold' ? remind(r.id) : log(r, me, 'No reply from the show. Lining up a make-good date, from the Inbox');
+    else if (ev.kase === 'pushback') log(r, me, ev.opt === 'hold' ? 'Host pushed back on a read-verbatim line. Asked the buyer for an approved alternate' : 'Host pushed back on a read-verbatim line. Told them it stands');
+  }
+  else if (ev.ev === 'mode') { r.manual = ev.manual; log(r, me, ev.manual ? 'Took over the show thread in the Inbox. The agent only drafts now' : 'Handed the show thread back to the agent'); }
+  else if (ev.ev === 'status') {
+    if (ev.status === 'Acknowledged' && r.status === 'requested') { r.status = 'production'; r.ackDay = r.ackDay || dow(r.date); log(r, sh.contact, 'Acknowledged by email. Publishing ' + r.ackDay); }
+    else if (ev.status.indexOf('File in') === 0 && r.delivery === 'dai' && !r.file && ['requested', 'production', 'revision'].includes(r.status)) hostUpload(r.id);
+    else if (!/Accepted|Shifted|Revision|File in/.test(ev.status)) log(r, 'Agent', 'Show thread: ' + ev.status, true);
+  }
+  else if (ev.ev === 'log') log(r, me, ev.text);
+}
+function openSpot(key) { const r = REQS.find(x => keyOf(x) === key); if (!r) return; S.role = 'ops'; S.tab = 'production'; S.status = r.status === 'complete' ? 'all' : 'open'; openRequest(r.id); }
+function checkNav() { if (ONLY || DRAWER) return; try { const v = JSON.parse(localStorage.getItem('acme_prodnav') || 'null'); if (v) { localStorage.removeItem('acme_prodnav'); openSpot(v.key); } } catch (e) {} }
+window.addEventListener('storage', e => { if (e.key === 'acme_prodnav') checkNav(); });
+if (/[?&]embed=1/.test(location.search)) document.body.classList.add('nested');
+if (ONLY) document.body.classList.add('campaign');
+if (DRAWER) document.body.classList.add('drawer-only');
+
+/* ───────── shared spot events: Inbox threads <-> Production rows ─────────
+   Both screens append to one log in localStorage and replay what the other wrote. */
+const SPOT_LOG = 'acme_spot_events'; let applied = 0, applying = false;
+if (window.self === window.top) { try { localStorage.removeItem(SPOT_LOG); } catch (e) {} }
+function emit(ev) { if (applying) return; try { const l = JSON.parse(localStorage.getItem(SPOT_LOG) || '[]'); l.push(Object.assign({ from: ME }, ev)); localStorage.setItem(SPOT_LOG, JSON.stringify(l)); applied = l.length; } catch (e) {} }
+function pull() {
+  let l = []; try { l = JSON.parse(localStorage.getItem(SPOT_LOG) || '[]'); } catch (e) {}
+  if (l.length < applied) { reseed(); applied = 0; }
+  applying = true; let n = 0;
+  for (; applied < l.length; applied++) { if (l[applied].from !== ME) { try { handle(l[applied]); n++; } catch (e) { console.error(e); } } }
+  applying = false; if (n) render();
+}
+window.addEventListener('storage', e => { if (e.key === SPOT_LOG) pull(); });
+
+/* ───────── bookings from Inventory ───────── */
+const INV_SHOW = { rogan: 'rogan', armchair: 'armchair', callherdaddy: 'chd', huberman: 'huberman', melrobbins: 'mel', smartless: 'smartless', oprah: 'oprah' };
+function syncInventory(announce) {
+  const read = k => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) { return []; } };
+  const inv = read('acme_spot_bookings'), vet = read('acme_vet_bookings');
+  let added = 0;
+  REQS = REQS.filter(r => r.src !== 'inv' || r.status !== 'draft' || inv.find(b => b.id === r.invId));   // cleared in Inventory before it went out
+  [[inv, 'inv'], [vet, 'vet']].forEach(([list, src]) => list.forEach(b => {
+    if (REQS.find(r => r.invId === b.id)) return;
+    let show = INV_SHOW[b.showId];
+    if (!show) { if (!b.showName) return; show = 'x_' + b.showName.toLowerCase().replace(/[^a-z0-9]/g, ''); if (!SHOWS[show]) { SHOWS[show] = EXTRA.shows[show] = { name: b.showName, short: b.showName, net: 'orig', contact: b.contact || 'Producer', pub: 'Mon', host: 'Megaphone', ontime: 92 }; } }
+    const a = b.ask || {};
+    if (!BR[b.brand]) BR[b.brand] = EXTRA.brands[b.brand] = { col: b.col || '#334155', agency: a.agency || 'Direct', pts: b.pts || ['Talking points are in the copy link on the booking'], cta: b.cta || 'as written in the copy' };
+    const dai = a.delivery === 'dai';
+    const r = R(b.brand, show, dai ? 'dai' : 'baked', 0, 0, 'draft', { fresh: true, invId: b.id, src, date: b.date, due: dai ? addDays(b.date, -3) : b.date, len: a.len || 60, pos: { pre: 'Pre-roll', mid: 'Mid-roll', post: 'Post-roll' }[b.roll] || 'Mid-roll', pre: !!a.pre, verbatim: !!a.verbatim, personal: !!a.personal, imps: a.imps || 350000, cpm: b.cpm || 28, pixel: !!a.pixel, noScript: !a.copy });
+    log(r, 'Sales', src === 'vet' ? 'IO signed on a vetted show. Request created from the vetting record, nothing re-typed' : 'Booked in Inventory. Request created automatically, nothing re-typed');
+    if (r.noScript) log(r, 'Agent', 'No copy link on the booking. Held back from sending', true);
+    added++;
+  }));
+  if (added && announce && !ONLY) toast(added + ' new booking' + (added === 1 ? '' : 's'));
+  return added;
+}
+window.addEventListener('storage', e => { if (e.key === 'acme_spot_bookings' || e.key === 'acme_vet_bookings') { load(); syncInventory(true); render(); } });
+window.addEventListener('focus', () => { if (syncInventory(true)) render(); });
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && ddCur) { ddClose(); return; } if (e.key === 'Escape' && S.open && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) back(); });
+if (window.self === window.top) { try { localStorage.removeItem(STATE_KEY); } catch (e) {} }
+if (!load()) seed();
+function applyRole() {
+  if (ONLY || !EMBED) return false; let v = null; try { v = JSON.parse(localStorage.getItem('acme_role') || 'null'); } catch (e) {}
+  const role = (v && v.role) || 'ops', host = (v && v.host) || S.hostShow, pnet = (v && v.net) || ''; if (role === S.role && host === S.hostShow && pnet === (S.pnet || '')) return false;
+  S.role = role; S.hostShow = host; S.pnet = pnet; S.sel.clear(); S.show = 'all'; S.status = 'open'; return true;
+}
+window.addEventListener('storage', e => { if (e.key === 'acme_role' && !DRAWER && applyRole()) { ddClose(); render(); } });
+/* which network each show belongs to is set in Shows and Settings > Networks */
+function applyAccess() { let A = null; try { A = JSON.parse(localStorage.getItem('acme_access') || 'null'); } catch (e) {} if (!A) return;
+  (A.networks || []).forEach(n => { NETS[n.id] = n.name; });
+  Object.keys(SHOWS).forEach(k => { const a = (A.shows || {})[SHOWS[k].name]; if (a) SHOWS[k].net = a.net || 'none'; }); }
+window.addEventListener('storage', e => { if (e.key === 'acme_access') { applyAccess(); render(); } });
+applyAccess();
+applyRole();
+if (DRAWER) { const u = new URLSearchParams(location.search); S.open = isNaN(+DRAWER) || !req(DRAWER) ? DRAWER : DRAWER; if (!req(S.open) && req(+DRAWER)) S.open = +DRAWER; S.role = u.get('role') || S.role; S.hostShow = u.get('host') || S.hostShow; S.anim = true; }
+syncInventory(false); render(); pull(); checkNav();
+if (DRAWER) { if (!S.open) back(); else window.focus(); }
+</script>
+</body>
+</html>

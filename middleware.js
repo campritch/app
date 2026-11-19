@@ -33,7 +33,7 @@ const TEAM_PATHS = new Set([
   // reachable ungated.
   '/acme', '/acme-os.html',
   '/acme-inventory.html', '/acme-vetting.html',
-  '/acme-outbound-bw.html', '/acme-delivery.html',
+  '/acme-outbound-bw.html', '/acme-delivery.html', '/acme-booking.html', '/acme-production.html', '/acme-inbox.html', '/acme-settings.html',
   '/acme/creators', '/acme-creators.html'
 ]);
 
@@ -76,7 +76,7 @@ export const config = {
     '/demos', '/demos.html',
     '/acme', '/acme-os.html',
     '/acme-inventory.html', '/acme-vetting.html',
-    '/acme-outbound-bw.html', '/acme-delivery.html',
+    '/acme-outbound-bw.html', '/acme-delivery.html', '/acme-booking.html', '/acme-production.html', '/acme-inbox.html', '/acme-settings.html',
     '/acme/creators', '/acme-creators.html',
     '/outbound', '/acme-outbound.html',
     '/financialdashboard', '/financial-dashboard-preview.html'

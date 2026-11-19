@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acme Network — Inbox</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2318181B'/%3E%3Ctext x='16' y='22' font-family='Helvetica,Arial,sans-serif' font-size='15' font-weight='700' fill='%23ffffff' text-anchor='middle'%3EAN%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #17212B;
+      --text-primary: #0E1323;
+      --text-secondary: #707481;
+      --text-tertiary: #707481;
+      --border: #DEE0E4;
+      --border-light: #EDEEF1;
+      --white: #ffffff;
+      --accent: #FF6267;
+      --accent-hover: #ff4d52;
+      --accent-soft: #FFF1F1;
+      --secondary: #E4E6ED;
+      --secondary-lite: #F3F4F6;
+      --page-bg: #F9FAFB;
+      --green-text: #0E6832; --green-bg: #D6F1E0;
+      --amber-text: #C2410C; --amber-bg: #FFEDD5;
+      --blue-text: #1435C0;  --blue-bg: #C7E0FF;
+      --red-text: #B91C1C;   --red-bg: #FEE2E2;
+      --radius-card: 16px; --radius-panel: 12px; --radius-btn: 8px; --radius-pill: 999px;
+      --shadow-card: 0 1px 2px rgba(14,19,35,.04), 0 8px 24px rgba(14,19,35,.05);
+      --shadow-pop: 0 8px 24px rgba(14,19,35,.08);
+      --shadow-btn: 0 1px 3px 0 rgba(166,175,195,.20);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; background: var(--page-bg); color: var(--text-primary); -webkit-font-smoothing: antialiased; line-height: 1.45; font-size: 14px; }
+    button { font-family: inherit; cursor: pointer; }
+    input, textarea, select { font-family: inherit; }
+    .wrap { max-width: 1320px; margin: 0 auto; padding: 24px 28px 60px; }
+
+    /* header */
+    .pagebar { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+    .view-title { font-size: 20px; font-weight: 700; letter-spacing: -.03em; }
+    .view-sub { font-size: 13px; color: var(--text-secondary); margin-top: 3px; font-weight: 500; max-width: 640px; }
+    .pagebar__right { display: flex; align-items: center; gap: 10px; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border-radius: var(--radius-btn); padding: 9px 16px; font-size: 14px; font-weight: 500; border: 1px solid var(--border); background: var(--white); color: var(--text-primary); box-shadow: var(--shadow-btn); white-space: nowrap; }
+    .btn:hover { background: var(--secondary); }
+    .btn--primary { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: none; }
+    .btn--primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .btn--sm { padding: 6px 11px; font-size: 12.5px; font-weight: 600; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* segmented view tabs */
+    .tabs { display: flex; gap: 4px; background: var(--secondary-lite); border-radius: 10px; padding: 4px; width: fit-content; }
+    .tab { border: 0; background: transparent; padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 600; color: var(--text-secondary); display: inline-flex; align-items: center; gap: 7px; }
+    .tab.active { background: var(--white); color: var(--text-primary); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filters { display: flex; gap: 6px; flex-wrap: wrap; }
+    .fpill { border: 1px solid var(--border); background: var(--white); color: var(--text-secondary); border-radius: var(--radius-pill); padding: 6px 12px; font-size: 12.5px; font-weight: 600; display: inline-flex; gap: 6px; align-items: center; }
+    .fpill b { font-weight: 700; color: var(--text-primary); }
+    .fpill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .fpill.active b { color: #fff; }
+
+    /* stats */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-card); margin-bottom: 20px; }
+    .stat { padding: 16px 20px; border-right: 1px solid var(--border-light); }
+    .stat:last-child { border-right: 0; }
+    .stat__label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+    .stat__value { font-size: 24px; font-weight: 700; letter-spacing: -.04em; margin-top: 4px; font-variant-numeric: tabular-nums; }
+    .stat__sub { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+    .stat__sub b { color: var(--green-text); font-weight: 600; }
+
+    /* layout */
+    .grid { display: grid; grid-template-columns: 248px 1fr; gap: 18px; align-items: start; } .grid > * { min-width: 0; }
+    /* the thread list is the same component as the Vetting Agent inbox */
+    .msg-pane { background: var(--white); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow-card); }
+    .inbox2__head { padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .inbox2__search { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; background: var(--white); border-radius: 8px; box-shadow: inset 0 0 0 1px var(--border); padding: 6px 9px; color: var(--text-tertiary); }
+    .inbox2__search:focus-within { box-shadow: inset 0 0 0 1.5px var(--text-primary); }
+    .inbox2__search input { border: none; outline: none; background: none; font-family: inherit; font-size: 12.5px; font-weight: 500; color: var(--text-primary); width: 100%; min-width: 0; }
+    .inbox2__who { flex: none; max-width: 132px; display: inline-flex; align-items: center; gap: 8px; font-family: inherit; font-size: 12.5px; font-weight: 500; color: var(--text-primary); background: var(--white); border: 0; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--border); padding: 7px 8px; cursor: pointer; outline: none; }
+    .inbox2__who span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .inbox2__who svg { flex: none; color: var(--text-secondary); }
+    .inbox2__who:focus-visible { box-shadow: inset 0 0 0 1.5px var(--text-primary); }
+    .inbox2__sub { padding: 10px 16px 6px; border-top: 1px solid var(--border-light); font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-tertiary); }
+    .inbox2__sub + .conv { border-top: 0; }
+    .inbox2__head { justify-content: flex-start; gap: 8px; }
+    .inbox2__sbtn { padding: 8px; } .inbox2__sbtn svg { color: var(--text-secondary); }
+    .inbox2__head:not(.searching) .inbox2__search, .inbox2__head.searching .inbox2__sbtn, .inbox2__head.searching #boxDd, .inbox2__head.searching #whoDd { display: none; }
+    .inbox2__x { flex: none; border: 0; background: none; padding: 2px; display: inline-flex; color: var(--text-tertiary); cursor: pointer; border-radius: 4px; }
+    #boxDd { flex: 1; min-width: 0; display: flex; } #boxDd:empty { display: block; }
+    #boxDd .inbox2__who { max-width: none; flex: 1; justify-content: space-between; }
+    .inbox2__who i { font-style: normal; color: var(--text-tertiary); margin-left: 6px; }
+    .inbox2__empty { padding: 18px 20px; font-size: 12.5px; color: var(--text-tertiary); border-top: 1px solid var(--border-light); }
+    .conv { display: flex; gap: 11px; padding: 10px 16px; border-top: 1px solid var(--border-light); cursor: pointer; width: 100%; text-align: left; }
+    .conv:hover { background: #FCFCFD; } .conv.on { background: var(--secondary-lite); } .conv:focus-visible { outline: 2px solid var(--text-primary); outline-offset: -2px; }
+    .conv__body { min-width: 0; flex: 1; }
+    .conv__top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .conv__name { font-size: 13.5px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .conv__pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 3px; }
+    .cpill { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 500; padding: 3px 8px; border-radius: 999px; background: var(--secondary-lite); color: var(--text-secondary); white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+    .conv.on .cpill { background: var(--white); } .cpill--needs { background: var(--amber-bg) !important; color: var(--amber-text); font-weight: 600; }
+    .own { flex: none; display: inline-flex; align-items: center; border: 0; background: none; padding: 0; font-family: inherit; font-size: 11px; font-weight: 600; color: var(--text-tertiary); border-radius: 999px; cursor: pointer; }
+    .own i { width: 24px; height: 24px; border-radius: 50%; background: #27272A; color: #fff; display: grid; place-items: center; font-size: 10px; font-weight: 700; font-style: normal; }
+    .own:hover i, .own:focus-visible i { box-shadow: 0 0 0 2px var(--white), 0 0 0 3.5px var(--text-tertiary); }
+    .own.none { padding: 3px 8px; border: 1px dashed var(--border); }
+    .ddmenu { position: fixed; z-index: 400; background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 32px rgba(23,33,43,.14); padding: 4px; overflow-y: auto; display: flex; flex-direction: column; }
+    .ddopt { display: flex; align-items: center; gap: 8px; border: 0; background: none; font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text-primary); padding: 8px 12px 8px 8px; border-radius: 7px; cursor: pointer; text-align: left; white-space: nowrap; outline: none; }
+    .ddopt svg { flex: none; visibility: hidden; } .ddopt.on { font-weight: 600; } .ddopt.on svg { visibility: visible; }
+    .ddopt:hover, .ddopt:focus-visible { background: var(--page-bg); }
+    .list { display: flex; flex-direction: column; gap: 10px; }
+    .deal { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-panel); padding: 14px; box-shadow: var(--shadow-card); cursor: pointer; transition: border-color .15s; }
+    .deal:hover { border-color: #C5CBD5; }
+    .deal.active { border-color: var(--text-primary); box-shadow: 0 0 0 1px var(--text-primary), var(--shadow-card); }
+    .deal__top { display: flex; align-items: center; gap: 11px; }
+    .logo { width: 40px; height: 40px; border-radius: 10px; background: var(--secondary-lite); border: 1px solid var(--border); display: grid; place-items: center; font-weight: 700; font-size: 13px; color: var(--text-primary); flex-shrink: 0; }
+    .deal__name { font-size: 15px; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .deal__meta { font-size: 12.5px; color: var(--text-secondary); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .deal__row { display: flex; align-items: center; justify-content: space-between; margin-top: 11px; gap: 8px; }
+    .deal__last { font-size: 12.5px; color: var(--text-secondary); margin-top: 9px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .money { font-weight: 700; font-variant-numeric: tabular-nums; font-size: 13.5px; }
+
+    .pill { display: inline-flex; align-items: center; gap: 5px; border-radius: var(--radius-pill); padding: 3px 9px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+    .pill--green { background: var(--green-bg); color: var(--green-text); }
+    .pill--amber { background: var(--amber-bg); color: var(--amber-text); }
+    .pill--blue { background: var(--blue-bg); color: var(--blue-text); }
+    .pill--gray { background: var(--secondary-lite); color: var(--text-secondary); }
+    .pill--red { background: var(--red-bg); color: var(--red-text); }
+    .typing { display: inline-flex; gap: 3px; }
+    .typing i { width: 4px; height: 4px; border-radius: 50%; background: currentColor; animation: blink 1.2s infinite; }
+    .typing i:nth-child(2) { animation-delay: .2s; } .typing i:nth-child(3) { animation-delay: .4s; }
+    @keyframes blink { 0%,80%,100% { opacity: .25 } 40% { opacity: 1 } }
+
+    /* deal room */
+    .room { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-card); overflow: hidden; }
+    .room__head { padding: 18px 22px 16px; border-bottom: 1px solid var(--border-light); }
+    .room__title { display: flex; align-items: center; gap: 12px; }
+    .room__name { font-size: 18px; font-weight: 700; letter-spacing: -.03em; }
+    .room__meta { font-size: 12.5px; color: var(--text-secondary); font-weight: 500; margin-top: 2px; }
+    .room__actions { margin-left: auto; display: flex; gap: 8px; }
+
+    .stepper { display: flex; margin-top: 16px; gap: 6px; }
+    .step { flex: 1; }
+    .step__bar { height: 4px; border-radius: 4px; background: var(--secondary); }
+    .step.done .step__bar { background: var(--text-primary); }
+    .step.cur .step__bar { background: var(--accent); }
+    .step__label { font-size: 11.5px; font-weight: 600; color: var(--text-secondary); margin-top: 6px; }
+    .step.done .step__label, .step.cur .step__label { color: var(--text-primary); }
+
+    .room__body { display: grid; grid-template-columns: 1fr 320px; }
+    .propgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px 32px; }
+    .prop { font-size: 14.5px; line-height: 1.75; color: var(--text-primary); } .prop b { font-weight: 600; }
+    .prop__h { font-size: 16px; font-weight: 700; letter-spacing: -.01em; margin-bottom: 4px; }
+    .prop__rule { height: 1px; background: var(--border); margin: 4px 0 2px; }
+    .thread { padding: 18px 22px; border-right: 1px solid var(--border-light); min-height: 320px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+    .thread > * { flex: none; }
+    .wrap { padding-bottom: 24px !important; }
+    .msg-pane { display: flex; flex-direction: column; } .msg-pane > .inbox2__head { flex: none; } #list { flex: 1; min-height: 0; overflow-y: auto; }
+    #room .room { display: flex; flex-direction: column; } #room .room__head { flex: none; }
+    #room .room__body { flex: 1; min-height: 0; grid-template-rows: minmax(0, 1fr); } #room .thread { min-height: 0; }
+    .side { padding: 18px; display: flex; flex-direction: column; gap: 16px; background: #FCFCFD; }
+    .side__t { font-size: 13px; font-weight: 700; letter-spacing: -.01em; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+
+    .mail { border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--white); animation: rise .35s ease; }
+    @keyframes rise { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+    .mail--out { border-color: #E9D6D7; }
+    .mail__head { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--border-light); }
+    .av { width: 30px; height: 30px; border-radius: 50%; background: #27272A; color: #fff; display: grid; place-items: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+    .av--ext { background: var(--secondary); color: var(--text-primary); }
+    .mail__head { border-bottom: 0; padding: 12px 14px 0; align-items: baseline; }
+    .mail__line { border: 0; background: none; padding: 0; margin: 0; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--text-primary); cursor: pointer; text-align: left; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-radius: 4px; }
+    .mail__line:hover { color: var(--text-secondary); } .mail__line:focus-visible { outline: 1.5px solid var(--text-primary); outline-offset: 2px; }
+    .mail__meta { display: none; padding: 8px 14px 0; font-size: 12.5px; color: var(--text-secondary); font-weight: 500; grid-template-columns: 44px 1fr; gap: 3px 10px; }
+    .mail.open .mail__meta { display: grid; } .mail__meta b { font-weight: 500; color: var(--text-tertiary); } .mail__meta span { color: var(--text-primary); min-width: 0; overflow-wrap: anywhere; } .mail__meta em { font-style: normal; color: var(--text-secondary); }
+    .mail__time { align-self: center; white-space: nowrap; flex: none; }
+    /* message cards: soft white cards on a grey thread, large readable body, quiet uppercase date */
+    #room .thread { background: #F4F5F7; padding: 20px 22px; gap: 12px; }
+    #room .mail { border: 0; border-radius: 8px; box-shadow: 0 1px 2px rgba(16,19,35,.06), 0 2px 8px rgba(16,19,35,.06); }
+    #room .mail--out { border-color: transparent; }
+    #room .mail__head { padding: 16px 22px 0; }
+    #room .mail__line { font-size: 14.5px; font-weight: 600; color: #16181D; letter-spacing: -.005em; }
+    #room .mail__time { font-size: 11.5px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; color: #8E9299; }
+    #room .mail__time .pill { text-transform: none; letter-spacing: 0; }
+    #room .mail__meta { padding: 10px 22px 0; font-size: 13px; }
+    #room .mail__body { padding: 12px 22px 18px; font-size: 14.5px; line-height: 1.7; font-weight: 400; color: #1B1D22; }
+    #room .mail__att { margin: 0 22px 16px; }
+    #room .whyd { margin: 0 22px 18px; }
+    .mail__from { font-size: 13px; font-weight: 600; }
+    .mail__to { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+    .mail__time { margin-left: auto; font-size: 12px; color: var(--text-secondary); font-weight: 500; display: flex; align-items: center; gap: 8px; }
+    .mail__body { padding: 12px 14px; font-size: 13.5px; line-height: 1.55; white-space: pre-line; }
+    .mail__att { margin: 0 14px 12px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 6px 10px; font-size: 12.5px; font-weight: 600; }
+    .why { margin: 0 14px 12px; background: var(--secondary-lite); border-radius: 10px; padding: 9px 11px; font-size: 12.5px; color: var(--text-primary); line-height: 1.45; display: flex; gap: 8px; }
+    .why b { font-weight: 700; white-space: nowrap; }
+
+    .approval { border: 1px solid #F6C9A4; background: #FFFAF5; border-radius: var(--radius-panel); padding: 14px; animation: rise .35s ease; }
+    .approval__t { font-size: 13.5px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .approval__s { font-size: 13px; color: var(--text-primary); margin: 6px 0 12px; line-height: 1.5; }
+    .approval__opts { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .working { display: flex; align-items: center; gap: 9px; font-size: 12.5px; color: var(--text-secondary); font-weight: 600; padding: 4px 2px; }
+
+    .compose { display: flex; gap: 8px; margin-top: auto; padding-top: 6px; }
+    .input { width: 100%; border: 0; border-radius: var(--radius-btn); background: var(--white); box-shadow: inset 0 0 0 1px var(--border), var(--shadow-btn); padding: 10px 12px; font-size: 14px; color: var(--text-primary); min-height: 42px; outline: none; }
+    .input:focus { box-shadow: inset 0 0 0 1.5px var(--text-primary); }
+    .input::placeholder { color: var(--text-secondary); }
+    textarea.input { resize: vertical; min-height: 84px; line-height: 1.5; }
+    select.input { border: 1px solid var(--border); box-shadow: var(--shadow-btn); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23707481' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+
+    /* terms table */
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    th { background: #F7F8FA; font-size: 12px; font-weight: 600; color: var(--text-secondary); text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--border-light); }
+    td { padding: 8px; border-bottom: 1px solid var(--border-light); font-weight: 500; vertical-align: top; font-variant-numeric: tabular-nums; }
+    td.k { color: var(--text-secondary); font-weight: 600; }
+    td.cur { font-weight: 700; }
+    .tbl { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--white); }
+    .flash { animation: flash 1.2s ease; }
+    @keyframes flash { 0% { background: #FFF1D6 } 100% { background: transparent } }
+
+    .kv { display: grid; grid-template-columns: 92px 1fr; gap: 6px 10px; font-size: 12.5px; }
+    .kv dt { color: var(--text-secondary); font-weight: 600; }
+    .kv dd { font-weight: 500; }
+    .points { font-size: 12.5px; line-height: 1.5; padding-left: 16px; }
+    .points li { margin-bottom: 3px; }
+    .rule { display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; padding: 7px 0; border-bottom: 1px solid var(--border-light); }
+    .rule:last-child { border-bottom: 0; }
+    .rule span { color: var(--text-secondary); font-weight: 600; }
+    .rule b { font-weight: 700; }
+
+    .empty { padding: 60px 20px; text-align: center; color: var(--text-secondary); font-weight: 500; }
+
+    /* drawer */
+    .scrim { position: fixed; inset: 0; background: rgba(14,19,35,.35); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40; }
+    .scrim.open { opacity: 1; pointer-events: auto; }
+    .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 560px; max-width: 100vw; background: var(--white); box-shadow: -12px 0 40px rgba(14,19,35,.16); transform: translateX(100%); transition: transform .25s ease; z-index: 50; display: flex; flex-direction: column; }
+    .drawer.open { transform: none; }
+    .drawer__head { padding: 20px 24px 14px; border-bottom: 1px solid var(--border-light); }
+    .drawer__t { font-size: 18px; font-weight: 700; letter-spacing: -.03em; }
+    .drawer__s { font-size: 13px; color: var(--text-secondary); font-weight: 500; margin-top: 3px; }
+    .drawer__body { padding: 18px 24px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px; }
+    .drawer__foot { padding: 14px 24px; border-top: 1px solid var(--border-light); display: flex; align-items: center; gap: 10px; }
+    .drawer__foot .sum { font-size: 12.5px; color: var(--text-secondary); font-weight: 500; margin-right: auto; }
+    .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .field .hint { font-size: 12px; color: var(--text-secondary); font-weight: 500; margin-top: 5px; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    .drop { border: 1.5px dashed #C5CBD5; border-radius: var(--radius-panel); padding: 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; background: #FCFCFD; }
+    .drop:hover { border-color: var(--text-primary); }
+    .drop__icon { width: 38px; height: 38px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex-shrink: 0; }
+    .drop__t { font-size: 13.5px; font-weight: 600; }
+    .drop__s { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+    .parsed { border: 1px solid var(--border); border-radius: var(--radius-panel); padding: 12px 14px; display: none; }
+    .parsed.show { display: block; animation: rise .3s ease; }
+    .parsed__t { font-size: 12.5px; font-weight: 700; display: flex; align-items: center; gap: 7px; margin-bottom: 8px; color: var(--green-text); }
+    .section-label { font-size: 12px; font-weight: 700; color: var(--text-secondary); letter-spacing: .02em; margin-top: 4px; }
+    .seg { display: flex; gap: 4px; background: var(--secondary-lite); border-radius: 10px; padding: 4px; }
+    .seg button { flex: 1; border: 0; background: transparent; padding: 8px 10px; border-radius: 7px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+    .seg button.active { background: var(--white); color: var(--text-primary); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+
+    .pb-src { font-size: 12.5px; color: var(--text-secondary); font-weight: 500; background: var(--secondary-lite); border-radius: 10px; padding: 10px 12px; line-height: 1.5; }
+    .pb-src b { color: var(--text-primary); }
+    .pb { display: flex; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--border-light); }
+    .pb__n { width: 24px; height: 24px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700; display: grid; place-items: center; flex-shrink: 0; }
+    .pb__t { font-size: 13.5px; font-weight: 700; letter-spacing: -.01em; }
+    .pb__d { font-size: 13px; line-height: 1.5; margin-top: 3px; }
+    .pb__s { font-size: 12px; color: var(--text-secondary); font-weight: 500; margin-top: 4px; }
+    .pb__edit { align-self: flex-start; flex: none; opacity: 0; } .pb:hover .pb__edit, .pb__edit:focus-visible { opacity: 1; }
+    @media (hover: none) { .pb__edit { opacity: 1; } }
+    .pb--edit textarea { width: 100%; resize: vertical; line-height: 1.5; font-family: inherit; }
+    .pbfiles { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+    .pbfile { display: flex; align-items: center; gap: 9px; border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; font-size: 13px; background: var(--white); color: var(--text-secondary); }
+    .pbfile__n { flex: 1; min-width: 0; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pbfile__s { font-size: 12px; font-weight: 500; white-space: nowrap; }
+    .pbx { border: 0; background: none; color: var(--text-secondary); width: 24px; height: 24px; border-radius: 6px; display: grid; place-items: center; flex: none; }
+    .pbx:hover { background: var(--secondary-lite); color: var(--text-primary); }
+    .field label.drop { display: flex; margin: 0; }
+    .mailbtn span { max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mailmenu { z-index: 500; padding: 6px; } .mailmenu__h { font-size: 12px; font-weight: 500; color: var(--text-secondary); padding: 6px 8px 4px; }
+    .mailmenu__rule { height: 1px; background: var(--border-light); margin: 4px 0; }
+    .mailrow { display: flex; align-items: center; gap: 4px; } .mailrow .ddopt span { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
+    .mailrow b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; } .mailrow small { font-size: 11.5px; color: var(--text-secondary); font-weight: 500; }
+    .ccrow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 12px; font-size: 12.5px; }
+    .ccrow__l { color: var(--text-secondary); font-weight: 600; margin-right: 2px; }
+    .ccrow--box { margin-top: 0; border: 1px solid var(--border); border-radius: 10px; padding: 7px 8px; background: var(--white); }
+    .ccchip { display: inline-flex; align-items: center; gap: 4px; background: var(--secondary-lite); border-radius: 999px; padding: 3px 4px 3px 10px; font-weight: 500; color: var(--text-primary); }
+    .ccchip button { border: 0; background: none; color: var(--text-secondary); width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; }
+    .ccchip button:hover { background: var(--secondary); color: var(--text-primary); }
+    .ccadd { border: 0; outline: none; background: none; font: inherit; font-size: 12.5px; font-weight: 500; color: var(--text-primary); min-width: 110px; flex: 1; padding: 4px 4px; border-radius: 6px; }
+    .ccadd::placeholder { color: var(--text-secondary); }
+    .drop.over { border-color: var(--text-primary); background: var(--secondary-lite); }
+    .mail--static { animation: none; }
+    @media (max-width: 1100px) { .room__body { grid-template-columns: 1fr; } .thread { border-right: 0; border-bottom: 1px solid var(--border-light); } }
+    @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } .stats { grid-template-columns: 1fr 1fr; } .stat:nth-child(2) { border-right: 0; } .wrap { padding: 18px 16px 50px; } .row3 { grid-template-columns: 1fr 1fr; } }
+    [hidden] { display: none !important; }
+    .whyd { margin: 0 14px 12px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.45; }
+    .whyd summary { cursor: pointer; font-weight: 600; width: fit-content; }
+    .whyd[open] { background: var(--secondary-lite); border-radius: 10px; padding: 9px 11px; color: var(--text-primary); }
+    .draft__ta { display: block; width: 100%; margin-top: 10px; resize: vertical; line-height: 1.5; font-family: inherit; font-size: 13.5px; }
+    .draft__cc { padding: 0; margin-top: 10px; border: 0; } .draft__saved { font-size: 12px; font-weight: 500; color: var(--text-secondary); align-self: center; }
+    .draft { border: 1px dashed #C5CBD5; background: #FCFCFD; border-radius: var(--radius-panel); padding: 14px; }
+    .mode { display: flex; gap: 3px; background: var(--secondary-lite); border-radius: 9px; padding: 3px; }
+    .mode button { border: 0; background: transparent; padding: 5px 12px; border-radius: 6px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+    .mode button.active { background: var(--white); color: var(--text-primary); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="pagebar" style="align-items:center;margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div class="view-title" id="title">Inbox</div>
+    </div>
+    <div class="pagebar__right">
+      <span id="kindDd"></span>
+      <span id="inboxMail"></span>
+      <button class="btn btn--sm" onclick="openPlaybook()">Playbook</button>
+      <button class="btn btn--sm" id="newBtn" onclick="if(kind==='seller')openAddLead();else{side=kind;openForm()}">New thread</button>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="msg-pane">
+      <div class="inbox2__head" id="listHead">
+        <button type="button" class="inbox2__who inbox2__sbtn" aria-label="Search" onclick="searchOpen()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
+        <div class="inbox2__search">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex:none"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="qIn" placeholder="Search" aria-label="Search threads" oninput="qF=this.value;render()" onblur="if(!this.value)searchClose()" onkeydown="if(event.key==='Escape')searchClose()">
+          <button type="button" class="inbox2__x" aria-label="Close search" onmousedown="event.preventDefault()" onclick="searchClose()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </div>
+        <span id="boxDd"></span>
+        <span id="whoDd"></span>
+      </div>
+      <div id="list"></div>
+    </div>
+    <div id="room"></div>
+  </div>
+</div>
+
+<!-- quick form drawer -->
+<div class="scrim" id="scrim" onclick="closeForm()"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer__head">
+    <div class="drawer__t" id="formTitle">New booking</div>
+    <div class="drawer__s" id="formSub">Give the agent the brief. It takes it from here.</div>
+  </div>
+  <div class="drawer__body" id="formBody"></div>
+  <div class="drawer__foot" id="drawerFoot">
+    <div class="sum" id="formSum" style="display:flex"></div>
+    <button class="btn" onclick="closeForm()">Cancel</button>
+    <button class="btn btn--primary" onclick="launch()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+      <span id="launchLabel">Start booking</span>
+    </button>
+  </div>
+</aside>
+
+<script>
+/* ───────────────────────── helpers ───────────────────────── */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const usd = n => '$' + Math.round(n).toLocaleString('en-US');
+const cpm = n => '$' + (Math.round(n * 100) / 100).toFixed(2).replace(/\.00$/, '');
+const kfmt = n => n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : Math.round(n / 1000) + 'K';
+const initials = s => s.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+const first = s => s.split(' ')[0];
+const fmtDate = iso => { const d = new Date(iso + 'T12:00:00'); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); };
+const SPEED = 1100; // ms between simulated emails
+const TIMES = ['Mon 9:04am', 'Mon 4:12pm', 'Tue 8:31am', 'Tue 5:32pm', 'Wed 8:19am', 'Thu 9:02am', 'Thu 12:19pm', 'Thu 12:20pm', 'Thu 12:31pm', 'Thu 5:49pm', 'Fri 9:10am', 'Fri 2:46pm', 'Mon 9:35am', 'Mon 3:12pm', 'Tue 10:05am', 'Tue 4:40pm'];
+
+const STAGES = {
+  buyer:  ['Outreach', 'Proposal', 'Negotiating', 'IO', 'Creative', 'Live'],
+  seller: ['Inquiry', 'Proposal', 'Negotiating', 'IO', 'Creative', 'Live']
+};
+const GOALS = { awareness: 'Awareness', conversions: 'Conversions / promo code', launch: 'Product launch' };
+const SELL_GOALS = { cpm: 'Protect CPM', sellthrough: 'Maximize sell-through', remnant: 'Fill remnant' };
+
+/* Categories sellers route to review. Flag them in the first email, not after scripting. */
+const SENSITIVE = [
+  { re: /\b(invest|wefunder|funding round|shares?|crowdfund|crypto|token)\b/i, label: 'investment solicitation' },
+  { re: /\b(peptide|hormone|supplement|cure|treat|reverses?|weight loss|clinical)\b/i, label: 'health claims' },
+  { re: /\b(gambl|casino|betting|sportsbook)\b/i, label: 'gambling' },
+  { re: /\b(cbd|thc|alcohol|vape)\b/i, label: 'restricted product' },
+];
+function screen(text) { const hit = SENSITIVE.find(s => s.re.test(text || '')); return hit ? hit.label : null; }
+
+/* What the agent learned from real booking threads (sources anonymized). */
+const PLAYBOOK = [
+  { t: 'Name the client and what the ad promotes in email one', d: 'Sellers asked "Who is the client?" before quoting, and one routed an investment pitch to review only after scripting started. The agent names the brand, the product and any sensitive category up front.', src: 'AI dev-tools brand × tech show · investing network thread' },
+  { t: 'Send brief, budget and timeline before they ask', d: 'Every seller asked for go-live date and budget before building a proposal. Sending them in the first or second email saves a full round trip.', src: 'Health brand × lifestyle network' },
+  { t: 'One clean ask, not a haggle', d: '"Any flexibility to bring CPM down to $X?" was accepted in a single round. The agent asks once at your walk-away and only escalates if the seller holds.', src: 'Health brand × lifestyle network' },
+  { t: 'Read the rate card\'s priority tiers', d: 'One network runs anything under $35 CPM as non-prioritized, which back-loads delivery. The agent tells you what a lower CPM costs in delivery before you take it.', src: 'Robotics brand × investing network' },
+  { t: 'Ask format questions with the offer', d: 'DAI or baked-in, run-of or fixed position, host-read or client audio, delivery per episode. Asking these one at a time added a day each.', src: 'Robotics brand × investing network' },
+  { t: 'Walk away fast when the math cannot work', d: 'A flat $25-30K per episode with a 3-episode minimum against a test budget. The agent asks once for a smaller package, then closes politely and logs the rate card.', src: 'AI dev-tools brand × tech show' },
+  { t: 'Nudge after 24 hours, twice max', d: '"Just following up here!" after a quiet day. After two nudges it pings you instead of double-tapping a third time.', src: 'All three threads' },
+  { t: 'Draft the IO itself', d: 'Internal handoffs ("can you draft the IO and send it to me?") added 1-2 days per deal. The agent fills the IO from the agreed terms and sends it.', src: 'Health brand × lifestyle network · robotics thread' },
+  { t: 'Request the read sample with the talking points', d: 'Getting an audio read sample for brand approval took three follow-ups on one deal. The agent asks for it in the same email as the talking points.', src: 'Robotics brand × investing network' },
+];
+
+let side = 'seller';
+let filter = 'needs';
+let kind = 'seller';
+let detailsOpen = false;
+let activeId = null;
+let deals = [];
+let seq = 0;
+
+/* ───────────────────────── negotiation scripts ─────────────────────────
+   Shaped on real booking threads: outreach → brief → proposal → one price
+   ask → IO → creative approvals → live. Each step can add an email, move
+   the stage, update terms, or pause for you (approval). */
+
+function buyerScript(d) {
+  const card = Math.round(d.max + 6);          // rate card "standard priority" tier
+  const counter = Math.round(d.max + 2);       // seller's counter, over your walk-away
+  const s1 = d.shows[0], s2 = d.shows[1];
+  const flight = `${fmtDate(d.start)} - ${fmtDate(d.end)}`;
+  const flag = d.flag;
+  const budget = d.budget || d.imps / 1000 * d.target;
+
+  if (d.type === 'flat') return [
+    { stage: 0, mail: { dir: 'out', body: `Hey ${first(d.contact)},\n\nI'm reaching out about ${d.brand}, ${d.desc}. They want to reach ${d.audience}, and we think ${s1} could be a strong fit.\n\nWould love to see your sponsorship options, rates and upcoming availability. Budget for this first test is around ${usd(budget)}.\n\nThanks!\nCam`,
+        head: 'Opened with the client and budget', why: 'Named the client and shared the budget up front, so the seller can say yes or no without a "who is the client?" round trip.' } },
+    { stage: 1, terms: { cpm: `${usd(d.flatRate)} / episode`, volume: '3-episode minimum', format: 'Pre-roll or mid-roll + newsletter' }, mail: { dir: 'in',
+        body: `Thanks for sharing, sounds like a good fit!\n\n${s1} is a top-20 show in its category, 45k downloads per episode plus the newsletter (1.2M readers). Placements include podcast and newsletter.\n\nPre-roll: ${usd(d.flatRate)}\nMid-roll: ${usd(d.flatRate - 5000)}\n\nThere is a 3-episode minimum.` } },
+    { stage: 2, mail: { dir: 'out', body: `Thanks for sending this over! The show definitely looks like a strong fit, but the pricing is quite a bit more than what we can do for a test at this stage.\n\nIf there's any flexibility on pricing or a smaller package you could offer, we'd be happy to take a look.`,
+        head: 'Pushed back on the episode minimum', why: `3-episode minimum = ${usd((d.flatRate - 5000) * 3)} at the cheapest, vs a ${usd(budget)} budget. Asked once for a smaller package before walking.` } },
+    { mail: { dir: 'in', body: `No worries. That's not an option at this time but thanks for your interest!` } },
+    { status: 'passed', mail: { dir: 'out', body: `Totally understand, thanks ${first(d.contact)}! We'll keep ${s1} in mind as budgets grow.`,
+        head: 'Passed and logged the rate card', why: 'Closed politely and logged the rate card and minimum to the show profile, so nobody re-asks next quarter.' } },
+  ];
+
+  return [
+    { stage: 0, mail: { dir: 'out',
+        body: `Hey ${first(d.contact)},\n\nStarting a new thread here for ${d.brand}! ${d.desc[0].toUpperCase() + d.desc.slice(1)}. They're looking to reach ${d.audience}, so we think ${d.shows.join(' and ')} could be a great fit.${flag ? `\n\nFlagging up front: the creative touches ${flag}, so happy to route it through your review before any scripting.` : ''}\n\nWould you be able to share a media kit or rate card with placements, rates, availability and any category exclusivity?\n\nThanks!\nCam`,
+        head: flag ? 'Flagged talking points for review' : 'Introduced the client and the ad', why: flag ? `Talking points touch ${flag}. Flagged it in email one so the network routes review now, not after the hosts have the script.` : 'Named the client and what the ad promotes in the first email. Sellers ask "who is the client?" before quoting anything.' } },
+    { mail: { dir: 'in', body: `Hi Cam,\n\nThanks for thinking of ${s1} for ${d.brand}! Happy to put together a proposal with the relevant options.\n\nCould you share the campaign brief, including the target timeline and budget?` } },
+    { mail: { dir: 'out', att: `${d.brand} - talking points.pdf`,
+        body: `Thanks for getting back to me!\n\nWe're hoping to go live ${fmtDate(d.start)} and run through ${fmtDate(d.end)}, with a budget of around ${usd(budget)}. Goal is ${GOALS[d.goal].toLowerCase()}. Talking points attached.\n\nWould love to see what you can put together!`,
+        head: 'Sent the full brief', why: 'Timeline, budget, goal and talking points in one email. Every seller needs these before they will build a proposal.' } },
+    { stage: 1, terms: { cpm: card, format: 'DAI mid-roll, run-of', priority: `Standard at ${cpm(card)}+` }, mail: { dir: 'in', att: `${d.network} - proposal.pdf`,
+        body: `Thanks, that helps. Proposal attached.\n\n${d.shows.join(' and ')} ${d.shows.length > 1 ? 'are' : 'is'} approved and listed first. Ad positions Mid 1 and Mid 2, 15-30 seconds.\n\nRate: under ${cpm(card)} is considered non-prioritized, ${cpm(card)}+ is standard prioritized, ${cpm(card + 5)}+ is highest priority.` } },
+    { stage: 2, terms: { cpm: d.target, volume: `${kfmt(d.imps)} impressions`, format: 'Host-read, DAI (asked)' }, mail: { dir: 'out',
+        body: `Thanks for sending this over! A couple of quick ones: would these run as dynamic insertions, and what does delivery look like per episode?\n\nIf it works on your end, we'd like to move forward with ${kfmt(d.imps)} impressions across ${d.shows.join(' and ')} at a ${cpm(d.target)} CPM, host-read.`,
+        head: 'Opened pricing at your target CPM', why: `Format questions and the offer in one email. Opened at your ${cpm(d.target)} target, below their tier, to leave room for one ask.` } },
+    { mail: { dir: 'out', body: `Just following up here! We're hoping to move forward with ${s1} soon, so it'd be great to get clarity on delivery and insertion when you have a chance.`,
+        head: 'Nudged after 24 hours of silence', why: 'No reply in 24 hours. Threads stall most often right after an offer goes out.' } },
+    { terms: { cpm: counter, format: 'Host-read, DAI mid-roll run-of', priority: `Non-prioritized under ${cpm(card)}` }, mail: { dir: 'in',
+        body: `Hi - yes, dynamically inserted through our ad server, run-of in the mid positions. Host-read works.\n\nBest we can do is ${cpm(counter)}. Heads up that anything under ${cpm(card)} runs non-prioritized, so delivery can back-load toward the end of the flight.` } },
+    { approval: {
+        title: `Seller is at ${cpm(counter)}, ${cpm(counter - d.max)} over your walk-away`,
+        body: `Also: under ${cpm(card)} runs non-prioritized, so delivery may back-load. I'd ask once for your ${cpm(d.max)} max with "any flexibility" phrasing. That landed in one round on a past deal.`,
+        options: [
+          { id: 'hold', label: `Ask for ${cpm(d.max)}`, primary: true },
+          { id: 'approve', label: `Approve ${cpm(counter)}` },
+          { id: 'takeover', label: 'I\'ll take over' }
+        ] } },
+    { branch: c => c === 'approve'
+        ? { mail: { dir: 'out', body: `Works for us at ${cpm(counter)}, host-read, DAI mid-roll. I'll send the IO over now.`, head: 'Confirmed the rate you approved', why: `You approved ${cpm(counter)}. Locked the format in writing before sending paper.` } }
+        : { mail: { dir: 'out', body: `Got it, thanks! Would there be any flexibility to bring CPM down to ${cpm(d.max)}? If so we can sign the IO this week.`, head: 'Countered on price at your walk-away', why: 'One clean ask at your walk-away, paired with a fast signature. No haggling.' } } },
+    { branch: c => c === 'approve'
+        ? { stage: 3, terms: { cpm: counter }, mail: { dir: 'in', body: `Sounds great. Do you have an insertion order available?` } }
+        : { stage: 3, terms: { cpm: d.max }, mail: { dir: 'in', body: `Good news, we can accommodate ${cpm(d.max)} CPM for ${d.brand}!${s2 ? `\n\nAlso a quick heads up that ${s2} is sold out for the rest of the year, in case that factors into your plans.` : ''}` } } },
+    { terms: s2 ? { volume: `${kfmt(d.imps)} impressions (${s1} only)` } : {}, mail: { dir: 'out', att: `${d.network} x ${d.brand} - Insertion Order.docx`,
+        body: `Thanks! Draft IO attached: ${kfmt(d.imps)} impressions, host-read, DAI mid-roll, ${flight}.\n\nPlease confirm it looks good and confirm the run dates so I can request signatures.`,
+        head: 'Sent the IO', why: 'Drafted the IO from the agreed terms instead of an internal handoff. That handoff added 1-2 days on past deals.' } },
+    { terms: { flight }, mail: { dir: 'in', att: 'IO - countersigned.pdf',
+        body: `Signed and attached. Run dates ${flight} work, sooner the better.\n\nWhen will you have the script available for us to review?` } },
+    { stage: 4, terms: { creative: 'Read sample requested' }, mail: { dir: 'out', att: `${d.brand} - talking points.pdf`,
+        body: `Talking points attached, tracking link to follow. Could you also send an audio read sample so the brand can approve before episodes go live?\n\nThanks so much!`,
+        head: 'Sent talking points, asked for a read sample', why: 'Asked for the read sample in the same email as the talking points. On a past deal it took three follow-ups to get one.' } },
+    { terms: { creative: 'Sample received' }, mail: { dir: 'in', att: `${d.brand} - read sample.mp3`, body: `Read sample attached. Talking points cleared our review.` } },
+    { stage: 5, status: 'booked', terms: { creative: 'Brand approved' }, mail: { dir: 'out',
+        body: `Brand loved it, approved! You're good to go live ${fmtDate(d.start)}. Thanks again!`,
+        head: 'Approved the read for launch', why: 'Got brand sign-off on the read, then cleared it for launch. Delivery tracking starts at first air.' } },
+  ];
+}
+
+function sellerScript(d) {
+  const ask = d.floor - 2;
+  const flight = `${fmtDate(d.start)} - ${fmtDate(d.end)}`;
+  const s1 = d.shows[0], s2 = d.shows[1];
+  return [
+    { stage: 0, mail: { dir: 'in',
+        body: `Hey team,\n\nWe have a new brand we'd love to run by you: ${d.brand}, ${d.desc}. The campaign is targeting ${d.audience}.\n\nWe have ${s1} in mind. Would you be able to share an RFP with available placements, rates and any category exclusivity options?\n\nThanks!\n${d.contact}` } },
+    { mail: { dir: 'out', body: `Hi ${first(d.contact)},\n\nThanks for thinking of ${s1} for ${d.brand}! Happy to put together a proposal.\n\nCould you share the campaign brief, including the target timeline and budget?`,
+        head: 'Qualified the lead', why: 'Qualified before quoting. Budget and timeline decide which shows and formats are worth pitching.' } },
+    { mail: { dir: 'in', body: `We're hoping to go live ${fmtDate(d.start)}, with a budget of around ${usd(d.imps / 1000 * d.floor)}. We also liked the simulcast option on the roster.` } },
+    { stage: 1, terms: { cpm: d.rate, volume: `${kfmt(d.imps)} impressions`, format: 'Host-read, DAI mid-roll' }, mail: { dir: 'out', att: `${d.brand} x Acme Network - proposal.pdf`,
+        body: `Thanks, that helps. Proposal attached.\n\n${d.shows.join(' and ')} ${d.shows.length > 1 ? 'are' : 'is'} approved and listed first, at ${cpm(d.rate)} CPM host-read. I've also included a couple of shows with relevant audiences, host approval pending. Holds are placed for 48 hours.\n\nLet me know which options you'd like to explore.`,
+        head: 'Sent the proposal with 48-hour holds', why: 'Led with host-approved shows so the buyer can book today, and placed 48-hour holds to create a soft deadline.' } },
+    { stage: 2, terms: { cpm: ask }, mail: { dir: 'in', body: `Thanks! We'll go with ${s1} for now. Would there be any flexibility to bring CPM down to ${cpm(ask)}?` } },
+    { approval: {
+        title: `Buyer asked for ${cpm(ask)}, ${cpm(d.floor - ask)} under your floor`,
+        body: `They're ready to sign on ${s1}. I'd counter at your ${cpm(d.floor)} floor and keep them prioritized in the run, plus a heads up that ${s2 || s1} is close to selling out for the year.`,
+        options: [
+          { id: 'hold', label: `Counter at ${cpm(d.floor)}`, primary: true },
+          { id: 'approve', label: `Accept ${cpm(ask)}` },
+          { id: 'takeover', label: 'I\'ll take over' }
+        ] } },
+    { branch: c => c === 'approve'
+        ? { mail: { dir: 'out', body: `Good news, we can accommodate ${cpm(ask)} CPM for ${s1} on the ${d.brand} campaign!`, head: 'Accepted a below-floor rate you approved', why: `You approved ${cpm(ask)}. Logged it as a below-floor exception on this buyer.` }, terms: { cpm: ask } }
+        : { mail: { dir: 'out', body: `We can't go below ${cpm(d.floor)}, but at ${cpm(d.floor)} you stay prioritized in the run, so delivery lands evenly across the flight.${s2 ? `\n\nQuick heads up that ${s2} is close to selling out for the year, in case that factors into your plans.` : ''}`, head: 'Countered on price, held your floor', why: 'Held your floor and sold priority delivery instead of rate. Used real scarcity as the deadline.' }, terms: { cpm: d.floor } } },
+    { stage: 3, mail: { dir: 'in', body: `Fair enough. ${cpm(d.floor)} works, let's do it. Send the IO.` }, branch: c => c === 'approve' ? { stage: 3, mail: { dir: 'in', body: `Amazing, thank you! Send the IO when ready.` } } : { stage: 3, mail: { dir: 'in', body: `Fair enough, ${cpm(d.floor)} works. Let's do it. Send the IO.` } } },
+    { terms: { flight }, mail: { dir: 'out', att: `${d.network} x Acme Network - IO.pdf`,
+        body: `IO attached for signature. Holds converted to confirmed for ${flight}.\n\nWhen will you have the script or talking points for us to review?`,
+        head: 'Sent the IO and converted the holds', why: 'Converted holds the moment terms were agreed, so Inventory shows them as sold.' } },
+    { stage: 4, mail: { dir: 'in', att: `${d.brand} - talking points.pdf`, body: `Signed IO and talking points attached!` } },
+    { terms: { creative: 'Revision requested' }, mail: { dir: 'out',
+        body: `Thanks! Our review flagged one line before the hosts record: talking point 3 makes a health claim ("reverses aging"). Could you reword it as a benefit statement? Everything else is cleared.`,
+        head: 'Checked talking points against ad policy', why: 'Checked talking points against Acme\'s ad policy before scripting, not after. Catching it now saves a re-record.' } },
+    { mail: { dir: 'in', att: `${d.brand} - talking points v2.pdf`, body: `Done, updated version attached.` } },
+    { stage: 5, status: 'booked', terms: { creative: 'Read sample sent' }, mail: { dir: 'out', att: `${s1} - read sample.mp3`,
+        body: `Read sample attached for brand approval. First episode goes live ${fmtDate(d.start)}.`,
+        head: 'Sent the read sample', why: 'Sent the read sample unprompted. Buyers ask for it on almost every deal.' } },
+  ];
+}
+
+/* ───────────────────────── deal model ───────────────────────── */
+function makeDeal(p) {
+  const d = Object.assign({ id: ++seq, status: 'negotiating', stage: 0, thread: [], approval: null, choice: null, step: 0, busy: false }, p);
+  d.flag = d.flag !== undefined ? d.flag : screen((d.points || []).join(' ') + ' ' + (d.desc || ''));
+  const flight = `${fmtDate(d.start)} - ${fmtDate(d.end)}`;
+  d.termRows = d.side === 'show' ? showRows(d) : d.side === 'buyer'
+    ? { cpm: { label: 'Rate', open: '-', cur: '-' },
+        volume: { label: 'Volume', open: `${kfmt(d.imps)} impressions`, cur: `${kfmt(d.imps)} impressions` },
+        format: { label: 'Format', open: 'Host-read', cur: 'Host-read' },
+        priority: { label: 'Priority', open: '-', cur: '-' },
+        flight: { label: 'Flight', open: flight, cur: flight },
+        creative: { label: 'Creative', open: '-', cur: '-' } }
+    : { cpm: { label: 'Rate', open: '-', cur: '-' },
+        volume: { label: 'Volume', open: '-', cur: '-' },
+        format: { label: 'Format', open: '-', cur: '-' },
+        flight: { label: 'Flight', open: flight, cur: flight },
+        creative: { label: 'Creative', open: '-', cur: '-' } };
+  d.script = d.side === 'show' ? showScript(d) : d.side === 'buyer' ? buyerScript(d) : sellerScript(d);
+  return d;
+}
+
+function applyStep(d, step, animate) {
+  if (step.branch) step = step.branch(d.choice);
+  if (step.approval) { d.approval = step.approval; d.status = 'needs'; return 'pause'; }
+  if (typeof step.stage === 'number') d.stage = step.stage;
+  if (step.status) d.status = step.status;
+  d.flashKeys = [];
+  if (step.terms) {
+    for (const [k, v] of Object.entries(step.terms)) {
+      const row = d.termRows[k]; if (!row) continue;
+      const val = k === 'cpm' && typeof v === 'number' ? cpm(v) + ' CPM' : v;
+      if (row.open === '-') row.open = val;
+      row.cur = val; d.flashKeys.push(k);
+      if (k === 'cpm' && typeof v === 'number') d.currentCpm = v;
+      if (k === 'cpm' && typeof v === 'string') d.currentLabel = v;
+    }
+  }
+  if (animate && d.side === 'show' && step.terms && step.terms.status) emit({ ev: 'status', key: keyOf(d), status: step.terms.status });
+  if (step.mail) d.thread.push(Object.assign({ fresh: animate, time: TIMES[Math.min(d.thread.filter(m => m.dir !== 'note').length, TIMES.length - 1)] }, step.mail));
+  return 'ok';
+}
+
+function runTo(d, n) { // instant, for seeds
+  while (d.step < d.script.length && d.step < n) {
+    const r = applyStep(d, d.script[d.step], false); d.step++;
+    if (r === 'pause') {
+      if (d.step >= n) break;
+      d.approval = null; d.choice = 'hold'; d.status = 'negotiating';
+      d.thread.push({ dir: 'note', body: 'You approved the agent\'s plan.' });
+    }
+  }
+  if (!['needs', 'booked', 'passed'].includes(d.status) && d.step < d.script.length) d.status = 'negotiating';
+}
+
+function play(d) {
+  if (d.busy || d.approval || d.step >= d.script.length || d.status === 'paused') return;
+  d.busy = true; render();
+  setTimeout(() => {
+    d.busy = false;
+    if (d.status === 'paused') { render(); return; }
+    const r = applyStep(d, d.script[d.step], true); d.step++;
+    render();
+    if (r !== 'pause' && !['booked', 'passed'].includes(d.status)) play(d);
+  }, SPEED);
+}
+
+function choose(id, opt) {
+  const d = deals.find(x => x.id === id); if (!d) return;
+  if (opt === 'takeover') {
+    d.approval = null; d.status = 'paused'; d.busy = false;
+    d.thread.push({ dir: 'note', body: 'Switched to manual. The agent stops sending and drafts replies for you.' });
+    if (d.side === 'show') emit({ ev: 'mode', key: keyOf(d), manual: true });
+    manualAdvance(d); render(); return;
+  }
+  const lbl = (d.approval.options.find(o => o.id === opt) || {}).label || 'the agent\'s plan';
+  d.choice = opt; d.approval = null; d.status = 'negotiating';
+  d.thread.push({ dir: 'note', body: 'You chose: ' + lbl + '.' });
+  if (d.side === 'show') emit({ ev: 'choice', key: keyOf(d), kase: d.kase, opt });
+  render(); play(d);
+}
+
+function resume(id) { const d = deals.find(x => x.id === id); d.status = 'negotiating'; if (d.side === 'show') emit({ ev: 'mode', key: keyOf(d), manual: false }); d.thread.push({ dir: 'note', body: 'Handed back to the agent.' }); render(); play(d); }
+
+function instruct(id) {
+  const inp = document.getElementById('instr'); const v = inp.value.trim(); if (!v) return;
+  const d = deals.find(x => x.id === id);
+  d.thread.push({ dir: 'note', body: `You told the agent: "${v}". It applies this from the next email.` });
+  inp.value = ''; render();
+}
+
+/* ───────────────────────── seeds ───────────────────────── */
+function seed() {
+  const B = (p, n) => { const d = makeDeal(Object.assign({ side: 'buyer' }, p)); runTo(d, n); deals.push(d); };
+  const S = (p, n) => { const d = makeDeal(Object.assign({ side: 'seller' }, p)); runTo(d, n); deals.push(d); };
+
+  B({ brand: 'Northbound Coffee', desc: 'a small-batch coffee subscription roasted the week it ships', audience: 'busy professionals 25-44',
+      network: 'Tidewater Audio', contact: 'Dana Ruiz', email: 'dana@tidewateraudio.com',
+      shows: ['SmartLess', 'Armchair Expert'], imps: 120000, start: '2026-12-01', end: '2026-12-31', goal: 'conversions',
+      budget: 3600, target: 26, max: 29,
+      points: ['Roasted the week it ships', 'Code SMART20 for 20% off first bag', 'Host to mention their own morning routine'] }, 8);
+  B({ brand: 'Halcyon Health', desc: 'a longevity platform covering hormone health and peptides', audience: 'women 35-54',
+      network: 'Brightside Media', contact: 'Marcus Webb', email: 'marcus@brightsidemedia.com',
+      shows: ['The Mel Robbins Podcast', 'Call Her Daddy'], imps: 140000, start: '2026-11-30', end: '2026-12-31', goal: 'launch',
+      budget: 4000, target: 27, max: 30,
+      points: ['Personalized peptide and hormone plans', 'Board-certified clinicians', 'Code MEL for first month free'] }, 6);
+  B({ brand: 'Lumen Sleep', desc: 'a sleep mask that blocks 100% of light', audience: 'health-conscious adults 25-54',
+      network: 'Acme Network', contact: 'Priya Shah', email: 'priya@acmenetwork.com',
+      shows: ['Huberman Lab', 'The Oprah Podcast'], imps: 200000, start: '2026-11-17', end: '2026-12-20', goal: 'awareness',
+      budget: 7000, target: 32, max: 35,
+      points: ['Blocks 100% of light', 'Host should talk about their own sleep', '30-night trial'] }, 99);
+  B({ type: 'flat', brand: 'Corelane AI', desc: 'an AI code review platform that helps software teams ship better code', audience: 'developers and engineering leaders',
+      network: 'Signal Pod Co.', contact: 'Jordan Blake', email: 'jordan@signalpod.co',
+      shows: ['Ship It Weekly'], imps: 135000, start: '2026-10-05', end: '2026-11-15', goal: 'awareness',
+      budget: 5000, target: 30, max: 34, flatRate: 30000,
+      points: ['Catches bugs before merge', 'Free for teams under 10'] }, 99);
+
+  S({ brand: 'Kinfolk Meal Kits', desc: 'a weeknight meal kit built around 20-minute recipes', audience: 'parents 30-45',
+      network: 'Harbor Media', contact: 'Tess Alvarez', email: 'tess@harbormedia.co',
+      shows: ['Armchair Expert', 'SmartLess'], imps: 150000, start: '2026-12-08', end: '2027-01-18', goal: 'cpm',
+      rate: 34, floor: 30 }, 6);
+  S({ brand: 'Atlas Luggage', desc: 'carry-on luggage with a lifetime warranty', audience: 'frequent travelers 25-44',
+      network: 'Tandem Audio', contact: 'Jake Morrow', email: 'jake@tandemaudio.com',
+      shows: ['Call Her Daddy'], imps: 90000, start: '2027-01-12', end: '2027-02-28', goal: 'sellthrough',
+      rate: 32, floor: 27 }, 3);
+  S({ brand: 'Verde Skincare', desc: 'clean skincare for sensitive skin', audience: 'women 25-44',
+      network: 'Brightline Agency', contact: 'Nora Kim', email: 'nora@brightline.agency',
+      shows: ['The Mel Robbins Podcast', 'Call Her Daddy'], imps: 110000, start: '2026-11-24', end: '2026-12-22', goal: 'remnant',
+      rate: 30, floor: 25 }, 99);
+
+  const H = (p, n) => { const d = makeDeal(Object.assign({ side: 'show', imps: 350000, end: p.start, network: 'Acme Network' }, p)); runTo(d, n); deals.push(d); return d; };
+  H({ kase: 'file', brand: 'Quince', shows: ['SmartLess'], contact: 'Dana Whitfield', email: 'dana@smartlessmedia.com', delivery: 'Ad-inserted', spec: ':60 mid-roll', start: '2026-06-18', due: 'Mon Jun 15', code: 'SMARTLESS', score: 96 }, 7);
+  H({ kase: 'move', brand: 'Monarch', shows: ['The Joe Rogan Experience'], contact: 'Jamie Ortiz', email: 'jamie@jreproductions.com', delivery: 'Baked-in', spec: ':60 mid-roll', start: '2026-06-17', due: '-' }, 3);
+  H({ kase: 'silent', brand: 'Kalshi', shows: ['The Joe Rogan Experience'], contact: 'Jamie Ortiz', email: 'jamie@jreproductions.com', delivery: 'Ad-inserted', spec: ':60 mid-roll', start: '2026-06-17', due: 'Mon Jun 15' }, 5);
+  H({ kase: 'file', brand: 'Ritual', shows: ['The Mel Robbins Podcast'], contact: 'Tracey Dunn', email: 'tracey@melrobbins.com', delivery: 'Ad-inserted', spec: ':60 mid-roll', start: '2026-06-19', due: 'Tue Jun 16', code: 'MEL', score: 93 }, 3);
+  H({ kase: 'file', brand: 'Squarespace', shows: ['Huberman Lab'], contact: 'Ian Brooks', email: 'ian@hubermanlab.com', delivery: 'Ad-inserted', spec: ':60 mid-roll', start: '2026-06-19', due: 'Tue Jun 16', code: 'HUBERMAN', score: 95 }, 99);
+  H({ kase: 'file', brand: 'Toyota', shows: ['Armchair Expert'], contact: 'Rob Hale', email: 'rob@armchairexpert.com', delivery: 'Ad-inserted', spec: ':60 mid-roll', start: '2026-06-18', due: 'Mon Jun 15', code: 'ARMCHAIR', score: 74 }, 3);
+  const k = H({ kase: 'pushback', brand: 'Kalshi', shows: ['Call Her Daddy'], contact: 'Maya Chen', email: 'maya@callherdaddy.com', delivery: 'Ad-inserted', spec: ':60 mid-roll', start: '2026-06-19', due: 'Tue Jun 16' }, 2);
+  k.status = 'paused'; k.thread.push({ dir: 'note', body: 'Switched to manual. The agent stops sending and drafts replies for you.' }); manualAdvance(k);
+}
+
+/* ───────────────────────── render ───────────────────────── */
+const STATUS = {
+  needs: ['pill--amber', 'Needs you'],
+  negotiating: ['pill--blue', 'Agent handling'],
+  booked: ['pill--green', 'Done'],
+  passed: ['pill--gray', 'Passed'],
+  paused: ['pill--gray', 'Manual'],
+};
+function statusPill(d) {
+  if (d.busy) return `<span class="pill pill--blue"><span class="typing"><i></i><i></i><i></i></span>Agent working</span>`;
+  const [c, l] = STATUS[d.status] || STATUS.negotiating;
+  return `<span class="pill ${c}">${l}</span>`;
+}
+function partnerPill(d) { return ['booked', 'passed'].includes(d.status) ? '<span class="pill pill--green">Done</span>' : '<span class="pill pill--blue">Open</span>'; }
+function value(d) { return d.imps / 1000 * (d.currentCpm || (d.side === 'buyer' ? d.target : d.rate)); }
+
+/* The signed-in account (set in the shell). A sub-network producer or a show only sees its own threads with Acme ad ops, from its own side. */
+let PSHOWS = [];
+function partner() { if (window.parent === window) return null; try { const v = JSON.parse(localStorage.getItem('acme_role') || 'null'); if (!v || !['producer', 'host'].includes(v.role)) return null; PSHOWS = v.shows || []; return v.role; } catch (e) { return null; } }
+window.addEventListener('storage', e => { if (e.key === 'acme_role') { activeId = null; filter = partner() ? 'open' : 'needs'; render(); } });
+function partnerReply(id) { const d = deals.find(x => x.id === id), el = $('#preply'), v = el.value.trim(); if (!v) return; d.thread.push({ dir: 'in', time: 'Just now', body: v, fresh: true }); render(); }
+let qF = '', whoF = 'all', box = 'leads';   // box: seller inbox level, leads or mail the agent filtered out
+/* Mail that reached the connected sales inbox but is not an advertiser lead. The agent files it here with its reason. */
+const FILTERED = [
+  { id: 'f4', box: 'unsure', from: 'Tara Whitfield', org: 'Halo Sleep', email: 'tara@halosleep.example', time: 'Wed 7:48am', why: 'Possible lead', reason: 'A brand asking to "work with" a show, but no budget, dates or mention of ads. Could be sponsorship or a guest request.', subj: 'Working with Armchair Expert', body: 'Hi,\n\nWe make a sleep headband and love Armchair Expert. Is there a way for us to work with the show this fall? Happy to jump on a call.\n\nTara' },
+  { id: 'f1', box: 'archived', from: 'Devon Pike', org: 'RankLift SEO', email: 'devon@ranklift.example', time: 'Tue 7:02am', why: 'Vendor pitch', reason: 'Selling a service to the network. No brand, budget or flight mentioned.', subj: 'Double your podcast traffic in 30 days', body: 'Hi there,\n\nI took a look at your site and found 14 quick SEO wins. We help podcast networks double organic traffic in 30 days. Do you have 10 minutes this week for a free audit?\n\nDevon' },
+  { id: 'f2', box: 'archived', from: 'Marisol Vega', org: 'Brightline PR', email: 'marisol@brightlinepr.example', time: 'Mon 3:40pm', why: 'Guest pitch', reason: 'Asking for a guest booking, not ad inventory. Forwarded to the show team.', subj: 'Guest idea: founder of a sleep-tech startup', body: 'Hello,\n\nMy client would be a great guest for Armchair Expert. She can speak to sleep science and founder burnout. Happy to send a one-sheet.\n\nMarisol' },
+  { id: 'f3', box: 'archived', from: 'Podcast Summit', org: 'Events', email: 'news@podsummit.example', time: 'Mon 9:15am', why: 'Newsletter', reason: 'Bulk mail with an unsubscribe header. No person is asking anything.', subj: 'Early-bird passes end Friday', body: 'Early-bird passes for Podcast Summit end this Friday. Join 2,000 creators and networks for three days of sessions.' }
+];
+function treatAsLead(id) {
+  const i = FILTERED.findIndex(f => f.id === id), f = FILTERED[i]; if (!f) return; FILTERED.splice(i, 1);
+  const today = new Date(), iso = x => x.toISOString().slice(0, 10);
+  const d = makeDeal({ side: 'seller', brand: f.org, desc: f.subj, audience: 'adults 25-54', network: f.org, contact: f.from, email: f.email, shows: [SHOWS[1], SHOWS[2]], imps: 120000,
+    start: iso(new Date(today.getTime() + 21 * 864e5)), end: iso(new Date(today.getTime() + 56 * 864e5)), goal: 'cpm', rate: 34, floor: 30, points: [] });
+  d.owner = null; d.thread.push({ dir: 'note', body: 'You marked this as a lead. The agent picks it up from here.' });
+  deals.unshift(d); activeId = d.id; box = 'leads'; render(); play(d);
+}
+function archiveMail(id) { const f = FILTERED.find(x => x.id === id); if (f) { f.box = 'archived'; activeId = null; render(); } }
+function renderFiltered(f) {
+  $('#room').innerHTML = `<div class="room">
+    <div class="room__head"><div class="room__title">
+      <div class="logo">${initials(f.org)}</div>
+      <div><div class="room__name">${esc(f.subj)}</div><div class="room__meta">From ${esc(f.from)}, ${esc(f.org)} · ${f.box === 'unsure' ? 'the agent is not sure' : 'archived by the agent'}</div></div>
+      <div class="room__actions"><span class="pill pill--gray">${f.box === 'unsure' ? 'Unsure' : 'Not a lead'}</span>${f.box === 'unsure' ? `<button class="btn btn--sm" onclick="archiveMail('${f.id}')">Archive</button>` : ''}<button class="btn btn--sm${f.box === 'unsure' ? ' btn--primary' : ''}" onclick="treatAsLead('${f.id}')">Treat as lead</button></div>
+    </div></div>
+    <div class="room__body" style="grid-template-columns:1fr"><div class="thread">
+      <div class="prop"><div><b>${f.box === 'unsure' ? "Agent's guess" : 'Archived as'}:</b> ${esc(f.why)}</div><div><b>Why:</b> ${esc(f.reason)}</div></div><div class="prop__rule"></div>
+      <div class="mail mail--static">${mailHead({ name: f.from, email: f.email }, [{ email: MAILS.seller[mailSel.seller] ? MAILS.seller[mailSel.seller].a : 'sales@acme-network.com' }], f.time, '', MAILS.seller[mailSel.seller] ? MAILS.seller[mailSel.seller].a : '', 0)}<div class="mail__body">${esc(f.body)}</div></div>
+    </div></div></div>`;
+}
+function searchOpen() { $('#listHead').classList.add('searching'); $('#qIn').focus(); }
+function searchClose() { const i = $('#qIn'); i.value = ''; qF = ''; $('#listHead').classList.remove('searching'); i.blur(); render(); }
+const TEAM = ['Cam Pritchard', 'Jordan Lee', 'Priya Shah'];
+/* our own dropdown, never a native select */
+const DDS = {}; let ddCur = null;
+function ddClose() { const m = document.getElementById('ddmenu'); if (m) m.remove(); ddCur = null; }
+function ddOpen(btn, id) {
+  const was = ddCur; ddClose(); if (was === id) return;
+  const d = DDS[id], r = btn.getBoundingClientRect(), m = document.createElement('div');
+  m.id = 'ddmenu'; m.className = 'ddmenu'; m.setAttribute('role', 'listbox'); m.setAttribute('aria-label', btn.getAttribute('aria-label'));
+  m.innerHTML = d.opts.map((o, i) => '<button type="button" role="option" aria-selected="' + (o[0] === d.val) + '" class="ddopt' + (o[0] === d.val ? ' on' : '') + '" onclick="ddPick(\'' + id + '\',' + i + ')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg><span>' + esc(o[1]) + '</span></button>').join('');
+  document.body.appendChild(m); ddCur = id;
+  m.style.minWidth = r.width + 'px'; m.style.top = (r.bottom + 4) + 'px'; m.style.maxHeight = Math.max(160, innerHeight - r.bottom - 16) + 'px';
+  m.style.left = Math.max(8, Math.min(r.left, innerWidth - m.offsetWidth - 8)) + 'px';
+  (m.querySelector('.on') || m.firstChild).focus();
+  m.onkeydown = e => { if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return; e.preventDefault(); const o = [...m.children], n = o.indexOf(document.activeElement) + (e.key === 'ArrowDown' ? 1 : -1); o[(n + o.length) % o.length].focus(); };
+}
+function ddPick(id, i) { const d = DDS[id]; ddClose(); d.pick(d.opts[i][0]); render(); }
+document.addEventListener('mousedown', e => { if (ddCur && !e.target.closest('#ddmenu, .own, .inbox2__who, .kinddd')) ddClose(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && ddCur) ddClose(); });
+function setSide(s) {
+  side = s; filter = 'all'; activeId = null;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.side === s));
+  $('#title').textContent = s === 'buyer' ? 'Buyer Agent' : 'Seller Agent';
+  $('#subtitle').textContent = s === 'buyer'
+    ? 'Hand it the IO, talking points, dates and goal. It runs the whole email thread with the network, from first outreach to signed IO and approved read, inside your guardrails. You only step in when it asks.'
+    : 'Watches your sales inbox. Qualifies every inquiry, sends the proposal, holds avails, negotiates against your floor, sends the IO and clears creative. You only step in when it asks.';
+  $('#newLabel').textContent = s === 'buyer' ? 'New booking' : 'Set up seller agent';
+  $('#inboxLabel').textContent = s === 'buyer' ? 'cam@northstarbrands.com' : 'cam@acme-network.com';
+  render();
+}
+
+function render() {
+  const P = partner();
+  if (P) { kind = 'show'; if (!['open', 'done'].includes(filter)) filter = 'open'; } else if (['open'].includes(filter)) filter = 'needs';
+  const mine = deals.filter(d => d.side === kind && (!P || PSHOWS.includes(d.shows[0])));
+  const bucket = d => P ? (['booked', 'passed'].includes(d.status) ? 'done' : 'open') : d.status === 'needs' ? 'needs' : d.status === 'paused' ? 'manual' : ['booked', 'passed'].includes(d.status) ? 'done' : 'agent';
+  const counts = { needs: 0, agent: 0, manual: 0, done: 0, open: 0 }; mine.forEach(d => counts[bucket(d)]++);
+  document.querySelector('.pagebar__right').hidden = !!P;
+  const needs = k => deals.filter(d => d.side === k && d.status === 'needs').length;
+  $('#newBtn').hidden = !!P || kind === 'show';   // buyer starts a booking; seller only adds a lead the inbox missed
+  $('#newBtn').textContent = kind === 'seller' ? 'Add lead' : 'New thread';
+  mailSide = kind === 'buyer' ? 'buyer' : 'seller'; renderMailBtn();
+  // one list, the ones that need you first; search and the assignee filter narrow it
+  const order = { needs: 0, manual: 1, agent: 2, open: 2, done: 3 };
+  const label = d => d.side === 'show' ? (P === 'host' ? d.brand : d.shows[0]) : d.brand;
+  const shown = mine.filter(d => (!qF.trim() || (d.brand + ' ' + d.shows.join(' ') + ' ' + (d.network || '')).toLowerCase().includes(qF.trim().toLowerCase())) && (P || whoF === 'all' || (whoF === 'none' ? !d.owner : d.owner === whoF)))
+    .map((d, i) => [d, i]).sort((a, b) => order[bucket(a[0])] - order[bucket(b[0])] || a[1] - b[1]).map(x => x[0]);
+  const junk = !P && kind === 'seller' ? FILTERED.filter(f => f.box === box && (!qF.trim() || (f.from + ' ' + f.org + ' ' + f.subj).toLowerCase().includes(qF.trim().toLowerCase()))) : [];
+  const hasBox = !P && kind === 'seller'; if (!hasBox) box = 'leads';
+  const inJunk = box !== 'leads';
+  const BOXES = [['leads', 'Leads', mine.length], ['unsure', 'Unsure', FILTERED.filter(f => f.box === 'unsure').length], ['archived', 'Archived', FILTERED.filter(f => f.box === 'archived').length]];
+  if (inJunk) { if (!junk.find(f => f.id === activeId)) activeId = (junk[0] || {}).id; }
+  else if (!activeId || !shown.find(d => d.id === activeId)) activeId = (shown[0] || {}).id;
+  const onJunk = inJunk ? junk.find(f => f.id === activeId) : null;
+  Object.keys(DDS).forEach(k => delete DDS[k]);
+  DDS.box = { val: box, opts: BOXES.map(b => [b[0], b[1] + '  ' + b[2]]), pick: v => { box = v; activeId = null; } };
+  const cur = BOXES.find(b => b[0] === box);
+  $('#boxDd').innerHTML = hasBox ? '<button type="button" class="inbox2__who" aria-haspopup="listbox" aria-label="Inbox" onclick="ddOpen(this,\'box\')"><span>' + cur[1] + '<i>' + cur[2] + '</i></span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>' : '';
+  const KINDS = [['seller', 'Seller view'], ['buyer', 'Buyer view'], ['show', 'Show view']];
+  DDS.kind = { val: kind, opts: KINDS, pick: v => { kind = v; activeId = null; } };
+  $('#kindDd').innerHTML = '<button type="button" class="btn btn--sm kinddd" aria-haspopup="listbox" aria-label="View" onclick="ddOpen(this,\'kind\')"><span>' + KINDS.find(k => k[0] === kind)[1] + '</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>';
+  DDS.who = { val: whoF, opts: [['all', 'All']].concat(TEAM.map(t => [t, t]), [['none', 'Unassigned']]), pick: v => { whoF = v; } };
+  $('#whoDd').innerHTML = P ? '' : '<button type="button" class="inbox2__who"' + (inJunk ? ' style="visibility:hidden" tabindex="-1"' : '') + ' aria-haspopup="listbox" aria-label="Assigned to" onclick="ddOpen(this,\'who\')"><span>' + esc(whoF === 'all' ? 'All' : whoF === 'none' ? 'Unassigned' : whoF) + '</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>';
+
+  $('#list').innerHTML = inJunk ? '' : shown.length ? shown.map(d => {
+    const last = [...d.thread].reverse().find(m => m.dir !== 'note'), b = bucket(d);
+    const st = P ? (b === 'done' ? 'Done' : 'Open') : d.busy ? 'Agent working' : (STATUS[d.status] || STATUS.negotiating)[1];
+    const third = d.side === 'show' ? (P === 'host' ? d.delivery : d.brand) : d.currentCpm ? cpm(d.currentCpm) + ' CPM' : d.currentLabel || '';
+    if (!P) DDS['own' + d.id] = { val: d.owner || '', opts: TEAM.map(t => [t, t]).concat([['', 'Unassigned']]), pick: v => { d.owner = v || null; } };
+    const own = P ? '' : '<button type="button" class="own' + (d.owner ? '' : ' none') + '" aria-haspopup="listbox" aria-label="Assign ' + esc(label(d)) + '" title="' + esc(d.owner || 'Unassigned') + '" onclick="event.stopPropagation();ddOpen(this,\'own' + d.id + '\')">' + (d.owner ? '<i>' + initials(d.owner) + '</i>' : 'Assign') + '</button>';
+    return `<div class="conv ${d.id === activeId ? 'on' : ''}" role="button" tabindex="0" onclick="activeId=${d.id};render()" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();activeId=${d.id};render()}">
+      <div class="conv__body">
+        <div class="conv__top"><div class="conv__name">${esc(label(d))}</div>${own}</div>
+        <div class="conv__pills"><span class="cpill ${!P && b === 'needs' ? 'cpill--needs' : ''}">${st}</span>${last && last.time ? `<span class="cpill">${esc(last.time)}</span>` : ''}${third ? `<span class="cpill">${esc(third)}</span>` : ''}</div>
+      </div>
+    </div>`;
+  }).join('') : `<div class="inbox2__empty">Nothing here.</div>`;
+  if (inJunk) $('#list').innerHTML = !junk.length ? '<div class="inbox2__empty">Nothing here.</div>' : junk.map(f => `<div class="conv ${f.id === activeId ? 'on' : ''}" role="button" tabindex="0" onclick="activeId='${f.id}';render()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();activeId='${f.id}';render()}">
+      <div class="conv__body"><div class="conv__top"><div class="conv__name">${esc(f.org)}</div></div>
+      <div class="conv__pills"><span class="cpill">${esc(f.why)}</span><span class="cpill">${esc(f.time)}</span></div></div></div>`).join('');
+  if (inJunk) { if (onJunk) renderFiltered(onJunk); else $('#room').innerHTML = ''; return; }
+
+  renderRoom(shown.find(d => d.id === activeId), P);
+}
+
+/* One line per message, like a mail client: "Tess to Me". Click the line for the full From / To / Cc and time. */
+function mailHead(from, tos, time, pill, mine, nTo) {
+  const nm = x => x.email === mine ? 'Me' : x.name ? first(x.name) : (w => w.charAt(0).toUpperCase() + w.slice(1))(x.email.split('@')[0].split(/[._]/)[0]);
+  const list = a => a.length > 1 ? a.slice(0, -1).join(', ') + ' & ' + a[a.length - 1] : a[0] || '';
+  const full = x => (x.name ? esc(x.name) + ' ' : '') + '<em>&lt;' + esc(x.email) + '&gt;</em>';
+  const to = nTo ? tos.slice(0, nTo) : tos, cc = nTo ? tos.slice(nTo) : [];
+  return `<div class="mail__head"><button type="button" class="mail__line" aria-expanded="false" onclick="const m=this.closest('.mail');this.setAttribute('aria-expanded',m.classList.toggle('open'))">${esc(nm(from))} to ${esc(list(tos.map(nm)))}</button><div class="mail__time">${pill}${esc(time || '')}</div></div>
+      <div class="mail__meta"><b>From</b><span>${full(from)}</span><b>To</b><span>${to.map(full).join(', ')}</span>${cc.length ? '<b>Cc</b><span>' + cc.map(full).join(', ') + '</span>' : ''}<b>Sent</b><span>${esc(time || '')}</span></div>`;
+}
+function renderRoom(d, P) {
+  if (!d) { $('#room').innerHTML = `<div class="room"><div class="empty">Nothing here.${P ? '' : ' The agents are handling the rest.'}</div></div>`; return; }
+  const stages = STAGES[d.side] || [];
+  const passed = d.status === 'passed';
+  const stepper = stages.map((l, i) => `<div class="step ${i < d.stage || (i === d.stage && d.status === 'booked') ? 'done' : (i === d.stage && !passed) ? 'cur' : ''}"><div class="step__bar"></div><div class="step__label">${l}</div></div>`).join('');
+  const me = { name: 'Cam Pritchard', email: d.side === 'buyer' ? 'cam@northstarbrands.com' : 'cam@acme-network.com' };
+  const them = { name: d.contact, email: d.email };
+
+  const mails = d.thread.map(m => {
+    if (P && m.dir === 'note') return '';
+    if (m.dir === 'note') return `<div class="working" style="color:var(--text-primary)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>${esc(m.body)}</div>`;
+    const out = (m.dir === 'out') !== !!P;   // a partner reads the thread from their own side
+    const from = m.dir === 'out' ? me : them, to = m.dir === 'out' ? them : me;
+    const html = `<div class="mail ${out ? 'mail--out' : ''} ${m.fresh ? '' : 'mail--static'}">
+      ${mailHead(from, [to].concat(m.dir === 'out' && !P ? (m.cc || ccOf(d)).map(a => ({ email: a })) : []), m.time, out && !P ? `<span class="pill pill--gray">${m.by === 'you' ? 'Sent by you' : 'Sent by agent'}</span>` : '', P ? '' : me.email, m.dir === 'out' && !P ? 1 : 0)}
+      <div class="mail__body">${esc(m.body)}</div>
+      ${m.att ? `<div class="mail__att"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>${esc(m.att)}</div>` : ''}
+      ${m.why && !P ? `<details class="whyd" open><summary>${esc(m.head || 'Agent reply')}</summary>${esc(m.why)}</details>` : ''}
+    </div>`;
+    m.fresh = false;
+    return html;
+  }).join('');
+
+  const approval = d.approval && !P ? `<div class="approval">
+      <div class="approval__t"><span class="pill pill--amber">Needs you</span>${esc(d.approval.title)}</div>
+      <div class="approval__s">${esc(d.approval.body)}</div>
+      <div class="approval__opts">${d.approval.options.map(o => `<button class="btn btn--sm ${o.primary ? 'btn--primary' : ''}" onclick="choose(${d.id},'${o.id}')">${esc(o.label)}</button>`).join('')}</div>
+    </div>` : '';
+  const lastMail = [...d.thread].reverse().find(m => m.dir !== 'note');
+  const working = d.busy && !P ? `<div class="working"><span class="typing"><i></i><i></i><i></i></span>${lastMail && lastMail.dir === 'out' ? `Waiting on ${esc(first(d.contact))}'s reply` : 'Agent drafting reply'}</div>` : '';
+
+  const flash = d.flashKeys || [];
+  const terms = Object.entries(d.termRows).map(([k, r]) => `<tr class="${flash.includes(k) ? 'flash' : ''}"><td class="k">${r.label}</td><td>${esc(r.open)}</td><td class="cur">${esc(r.cur)}</td></tr>`).join('');
+  d.flashKeys = [];
+
+  const flagRow = d.flag ? `<div class="rule"><span>Review flag</span><b style="color:var(--amber-text)">${esc(d.flag)}</b></div>` : '';
+  const brief = d.side === 'show' ? showBrief(d) : d.side === 'buyer' ? `
+      <div><div class="side__t">Brief</div>
+        <dl class="kv">
+          <dt>Brand</dt><dd>${esc(d.desc)}</dd>
+          <dt>Audience</dt><dd>${esc(d.audience)}</dd>
+          <dt>Network</dt><dd>${esc(d.network)}</dd>
+          <dt>Shows</dt><dd>${esc(d.shows.join(', '))}</dd>
+          <dt>Goal</dt><dd>${GOALS[d.goal]}</dd>
+          <dt>Budget</dt><dd>${usd(d.budget)}</dd>
+        </dl></div>
+      <div><div class="side__t">Talking points</div><ul class="points">${d.points.map(p => `<li>${esc(p)}</li>`).join('')}</ul></div>
+      <div><div class="side__t">Guardrails</div>
+        <div class="rule"><span>Target CPM</span><b>${cpm(d.target)}</b></div>
+        <div class="rule"><span>Walk-away</span><b>${cpm(d.max)}</b></div>
+        <div class="rule"><span>Sign IO</span><b>After your OK</b></div>
+        ${flagRow}
+      </div>` : `
+      <div><div class="side__t">Inquiry</div>
+        <dl class="kv">
+          <dt>Buyer</dt><dd>${esc(d.network)}</dd>
+          <dt>Brand</dt><dd>${esc(d.brand)}</dd>
+          <dt>Audience</dt><dd>${esc(d.audience)}</dd>
+          <dt>Shows</dt><dd>${esc(d.shows.join(', '))}</dd>
+        </dl></div>
+      <div><div class="side__t">Guardrails</div>
+        <div class="rule"><span>Rate card</span><b>${cpm(d.rate)}</b></div>
+        <div class="rule"><span>Floor</span><b>${cpm(d.floor)}</b></div>
+        <div class="rule"><span>Strategy</span><b>${SELL_GOALS[d.goal]}</b></div>
+        <div class="rule"><span>Holds</span><b>48 hours</b></div>
+        <div class="rule"><span>Ad policy</span><b>Pre-review creative</b></div>
+      </div>`;
+
+  const live = !['booked', 'passed'].includes(d.status);
+  const actions = (live ? `<div class="mode" role="group" aria-label="Who is sending"><button class="${d.status !== 'paused' ? 'active' : ''}" onclick="setMode(${d.id},'agent')">Agent</button><button class="${d.status === 'paused' ? 'active' : ''}" onclick="setMode(${d.id},'manual')">Manual</button></div>` : '') + (d.side === 'show' && window.parent !== window && window.parent.openProductionSpot ? `<button class="btn btn--sm" onclick="window.parent.openProductionSpot(keyOf(deals.find(x => x.id === ${d.id})))">Open spot</button>` : '') + `<button class="btn btn--sm" onclick="detailsOpen=!detailsOpen;render()">${detailsOpen ? 'Hide details' : 'Details'}</button>`;
+
+  $('#room').innerHTML = `<div class="room">
+    <div class="room__head">
+      <div class="room__title">
+        <div class="logo">${initials(P === 'host' ? d.brand : d.side === 'show' ? d.shows[0] : d.brand)}</div>
+        <div><div class="room__name">${P === 'host' ? esc(d.brand) : d.side === 'show' ? esc(d.shows[0]) + ' · ' + esc(d.brand) : esc(d.brand) + ' × ' + esc(d.side === 'buyer' ? d.network : 'Acme Network')}</div>
+          <div class="room__meta">${P ? 'Thread with Acme Network ad ops · ' + esc(d.spec) + ', ' + d.delivery.toLowerCase() + ' · airs ' + fmtDate(d.start) : d.side === 'show' ? 'Thread with ' + esc(d.contact) + ', producer · ' + esc(d.spec) + ', ' + d.delivery.toLowerCase() + ' · airs ' + fmtDate(d.start) : (d.side === 'buyer' ? 'Booking with ' : 'Inbound from ') + esc(d.contact) + ', ' + esc(d.network) + ' · ' + kfmt(d.imps) + ' impressions'}</div></div>
+        <div class="room__actions">${P ? partnerPill(d) : statusPill(d) + actions}</div>
+      </div>
+      ${P ? '' : ccRow(d)}
+      
+    </div>
+    <div class="room__body" style="grid-template-columns:1fr">
+      <div class="thread">
+        ${detailsOpen && !P ? detailsHTML(d) : ''}${mails}${working}${approval}
+        ${P ? (['booked', 'passed'].includes(d.status) ? '' : `<div class="compose"><input class="input" id="preply" placeholder="Reply to Acme Network" onkeydown="if(event.key==='Enter')partnerReply(${d.id})"><button class="btn" onclick="partnerReply(${d.id})">Send</button></div>`) : composeHTML(d)}
+      </div>
+    </div>
+  </div>`;
+  roomKey = d.id + ':' + d.thread.length + ':' + (d.approval ? 1 : 0) + ':' + (d.busy ? 1 : 0) + ':' + d.status;
+}
+/* Like the SpotsNow messages area: both panes run to the bottom of the screen and scroll inside.
+   A thread opens on its latest message, where the next action is. */
+let roomKey = '', threadKey = '', threadTop = 0;
+function fitPanes() {
+  const g = $('.grid'), h = Math.max(420, innerHeight - (g.getBoundingClientRect().top + scrollY) - 28) + 'px';
+  $('.msg-pane').style.height = h; const r = $('#room .room'); if (r) r.style.height = h;
+}
+const renderBase = render;
+render = function () {
+  roomKey = ''; renderBase(); fitPanes();
+  const t = $('#room .thread'); if (!t) return;
+  if (roomKey && roomKey === threadKey) t.scrollTop = threadTop; else { threadKey = roomKey; t.scrollTop = roomKey ? t.scrollHeight : 0; }
+  threadTop = t.scrollTop; t.onscroll = () => { threadTop = t.scrollTop; };
+};
+addEventListener('resize', fitPanes);
+
+/* ───────────────────────── drawer: quick form + playbook ───────────────────────── */
+const SHOWS = ['Huberman Lab', 'SmartLess', 'Armchair Expert', 'Call Her Daddy', 'The Mel Robbins Podcast', 'The Oprah Podcast'];
+
+function openDrawer() { $('#scrim').classList.add('open'); $('#drawer').classList.add('open'); $('#drawer').setAttribute('aria-hidden', 'false'); }
+function closeForm() { $('#scrim').classList.remove('open'); $('#drawer').classList.remove('open'); $('#drawer').setAttribute('aria-hidden', 'true'); }
+
+/* Playbook: every rule can be rewritten, and the agent's training set (threads and a connected mailbox) is managed here. */
+let pbEdit = null, pbMail = null;
+const PB_FILES = [{ n: 'Health brand x lifestyle network.pdf', s: '14 emails' }, { n: 'Robotics brand x investing network.pdf', s: '11 emails' }, { n: 'AI dev-tools brand x tech show.pdf', s: '6 emails' }];
+const PB_X = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+function pbSave(i) { const t = $('#pbT').value.trim(), d = $('#pbD').value.trim(); if (!t) { $('#pbT').focus(); return; } Object.assign(PLAYBOOK[i], { t, d, src: PLAYBOOK[i].src === 'New rule' || PLAYBOOK[i].edited ? 'Written by you' : PLAYBOOK[i].src + ' · edited by you', edited: true }); pbEdit = null; renderPlaybook(); }
+function pbCancel(i) { if (!PLAYBOOK[i].t) PLAYBOOK.splice(i, 1); pbEdit = null; renderPlaybook(); }
+function pbDelete(i) { PLAYBOOK.splice(i, 1); pbEdit = null; renderPlaybook(); }
+function pbAdd() { PLAYBOOK.push({ t: '', d: '', src: 'New rule' }); pbEdit = PLAYBOOK.length - 1; renderPlaybook(); $('#pbT').focus(); $('#pbT').scrollIntoView({ block: 'center' }); }
+function pbFiles(list) { [...list].filter(f => /\.pdf$/i.test(f.name) || f.type === 'application/pdf').forEach(f => PB_FILES.push({ n: f.name, s: 'Reading' })); renderPlaybook(); setTimeout(() => { PB_FILES.forEach(f => { if (f.s === 'Reading') f.s = 'Added just now'; }); if ($('#drawer').classList.contains('open') && $('#pbList')) renderPlaybook(); }, 1400); }
+function pbConnect() { const v = $('#pbMail').value.trim(); if (!/^\S+@\S+\.\S+$/.test(v)) { $('#pbMail').focus(); return; } pbMail = v; renderPlaybook(); }
+function renderPlaybook() {
+  const body = $('#formBody'), top = $('.drawer__body') ? $('.drawer__body').scrollTop : 0;
+  body.innerHTML = `
+    <div id="pbList">${PLAYBOOK.map((p, i) => i === pbEdit
+      ? `<div class="pb pb--edit"><div class="pb__n">${i + 1}</div><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:8px">
+          <input class="input" id="pbT" aria-label="Rule" placeholder="Rule" value="${esc(p.t)}">
+          <textarea class="input" id="pbD" aria-label="How the agent should handle it" placeholder="How the agent should handle it" rows="4">${esc(p.d)}</textarea>
+          <div style="display:flex;gap:8px;align-items:center"><button class="btn btn--sm btn--primary" onclick="pbSave(${i})">Save</button><button class="btn btn--sm" onclick="pbCancel(${i})">Cancel</button><span style="margin-left:auto"></span>${p.t ? `<button class="btn btn--sm" onclick="pbDelete(${i})">Delete rule</button>` : ''}</div>
+        </div></div>`
+      : `<div class="pb"><div class="pb__n">${i + 1}</div><div style="flex:1;min-width:0"><div class="pb__t">${esc(p.t)}</div><div class="pb__d">${esc(p.d)}</div><div class="pb__s">${esc(p.src)}</div></div><button class="btn btn--sm pb__edit" aria-label="Edit rule ${i + 1}" onclick="pbEdit=${i};renderPlaybook();$('#pbD').focus()">Edit</button></div>`).join('')}</div>
+    <div><button class="btn btn--sm" onclick="pbAdd()">+ Add rule</button></div>
+    <div class="field"><label>Training threads</label>
+      <div class="pbfiles">${PB_FILES.map((f, i) => `<div class="pbfile"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="pbfile__n">${esc(f.n)}</span><span class="pbfile__s">${esc(f.s)}</span><button class="pbx" aria-label="Remove ${esc(f.n)}" onclick="PB_FILES.splice(${i},1);renderPlaybook()">${PB_X}</button></div>`).join('')}</div>
+      <label class="drop" for="pbUp" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="event.preventDefault();this.classList.remove('over');pbFiles(event.dataTransfer.files)"><div class="drop__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div><div><div class="drop__t">Drop email threads</div><div class="drop__s">PDF exports, as many as you like</div></div></label>
+      <input type="file" id="pbUp" accept="application/pdf,.pdf" multiple hidden onchange="pbFiles(this.files);this.value=''">
+    </div>
+    <div class="field"><label>Copy on every email</label>
+      <div class="ccrow ccrow--box">${ccChips(CC_DEFAULT, 'pbCcDel')}<input class="ccadd" type="text" autocomplete="off" data-1p-ignore data-lpignore="true" data-form-type="other" aria-label="Copy someone on every email" placeholder="Add email" onkeydown="if(ccKey(event))pbCcAdd(this)" onblur="if(this.value.trim())pbCcAdd(this)"></div>
+    </div>
+    <div class="field"><label for="pbMail">Training email</label>
+      ${pbMail ? `<div class="pbfile"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg><span class="pbfile__n">${esc(pbMail)}</span><span class="pill pill--green">Connected</span><button class="btn btn--sm" onclick="pbMail=null;renderPlaybook()">Disconnect</button></div>`
+        : `<div style="display:flex;gap:8px"><input class="input" id="pbMail" type="email" style="flex:1" placeholder="sales@acme-network.com" onkeydown="if(event.key==='Enter')pbConnect()"><button class="btn" onclick="pbConnect()">Connect</button></div>`}
+    </div>`;
+  if ($('.drawer__body')) $('.drawer__body').scrollTop = top;
+}
+/* Who is copied. A default list applies to every thread (set in the Playbook); any thread can have its own. */
+let CC_DEFAULT = ['adops@acme-network.com'];
+const ccOf = d => d.cc || CC_DEFAULT;
+const ccOk = v => /^\S+@\S+\.\S+$/.test(v);
+const CC_X = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+/* like a mail client: Enter, comma, semicolon or space turns what you typed into a chip */
+function ccKey(e) { if (!['Enter', ',', ';', ' '].includes(e.key)) return false; e.preventDefault(); return true; }
+function ccChips(list, del) { return list.map((a, i) => '<span class="ccchip">' + esc(a) + '<button type="button" aria-label="Remove ' + esc(a) + '" onclick="' + del + '(' + i + ')">' + CC_X + '</button></span>').join(''); }
+function ccAdd(id, el) { const d = deals.find(x => x.id === id), v = el.value.trim().toLowerCase(); if (!ccOk(v)) return; if (!ccOf(d).includes(v)) d.cc = ccOf(d).concat(v); render(); const n = document.querySelector('.ccrow .ccadd'); if (n) n.focus(); }
+function ccDel(i) { const d = deals.find(x => x.id === activeId); d.cc = ccOf(d).filter((_, k) => k !== i); render(); }
+function ccRow(d) { return '<div class="ccrow"><span class="ccrow__l">Cc</span>' + ccChips(ccOf(d), 'ccDel') + '<input class="ccadd" type="text" autocomplete="off" data-1p-ignore data-lpignore="true" data-form-type="other" aria-label="Copy someone on this thread" placeholder="Add email" onkeydown="if(ccKey(event))ccAdd(' + d.id + ',this)" onblur="if(this.value.trim())ccAdd(' + d.id + ',this)"></div>'; }
+function pbCcAdd(el) { const v = el.value.trim().toLowerCase(); if (!ccOk(v)) return; if (!CC_DEFAULT.includes(v)) CC_DEFAULT = CC_DEFAULT.concat(v); renderPlaybook(); render(); const n = document.querySelector('#formBody .ccadd'); if (n) n.focus(); }
+function pbCcDel(i) { CC_DEFAULT = CC_DEFAULT.filter((_, k) => k !== i); renderPlaybook(); render(); }
+/* The mailbox the agent sends from: pick a connected one or connect Gmail / Outlook. */
+const MAILS = { buyer: [{ a: 'cam@northstarbrands.com', p: 'Gmail' }], seller: [{ a: 'cam@acme-network.com', p: 'Gmail' }] }, mailSel = { buyer: 0, seller: 0 };
+let mailSide = 'seller';
+function renderMailBtn() { const m = MAILS[mailSide][mailSel[mailSide]];
+  const html = t => '<button type="button" class="btn btn--sm mailbtn" aria-haspopup="menu" aria-label="' + t + '" onclick="mailMenu(this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg><span>' + (m ? esc(m.a) : 'Connect your email') + '</span></button>';
+  $('#formSum').innerHTML = html('Send from'); $('#inboxMail').innerHTML = html('Connected inbox'); }
+function mailClose() { const m = document.getElementById('mailmenu'); if (m) m.remove(); }
+function mailMenu(btn) {
+  if (document.getElementById('mailmenu')) { mailClose(); return; }
+  const r = btn.getBoundingClientRect(), m = document.createElement('div'), list = MAILS[mailSide]; m.id = 'mailmenu'; m.className = 'ddmenu mailmenu'; m.setAttribute('role', 'menu');
+  const tick = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>', plus = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+  m.innerHTML = '<div class="mailmenu__h">' + btn.getAttribute('aria-label') + '</div>' + list.map((x, i) => '<div class="mailrow"><button type="button" role="menuitemradio" aria-checked="' + (i === mailSel[mailSide]) + '" class="ddopt' + (i === mailSel[mailSide] ? ' on' : '') + '" style="flex:1;min-width:0" onclick="mailSel[mailSide]=' + i + ';mailClose();renderMailBtn()">' + tick + '<span><b>' + esc(x.a) + '</b><small>' + x.p + (i === mailSel[mailSide] ? ' · Selected' : '') + '</small></span></button><button type="button" class="pbx" aria-label="Remove ' + esc(x.a) + '" onclick="mailRemove(' + i + ')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"/></svg></button></div>').join('') +
+    '<div class="mailmenu__rule"></div>' + ['Gmail', 'Outlook'].map(p => '<button type="button" role="menuitem" class="ddopt on" onclick="mailConnect(\'' + p + '\')">' + plus + '<span style="font-weight:500">Connect ' + p + '</span></button>').join('');
+  document.body.appendChild(m); m.style.minWidth = '280px'; m.style.left = Math.max(8, Math.min(r.left, innerWidth - m.offsetWidth - 8)) + 'px';
+  if (r.top < innerHeight / 2) m.style.top = (r.bottom + 6) + 'px'; else m.style.bottom = (innerHeight - r.top + 6) + 'px';
+  m.querySelector('.ddopt').focus();
+}
+function mailConnect(p) { const list = MAILS[mailSide], dom = mailSide === 'buyer' ? 'northstarbrands.com' : 'acme-network.com', a = (p === 'Gmail' ? 'sales@' : 'adops@') + dom;
+  let i = list.findIndex(x => x.a === a); if (i < 0) { list.push({ a, p }); i = list.length - 1; } mailSel[mailSide] = i; mailClose(); renderMailBtn(); }
+function mailRemove(i) { const list = MAILS[mailSide]; list.splice(i, 1); mailSel[mailSide] = Math.min(mailSel[mailSide] >= i ? Math.max(0, mailSel[mailSide] - 1) : mailSel[mailSide], Math.max(0, list.length - 1)); mailClose(); renderMailBtn(); }
+document.addEventListener('mousedown', e => { if (!e.target.closest('#mailmenu, .mailbtn')) mailClose(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') mailClose(); });
+function openPlaybook() {
+  $('#formTitle').textContent = 'Playbook';
+  $('#formSub').textContent = 'How the agent handles every thread.';
+  pbEdit = null; renderPlaybook();
+  $('#drawerFoot').style.display = 'none';
+  openDrawer();
+}
+
+/* Seller: a lead the connected inbox never saw (a text, a DM, another mailbox). Forward it or paste it. */
+let addLead = false;
+function openAddLead() {
+  addLead = true; side = 'seller';
+  $('#drawerFoot').style.display = ''; $('#formSum').style.display = 'none';
+  $('#formTitle').textContent = 'Add lead'; $('#formSub').textContent = '';
+  $('#launchLabel').textContent = 'Add lead';
+  $('#formBody').innerHTML = `
+    <div class="field"><label>Forward the email to</label>
+      <div style="display:flex;gap:8px"><input class="input" id="f_fwd" readonly value="leads@acme-network.com"><button type="button" class="btn btn--sm" onclick="navigator.clipboard&&navigator.clipboard.writeText('leads@acme-network.com');this.textContent='Copied'">Copy</button></div></div>
+    <div class="field"><label>Or paste the thread</label><textarea class="input" id="f_paste" style="min-height:180px" placeholder="Paste the email, text or DM"></textarea></div>
+    <div class="row2">
+      <div class="field"><label>Brand</label><input class="input" id="f_brand" placeholder="e.g. Juniper Pet Food"></div>
+      <div class="field"><label>Buyer email</label><input class="input" id="f_email" placeholder="buyer@agency.com"></div>
+    </div>`;
+  openDrawer();
+}
+function openForm() {
+  const buyer = side === 'buyer';
+  addLead = false; $('#formSum').style.display = 'flex';
+  $('#drawerFoot').style.display = '';
+  $('#formTitle').textContent = buyer ? 'New booking' : 'New seller agent run';
+  $('#formSub').textContent = buyer ? 'Give the agent the brief. It runs the thread from outreach to approved read.' : 'Point it at an inquiry. It qualifies, proposes, negotiates against your floor, sends the IO and clears creative.';
+  $('#launchLabel').textContent = buyer ? 'Start booking' : 'Start agent';
+  $('#formBody').innerHTML = buyer ? `
+    <div class="drop" onclick="parseIO()">
+      <div class="drop__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div>
+      <div><div class="drop__t">Upload IO or brief</div><div class="drop__s">PDF, DOCX or spreadsheet. The agent reads brand, shows, volume, flight and budget.</div></div>
+    </div>
+    <div class="parsed" id="parsed"><div class="parsed__t"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>Read from IO</div><div style="font-size:12.5px;color:var(--text-secondary);font-weight:500">Filled the fields below. Check them before starting.</div><div id="flagNote"></div></div>
+    <div class="row2">
+      <div class="field"><label>Brand</label><input class="input" id="f_brand" placeholder="e.g. Northbound Coffee"></div>
+      <div class="field"><label>Budget</label><input class="input" id="f_budget" placeholder="$4,000"></div>
+    </div>
+    <div class="field"><label>What the brand does</label><input class="input" id="f_desc" placeholder="One line. The agent puts this in the first email."></div>
+    <div class="field"><label>Target audience</label><input class="input" id="f_aud" placeholder="e.g. women 35-54"></div>
+    <div class="row2">
+      <div class="field"><label>Network</label><input class="input" id="f_network" placeholder="e.g. Tidewater Audio"></div>
+      <div class="field"><label>Rep email</label><input class="input" id="f_email" placeholder="rep@network.com"></div>
+    </div>
+    <div class="field"><label>Shows</label><input class="input" id="f_shows" placeholder="Comma separated"></div>
+    <div class="row3">
+      <div class="field"><label>Impressions</label><input class="input" id="f_imps" placeholder="120,000"></div>
+      <div class="field"><label>Start</label><input class="input" type="date" id="f_start"></div>
+      <div class="field"><label>End</label><input class="input" type="date" id="f_end"></div>
+    </div>
+    <div class="field"><label>Campaign goal</label>
+      <div class="seg" id="f_goal">${Object.entries(GOALS).map(([k, l], i) => `<button type="button" class="${i === 0 ? 'active' : ''}" data-v="${k}" onclick="segPick(this)">${l.split(' /')[0]}</button>`).join('')}</div></div>
+    <div class="field"><label>Talking points</label><textarea class="input" id="f_points" oninput="checkFlag()" placeholder="One per line. Promo codes, must-say lines, things to avoid."></textarea>
+      <div class="hint" id="flagHint">The agent screens these for categories networks send to review (investment, health claims, gambling) and flags them in the first email.</div></div>
+    <div class="section-label">Guardrails</div>
+    <div class="row2">
+      <div class="field"><label>Target CPM</label><input class="input" id="f_target" placeholder="$26"></div>
+      <div class="field"><label>Walk-away CPM</label><input class="input" id="f_max" placeholder="$29"><div class="hint">The agent never agrees above this without you.</div></div>
+    </div>
+    <div class="field"><label>Signing</label>
+      <div class="seg" id="f_sign"><button type="button" class="active" onclick="segPick(this)">Ask me before signing</button><button type="button" onclick="segPick(this)">Auto-book inside guardrails</button></div></div>
+  ` : `
+    <div class="field"><label>Inquiry source</label>
+      <div class="seg" id="f_src"><button type="button" class="active" onclick="segPick(this)">Watch sales inbox</button><button type="button" onclick="segPick(this)">Paste a thread</button></div>
+      <div class="hint">Connected: sales@acme-network.com. The agent answers new buyer emails within minutes.</div></div>
+    <div class="row2">
+      <div class="field"><label>Buyer / agency</label><input class="input" id="f_network" placeholder="e.g. Harbor Media"></div>
+      <div class="field"><label>Buyer email</label><input class="input" id="f_email" placeholder="buyer@agency.com"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Brand</label><input class="input" id="f_brand" placeholder="e.g. Kinfolk Meal Kits"></div>
+      <div class="field"><label>Impressions requested</label><input class="input" id="f_imps" placeholder="120,000"></div>
+    </div>
+    <div class="field"><label>Shows</label><input class="input" id="f_shows" placeholder="Comma separated"></div>
+    <div class="row2">
+      <div class="field"><label>Start</label><input class="input" type="date" id="f_start"></div>
+      <div class="field"><label>End</label><input class="input" type="date" id="f_end"></div>
+    </div>
+    <div class="field"><label>Strategy</label>
+      <div class="seg" id="f_goal">${Object.entries(SELL_GOALS).map(([k, l], i) => `<button type="button" class="${i === 0 ? 'active' : ''}" data-v="${k}" onclick="segPick(this)">${l}</button>`).join('')}</div></div>
+    <div class="section-label">Guardrails</div>
+    <div class="row2">
+      <div class="field"><label>Rate card CPM</label><input class="input" id="f_rate" placeholder="$34"></div>
+      <div class="field"><label>Floor CPM</label><input class="input" id="f_floor" placeholder="$30"><div class="hint">Never sold below this without you.</div></div>
+    </div>
+    <div class="field"><label>Packaging and ad policy</label><textarea class="input" id="f_points" placeholder="One per line">Lead with host-approved shows
+Holds expire after 48 hours
+Pre-review talking points: no health claims, no investment solicitation</textarea></div>
+  `;
+  renderMailBtn();
+  openDrawer();
+}
+function segPick(b) { b.parentElement.querySelectorAll('button').forEach(x => x.classList.remove('active')); b.classList.add('active'); }
+function checkFlag() {
+  const h = document.getElementById('flagHint'); if (!h) return;
+  const f = screen(str('f_points', '') + ' ' + str('f_desc', ''));
+  h.innerHTML = f ? `<span style="color:var(--amber-text);font-weight:600">Review flag: ${esc(f)}.</span> The agent will disclose this in the first email so the network can route review before scripting.` : 'The agent screens these for categories networks send to review (investment, health claims, gambling) and flags them in the first email.';
+}
+
+function parseIO() {
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+  set('f_brand', 'Coastline Running Co.'); set('f_budget', '$3,500'); set('f_network', 'Tidewater Audio'); set('f_email', 'dana.ruiz@tidewateraudio.com');
+  set('f_desc', 'running shoes with a free New Year training plan'); set('f_aud', 'runners and fitness-minded adults 25-44');
+  set('f_shows', 'Huberman Lab, Armchair Expert'); set('f_imps', '120,000'); set('f_start', '2027-01-04'); set('f_end', '2027-02-14');
+  set('f_points', 'Free New Year training plan with any shoe\nCode RUN15 for 15% off\nHost shares their own running habit');
+  set('f_target', '$26'); set('f_max', '$29');
+  $('#parsed').classList.add('show'); checkFlag();
+}
+
+function num(id, d) { const el = document.getElementById(id); const v = el ? parseFloat(String(el.value).replace(/[^0-9.]/g, '')) : NaN; return isNaN(v) ? d : v; }
+function str(id, d) { const el = document.getElementById(id); return el && el.value.trim() ? el.value.trim() : d; }
+
+function launch() {
+  const goal = ($('#f_goal .active') || {}).dataset?.v;
+  const shows = str('f_shows', '').split(',').map(s => s.trim()).filter(Boolean);
+  const today = new Date(); const iso = x => x.toISOString().slice(0, 10);
+  const start = str('f_start', iso(new Date(today.getTime() + 21 * 864e5)));
+  const end = str('f_end', iso(new Date(today.getTime() + 56 * 864e5)));
+  const email = str('f_email', side === 'buyer' ? 'rep@network.com' : 'buyer@agency.com');
+  const contact = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  const base = {
+    side, brand: str('f_brand', side === 'buyer' ? 'Coastline Running Co.' : 'Juniper Pet Food'),
+    desc: str('f_desc', side === 'buyer' ? 'running shoes with a free training plan' : 'fresh dog food delivered weekly'),
+    audience: str('f_aud', side === 'buyer' ? 'adults 25-44' : 'dog owners 25-54'),
+    network: str('f_network', side === 'buyer' ? 'Tidewater Audio' : 'Harbor Media'),
+    contact, email, shows: shows.length ? shows : [SHOWS[1], SHOWS[2]], imps: num('f_imps', 120000), start, end,
+    goal: goal || (side === 'buyer' ? 'awareness' : 'cpm')
+  };
+  let d;
+  if (side === 'buyer') {
+    const target = num('f_target', 26), max = Math.max(num('f_max', 29), target + 0.5);
+    d = makeDeal(Object.assign(base, { budget: num('f_budget', base.imps / 1000 * target), target, max, points: str('f_points', 'Lead with the offer\nPromo code in every read').split('\n').filter(Boolean) }));
+  } else {
+    const floor = num('f_floor', 30), rate = Math.max(num('f_rate', 34), floor + 1);
+    d = makeDeal(Object.assign(base, { rate, floor, points: [] }));
+  }
+  d.thread.push({ dir: 'note', body: side === 'buyer'
+    ? (d.flag ? `Brief received. Pre-flight: talking points touch ${d.flag}, so the first email discloses it.` : 'Brief received. Pre-flight check clear. Drafting outreach to ' + d.network + '.')
+    : addLead ? 'Added by you' + (str('f_paste', '') ? ' from a pasted thread' : '') + '. The agent picks it up from here.' : 'New inquiry from ' + d.network + ' in the sales inbox.' });
+  if (addLead) { d.owner = null; box = 'leads'; addLead = false; }
+  deals.unshift(d); activeId = d.id; kind = d.side; filter = 'agent';
+  closeForm(); render(); play(d);
+}
+
+/* ───────────────────────── show threads ───────────────────────── */
+/* Thread details as plain "Label: value" lines, the same block the Vetting Agent uses for a campaign request. */
+function detailGroups(d) {
+  const terms = Object.values(d.termRows).map(r => [r.label, r.cur + (r.open && r.open !== r.cur ? ' (opened at ' + r.open + ')' : '')]);
+  if (d.side === 'show') return [['Spot', terms], ['Agent handles alone', [['Script, format and due date questions', 'Yes'], ['Publish day inside the booked week', 'Yes'], ['Reminders', '72, 48, 24 hours']]],
+    ['Agent asks you', [['Moves outside the booked week', 'Yes'], ['Script or brand pushback', 'Yes'], ['Accepting a file', 'Yes'], ['Anything about money', 'Yes']]], ['Source', [['Booking', 'Inventory, by sales'], ['Copy', 'Attached on the IO'], ['Network', d.network]]]];
+  if (d.side === 'buyer') return [['Brief', [['Brand', d.desc], ['Audience', d.audience], ['Network', d.network], ['Shows', d.shows.join(', ')], ['Goal', GOALS[d.goal]], ['Budget', usd(d.budget)], ['Talking points', d.points.join('; ')]]], ['Terms', terms],
+    ['Guardrails', [['Target CPM', cpm(d.target)], ['Walk-away', cpm(d.max)], ['Sign IO', 'After your OK']].concat(d.flag ? [['Review flag', d.flag]] : [])]];
+  return [['Inquiry', [['Buyer', d.network], ['Brand', d.brand], ['Audience', d.audience], ['Shows', d.shows.join(', ')]]], ['Terms', terms],
+    ['Guardrails', [['Rate card', cpm(d.rate)], ['Floor', cpm(d.floor)], ['Strategy', SELL_GOALS[d.goal]], ['Holds', '48 hours'], ['Ad policy', 'Pre-review creative']]]];
+}
+function detailsHTML(d) { return '<div class="propgrid">' + detailGroups(d).map(g => '<div class="prop"><div class="prop__h">' + g[0] + ':</div>' + g[1].filter(r => r[1] != null && r[1] !== '').map(r => '<div><b>' + esc(r[0]) + ':</b> ' + esc(r[1]) + '</div>').join('') + '</div>').join('') + '</div><div class="prop__rule"></div>'; }
+function showRows(d) {
+  return { spec: { label: 'Spec', open: d.spec, cur: d.spec }, delivery: { label: 'Delivery', open: d.delivery, cur: d.delivery },
+    flight: { label: 'Airs', open: fmtDate(d.start), cur: fmtDate(d.start) }, due: { label: 'File due', open: d.due, cur: d.due },
+    status: { label: 'Status', open: 'Booked', cur: 'Booked' } };
+}
+function showBrief(d) {
+  return `<div><div class="side__t">What the agent can do alone</div>
+      <div class="rule"><span>Answer script, format, due date</span><b>Yes</b></div>
+      <div class="rule"><span>Move publish day in the booked week</span><b>Yes</b></div>
+      <div class="rule"><span>Reminders</span><b>72, 48, 24 hours</b></div>
+      <div class="rule"><span>Move outside the booked week</span><b style="color:var(--amber-text)">Asks you</b></div>
+      <div class="rule"><span>Script or brand pushback</span><b style="color:var(--amber-text)">Asks you</b></div>
+      <div class="rule"><span>Accept a file</span><b style="color:var(--amber-text)">Asks you</b></div>
+      <div class="rule"><span>Anything about money</span><b style="color:var(--amber-text)">Asks you</b></div>
+    </div>
+    <div><div class="side__t">Where this came from</div>
+      <dl class="kv"><dt>Booking</dt><dd>Inventory, by sales</dd><dt>Copy</dt><dd>Attached on the IO</dd><dt>Network</dt><dd>${esc(d.network)}</dd></dl></div>`;
+}
+function showScript(d) {
+  const f = first(d.contact), sh = d.shows[0], dai = d.delivery === 'Ad-inserted';
+  const req = { terms: { status: 'Requested' }, mail: { dir: 'out', att: `${d.brand} - script.pdf`,
+    body: `Hey ${f},\n\nNew spot for ${sh}: ${d.brand}, ${d.spec}, ${d.delivery.toLowerCase()}, airing ${fmtDate(d.start)}.${dai ? ` We need the MP3 by ${d.due}.` : ' Nothing to upload, just read it in the episode.'}\n\nScript attached. Can you confirm you have it and tell me which day you're publishing?\n\nThanks,\nAcme Network Ad Ops`,
+    head: 'Sent the brief to the show', why: 'Sent the Tuesday before the flight week, straight from the Inventory booking. Copy was attached to the IO, so nothing held it back.' } };
+  const rem = (h, why) => ({ mail: { dir: 'out', body: `Hey ${f}, quick reminder that the ${d.brand} file is due ${d.due}, ${h} from now. MP3 only. Script is in the first email of this thread.`, head: 'Reminded the show of the due date', why } });
+
+  if (d.kase === 'move') return [ req,
+    { mail: { dir: 'in', body: `Hey, we're dark that week, the host is traveling. Can ${d.brand} run the week of Jun 29 instead?` } },
+    { approval: { title: `${sh} wants to move ${d.brand} outside the booked week`,
+        body: `Booked for the week of Jun 15; they are asking for Jun 29. Inventory has a mid-roll open that week and the IO allows a shift with notice. I'd confirm the move and tell the buyer.`,
+        options: [{ id: 'hold', label: 'Move to Jun 29', primary: true }, { id: 'approve', label: 'Keep the date' }, { id: 'takeover', label: 'I\'ll take over' }] } },
+    { branch: c => c === 'approve'
+        ? { mail: { dir: 'out', body: `Thanks ${f}. We need to keep the week of Jun 15 for this one, ${d.brand}'s flight is fixed. Could a pre-recorded read work before the host leaves?`, head: 'Kept the air date, offered a pre-record', why: 'You chose to keep the date. Offered the one option that still delivers inside the flight.' } }
+        : { terms: { flight: 'Jun 29', status: 'Shifted' }, mail: { dir: 'out', body: `Jun 29 works. I've moved it on our side and let ${d.brand} know. Same script, new date.`, head: 'Moved the air date', why: 'You approved the move. Logged the shift on the spot, updated Inventory and told the buyer in their thread.' } } },
+    { terms: { status: 'Acknowledged' }, mail: { dir: 'in', body: `Perfect, thanks!` } } ];
+
+  if (d.kase === 'pushback') return [ req,
+    { mail: { dir: 'in', body: `Got the script. I'm not comfortable reading "regulated by the CFTC" as written, it feels like I'm vouching for it. Can I soften that line?` } },
+    { approval: { title: `Host wants to change a read-verbatim line`, body: `${d.brand}'s brief marks that line read-verbatim and the IO requires buyer pre-approval. I'd ask the buyer for an approved alternate.`,
+        options: [{ id: 'hold', label: 'Ask the buyer', primary: true }, { id: 'approve', label: 'Hold the line' }, { id: 'takeover', label: 'I\'ll take over' }] } },
+    { branch: c => c === 'approve'
+        ? { mail: { dir: 'out', body: `Hey ${f}, that line has to be read as written, it's a compliance requirement from ${d.brand}. Everything else you can put in your own words.`, head: 'Held the verbatim line', why: 'You chose to hold the line.' } }
+        : { terms: { status: 'With buyer' }, mail: { dir: 'out', body: `Hey ${f}, totally fair. That line is marked read-verbatim by ${d.brand}, so I can't change it myself. I'm asking them for an approved alternate now. Please hold off recording until I'm back to you, should be today.`, head: 'Asked the buyer for an alternate line', why: 'The line is read-verbatim, so the agent cannot reword it. Asking the buyer keeps the host from recording twice.' } } },
+    { mail: { dir: 'in', body: `Sounds good, I'll wait.` } } ];
+
+  if (d.kase === 'silent') return [ req,
+    rem('72 hours', 'First automatic reminder.'), rem('48 hours', 'Second automatic reminder.'), rem('24 hours', 'Last automatic reminder. After this the agent asks you.'),
+    { approval: { title: `No reply from ${sh} after three reminders`, body: `The ${d.brand} file was due ${d.due} and airs ${fmtDate(d.start)}. ${f} has not acknowledged.`,
+        options: [{ id: 'hold', label: 'Send a final nudge', primary: true }, { id: 'approve', label: 'Line up a make-good date' }, { id: 'takeover', label: 'I\'ll take over' }] } },
+    { branch: c => c === 'approve'
+        ? { terms: { status: 'Make-good pending' }, mail: { dir: 'out', body: `Hey ${f}, since we haven't heard back we're moving ${d.brand} to next week. Can you confirm you can do ${d.due.split(' ')[0]} next week?`, head: 'Offered a make-good date', why: 'You chose a make-good date. Inventory has the same position open next week.' } }
+        : { mail: { dir: 'out', body: `Hey ${f}, last one from me: the ${d.brand} file was due ${d.due}, for ${fmtDate(d.start)}. If today is not possible, tell me what is and I'll sort it with the buyer.`, head: 'Sent a final nudge', why: 'You chose one more nudge, with a way out so they answer.' } } } ];
+
+  return [ req,
+    { mail: { dir: 'in', body: `Got it. Quick one, which code is it this time? Last ${d.brand} read used a different one. Also can we publish Thursday instead of Monday?` } },
+    { terms: { status: 'Acknowledged' }, mail: { dir: 'out', body: `It's ${d.code} this time, all caps. Thursday is fine, it's inside the booked week, so I've moved the publish day. File is still due ${d.due}, MP3.`,
+        head: 'Answered the host\'s questions', why: 'Both answers were already on the booking: the code is in the brief, and Thursday is inside the booked week. Nobody needed to be asked.' } },
+    rem('24 hours', 'The 72 and 48 hour reminders already went. This is the last automatic one.'),
+    { terms: { status: 'File in' }, mail: { dir: 'in', att: `${sh.toLowerCase().replace(/\s/g, '')}_${d.brand.toLowerCase()}_final.mp3`, body: `Here you go.` } },
+    { terms: { status: `File in, ${d.score}% match` }, mail: { dir: 'out', body: `Got it, thanks ${f}! It's with ad ops for a listen. I'll confirm as soon as it's accepted.`, head: 'Scored the read against the talking points', why: `Scored the read against the talking points: ${d.score}%. Every point and the code were read.` } },
+    { approval: { title: `${d.brand} file is in: ${d.score}% script match`, body: `Every talking point and the code were read, and it runs 0:58 of :60. Tone is the one thing I can't judge. Accepting sends it to the Execution desk, renamed, with the pixel.`,
+        options: [{ id: 'hold', label: 'Accept file', primary: true }, { id: 'approve', label: 'Send back' }, { id: 'takeover', label: 'I\'ll take over' }] } },
+    { branch: c => c === 'approve'
+        ? { terms: { status: 'Revision requested' }, mail: { dir: 'out', body: `Hey ${f}, one more pass needed on the ${d.brand} read. Ad ops will follow up with the specific note.`, head: 'Sent the read back for another pass', why: 'You sent it back.' } }
+        : { status: 'booked', terms: { status: 'Accepted, with execution' }, mail: { dir: 'out', body: `Approved, thank you ${f}! Nothing else needed on this one.`, head: 'Accepted the read', why: 'You accepted. File renamed and placed on the Execution desk with the pixel and flight dates.' } } } ];
+}
+
+/* ───────────────────────── manual mode ───────────────────────── */
+function draftOf(d) { let st = d.script[d.step]; if (!st) return null; if (st.branch) st = st.branch(d.choice || 'hold'); return st.mail && st.mail.dir === 'out' ? st : null; }
+function manualAdvance(d) {
+  d.choice = d.choice || 'hold';
+  while (d.step < d.script.length) {
+    const st = d.script[d.step], r = st.branch ? st.branch(d.choice) : st;
+    if (r.approval) { d.step++; continue; }
+    if (r.mail && r.mail.dir === 'out') break;
+    applyStep(d, st, true); d.step++;
+    if (['booked', 'passed'].includes(d.status)) return;
+  }
+  d.status = 'paused';
+}
+function afterManualSend(d) { render(); if (['booked', 'passed'].includes(d.status)) return; setTimeout(() => { if (d.status === 'paused') { manualAdvance(d); render(); } }, SPEED); }
+function sendDraft(id) { const d = deals.find(x => x.id === id); if (!draftOf(d)) return; applyStep(d, d.script[d.step], true); d.step++; d.thread[d.thread.length - 1].by = 'draft'; if (d.side === 'show') emit({ ev: 'log', key: keyOf(d), text: 'Sent the agent\'s drafted reply to the show from the Inbox' }); afterManualSend(d); }
+function sendManual(id) {
+  const d = deals.find(x => x.id === id), inp = document.getElementById('reply'), v = inp.value.trim(); if (!v) return;
+  d.thread.push({ dir: 'out', by: 'you', body: v, fresh: true, time: TIMES[Math.min(d.thread.filter(m => m.dir !== 'note').length, TIMES.length - 1)] });
+  if (draftOf(d)) d.step++;
+  if (d.side === 'show') emit({ ev: 'log', key: keyOf(d), text: 'Replied to the show by hand from the Inbox' });
+  afterManualSend(d);
+}
+function sendReply(id) { const d = deals.find(x => x.id === id), dr = draftOf(d), v = document.getElementById('reply').value.trim(); if (!v) { document.getElementById('reply').focus(); return; }
+  const cc = draftCcOf(d).slice(), n = d.thread.length; d.draftText = null; d.draftCc = null; d.draftSaved = false;
+  if (dr && v === dr.mail.body.trim()) sendDraft(id); else sendManual(id);
+  const sent = d.thread.slice(n).find(m => m.dir === 'out'); if (sent) { sent.cc = cc; render(); } }
+function setMode(id, m) { const d = deals.find(x => x.id === id); if (m === 'manual' && d.status !== 'paused') choose(id, 'takeover'); if (m === 'agent' && d.status === 'paused') resume(id); }
+function composeHTML(d) {
+  if (['booked', 'passed'].includes(d.status)) return '';
+  if (d.status !== 'paused') return `<div class="compose"><input class="input" id="instr" placeholder="Tell the agent something, e.g. &quot;Thursday is fine for this show&quot;" onkeydown="if(event.key==='Enter')instruct(${d.id})"><button class="btn" onclick="instruct(${d.id})">Send</button></div>`;
+  const dr = draftOf(d), body = d.draftText != null ? d.draftText : dr ? dr.mail.body : '';
+  const box = MAILS.seller[mailSel.seller] && d.side !== 'buyer' ? MAILS.seller[mailSel.seller].a : MAILS.buyer[mailSel.buyer] ? MAILS.buyer[mailSel.buyer].a : 'your mailbox';
+  return `<div class="draft"><div class="approval__t"><span class="pill pill--gray">${dr ? 'Agent draft' : 'Your reply'}</span>${dr ? 'Not sent' : ''}</div>
+    <div class="ccrow draft__cc"><span class="ccrow__l">Cc</span>${ccChips(draftCcOf(d), 'draftCcDel')}<input class="ccadd" type="text" autocomplete="off" data-1p-ignore data-lpignore="true" data-form-type="other" aria-label="Copy someone on this email" placeholder="Add email" onkeydown="if(ccKey(event))draftCcAdd(${d.id},this)" onblur="if(this.value.trim())draftCcAdd(${d.id},this)"></div>
+    <textarea class="input draft__ta" id="reply" aria-label="Reply to ${esc(first(d.contact))}" rows="${Math.min(12, Math.max(3, body.split('\n').length + Math.floor(body.length / 110) + 1))}" placeholder="Write your reply to ${esc(first(d.contact))}" oninput="const s=document.getElementById('draftSaved');if(s)s.textContent=''">${esc(body)}</textarea>
+    <div class="approval__opts"><button class="btn btn--sm btn--primary" onclick="sendReply(${d.id})">Send</button><button class="btn btn--sm" onclick="saveDraft(${d.id})">Send to drafts</button><span class="draft__saved" id="draftSaved">${d.draftSaved ? 'Saved to Drafts in ' + esc(box) : ''}</span></div></div>`;
+}
+/* Cc on this one email: starts from the thread's Cc, and changes here do not touch the thread. */
+function draftCcOf(d) { return d.draftCc || ccOf(d); }
+function keepDraft(d) { const r = document.getElementById('reply'); if (r) d.draftText = r.value; }
+function draftCcAdd(id, el) { const d = deals.find(x => x.id === id), v = el.value.trim().toLowerCase(); if (!ccOk(v)) return; keepDraft(d); if (!draftCcOf(d).includes(v)) d.draftCc = draftCcOf(d).concat(v); render(); const n = document.querySelector('.draft__cc .ccadd'); if (n) n.focus(); }
+function draftCcDel(i) { const d = deals.find(x => x.id === activeId); keepDraft(d); d.draftCc = draftCcOf(d).filter((_, k) => k !== i); render(); }
+function saveDraft(id) { const d = deals.find(x => x.id === id); keepDraft(d); if (!(d.draftText || '').trim()) { document.getElementById('reply').focus(); return; } d.draftSaved = true; render(); }
+
+function openThread(agent, q) {
+  q = String(q || '').toLowerCase();
+  const d = deals.find(x => x.side === agent && (x.brand + ' ' + x.shows.join(' ')).toLowerCase().includes(q)); if (!d) return;
+  kind = agent; activeId = d.id;
+  qF = ''; whoF = 'all'; const qi = document.querySelector('.inbox2__search input'); if (qi) qi.value = '';
+  filter = d.status === 'needs' ? 'needs' : d.status === 'paused' ? 'manual' : ['booked', 'passed'].includes(d.status) ? 'done' : 'agent';
+  render();
+}
+function fromHash() { const m = decodeURIComponent(location.hash.slice(1)).split('/'); if (m.length === 2) openThread(m[0], m[1]); }
+window.addEventListener('message', e => { const m = e.data; if (m && m.type === 'inboxnav') openThread(m.agent, m.q); });
+window.addEventListener('hashchange', fromHash);
+
+const ME = 'inbox';
+const keyOf = d => d.brand + '|' + d.shows[0];
+function reseed() { deals = []; seq = 0; activeId = null; seed(); assignOwners(); }
+function assignOwners() { deals.forEach((d, i) => { if (d.owner === undefined) d.owner = i % 4 === 3 ? null : TEAM[i % 3]; }); }
+function handle(ev) {
+  const d = deals.find(x => x.side === 'show' && keyOf(x) === ev.key); if (!d) return;
+  const note = t => d.thread.push({ dir: 'note', body: t });
+  const f = first(d.contact), time = TIMES[Math.min(d.thread.filter(m => m.dir !== 'note').length, TIMES.length - 1)];
+  if (ev.ev === 'accept') { if (d.approval && d.kase === 'file') choose(d.id, 'hold'); else { note('File accepted in Spots.'); d.approval = null; d.status = 'booked'; d.termRows.status.cur = 'Accepted, with execution'; } }
+  else if (ev.ev === 'sendback') { if (d.approval && d.kase === 'file') choose(d.id, 'approve'); else { note('Sent back from Spots: ' + ev.note); d.termRows.status.cur = 'Revision requested'; d.thread.push({ dir: 'out', by: 'you', time, fresh: true, body: `Hey ${f},\n\nOne fix needed on the ${d.brand} read:\n\n${ev.note}` }); } }
+  else if (ev.ev === 'remind') { d.thread.push({ dir: 'out', by: 'you', time, fresh: true, body: `Hey ${f}, a nudge on ${d.brand} for ${fmtDate(d.start)}. Can you confirm where it stands?` }); note('Reminder sent from Production.'); }
+  else if (ev.ev === 'shift') { d.termRows.flight.cur = ev.label; note('Flight moved to ' + ev.label + ' in Spots.'); }
+  else if (ev.ev === 'live') { note('Set live by the execution team.'); d.termRows.status.cur = 'Live'; }
+}
+
+/* ───────── shared spot events: Inbox threads <-> Production rows ─────────
+   Both screens append to one log in localStorage and replay what the other wrote. */
+const SPOT_LOG = 'acme_spot_events'; let applied = 0, applying = false;
+if (window.self === window.top) { try { localStorage.removeItem(SPOT_LOG); } catch (e) {} }
+function emit(ev) { if (applying) return; try { const l = JSON.parse(localStorage.getItem(SPOT_LOG) || '[]'); l.push(Object.assign({ from: ME }, ev)); localStorage.setItem(SPOT_LOG, JSON.stringify(l)); applied = l.length; } catch (e) {} }
+function pull() {
+  let l = []; try { l = JSON.parse(localStorage.getItem(SPOT_LOG) || '[]'); } catch (e) {}
+  if (l.length < applied) { reseed(); applied = 0; }
+  applying = true; let n = 0;
+  for (; applied < l.length; applied++) { if (l[applied].from !== ME) { try { handle(l[applied]); n++; } catch (e) { console.error(e); } } }
+  applying = false; if (n) render();
+}
+window.addEventListener('storage', e => { if (e.key === SPOT_LOG) pull(); });
+
+seed(); assignOwners();
+render();
+pull();
+fromHash();
+</script>
+
+</body>
+</html>

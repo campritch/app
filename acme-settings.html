@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acme Network - Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #17212B; --text-primary: #0E1323; --text-secondary: #707481; --text-tertiary: #9CA0AB;
+      --border: #DEE0E4; --border-light: #EDEEF1; --white: #ffffff;
+      --accent: #FF6267; --accent-hover: #ff4d52;
+      --secondary: #E4E6ED; --secondary-lite: #F3F4F6; --page-bg: #F9FAFB;
+      --shadow-card: 0 1px 2px rgba(14,19,35,.04), 0 8px 24px rgba(14,19,35,.05);
+      --shadow-btn: 0 1px 3px 0 rgba(166,175,195,.20);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; background: var(--page-bg); color: var(--text-primary); -webkit-font-smoothing: antialiased; line-height: 1.45; font-size: 14px; }
+    button { font-family: inherit; cursor: pointer; } input { font-family: inherit; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 28px 60px; }
+    .top { display: flex; align-items: center; gap: 22px; margin-bottom: 22px; flex-wrap: wrap; }
+    .h1 { font-size: 19px; font-weight: 700; letter-spacing: -.03em; }
+    .tabs { display: flex; gap: 4px; background: var(--secondary-lite); border-radius: 10px; padding: 4px; }
+    .tab { border: 0; background: none; padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+    .tab.active { background: var(--white); color: var(--text-primary); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 600; border: 1px solid var(--border); background: var(--white); color: var(--text-primary); box-shadow: var(--shadow-btn); white-space: nowrap; }
+    .btn:hover { background: var(--secondary-lite); }
+    .btn--primary { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: none; }
+    .btn--primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .btn--sm { padding: 6px 11px; font-size: 12.5px; }
+    .x { border: 0; background: none; color: var(--text-tertiary); width: 26px; height: 26px; border-radius: 6px; display: inline-grid; place-items: center; }
+    .x:hover { background: var(--secondary-lite); color: var(--text-primary); }
+
+    .grid { display: grid; grid-template-columns: 280px 1fr; gap: 18px; align-items: start; }
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow-card); overflow: hidden; }
+    .net { display: flex; align-items: center; gap: 11px; width: 100%; border: 0; border-top: 1px solid var(--border-light); background: none; padding: 12px 16px; text-align: left; }
+    .net:first-child { border-top: 0; } .net:hover { background: #FCFCFD; } .net.on { background: var(--secondary-lite); }
+    .net__t { font-size: 13.5px; font-weight: 700; } .net__s { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+    .logo { width: 34px; height: 34px; border-radius: 9px; background: #27272A; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 11.5px; flex: none; }
+    .add { padding: 12px 16px; border-top: 1px solid var(--border-light); }
+
+    .sec { padding: 18px 20px; border-top: 1px solid var(--border-light); }
+    .sec:first-child { border-top: 0; }
+    .sec__h { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .sec__t { font-size: 14px; font-weight: 700; }
+    .name { border: 0; outline: none; font: inherit; font-size: 18px; font-weight: 700; letter-spacing: -.02em; color: var(--text-primary); background: none; width: 100%; border-radius: 8px; padding: 4px 6px; margin-left: -6px; }
+    .name:hover { background: var(--secondary-lite); } .name:focus { background: var(--white); box-shadow: inset 0 0 0 1.5px var(--text-primary); }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { display: inline-flex; align-items: center; border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 600; background: var(--secondary-lite); color: var(--text-primary); }
+    .muted { color: var(--text-secondary); font-weight: 500; font-size: 13px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-align: left; padding: 0 10px 8px 0; white-space: nowrap; }
+    td { padding: 8px 10px 8px 0; border-top: 1px solid var(--border-light); vertical-align: middle; }
+    .inp { border: 0; outline: none; font: inherit; font-size: 13px; font-weight: 600; color: var(--text-primary); background: none; width: 100%; min-width: 120px; border-radius: 7px; padding: 7px 8px; margin-left: -8px; box-shadow: inset 0 0 0 1px transparent; }
+    .inp.sub { font-weight: 500; color: var(--text-secondary); }
+    .inp:hover { box-shadow: inset 0 0 0 1px var(--border); } .inp:focus { box-shadow: inset 0 0 0 1.5px var(--text-primary); color: var(--text-primary); }
+    .dd { display: inline-flex; align-items: center; justify-content: space-between; gap: 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); padding: 6px 10px; font-size: 12.5px; font-weight: 600; color: var(--text-primary); min-width: 118px; }
+    .dd svg { color: var(--text-secondary); flex: none; } .dd:focus-visible { border-color: var(--text-primary); outline: none; }
+    .ddmenu { position: fixed; z-index: 90; background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 32px rgba(23,33,43,.14); padding: 4px; display: flex; flex-direction: column; }
+    .ddopt { display: flex; align-items: center; gap: 8px; border: 0; background: none; font-size: 13px; font-weight: 500; color: var(--text-primary); padding: 8px 12px 8px 8px; border-radius: 7px; text-align: left; white-space: nowrap; outline: none; }
+    .ddopt svg { flex: none; visibility: hidden; } .ddopt.on { font-weight: 600; } .ddopt.on svg { visibility: visible; }
+    .ddopt:hover, .ddopt:focus-visible { background: var(--page-bg); }
+    .areas { display: flex; gap: 6px; flex-wrap: wrap; }
+    .area { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); background: var(--white); border-radius: 8px; padding: 5px 9px 5px 7px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+    .area i { width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid var(--border); display: grid; place-items: center; color: #fff; flex: none; }
+    .area.on { color: var(--text-primary); border-color: var(--text-primary); } .area.on i { background: var(--primary); border-color: var(--primary); }
+    .area:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 1px; }
+    .empty { padding: 44px 20px; text-align: center; color: var(--text-secondary); font-weight: 500; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .wrap { padding: 18px 16px 50px; } }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="h1">Settings</div>
+    <div class="tabs"><button class="tab active">Networks</button></div>
+  </div>
+  <div class="grid">
+    <div class="card" id="nets"></div>
+    <div class="card" id="detail"></div>
+  </div>
+</div>
+<script>
+/* Networks and who can see what. One shared record (localStorage 'acme_access') that the shell's account switch,
+   the Shows page, Spots and the Inbox all read. */
+const KEY = 'acme_access';
+const AREAS = [['inbox', 'Inbox'], ['spots', 'Spots'], ['shows', 'Shows']];
+const ROLE_AREAS = { admin: ['inbox', 'spots', 'shows'], production: ['spots'] };
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const initials = s => (s || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+const CHECK = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+const TICK = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>';
+
+let A = load(), cur = null;
+function load() { try { return JSON.parse(localStorage.getItem(KEY) || 'null') || { networks: [], shows: {} }; } catch (e) { return { networks: [], shows: {} }; } }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(A)); } catch (e) {} if (window.parent !== window && window.parent.applyLogin) window.parent.applyLogin(); }
+window.addEventListener('storage', e => { if (e.key === KEY) { A = load(); render(); } });
+const net = () => A.networks.find(n => n.id === cur);
+const showsOf = id => Object.keys(A.shows).filter(k => A.shows[k].net === id);
+const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+
+function addNetwork() { const n = { id: uid('n'), name: 'New network', people: [] }; A.networks.push(n); cur = n.id; save(); render(); const el = $('.name'); el.focus(); el.select(); }
+function removeNetwork() { const n = net(); Object.values(A.shows).forEach(s => { if (s.net === n.id) s.net = ''; }); A.networks = A.networks.filter(x => x !== n); cur = null; save(); render(); }
+function rename(v) { net().name = v.trim() || 'Untitled network'; save(); renderList(); }
+function addPerson() { net().people.push({ id: uid('p'), name: '', email: '', role: 'production', areas: ROLE_AREAS.production.slice() }); save(); render(); const el = document.querySelector('tbody tr:last-child .inp'); if (el) el.focus(); }
+function person(id) { return net().people.find(p => p.id === id); }
+function setField(id, k, v) { person(id)[k] = v.trim(); save(); renderList(); }
+function setRole(id, r) { const p = person(id); p.role = r; p.areas = ROLE_AREAS[r].slice(); save(); render(); }
+function toggleArea(id, a) { const p = person(id); p.areas = p.areas.includes(a) ? p.areas.filter(x => x !== a) : p.areas.concat(a); save(); render(); }
+function removePerson(id) { const n = net(); n.people = n.people.filter(p => p.id !== id); save(); render(); }
+function viewAs(id) { if (window.parent !== window && window.parent.signInAs) window.parent.signInAs('net:' + id); }
+
+/* our own dropdown, never a native select */
+let ddFor = null;
+function ddClose() { const m = document.getElementById('ddmenu'); if (m) m.remove(); ddFor = null; }
+function roleMenu(btn, id) {
+  const was = ddFor; ddClose(); if (was === id) return;
+  const r = btn.getBoundingClientRect(), m = document.createElement('div'), p = person(id);
+  m.id = 'ddmenu'; m.className = 'ddmenu'; m.setAttribute('role', 'listbox');
+  m.innerHTML = [['admin', 'Admin'], ['production', 'Production']].map(o => '<button type="button" role="option" class="ddopt' + (p.role === o[0] ? ' on' : '') + '" onclick="ddClose();setRole(\'' + id + '\',\'' + o[0] + '\')">' + TICK + '<span>' + o[1] + '</span></button>').join('');
+  document.body.appendChild(m); ddFor = id;
+  m.style.minWidth = r.width + 'px'; m.style.top = (r.bottom + 4) + 'px'; m.style.left = r.left + 'px';
+  (m.querySelector('.on') || m.firstChild).focus();
+}
+document.addEventListener('mousedown', e => { if (ddFor && !e.target.closest('#ddmenu, .dd')) ddClose(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') ddClose(); });
+
+function renderList() {
+  $('#nets').innerHTML = A.networks.map(n => '<button class="net' + (n.id === cur ? ' on' : '') + '" onclick="cur=\'' + n.id + '\';render()"><span class="logo">' + initials(n.name) + '</span><span><span class="net__t">' + esc(n.name) + '</span><br><span class="net__s">' + showsOf(n.id).length + ' shows · ' + n.people.length + ' people</span></span></button>').join('') +
+    '<div class="add"><button class="btn btn--sm" onclick="addNetwork()">+ Add network</button></div>';
+}
+function render() {
+  ddClose();
+  if (!net()) cur = (A.networks[0] || {}).id || null;
+  renderList();
+  const n = net();
+  if (!n) { $('#detail').innerHTML = '<div class="empty">No networks yet.</div>'; return; }
+  const shows = showsOf(n.id);
+  $('#detail').innerHTML =
+    '<div class="sec"><div class="sec__h" style="margin:0"><input class="name" aria-label="Network name" value="' + esc(n.name) + '" onchange="rename(this.value)"><button class="btn btn--sm" onclick="removeNetwork()">Remove</button></div></div>' +
+    '<div class="sec"><div class="sec__h"><div class="sec__t">Shows</div></div>' + (shows.length ? '<div class="chips">' + shows.map(s => '<span class="chip">' + esc(s) + '</span>').join('') + '</div>' : '<div class="muted">No shows assigned.</div>') + '</div>' +
+    '<div class="sec"><div class="sec__h"><div class="sec__t">People</div><button class="btn btn--sm" onclick="addPerson()">+ Add person</button></div>' +
+    (n.people.length ? '<table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Can see</th><th></th></tr></thead><tbody>' + n.people.map(p => { const q = "'" + p.id + "'";
+      return '<tr><td><input class="inp" aria-label="Name" placeholder="Name" value="' + esc(p.name) + '" onchange="setField(' + q + ',\'name\',this.value)"></td>' +
+        '<td><input class="inp sub" aria-label="Email" placeholder="Email" value="' + esc(p.email) + '" onchange="setField(' + q + ',\'email\',this.value)"></td>' +
+        '<td><button type="button" class="dd" aria-haspopup="listbox" aria-label="Role" onclick="roleMenu(this,' + q + ')"><span>' + (p.role === 'admin' ? 'Admin' : 'Production') + '</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button></td>' +
+        '<td><div class="areas">' + AREAS.map(a => '<button type="button" role="checkbox" aria-checked="' + p.areas.includes(a[0]) + '" class="area' + (p.areas.includes(a[0]) ? ' on' : '') + '" onclick="toggleArea(' + q + ',\'' + a[0] + '\')"><i>' + CHECK + '</i>' + a[1] + '</button>').join('') + '</div></td>' +
+        '<td style="white-space:nowrap;text-align:right;padding-right:0"><button class="btn btn--sm" onclick="viewAs(' + q + ')">View as</button> <button class="x" aria-label="Remove ' + esc(p.name || 'person') + '" onclick="removePerson(' + q + ')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></td></tr>';
+    }).join('') + '</tbody></table>' : '<div class="muted">No one has access yet.</div>') + '</div>';
+}
+render();
+</script>
+</body>
+</html>

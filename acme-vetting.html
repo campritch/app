@@ -138,6 +138,7 @@
     .stage { padding: 22px 24px; }
     .stage__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
     .stage__h { font-size: 16px; font-weight: 700; letter-spacing: -.02em; }
+    .stage__desc, .stage__note { display: none !important; }
     .stage__desc { font-size: 12.5px; color: var(--text-secondary); margin-top: 3px; max-width: 560px; line-height: 1.5; }
     .ai-tag { font-size: 9.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-secondary); background: var(--secondary-lite); border: 1px solid var(--border); border-radius: 999px; padding: 3px 9px; display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; }
     .ai-tag i { width: 6px; height: 6px; border-radius: 50%; background: #18794E; }
@@ -509,10 +510,32 @@
     .msg { display: grid; grid-template-columns: 248px 1fr; gap: 18px; align-items: start; }
     .msg > * { min-width: 0; }
     .msg-pane { background: var(--white); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow-card); }
-    .inbox2__head { padding: 18px 20px 14px; }
+    .inbox2__head { padding: 14px 14px 14px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .inbox2__title { font-size: 19px; font-weight: 700; letter-spacing: -.01em; }
-    .inbox2__search { margin-top: 13px; display: flex; align-items: center; gap: 9px; background: var(--white); border: 0; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--border), var(--shadow-btn); padding: 10px 12px; color: var(--text-tertiary); }
-    .inbox2__search input { border: none; outline: none; background: none; font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text-primary); width: 100%; }
+    .dd { display: inline-flex; align-items: center; justify-content: space-between; gap: 8px; text-align: left; cursor: pointer; font-family: inherit; }
+    .dd__v { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .dd__c { flex: none; color: var(--text-secondary); }
+    .ddmenu { position: fixed; z-index: 400; background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 32px rgba(23,33,43,.14); padding: 4px; overflow-y: auto; display: flex; flex-direction: column; }
+    .ddopt { display: flex; align-items: center; gap: 8px; border: 0; background: none; font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text-primary); padding: 8px 12px 8px 8px; border-radius: 7px; cursor: pointer; text-align: left; white-space: nowrap; outline: none; }
+    .ddopt svg { flex: none; visibility: hidden; } .ddopt.on { font-weight: 600; } .ddopt.on svg { visibility: visible; }
+    .ddopt:hover, .ddopt:focus-visible { background: var(--page-bg); }
+    .ddgrp { font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-tertiary); padding: 9px 10px 4px; }
+    .acct { border: 0; background: none; padding: 4px 4px 4px 10px; border-radius: 999px; gap: 10px; }
+    .acct:hover, .acct[aria-expanded="true"] { background: var(--secondary-lite); }
+    .acct__who { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.25; }
+    .acct__who b, .acct__opt b { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .acct__who small, .acct__opt small { font-size: 11.5px; font-weight: 500; color: var(--text-tertiary); }
+    .acct__opt { display: flex; flex-direction: column; line-height: 1.3; }
+    .inbox2__who { flex: none; max-width: 132px; font-family: inherit; font-size: 12.5px; font-weight: 500; color: var(--text-primary); background: var(--white); border: 0; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--border); padding: 7px 8px; cursor: pointer; outline: none; }
+    .inbox2__who:focus-visible { box-shadow: inset 0 0 0 1.5px var(--text-primary); }
+    .own { position: relative; flex: none; display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px; border: 0; font-family: inherit; font-size: 11px; font-weight: 600; color: var(--text-secondary); padding: 2px 7px 2px 2px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--border); background: var(--white); cursor: pointer; }
+    .own:hover, .own:focus-within { box-shadow: inset 0 0 0 1px var(--text-tertiary); }
+    .own i { width: 18px; height: 18px; border-radius: 50%; background: #27272A; color: #fff; display: grid; place-items: center; font-size: 8.5px; font-weight: 700; font-style: normal; }
+    .own:not(.none) { padding: 0; box-shadow: none; background: none; } .own:not(.none) i { width: 24px; height: 24px; font-size: 10px; } .own:not(.none):hover i, .own:not(.none):focus-visible i { box-shadow: 0 0 0 2px var(--white), 0 0 0 3.5px var(--text-tertiary); }
+    .own.none { padding: 3px 8px; color: var(--text-tertiary); box-shadow: none; border: 1px dashed var(--border); }
+    .inbox2__empty { padding: 18px 20px; font-size: 12.5px; color: var(--text-tertiary); border-top: 1px solid var(--border-light); }
+    .inbox2__search { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; background: var(--white); border: 0; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--border); padding: 6px 9px; color: var(--text-tertiary); }
+    .inbox2__search:focus-within { box-shadow: inset 0 0 0 1.5px var(--text-primary); }
+    .inbox2__search input { border: none; outline: none; background: none; font-family: inherit; font-size: 12.5px; font-weight: 500; color: var(--text-primary); width: 100%; min-width: 0; }
     .conv { display: flex; gap: 11px; padding: 10px 16px; border-top: 1px solid var(--border-light); cursor: pointer; width: 100%; text-align: left; background: none; border-left: none; border-right: none; border-bottom: none; }
     .conv:hover { background: #FCFCFD; }
     .conv.on { background: var(--secondary-lite); }
@@ -561,6 +584,48 @@
     .recv-rev { font-size: 12.5px; font-weight: 700; color: var(--text-primary); letter-spacing: -.01em; }
     .recv-dates { font-size: 12px; color: var(--text-secondary); font-weight: 500; margin-top: 1px; white-space: nowrap; }
     @media (max-width: 900px) { .recv-shows { grid-template-columns: 1fr; } }
+    .intake-line { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 12.5px; color: var(--text-primary); }
+    .intake-k { font-size: 11px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--text-tertiary); margin-right: 2px; }
+    .intake-more { margin-left: auto; border: none; background: none; font: inherit; font-size: 12px; font-weight: 600; color: var(--text-tertiary); cursor: pointer; padding: 4px 0; }
+    .intake-more:hover { color: var(--text-primary); }
+    .intake-kv { margin-top: 12px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .recv-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .recv-table th { text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--text-tertiary); padding: 7px 10px; background: #F9FAFB; border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light); }
+    .recv-table td { padding: 7px 10px; border-bottom: 1px solid var(--border-light); color: var(--text-secondary); white-space: nowrap; }
+    .recv-table td b { color: var(--text-primary); font-weight: 600; font-size: 13px; }
+    .recv-table td span { margin-left: 8px; color: var(--text-tertiary); }
+    .recv-table tr:last-child td { border-bottom: none; }
+    .recv-table tbody tr:hover { background: #FAFBFC; }
+    .prop { font-size: 14.5px; line-height: 1.75; color: var(--text-primary); }
+    .prop b { font-weight: 600; } .prop__h { font-size: 16px; font-weight: 700; letter-spacing: -.01em; margin-bottom: 4px; color: var(--text-primary); }
+    .prop__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .hist__row { display: grid; grid-template-columns: 92px 1fr; gap: 12px; font-size: 13px; line-height: 1.5; padding: 5px 0; color: var(--text-primary); }
+    .hist__row > span:first-child { color: var(--text-tertiary); font-weight: 500; font-variant-numeric: tabular-nums; }
+    .hist__row b { font-weight: 600; }
+    .prop__rule { height: 1px; background: var(--border); margin: 18px 0 16px; }
+    .srows { display: flex; flex-direction: column; gap: 6px; }
+    .srow { display: flex; align-items: center; gap: 12px; border: 1px solid var(--border); border-radius: 12px; padding: 9px 10px 9px 12px; background: var(--white); }
+    .srow__n { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .srow__n span { margin-left: 8px; font-size: 12.5px; font-weight: 500; color: var(--text-tertiary); }
+    .srow__st { display: flex; align-items: center; gap: 16px; font-size: 13px; flex-shrink: 0; }
+    .sck { display: inline-flex; align-items: center; gap: 5px; color: var(--text-primary); font-weight: 500; }
+    .sck--bad { color: #C4353A; font-weight: 600; background: #FEECEC; border-radius: 6px; padding: 2px 8px; }
+    .srow__d { font-weight: 600; color: var(--text-primary); width: 96px; text-align: right; }
+    .srow .recv-x { opacity: .5; } .srow:hover .recv-x { opacity: 1; }
+    .srow--wrap { display: block; padding: 0; } .srow--wrap.on { border-color: #C5CBD5; }
+    .srow__btn { width: 100%; display: flex; align-items: center; gap: 12px; padding: 9px 12px; border: none; background: none; font: inherit; text-align: left; cursor: pointer; border-radius: 12px; }
+    .srow__btn:hover { background: #FAFBFC; }
+    .sck--wait { color: var(--text-tertiary); }
+    .recv-x { width: 24px; height: 24px; border-radius: 6px; border: none; background: none; color: var(--text-tertiary); font-size: 17px; line-height: 1; cursor: pointer; opacity: .45; }
+    .recv-table tr:hover .recv-x { opacity: 1; } .recv-x:hover { background: #FEECEC; color: #C4353A; }
+    .addpop { position: absolute; right: 0; top: calc(100% + 6px); width: 320px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 32px rgba(23,33,43,.14); z-index: 20; overflow: hidden; }
+    .addpop input { width: 100%; border: none; border-bottom: 1px solid var(--border-light); padding: 11px 13px; font: inherit; font-size: 13px; outline: none; }
+    .addpop__list { max-height: 260px; overflow: auto; }
+    .addpop__list button { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: left; border: none; background: none; padding: 9px 13px; font: inherit; cursor: pointer; }
+    .addpop__list button:hover { background: #F9FAFB; }
+    .addpop__list b { display: block; font-size: 13px; font-weight: 600; color: var(--text-primary); } .addpop__list i { font-style: normal; font-size: 12px; color: var(--text-tertiary); }
+    .addpop__list em { font-style: normal; font-size: 12px; font-weight: 700; color: var(--accent, #FF6267); }
+    .addpop__empty { padding: 14px 13px; font-size: 12.5px; color: var(--text-tertiary); }
     .pbar { height: 8px; border-radius: 6px; background: var(--secondary-lite); overflow: hidden; margin-top: 16px; }
     .pbar i { display: block; height: 100%; background: var(--primary); transition: width .3s; }
     /* compact horizontal stepper */
@@ -705,58 +770,89 @@ Acme Network`
     const REQ_DATES = ["Jul 7 – 28","Jul 14 – Aug 4","Jul 1 – 28","Jul 7 – Aug 4","Jul 14 – 28"];
     const REQ_EPS = [8,8,6,8,4];
     const reqRev = (s)=> Math.round(s.cpm * s.dl * 8 / 1000);
-    function StageReceived({ onNext, primaryLabel, note, hideCta }){
-      const totalReq = SHOWS.reduce((a,s)=>a+reqRev(s),0);
-      const [exp,setExp]=useState(false);
+    SHOWS.forEach((s,i)=>{ s.reqDates=REQ_DATES[i%5]; s.reqEps=REQ_EPS[i%5]; s.reqDai=i%3===0; });
+    // Other network shows the operator can add to a request. Removed shows go back into this pool.
+    const SHOW_POOL = [
+      { id:"cleanslate", name:"Clean Slate", host:"Rae Monroe", cat:"Wellness", dl:84000, fem:81, age:"25-44", geo:"US 87%", contact:"Rae Monroe", email:"rae@cleanslatepod.com", cpm:25 },
+      { id:"vanitytable", name:"The Vanity Table", host:"Odette Ruiz", cat:"Beauty", dl:112000, fem:92, age:"25-44", geo:"US 85%", contact:"Odette Ruiz", email:"odette@vanitytable.fm", cpm:30 },
+      { id:"girlsnight", name:"Girls Night In", host:"Kim & Tori", cat:"Lifestyle", dl:147000, fem:88, age:"18-34", geo:"US 83%", contact:"Kim Alvarez", email:"kim@girlsnightin.co", cpm:28 },
+      { id:"motherload", name:"Motherload", host:"Steph Ito", cat:"Parenting", dl:96000, fem:93, age:"30-49", geo:"US 89%", contact:"Steph Ito", email:"steph@motherloadpod.com", cpm:27 },
+      { id:"secondact", name:"Second Act", host:"Gwen Harlow", cat:"Lifestyle", dl:63000, fem:79, age:"35-54", geo:"US 90%", contact:"Gwen Harlow", email:"gwen@secondactpod.com", cpm:22 },
+      { id:"wellread", name:"Well Read", host:"Nia Brooks", cat:"Books / Culture", dl:58000, fem:77, age:"25-44", geo:"US 82%", contact:"Nia Brooks", email:"nia@wellreadpod.com", cpm:21 },
+    ].map((s,i)=>({ ...s, precheck:"clear", reply:"yes", units:8, ans:{read:true,pe:true,social:true}, reqDates:REQ_DATES[i%5], reqEps:REQ_EPS[i%5], reqDai:i%2===0 }));
+    const THRIVE_LEAD = [["Brand","Thrive Cosmetics"],["Agency","Oxford Road"],["Flight","July 2026"],["Asks","Host read, personal endorsement, social add-on, usage rights"],["Due","EOD tomorrow"]];
+    const NET_BANK = [["Dead Air","Comedy"],["The Bleachers","Sports"],["Off Menu Club","Food"],["Night Shift","Comedy"],["Trail Mix","Outdoors"],["Loud & Clear","Music"],["The Group Chat","Culture"],["Two Beers In","Comedy"],["Sunday Scaries","Lifestyle"],["Gear Talk","Outdoors"],["The Rewatch","TV / Film"],["Bad Advice","Comedy"],["Overtime","Sports"],["Weeknight Kitchen","Food"],["The Long Run","Fitness"],["Small Wins","Lifestyle"],["Family Table","Parenting"],["Pantry Raid","Food"],["Dad Mode","Parenting"],["The Commute","News / Culture"],["Fit Check","Fitness"],["Homebody","Home"],["Lunch Break","Comedy"],["Budget Bites","Food"],["Roommates","Comedy"],["First Pitch","Sports"]];
+    const AUG_DATES = ["Aug 4 – 25","Aug 11 – Sep 1","Aug 3 – 31","Aug 4 – Sep 1","Aug 11 – 25"];
+    const bankShow = (i, tag, dates) => { const b=NET_BANK[i%NET_BANK.length]; return { id:tag+"-"+i, name:b[0], cat:b[1], dl:60000+((i*37)%15)*10000, cpm:22+(i*5)%12, units:8, precheck:"clear", reqDates:dates[i%5], reqEps:REQ_EPS[i%5], reqDai:i%3===0 }; };
+    // Other campaigns in the inbox, at their own step, in the same layout.
+    const CAMPS = {
+      liquiddeath: { step:"sent",
+        lead:[["Brand","Liquid Death"],["Agency","AdResults"],["Flight","July 2026"],["Asks","Host read, personal endorsement"],["Requested","$540,000 across 22 shows, 13 cleared the pre-check"],["Due","Replies due Thursday"]],
+        shows:Array.from({length:13},(_,i)=>bankShow(i,"ld",REQ_DATES)), status:{}, cond:{}, time:"1d ago" },
+      hellofresh: { step:"intake",
+        lead:[["Brand","HelloFresh"],["Agency","Oxford Road"],["Flight","August 2026"],["Asks","Host read, personal endorsement, promo code"],["Due","48 hours"]],
+        shows:Array.from({length:18},(_,i)=>bankShow(i+13,"hf",AUG_DATES)), pool:Array.from({length:5},(_,i)=>bankShow(i+5,"hf",AUG_DATES)) },
+    };
+    CAMPS.liquiddeath.shows.forEach((s,i)=>{ CAMPS.liquiddeath.status[s.id] = i<6?"approved":i<9?"cond":i<12?"await":"sent"; if(i>=6&&i<9) CAMPS.liquiddeath.cond[s.id]=["Category exclusivity, no competing beverage that week","Promo code required in the read"]; });
+    Object.assign(CAMPS.hellofresh.shows[3], { precheck:"conflict", pcNote:"Meal-kit exclusive, a competitor is booked through Aug 31." });
+    Object.assign(CAMPS.hellofresh.shows[9], { precheck:"sold", pcNote:"Sold out for August." });
+    function addShow(id, shows, pool){ const i=pool.findIndex(s=>s.id===id); if(i<0) return; const s=pool.splice(i,1)[0]; shows.push(s); if(shows===SHOWS && !VET_STATUS[s.id]) VET_STATUS[s.id]="sent"; }
+    function removeShow(id, shows, pool){ const i=shows.findIndex(s=>s.id===id); if(i<0) return; pool.unshift(shows.splice(i,1)[0]); }
+    // Lead details: the same plain block on every campaign, whatever step it is at.
+    function LeadDetails({ rows, action }){
+      return <div className="prop"><div className="prop__top"><div className="prop__h">Campaign request:</div>{action}</div>{rows.map(r=><div key={r[0]}><b>{r[0]}:</b> {r[1]}</div>)}</div>;
+    }
+    const Ck = ({ t }) => <span className="sck"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5 9-10"/></svg>{t}</span>;
+
+    function StageReceived({ onNext, primaryLabel, note, hideCta, onChange, lead, action, shows=SHOWS, pool:poolAll=SHOW_POOL }){
+      const totalReq = shows.reduce((a,s)=>a+reqRev(s),0);
+      const [adding,setAdding]=useState(false);
+      const [q,setQ]=useState("");
+      const [,bump]=useState(0);
+      const changed = ()=>{ bump(v=>v+1); onChange && onChange(); };
+      const pool = poolAll.filter(s=> !q.trim() || (s.name+" "+s.cat).toLowerCase().includes(q.trim().toLowerCase()));
       return (
         <div className="card stage">
-          <div className="stage__head" style={{marginBottom:"12px"}}>
-            <div className="stage__desc" style={{margin:0}}>Parsed from the ad server — the AE already entered the deal upstream. Nothing goes out until you approve.</div>
-            <span className="ai-tag"><i></i>Parsed automatically</span>
-          </div>
-          <div className="adreq">
-            <div className="adreq__bar">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
-              AdApproval intake · Thrive Cosmetics
-              <span className="src">via the ad server → vetting inbox</span>
-            </div>
-            <div className="kv">
-              {exp && <React.Fragment>
-              <div>Advertiser</div><div>Thrive Cosmetics <span style={{color:"var(--text-tertiary)",fontWeight:600}}>· clean beauty / cosmetics</span></div>
-              <div>Campaign</div><div>July 2026 flight</div>
-              <div>Agency / template</div><div>Oxford Road — Q3 Host-Read RFP <span className="chip" style={{marginLeft:6}}>Google Sheet</span></div>
-              <div>Requested shows</div><div><b>15 shows</b> mapped by the ad server</div>
-              </React.Fragment>}
-              <div>Additional asks</div><div><div className="chiplist"><span className="chip">Host read</span><span className="chip">Personal endorsement</span><span className="chip">Social add-on</span><span className="chip">Usage rights</span></div></div>
-              <div>Due date</div><div style={{fontWeight:700}}>24 hours — EOD tomorrow</div>
-            </div>
-            <button onClick={()=>setExp(v=>!v)} style={{border:"none",background:"none",padding:"12px 14px 4px",font:"inherit",fontSize:"12px",fontWeight:600,color:"var(--text-tertiary)",cursor:"pointer",display:"inline-flex",alignItems:"center",gap:"5px"}}>
-              {exp ? "Hide details" : "Advertiser, campaign, agency & shows"}
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{transform:exp?"rotate(180deg)":"none"}}><path d="m6 9 6 6 6-6"/></svg>
-            </button>
-          </div>
-          <div className="recv-head">
-            <div className="recv-label" style={{margin:0}}>Shows selected by the AE <span>· 15 requested</span></div>
-            <div className="recv-total">{fmtUSD(totalReq)} requested pipeline <span>· desired July flight · from the ad server</span></div>
-          </div>
-          <div className="recv-shows">
-            {SHOWS.map((s,i)=>(
-              <div className="recv-show" key={s.id}>
-                <div className="recv-thumb">{initials(s.name)}</div>
-                <div className="recv-body"><div className="recv-name">{s.name}</div><div className="recv-cat">{s.cat} · {REQ_DATES[i%5]}</div></div>
-                <div className="recv-meta">
-                  <div className="recv-rev">{fmtUSD(reqRev(s))}</div>
-                  <div className="recv-dates">{REQ_EPS[i%5]} eps · {i%3===0?"DAI":"Baked-in"}</div>
+          <LeadDetails action={action} rows={[...(lead||THRIVE_LEAD), ["Requested", fmtUSD(totalReq)+" across "+shows.length+" shows"]]} />
+          <div className="prop__rule"></div>
+          <div className="recv-head" style={{margin:"0 0 10px",alignItems:"center"}}>
+            <div className="prop__h" style={{margin:0,fontSize:"15px"}}>Shows to vet</div>
+            <div style={{position:"relative"}}>
+              <button className="btn btn--sm" onClick={()=>{ setAdding(v=>!v); setQ(""); }}>+ Add show</button>
+              {adding && <div className="addpop">
+                <input autoFocus placeholder="Search network shows" value={q} onChange={e=>setQ(e.target.value)} />
+                <div className="addpop__list">
+                  {pool.length===0 && <div className="addpop__empty">No other shows match</div>}
+                  {pool.map(s=>(
+                    <button key={s.id} onClick={()=>{ addShow(s.id, shows, poolAll); changed(); }}>
+                      <span><b>{s.name}</b><i>{s.cat} · {Math.round(s.dl/1000)}K downloads</i></span><em>Add</em>
+                    </button>
+                  ))}
                 </div>
-              </div>
-            ))}
+              </div>}
+            </div>
           </div>
-          <div className="stage__foot">
-            <div className="stage__note">{note || "Next, the system checks each requested show for category conflicts, July avails, and historical host preferences before anything goes out — so the AE gets feedback before the request is committed."}</div>
+          <div className="srows">
+            {shows.map(s=>{ const ok=(t)=><Ck t={t} />; const bad=(t)=><span className="sck sck--bad" title={s.pcNote||""}>{t}</span>; return (
+              <div className="srow" key={s.id}>
+                <div className="recv-thumb">{initials(s.name)}</div>
+                <div className="srow__n">{s.name}<span>{s.cat}</span></div>
+                <div className="srow__st">
+                  {s.precheck==="conflict" ? bad("Category conflict") : ok("Category")}
+                  {s.precheck==="sold" ? bad("Sold out") : ok("Avails")}
+                  <span className="srow__d">Starts {s.reqDates.split(" – ")[0]}</span>
+                </div>
+                <button className="recv-x" title={"Remove "+s.name} aria-label={"Remove "+s.name} onClick={()=>{ removeShow(s.id, shows, poolAll); changed(); }}>×</button>
+              </div>
+            ); })}
+            {shows.length===0 && <div style={{color:"var(--text-tertiary)",fontSize:"13px",padding:"10px 2px"}}>No shows on this request. Add one to vet it.</div>}
+          </div>
+          {(note || !hideCta) && <div className="stage__foot">
+            <div className="stage__note">{note || "Next, the system checks each requested show for category conflicts, July avails, and historical host preferences before anything goes out."}</div>
             {!hideCta && <button className="btn btn--primary" onClick={onNext}>{primaryLabel || "Run conflict + avails pre-check"}
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </button>}
-          </div>
+          </div>}
         </div>
       );
     }
@@ -1005,10 +1101,10 @@ Acme Network`;
     }
 
     /* ═══════════════ STAGE: SHEET ═══════════════ */
-    function StageSheet({ onNext, embed }){
+    function StageSheet({ onNext, embed, camp }){
       // viable = yes + conditional + dailyedit (recovered follow-up → yes)
       const viableIds = ["honestly","mombrain","wellnesshour","realtalk","selfcare","hustle","unwind","afterhours","dailyedit"];
-      const viable = viableIds.map(id=>SHOWS.find(s=>s.id===id));
+      const viable = camp ? camp.rows : viableIds.map(id=>SHOWS.find(s=>s.id===id)).filter(Boolean);
       const [prices,setPrices]=useState(()=>{ const p={}; viable.forEach(s=>p[s.id]=s.cpm); return p; });
       const cost = (s)=> Math.round(prices[s.id]*s.dl*s.units/1000);
       const total = viable.reduce((a,s)=>a+cost(s),0);
@@ -1016,20 +1112,20 @@ Acme Network`;
         <div className="card stage">
           <div className="stage__head">
             <div>
-              <div className="stage__h">RFP sheet — Oxford Road template, filled</div>
+              <div className="stage__h">RFP sheet, {camp?camp.agency:"Oxford Road"} template, filled</div>
               <div className="stage__desc">The agent read Oxford Road's exact template, pulled each show's data, applied the right rate card, and carried over the exclusions from vetting. Review, tweak a price, and send back.</div>
             </div>
             <span className="ai-tag"><i></i>Sheets API · auto-fill</span>
           </div>
           <div className="sheet-meta">
-            <span className="sheet-tag">Template: <b>Oxford Road — Q3 Host-Read</b></span>
-            <span className="sheet-tag">Rate card: <b>Oxford Road (Tier 2)</b></span>
-            <span className="sheet-tag">9 viable shows · {viable.length} rows</span>
+            <span className="sheet-tag">Template: <b>{camp?camp.agency+" Standard":"Oxford Road — Q3 Host-Read"}</b></span>
+            <span className="sheet-tag">Rate card: <b>{camp?camp.agency:"Oxford Road"} (Tier 2)</b></span>
+            <span className="sheet-tag">{viable.length} viable shows · {viable.length} rows</span>
           </div>
           <div className="gsheet">
             <div className="gsheet__bar">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2h8l6 6v14H6z" opacity=".25"/><path d="M14 2l6 6h-6z"/></svg>
-              Thrive_Cosmetics_July_RFP — Oxford Road
+              {camp ? camp.brand.replace(/\s+/g,"_")+"_RFP · "+camp.agency : "Thrive_Cosmetics_July_RFP — Oxford Road"}
               <span className="sub">edit a price inline · auto-recalculates</span>
             </div>
             <div className="gscroll">
@@ -1043,18 +1139,18 @@ Acme Network`;
                       <td className="gs-show">{s.name}</td>
                       <td>Host-read</td>
                       <td className="gs-num">{s.dl.toLocaleString("en-US")}</td>
-                      <td>{s.fem}% F · {s.age}</td>
+                      <td>{s.fem ? s.fem+"% F · "+s.age : "-"}</td>
                       <td>Mid-roll</td>
                       <td className="gs-num">{s.units}</td>
                       <td><span className="gs-edit"><span>$</span><input type="number" value={prices[s.id]} onChange={e=>setPrices(p=>({...p,[s.id]:Math.max(0,Number(e.target.value)||0)}))} /></span></td>
                       <td className="gs-num">{fmtUSD(cost(s))}</td>
-                      <td className="gs-excl">{s.reply==="conditional" ? "Skincare line only — no color cosmetics" : s.id==="dailyedit" ? "Confirmed on follow-up" : "—"}</td>
+                      <td className="gs-excl">{camp ? (s.note||"-") : s.reply==="conditional" ? "Skincare line only — no color cosmetics" : s.id==="dailyedit" ? "Confirmed on follow-up" : "—"}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <div className="gs-foot"><span>9 shows · {viable.reduce((a,s)=>a+s.units,0)} units · July flight</span><span>Total: {fmtUSD(total)}</span></div>
+            <div className="gs-foot"><span>{viable.length} shows · {viable.reduce((a,s)=>a+s.units,0)} units · {camp?camp.flight:"July flight"}</span><span>Total: {fmtUSD(total)}</span></div>
           </div>
           {!embed && <div className="stage__foot">
             <div className="stage__note">Pricing keeps a human touch. Rate card pre-fills every row; you can override any cell (a new-show deal, a loyalty rate) before it goes out. The conditional exclusion is already noted on The Wellness Hour.</div>
@@ -1142,59 +1238,72 @@ Acme Network`;
       return <span className="verdict sent">{st==="await"?"Awaiting":"Sent"}</span>;
     };
 
-    function SentList({ onSendRfp, done, onExec }){
-      const clear = SHOWS.filter(s=>s.precheck==="clear");
+    function SentList({ onSendRfp, done, onExec, lead, action, returned, shows, status=VET_STATUS, cond=VET_COND, time }){
+      const clear = shows || SHOWS.filter(s=>s.precheck==="clear");
       const [open,setOpen]=useState(null);
       const n = { approved:0, cond:0, await:0, sent:0 };
-      clear.forEach(s=>n[VET_STATUS[s.id]]++);
+      clear.forEach(s=>n[status[s.id]]++);
+      const rows = lead || [...THRIVE_LEAD.slice(0,4), ["Requested", fmtUSD(SHOWS.reduce((a,s)=>a+reqRev(s),0))+" across "+SHOWS.length+" shows, "+clear.length+" cleared the pre-check"]];
+      // everything that has happened on this request, newest first
+      const val = k => (rows.find(r=>r[0]===k)||[])[1] || "";
+      const replied = clear.filter(s=>status[s.id]==="approved"||status[s.id]==="cond");
+      const hist = [
+        ["Mon 9:02am", "RFP received from "+val("Agency")+" for "+val("Brand")],
+        ["Mon 9:03am", "Pre-check run on every requested show for category conflicts and avails. "+clear.length+" cleared"],
+        ["Mon 9:20am", "Vetting emails sent to "+clear.length+" shows, one per show"],
+        ...replied.map((s,i)=>{ const m=612+i*17, h=Math.floor(m/60); return ["Mon "+(h>12?h-12:h)+":"+String(m%60).padStart(2,"0")+(h<12?"am":"pm"), s.name+(status[s.id]==="cond" ? " approved with conditions: "+(cond[s.id]||[]).join("; ") : " approved, no conditions")]; }),
+        ...(n.await+n.sent>0 ? [["Tue 9:20am", "Reminder sent to the "+(n.await+n.sent)+" shows that have not replied"]] : []),
+        ...(returned||done ? [["Tue 2:10pm", "Filled RFP returned to "+val("Agency")+" with "+replied.length+" vetted and priced shows"]] : []),
+      ].reverse();
+      const PRIOR = [["Mar 2026","AG1","Approved"],["Jan 2026","BetterHelp","Approved with conditions"],["Nov 2025","Celsius","Declined, category conflict"],["Sep 2025","Quince","Approved"],["Jun 2025","DraftKings","Declined, host preference"]];
       return (
         <React.Fragment>
-          <div className="card">
-            <div className="stage__head" style={{padding:"16px 20px 12px",margin:0,borderBottom:"1px solid var(--border-light)"}}>
-              <div>
-                <div className="stage__h">Vetting emails sent · {clear.length} shows</div>
-                <div className="stage__desc">One email per show, sent one-to-one. The agent watches each thread and logs replies as they land — {n.approved} approved, {n.cond} approved with conditions, {n.await+n.sent} still out.</div>
-              </div>
-              <span className="ai-tag"><i></i>Monitoring threads</span>
+          <div className="card stage">
+            <LeadDetails action={action} rows={[...rows, ["Replies", n.approved+" approved, "+n.cond+" approved with conditions, "+(n.await+n.sent)+" still out"]]} />
+            <div className="prop__rule"></div>
+            <div className="prop__h" style={{margin:"0 0 10px",fontSize:"15px"}}>Vetting status</div>
+            <div className="srows">
+              {clear.map((s,i)=>{ const st=status[s.id]; const isOpen=open===s.id; const replied=st==="approved"||st==="cond"; return (
+                <div key={s.id} className={"srow srow--wrap"+(isOpen?" on":"")}>
+                  <button className="srow__btn" onClick={()=>setOpen(o=>o===s.id?null:s.id)}>
+                    <div className="recv-thumb">{initials(s.name)}</div>
+                    <div className="srow__n">{s.name}<span>{s.cat}</span></div>
+                    <div className="srow__st">
+                      <Ck t="Sent" />
+                      {replied ? <Ck t="Replied" /> : <span className="sck sck--wait">Awaiting reply</span>}
+                      <span style={{width:"176px",textAlign:"right"}}>{statusPill(st)}</span>
+                    </div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,transition:"transform .18s",transform:isOpen?"rotate(90deg)":"none"}}><path d="m9 6 6 6-6 6"/></svg>
+                  </button>
+                  {isOpen && <div style={{padding:"2px 12px 12px 52px"}}>
+                    <div style={{fontSize:"12px",color:"var(--text-tertiary)",marginBottom:"8px"}}>{s.contact ? "Sent to "+s.contact+" · " : "Sent "}{time || VET_SENT_TIME[i] || "just now"}</div>
+                    {st==="approved" && <div style={{display:"inline-flex",alignItems:"center",gap:"8px",fontSize:"12.5px",fontWeight:600,color:"var(--yes-text)",background:"var(--yes-bg)",border:"1px solid var(--yes-line)",borderRadius:"9px",padding:"9px 12px"}}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                      Cleared, no conditions. Host confirmed every ask.
+                    </div>}
+                    {st==="cond" && <div>
+                      <div style={{fontSize:"11px",fontWeight:700,letterSpacing:".05em",textTransform:"uppercase",color:"var(--text-tertiary)",margin:"4px 0 8px"}}>Conditions on the yes</div>
+                      {(cond[s.id]||[]).map((c,ci)=>(
+                        <div key={ci} className="flagline" style={{marginTop:ci?"7px":0}}>
+                          <span>⚑</span><span>{c}</span>
+                        </div>
+                      ))}
+                    </div>}
+                    {(st==="await"||st==="sent") && <div style={{display:"inline-flex",alignItems:"center",gap:"8px",fontSize:"12.5px",fontWeight:600,color:"var(--text-secondary)",background:"var(--white)",border:"1px dashed var(--border)",borderRadius:"9px",padding:"9px 12px"}}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                      Waiting on reply · reminder auto-drafts at 24h
+                    </div>}
+                    <div style={{fontSize:"11px",fontWeight:700,letterSpacing:".05em",textTransform:"uppercase",color:"var(--text-tertiary)",margin:"14px 0 6px"}}>Vetting history</div>
+                    {[PRIOR[i%5],PRIOR[(i+2)%5]].map((h,hi)=><div key={hi} className="hist__row"><span>{h[0]}</span><span><b>{h[1]}</b> · {h[2]}</span></div>)}
+                  </div>}
+                </div>
+              ); })}
             </div>
-            {clear.map((s,i)=>{ const st=VET_STATUS[s.id]; const isOpen=open===s.id; return (
-              <div key={s.id} style={{borderBottom:"1px solid var(--border-light)"}}>
-                <button onClick={()=>setOpen(o=>o===s.id?null:s.id)} style={{width:"100%",display:"flex",alignItems:"center",gap:"13px",padding:"13px 20px",background:isOpen?"var(--secondary-lite)":"none",border:"none",font:"inherit",textAlign:"left",cursor:"pointer"}}>
-                  <div className="pc-thumb">{initials(s.name)}</div>
-                  <div style={{flex:"1.3",minWidth:0}}>
-                    <div style={{fontSize:"13.5px",fontWeight:700,letterSpacing:"-.01em"}}>{s.name}</div>
-                    <div style={{fontSize:"11.5px",color:"var(--text-tertiary)",fontWeight:600}}>{s.cat}</div>
-                  </div>
-                  <div style={{flex:"1",minWidth:0}}>
-                    <div style={{fontSize:"12px",fontWeight:600,color:"var(--text-secondary)"}}>{s.contact}</div>
-                    <div style={{fontSize:"11px",color:"var(--text-tertiary)",fontWeight:600,overflow:"hidden",textOverflow:"ellipsis"}}>{s.email}</div>
-                  </div>
-                  <div style={{fontSize:"11.5px",color:"var(--text-tertiary)",fontWeight:600,width:"64px",textAlign:"right",flexShrink:0}}>{VET_SENT_TIME[i]}</div>
-                  <div style={{width:"172px",textAlign:"right",flexShrink:0}}>{statusPill(st)}</div>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,transition:"transform .18s",transform:isOpen?"rotate(180deg)":"none"}}><path d="m6 9 6 6 6-6"/></svg>
-                </button>
-                {isOpen && <div style={{padding:"2px 22px 16px 66px"}}>
-                  {st==="approved" && <div style={{display:"inline-flex",alignItems:"center",gap:"8px",fontSize:"12.5px",fontWeight:600,color:"var(--yes-text)",background:"var(--yes-bg)",border:"1px solid var(--yes-line)",borderRadius:"9px",padding:"9px 12px"}}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                    Cleared — no conditions. Host confirmed read, PE, and social.
-                  </div>}
-                  {st==="cond" && <div>
-                    <div style={{fontSize:"11px",fontWeight:700,letterSpacing:".05em",textTransform:"uppercase",color:"var(--text-tertiary)",margin:"4px 0 8px"}}>Conditions on the yes</div>
-                    {VET_COND[s.id].map((c,ci)=>(
-                      <div key={ci} className="flagline" style={{marginTop:ci?"7px":0}}>
-                        <span>⚑</span><span>{c}</span>
-                      </div>
-                    ))}
-                  </div>}
-                  {(st==="await"||st==="sent") && <div style={{display:"inline-flex",alignItems:"center",gap:"8px",fontSize:"12.5px",fontWeight:600,color:"var(--text-secondary)",background:"var(--white)",border:"1px dashed var(--border)",borderRadius:"9px",padding:"9px 12px"}}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-                    Waiting on reply · reminder auto-drafts at 24h
-                  </div>}
-                </div>}
-              </div>
-            ); })}
+            <div className="prop__rule"></div>
+            <div className="prop__h" style={{margin:"0 0 8px",fontSize:"15px"}}>History</div>
+            <div className="hist">{hist.map((h,hi)=><div key={hi} className="hist__row"><span>{h[0]}</span><span>{h[1]}</span></div>)}</div>
           </div>
-          {done ? (
+          {lead ? null : done ? (
             <div className="card" style={{marginTop:"14px",padding:"16px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"14px"}}>
               <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
                 <DoneBadge size={30} />
@@ -1216,71 +1325,143 @@ Acme Network`;
       );
     }
 
+    /* ═══════════════ PRODUCTION, inside a campaign ═══════════════
+       A booked campaign keeps going in the same inbox: vetted -> returned -> booked -> copy to show -> proof -> execution.
+       The spot list is the same Production data the Production tab shows, filtered to this advertiser. */
+    /* Our own dropdown, never a native select. The menu is portaled to the body so cards and tables cannot clip it. */
+    function Dd({ value, options, onChange, className="", label, children, style, align }){
+      const [pos,setPos]=useState(null); const btn=useRef(null); const menu=useRef(null);
+      const flat = options.map(o=> typeof o==="string" ? { v:o, l:o } : o);
+      const cur = flat.find(o=>o.v===value);
+      const close = ()=>setPos(null);
+      const open = ()=>{ const r=btn.current.getBoundingClientRect(); setPos({ top:r.bottom+4, left:r.left, right:window.innerWidth-r.right, w:r.width, max:Math.max(180, window.innerHeight-r.bottom-16) }); };
+      useEffect(()=>{ if(!pos) return;
+        const out = e=>{ if(!menu.current.contains(e.target) && !btn.current.contains(e.target)) close(); };
+        const key = e=>{ if(e.key==="Escape"){ e.stopPropagation(); close(); btn.current.focus(); } };
+        const sc = e=>{ if(!menu.current.contains(e.target)) close(); };
+        document.addEventListener("mousedown",out); document.addEventListener("keydown",key,true); window.addEventListener("resize",close); window.addEventListener("scroll",sc,true);
+        const on = menu.current.querySelector(".ddopt.on") || menu.current.querySelector(".ddopt"); on && on.focus();
+        return ()=>{ document.removeEventListener("mousedown",out); document.removeEventListener("keydown",key,true); window.removeEventListener("resize",close); window.removeEventListener("scroll",sc,true); };
+      },[pos]);
+      const arrows = e=>{ if(e.key!=="ArrowDown"&&e.key!=="ArrowUp") return; e.preventDefault(); const o=[...menu.current.querySelectorAll(".ddopt")]; const n=o.indexOf(document.activeElement)+(e.key==="ArrowDown"?1:-1); o[(n+o.length)%o.length].focus(); };
+      return <React.Fragment>
+        <button type="button" ref={btn} className={"dd "+className} style={style} aria-haspopup="listbox" aria-expanded={!!pos} aria-label={label} onClick={e=>{ e.stopPropagation(); pos?close():open(); }} onKeyDown={e=>e.stopPropagation()}>
+          {children || <React.Fragment><span className="dd__v">{cur?cur.l:value}</span><svg className="dd__c" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg></React.Fragment>}
+        </button>
+        {pos && ReactDOM.createPortal(
+          <div ref={menu} className="ddmenu" role="listbox" aria-label={label} onKeyDown={arrows} onClick={e=>e.stopPropagation()} style={{top:pos.top, ...(align==="right"?{right:Math.max(8,pos.right)}:{left:Math.max(8,Math.min(pos.left, window.innerWidth-240))}), minWidth:pos.w, maxHeight:pos.max}}>
+            {flat.map((o,i)=> o.group ? <div key={"g"+i} className="ddgrp">{o.group}</div> :
+              <button type="button" key={o.v} role="option" aria-selected={o.v===value} className={"ddopt"+(o.v===value?" on":"")} onClick={()=>{ close(); onChange(o.v); btn.current && btn.current.focus(); }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5 9-10"/></svg><span>{o.l}</span>
+              </button>)}
+          </div>, document.body)}
+      </React.Fragment>;
+    }
+    // The signed-in account is global (the shell owns it). Only ad ops sees vetting, the dashboard and forms.
+    const OPS_ACCT = { id:"ops", role:"ops", name:"Cam Pritchard", ini:"CP", sub:"Ad ops · Acme Network" };
+    const readAcct = ()=>{ try{ const v=JSON.parse(localStorage.getItem("acme_role")||"null"); return v && v.role ? v : OPS_ACCT; }catch(e){ return OPS_ACCT; } };
+    const readAccess = ()=>{ try{ return JSON.parse(localStorage.getItem("acme_access")||"null") || { networks:[], shows:{} }; }catch(e){ return { networks:[], shows:{} }; } };
+    const acctHead = a => a.role==="ops" ? ["Vetting Agent","Everything before the ad airs"] : a.role==="producer" ? [a.netName||"Network","Spots on your network's shows"] : a.role==="host" ? [a.name,"Reads you owe and what has aired"] : ["Execution desk","Accepted files ready to load"];
+    const BOOKED = { rocket:true };
+    const TEAM = ["Cam Pritchard","Jordan Lee","Priya Shah"];
+    function publishVetBookings(){
+      const dates = ["2026-07-07","2026-07-08","2026-07-09","2026-07-14","2026-07-15","2026-07-16"];
+      const list = SHOWS.filter(s=>["approved","cond"].includes(VET_STATUS[s.id])).map((s,i)=>({
+        id:"vet-thrive-"+s.id, brand:"Thrive Cosmetics", showName:s.name, contact:s.contact, date:dates[i%dates.length], roll:"mid", position:1, cpm:s.cpm, col:"#0F766E",
+        pts:["Liquid Lash Extensions mascara, the tubing formula that does not smudge","Say how long you have worn it and what you noticed","Every purchase funds a donation to a woman in need"], cta:"thrivecosmetics.com/{show} for 20% off",
+        ask:{ delivery:i%2?"baked":"dai", len:60, verbatim:false, personal:true, pre:false, copy:"https://docs.acme-network.com/thrive-july-copy", pixel:i%2?"":"https://pixel.example/thrive", imps:s.dl, agency:"Oxford Road" } }));
+      try { localStorage.setItem("acme_vet_bookings", JSON.stringify(list)); } catch(e) {}
+    }
+    function CampaignProduction({ brand, note }){
+      return (
+        <div className="card" style={{overflow:"hidden"}}>
+          <div className="stage__head" style={{padding:"16px 20px 12px",margin:0,borderBottom:"1px solid var(--border-light)"}}>
+            <div>
+              <div className="stage__h">Booked spots</div>
+              <div className="stage__desc">{note}</div>
+            </div>
+            <span className="ai-tag"><i></i>Show agent on every thread</span>
+          </div>
+          <iframe title={"Spots · "+brand} src={"acme-production.html?embed=1&brand="+encodeURIComponent(brand)} style={{width:"100%",height:"calc(100vh - 290px)",minHeight:"520px",border:"none",display:"block"}}></iframe>
+        </div>
+      );
+    }
+
     /* ═══════════════ OPERATOR VIEW — clean Messages two-pane (no red) ═══════════════ */
     function OperatorView({ stages, setStages, onExec }){
       const [sel,setSel]=useState("thrive");
       const [q,setQ]=useState("");
       // Thrive's new two-action flow: intake → sent-list → done (independent of the old stage stepper)
       const [thriveStep,setThriveStep]=useState("intake");
-      const thriveDone = thriveStep==="done";
-      const thriveLabel = thriveStep==="intake" ? "To vet" : thriveStep==="sent" ? "Vetting sent" : "Returned";
-      const list = REQ_ORDER.filter(id=> !q.trim() || REQ_META[id].adv.toLowerCase().includes(q.trim().toLowerCase()));
+      const thriveDone = thriveStep==="done" || thriveStep==="prod";
+      const thriveLabel = thriveStep==="intake" ? "To vet" : thriveStep==="sent" ? "Vetting sent" : thriveStep==="prod" ? "Booked" : "Returned";
+      const [who,setWho]=useState("all");
+      const [,bumpOp]=useState(0);   // re-read campaign state changed inside the thread (e.g. RFP returned)
+      const [owners,setOwners]=useState({ thrive:"Cam Pritchard", liquiddeath:"Jordan Lee", rocket:"Priya Shah" });
+      const list = REQ_ORDER.filter(id=> (!q.trim() || REQ_META[id].adv.toLowerCase().includes(q.trim().toLowerCase())) && (who==="all" || (who==="none" ? !owners[id] : owners[id]===who)));
       return (
         <div className="msg">
           <div className="msg-pane">
             <div className="inbox2__head">
-              <div className="inbox2__title">Inbox</div>
               <div className="inbox2__search">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-                <input placeholder="Search…" value={q} onChange={e=>setQ(e.target.value)} />
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" style={{flex:"none"}}><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                <input placeholder="Search" aria-label="Search campaigns" value={q} onChange={e=>setQ(e.target.value)} />
               </div>
+              <Dd className="inbox2__who" label="Assigned to" align="right" value={who} onChange={setWho} options={[{v:"all",l:"All"}, ...TEAM.map(t=>({v:t,l:t})), {v:"none",l:"Unassigned"}]} />
             </div>
             <div>
-              {list.map(id=>{ const meta=REQ_META[id]; const isThrive=id==="thrive"; const stg=isThrive?thriveLabel:STEP_SHORT[STAGES[stages[id]].key]; const vt=REQ_VET[id]; const done=vt[0]===vt[1] && vt[1]>0; const pill={display:"inline-flex",alignItems:"center",gap:"4px",fontSize:"10.5px",fontWeight:500,padding:"3px 8px",borderRadius:"999px",background:"var(--secondary-lite)",color:"var(--text-secondary)",whiteSpace:"nowrap"}; return (
-                <button key={id} className={"conv"+(sel===id?" on":"")} onClick={()=>setSel(id)}>
+              {list.map(id=>{ const meta=REQ_META[id]; const isThrive=id==="thrive"; const stg=isThrive?thriveLabel:BOOKED[id]?"Booked":CAMPS[id]&&CAMPS[id].returned?"Returned":STEP_SHORT[STAGES[stages[id]].key]; const vt=REQ_VET[id]; const done=vt[0]===vt[1] && vt[1]>0; const pill={display:"inline-flex",alignItems:"center",gap:"4px",fontSize:"10.5px",fontWeight:500,padding:"3px 8px",borderRadius:"999px",background:"var(--secondary-lite)",color:"var(--text-secondary)",whiteSpace:"nowrap"}; return (
+                <div key={id} role="button" tabIndex={0} className={"conv"+(sel===id?" on":"")} onClick={()=>setSel(id)} onKeyDown={e=>{ if(e.target===e.currentTarget && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); setSel(id); } }}>
                   <div className="conv__body">
-                    <div className="conv__top"><div className="conv__name" style={{display:"flex",alignItems:"center",gap:"7px"}}>{meta.adv}{isThrive && thriveDone && <DoneBadge size={18} />}</div></div>
+                    <div className="conv__top"><div className="conv__name" style={{display:"flex",alignItems:"center",gap:"7px"}}>{meta.adv}{isThrive && thriveDone && <DoneBadge size={18} />}</div>
+                      <Dd className={"own"+(owners[id]?"":" none")} label={"Assign "+meta.adv} align="right" value={owners[id]||""} onChange={v=>setOwners(o=>({...o,[id]:v||null}))} options={[...TEAM.map(t=>({v:t,l:t})), {v:"",l:"Unassigned"}]}>
+                        {owners[id] ? <i title={owners[id]}>{initials(owners[id])}</i> : "Assign"}
+                      </Dd></div>
                     <div style={{display:"flex",flexWrap:"wrap",gap:"6px",marginTop:"3px"}}>
                       <span style={pill}>{stg}</span>
                       <span style={pill}>{REQ_TIME[id]}</span>
                       <span style={{...pill, background:done?"var(--yes-bg)":"var(--secondary-lite)", color:done?"var(--yes-text)":"var(--text-secondary)"}}>{vt[0]}/{vt[1]}</span>
                     </div>
                   </div>
-                </button>
+                </div>
               ); })}
+              {list.length===0 && <div className="inbox2__empty">No campaigns here.</div>}
             </div>
           </div>
           <div className="thread">
-            <ThreadPanel sel={sel} onExec={onExec} thriveStep={thriveStep} setThriveStep={setThriveStep} />
+            <ThreadPanel sel={sel} onExec={onExec} thriveStep={thriveStep} setThriveStep={setThriveStep} onChange={()=>bumpOp(v=>v+1)} />
           </div>
         </div>
       );
     }
 
-    function ThreadPanel({ sel, onExec, thriveStep, setThriveStep }){
+    function ThreadPanel({ sel, onExec, thriveStep, setThriveStep, onChange }){
       const meta = REQ_META[sel];
+      const [showsVer,setShowsVer]=useState(0);     // bumps when shows are added / removed at intake
       const [vetOpen,setVetOpen]=useState(false);   // right drawer: pre-check + vetting emails (~480px)
       const [rfpOpen,setRfpOpen]=useState(false);   // wide right drawer: return the filled RFP (~680px)
       const [tpl,setTpl]=useState("Oxford Road — Q3 Host-Read RFP");
-      const done = thriveStep==="done";
+      const prod = thriveStep==="prod";
+      const done = thriveStep==="done" || prod;
+      const headAction = () => { if (thriveStep==="intake") setVetOpen(true); else if (thriveStep==="sent") setRfpOpen(true); else { publishVetBookings(); setThriveStep("prod"); } };
+      const camp = CAMPS[sel];
+      const arrow = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>;
+      const action = sel==="thrive" ? (!prod &&
+        <button className="btn btn--primary" style={{flexShrink:0}} onClick={headAction}>
+          {thriveStep==="intake" ? "Vet shows" : thriveStep==="sent" ? "Create RFP" : "IO signed"}{arrow}
+        </button>)
+        : camp && camp.step==="sent" && !camp.returned && <button className="btn btn--primary" style={{flexShrink:0}} onClick={()=>setRfpOpen(true)}>Create RFP{arrow}</button>;
+      const lv = k => ((camp ? camp.lead : THRIVE_LEAD).find(r=>r[0]===k)||[])[1] || "";
+      const sheetCamp = camp && { brand:lv("Brand"), agency:lv("Agency"), flight:lv("Flight"), rows:camp.shows.filter(x=>["approved","cond"].includes(camp.status[x.id])).map(x=>({ ...x, note:(camp.cond[x.id]||[]).join("; ") })) };
+      const returnRfp = ()=>{ setRfpOpen(false); if(sel==="thrive") setThriveStep("done"); else { camp.returned=true; setShowsVer(v=>v+1); onChange && onChange(); } };
       return (
         <React.Fragment>
-          <div className="thread__head">
-            <div className="thread__av">{initials(meta.adv)}</div>
-            <div>
-              <div className="thread__title" style={{display:"flex",alignItems:"center",gap:"10px"}}>{meta.adv}{sel==="thrive" && done && <DoneBadge size={26} />}</div>
-              <div className="thread__sub">{meta.sub}</div>
-            </div>
-            {sel==="thrive" && !done &&
-              <button className="btn btn--primary" style={{marginLeft:"auto",flexShrink:0,alignSelf:"center"}} onClick={()=> thriveStep==="intake" ? setVetOpen(true) : setRfpOpen(true)}>
-                {thriveStep==="intake" ? "Vet shows" : "Send RFP"}
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-              </button>}
-          </div>
           {sel==="thrive" ? <React.Fragment>
-            {thriveStep==="intake"
-              ? <StageReceived hideCta onNext={()=>setVetOpen(true)} primaryLabel="Vet shows" note="Vet the 15 requested shows for the July flight. The agent pre-checks category conflicts and avails, then sends one vetting email per cleared show. Nothing goes out until you approve." />
-              : <SentList onSendRfp={()=>setRfpOpen(true)} done={done} onExec={onExec} />}
+            {prod
+              ? <CampaignProduction brand="Thrive Cosmetics" note="The IO is signed on 6 vetted shows. Each one became a spot from the vetting record. The show agent sends the copy the Tuesday before each flight week and chases the file; you accept reads here." />
+              : thriveStep==="intake"
+              ? <StageReceived hideCta action={action} onChange={()=>setShowsVer(v=>v+1)} />
+              : <SentList action={action} onSendRfp={()=>setRfpOpen(true)} done={done} onExec={onExec} />}
 
             {/* ─── Drawer 1: Vet shows (pre-check + vetting emails) ─── */}
             <div className={"rd-overlay"+(vetOpen?" open":"")} onClick={()=>setVetOpen(false)}></div>
@@ -1297,9 +1478,9 @@ Acme Network`;
               </div>
               <div className="rd-body">
                 <div style={{fontSize:"11px",fontWeight:700,letterSpacing:".05em",textTransform:"uppercase",color:"var(--text-tertiary)",margin:"0 0 10px"}}>1 · Pre-check</div>
-                <StagePrecheck embed />
+                <StagePrecheck embed key={"pc"+showsVer} />
                 <div style={{fontSize:"11px",fontWeight:700,letterSpacing:".05em",textTransform:"uppercase",color:"var(--text-tertiary)",margin:"22px 0 10px"}}>2 · Vetting emails</div>
-                <StageVetting embed />
+                <StageVetting embed key={"vt"+showsVer} />
               </div>
               <div style={{borderTop:"1px solid var(--border)",background:"var(--white)",padding:"14px 26px",display:"flex",justifyContent:"flex-end"}}>
                 <button className="btn btn--primary" onClick={()=>{ setVetOpen(false); setThriveStep("sent"); }}>Send vetting emails
@@ -1308,6 +1489,13 @@ Acme Network`;
               </div>
             </div>
 
+          </React.Fragment> : BOOKED[sel] ? (
+            <CampaignProduction brand={meta.adv} note="Vetted, priced and booked. These are the spots between the signed IO and air. Open one to see the script, the file and the timeline." />
+          ) : (
+            CAMPS[sel].step==="intake"
+              ? <StageReceived key={sel} hideCta lead={CAMPS[sel].lead} shows={CAMPS[sel].shows} pool={CAMPS[sel].pool} onChange={()=>setShowsVer(v=>v+1)} />
+              : <SentList key={sel} action={action} returned={CAMPS[sel].returned} lead={CAMPS[sel].lead} shows={CAMPS[sel].shows} status={CAMPS[sel].status} cond={CAMPS[sel].cond} time={CAMPS[sel].time} />
+          )}
             {/* ─── Drawer 2: Send RFP (upload / template + filled sheet) ─── */}
             <div className={"rd-overlay"+(rfpOpen?" open":"")} onClick={()=>setRfpOpen(false)}></div>
             <div className={"rdrawer"+(rfpOpen?" open":"")} style={{width:"680px",minWidth:"680px",maxWidth:"94vw"}}>
@@ -1315,7 +1503,7 @@ Acme Network`;
                 <button className="rd-close" onClick={()=>setRfpOpen(false)}>×</button>
                 <div className="rd-head__top">
                   <div>
-                    <div className="rd-eyebrow">Return to AE · Thrive Cosmetics</div>
+                    <div className="rd-eyebrow">Return to AE · {meta.adv}</div>
                     <div className="rd-title">Return the filled RFP</div>
                     <div className="rd-subtitle">Drop the agency's formatted sheet or pick a template, then send the priced rows back.</div>
                   </div>
@@ -1333,29 +1521,19 @@ Acme Network`;
                   </div>
                   <div style={{flex:"1 1 240px"}}>
                     <div style={{fontSize:"12.5px",fontWeight:700,marginBottom:"8px"}}>Or choose a template</div>
-                    <select value={tpl} onChange={e=>setTpl(e.target.value)} style={{width:"100%",border:"1px solid var(--border)",borderRadius:"11px",padding:"12px 13px",font:"inherit",fontSize:"13px",fontWeight:600,color:"var(--text-primary)",background:"var(--white)"}}>
-                      <option>Oxford Road — Q3 Host-Read RFP</option>
-                      <option>AdResults — Standard</option>
-                      <option>Adopter — Host-Read</option>
-                    </select>
+                    <Dd label="RFP template" value={tpl} onChange={setTpl} options={["Oxford Road — Q3 Host-Read RFP","AdResults — Standard","Adopter — Host-Read"]} style={{width:"100%",border:"1px solid var(--border)",borderRadius:"11px",padding:"12px 13px",font:"inherit",fontSize:"13px",fontWeight:600,color:"var(--text-primary)",background:"var(--white)"}} />
                     <div style={{fontSize:"11.5px",color:"var(--text-tertiary)",fontWeight:500,marginTop:"9px",lineHeight:1.5}}>The agent fills the chosen layout from your vetted show data and rate card.</div>
                   </div>
                 </div>
                 <div style={{fontSize:"11px",fontWeight:700,letterSpacing:".05em",textTransform:"uppercase",color:"var(--text-tertiary)",margin:"0 0 10px"}}>RFP fields · priced & vetted rows</div>
-                <StageSheet embed />
+                <StageSheet key={sel} embed camp={sheetCamp||undefined} />
               </div>
               <div style={{borderTop:"1px solid var(--border)",background:"var(--white)",padding:"14px 26px",display:"flex",justifyContent:"flex-end"}}>
-                <button className="btn btn--primary" onClick={()=>{ setRfpOpen(false); setThriveStep("done"); }}>Return filled sheet
+                <button className="btn btn--primary" onClick={returnRfp}>Return filled sheet
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                 </button>
               </div>
             </div>
-          </React.Fragment> : (
-            <div className="scard">
-              <div className="scard__h">{REQ_META[sel].adv}</div>
-              <div className="stage__note" style={{marginTop:"8px",fontSize:"13px",lineHeight:1.6}}>{REQ_PREVIEW[sel]} The full interactive workflow is wired on Thrive Cosmetics — open that one to walk every step.</div>
-            </div>
-          )}
         </React.Fragment>
       );
     }
@@ -1570,19 +1748,6 @@ Acme Network`;
     const NEW_TEMPLATE = { id:"veritone", name:"Veritone — Audio Upfront '26", abbr:"VRT", type:"Host-read table", typeCls:"", headerRow:6, used:"just now",
       cols:["Show Name","Network","Host Name","Genre","Read Style","Ad Placement","Spot Length","Avg Downloads per Episode","Monthly Impressions","Net CPM","Rate Card CPM","% Male","% Female","Median Age","Household HHI","Category Exclusivity","Promo Code","Brand Lift Study?","Make-Good Policy","Notes to Buyer"] };
 
-    function renderFieldOptions(){
-      return (
-        <React.Fragment>
-          <option value={REVIEW}>{REVIEW}</option>
-          {CANON.map(grp=>(
-            <optgroup key={grp.g} label={grp.g}>
-              {grp.fields.map(f=><option key={f} value={f}>{f}</option>)}
-            </optgroup>
-          ))}
-          <option value={SKIP}>{SKIP}</option>
-        </React.Fragment>
-      );
-    }
 
     function MappingTable({ tpl }){
       const auto = useMemo(()=>tpl.cols.map(c=>autoMap(c)), [tpl.id]);
@@ -1609,7 +1774,7 @@ Acme Network`;
                     <tr key={i} className={st==="review"?"review":""}>
                       <td className="map-col">{c}</td>
                       <td className="map-arrow">→</td>
-                      <td><select className={"map-select"+(st==="review"?" review":"")} value={map[i]} onChange={e=>setMap(m=>{const n=m.slice();n[i]=e.target.value;return n;})}>{renderFieldOptions()}</select></td>
+                      <td><Dd className={"map-select"+(st==="review"?" review":"")} label="Maps to" value={map[i]} onChange={v=>setMap(m=>{const n=m.slice();n[i]=v;return n;})} options={[REVIEW, ...CANON.flatMap(grp=>[{group:grp.g}, ...grp.fields])]} /></td>
                       <td><span className={"map-stat "+st}>{st==="ok"?"✓ Mapped":st==="review"?"⚑ Review":"Skipped"}</span></td>
                     </tr>
                   );
@@ -1853,7 +2018,10 @@ Acme Network`;
        sticky Shows col, search, CSV upload, undo/redo). The RFP filler pulls from here. */
     const MSH_CATEGORIES = ["Wellness","Beauty","Beauty / Skincare","Parenting","Lifestyle","Business","Comedy","News / Culture","Books / Culture"];
     const MSH_TYPES = ["Podcast","Radio","YouTube"];
+    let MSH_NETS = [];   // networks from Settings, refreshed each time the Shows table renders
     const MSH_COLS = [
+      { key:"net", label:"Network", w:190, type:"net" },
+      { key:"contact", label:"Show contact", w:160, type:"text", ph:"Add a person" },
       { key:"cpm", label:"CPM", w:80, type:"money" },
       { key:"impressions", label:"Impressions", w:108, type:"int" },
       { key:"delivery", label:"Delivery", w:118, type:"select", opts:["Audio Only","Simulcast","Video Only"] },
@@ -1871,27 +2039,31 @@ Acme Network`;
     ];
     let MSH_ID = 0;
     function buildMShows(){
-      return SHOWS.map((s,i)=>{
+      const A = readAccess();
+      const extra = Object.keys(A.shows||{}).filter(n=>!SHOWS.find(s=>s.name===n)).map(n=>({ ...newMShow(n), id:"net-"+n, category:"Comedy", net:A.shows[n].net||"", contact:A.shows[n].contact||"" }));
+      return extra.concat(SHOWS.map((s,i)=>{
         const parts = s.age.split("-").map(Number);
         const audioOnly = i%4===0;
         return { id:s.id, name:s.name, cpm:s.cpm, impressions:s.dl,
           delivery: audioOnly?"Audio Only":"Simulcast", videoPct: audioOnly?0:55, audioPct: audioOnly?100:45,
           ageType:"Average Age", age: Math.round(((parts[0]||25)+(parts[1]||44))/2),
           gender: s.fem+"% F", hhiType:"Average HHI", hhi: ["$110k","$95k","$88k","$102k","$120k"][i%5],
-          location:"US", category:s.cat, type:"Podcast", promoCodes:"", selected:false };
-      });
+          location:"US", category:s.cat, type:"Podcast", promoCodes:"", selected:false,
+          net:((A.shows||{})[s.name]||{}).net||"", contact:((A.shows||{})[s.name]||{}).contact||(s.contact||"") };
+      }));
     }
     function newMShow(name){
       return { id:"new-"+(++MSH_ID), name: name||"New show", cpm:18, impressions:25000, delivery:"Simulcast", videoPct:50, audioPct:50,
-        ageType:"Average Age", age:34, gender:"60% F", hhiType:"Average HHI", hhi:"$95k", location:"US", category:"Wellness", type:"Podcast", promoCodes:"", selected:false };
+        ageType:"Average Age", age:34, gender:"60% F", hhiType:"Average HHI", hhi:"$95k", location:"US", category:"Wellness", type:"Podcast", promoCodes:"", selected:false, net:"", contact:"" };
     }
     const onlyNum = (v)=>String(v).replace(/[^0-9.]/g,"");
 
     function MCell({ col, row, update }){
       const v = row[col.key];
+      if (col.type==="net") return <Dd className="msh-sel" label="Network" value={v||""} onChange={x=>update(row.id,{net:x})} options={[...MSH_NETS.map(n=>({v:n.id,l:n.name})), {v:"",l:"Unassigned"}]} />;
       if (col.type==="select" || col.type==="cat" || col.type==="typ"){
         const opts = col.type==="cat"?MSH_CATEGORIES: col.type==="typ"?MSH_TYPES: col.opts;
-        return <select className="msh-sel" value={v} onChange={e=>update(row.id,{[col.key]:e.target.value})}>{opts.map(o=><option key={o} value={o}>{o}</option>)}</select>;
+        return <Dd className="msh-sel" label={col.label||col.key} value={v} onChange={x=>update(row.id,{[col.key]:x})} options={opts} />;
       }
       if (col.type==="money") return <div className="msh-cell"><span className="maffix2">$</span><input className="msh-inp flush" value={v} onChange={e=>update(row.id,{cpm:onlyNum(e.target.value)})} /></div>;
       if (col.type==="pct") return <div className="msh-cell"><input className="msh-inp flush" value={v} onChange={e=>update(row.id,{[col.key]:onlyNum(e.target.value)})} /><span className="maffix2">%</span></div>;
@@ -1904,11 +2076,19 @@ Acme Network`;
       const [past,setPast]=useState([]); const [future,setFuture]=useState([]);
       const [q,setQ]=useState(""); const [saved,setSaved]=useState(false); const [syncing,setSyncing]=useState(false);
       const snap=()=>{ setPast(p=>[...p,rows].slice(-50)); setFuture([]); };
-      const update=(id,patch)=>{ snap(); setRows(rs=>rs.map(r=>r.id===id?{...r,...patch}:r)); };
+      const update=(id,patch)=>{ snap(); setRows(rs=>rs.map(r=>r.id===id?{...r,...patch}:r));
+        if("net" in patch || "contact" in patch){ const r=rows.find(x=>x.id===id), A=readAccess(); A.shows=A.shows||{}; A.shows[r.name]={ net:"net" in patch?patch.net:(r.net||""), contact:"contact" in patch?patch.contact:(r.contact||"") };
+          try{ localStorage.setItem("acme_access", JSON.stringify(A)); }catch(e){} if(window.top!==window && window.top.applyLogin) window.top.applyLogin(); } };
+      // a network login only sees, and cannot reassign, its own shows
+      const [acct,setAcct]=useState(readAcct); const [,bumpNets]=useState(0);
+      useEffect(()=>{ const h=e=>{ if(e.key==="acme_role") setAcct(readAcct()); if(e.key==="acme_access") bumpNets(n=>n+1); }; window.addEventListener("storage",h); return ()=>window.removeEventListener("storage",h); },[]);
+      MSH_NETS = readAccess().networks||[];
+      const mine = acct.role==="producer" ? rows.filter(r=>r.net===acct.net) : rows;
+      const cols = acct.role==="producer" ? MSH_COLS.filter(c=>c.key!=="net") : MSH_COLS;
       const undo=()=>{ if(!past.length)return; setFuture(f=>[rows,...f].slice(0,50)); setRows(past[past.length-1]); setPast(p=>p.slice(0,-1)); };
       const redo=()=>{ if(!future.length)return; setPast(p=>[...p,rows].slice(-50)); setRows(future[0]); setFuture(f=>f.slice(1)); };
       const toggle=(id)=> setRows(rs=>rs.map(r=>r.id===id?{...r,selected:!r.selected}:r));
-      const filtered = q.trim()? rows.filter(r=>r.name.toLowerCase().includes(q.trim().toLowerCase())) : rows;
+      const filtered = q.trim()? mine.filter(r=>r.name.toLowerCase().includes(q.trim().toLowerCase())) : mine;
       const allSel = filtered.length>0 && filtered.every(r=>r.selected);
       const toggleAll=()=> setRows(rs=>rs.map(r=> filtered.includes(r)?{...r,selected:!allSel}:r));
       const nSel = rows.filter(r=>r.selected).length;
@@ -1922,15 +2102,7 @@ Acme Network`;
           <div className="msh-head">
             <div>
               <h1>Manage shows</h1>
-              <p>The single source of truth. Demographics, delivery splits, and rate cards sync in from the ad server, the inventory tracker, and CSV/rate-card uploads — and every RFP fills straight from this data. Edit any cell; it flows everywhere.</p>
             </div>
-          </div>
-          <div className="msh-sources">
-            <span className="msh-sources__lbl">Synced from</span>
-            <span className="msh-source">{tickIcon}Ad server · CRM &amp; orders</span>
-            <span className="msh-source">{tickIcon}Inventory tracker</span>
-            <span className="msh-source">{tickIcon}rate-cards.csv</span>
-            <span className="msh-source add" onClick={upload}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>Connect a source</span>
           </div>
 
           <div className="msh-card">
@@ -1952,7 +2124,7 @@ Acme Network`;
                   <tr>
                     <th className="stick stick--sel"><div className={"msh-check"+(allSel?" on":"")} onClick={toggleAll}>{allSel && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>}</div></th>
                     <th className="stick stick--show">Shows</th>
-                    {MSH_COLS.map(c=><th key={c.key} style={{width:c.w,minWidth:c.w}}>{c.label}</th>)}
+                    {cols.map(c=><th key={c.key} style={{width:c.w,minWidth:c.w}}>{c.label}</th>)}
                   </tr>
                 </thead>
                 <tbody>
@@ -1960,7 +2132,7 @@ Acme Network`;
                     <tr key={r.id}>
                       <td className="stick stick--sel"><div className={"msh-check"+(r.selected?" on":"")} onClick={()=>toggle(r.id)}>{r.selected && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>}</div></td>
                       <td className="stick stick--show"><div className="msh-show"><div className="msh-thumb">{initials(r.name)}</div><div className="msh-showname">{r.name}</div></div></td>
-                      {MSH_COLS.map(c=><td key={c.key} style={{width:c.w,minWidth:c.w}}><MCell col={c} row={r} update={update} /></td>)}
+                      {cols.map(c=><td key={c.key} style={{width:c.w,minWidth:c.w}}><MCell col={c} row={r} update={update} /></td>)}
                     </tr>
                   ))}
                 </tbody>
@@ -1981,45 +2153,65 @@ Acme Network`;
     /* ═══════════════ APP ═══════════════ */
     function App(){
       const [tab,setTab]=useState("operator");
+      const [acct,setAcct]=useState(OPS_ACCT);          // who is signed in: decides which tabs exist and what Spots shows
+      const login = acct.role, [title,sub] = acctHead(acct);
+      const accounts = (window.top!==window && window.top.accountList) ? window.top.accountList() : [OPS_ACCT];
+      const signIn = id=>{ if(window.top!==window && window.top.signInAs) window.top.signInAs(id); };
+      // the account is global: follow it when it changes anywhere in the platform
+      useEffect(()=>{ const read=()=>{ const a=readAcct(); setAcct(a); if(a.role!=="ops"){ setProdSeen(true); setTab("production"); } };
+        read(); const h=e=>{ if(e.key==="acme_role") read(); }; window.addEventListener("storage",h); return ()=>window.removeEventListener("storage",h); },[]);
+      const [prodSeen,setProdSeen]=useState(false);   // Production loads on first visit and stays mounted so its state survives tab switches
+      const goProd=()=>{ setProdSeen(true); setTab("production"); };
+      useEffect(()=>{
+        const check=()=>{ try{ const v=JSON.parse(localStorage.getItem("acme_vetnav")||"null"); if(v){ localStorage.removeItem("acme_vetnav"); if(v.tab==="production") goProd(); else if(v.tab==="shows"||v.tab==="operator") setTab(v.tab); } }catch(e){} };
+        check(); const h=e=>{ if(e.key==="acme_vetnav") check(); };
+        window.addEventListener("storage",h); return ()=>window.removeEventListener("storage",h);
+      },[]);
       const [stages,setStages]=useState({ thrive:0, liquiddeath:3, rocket:6, hellofresh:0 });
       const [templates,setTemplates]=useState(TEMPLATES_SEED);
       const addTemplate=(t)=>setTemplates(ts=> ts.find(x=>x.id===t.id)? ts : [...ts, t]);
       return (
         <div className="wrap">
-          <div className="topbar" style={{justifyContent:"flex-start",gap:"22px"}}>
+          {/* Shows is a workspace page opened from the sidebar, so it drops the agent's title and tabs */}
+          <div className="topbar" style={{justifyContent:"flex-start",gap:"22px",display:tab==="shows"?"none":undefined}}>
             <div className="brand">
               <div style={{display:"flex",flexDirection:"column",gap:"2px"}}>
-                <div style={{fontSize:"19px",fontWeight:700,letterSpacing:"-.03em",color:"var(--text-primary)"}}>Vetting Agent</div>
-                <div style={{fontSize:"12.5px",fontWeight:500,color:"var(--text-tertiary)"}}>RFP intake → priced media plan</div>
+                <div style={{fontSize:"19px",fontWeight:700,letterSpacing:"-.03em",color:"var(--text-primary)"}}>{title}</div>
+                <div style={{fontSize:"12.5px",fontWeight:500,color:"var(--text-tertiary)"}}>{sub}</div>
               </div>
             </div>
-            <div className="tabs" style={{margin:0}}>
+            <div className="tabs" style={{margin:0,display:login==="ops"?undefined:"none"}}>
             <button className={"tab"+(tab==="operator"?" active":"")} onClick={()=>setTab("operator")}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-              Operator
+              Vetting
+            </button>
+            <button className={"tab"+(tab==="production"?" active":"")} onClick={goProd}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              Spots
             </button>
             <button className={"tab"+(tab==="exec"?" active":"")} onClick={()=>setTab("exec")}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
               Dashboard
-            </button>
-            <button className={"tab"+(tab==="shows"?" active":"")} onClick={()=>setTab("shows")}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></svg>
-              Shows
             </button>
             <button className={"tab"+(tab==="templates"?" active":"")} onClick={()=>setTab("templates")}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
               Forms <small>· {templates.length}</small>
             </button>
             </div>
-            <div className="avatar" style={{marginLeft:"auto"}}>CP</div>
+            <Dd className="acct" label="Signed in as" align="right" value={acct.id} onChange={signIn} style={{marginLeft:"auto"}}
+              options={[{group:"Sign in as"}, ...accounts.map(l=>({ v:l.id, l:<span className="acct__opt"><b>{l.name}</b><small>{l.sub}</small></span> }))]}>
+              <span className="acct__who"><b>{acct.name}</b><small>{acct.sub}</small></span>
+              <span className="avatar">{acct.ini}</span>
+            </Dd>
           </div>
 
-          {tab==="operator" && <OperatorView stages={stages} setStages={setStages} onExec={()=>setTab("exec")} />}
+          {/* kept mounted so a campaign's place in the flow survives a tab switch */}
+          <div style={{display:tab==="operator"?"block":"none"}}><OperatorView stages={stages} setStages={setStages} onExec={()=>setTab("exec")} /></div>
+          {prodSeen && <iframe title="Spots" src="acme-production.html?embed=1" style={{display:tab==="production"?"block":"none", width:"100%", height:"calc(100vh - 140px)", minHeight:"640px", border:"none"}}></iframe>}
           {tab==="exec" && <ExecutiveView />}
           {tab==="shows" && <ManageShowsView />}
           {tab==="templates" && <TemplatesView templates={templates} onAddTemplate={addTemplate} />}
 
-          <div className="footnote">Built for Acme Network · RFP + Vetting Agent demo · seeded mock data, in-memory · powered by <b>SpotsNow</b></div>
         </div>
       );
     }

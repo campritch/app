@@ -111,7 +111,7 @@
     .sb-user:hover { background: var(--nav-hover); }
     .sb-user__chev { color: var(--text-tertiary); margin-left: auto; flex-shrink: 0; transition: transform .18s ease; }
     .sb-user.open .sb-user__chev { transform: rotate(180deg); }
-    .addons-menu { position: absolute; left: 8px; right: 8px; bottom: 62px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 32px rgba(14,19,35,.16); padding: 7px; z-index: 50; }
+    .addons-menu { max-height: calc(100vh - 90px); overflow-y: auto; position: absolute; left: 8px; right: 8px; bottom: 62px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 32px rgba(14,19,35,.16); padding: 7px; z-index: 50; }
     .addons-menu__t { font-size: 10.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--text-tertiary); padding: 6px 8px 5px; }
     .addons-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-primary); }
     .addons-row:hover { background: var(--secondary-lite); }
@@ -330,6 +330,14 @@
     .attach__sub { font-size: 11.5px; color: var(--text-tertiary); margin-top: 2px; font-weight: 500; line-height: 1.4; }
     .attach .abtn { text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
 
+    /* a partner login (sub-network, show, execution team) only gets its own page */
+    body.guest .sb-group__label, body.guest .nav-item, body.guest .subnav, body.guest .sb-powered, body.guest .nav-item .dot { display: none !important; }
+    body.guest.area-spots .nav-item[data-view="vetting"], body.guest.area-inbox .nav-item[data-view="inbox"], body.guest.area-shows .nav-item[data-nav="shows"] { display: flex !important; }
+    body.guest .addons-only { display: none !important; }
+    .acct-row { display: flex; align-items: center; gap: 8px; width: 100%; border: 0; background: none; font-family: inherit; text-align: left; padding: 7px 8px; border-radius: 8px; cursor: pointer; }
+    .acct-row:hover, .acct-row:focus-visible { background: var(--secondary-lite); outline: none; }
+    .acct-row svg { flex: none; visibility: hidden; color: var(--text-primary); } .acct-row.on svg { visibility: visible; }
+    .acct-row b { display: block; font-size: 13px; font-weight: 600; color: var(--text-primary); } .acct-row small { display: block; font-size: 11.5px; font-weight: 500; color: var(--text-tertiary); }
     @media (max-width: 1080px) {
       .stats { grid-template-columns: repeat(2,1fr); }
       .agents { grid-template-columns: 1fr; }
@@ -356,6 +364,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
         Command Center
       </button>
+      <button class="nav-item" data-view="inbox" onclick="switchView('inbox')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13L22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6z"/></svg>
+        Inbox
+      </button>
     </div>
 
     <div class="sb-group">
@@ -364,9 +376,9 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
         Inventory <span class="dot"></span>
       </button>
-      <button class="nav-item" data-view="vetting" onclick="switchView('vetting')">
+      <button class="nav-item" data-view="vetting" onclick="showVetting()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-        Vetting Agent <span class="dot"></span>
+        <span id="navVetLabel">Vetting Agent</span> <span class="dot"></span>
       </button>
       <button class="nav-item" data-view="outbound" onclick="switchView('outbound')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
@@ -385,7 +397,11 @@
 
     <div class="sb-group">
       <div class="sb-group__label">Workspace</div>
-      <button class="nav-item" onclick="return false">
+      <button class="nav-item" data-nav="shows" onclick="showShows()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>
+        Shows
+      </button>
+      <button class="nav-item" data-view="settings" onclick="switchView('settings')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         Settings
       </button>
@@ -394,13 +410,20 @@
     <div class="sb-foot">
       <button class="sb-powered" data-view="spotsnow" onclick="switchView('spotsnow')"><span class="smark">S</span>Powered by <b>SpotsNow</b></button>
       <div class="addons-menu" id="addonsMenu" hidden>
-        <div class="addons-menu__t">Add-ons · show in nav</div>
-        <label class="addons-row" onclick="event.stopPropagation()"><span>Inventory Agent</span><input type="checkbox" checked onchange="toggleAddon('inventory',this.checked)"></label>
-        <label class="addons-row" onclick="event.stopPropagation()"><span>Vetting Agent</span><input type="checkbox" checked onchange="toggleAddon('vetting',this.checked)"></label>
-        <label class="addons-row" onclick="event.stopPropagation()"><span>Outbound</span><input type="checkbox" checked onchange="toggleAddon('outbound',this.checked)"></label>
-        <label class="addons-row" onclick="event.stopPropagation()"><span>Delivery Agent</span><input type="checkbox" checked onchange="toggleAddon('delivery',this.checked)"></label>
+        <div class="addons-menu__t">Sign in as</div>
+        <div id="acctList"></div>
+        <div class="addons-menu__t addons-only" style="margin-top:4px;border-top:1px solid var(--border-light);padding-top:10px">Show in nav</div>
+        <label class="addons-row addons-only" onclick="event.stopPropagation()"><span>Command Center</span><input type="checkbox" checked onchange="toggleAddon('commandcenter',this.checked)"></label>
+        <label class="addons-row addons-only" onclick="event.stopPropagation()"><span>Inbox</span><input type="checkbox" checked onchange="toggleAddon('inbox',this.checked)"></label>
+        <label class="addons-row addons-only" onclick="event.stopPropagation()"><span>Inventory Agent</span><input type="checkbox" checked onchange="toggleAddon('inventory',this.checked)"></label>
+        <label class="addons-row addons-only" onclick="event.stopPropagation()"><span>Vetting Agent</span><input type="checkbox" checked onchange="toggleAddon('vetting',this.checked)"></label>
+        <label class="addons-row addons-only" onclick="event.stopPropagation()"><span>Outbound</span><input type="checkbox" checked onchange="toggleAddon('outbound',this.checked)"></label>
+        <label class="addons-row addons-only" onclick="event.stopPropagation()"><span>Delivery Agent</span><input type="checkbox" checked onchange="toggleAddon('delivery',this.checked)"></label>
+        <label class="addons-row addons-only" onclick="event.stopPropagation()" style="padding-left:20px"><span>Campaign Portal</span><input type="checkbox" checked onchange="toggleAddon('portal',this.checked)"></label>
+        <label class="addons-row addons-only" onclick="event.stopPropagation()"><span>Shows</span><input type="checkbox" checked onchange="toggleAddon('shows',this.checked)"></label>
+        <label class="addons-row addons-only" onclick="event.stopPropagation()"><span>Settings</span><input type="checkbox" checked onchange="toggleAddon('settings',this.checked)"></label>
       </div>
-      <div class="sb-user" id="sbUser" onclick="toggleAddonsMenu(event)" title="Manage add-ons">
+      <div class="sb-user" id="sbUser" onclick="toggleAddonsMenu(event)" title="Switch account">
         <div class="sb-user__av">CP</div>
         <div style="min-width:0">
           <div class="sb-user__name">Cam Pritchard</div>
@@ -420,7 +443,7 @@
         <div class="pagebar">
           <div>
             <div class="view-title">Network HQ <span class="live-dot">Agents live</span></div>
-            <div class="view-sub">Four agents working your inventory around the clock. You approve, they execute.</div>
+            <div class="view-sub">Five agents working your inventory around the clock. You approve, they execute.</div>
           </div>
           <div class="pagebar__right">
             <div class="date-pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>July 2026 cycle</div>
@@ -437,7 +460,7 @@
           <div class="stat"><div class="stat__label">RFP Completion</div><div class="stat__value">1.3d</div><div class="stat__sub"><b>↓ from 3 weeks</b></div></div>
         </div>
 
-        <div class="section-title">Your add-ons <span class="muted">4 agents running your network · always on</span></div>
+        <div class="section-title">Your add-ons <span class="muted">5 agents running your network · always on</span></div>
         <div class="agents">
 
           <div class="agent" onclick="switchView('inventory')">
@@ -455,7 +478,7 @@
             </div>
           </div>
 
-          <div class="agent" onclick="switchView('vetting')">
+          <div class="agent" onclick="showVetting()">
             <div class="agent__head">
               <div class="agent__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
               <div>
@@ -481,6 +504,21 @@
             <div class="agent__desc">You give it brands and the context. It finds the buyers, pulls their emails from Apollo, and drafts every LinkedIn note, email and one-pager.</div>
             <div class="agent__foot">
               <div class="agent__stat"><b>8</b><span>buyers drafted</span></div>
+              <div style="display:flex;align-items:center;gap:12px"><span class="agent__status st-working">Running</span><span class="agent__open">Open <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+            </div>
+          </div>
+
+          <div class="agent" onclick="switchView('inbox')">
+            <div class="agent__head">
+              <div class="agent__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H5.2L4 17.5z"/><path d="M8 9h8M8 12h5"/></svg></div>
+              <div>
+                <div class="agent__name">Booking Agent</div>
+                <div class="agent__role">Negotiate &amp; book over email</div>
+              </div>
+            </div>
+            <div class="agent__desc">Replaces the long email threads. Give it the IO, talking points, dates and goal and it negotiates inside your guardrails and books. Works the buy side and the sell side.</div>
+            <div class="agent__foot">
+              <div class="agent__stat"><b>2.1d</b><span>brief to signed IO</span></div>
               <div style="display:flex;align-items:center;gap:12px"><span class="agent__status st-working">Running</span><span class="agent__open">Open <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
             </div>
           </div>
@@ -523,7 +561,7 @@
             <div class="approval__meta">Full media plan + pricing drafted across <b>6 shows</b>. Proposed value <b>$48K</b>, category exclusivity cleared.</div>
             <div class="approval__actions">
               <button class="btn btn--accent">Approve &amp; send</button>
-              <button class="btn btn--ghost" onclick="switchView('vetting')">Review</button>
+              <button class="btn btn--ghost" onclick="showVetting()">Review</button>
             </div>
           </div>
           <div class="approval">
@@ -588,7 +626,7 @@
             </div>
           </div>
 
-          <div class="agent" onclick="switchView('vetting')">
+          <div class="agent" onclick="showVetting()">
             <div class="agent__head">
               <div class="agent__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
               <div>
@@ -645,7 +683,12 @@
     <!-- VETTING (iframe) -->
     <section class="view" id="view-vetting"><iframe data-src="acme-vetting.html" title="Vetting Agent"></iframe></section>
 
+
+    <section class="view" id="view-inbox"><iframe data-src="acme-inbox.html" title="Inbox"></iframe></section>
+    <section class="view" id="view-settings"><iframe data-src="acme-settings.html" title="Settings"></iframe></section>
+
     <!-- DELIVERY (iframe) -->
+
     <section class="view" id="view-delivery"><iframe data-src="acme-delivery.html" title="Delivery"></iframe></section>
 
     <!-- BRANDS (compliance setup — part of Delivery) -->
@@ -746,12 +789,80 @@ Slots like this tend to move fast once the category opens up. Want me to put tog
       var open=m.hasAttribute('hidden'); if(open){ m.removeAttribute('hidden'); u.classList.add('open'); } else { m.setAttribute('hidden',''); u.classList.remove('open'); } }
     function closeAddonsMenu(){ var m=document.getElementById('addonsMenu'), u=document.getElementById('sbUser'); if(m){ m.setAttribute('hidden',''); } if(u){ u.classList.remove('open'); } }
     function toggleAddon(view,on){
-      // show/hide the add-on's nav item (and its subnav); if hiding the active view, fall back to Network HQ
-      document.querySelectorAll('[data-view="'+view+'"]').forEach(function(n){ n.style.display = on ? '' : 'none'; });
+      // show/hide a module's nav item (and its subnav); if hiding the active module, fall back to Network HQ
+      document.querySelectorAll('.nav-item[data-view="'+view+'"], .nav-item[data-nav="'+view+'"], .subnav-item[data-sub="'+view+'"]').forEach(function(n){ n.style.display = on ? '' : 'none'; });
       var sub=document.getElementById('subnav-'+view); if(sub && !on) sub.hidden=true;
-      if(!on){ var el=document.getElementById('view-'+view); if(el && el.classList.contains('active')) switchView('home'); } }
+      if(!on){
+        var active=document.querySelector('.nav-item.active, .subnav-item.active');
+        if(active && (active.getAttribute('data-view')===view || active.getAttribute('data-nav')===view || active.getAttribute('data-sub')===view)) switchView('home');
+      } }
     document.addEventListener('click', function(e){ var m=document.getElementById('addonsMenu'); if(m && !m.hasAttribute('hidden') && !e.target.closest('#addonsMenu') && !e.target.closest('#sbUser')) closeAddonsMenu(); });
+    try { ['acme_spot_events','acme_prodnav','acme_vetnav','acme_role','acme_prod_state','acme_vet_bookings'].forEach(k=>localStorage.removeItem(k)); } catch (e) {}   // Inbox <-> Production demo state starts clean
+    // open one spot in Vetting Agent > Production from anywhere: openProductionSpot('Quince|SmartLess')
+    // One account for the whole platform. The shell owns it; pages read it from localStorage 'acme_role'.
+    // Networks, their people and what each person can see live in 'acme_access' (edited in Settings > Networks and in Shows).
+    const ACCESS_KEY = 'acme_access';
+    try { localStorage.setItem(ACCESS_KEY, JSON.stringify({
+      networks: [
+        { id:'ltc', name:'Laugh Track Collective', people:[
+          { id:'p1', name:'Erin Castillo', email:'erin@laughtrack.example', role:'admin', areas:['inbox','spots','shows'] },
+          { id:'p2', name:'Marcus Bell', email:'marcus@laughtrack.example', role:'production', areas:['spots'] } ] },
+        { id:'orig', name:'Acme Originals', people:[
+          { id:'p3', name:'Nina Okafor', email:'nina@acme-network.example', role:'production', areas:['spots'] } ] }
+      ],
+      shows: { 'SmartLess':{net:'ltc',contact:'Dana Whitfield'}, 'Armchair Expert':{net:'ltc',contact:'Rob Hale'}, 'Call Her Daddy':{net:'ltc',contact:'Maya Chen'},
+               'The Joe Rogan Experience':{net:'orig',contact:'Jamie Ortiz'}, 'Huberman Lab':{net:'orig',contact:'Ian Brooks'}, 'The Mel Robbins Podcast':{net:'orig',contact:'Tracey Dunn'}, 'The Oprah Podcast':{net:'orig',contact:'Sam Reyes'} }
+    })); } catch (e) {}
+    function access(){ try { return JSON.parse(localStorage.getItem(ACCESS_KEY) || 'null') || { networks:[], shows:{} }; } catch (e) { return { networks:[], shows:{} }; } }
+    const ini2 = s => (s || '?').split(/\s+/).filter(Boolean).slice(0,2).map(w => w[0]).join('').toUpperCase();
+    function accountList(){
+      const out = [{ id:'ops', role:'ops', name:'Cam Pritchard', ini:'CP', org:'Acme Network', sub:'Ad ops · Acme Network' }];
+      const A = access();
+      A.networks.forEach(n => n.people.forEach(p => out.push({ id:'net:'+p.id, role:'producer', net:n.id, netName:n.name, level:p.role, areas:p.areas, name:p.name || 'Unnamed', ini:ini2(p.name), org:n.name,
+        sub:(p.role === 'admin' ? 'Admin' : 'Production') + ' · ' + n.name, shows:Object.keys(A.shows).filter(k => A.shows[k].net === n.id) })));
+      out.push({ id:'show:SmartLess', role:'host', host:'smartless', shows:['SmartLess'], areas:['inbox','spots'], name:'SmartLess', ini:'SL', org:'Show login', sub:'Show login' });
+      out.push({ id:'traffic', role:'traffic', areas:['spots'], name:'Execution team', ini:'ET', org:'Ad-insertion partner', sub:'Ad-insertion partner' });
+      return out;
+    }
+    function currentAccount(){ let v = null; try { v = JSON.parse(localStorage.getItem('acme_role') || 'null'); } catch (e) {} const l = accountList(); return l.find(a => a.id === (v && v.id)) || l[0]; }
+    function writeAccount(a){ let old = null; try { old = JSON.parse(localStorage.getItem('acme_role') || 'null'); } catch (e) {} const same = old && JSON.stringify(Object.assign({}, old, { at:0 })) === JSON.stringify(Object.assign({}, a, { at:0 }));
+      if (!same) { try { localStorage.setItem('acme_role', JSON.stringify(Object.assign({}, a, { at:Date.now() }))); } catch (e) {} } }
+    function signInAs(id){ const a = accountList().find(x => x.id === id) || accountList()[0]; writeAccount(a); closeAddonsMenu(); applyLogin(true); }
+    function applyLogin(go){
+      const a = currentAccount(), guest = a.role !== 'ops', areas = a.areas || [];
+      writeAccount(a);   // keeps the stored account in step with Settings (areas, shows, name)
+      const b = document.body.classList; b.toggle('guest', guest); ['inbox','spots','shows'].forEach(k => b.toggle('area-' + k, guest && areas.includes(k)));
+      document.getElementById('navVetLabel').textContent = !guest ? 'Vetting Agent' : a.role === 'host' ? 'My reads' : a.role === 'traffic' ? 'Files to load' : 'Spots';
+      document.querySelector('.sb-user__av').textContent = a.ini;
+      document.querySelector('.sb-user__name').textContent = a.name;
+      document.querySelector('.sb-user__sub').textContent = a.org;
+      document.getElementById('acctList').innerHTML = accountList().map(x => '<button type="button" class="acct-row' + (x.id === a.id ? ' on' : '') + '" onclick="event.stopPropagation();signInAs(\'' + x.id + '\')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg><span><b>' + x.name.replace(/</g,'&lt;') + '</b><small>' + x.sub.replace(/</g,'&lt;') + '</small></span></button>').join('');
+      if (go === true) { if (!guest) switchView('home'); else if (areas.includes('spots')) { showsOn = false; vetTab('production'); switchView('vetting'); } else if (areas.includes('inbox')) switchView('inbox'); else if (areas.includes('shows')) showShows(); else switchView('vetting'); }
+    }
+    window.addEventListener('storage', e => { if (e.key === 'acme_role' || e.key === ACCESS_KEY) applyLogin(); });
+    applyLogin();
+    function openProductionSpot(key){
+      try { localStorage.setItem('acme_prodnav', JSON.stringify({key:key, at:Date.now()})); localStorage.setItem('acme_vetnav', JSON.stringify({tab:'production', at:Date.now()})); } catch (e) {}
+      showsOn = false; switchView('vetting');
+    }
+    // open one agent thread in the Inbox from anywhere: openInboxThread('show','Quince SmartLess')
+    function openInboxThread(agent, q){
+      switchView('inbox');
+      const ifr = document.querySelector('#view-inbox iframe');
+      const post = ()=>ifr.contentWindow.postMessage({type:'inboxnav', agent:agent, q:q}, '*');
+      if (ifr.contentDocument && ifr.contentDocument.readyState === 'complete' && ifr.contentWindow.openThread) post(); else ifr.addEventListener('load', post, {once:true});
+    }
+    // Shows is a workspace page. It lives in the Vetting Agent frame so RFPs and vetting read the same show data.
+    let showsOn = false;
+    function vetTab(tab){ try { localStorage.setItem('acme_vetnav', JSON.stringify({tab:tab, at:Date.now()})); } catch (e) {} }
+    function showShows(){
+      vetTab('shows'); showsOn = true; switchView('vetting');
+      document.querySelector('.nav-item[data-view="vetting"]').classList.remove('active');
+      document.querySelector('.nav-item[data-nav="shows"]').classList.add('active');
+    }
+    function showVetting(){ if (showsOn) vetTab(document.body.classList.contains('guest') ? 'production' : 'operator'); showsOn = false; switchView('vetting'); }
     function switchView(name){
+      const sh = document.querySelector('.nav-item[data-nav="shows"]'); if (sh) sh.classList.remove('active');
       document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
       const view = document.getElementById('view-'+name);
       view.classList.add('active');

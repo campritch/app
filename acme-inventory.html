@@ -78,6 +78,7 @@
 
     /* TABS */
     .tabs { display: flex; gap: 4px; background: var(--secondary-lite); border: none; border-radius: 10px; padding: 4px; margin-bottom: 22px; width: fit-content; }
+    .tabs--top { margin: 0 auto 0 28px; }
     .tab { border: none; background: none; padding: 8px 15px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--text-secondary); transition: all .2s; }
     .tab:hover { color: var(--text-primary); }
     .tab:hover { background: var(--secondary-lite); }
@@ -157,6 +158,47 @@
     .ccell--sold .ccell__range { color: #ADB1B9; }
     .ccell--hold { background: var(--secondary-lite); border-color: var(--border); color: var(--text-secondary); }
     .ccell--hold .ccell__range { color: var(--text-tertiary); }
+    /* all-shows guide: dates down the side, one column per show */
+    .guide-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .guide-bar .msheet-search { max-width: 280px; }
+    .g-corner { vertical-align: bottom; border-bottom: 1px solid var(--border) !important; width: 230px; min-width: 230px; }
+    .g-month { position: static; border-bottom: 1px solid var(--border-light); }
+    .g-day { background: #F7F8FA; padding: 5px 8px 6px; text-align: left; white-space: nowrap; width: 66px; min-width: 66px; }
+    .g-day .ep-c__date { display: block; font-size: 11.5px; font-weight: 700; margin: 0; color: var(--text-primary); }
+    .g-day .ep-c__day { display: block; font-size: 10px; }
+    td.g-show { padding: 4px 12px; height: 30px; width: 230px; min-width: 230px; max-width: 230px; cursor: pointer; white-space: nowrap; }
+    td.g-show:hover .g-show__name { text-decoration: underline; }
+    .g-show__name { display: inline-block; max-width: 150px; vertical-align: top; line-height: 22px; font-size: 12px; font-weight: 700; color: var(--text-primary); letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .g-show__sub { float: right; font-size: 10.5px; font-weight: 600; color: var(--text-tertiary); line-height: 22px; }
+    .g-cell { padding: 2px 4px; height: 30px; vertical-align: middle; }
+    .g-bars { width: 100%; height: 20px; display: flex; gap: 2px; border: 0; background: none; padding: 0; cursor: pointer; border-radius: 6px; }
+    .g-bars i { flex: 1; border-radius: 4px; border: 1px dashed var(--border); background: var(--white); }
+    .g-bars i.sold { background: var(--sold-bg); border: 1px solid var(--sold-bg); }
+    .g-bars i.hold { background: var(--secondary-lite); border: 1px solid var(--border); }
+    .g-bars i.dim { opacity: .28; }
+    .g-bars i { cursor: pointer; } .g-bars i:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .g-bars i:hover { box-shadow: 0 0 0 2px var(--border); }
+    .g-bars--book i.free:hover { background: var(--accent); border: 1px solid var(--accent); box-shadow: none; }
+    .g-bars i.part { border: 1px solid var(--border); }
+    .g-tip { position: fixed; z-index: 60; transform: translate(-50%, calc(-100% - 8px)); background: var(--sold-bg); color: #fff; border-radius: 8px; padding: 7px 10px; font-size: 12px; line-height: 1.35; white-space: nowrap; pointer-events: none; box-shadow: 0 6px 18px rgba(23,33,43,.18); display: flex; flex-direction: column; gap: 1px; }
+    .g-tip b { font-weight: 600; } .g-tip span { opacity: .85; } .g-tip em { font-style: normal; opacity: .6; font-size: 11px; }
+    .g-by-week .g-day { width: 84px; min-width: 84px; } .g-by-month .g-day { width: 120px; min-width: 120px; }
+    .g-by-month .g-day .ep-c__day { display: none; } .g-by-month .g-day { padding: 8px 10px; }
+    .g-fill { width: auto; border-right: 0 !important; } th.g-fill { background: #F7F8FA; }
+    .spick--box .spick__btn { font-size: 12.5px; font-weight: 600; letter-spacing: 0; padding: 8px 12px; border-radius: 8px; background: var(--white); box-shadow: inset 0 0 0 1px var(--border), var(--shadow-btn); gap: 8px; }
+    .spick--box .spick__menu { width: 220px; }
+    .g-empty { padding: 26px; text-align: center; color: var(--text-secondary); font-size: 13px; font-weight: 500; }
+    /* show picker: our own searchable dropdown, never a native select */
+    .spick { position: relative; }
+    .spick__btn { border: 0; background: none; font-family: inherit; font-size: 15px; font-weight: 700; letter-spacing: -.01em; color: var(--text-primary); padding: 2px 0; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; max-width: 100%; }
+    .spick__btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .spick__btn svg { flex: none; color: var(--text-secondary); }
+    .spick__menu { position: absolute; z-index: 40; top: calc(100% + 6px); left: 0; width: 260px; background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 32px rgba(23,33,43,.14); padding: 6px; }
+    .spick__menu input { width: 100%; box-sizing: border-box; border: 0; outline: none; box-shadow: inset 0 0 0 1px var(--border); border-radius: 7px; padding: 7px 9px; font-family: inherit; font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+    .spick__menu input:focus { box-shadow: inset 0 0 0 1.5px var(--text-primary); }
+    .spick__list { max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; }
+    .spick__opt { border: 0; background: none; text-align: left; font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text-primary); padding: 7px 9px; border-radius: 7px; cursor: pointer; }
+    .spick__opt:hover, .spick__opt:focus-visible { background: var(--secondary-lite); outline: none; } .spick__opt.on { font-weight: 700; }
     .cell { padding: 6px; }
     .slot { width: 100%; text-align: left; border: 1px solid var(--border); background: var(--white); border-radius: 8px; padding: 8px 9px; min-height: 46px; display: flex; flex-direction: column; justify-content: center; gap: 2px; transition: box-shadow .1s, transform .07s; }
     .slot:hover { box-shadow: 0 4px 12px rgba(16,19,35,.12); transform: translateY(-1px); }
@@ -333,6 +375,13 @@
     .cpm-inp span { padding: 9px 11px; background: var(--secondary-lite); font-weight: 700; color: var(--text-secondary); font-size: 14px; }
     .cpm-inp input { border: none; padding: 9px 12px; font-family: inherit; font-size: 14px; font-weight: 700; width: 90px; }
     .cpm-inp input:focus { outline: none; }
+    .askbox { border: 1px solid var(--border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 14px; background: #FCFCFD; }
+    .askbox__t { font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
+    .askbox__s { font-size: 12.5px; color: var(--text-secondary); font-weight: 500; margin-top: -10px; }
+    .askrow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .askbox .seg button { padding: 7px 10px; white-space: nowrap; }
+    .askchecks { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; font-weight: 600; }
+    .askchecks label { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; }
     .cpm-hint { font-size: 11.5px; color: var(--text-tertiary); font-weight: 600; }
 
     .footnote { text-align: center; color: var(--text-tertiary); font-size: 12px; margin-top: 44px; }
@@ -462,7 +511,7 @@
 
       return { shows, episodes };
     }
-    function mkSlot(epId, roll, position){ return { id:epId+"-"+roll+position, roll, position, status:"available", sponsor:null, category:null, cpm:null, notes:"", followUp:"", flightStart:null, flightEnd:null }; }
+    function mkSlot(epId, roll, position){ return { id:epId+"-"+roll+position, roll, position, status:"available", sponsor:null, category:null, cpm:null, notes:"", followUp:"", flightStart:null, flightEnd:null, ask:null }; }
 
     /* ── Manage Shows spreadsheet helpers ── */
     const clamp = (n,lo,hi) => Math.max(lo, Math.min(hi, n));
@@ -686,6 +735,113 @@
       );
     }
 
+    /* ───────────────── ALL SHOWS GUIDE ───────────────── */
+    function GuideGrid({ shows, episodes, onOpen, brand, by, onQuick, onEdit }){
+      const [tip,setTip]=useState(null);
+      const tipOn = e => { const t=e.target.closest && e.target.closest("i[data-a]"); if(!t){ if(tip) setTip(null); return; }
+        const r=t.getBoundingClientRect(); setTip({ x:r.left+r.width/2, y:r.top, a:t.dataset.a, b:t.dataset.b, c:t.dataset.c }); };
+      const posName = x => ROLL_LABEL[x.roll].replace("-Roll","-roll")+" position "+x.position;
+      // columns are days, weeks or months; every column knows which of a show's episodes fall in it
+      const colOf = e => by==="week" ? "w"+e.weekIndex : by==="month" ? e.date.getFullYear()+"-"+e.date.getMonth() : "d"+e.date.getTime();
+      const colMap = {}, byShow = {}; shows.forEach(s=>byShow[s.id]={});
+      episodes.forEach(e=>{ if(!byShow[e.showId]) return; const k=colOf(e);
+        if(!colMap[k]){ const d = by==="week" ? dateOf(WEEKS[e.weekIndex],0) : by==="month" ? new Date(e.date.getFullYear(), e.date.getMonth(), 1) : e.date;
+          colMap[k] = { key:k, date:d, group: by==="month" ? String(d.getFullYear()) : monthKey(d),
+            label: by==="month" ? MONTH_NAMES[d.getMonth()] : fmtEpDate(d), sub: by==="week" ? "Week" : by==="month" ? "" : DAY_NAMES[(d.getDay()+6)%7] }; }
+        (byShow[e.showId][k] || (byShow[e.showId][k]=[])).push(e); });
+      // a brand only highlights its own spots; every show and date stays put so the grid never jumps
+      const has = (s,c) => !!byShow[s.id][c.key];
+      const cols = Object.values(colMap).sort((x,y)=>x.date-y.date);
+      const groups = [];
+      cols.forEach(c=>{ let g=groups[groups.length-1]; if(!g || g.key!==c.group){ g={key:c.group,n:0}; groups.push(g); } g.n++; });
+      const all = s => Object.values(byShow[s.id]).flat();
+      const spots = s => { let n=0; all(s).forEach(e=>e.slots.forEach(x=>{ if(x.sponsor===brand) n++; })); return n; };
+      const open = s => { let t=0,a=0; all(s).forEach(e=>e.slots.forEach(x=>{t++; if(x.status==="available")a++;})); return t?Math.round(a/t*100):0; };
+      if(!shows.length) return <div className="gridwrap"><div className="g-empty">No shows match.</div></div>;
+      const period = c => by==="day" ? c.label : by==="week" ? "week of "+c.label : c.label;
+      return (
+        <div className="gridwrap" onMouseOver={tipOn} onMouseLeave={()=>setTip(null)} onClick={()=>setTip(null)}>
+          {tip && <div className="g-tip" style={{left:tip.x+"px",top:tip.y+"px"}}><b>{tip.a}</b><span>{tip.b}</span>{tip.c && <em>{tip.c}</em>}</div>}
+          <div className="gridscroll" onScroll={()=>tip&&setTip(null)}>
+          <table className={"grid grid--compact g-by-"+by}>
+            <thead>
+              <tr>
+                <th className="col-ep roll-h g-corner" rowSpan={2}>Show</th>
+                {groups.map((g,i)=>(<th key={g.key+i} className="roll-h g-month" colSpan={g.n}>{g.key}</th>))}<th className="g-fill" style={{background:"#F7F8FA"}}></th>
+              </tr>
+              <tr>{cols.map(c=>(<th key={c.key} className="g-day"><span className="ep-c__date">{c.label}</span><span className="ep-c__day">{c.sub}</span></th>))}<th className="g-fill"></th></tr>
+            </thead>
+            <tbody>
+              {shows.map(s=>(
+                <tr key={s.id}>
+                  <td className="col-ep g-show" onClick={()=>onOpen(s.id)} title={"Open "+s.name}>
+                    <span className="g-show__name">{s.name}</span><span className="g-show__sub">{brand ? spots(s)+" spot"+(spots(s)===1?"":"s") : open(s)+"% open"}</span>
+                  </td>
+                  {cols.map(c=>{
+                    if(!has(s,c)) return <td key={c.key} className="g-cell"></td>;
+                    const eps = byShow[s.id][c.key], slots = eps.flatMap(e=>e.slots);
+                    const sold=slots.filter(x=>x.status==="sold").length, hold=slots.filter(x=>x.status==="hold").length;
+                    const names=[...new Set(slots.filter(x=>x.sponsor).map(x=>x.sponsor))];
+                    const label=s.name+", "+period(c)+": "+sold+" sold, "+hold+" on hold, "+(slots.length-sold-hold)+" open"+(by==="day"?"":" across "+eps.length+" episode"+(eps.length===1?"":"s"))+(names.length?" ("+names.join(", ")+")":"");
+                    return (<td key={c.key} className="g-cell">
+                      <div className={"g-bars"+(brand?" g-bars--book":"")}>
+                        {by==="day"
+                          ? eps[0].slots.map(x=>{ const mine=brand&&x.sponsor===brand, free=x.status==="available";
+                              const state = free ? "Available" : (x.status==="hold"?"On hold":"Booked")+(x.sponsor?" · "+x.sponsor:"");
+                              const act = !brand ? (free ? "Click to book" : "Click to edit") : free ? "Click to book "+brand : mine ? "Click to remove" : "Click to edit";
+                              return <i key={x.id} role="button" tabIndex={0} data-a={posName(x)} data-b={state} data-c={act} aria-label={s.name+", "+c.label+", "+posName(x)+": "+state+". "+act}
+                                className={(free?"":x.status)+(brand&&!free&&!mine?" dim":"")+(brand&&free?" free":"")}
+                                onClick={()=> brand&&(free||mine) ? onQuick([{ep:eps[0],slot:x}], brand, mine) : onEdit(eps[0],x)}
+                                onKeyDown={e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); e.currentTarget.click(); } }}></i>; })
+                          // condensed: still one unit per ad position, filled by how much of the period is sold
+                          : showColumns(s).map(pc=>{ const ps=slots.filter(x=>x.roll===pc.roll&&x.position===pc.position); if(!ps.length) return null;
+                              const mine=ps.filter(x=>brand ? x.sponsor===brand : x.status==="sold").length, rest=ps.filter(x=>x.status!=="available").length-mine;
+                              const a=mine/ps.length*100, b2=a+rest/ps.length*100;
+                              const fill = a||rest ? {background:"linear-gradient(to top, var(--sold-bg) 0 "+a+"%, "+(brand?"#E3E5E9":"#C9CDD4")+" "+a+"% "+b2+"%, #fff "+b2+"% 100%)"} : null;
+                              const pairs=eps.flatMap(e=>e.slots.filter(x=>x.roll===pc.roll&&x.position===pc.position).map(x=>({ep:e,slot:x})));
+                              const minePairs=pairs.filter(q=>q.slot.sponsor===brand), freePairs=pairs.filter(q=>q.slot.status==="available");
+                              const tip = !brand ? "Open "+s.name : minePairs.length ? "Remove "+brand+" from this "+by : freePairs.length ? "Book "+brand+" on "+freePairs.length+" open episode"+(freePairs.length===1?"":"s") : "Nothing open";
+                              const nS=ps.filter(x=>x.status==="sold").length, nH=ps.filter(x=>x.status==="hold").length, who=[...new Set(ps.filter(x=>x.sponsor).map(x=>x.sponsor))];
+                              const state=nS+" booked"+(nH?", "+nH+" on hold":"")+", "+(ps.length-nS-nH)+" available of "+ps.length+(who.length?" · "+who.join(", "):"");
+                              return <i key={pc.key} role="button" tabIndex={0} data-a={posName(pc)} data-b={state} data-c={brand&&tip!=="Nothing open"?"Click to "+tip.charAt(0).toLowerCase()+tip.slice(1):brand?"":"Click to open "+s.name} aria-label={s.name+", "+period(c)+", "+posName(pc)+": "+state}
+                                className={(a>=100?"sold":a||rest?"part":"")+(brand&&freePairs.length&&!minePairs.length?" free":"")} style={a>=100?null:fill}
+                                onClick={()=> !brand ? onOpen(s.id) : minePairs.length ? onQuick(minePairs, brand, true) : freePairs.length ? onQuick(freePairs, brand, false) : null}
+                                onKeyDown={e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); e.currentTarget.click(); } }}></i>; })}
+                      </div>
+                    </td>);
+                  })}
+                  <td className="g-fill"></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div></div>
+      );
+    }
+
+    /* searchable show picker (our own dropdown) */
+    function ShowPicker({ shows, value, onPick, box, placeholder }){
+      const [open,setOpen]=useState(false); const [q,setQ]=useState(""); const ref=useRef(null);
+      useEffect(()=>{ if(!open) return; const h=e=>{ if(ref.current && !ref.current.contains(e.target)) setOpen(false); }; const k=e=>{ if(e.key==="Escape") setOpen(false); };
+        document.addEventListener("mousedown",h); document.addEventListener("keydown",k); return ()=>{ document.removeEventListener("mousedown",h); document.removeEventListener("keydown",k); }; },[open]);
+      const cur = shows.find(s=>s.id===value) || shows[0];
+      const list = shows.filter(s=>s.name.toLowerCase().includes(q.trim().toLowerCase()));
+      return (
+        <div className={"spick"+(box?" spick--box":"")} ref={ref}>
+          <button type="button" className="spick__btn" aria-haspopup="listbox" aria-expanded={open} onClick={()=>{ setQ(""); setOpen(o=>!o); }}>
+            <span>{cur.name}</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          {open && <div className="spick__menu">
+            <input autoFocus placeholder={placeholder||"Search shows"} aria-label={placeholder||"Search shows"} value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>{ if(e.key==="Enter" && list[0]){ onPick(list[0].id); setOpen(false); } }} />
+            <div className="spick__list" role="listbox">
+              {list.map(s=><button type="button" key={s.id} role="option" aria-selected={s.id===value} className={"spick__opt"+(s.id===value?" on":"")} onClick={()=>{ onPick(s.id); setOpen(false); }}>{s.name}</button>)}
+              {!list.length && <div className="g-empty" style={{padding:"12px"}}>No matches.</div>}
+            </div>
+          </div>}
+        </div>
+      );
+    }
+
     /* ───────────────── WEEK (SUPER UNIT) GRID ───────────────── */
     function WeekGrid({ show, episodes, onSlot }){
       const cols = showColumns(show);
@@ -831,6 +987,18 @@
     }
 
     /* ───────────────── SLOT EDITOR ───────────────── */
+    try { localStorage.removeItem("acme_spot_bookings"); } catch(err) {}   // demo state restarts with the page
+    const ASK_DEFAULT = { delivery:"baked", len:60, verbatim:false, personal:true, pre:false, copy:"", pixel:"", imps:0, agency:"", po:"" };
+    // Sold slots are published for Production (same browser, other tab of the OS) so nothing is typed twice.
+    function publishBookings(eps, slot, patch, showName){
+      try {
+        const key="acme_spot_bookings"; const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+        let list=JSON.parse(localStorage.getItem(key)||"[]");
+        eps.forEach(e=>{ const id=e.id+"-"+slot.roll+slot.position; list=list.filter(b=>b.id!==id);
+          if(patch.status==="sold"&&patch.sponsor) list.push({ id, brand:patch.sponsor, showId:e.showId, showName, date:iso(e.date), roll:slot.roll, position:slot.position, cpm:patch.cpm, ask:patch.ask||ASK_DEFAULT, at:Date.now() }); });
+        localStorage.setItem(key, JSON.stringify(list));
+      } catch(err) {}
+    }
     function SlotEditor({ ctx, shows, onClose, onSave }){
       const open = !!ctx;
       const [status,setStatus]=useState("available");
@@ -840,15 +1008,17 @@
       const [notes,setNotes]=useState("");
       const [followUp,setFollowUp]=useState("");
       const [scope,setScope]=useState("episode");
-      useEffect(()=>{ if(ctx){ const s=ctx.slot; setStatus(s.status); setSponsor(s.sponsor||""); setCategory(s.category||""); const sh=shows.find(x=>x.id===ctx.ep.showId); setCpm(s.cpm||sh.cpm[s.position-1]||""); setNotes(s.notes||""); setFollowUp(s.followUp||""); setScope(ctx.defaultScope||"episode"); } },[ctx]);
+      const [ask,setAsk]=useState(ASK_DEFAULT);
+      const setA = (k,v)=>setAsk(a=>({ ...a, [k]:v }));
+      useEffect(()=>{ if(ctx){ const s=ctx.slot; setStatus(s.status); setSponsor(s.sponsor||""); setCategory(s.category||""); const sh=shows.find(x=>x.id===ctx.ep.showId); setCpm(s.cpm||sh.cpm[s.position-1]||""); setNotes(s.notes||""); setFollowUp(s.followUp||""); setScope(ctx.defaultScope||"episode"); setAsk(s.ask||{ ...ASK_DEFAULT, imps: sh.impressions }); } },[ctx]);
       useEffect(()=>{ if(sponsor && SPONSORS[sponsor]) setCategory(SPONSORS[sponsor].category); },[sponsor]);
       if(!ctx) return <div className="drawer-overlay" onClick={onClose}></div>;
       const sh = shows.find(x=>x.id===ctx.ep.showId);
       const needsSponsor = status!=="available";
       const rollColor = ctx.slot.roll==="pre"?"var(--blue-text)":ctx.slot.roll==="post"?"var(--orange-text)":"var(--accent)";
       const known = SPONSORS[sponsor];
-      const save = () => { onSave(ctx.ep, ctx.slot, { status, sponsor:needsSponsor?(sponsor||null):null, category:needsSponsor?(category||(known?known.category:null)):null, cpm:needsSponsor?(Number(cpm)||null):null, notes:needsSponsor?notes:"", followUp:status==="hold"?followUp:"" }, scope); onClose(); };
-      const clear = () => { onSave(ctx.ep, ctx.slot, { status:"available", sponsor:null, category:null, cpm:null, notes:"", followUp:"" }, scope); onClose(); };
+      const save = () => { onSave(ctx.ep, ctx.slot, { status, sponsor:needsSponsor?(sponsor||null):null, category:needsSponsor?(category||(known?known.category:null)):null, cpm:needsSponsor?(Number(cpm)||null):null, notes:needsSponsor?notes:"", followUp:status==="hold"?followUp:"", ask:status==="sold"?ask:null }, scope); onClose(); };
+      const clear = () => { onSave(ctx.ep, ctx.slot, { status:"available", sponsor:null, category:null, cpm:null, notes:"", followUp:"", ask:null }, scope); onClose(); };
       return (
         <React.Fragment>
           <div className={"drawer-overlay"+(open?" open":"")} onClick={onClose}></div>
@@ -882,6 +1052,27 @@
                 {status==="hold" && <div><div className="fld__label">Hear back by</div><input type="date" className="field" value={followUp} onChange={e=>setFollowUp(e.target.value)} /></div>}
                 <div><div className="fld__label">Notes</div><textarea className="field" placeholder="Offered $18 CPM, hear back by Fri, can offer BOGO…" value={notes} onChange={e=>setNotes(e.target.value)} /></div>
                 {status==="hold" && notes && <div className="hold-note"><span>⚑</span><span>On hold for {sponsor||"sponsor"}. Surfaces on your weekly sales call so you can push it over the line.</span></div>}
+                {status==="sold" && <div className="askbox">
+                  <div className="askbox__t">The ask for {sh.name}</div>
+                  <div className="askbox__s">Filled in once, here. The request to the show, the execution handoff and the air check all read from it.</div>
+                  <div className="askrow">
+                    <div><div className="fld__label">Delivery</div><div className="seg"><button className={ask.delivery==="baked"?"on":""} onClick={()=>setA("delivery","baked")}>Baked-in</button><button className={ask.delivery==="dai"?"on":""} onClick={()=>setA("delivery","dai")}>Ad-inserted</button></div></div>
+                    <div><div className="fld__label">Length</div><div className="seg">{[30,60,90].map(n=><button key={n} className={ask.len===n?"on":""} onClick={()=>setA("len",n)}>:{n}</button>)}</div></div>
+                  </div>
+                  <div className="askchecks">
+                    <label><input type="checkbox" checked={ask.verbatim} onChange={e=>setA("verbatim",e.target.checked)} />Read verbatim</label>
+                    <label><input type="checkbox" checked={ask.personal} onChange={e=>setA("personal",e.target.checked)} />Personal experience</label>
+                    <label><input type="checkbox" checked={ask.pre} onChange={e=>setA("pre",e.target.checked)} />Buyer pre-approval</label>
+                  </div>
+                  <div><div className="fld__label">Copy link</div><input className="field" placeholder="Link to the script or talking points" value={ask.copy} onChange={e=>setA("copy",e.target.value)} />
+                    {!ask.copy && <div className="cpm-hint" style={{marginTop:"7px"}}>No copy yet. The request is held back until there is one.</div>}</div>
+                  <div className="askrow">
+                    <div><div className="fld__label">Impressions booked</div><input type="number" className="field" value={ask.imps} onChange={e=>setA("imps",Number(e.target.value)||0)} /></div>
+                    <div><div className="fld__label">Agency</div><input className="field" placeholder="Direct" value={ask.agency} onChange={e=>setA("agency",e.target.value)} /></div>
+                  </div>
+                  <div><div className="fld__label">Tracking pixel or prefix</div><input className="field" placeholder="Paste the pixel URL, if there is one" value={ask.pixel} onChange={e=>setA("pixel",e.target.value)} /></div>
+                  <div><div className="fld__label">IO or PO number</div><input className="field" placeholder="Optional" value={ask.po} onChange={e=>setA("po",e.target.value)} /></div>
+                </div>}
                 <div><div className="fld__label">Apply to</div>
                   <div className="scope-seg">
                     <button className={scope==="episode"?"on":""} onClick={()=>setScope("episode")}>This episode<small>a la carte</small></button>
@@ -904,12 +1095,16 @@
       const [data,setData]=useState(buildSeed);
       const [past,setPast]=useState([]);
       const [future,setFuture]=useState([]);
-      const [view,setView]=useState("calendar");
+      const [view,setView]=useState("guide");
+      const [guideQ,setGuideQ]=useState("");
+      const [guideBrand,setGuideBrand]=useState("");
+      const [guideBy,setGuideBy]=useState("day");
       const [selectedShow,setSelectedShow]=useState("rogan");
       const [calMode,setCalMode]=useState("episode");
       const [editCtx,setEditCtx]=useState(null);
       const [sheetSearch,setSheetSearch]=useState("");
       const { shows, episodes } = data;
+      const brandItems = useMemo(()=>[{id:"",name:"All brands"}].concat([...new Set(Object.keys(SPONSORS).concat(episodes.flatMap(e=>e.slots.filter(x=>x.sponsor&&x.status!=="available").map(x=>x.sponsor))))].sort().map(n=>({id:n,name:n}))),[episodes]);
       const goView = v => { setEditCtx(null); setView(v); };
       const show = shows.find(s=>s.id===selectedShow) || shows[0];
       const showEpisodes = useMemo(()=>episodes.filter(e=>e.showId===selectedShow),[episodes,selectedShow]);
@@ -922,6 +1117,7 @@
 
       const onSave = (ep, slot, patch, scope) => {
         snapshot();
+        publishBookings(data.episodes.filter(e=> e.showId===ep.showId && (scope==="week" ? e.weekIndex===ep.weekIndex : e.id===ep.id)), slot, patch, (data.shows.find(x=>x.id===ep.showId)||{}).name);
         setData(d=>{
           const apply = (s)=>({ ...s, ...patch, flightStart: patch.status==="sold"?ep.date:null, flightEnd: patch.status==="sold"?ep.date:null });
           return { ...d, episodes: d.episodes.map(e=>{
@@ -932,6 +1128,17 @@
             return e;
           })};
         });
+      };
+
+      // quick booking from the All shows guide: book (or remove) the picked brand on the clicked slots
+      const onQuick = (pairs, brand, remove) => {
+        snapshot();
+        const ids = new Set(pairs.map(q=>q.slot.id));
+        const patchFor = (e,x) => { const sh=data.shows.find(z=>z.id===e.showId)||{};
+          return remove ? { status:"available", sponsor:null, category:null, cpm:null, notes:"", followUp:"", ask:null, flightStart:null, flightEnd:null }
+            : { status:"sold", sponsor:brand, category:(SPONSORS[brand]||{}).category||null, cpm:(sh.cpm||[])[x.position-1]||null, flightStart:e.date, flightEnd:e.date }; };
+        pairs.forEach(q=>publishBookings([q.ep], q.slot, patchFor(q.ep,q.slot), (data.shows.find(z=>z.id===q.ep.showId)||{}).name));
+        setData(d=>({ ...d, episodes: d.episodes.map(e=> e.slots.some(x=>ids.has(x.id)) ? { ...e, slots: e.slots.map(x=> ids.has(x.id) ? { ...x, ...patchFor(e,x) } : x) } : e) }));
       };
 
       // Manage Shows spreadsheet
@@ -955,6 +1162,11 @@
                 <div style={{fontSize:"12.5px",fontWeight:500,color:"var(--text-tertiary)"}}>Network availability &amp; pricing</div>
               </div>
             </div>
+            <div className="tabs tabs--top">
+              <button className={"tab"+(view==="guide"?" active":"")} onClick={()=>goView("guide")}>All shows</button>
+              <button className={"tab"+(view==="calendar"?" active":"")} onClick={()=>goView("calendar")}>Inventory calendar</button>
+              <button className={"tab"+(view==="config"?" active":"")} onClick={()=>goView("config")}>Show setup</button>
+            </div>
             <div className="topbar__right">
               <div className="date-pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>July 2026 cycle</div>
               <button className="sf-btn" title="Synced with your CRM"><span className="dot"></span>CRM connected</button>
@@ -962,10 +1174,21 @@
             </div>
           </div>
 
-          <div className="tabs">
-            <button className={"tab"+(view==="calendar"?" active":"")} onClick={()=>goView("calendar")}>Inventory calendar</button>
-            <button className={"tab"+(view==="config"?" active":"")} onClick={()=>goView("config")}>Show setup</button>
-          </div>
+
+          {view==="guide" && <React.Fragment>
+            <div className="guide-bar">
+              <div className="msheet-search">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                <input placeholder="Search shows" aria-label="Search shows" value={guideQ} onChange={e=>setGuideQ(e.target.value)} />
+              </div>
+              <ShowPicker box shows={brandItems} value={guideBrand} onPick={setGuideBrand} placeholder="Search brands" />
+              <div className="seg">
+                {[["day","Day"],["week","Week"],["month","Month"]].map(o=><button key={o[0]} className={guideBy===o[0]?"on":""} onClick={()=>setGuideBy(o[0])}>{o[1]}</button>)}
+              </div>
+              <div className="status-legend" style={{marginLeft:"auto"}}><span><i className="sl-av"></i>Available</span><span><i className="sl-hold"></i>On hold</span><span><i className="sl-sold"></i>Sold</span></div>
+            </div>
+            <GuideGrid by={guideBy} brand={guideBrand} shows={shows.filter(s=>s.name.toLowerCase().includes(guideQ.trim().toLowerCase()))} episodes={episodes} onOpen={id=>{ setSelectedShow(id); goView("calendar"); }} onQuick={onQuick} onEdit={(ep,slot)=>setEditCtx({ep,slot})} />
+          </React.Fragment>}
 
           {view==="calendar" && <React.Fragment>
             <div className="planhead">
@@ -973,7 +1196,7 @@
                 <div className="showpick__thumb">{show.name.split(" ").map(w=>w[0]).slice(0,2).join("")}</div>
                 <div className="showpick__body">
                   <div className="showpick__label">Podcast</div>
-                  <select value={selectedShow} onChange={e=>setSelectedShow(e.target.value)}>{shows.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select>
+                  <ShowPicker shows={shows} value={selectedShow} onPick={setSelectedShow} />
                   <div className="showpick__eps">{showEpisodes.length} episodes · {show.contentType}</div>
                 </div>
               </div>
