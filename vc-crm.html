@@ -1037,6 +1037,7 @@ Dana Whitfield, Overline, worked together at Techstars,"></textarea>
   <div class="toast" id="toast"></div>
 
 <script src="/vc-fund-data.js"></script>
+<script src="/vc-people-import.js"></script>
 <script>
 /* ══════════════════════════════════════════════════════════════
    FUND + PEOPLE DATA comes from /vc-fund-data.js, generated from
@@ -1117,6 +1118,9 @@ function rebuild(){
       PERSON_BY_ID[pid].tbd = false;
     }
   });
+  // Imported contacts (and any saved per-person overrides): surface email +
+  // LinkedIn on the person object so the table, drawer and exports show them.
+  PEOPLE.forEach(p => { const st = state.people[p.id]; if (!st) return; if (st.email && !p.email0) p.email0 = st.email; if (st.li && !p.li0) p.li0 = st.li; });
   FUND_NORMS = FUNDS.map(f => ({ f, norm: normOrg(f.name) })).filter(x => x.norm && !JUNK_NORMS.has(x.norm));
   // Enrich connectors from Cam's imported LinkedIn connections: real current
   // position + profile URL replace generic roles like "NFX Signal connector".
@@ -5703,7 +5707,7 @@ $('exportPeopleBtn').addEventListener('click', () => {
   const funds = STAGE_TABS.includes(currentTab)
     ? visibleFunds()
     : [...new Set(visiblePeople().map(p => p.fundId))].map(id => FUND_BY_ID[id]).filter(Boolean);
-  const lines = [['person','title','fund','linkedin','path','connectors','stage'].join(',')];
+  const lines = [['person','title','fund','email','linkedin','path','connectors','stage'].join(',')];
   funds.forEach(f => {
     PEOPLE.filter(p => p.fundId === f.id).forEach(p => {
       const pi = pathInfo(p);
@@ -5711,6 +5715,7 @@ $('exportPeopleBtn').addEventListener('click', () => {
         p.tbd ? ('[' + p.title + ']') : p.name,
         p.title || '',
         f.name,
+        p.email0 || '',
         personProfileUrl(p) || '',
         pi.kind,
         pi.connectors.map(c => c.name).concat(pi.existing.map(e => pathShort(e.via) + ' (existing)')).join('; '),
@@ -5934,6 +5939,30 @@ if (!state._reachedOutSeed) {
   });
   state._reachedOutSeed = 1;
   if (seeded) save();
+}
+
+/* One-time import of the Consumer / Entertainment / Media / Marketplace contact
+   list (Apollo export, matched to roster funds in vc-people-import.js): attaches
+   email + LinkedIn to each person, enriching an existing roster person where the
+   name matches and adding a new person under the fund otherwise. Never overwrites
+   an email or LinkedIn already on record. Runs once per stored state; clear
+   state._peopleImportV1 to re-run. */
+if (!state._peopleImportV1 && Array.isArray(window.SN_PEOPLE_IMPORT)) {
+  const rosterPids = new Set();
+  SEED_FUNDS.forEach(f => (f.people || []).forEach(pp => { if (pp.n) rosterPids.add(f.id + '_' + slug(pp.n)); }));
+  const haveFund = new Set(SEED_FUNDS.map(f => f.id));
+  let imported = 0;
+  window.SN_PEOPLE_IMPORT.forEach(rec => {
+    if (!rec || !haveFund.has(rec.f) || !rec.n) return;
+    const pid = rec.f + '_' + slug(rec.n);
+    const st = PS(pid);
+    if (!rosterPids.has(pid)) st.added = st.added || { name: rec.n, title: rec.t || 'Partner' };
+    if (rec.l && !st.li) st.li = rec.l;
+    if (rec.e && !st.email) st.email = rec.e;
+    imported++;
+  });
+  state._peopleImportV1 = 1;
+  if (imported) save();
 }
 
 rebuild();
