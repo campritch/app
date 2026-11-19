@@ -50,12 +50,13 @@ const DEMO_PATHS = new Set([
 // from the client-demo password so fundraising data never leaks through it.
 const VC_PATHS = new Set([
   '/investorcrm', '/raise', '/vc-crm', '/vc-crm.html',
-  '/vc-fund-data.js' // real investor pipeline data - must never be open
+  '/vc-fund-data.js', // real investor pipeline data - must never be open
+  '/vc-people-import.js' // imported investor contacts (emails + LinkedIn) - must never be open
 ]);
 
 export const config = {
   matcher: [
-    '/investorcrm', '/raise', '/vc-crm', '/vc-crm.html', '/vc-fund-data.js',
+    '/investorcrm', '/raise', '/vc-crm', '/vc-crm.html', '/vc-fund-data.js', '/vc-people-import.js',
     '/nav', '/nav.html',
     '/strategy', '/strategy.html',
     '/ceo-dashboard', '/ceo-dashboard.html',
